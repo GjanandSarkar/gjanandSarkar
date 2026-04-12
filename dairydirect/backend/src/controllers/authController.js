@@ -6,10 +6,10 @@ import { log } from "../utils/logger.js";
 
 export const signup = async (req, res) => {
   try {
-    const { email, password, fullName } = req.body;
+    const { phone, password, name } = req.body;
 
     // Validate input
-    if (!email || !password || !fullName) {
+    if (!phone || !password) {
       return res.status(400).json({
         error: "Missing required fields",
       });
@@ -23,9 +23,9 @@ export const signup = async (req, res) => {
       .from("users")
       .insert([
         {
-          email,
-          password_hash: hashedPassword,
-          full_name: fullName,
+          phone,
+          name: name || "User",
+          role: "CUSTOMER",
         },
       ])
       .select();
@@ -41,7 +41,7 @@ export const signup = async (req, res) => {
 
     // Generate JWT token
     const token = jwt.sign(
-      { id: data[0].id, email: data[0].email },
+      { id: data[0].id, phone: data[0].phone },
       process.env.JWT_SECRET,
       { expiresIn: process.env.JWT_EXPIRES_IN },
     );
@@ -50,8 +50,8 @@ export const signup = async (req, res) => {
       message: "User created successfully",
       user: {
         id: data[0].id,
-        email: data[0].email,
-        fullName: data[0].full_name,
+        phone: data[0].phone,
+        name: data[0].name,
       },
       token,
     });
@@ -65,11 +65,11 @@ export const signup = async (req, res) => {
 
 export const login = async (req, res) => {
   try {
-    const { email, password } = req.body;
+    const { phone } = req.body;
 
-    if (!email || !password) {
+    if (!phone) {
       return res.status(400).json({
-        error: "Email and password required",
+        error: "Phone number required",
       });
     }
 
@@ -77,44 +77,24 @@ export const login = async (req, res) => {
     const { data, error } = await supabase
       .from("users")
       .select("*")
-      .eq("email", email)
+      .eq("phone", phone)
       .single();
 
     if (error || !data) {
-      return res.status(401).json({
-        error: "Invalid credentials",
+      // User doesn't exist, will be created during OTP verification
+      return res.status(200).json({
+        message: "OTP sent to phone",
+        requiresOTP: true,
+        phone: phone,
       });
     }
 
-    // Verify password
-    const isPasswordValid = await bcryptjs.compare(
-      password,
-      data.password_hash,
-    );
-
-    if (!isPasswordValid) {
-      return res.status(401).json({
-        error: "Invalid credentials",
-      });
-    }
-
-    // Generate JWT token
-    const token = jwt.sign(
-      { id: data.id, email: data.email },
-      process.env.JWT_SECRET,
-      { expiresIn: process.env.JWT_EXPIRES_IN },
-    );
-
-    log.info("User logged in:", data.id);
-
+    // User exists, send OTP
     res.json({
-      message: "Login successful",
-      user: {
-        id: data.id,
-        email: data.email,
-        fullName: data.full_name,
-      },
-      token,
+      message: "OTP sent to phone",
+      requiresOTP: true,
+      phone: phone,
+      isExistingUser: true,
     });
   } catch (error) {
     log.error("Login error:", error);
@@ -136,7 +116,7 @@ export const refreshToken = (req, res) => {
 
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
     const newToken = jwt.sign(
-      { id: decoded.id, email: decoded.email },
+      { id: decoded.id, phone: decoded.phone },
       process.env.JWT_SECRET,
       { expiresIn: process.env.JWT_EXPIRES_IN },
     );

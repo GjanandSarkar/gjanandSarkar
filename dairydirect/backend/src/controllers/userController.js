@@ -33,14 +33,19 @@ export const getProfile = async (req, res) => {
 export const updateProfile = async (req, res) => {
   try {
     const userId = req.user.id;
-    const { fullName, phone, address } = req.body;
+    const { name } = req.body;
+
+    // Only name can be updated (phone is unique identifier)
+    if (!name) {
+      return res.status(400).json({
+        error: "Name is required",
+      });
+    }
 
     const { data, error } = await supabase
       .from("users")
       .update({
-        full_name: fullName,
-        phone,
-        address,
+        name: name,
       })
       .eq("id", userId)
       .select();

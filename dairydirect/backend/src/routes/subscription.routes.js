@@ -1,42 +1,22 @@
 // src/routes/subscription.routes.js — Subscription Routes
 import express from "express";
+import { getUserSubscriptions, createSubscription, getSubscriptionById, updateSubscription, cancelSubscription } from "../controllers/subscriptionController.js";
 
 const router = express.Router();
 
 // GET /api/subscriptions
-router.get("/", (req, res) => {
-  res.json({
-    message: "Get subscriptions endpoint",
-    subscriptions: [],
-  });
-});
+router.get("/", getUserSubscriptions);
 
 // POST /api/subscriptions
-router.post("/", (req, res) => {
-  res.json({
-    message: "Create subscription endpoint",
-  });
-});
+router.post("/", createSubscription);
 
 // GET /api/subscriptions/:id
-router.get("/:id", (req, res) => {
-  res.json({
-    message: `Get subscription ${req.params.id}`,
-  });
-});
+router.get("/:id", getSubscriptionById);
 
 // PATCH /api/subscriptions/:id
-router.patch("/:id", (req, res) => {
-  res.json({
-    message: `Update subscription ${req.params.id}`,
-  });
-});
+router.patch("/:id", updateSubscription);
 
 // DELETE /api/subscriptions/:id
-router.delete("/:id", (req, res) => {
-  res.json({
-    message: `Delete subscription ${req.params.id}`,
-  });
-});
+router.delete("/:id", cancelSubscription);
 
 export default router;

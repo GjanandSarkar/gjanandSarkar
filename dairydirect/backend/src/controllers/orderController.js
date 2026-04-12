@@ -5,17 +5,26 @@ import { log } from "../utils/logger.js";
 export const createOrder = async (req, res) => {
   try {
     const userId = req.user.id;
-    const { items, totalPrice, shippingAddress } = req.body;
+    const { items, addressId, type = "SINGLE", totalAmount, notes } = req.body;
+
+    // Validate required fields
+    if (!addressId || !totalAmount) {
+      return res.status(400).json({
+        error: "Missing required fields: addressId, totalAmount",
+      });
+    }
 
     const { data, error } = await supabase
       .from("orders")
       .insert([
         {
           user_id: userId,
-          items,
-          total_price: totalPrice,
-          shipping_address: shippingAddress,
-          status: "pending",
+          address_id: addressId,
+          type: type,
+          total_amount: totalAmount,
+          status: "PENDING",
+          notes: notes || null,
+          items: items || [],
         },
       ])
       .select();
