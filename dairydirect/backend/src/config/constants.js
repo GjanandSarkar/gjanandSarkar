@@ -10,24 +10,24 @@ export const HTTP_STATUS = {
 };
 
 export const ORDER_STATUS = {
-  PENDING: 'pending',
-  CONFIRMED: 'confirmed',
-  SHIPPED: 'shipped',
-  DELIVERED: 'delivered',
-  CANCELLED: 'cancelled',
+  PENDING: "pending",
+  CONFIRMED: "confirmed",
+  SHIPPED: "shipped",
+  DELIVERED: "delivered",
+  CANCELLED: "cancelled",
 };
 
 export const USER_ROLES = {
-  USER: 'user',
-  ADMIN: 'admin',
-  MODERATOR: 'moderator',
+  USER: "user",
+  ADMIN: "admin",
+  MODERATOR: "moderator",
 };
 
 export const PRODUCT_CATEGORIES = {
-  MILK: 'milk',
-  YOGURT: 'yogurt',
-  CHEESE: 'cheese',
-  BUTTER: 'butter',
-  GHEE: 'ghee',
-  CREAM: 'cream',
+  MILK: "milk",
+  YOGURT: "yogurt",
+  CHEESE: "cheese",
+  BUTTER: "butter",
+  GHEE: "ghee",
+  CREAM: "cream",
 };

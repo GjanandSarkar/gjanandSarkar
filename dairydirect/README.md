@@ -47,6 +47,7 @@ dairydirect/
 ## 🛠️ Tech Stack
 
 **Backend:**
+
 - Node.js + Express
 - PostgreSQL (via Supabase)
 - JWT Authentication
@@ -54,6 +55,7 @@ dairydirect/
 - CORS
 
 **Frontend:**
+
 - React 18
 - Vite
 - React Router
@@ -61,6 +63,7 @@ dairydirect/
 - CSS3
 
 **Database:**
+
 - Supabase (PostgreSQL)
 
 ## 📋 Prerequisites
@@ -73,12 +76,14 @@ dairydirect/
 ## 🚀 Quick Start
 
 ### 1. Clone the Repository
+
 ```bash
 git clone <repository-url>
 cd dairydirect
 ```
 
 ### 2. Backend Setup
+
 ```bash
 cd backend
 npm install
@@ -90,24 +95,28 @@ cp .env.example .env
 ```
 
 ### 3. Frontend Setup
+
 ```bash
 cd ../frontend
 npm install
 ```
 
 ### 4. Database Setup
+
 - Create a Supabase project
 - Run the schema.sql and seed.sql scripts in Supabase SQL editor
 
 ### 5. Run the Application
 
 **Terminal 1 - Backend:**
+
 ```bash
 cd backend
 npm run dev
 ```
 
 **Terminal 2 - Frontend:**
+
 ```bash
 cd frontend
 npm run dev
@@ -123,20 +132,24 @@ See `docs/DairyDirect_API.postman_collection.json` for complete API endpoints.
 ### Key Endpoints:
 
 **Authentication**
+
 - POST /api/auth/signup
 - POST /api/auth/login
 - POST /api/auth/refresh
 
 **Products**
+
 - GET /api/products
 - GET /api/products/:id
 
 **Orders**
+
 - POST /api/orders
 - GET /api/orders
 - GET /api/orders/:id
 
 **User**
+
 - GET /api/users/profile
 - PATCH /api/users/profile
 

@@ -1,13 +1,13 @@
 // src/middlewares/auth.middleware.js — JWT Authentication
-import jwt from 'jsonwebtoken';
+import jwt from "jsonwebtoken";
 
 export const authenticate = (req, res, next) => {
-  const token = req.headers.authorization?.split(' ')[1];
+  const token = req.headers.authorization?.split(" ")[1];
 
   if (!token) {
     return res.status(401).json({
-      error: 'Unauthorized',
-      message: 'Missing authentication token',
+      error: "Unauthorized",
+      message: "Missing authentication token",
     });
   }
 
@@ -17,8 +17,8 @@ export const authenticate = (req, res, next) => {
     next();
   } catch (error) {
     res.status(401).json({
-      error: 'Unauthorized',
-      message: 'Invalid or expired token',
+      error: "Unauthorized",
+      message: "Invalid or expired token",
     });
   }
 };

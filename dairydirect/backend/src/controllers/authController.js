@@ -1,8 +1,8 @@
 // src/controllers/authController.js — Authentication Controller
-import jwt from 'jsonwebtoken';
-import bcryptjs from 'bcryptjs';
-import { supabase } from '../utils/supabase.js';
-import { log } from '../utils/logger.js';
+import jwt from "jsonwebtoken";
+import bcryptjs from "bcryptjs";
+import { supabase } from "../utils/supabase.js";
+import { log } from "../utils/logger.js";
 
 export const signup = async (req, res) => {
   try {
@@ -11,7 +11,7 @@ export const signup = async (req, res) => {
     // Validate input
     if (!email || !password || !fullName) {
       return res.status(400).json({
-        error: 'Missing required fields',
+        error: "Missing required fields",
       });
     }
 
@@ -20,7 +20,7 @@ export const signup = async (req, res) => {
 
     // Insert user into Supabase
     const { data, error } = await supabase
-      .from('users')
+      .from("users")
       .insert([
         {
           email,
@@ -32,22 +32,22 @@ export const signup = async (req, res) => {
 
     if (error) {
       return res.status(400).json({
-        error: 'Signup failed',
+        error: "Signup failed",
         message: error.message,
       });
     }
 
-    log.info('User signed up:', data[0].id);
+    log.info("User signed up:", data[0].id);
 
     // Generate JWT token
     const token = jwt.sign(
       { id: data[0].id, email: data[0].email },
       process.env.JWT_SECRET,
-      { expiresIn: process.env.JWT_EXPIRES_IN }
+      { expiresIn: process.env.JWT_EXPIRES_IN },
     );
 
     res.status(201).json({
-      message: 'User created successfully',
+      message: "User created successfully",
       user: {
         id: data[0].id,
         email: data[0].email,
@@ -56,9 +56,9 @@ export const signup = async (req, res) => {
       token,
     });
   } catch (error) {
-    log.error('Signup error:', error);
+    log.error("Signup error:", error);
     res.status(500).json({
-      error: 'Internal Server Error',
+      error: "Internal Server Error",
     });
   }
 };
@@ -69,29 +69,32 @@ export const login = async (req, res) => {
 
     if (!email || !password) {
       return res.status(400).json({
-        error: 'Email and password required',
+        error: "Email and password required",
       });
     }
 
     // Fetch user from Supabase
     const { data, error } = await supabase
-      .from('users')
-      .select('*')
-      .eq('email', email)
+      .from("users")
+      .select("*")
+      .eq("email", email)
       .single();
 
     if (error || !data) {
       return res.status(401).json({
-        error: 'Invalid credentials',
+        error: "Invalid credentials",
       });
     }
 
     // Verify password
-    const isPasswordValid = await bcryptjs.compare(password, data.password_hash);
+    const isPasswordValid = await bcryptjs.compare(
+      password,
+      data.password_hash,
+    );
 
     if (!isPasswordValid) {
       return res.status(401).json({
-        error: 'Invalid credentials',
+        error: "Invalid credentials",
       });
     }
 
@@ -99,13 +102,13 @@ export const login = async (req, res) => {
     const token = jwt.sign(
       { id: data.id, email: data.email },
       process.env.JWT_SECRET,
-      { expiresIn: process.env.JWT_EXPIRES_IN }
+      { expiresIn: process.env.JWT_EXPIRES_IN },
     );
 
-    log.info('User logged in:', data.id);
+    log.info("User logged in:", data.id);
 
     res.json({
-      message: 'Login successful',
+      message: "Login successful",
       user: {
         id: data.id,
         email: data.email,
@@ -114,20 +117,20 @@ export const login = async (req, res) => {
       token,
     });
   } catch (error) {
-    log.error('Login error:', error);
+    log.error("Login error:", error);
     res.status(500).json({
-      error: 'Internal Server Error',
+      error: "Internal Server Error",
     });
   }
 };
 
 export const refreshToken = (req, res) => {
   try {
-    const token = req.headers.authorization?.split(' ')[1];
+    const token = req.headers.authorization?.split(" ")[1];
 
     if (!token) {
       return res.status(401).json({
-        error: 'No token provided',
+        error: "No token provided",
       });
     }
 
@@ -135,17 +138,17 @@ export const refreshToken = (req, res) => {
     const newToken = jwt.sign(
       { id: decoded.id, email: decoded.email },
       process.env.JWT_SECRET,
-      { expiresIn: process.env.JWT_EXPIRES_IN }
+      { expiresIn: process.env.JWT_EXPIRES_IN },
     );
 
     res.json({
-      message: 'Token refreshed',
+      message: "Token refreshed",
       token: newToken,
     });
   } catch (error) {
-    log.error('Token refresh error:', error);
+    log.error("Token refresh error:", error);
     res.status(401).json({
-      error: 'Invalid token',
+      error: "Invalid token",
     });
   }
 };

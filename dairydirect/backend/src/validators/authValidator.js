@@ -1,5 +1,5 @@
 // src/validators/authValidator.js — Authentication Validators
-import Joi from 'joi';
+import Joi from "joi";
 
 export const signupSchema = Joi.object({
   email: Joi.string().email().required(),

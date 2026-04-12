@@ -1,5 +1,5 @@
 # Docker Compose for DairyDirect
-version: '3.8'
+version: "3.8"
 
 services:
   # PostgreSQL Database (if not using Supabase)
