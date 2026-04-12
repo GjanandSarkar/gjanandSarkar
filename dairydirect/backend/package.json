@@ -1,0 +1,40 @@
+{
+  "name": "dairydirect-backend",
+  "version": "1.0.0",
+  "description": "DairyDirect - E-commerce Backend API",
+  "type": "module",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "dev": "nodemon index.js",
+    "test": "jest",
+    "seed": "node scripts/seed.js"
+  },
+  "keywords": [
+    "dairy",
+    "ecommerce",
+    "api"
+  ],
+  "author": "Your Name",
+  "license": "MIT",
+  "dependencies": {
+    "express": "^4.18.2",
+    "helmet": "^7.0.0",
+    "cors": "^2.8.5",
+    "dotenv": "^16.0.3",
+    "jsonwebtoken": "^9.0.0",
+    "bcryptjs": "^2.4.3",
+    "@supabase/supabase-js": "^2.26.0",
+    "express-rate-limit": "^6.7.0",
+    "nodemailer": "^6.9.3",
+    "stripe": "^11.10.0",
+    "joi": "^17.9.2"
+  },
+  "devDependencies": {
+    "nodemon": "^2.0.20",
+    "jest": "^29.5.0"
+  },
+  "engines": {
+    "node": ">=16.0.0"
+  }
+}

@@ -1,0 +1,19 @@
+{
+  "name": "dairydirect",
+  "version": "1.0.0",
+  "description": "DairyDirect — Hyper-local dairy delivery platform",
+  "private": true,
+  "scripts": {
+    "dev": "npm run dev --workspace=backend",
+    "dev:win": "npm run dev:win --workspace=backend",
+    "start": "npm run start --workspace=backend",
+    "install:all": "npm install && npm install --workspace=backend"
+  },
+  "workspaces": [
+    "backend",
+    "frontend"
+  ],
+  "devDependencies": {
+    "nodemon": "^3.1.0"
+  }
+}
