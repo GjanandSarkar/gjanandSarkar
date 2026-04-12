@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "tertiary": "#3b644c",
+                    "on-primary": "#ffffff",
+                    "on-tertiary-fixed-variant": "#264f38",
+                    "secondary": "#8a5025",
+                    "on-surface-variant": "#43493e",
+                    "surface-container-lowest": "#ffffff",
+                    "surface": "#fafaf3",
+                    "background": "#fafaf3",
+                    "inverse-on-surface": "#f1f1ea",
+                    "inverse-surface": "#2f312d",
+                    "surface-container-highest": "#e3e3dc",
+                    "tertiary-container": "#537e64",
+                    "tertiary-fixed": "#bfedce",
+                    "inverse-primary": "#a7d392",
+                    "on-tertiary-fixed": "#002111",
+                    "on-secondary": "#ffffff",
+                    "on-primary-container": "#f8ffee",
+                    "primary": "#3f6530",
+                    "surface-container": "#eeeee7",
+                    "surface-variant": "#e3e3dc",
+                    "surface-container-high": "#e8e9e2",
+                    "primary-container": "#577f46",
+                    "on-tertiary-container": "#f6fff5",
+                    "on-error": "#ffffff",
+                    "surface-tint": "#426832",
+                    "outline": "#73796d",
+                    "on-primary-fixed": "#042100",
+                    "outline-variant": "#c3c9bb",
+                    "on-background": "#1a1c18",
+                    "secondary-container": "#fdb07d",
+                    "surface-container-low": "#f4f4ed",
+                    "on-secondary-fixed-variant": "#6e3910",
+                    "error-container": "#ffdad6",
+                    "error": "#ba1a1a",
+                    "surface-bright": "#fafaf3",
+                    "on-error-container": "#93000a",
+                    "on-surface": "#1a1c18",
+                    "tertiary-fixed-dim": "#a4d1b3",
+                    "surface-dim": "#dadad4",
+                    "primary-fixed": "#c2efac",
+                    "on-tertiary": "#ffffff",
+                    "secondary-fixed-dim": "#ffb787",
+                    "primary-fixed-dim": "#a7d392",
+                    "on-secondary-fixed": "#311300",
+                    "secondary-fixed": "#ffdcc7",
+                    "on-primary-fixed-variant": "#2a4f1d",
+                    "on-secondary-container": "#774117"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px"
+            },
+            "fontFamily": {
+                    "headline": ["Inter"],
+                    "body": ["Inter"],
+                    "label": ["Inter"]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        body { font-family: 'Inter', sans-serif; background-color: #fafaf3; }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+            display: inline-block;
+            line-height: 1;
+            text-transform: none;
+            letter-spacing: normal;
+            word-wrap: normal;
+            white-space: nowrap;
+            direction: ltr;
+        }
+        .clay-gradient {
+            background: linear-gradient(135deg, #8a5025 0%, #774117 100%);
+        }
+        .primary-gradient {
+            background: linear-gradient(135deg, #3f6530 0%, #577f46 100%);
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="text-on-surface antialiased">
+<!-- TopAppBar -->
+<header class="fixed top-0 w-full z-50 bg-[#fafaf3]/80 dark:bg-stone-900/80 backdrop-blur-md shadow-[0_12px_32px_rgba(63,101,48,0.05)]">
+<div class="flex justify-between items-center px-6 py-4 w-full">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-green-800" data-icon="agriculture">agriculture</span>
+<span class="text-xl font-bold text-green-800 tracking-tight">DairyDirect</span>
+</div>
+<div class="flex items-center gap-4">
+<button class="text-stone-500 hover:opacity-80 transition-opacity active:scale-95">
+<span class="material-symbols-outlined" data-icon="search">search</span>
+</button>
+<button class="text-green-800 hover:opacity-80 transition-opacity active:scale-95 relative">
+<span class="material-symbols-outlined" data-icon="shopping_cart">shopping_cart</span>
+<span class="absolute -top-1 -right-1 w-2 h-2 bg-secondary rounded-full"></span>
+</button>
+</div>
+</div>
+</header>
+<main class="pt-20 pb-32 px-6">
+<!-- Personalized Greeting -->
+<section class="mb-8 pt-4">
+<h1 class="text-3xl font-extrabold text-on-surface tracking-tight leading-tight">
+                Good morning,<br/>Priya 🌿
+            </h1>
+<p class="text-on-surface-variant mt-2 text-sm">Your fresh farm delivery is ready.</p>
+</section>
+<!-- Subscription Card -->
+<section class="mb-10">
+<div class="clay-gradient rounded-3xl p-6 text-white relative overflow-hidden shadow-lg">
+<div class="relative z-10">
+<span class="text-[10px] font-bold uppercase tracking-widest opacity-80">Premium Member</span>
+<h2 class="text-2xl font-bold mt-1 mb-2">Save 20% on Daily Essentials</h2>
+<p class="text-sm opacity-90 mb-6 max-w-[200px]">Subscribe to our A2 Buffalo Milk &amp; Paneer combo.</p>
+<button class="bg-white text-secondary font-bold py-3 px-6 rounded-xl text-sm active:scale-95 transition-transform">
+                        Explore Subscriptions
+                    </button>
+</div>
+<!-- Decorative element mimicking milk drop -->
+<div class="absolute -right-10 -bottom-10 w-40 h-40 bg-white/10 rounded-full blur-3xl"></div>
+<div class="absolute right-4 bottom-4 opacity-20">
+<span class="material-symbols-outlined text-[120px]" data-icon="calendar_month">calendar_month</span>
+</div>
+</div>
+</section>
+<!-- Category Chips -->
+<section class="mb-8 -mx-6">
+<div class="flex overflow-x-auto gap-3 px-6 no-scrollbar">
+<button class="bg-primary text-on-primary px-6 py-2.5 rounded-full text-sm font-semibold whitespace-nowrap shadow-md">All Items</button>
+<button class="bg-surface-container-high text-on-surface-variant px-6 py-2.5 rounded-full text-sm font-medium whitespace-nowrap hover:bg-surface-container-highest transition-colors">Milk</button>
+<button class="bg-surface-container-high text-on-surface-variant px-6 py-2.5 rounded-full text-sm font-medium whitespace-nowrap hover:bg-surface-container-highest transition-colors">Paneer</button>
+<button class="bg-surface-container-high text-on-surface-variant px-6 py-2.5 rounded-full text-sm font-medium whitespace-nowrap hover:bg-surface-container-highest transition-colors">Ghee</button>
+<button class="bg-surface-container-high text-on-surface-variant px-6 py-2.5 rounded-full text-sm font-medium whitespace-nowrap hover:bg-surface-container-highest transition-colors">Buttermilk</button>
+</div>
+</section>
+<!-- Featured Products Header -->
+<div class="flex justify-between items-end mb-6">
+<h3 class="text-xl font-bold text-on-surface tracking-tight">Daily Fresh</h3>
+<span class="text-primary text-sm font-semibold">View all</span>
+</div>
+<!-- 2-Column Grid -->
+<section class="grid grid-cols-2 gap-4">
+<!-- Card 1 -->
+<div class="bg-surface-container-lowest rounded-2xl p-3 shadow-[0_4px_12px_rgba(0,0,0,0.02)] flex flex-col group">
+<div class="aspect-square rounded-xl overflow-hidden mb-3 bg-surface-container-low">
+<img alt="Fresh organic milk" class="w-full h-full object-cover" data-alt="Close-up of a glass bottle of fresh organic milk on a wooden table with soft sunlight filtering through farm windows" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDCvIv_Fs1pemuQstmAo0P0T4Bkmtn6PdKehn3paUlc_HwSeWXJXAIlXOZdzT9yPHiBvCp4qlNVeq8KVVj6_h5-HwXbzZ5bWONc9q7TrU8RPTac9WdofgISjiuceKmBBd7ZRIbGWmqUUIh-C-nhFsWSMRpFBBQW48w8wdiIj83Ajc3CTbQZDqLwQDPs6eDE8quBUfGPVlyu0eiI7kYD8qhhjqnDwjgN8J8u8uHn-ok-dZFBGJIFI8uxJdBzD9ivetkBytK708V89xI"/>
+</div>
+<div class="flex-grow">
+<h4 class="text-sm font-bold text-on-surface line-clamp-1">Farm Fresh A2 Milk</h4>
+<span class="text-[10px] text-stone-500 font-medium">1 Litre</span>
+<div class="flex justify-between items-center mt-3">
+<span class="text-primary font-bold">₹82.00</span>
+<button class="bg-primary text-on-primary w-8 h-8 rounded-lg flex items-center justify-center active:scale-90 transition-transform">
+<span class="material-symbols-outlined text-sm" data-icon="add">add</span>
+</button>
+</div>
+</div>
+</div>
+<!-- Card 2 -->
+<div class="bg-surface-container-lowest rounded-2xl p-3 shadow-[0_4px_12px_rgba(0,0,0,0.02)] flex flex-col group">
+<div class="aspect-square rounded-xl overflow-hidden mb-3 bg-surface-container-low">
+<img alt="Traditional Paneer" class="w-full h-full object-cover" data-alt="Cubes of fresh white artisanal paneer cheese on a green leaf with rustic wooden background and warm lighting" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCSmFRnnlFMDb_L0tfdRGbApomVZImFxIIYYLVqsPKFD3wBVGoPSb1925VzRfg10FzJS_lfpnW_JrJvY57vTnD2boTpbd32CCy9lyVW_fMzSYkG43xvX7VVlvDSDZfKESRgnNir3Uj8tMC1zsC6Z9mNwaPMXyKhjo5-HMxlSe5JAzb9svwgLQriLVzXQy2UuZJoONEiNPdORe7D_GthVG6ig9y7Dg5GNXcEGu1k1LJCJ-kXZa4LnSyDveeOsJXbZBTWFoS1vbCIfLA"/>
+</div>
+<div class="flex-grow">
+<h4 class="text-sm font-bold text-on-surface line-clamp-1">Malai Paneer</h4>
+<span class="text-[10px] text-stone-500 font-medium">200g</span>
+<div class="flex justify-between items-center mt-3">
+<span class="text-primary font-bold">₹110.00</span>
+<button class="bg-primary text-on-primary w-8 h-8 rounded-lg flex items-center justify-center active:scale-90 transition-transform">
+<span class="material-symbols-outlined text-sm" data-icon="add">add</span>
+</button>
+</div>
+</div>
+</div>
+<!-- Card 3 -->
+<div class="bg-surface-container-lowest rounded-2xl p-3 shadow-[0_4px_12px_rgba(0,0,0,0.02)] flex flex-col group">
+<div class="aspect-square rounded-xl overflow-hidden mb-3 bg-surface-container-low">
+<img alt="Pure Ghee" class="w-full h-full object-cover" data-alt="Golden textured cow ghee in a glass jar with a wooden spoon and soft ambient lighting on a cream surface" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAHDfqqZxkIcJ-oZInWpFaTLZP2ZeSxcGcATUI1zrdtrMj0nzhB6b0XPdcL5r5KosAYVTC0Nk_Qz_pOKNXvrnkfrVfaKdttFbaI1kR2gpZbjd4NzsSdN-vpAXKgLiNVMUiF5o9EnqokanZIZHjqKVBwtqwLFgh91BNmAw061P9q56ZYlz4EZ3-IbYTjSufgramEy6ByGJLGLaimfweu33gN3zaM4GmxgxUdcY6peb3Vo5T_vcFbuHeCMIxEA3xY401si6MJ39MPkfU"/>
+</div>
+<div class="flex-grow">
+<h4 class="text-sm font-bold text-on-surface line-clamp-1">Pure Desi Ghee</h4>
+<span class="text-[10px] text-stone-500 font-medium">500ml</span>
+<div class="flex justify-between items-center mt-3">
+<span class="text-primary font-bold">₹450.00</span>
+<button class="bg-primary text-on-primary w-8 h-8 rounded-lg flex items-center justify-center active:scale-90 transition-transform">
+<span class="material-symbols-outlined text-sm" data-icon="add">add</span>
+</button>
+</div>
+</div>
+</div>
+<!-- Card 4 -->
+<div class="bg-surface-container-lowest rounded-2xl p-3 shadow-[0_4px_12px_rgba(0,0,0,0.02)] flex flex-col group">
+<div class="aspect-square rounded-xl overflow-hidden mb-3 bg-surface-container-low">
+<img alt="Curd" class="w-full h-full object-cover" data-alt="Thick probiotic Greek yogurt in a ceramic bowl with small bubbles and fresh texture under soft natural light" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDOVm--AFQORK8ogVrJRbbiJIgIlft37dvtOIzOflFtxNJ8Kp1vWazsB_5G1HcZ63a_ywzL2H3jq0DFCt_KqzQmjWZr23r6jOAjpSwAU1nhin3n8yFbFM6N9RYgZREidUgNDlzE1t8P_we6bpeSggChdWdpuehMGSfzw6hqyDM9ICREZ6etvwG0ZCEJgm5yVeCsuy72af4IBcLI6_bxZnY5quBIaOogVpiJ-ikoP7PFh-qP7vyaQiJ1S3WW2eVzHYS8wOfbsyDsCwg"/>
+</div>
+<div class="flex-grow">
+<h4 class="text-sm font-bold text-on-surface line-clamp-1">Probiotic Curd</h4>
+<span class="text-[10px] text-stone-500 font-medium">400g</span>
+<div class="flex justify-between items-center mt-3">
+<span class="text-primary font-bold">₹65.00</span>
+<button class="bg-primary text-on-primary w-8 h-8 rounded-lg flex items-center justify-center active:scale-90 transition-transform">
+<span class="material-symbols-outlined text-sm" data-icon="add">add</span>
+</button>
+</div>
+</div>
+</div>
+</section>
+</main>
+<!-- BottomNavBar -->
+<nav class="fixed bottom-0 left-0 w-full flex justify-around items-center px-4 pb-6 pt-2 bg-[#fafaf3]/80 dark:bg-stone-900/80 backdrop-blur-md rounded-t-2xl z-50 shadow-[0_-8px_24px_rgba(63,101,48,0.05)]">
+<!-- Home (Active) -->
+<a class="flex flex-col items-center justify-center bg-green-100 dark:bg-green-900/30 text-green-900 dark:text-green-200 rounded-xl px-3 py-1.5 active:scale-90 transition-all duration-200" href="#">
+<span class="material-symbols-outlined" data-icon="home" style="font-variation-settings: 'FILL' 1;">home</span>
+<span class="text-[10px] font-medium tracking-wide">Home</span>
+</a>
+<!-- Products -->
+<a class="flex flex-col items-center justify-center text-stone-500 dark:text-stone-400 px-3 py-1.5 hover:bg-stone-100 dark:hover:bg-stone-800 active:scale-90 transition-all duration-200" href="#">
+<span class="material-symbols-outlined" data-icon="storefront">storefront</span>
+<span class="text-[10px] font-medium tracking-wide">Products</span>
+</a>
+<!-- Orders -->
+<a class="flex flex-col items-center justify-center text-stone-500 dark:text-stone-400 px-3 py-1.5 hover:bg-stone-100 dark:hover:bg-stone-800 active:scale-90 transition-all duration-200" href="#">
+<span class="material-symbols-outlined" data-icon="receipt_long">receipt_long</span>
+<span class="text-[10px] font-medium tracking-wide">Orders</span>
+</a>
+<!-- Subscribe -->
+<a class="flex flex-col items-center justify-center text-stone-500 dark:text-stone-400 px-3 py-1.5 hover:bg-stone-100 dark:hover:bg-stone-800 active:scale-90 transition-all duration-200" href="#">
+<span class="material-symbols-outlined" data-icon="calendar_month">calendar_month</span>
+<span class="text-[10px] font-medium tracking-wide">Subscribe</span>
+</a>
+<!-- Profile -->
+<a class="flex flex-col items-center justify-center text-stone-500 dark:text-stone-400 px-3 py-1.5 hover:bg-stone-100 dark:hover:bg-stone-800 active:scale-90 transition-all duration-200" href="#">
+<span class="material-symbols-outlined" data-icon="person">person</span>
+<span class="text-[10px] font-medium tracking-wide">Profile</span>
+</a>
+</nav>
+<style>
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+    </style>
+</body></html>

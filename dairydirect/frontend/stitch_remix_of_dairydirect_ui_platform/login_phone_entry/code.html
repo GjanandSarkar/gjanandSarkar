@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "error-container": "#ffdad6",
+                        "primary-container": "#577f46",
+                        "surface": "#fafaf3",
+                        "inverse-surface": "#2f312d",
+                        "on-surface-variant": "#43493e",
+                        "secondary-container": "#fdb07d",
+                        "on-background": "#1a1c18",
+                        "tertiary-container": "#537e64",
+                        "surface-container": "#eeeee7",
+                        "on-secondary-fixed": "#311300",
+                        "error": "#ba1a1a",
+                        "primary-fixed": "#c2efac",
+                        "on-primary-fixed-variant": "#2a4f1d",
+                        "primary": "#3f6530",
+                        "on-tertiary-fixed": "#002111",
+                        "surface-bright": "#fafaf3",
+                        "secondary-fixed-dim": "#ffb787",
+                        "inverse-primary": "#a7d392",
+                        "on-tertiary-container": "#f6fff5",
+                        "on-tertiary": "#ffffff",
+                        "surface-container-highest": "#e3e3dc",
+                        "secondary": "#8a5025",
+                        "surface-container-high": "#e8e9e2",
+                        "tertiary": "#3b644c",
+                        "tertiary-fixed": "#bfedce",
+                        "surface-tint": "#426832",
+                        "primary-fixed-dim": "#a7d392",
+                        "on-tertiary-fixed-variant": "#264f38",
+                        "surface-container-lowest": "#ffffff",
+                        "tertiary-fixed-dim": "#a4d1b3",
+                        "on-error": "#ffffff",
+                        "surface-variant": "#e3e3dc",
+                        "on-error-container": "#93000a",
+                        "background": "#fafaf3",
+                        "outline": "#73796d",
+                        "on-secondary": "#ffffff",
+                        "surface-container-low": "#f4f4ed",
+                        "on-secondary-container": "#774117",
+                        "on-primary-container": "#f8ffee",
+                        "on-primary": "#ffffff",
+                        "outline-variant": "#c3c9bb",
+                        "inverse-on-surface": "#f1f1ea",
+                        "on-secondary-fixed-variant": "#6e3910",
+                        "secondary-fixed": "#ffdcc7",
+                        "surface-dim": "#dadad4",
+                        "on-surface": "#1a1c18",
+                        "on-primary-fixed": "#042100"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "fontFamily": {
+                        "headline": ["Inter"],
+                        "body": ["Inter"],
+                        "label": ["Inter"]
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        body { font-family: 'Inter', sans-serif; }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .arc-bg {
+            clip-path: circle(50% at 100% 0%);
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-surface text-on-surface min-h-screen flex flex-col relative overflow-hidden">
+<!-- Subtle mint arc in top-right -->
+<div class="absolute top-0 right-0 w-[300px] h-[300px] bg-tertiary-fixed/30 arc-bg z-0 pointer-events-none"></div>
+<main class="flex-grow flex flex-col items-center justify-center px-6 relative z-10 w-full max-w-md mx-auto">
+<!-- Logo Section -->
+<div class="mb-12 flex justify-center">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-primary text-[32px]" data-icon="agriculture">agriculture</span>
+<span class="text-xl font-bold tracking-tight text-primary">DairyDirect</span>
+</div>
+</div>
+<!-- Heading Section -->
+<div class="w-full text-center mb-10">
+<h1 class="text-[28px] font-bold text-on-surface mb-2">Welcome back 👋</h1>
+<p class="text-on-surface-variant text-base">Enter your mobile number to continue</p>
+</div>
+<!-- Form Section -->
+<div class="w-full space-y-6">
+<div class="space-y-2">
+<div class="flex items-center bg-surface-container-high rounded-xl border border-outline-variant/20 focus-within:bg-surface-container-lowest focus-within:ring-1 focus-within:ring-primary/20 transition-all">
+<!-- India Flag + Prefix -->
+<div class="flex items-center gap-2 px-4 py-4 border-r border-outline-variant/30">
+<img alt="India Flag" class="w-6 h-4 rounded-sm object-cover" data-alt="close up of the national flag of India with orange white and green stripes and the blue wheel" src="https://lh3.googleusercontent.com/aida-public/AB6AXuD7zBdlrRfoS_JkxbZDBwf0YGrtxyvtJE0uDHEsIzo5NaBI-TtkCEcDmc6exZHFTK9KP6wxNZB6vQttu-NMSuGs6BJk63gt_pEB6rvbj9vXkFg2EqbwO7UIZLKO-dhKm06fxd4L9q2CM5o8Dd5Z_jHViNIwNkNLcig-VttqkAYNK4X4CXQLc6JtU1-kGJBiePWUst1oCZBfx9xzVdOjpj0bNT7pjMqr67CMfh8AwwndAKsToXWssM30t_1Lz-ul4RRYEwCozQIytqI"/>
+<span class="text-[18px] font-medium text-on-surface">+91</span>
+</div>
+<!-- Number Input -->
+<input class="w-full bg-transparent border-none focus:ring-0 text-[18px] font-medium placeholder:text-on-surface-variant/50 px-4 py-4" maxlength="10" placeholder="Mobile Number" type="tel"/>
+</div>
+</div>
+<!-- Action Button -->
+<button class="w-full bg-primary text-on-primary py-4 px-6 rounded-xl font-bold text-lg shadow-[0_12px_32px_rgba(63,101,48,0.15)] active:scale-[0.98] transition-all hover:bg-primary-container">
+                Send OTP
+            </button>
+<!-- Terms and Privacy -->
+<p class="text-center text-xs leading-relaxed text-on-surface-variant/80 px-4">
+                By continuing, you agree to our 
+                <a class="text-[#6e975c] font-semibold hover:underline" href="#">Terms of Service</a> 
+                and 
+                <a class="text-[#6e975c] font-semibold hover:underline" href="#">Privacy Policy</a>
+</p>
+</div>
+<!-- Editorial Illustration/Accent (Optional but fits 'Modern Pastoral') -->
+<div class="mt-16 w-full opacity-40">
+<div class="aspect-square w-full max-w-[120px] mx-auto rounded-full bg-gradient-to-tr from-primary/10 to-transparent flex items-center justify-center">
+<span class="material-symbols-outlined text-primary/40 text-[48px]" data-icon="nature_people">nature_people</span>
+</div>
+</div>
+</main>
+<!-- Footer Space -->
+<footer class="py-8 text-center w-full">
+<p class="text-[10px] uppercase tracking-[0.2em] text-on-surface-variant/40 font-bold">Trusted by 50,000+ Families</p>
+</footer>
+<!-- Background Pattern -->
+<div class="fixed inset-0 z-[-1] opacity-[0.03] pointer-events-none">
+<svg height="100%" width="100%">
+<pattern height="40" id="dotPattern" patternunits="userSpaceOnUse" width="40" x="0" y="0">
+<circle cx="2" cy="2" fill="#3f6530" r="1.5"></circle>
+</pattern>
+<rect fill="url(#dotPattern)" height="100%" width="100%"></rect>
+</svg>
+</div>
+</body></html>

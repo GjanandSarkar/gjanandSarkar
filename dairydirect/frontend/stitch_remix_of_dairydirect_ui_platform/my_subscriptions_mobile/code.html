@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>My Subscriptions - DairyDirect</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "primary-container": "#577f46",
+                    "primary-fixed": "#c2efac",
+                    "error": "#ba1a1a",
+                    "on-error-container": "#93000a",
+                    "on-tertiary": "#ffffff",
+                    "outline-variant": "#c3c9bb",
+                    "tertiary-fixed-dim": "#a4d1b3",
+                    "on-tertiary-fixed-variant": "#264f38",
+                    "surface-container-lowest": "#ffffff",
+                    "tertiary": "#3b644c",
+                    "on-secondary": "#ffffff",
+                    "secondary-fixed-dim": "#ffb787",
+                    "surface-container": "#eeeee7",
+                    "on-surface": "#1a1c18",
+                    "on-primary-container": "#f8ffee",
+                    "surface-bright": "#fafaf3",
+                    "surface-container-low": "#f4f4ed",
+                    "on-primary-fixed-variant": "#2a4f1d",
+                    "surface-tint": "#426832",
+                    "inverse-surface": "#2f312d",
+                    "surface-container-high": "#e8e9e2",
+                    "tertiary-container": "#537e64",
+                    "inverse-on-surface": "#f1f1ea",
+                    "secondary": "#8a5025",
+                    "secondary-fixed": "#ffdcc7",
+                    "surface-variant": "#e3e3dc",
+                    "on-secondary-container": "#774117",
+                    "on-surface-variant": "#43493e",
+                    "on-primary": "#ffffff",
+                    "on-primary-fixed": "#042100",
+                    "error-container": "#ffdad6",
+                    "on-tertiary-container": "#f6fff5",
+                    "on-background": "#1a1c18",
+                    "secondary-container": "#fdb07d",
+                    "primary-fixed-dim": "#a7d392",
+                    "on-error": "#ffffff",
+                    "on-secondary-fixed-variant": "#6e3910",
+                    "inverse-primary": "#a7d392",
+                    "on-secondary-fixed": "#311300",
+                    "background": "#fafaf3",
+                    "surface-dim": "#dadad4",
+                    "surface-container-highest": "#e3e3dc",
+                    "primary": "#3f6530",
+                    "surface": "#fafaf3",
+                    "outline": "#73796d",
+                    "on-tertiary-fixed": "#002111",
+                    "tertiary-fixed": "#bfedce"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px"
+            },
+            "fontFamily": {
+                    "headline": ["Inter"],
+                    "body": ["Inter"],
+                    "label": ["Inter"]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        body { font-family: 'Inter', sans-serif; }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .glass-header {
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+        }
+        .milk-drop-mask {
+            border-radius: 60% 40% 70% 30% / 30% 67% 33% 70%;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-surface text-on-surface min-h-screen pb-32">
+<!-- TopAppBar -->
+<header class="fixed top-0 w-full z-50 bg-[#fafaf3]/80 dark:bg-stone-900/80 backdrop-blur-md shadow-[0_12px_32px_rgba(63,101,48,0.05)]">
+<div class="flex justify-between items-center px-6 py-4 w-full">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-green-800 dark:text-green-400" data-icon="agriculture">agriculture</span>
+<h1 class="text-xl font-bold text-green-800 dark:text-green-400 font-sans tracking-tight">DairyDirect</h1>
+</div>
+<div class="flex items-center gap-4">
+<button class="text-stone-500 hover:opacity-80 transition-opacity active:scale-95 transition-transform">
+<span class="material-symbols-outlined" data-icon="shopping_cart">shopping_cart</span>
+</button>
+</div>
+</div>
+</header>
+<main class="pt-24 px-6 max-w-md mx-auto">
+<!-- Page Title -->
+<section class="mb-8">
+<h2 class="text-3xl font-bold tracking-tight text-on-surface mb-2">My Subscriptions</h2>
+<p class="text-on-surface-variant text-sm">Manage your recurring farm-fresh deliveries.</p>
+</section>
+<!-- Subscription Tabs/Filter -->
+<div class="flex gap-4 mb-8 overflow-x-auto pb-2 no-scrollbar">
+<button class="bg-primary text-on-primary px-6 py-2 rounded-full text-sm font-semibold shadow-sm transition-all">All</button>
+<button class="bg-surface-container-high text-on-surface-variant px-6 py-2 rounded-full text-sm font-medium hover:bg-surface-variant transition-all">Active</button>
+<button class="bg-surface-container-high text-on-surface-variant px-6 py-2 rounded-full text-sm font-medium hover:bg-surface-variant transition-all">Paused</button>
+</div>
+<!-- Subscription Cards List -->
+<div class="space-y-6">
+<!-- Active Subscription Card -->
+<article class="bg-surface-container-lowest rounded-2xl p-5 shadow-[0_8px_24px_rgba(63,101,48,0.03)] transition-all active:scale-[0.98]">
+<div class="flex gap-4 items-start mb-4">
+<div class="w-20 h-20 bg-surface-container-low rounded-xl overflow-hidden flex-shrink-0">
+<img class="w-full h-full object-cover" data-alt="glass bottle of fresh whole milk on a wooden table with soft sunlight" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDLwLW1qt-b9kKlWt8yY50IVnBLWpiwsDk_alQHTQiAzQf47x4nL-HfCHY17hW8PGKMBeVz--VKdpnWgegn76y24YKXXKOp0kyk0__SoGHhbrw7tZSiLn1Dyd9u-YZRVu0IxmDkDak4muDSdMVIwxYlB2tlUmr2kV9s2HLm5f5OcTQE2-QXwz3qi0JSFORWeG61yrAZp4DAl9dD3z0MWJ8zaxPSEL0_ONMk4ljOT_Yzd4sS2dgKq51PI5h2EUkOzxWR9IE9qAEbM_A"/>
+</div>
+<div class="flex-1">
+<div class="flex justify-between items-start">
+<span class="bg-primary-fixed text-on-primary-fixed text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full mb-1">Active</span>
+</div>
+<h3 class="text-lg font-bold text-on-surface leading-tight">Premium Whole Milk</h3>
+<p class="text-primary font-semibold text-sm">2 Bottles • Weekly</p>
+</div>
+</div>
+<div class="bg-surface-container-low rounded-xl p-4 mb-4 flex justify-between items-center">
+<div>
+<p class="text-[10px] text-on-surface-variant font-medium uppercase tracking-widest">Next Delivery</p>
+<p class="text-sm font-bold text-on-surface">Monday, Oct 23</p>
+</div>
+<div class="text-right">
+<p class="text-[10px] text-on-surface-variant font-medium uppercase tracking-widest">Frequency</p>
+<p class="text-sm font-bold text-on-surface">Weekly</p>
+</div>
+</div>
+<div class="flex gap-3">
+<button class="flex-1 bg-primary text-on-primary py-3 rounded-xl font-bold text-sm shadow-sm hover:opacity-90 active:scale-95 transition-all">
+                        Manage
+                    </button>
+<button class="w-12 h-12 flex items-center justify-center bg-surface-container-high text-on-surface-variant rounded-xl active:scale-95 transition-all">
+<span class="material-symbols-outlined" data-icon="edit">edit</span>
+</button>
+</div>
+</article>
+<!-- Paused Subscription Card -->
+<article class="bg-surface-container-lowest rounded-2xl p-5 shadow-[0_8px_24px_rgba(63,101,48,0.03)] opacity-90">
+<div class="flex gap-4 items-start mb-4">
+<div class="w-20 h-20 bg-surface-container-low rounded-xl overflow-hidden flex-shrink-0 grayscale">
+<img class="w-full h-full object-cover" data-alt="hand-churned artisanal butter in a ceramic dish with sea salt" src="https://lh3.googleusercontent.com/aida-public/AB6AXuB_aLpRQq_-AHCWDlgc2m213Bo1FFnLmwd2_FtCsg6n0gAdgSbrXacdl2wlpyHaNm3agWGUnxUdujqlPqChzDgT3w-l2r7cQTkoibiB9KiPgoB6fv23iFlFPuFzx556rs7ShvHSmWBS7O7Mh1DkLoDswOSsfgSFuMQbA58Fplf-0gdBViCQpvIET10wyA7Xo-n3s0eG521hnthKgfzusTfPTxBK5wuQCWwzshIWauENAuy6_2wfCxt7JqveGT9SOggXeOZMJDPAKys"/>
+</div>
+<div class="flex-1">
+<div class="flex justify-between items-start">
+<span class="bg-secondary-fixed text-on-secondary-fixed text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full mb-1">Paused</span>
+</div>
+<h3 class="text-lg font-bold text-on-surface leading-tight">Artisanal Salted Butter</h3>
+<p class="text-secondary font-semibold text-sm">1 Pack • Bi-Weekly</p>
+</div>
+</div>
+<div class="bg-surface-container-low/50 border border-dashed border-outline-variant/30 rounded-xl p-4 mb-4 text-center">
+<p class="text-xs text-on-surface-variant italic">No upcoming deliveries scheduled.</p>
+</div>
+<div class="flex gap-3">
+<button class="flex-1 bg-secondary text-on-secondary py-3 rounded-xl font-bold text-sm shadow-sm hover:opacity-90 active:scale-95 transition-all">
+                        Resume Delivery
+                    </button>
+<button class="w-12 h-12 flex items-center justify-center bg-surface-container-high text-on-surface-variant rounded-xl active:scale-95 transition-all">
+<span class="material-symbols-outlined" data-icon="more_vert">more_vert</span>
+</button>
+</div>
+</article>
+<!-- Asymmetric Bento-style Info Card -->
+<div class="grid grid-cols-2 gap-4">
+<div class="bg-tertiary-fixed text-on-tertiary-fixed p-5 rounded-2xl flex flex-col justify-between aspect-square">
+<span class="material-symbols-outlined text-3xl" data-icon="savings">savings</span>
+<div>
+<p class="text-xs font-medium uppercase tracking-tight opacity-70">Total Savings</p>
+<p class="text-2xl font-extrabold">$14.50</p>
+</div>
+</div>
+<div class="bg-surface-container-high p-5 rounded-2xl flex flex-col justify-between aspect-square">
+<span class="material-symbols-outlined text-3xl text-primary" data-icon="auto_awesome">auto_awesome</span>
+<div>
+<p class="text-xs font-medium text-on-surface-variant uppercase tracking-tight">Delivery Streak</p>
+<p class="text-2xl font-extrabold text-on-surface">12 <span class="text-sm font-medium">Weeks</span></p>
+</div>
+</div>
+</div>
+<!-- Empty State Variant (Conditional/Example) -->
+<!-- Uncomment to see empty state -->
+<!--
+            <div class="py-12 flex flex-col items-center text-center">
+                <div class="w-24 h-24 bg-surface-container-high milk-drop-mask flex items-center justify-center mb-6">
+                    <span class="material-symbols-outlined text-primary text-4xl" data-icon="calendar_add_on">calendar_add_on</span>
+                </div>
+                <h3 class="text-xl font-bold text-on-surface mb-2">No active subscriptions</h3>
+                <p class="text-on-surface-variant text-sm max-w-xs mx-auto mb-8">Set up recurring deliveries of your favorites and save up to 15% on every order.</p>
+                <button class="bg-primary text-on-primary px-8 py-4 rounded-xl font-bold shadow-lg shadow-primary/20 active:scale-95 transition-all">
+                    Start a Subscription
+                </button>
+            </div>
+            -->
+</div>
+</main>
+<!-- BottomNavBar -->
+<nav class="fixed bottom-0 left-0 w-full flex justify-around items-center px-4 pb-6 pt-2 bg-[#fafaf3]/80 dark:bg-stone-900/80 backdrop-blur-md rounded-t-2xl z-50 shadow-[0_-8px_24px_rgba(63,101,48,0.05)]">
+<a class="flex flex-col items-center justify-center text-stone-500 dark:text-stone-400 px-3 py-1.5 hover:bg-stone-100 dark:hover:bg-stone-800 active:scale-90 transition-all duration-200" href="#">
+<span class="material-symbols-outlined" data-icon="home">home</span>
+<span class="text-[10px] font-medium tracking-wide">Home</span>
+</a>
+<a class="flex flex-col items-center justify-center text-stone-500 dark:text-stone-400 px-3 py-1.5 hover:bg-stone-100 dark:hover:bg-stone-800 active:scale-90 transition-all duration-200" href="#">
+<span class="material-symbols-outlined" data-icon="storefront">storefront</span>
+<span class="text-[10px] font-medium tracking-wide">Products</span>
+</a>
+<a class="flex flex-col items-center justify-center text-stone-500 dark:text-stone-400 px-3 py-1.5 hover:bg-stone-100 dark:hover:bg-stone-800 active:scale-90 transition-all duration-200" href="#">
+<span class="material-symbols-outlined" data-icon="receipt_long">receipt_long</span>
+<span class="text-[10px] font-medium tracking-wide">Orders</span>
+</a>
+<a class="flex flex-col items-center justify-center bg-green-100 dark:bg-green-900/30 text-green-900 dark:text-green-200 rounded-xl px-3 py-1.5 active:scale-90 transition-all duration-200" href="#">
+<span class="material-symbols-outlined" data-icon="calendar_month" style="font-variation-settings: 'FILL' 1;">calendar_month</span>
+<span class="text-[10px] font-medium tracking-wide">Subscribe</span>
+</a>
+<a class="flex flex-col items-center justify-center text-stone-500 dark:text-stone-400 px-3 py-1.5 hover:bg-stone-100 dark:hover:bg-stone-800 active:scale-90 transition-all duration-200" href="#">
+<span class="material-symbols-outlined" data-icon="person">person</span>
+<span class="text-[10px] font-medium tracking-wide">Profile</span>
+</a>
+</nav>
+</body></html>

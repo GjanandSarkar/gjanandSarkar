@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>DairyDirect - Live Delivery Tracking</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "outline-variant": "#c3c9bb",
+                    "on-surface-variant": "#43493e",
+                    "surface-dim": "#dadad4",
+                    "tertiary-container": "#537e64",
+                    "on-tertiary": "#ffffff",
+                    "on-secondary-fixed-variant": "#6e3910",
+                    "surface-variant": "#e3e3dc",
+                    "secondary-fixed-dim": "#ffb787",
+                    "inverse-on-surface": "#f1f1ea",
+                    "on-tertiary-fixed-variant": "#264f38",
+                    "on-error": "#ffffff",
+                    "surface-tint": "#426832",
+                    "surface-container": "#eeeee7",
+                    "outline": "#73796d",
+                    "surface-bright": "#fafaf3",
+                    "error": "#ba1a1a",
+                    "primary": "#3f6530",
+                    "on-primary-container": "#f8ffee",
+                    "primary-fixed": "#c2efac",
+                    "on-secondary": "#ffffff",
+                    "secondary": "#8a5025",
+                    "surface": "#fafaf3",
+                    "on-secondary-fixed": "#311300",
+                    "error-container": "#ffdad6",
+                    "surface-container-lowest": "#ffffff",
+                    "on-primary-fixed": "#042100",
+                    "surface-container-high": "#e8e9e2",
+                    "secondary-fixed": "#ffdcc7",
+                    "on-background": "#1a1c18",
+                    "primary-fixed-dim": "#a7d392",
+                    "on-error-container": "#93000a",
+                    "primary-container": "#577f46",
+                    "background": "#fafaf3",
+                    "on-tertiary-fixed": "#002111",
+                    "tertiary-fixed": "#bfedce",
+                    "on-primary-fixed-variant": "#2a4f1d",
+                    "on-secondary-container": "#774117",
+                    "surface-container-highest": "#e3e3dc",
+                    "secondary-container": "#fdb07d",
+                    "inverse-surface": "#2f312d",
+                    "surface-container-low": "#f4f4ed",
+                    "inverse-primary": "#a7d392",
+                    "tertiary": "#3b644c",
+                    "on-surface": "#1a1c18",
+                    "on-primary": "#ffffff",
+                    "tertiary-fixed-dim": "#a4d1b3",
+                    "on-tertiary-container": "#f6fff5"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px"
+            },
+            "fontFamily": {
+                    "headline": ["Inter"],
+                    "body": ["Inter"],
+                    "label": ["Inter"]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        body { font-family: 'Inter', sans-serif; }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .map-gradient-overlay {
+            background: linear-gradient(to bottom, rgba(250, 250, 243, 0.4), transparent 20%, transparent 80%, #fafaf3);
+        }
+        .dashed-path {
+            stroke-dasharray: 8;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-surface text-on-surface overflow-hidden">
+<!-- Top Navigation (Shared Component Shell) -->
+<header class="fixed top-0 w-full z-50 bg-[#fafaf3]/80 backdrop-blur-md shadow-[0_12px_32px_rgba(63,101,48,0.05)] flex justify-between items-center px-6 py-4">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-green-800" data-icon="agriculture">agriculture</span>
+<span class="text-xl font-bold text-green-800 tracking-tight">DairyDirect</span>
+</div>
+<div class="flex items-center gap-4">
+<button class="text-stone-500 hover:opacity-80 transition-opacity active:scale-95">
+<span class="material-symbols-outlined" data-icon="shopping_cart">shopping_cart</span>
+</button>
+</div>
+</header>
+<main class="relative h-screen flex flex-col pt-16">
+<!-- Live Map Section (65% Height) -->
+<section class="relative h-[65%] w-full overflow-hidden bg-surface-container-low">
+<!-- Simulated Map Image -->
+<img alt="Detailed illustrative map of a leafy residential neighborhood with clean streets and parks" class="w-full h-full object-cover opacity-60 grayscale-[0.2] brightness-105" data-alt="Top-down map view of an upscale residential neighborhood with green spaces, clean grey roads, and soft morning lighting" data-location="Bangalore" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDN1KmwbH5nFz0kFzZZeZpSCxvQT29qq7K3cZWqu0s3Zguyzy-AJf1w1-2_JFtwTg3tcjvHv24B-YYeLQQ9X9FOxR94vT75sk69Gc5zc6CuYA8nk51HlEgdPixz2TvvuobV3gfwP_e0yXTqjno9a-tN-ztC3g50BWd948a0cNUw8GF7daOjlApDRvtdybfY_YEsGl0jqMeEjt58SYoNCeD0NWvCuy89DMgrOB1XhqjpSJ8Lq2LlubnpdtZGmRMHKR_vKOJLIaRWZZM"/>
+<!-- Map Overlay UI Elements -->
+<div class="absolute inset-0 map-gradient-overlay pointer-events-none"></div>
+<!-- SVG Polyline Overlay -->
+<svg class="absolute inset-0 w-full h-full pointer-events-none">
+<path class="dashed-path opacity-60" d="M 150 450 Q 300 350 450 400 T 700 300" fill="none" stroke="#3f6530" stroke-dasharray="8 8" stroke-width="3"></path>
+</svg>
+<!-- Arriving Pill (Floating) -->
+<div class="absolute top-8 left-1/2 -translate-x-1/2 z-20">
+<div class="bg-primary px-6 py-2.5 rounded-full shadow-lg flex items-center gap-3">
+<div class="w-2 h-2 rounded-full bg-white animate-pulse"></div>
+<span class="text-on-primary font-semibold text-sm tracking-wide">Arriving in ~12 min</span>
+</div>
+</div>
+<!-- Home Pin Marker -->
+<div class="absolute left-[700px] top-[300px] -translate-x-1/2 -translate-y-full flex flex-col items-center">
+<div class="bg-white p-2 rounded-2xl shadow-xl ring-2 ring-primary-container">
+<span class="material-symbols-outlined text-primary text-3xl" data-icon="home" data-weight="fill" style="font-variation-settings: 'FILL' 1;">home</span>
+</div>
+<div class="w-1 h-4 bg-primary-container"></div>
+</div>
+<!-- Scooter Delivery Marker -->
+<div class="absolute left-[300px] top-[350px] -translate-x-1/2 -translate-y-1/2">
+<div class="relative">
+<div class="absolute inset-0 bg-primary/20 rounded-full scale-[2] animate-ping"></div>
+<div class="bg-primary w-14 h-14 rounded-full shadow-2xl flex items-center justify-center border-4 border-white">
+<span class="material-symbols-outlined text-on-primary text-2xl" data-icon="moped">moped</span>
+</div>
+</div>
+</div>
+<!-- Map Controls -->
+<div class="absolute right-6 bottom-12 flex flex-col gap-3">
+<button class="w-12 h-12 bg-white rounded-2xl shadow-md flex items-center justify-center text-primary active:scale-90 transition-all">
+<span class="material-symbols-outlined" data-icon="add">add</span>
+</button>
+<button class="w-12 h-12 bg-white rounded-2xl shadow-md flex items-center justify-center text-primary active:scale-90 transition-all">
+<span class="material-symbols-outlined" data-icon="remove">remove</span>
+</button>
+<button class="w-12 h-12 bg-white rounded-2xl shadow-md flex items-center justify-center text-primary active:scale-90 transition-all">
+<span class="material-symbols-outlined" data-icon="my_location" style="font-variation-settings: 'FILL' 1;">my_location</span>
+</button>
+</div>
+</section>
+<!-- Bottom Sheet (35% Height) -->
+<section class="flex-1 bg-surface-container-lowest rounded-t-[32px] shadow-[0_-16px_48px_rgba(63,101,48,0.08)] z-40 relative px-8 pt-8 overflow-y-auto">
+<!-- Pull Bar -->
+<div class="absolute top-3 left-1/2 -translate-x-1/2 w-12 h-1.5 bg-surface-container-highest rounded-full"></div>
+<div class="max-w-3xl mx-auto flex flex-col h-full">
+<!-- Driver Info Section -->
+<div class="flex items-center justify-between mb-8">
+<div class="flex items-center gap-5">
+<div class="relative">
+<img alt="Driver portrait" class="w-16 h-16 rounded-2xl object-cover shadow-sm ring-4 ring-primary-fixed" data-alt="Professional headshot of a friendly middle-aged man with a warm smile, outdoor natural lighting, soft focus background" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAtWtGXr36Ooer1YYgygZUappD3BGQlseOPenS3_rzQg4xur_kkyVuhaGte7uq0bIP9ivEcm7TJYEEIwgCJMB5BlLwWOoxiSKxmwqmkukdHx_OpBRVtAe_kzT2XX5OYGo6duKoS8Lps_jZB_vd-vs57z_XnKCuNRSJL6UClBOhOdvsJHEYOBJsjehShc83NEasJnWSGEponWEGu8126k-PZb6f76PFtcDWLWUiJEKxPPh_Bw_ywQAg8Dq5PofMFPzHChU33CRtw3gg"/>
+<div class="absolute -bottom-1 -right-1 bg-tertiary w-6 h-6 rounded-full border-2 border-white flex items-center justify-center">
+<span class="material-symbols-outlined text-[12px] text-white" data-icon="verified" style="font-variation-settings: 'FILL' 1;">verified</span>
+</div>
+</div>
+<div>
+<p class="text-on-surface-variant text-sm font-medium mb-0.5">Your delivery partner</p>
+<h2 class="text-2xl font-bold text-on-surface tracking-tight leading-tight">Suresh D.</h2>
+<div class="flex items-center gap-1.5 mt-1">
+<span class="material-symbols-outlined text-secondary text-base" data-icon="star" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="text-sm font-semibold">4.9</span>
+<span class="text-stone-400 text-sm ml-1">• 2,400+ deliveries</span>
+</div>
+</div>
+</div>
+<div class="flex gap-3">
+<button class="w-14 h-14 bg-surface-container-low text-primary rounded-2xl flex items-center justify-center hover:bg-primary-fixed-dim transition-colors active:scale-95">
+<span class="material-symbols-outlined" data-icon="chat">chat</span>
+</button>
+<button class="w-14 h-14 bg-primary text-white rounded-2xl flex items-center justify-center hover:opacity-90 transition-all shadow-lg active:scale-95">
+<span class="material-symbols-outlined" data-icon="call" style="font-variation-settings: 'FILL' 1;">call</span>
+</button>
+</div>
+</div>
+<!-- Order Summary Cards -->
+<div class="bg-surface-container-low rounded-3xl p-6 mb-10">
+<div class="flex items-center justify-between mb-4">
+<h3 class="font-bold text-on-surface">Order Summary</h3>
+<span class="text-primary font-semibold text-sm">#DD-92834</span>
+</div>
+<div class="space-y-4">
+<div class="flex items-center gap-4">
+<div class="w-12 h-12 bg-white rounded-xl flex items-center justify-center">
+<img alt="Milk Bottle" class="w-10 h-10 object-contain" data-alt="Fresh organic whole milk in a classic glass bottle, condensation on surface, bright studio lighting" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBxMcz6tn1BnZ8TUoEXYjlRIJ6iGYoApJ5jibGTZwdJmMkky5ume-Y9-IULFy-INDBwtmZgt3qpWXOC5QnbsFRla3Il2nl2LQ_GipO8Kn1cOk1m0pK8pbmyjpNIi6D2iL6qtndDJz7QeLBYqTwSD5WZiMHKOWIQPxCF5i_HfRjd_DaPY111KegDevm8S69gWe98Mjlb6sG0khadCir4_JKNGO9CyHncTy0q2scWKGBdGh9Sl6r9gIsPngY7TrBPncaO03NniDx6oww"/>
+</div>
+<div class="flex-1">
+<p class="font-semibold text-on-surface">Fresh Farm Whole Milk</p>
+<p class="text-xs text-on-surface-variant">2 x 1000ml Glass Bottle</p>
+</div>
+<p class="font-bold text-primary">$8.50</p>
+</div>
+<div class="flex items-center gap-4">
+<div class="w-12 h-12 bg-white rounded-xl flex items-center justify-center">
+<img alt="Artisan Butter" class="w-10 h-10 object-contain" data-alt="Block of artisanal salted butter wrapped in parchment paper, rustic style" src="https://lh3.googleusercontent.com/aida-public/AB6AXuD9ipw21cdGrlKgi88x_O7Pj2uw41GFc-wLzg39TPABm-k1eluGN97cr9QUE_S6jvXGjQQA1JE_sHz2m1ykuOPaOiNPcLYgQQmtpujOFU0ld5NAmfzud5M9ZfFgU5wGa_9YKQE0BTPLX7lrzo8dDQdu9zD2w2uwRcPZCyCUuaZIlxD2oa-KKxCr6x6KGBO0IBIX6irfvSWH2wxxDat6v5KlbdY1m6vQn9o4fEHbS_n-xmo38sNhS8MWkZEjihxU-vBNZUk1g9PAYCc"/>
+</div>
+<div class="flex-1">
+<p class="font-semibold text-on-surface">Cultured Salted Butter</p>
+<p class="text-xs text-on-surface-variant">1 x 250g Block</p>
+</div>
+<p class="font-bold text-primary">$4.20</p>
+</div>
+</div>
+<div class="mt-6 pt-6 border-t border-outline-variant/30 flex justify-between items-center">
+<span class="text-sm font-medium text-on-surface-variant">Total with taxes</span>
+<span class="text-xl font-extrabold text-primary">$12.70</span>
+</div>
+</div>
+</div>
+</section>
+</main>
+<!-- Bottom Navigation Shell -->
+<nav class="fixed bottom-0 left-0 w-full flex justify-around items-center px-4 pb-6 pt-2 bg-[#fafaf3]/80 backdrop-blur-md rounded-t-2xl z-50 shadow-[0_-8px_24px_rgba(63,101,48,0.05)]">
+<a class="flex flex-col items-center justify-center text-stone-500 px-3 py-1.5 hover:bg-stone-100 transition-all" href="#">
+<span class="material-symbols-outlined" data-icon="home">home</span>
+<span class="text-[10px] font-medium tracking-wide">Home</span>
+</a>
+<a class="flex flex-col items-center justify-center text-stone-500 px-3 py-1.5 hover:bg-stone-100 transition-all" href="#">
+<span class="material-symbols-outlined" data-icon="storefront">storefront</span>
+<span class="text-[10px] font-medium tracking-wide">Products</span>
+</a>
+<a class="flex flex-col items-center justify-center bg-green-100 text-green-900 rounded-xl px-3 py-1.5 shadow-sm" href="#">
+<span class="material-symbols-outlined" data-icon="receipt_long">receipt_long</span>
+<span class="text-[10px] font-medium tracking-wide">Orders</span>
+</a>
+<a class="flex flex-col items-center justify-center text-stone-500 px-3 py-1.5 hover:bg-stone-100 transition-all" href="#">
+<span class="material-symbols-outlined" data-icon="calendar_month">calendar_month</span>
+<span class="text-[10px] font-medium tracking-wide">Subscribe</span>
+</a>
+<a class="flex flex-col items-center justify-center text-stone-500 px-3 py-1.5 hover:bg-stone-100 transition-all" href="#">
+<span class="material-symbols-outlined" data-icon="person">person</span>
+<span class="text-[10px] font-medium tracking-wide">Profile</span>
+</a>
+</nav>
+</body></html>

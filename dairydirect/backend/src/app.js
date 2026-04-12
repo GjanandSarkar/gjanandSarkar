@@ -26,6 +26,7 @@ app.use(helmet());
 
 // ─── 2. CORS ─────────────────────────────────────────────
 const allowedOrigins = process.env.ALLOWED_ORIGINS?.split(",") || [
+  "http://localhost:3000",
   "http://localhost:5173",
   "http://localhost:3001",
 ];

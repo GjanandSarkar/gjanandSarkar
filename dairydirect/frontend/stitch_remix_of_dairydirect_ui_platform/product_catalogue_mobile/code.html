@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "tertiary": "#3b644c",
+                        "on-primary": "#ffffff",
+                        "on-tertiary-fixed-variant": "#264f38",
+                        "secondary": "#8a5025",
+                        "on-surface-variant": "#43493e",
+                        "surface-container-lowest": "#ffffff",
+                        "surface": "#fafaf3",
+                        "background": "#fafaf3",
+                        "inverse-on-surface": "#f1f1ea",
+                        "inverse-surface": "#2f312d",
+                        "surface-container-highest": "#e3e3dc",
+                        "tertiary-container": "#537e64",
+                        "tertiary-fixed": "#bfedce",
+                        "inverse-primary": "#a7d392",
+                        "on-tertiary-fixed": "#002111",
+                        "on-secondary": "#ffffff",
+                        "on-primary-container": "#f8ffee",
+                        "primary": "#3f6530",
+                        "surface-container": "#eeeee7",
+                        "surface-variant": "#e3e3dc",
+                        "surface-container-high": "#e8e9e2",
+                        "primary-container": "#577f46",
+                        "on-tertiary-container": "#f6fff5",
+                        "on-error": "#ffffff",
+                        "surface-tint": "#426832",
+                        "outline": "#73796d",
+                        "on-primary-fixed": "#042100",
+                        "outline-variant": "#c3c9bb",
+                        "on-background": "#1a1c18",
+                        "secondary-container": "#fdb07d",
+                        "surface-container-low": "#f4f4ed",
+                        "on-secondary-fixed-variant": "#6e3910",
+                        "error-container": "#ffdad6",
+                        "error": "#ba1a1a",
+                        "surface-bright": "#fafaf3",
+                        "on-error-container": "#93000a",
+                        "on-surface": "#1a1c18",
+                        "tertiary-fixed-dim": "#a4d1b3",
+                        "surface-dim": "#dadad4",
+                        "primary-fixed": "#c2efac",
+                        "on-tertiary": "#ffffff",
+                        "secondary-fixed-dim": "#ffb787",
+                        "primary-fixed-dim": "#a7d392",
+                        "on-secondary-fixed": "#311300",
+                        "secondary-fixed": "#ffdcc7",
+                        "on-primary-fixed-variant": "#2a4f1d",
+                        "on-secondary-container": "#774117"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "fontFamily": {
+                        "headline": ["Inter"],
+                        "body": ["Inter"],
+                        "label": ["Inter"]
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .hide-scrollbar::-webkit-scrollbar { display: none; }
+        .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-surface font-body text-on-surface min-h-screen">
+<!-- TopAppBar -->
+<header class="fixed top-0 w-full z-50 bg-[#fafaf3]/80 dark:bg-stone-900/80 backdrop-blur-md shadow-[0_12px_32px_rgba(63,101,48,0.05)]">
+<div class="flex justify-between items-center px-6 py-4 w-full">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-green-800 dark:text-green-400">agriculture</span>
+<h1 class="text-xl font-bold text-green-800 dark:text-green-400 tracking-tight font-sans">DairyDirect</h1>
+</div>
+<div class="flex items-center gap-4">
+<button class="material-symbols-outlined text-green-800 dark:text-green-400 hover:opacity-80 transition-opacity active:scale-95">shopping_cart</button>
+</div>
+</div>
+</header>
+<main class="pt-20 pb-44 px-4">
+<!-- Search & Filter Section -->
+<section class="mb-6 space-y-4">
+<div class="relative">
+<span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-outline">search</span>
+<input class="w-full bg-surface-container-high border-none rounded-[10px] py-4 pl-12 pr-4 focus:ring-1 focus:ring-primary/20 focus:bg-surface-container-lowest transition-all placeholder:text-on-surface-variant/60" placeholder="Search for fresh milk, curd, or paneer..." type="text"/>
+</div>
+<!-- Clay Icons Filter Row -->
+<div class="flex gap-4 overflow-x-auto hide-scrollbar pb-2">
+<div class="flex flex-col items-center gap-1.5 flex-shrink-0">
+<div class="w-14 h-14 rounded-2xl bg-secondary-container flex items-center justify-center text-on-secondary-container shadow-sm active:scale-95 transition-transform">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">filter_list</span>
+</div>
+<span class="text-[11px] font-medium text-on-secondary-container">Filter</span>
+</div>
+<div class="flex flex-col items-center gap-1.5 flex-shrink-0">
+<div class="w-14 h-14 rounded-2xl bg-surface-container-low flex items-center justify-center text-secondary active:scale-95 transition-transform">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">eco</span>
+</div>
+<span class="text-[11px] font-medium text-on-surface-variant">Organic</span>
+</div>
+<div class="flex flex-col items-center gap-1.5 flex-shrink-0">
+<div class="w-14 h-14 rounded-2xl bg-surface-container-low flex items-center justify-center text-secondary active:scale-95 transition-transform">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">local_shipping</span>
+</div>
+<span class="text-[11px] font-medium text-on-surface-variant">Express</span>
+</div>
+<div class="flex flex-col items-center gap-1.5 flex-shrink-0">
+<div class="w-14 h-14 rounded-2xl bg-surface-container-low flex items-center justify-center text-secondary active:scale-95 transition-transform">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">workspace_premium</span>
+</div>
+<span class="text-[11px] font-medium text-on-surface-variant">Premium</span>
+</div>
+<div class="flex flex-col items-center gap-1.5 flex-shrink-0">
+<div class="w-14 h-14 rounded-2xl bg-surface-container-low flex items-center justify-center text-secondary active:scale-95 transition-transform">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">savings</span>
+</div>
+<span class="text-[11px] font-medium text-on-surface-variant">Offers</span>
+</div>
+</div>
+</section>
+<!-- Category Tabs -->
+<nav class="flex gap-8 overflow-x-auto hide-scrollbar border-b border-outline-variant/15 mb-6">
+<button class="pb-3 text-primary font-semibold relative flex-shrink-0 text-sm">
+                All Products
+                <div class="absolute bottom-0 left-0 w-full h-[3px] bg-primary rounded-t-full"></div>
+</button>
+<button class="pb-3 text-on-surface-variant font-medium flex-shrink-0 text-sm">Milk &amp; Cream</button>
+<button class="pb-3 text-on-surface-variant font-medium flex-shrink-0 text-sm">Curd &amp; Yogurt</button>
+<button class="pb-3 text-on-surface-variant font-medium flex-shrink-0 text-sm">Paneer &amp; Ghee</button>
+</nav>
+<!-- 2-Column Product Grid -->
+<div class="grid grid-cols-2 gap-4">
+<!-- Product Card 1 -->
+<div class="bg-surface-container-lowest rounded-2xl overflow-hidden shadow-[0_4px_20px_rgba(63,101,48,0.03)] flex flex-col">
+<div class="relative h-40 bg-surface-container-low">
+<img class="w-full h-full object-cover" data-alt="Premium glass bottle of fresh farm milk on a rustic wooden table with soft morning sunlight filtering through" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAbM_ZhEZa0wBYITB_wjuWN2tiaWW6T-s51oWNsESbARujtlyLDjsavUG44iBN5B442X15Y5uqOQqW192E8gPEeEnad8g0Dc3KTA9ky1pMBJBm5IRgePJA0-b2n1cz7jQHsMyNJbOXJkFWy__rr5mhFxwRpDnZ9MW3vZ-FjWMu28he6EVNDmcyP_wE1qM0ERbRV4iEGGBLI-pmyIgtxaoRg0KkDHb_foLc4RkYpaPNwk6EvesR5N7pSs_CW8vxbDrcSR354b8ALWSs"/>
+<div class="absolute top-2 right-2 bg-primary-fixed text-on-primary-fixed text-[10px] font-bold px-2 py-1 rounded-full">FRESH</div>
+</div>
+<div class="p-3 flex flex-col flex-grow">
+<h3 class="text-sm font-semibold text-on-surface line-clamp-1">Farm Fresh Whole Milk</h3>
+<p class="text-[11px] text-on-surface-variant mb-2">1 Litre</p>
+<div class="mt-auto flex items-center justify-between">
+<span class="text-primary font-bold">₹65</span>
+<button class="w-8 h-8 rounded-lg bg-primary text-on-primary flex items-center justify-center active:scale-90 transition-transform">
+<span class="material-symbols-outlined text-sm">add</span>
+</button>
+</div>
+</div>
+</div>
+<!-- Product Card 2 -->
+<div class="bg-surface-container-lowest rounded-2xl overflow-hidden shadow-[0_4px_20px_rgba(63,101,48,0.03)] flex flex-col">
+<div class="relative h-40 bg-surface-container-low">
+<img class="w-full h-full object-cover" data-alt="Artisanal thick greek yogurt in a ceramic bowl garnished with fresh mint leaves in a bright kitchen" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDLI0FT1B9gCIypAZdJa1UcePJCgDe3wfDTXkTxiEHKO4AH1e2kzYuMf7tPE3dy5e4THTHp7b9Sk550-2DYSsOjLQFdfPjULGcMVYsobGbfjYcmG95YesxUkVVkM5zOxIEVm0-Q6UXTt9bKfSuhrx5z_At5LG6qPyVnR_rMtUo6alrzjcH-KVca7_phOGgikAcakjwEeqpNV45ooXc7RfCxQ-lsNAwk8qSRBG8e4S-Y-tPcH7oiPyztn1XLbWVZcwtAnVwBgicXT_k"/>
+</div>
+<div class="p-3 flex flex-col flex-grow">
+<h3 class="text-sm font-semibold text-on-surface line-clamp-1">Classic Buffalo Curd</h3>
+<p class="text-[11px] text-on-surface-variant mb-2">500g</p>
+<div class="mt-auto flex items-center justify-between">
+<span class="text-primary font-bold">₹75</span>
+<div class="flex items-center gap-2 bg-primary-container/10 rounded-lg px-1 py-1">
+<button class="w-6 h-6 rounded-md bg-white text-primary flex items-center justify-center text-xs shadow-sm">1</button>
+</div>
+</div>
+</div>
+</div>
+<!-- Product Card 3 -->
+<div class="bg-surface-container-lowest rounded-2xl overflow-hidden shadow-[0_4px_20px_rgba(63,101,48,0.03)] flex flex-col">
+<div class="relative h-40 bg-surface-container-low">
+<img class="w-full h-full object-cover" data-alt="Golden block of fresh organic paneer cheese on a dark stone board with scattered black peppercorns" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBi9K4i2IkzXnw_hCZVCwzHAF2faeZ9mqLxsVfyYN-s2hpO9aNAVsv2cyQoiC8G3hCN3eROk9clzAkSfZp6l5mTM8hc2GkDcstL92x5zDrZmLyRO1gKysmgVTVoxJ5Vs0vZqyBvOH8LaxvNuYn9lbEqGvKCiMOdkNwZBOq-Ug4TYxNMGSkSePjFutCK-f9axCVF-yW6WToI8ZKiH_tgB4OVzY0s3iAGslZJ1O0oUju5b51yxQUkeenhcaRGFWw9kf96_DZ5Z1KlpX4"/>
+</div>
+<div class="p-3 flex flex-col flex-grow">
+<h3 class="text-sm font-semibold text-on-surface line-clamp-1">Organic Malai Paneer</h3>
+<p class="text-[11px] text-on-surface-variant mb-2">200g</p>
+<div class="mt-auto flex items-center justify-between">
+<span class="text-primary font-bold">₹110</span>
+<button class="w-8 h-8 rounded-lg bg-primary text-on-primary flex items-center justify-center active:scale-90 transition-transform">
+<span class="material-symbols-outlined text-sm">add</span>
+</button>
+</div>
+</div>
+</div>
+<!-- Product Card 4 -->
+<div class="bg-surface-container-lowest rounded-2xl overflow-hidden shadow-[0_4px_20px_rgba(63,101,48,0.03)] flex flex-col border border-primary/10">
+<div class="relative h-40 bg-surface-container-low">
+<img class="w-full h-full object-cover" data-alt="Pure golden cow ghee being poured from a wooden spoon into a traditional glass jar" src="https://lh3.googleusercontent.com/aida-public/AB6AXuApdryuDB1NV5hg6uMfOXxQ8GNa6HgoG7bZK2zmZ3hKmzxA1CIsDOLeFHG5FPMAMk2YQpdkXFZb7hN8TNaQ4FaK1BnNA60iYd1adLnZX6DCwJr32Bn_4UX8uxL4OI0GshIWjSw1-j3si_fbqfTe1fOkdYdtTWmX6s_TuKNUhV4Wh8_0D9nQFw0S5mPICRfF1Dq-ZhwwJeVZJkuSc5dSDW2RecprvR42GtNvH0WTo0hzUwGgGhryOMfYpLQrHq-ub5t2vWkOd-_hVos"/>
+<div class="absolute top-2 left-2 bg-secondary text-white text-[10px] font-bold px-2 py-1 rounded-full">BESTSELLER</div>
+</div>
+<div class="p-3 flex flex-col flex-grow">
+<h3 class="text-sm font-semibold text-on-surface line-clamp-1">Pure Cow Ghee</h3>
+<p class="text-[11px] text-on-surface-variant mb-2">500ml</p>
+<div class="mt-auto flex items-center justify-between">
+<span class="text-primary font-bold">₹340</span>
+<button class="w-8 h-8 rounded-lg bg-primary text-on-primary flex items-center justify-center active:scale-90 transition-transform">
+<span class="material-symbols-outlined text-sm">add</span>
+</button>
+</div>
+</div>
+</div>
+</div>
+</main>
+<!-- Sticky Cart Footer -->
+<div class="fixed bottom-[88px] left-0 w-full px-4 z-40">
+<div class="bg-primary-container text-on-primary-container rounded-2xl py-4 px-6 flex justify-between items-center shadow-lg shadow-primary/20 ring-1 ring-white/20">
+<div class="flex items-center gap-3">
+<div class="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center">
+<span class="material-symbols-outlined text-lg" style="font-variation-settings: 'FILL' 1;">shopping_bag</span>
+</div>
+<span class="text-sm font-semibold">2 items in cart — ₹140</span>
+</div>
+<div class="flex items-center gap-1 font-bold text-sm">
+                VIEW CART
+                <span class="material-symbols-outlined text-sm">chevron_right</span>
+</div>
+</div>
+</div>
+<!-- BottomNavBar -->
+<nav class="fixed bottom-0 left-0 w-full flex justify-around items-center px-4 pb-6 pt-2 bg-[#fafaf3]/80 dark:bg-stone-900/80 backdrop-blur-md rounded-t-2xl z-50 shadow-[0_-8px_24px_rgba(63,101,48,0.05)]">
+<a class="flex flex-col items-center justify-center text-stone-500 dark:text-stone-400 px-3 py-1.5 hover:bg-stone-100 dark:hover:bg-stone-800 active:scale-90 transition-all duration-200" href="#">
+<span class="material-symbols-outlined">home</span>
+<span class="text-[10px] font-medium tracking-wide">Home</span>
+</a>
+<a class="flex flex-col items-center justify-center bg-green-100 dark:bg-green-900/30 text-green-900 dark:text-green-200 rounded-xl px-3 py-1.5 active:scale-90 transition-all duration-200" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">storefront</span>
+<span class="text-[10px] font-medium tracking-wide">Products</span>
+</a>
+<a class="flex flex-col items-center justify-center text-stone-500 dark:text-stone-400 px-3 py-1.5 hover:bg-stone-100 dark:hover:bg-stone-800 active:scale-90 transition-all duration-200" href="#">
+<span class="material-symbols-outlined">receipt_long</span>
+<span class="text-[10px] font-medium tracking-wide">Orders</span>
+</a>
+<a class="flex flex-col items-center justify-center text-stone-500 dark:text-stone-400 px-3 py-1.5 hover:bg-stone-100 dark:hover:bg-stone-800 active:scale-90 transition-all duration-200" href="#">
+<span class="material-symbols-outlined">calendar_month</span>
+<span class="text-[10px] font-medium tracking-wide">Subscribe</span>
+</a>
+<a class="flex flex-col items-center justify-center text-stone-500 dark:text-stone-400 px-3 py-1.5 hover:bg-stone-100 dark:hover:bg-stone-800 active:scale-90 transition-all duration-200" href="#">
+<span class="material-symbols-outlined">person</span>
+<span class="text-[10px] font-medium tracking-wide">Profile</span>
+</a>
+</nav>
+</body></html>

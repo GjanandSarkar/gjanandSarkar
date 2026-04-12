@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>DairyDirect | Quality Report Form (C-17)</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "error-container": "#ffdad6",
+                        "surface-container": "#eeeee7",
+                        "on-tertiary-fixed-variant": "#264f38",
+                        "on-tertiary-fixed": "#002111",
+                        "tertiary-container": "#537e64",
+                        "secondary-container": "#fdb07d",
+                        "on-secondary": "#ffffff",
+                        "surface-container-high": "#e8e9e2",
+                        "primary": "#3f6530",
+                        "on-primary-fixed": "#042100",
+                        "surface-dim": "#dadad4",
+                        "surface-container-low": "#f4f4ed",
+                        "surface-tint": "#426832",
+                        "surface-bright": "#fafaf3",
+                        "on-primary-fixed-variant": "#2a4f1d",
+                        "tertiary": "#3b644c",
+                        "surface-container-highest": "#e3e3dc",
+                        "primary-fixed": "#c2efac",
+                        "error": "#ba1a1a",
+                        "outline": "#73796d",
+                        "inverse-on-surface": "#f1f1ea",
+                        "secondary-fixed": "#ffdcc7",
+                        "on-tertiary-container": "#f6fff5",
+                        "tertiary-fixed-dim": "#a4d1b3",
+                        "on-error-container": "#93000a",
+                        "on-surface-variant": "#43493e",
+                        "primary-fixed-dim": "#a7d392",
+                        "on-error": "#ffffff",
+                        "background": "#fafaf3",
+                        "surface-variant": "#e3e3dc",
+                        "secondary": "#8a5025",
+                        "inverse-surface": "#2f312d",
+                        "surface": "#fafaf3",
+                        "surface-container-lowest": "#ffffff",
+                        "on-tertiary": "#ffffff",
+                        "secondary-fixed-dim": "#ffb787",
+                        "on-secondary-fixed-variant": "#6e3910",
+                        "on-primary": "#ffffff",
+                        "on-secondary-container": "#774117",
+                        "primary-container": "#577f46",
+                        "on-primary-container": "#f8ffee",
+                        "inverse-primary": "#a7d392",
+                        "outline-variant": "#c3c9bb",
+                        "tertiary-fixed": "#bfedce",
+                        "on-background": "#1a1c18",
+                        "on-surface": "#1a1c18",
+                        "on-secondary-fixed": "#311300"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "fontFamily": {
+                        "headline": ["Inter"],
+                        "body": ["Inter"],
+                        "label": ["Inter"]
+                    }
+                },
+            }
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .backdrop-blur-xl { backdrop-filter: blur(24px); }
+        body { background-color: #fafaf3; color: #1a1c18; }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="font-body selection:bg-primary-fixed selection:text-on-primary-fixed">
+<!-- TopNavBar (Shared Component) -->
+<header class="fixed top-0 w-full z-50 bg-[#fafaf3]/80 dark:bg-stone-900/80 backdrop-blur-xl tonal-shift bg-stone-100/50 dark:bg-stone-800/50 shadow-[0_12px_32px_rgba(63,101,48,0.05)]">
+<div class="flex justify-between items-center px-6 py-4 w-full">
+<div class="flex items-center gap-4">
+<button class="material-symbols-outlined text-on-surface-variant hover:text-primary transition-colors">arrow_back</button>
+<h1 class="text-2xl font-bold text-emerald-900 dark:text-emerald-100 tracking-tight font-['Inter']">DairyDirect</h1>
+</div>
+<div class="flex items-center gap-4">
+<span class="material-symbols-outlined text-stone-500 hover:text-emerald-700 transition-colors cursor-pointer" data-icon="notifications">notifications</span>
+<span class="material-symbols-outlined text-stone-500 hover:text-emerald-700 transition-colors cursor-pointer" data-icon="shopping_cart">shopping_cart</span>
+<div class="w-8 h-8 rounded-full bg-surface-container-high overflow-hidden">
+<img alt="User profile" data-alt="close-up portrait of a smiling user with warm lighting and a soft neutral background" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAUxJxm-N1krBcyUnK2gxpmHn2ltP6dyUvjT32RHg8DD3KcRrKvAwLFKxVZ7_J2mv6sJzpPhXXGOn0fiX24pqmglXvlvlrO0sRgbZs74AiFZ9pd_gwUulFeZS2lMCzL0j2MVRsjDQ9eLxvLIp-cusmnfeHojI3QDg-2RQ3n6VcWz4XNGSmsz6HM1dKbvmoc_A3cKMZ5-2mplxe4SeqLiEy2o78JTPd3sGIRHF2ecghIas9J-cGpu7LxElAmXeEi8rCJ6dwOSgeN-u0"/>
+</div>
+</div>
+</div>
+</header>
+<main class="pt-24 pb-32 px-4 max-w-2xl mx-auto space-y-8">
+<!-- Header Section -->
+<section class="space-y-2">
+<span class="text-sm font-semibold tracking-widest text-secondary uppercase">Form C-17</span>
+<h2 class="text-4xl font-bold text-primary font-headline tracking-tight">Quality Report</h2>
+<p class="text-on-surface-variant leading-relaxed">We apologize for the inconvenience. Please provide details regarding the issue with your fresh delivery so we can make it right.</p>
+</section>
+<!-- Order Reference Card -->
+<div class="bg-surface-container-lowest rounded-2xl p-6 shadow-[0_8px_24px_rgba(63,101,48,0.04)] flex items-center gap-6">
+<div class="w-20 h-20 bg-surface-container rounded-xl overflow-hidden shrink-0">
+<img class="w-full h-full object-cover" data-alt="Fresh glass bottle of milk on a rustic wooden table with soft morning sunlight streaming through a window" src="https://lh3.googleusercontent.com/aida-public/AB6AXuB8quIC0YR3zJFOdQ_5jS8wyiUiLHO0GowDAgDS5K_niqWFTv6bsS6ru5ysmm_E7mfVshp0ZK6-OYiMxvFOgsyZ3L2dMHbCTYOhH1shoYAfk5SaGXgOgJfnxWdlYvr6mSImaRw5n5-34vqrz1t37ihlJcIW10ZwbGqK0seIATkGfFCotG6GdbnJBCrNSAN3bKLeQLKiiWT7LmkMnPwa7SD3rDBQ_Cz2OhcbhCHUoG0hUXJsRQnU_HDLD08owAHDv7kaPIYibb8qP2Q"/>
+</div>
+<div class="flex-1">
+<div class="flex justify-between items-start">
+<div>
+<h3 class="font-semibold text-lg text-on-surface">Order #DD-89241</h3>
+<p class="text-sm text-on-surface-variant">Delivered today, 8:45 AM</p>
+</div>
+<span class="bg-primary-fixed text-on-primary-fixed text-[10px] font-bold px-3 py-1 rounded-full uppercase tracking-tighter">Delivered</span>
+</div>
+<div class="mt-2 flex items-center text-primary font-semibold">
+<span class="text-sm">2 Items • $14.20</span>
+</div>
+</div>
+</div>
+<!-- Form Section -->
+<form class="space-y-8">
+<!-- Issue Type Selector -->
+<div class="space-y-4">
+<h4 class="text-xl font-semibold text-on-surface flex items-center gap-2">
+                    What's the issue?
+                </h4>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+<label class="group relative flex items-center p-4 bg-surface-container-low rounded-xl cursor-pointer hover:bg-surface-container-lowest transition-all border-2 border-transparent has-[:checked]:border-primary/20 has-[:checked]:bg-surface-container-lowest shadow-sm">
+<input class="hidden peer" name="issue_type" type="radio"/>
+<span class="material-symbols-outlined text-secondary mr-3" data-icon="ac_unit">ac_unit</span>
+<span class="text-on-surface font-medium">Spoiled / Not Fresh</span>
+<div class="ml-auto opacity-0 peer-checked:opacity-100 text-primary">
+<span class="material-symbols-outlined" data-weight="fill" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+</div>
+</label>
+<label class="group relative flex items-center p-4 bg-surface-container-low rounded-xl cursor-pointer hover:bg-surface-container-lowest transition-all border-2 border-transparent has-[:checked]:border-primary/20 has-[:checked]:bg-surface-container-lowest shadow-sm">
+<input class="hidden peer" name="issue_type" type="radio"/>
+<span class="material-symbols-outlined text-secondary mr-3" data-icon="wrong_location">wrong_location</span>
+<span class="text-on-surface font-medium">Wrong Item Sent</span>
+<div class="ml-auto opacity-0 peer-checked:opacity-100 text-primary">
+<span class="material-symbols-outlined" data-weight="fill" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+</div>
+</label>
+<label class="group relative flex items-center p-4 bg-surface-container-low rounded-xl cursor-pointer hover:bg-surface-container-lowest transition-all border-2 border-transparent has-[:checked]:border-primary/20 has-[:checked]:bg-surface-container-lowest shadow-sm">
+<input class="hidden peer" name="issue_type" type="radio"/>
+<span class="material-symbols-outlined text-secondary mr-3" data-icon="broken_image">broken_image</span>
+<span class="text-on-surface font-medium">Damaged Packaging</span>
+<div class="ml-auto opacity-0 peer-checked:opacity-100 text-primary">
+<span class="material-symbols-outlined" data-weight="fill" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+</div>
+</label>
+<label class="group relative flex items-center p-4 bg-surface-container-low rounded-xl cursor-pointer hover:bg-surface-container-lowest transition-all border-2 border-transparent has-[:checked]:border-primary/20 has-[:checked]:bg-surface-container-lowest shadow-sm">
+<input class="hidden peer" name="issue_type" type="radio"/>
+<span class="material-symbols-outlined text-secondary mr-3" data-icon="help_center">help_center</span>
+<span class="text-on-surface font-medium">Other Issue</span>
+<div class="ml-auto opacity-0 peer-checked:opacity-100 text-primary">
+<span class="material-symbols-outlined" data-weight="fill" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+</div>
+</label>
+</div>
+</div>
+<!-- Description -->
+<div class="space-y-4">
+<label class="text-xl font-semibold text-on-surface block">Additional Details</label>
+<textarea class="w-full min-h-[160px] p-5 rounded-2xl bg-surface-container-high border-none focus:ring-2 focus:ring-primary/20 focus:bg-surface-container-lowest transition-all placeholder:text-stone-400 text-on-surface resize-none" placeholder="Describe the condition of the items..."></textarea>
+</div>
+<!-- Photo Upload Section -->
+<div class="space-y-4">
+<div class="flex justify-between items-end">
+<label class="text-xl font-semibold text-on-surface block">Photos (Max 3)</label>
+<span class="text-xs text-on-surface-variant font-medium">Clear lighting helps us resolve issues faster</span>
+</div>
+<div class="grid grid-cols-3 gap-4">
+<div class="aspect-square bg-surface-container-high rounded-2xl border-2 border-dashed border-outline-variant/50 flex flex-col items-center justify-center gap-2 group cursor-pointer hover:border-primary/40 hover:bg-surface-container-lowest transition-all">
+<span class="material-symbols-outlined text-primary text-3xl">add_a_photo</span>
+<span class="text-[10px] font-bold text-on-surface-variant uppercase tracking-wider">Slot 1</span>
+</div>
+<div class="aspect-square bg-surface-container-high rounded-2xl border-2 border-dashed border-outline-variant/50 flex flex-col items-center justify-center gap-2 opacity-60">
+<span class="material-symbols-outlined text-stone-400 text-3xl">add_a_photo</span>
+<span class="text-[10px] font-bold text-on-surface-variant uppercase tracking-wider">Slot 2</span>
+</div>
+<div class="aspect-square bg-surface-container-high rounded-2xl border-2 border-dashed border-outline-variant/50 flex flex-col items-center justify-center gap-2 opacity-60">
+<span class="material-symbols-outlined text-stone-400 text-3xl">add_a_photo</span>
+<span class="text-[10px] font-bold text-on-surface-variant uppercase tracking-wider">Slot 3</span>
+</div>
+</div>
+</div>
+<!-- CTA -->
+<div class="pt-8 flex flex-col gap-4">
+<button class="w-full bg-primary text-on-primary py-5 rounded-2xl font-bold text-lg shadow-[0_12px_24px_rgba(63,101,48,0.2)] hover:shadow-[0_16px_32px_rgba(63,101,48,0.3)] hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center justify-center gap-3" type="submit">
+                    Submit Quality Report
+                    <span class="material-symbols-outlined" data-icon="send">send</span>
+</button>
+<div class="p-4 bg-secondary-fixed rounded-2xl flex items-start gap-4">
+<span class="material-symbols-outlined text-on-secondary-fixed-variant" data-icon="info" data-weight="fill" style="font-variation-settings: 'FILL' 1;">info</span>
+<p class="text-xs text-on-secondary-fixed-variant leading-relaxed">
+                        Reports are reviewed within 24 hours. Valid quality issues are eligible for instant 100% refund or replacement delivery.
+                    </p>
+</div>
+</div>
+</form>
+</main>
+<!-- BottomNavBar (Shared Component) -->
+<nav class="fixed bottom-0 left-0 w-full z-50 flex justify-around items-center px-4 pt-2 pb-8 bg-[#fafaf3]/90 dark:bg-stone-900/90 backdrop-blur-md rounded-t-3xl border-t border-stone-200/20 shadow-[0_-4px_24px_rgba(63,101,48,0.08)]">
+<a class="flex flex-col items-center justify-center text-stone-500 dark:text-stone-400 px-5 py-2 hover:scale-105 active:scale-90 transition-transform" href="#">
+<span class="material-symbols-outlined" data-icon="storefront">storefront</span>
+<span class="text-[10px] font-medium font-['Inter']">Shop</span>
+</a>
+<a class="flex flex-col items-center justify-center text-stone-500 dark:text-stone-400 px-5 py-2 hover:scale-105 active:scale-90 transition-transform" href="#">
+<span class="material-symbols-outlined" data-icon="local_mown">local_see</span>
+<span class="text-[10px] font-medium font-['Inter']">Deliveries</span>
+</a>
+<a class="flex flex-col items-center justify-center text-stone-500 dark:text-stone-400 px-5 py-2 hover:scale-105 active:scale-90 transition-transform" href="#">
+<span class="material-symbols-outlined" data-icon="insert_chart">insert_chart</span>
+<span class="text-[10px] font-medium font-['Inter']">Reports</span>
+</a>
+<a class="flex flex-col items-center justify-center bg-emerald-100 dark:bg-emerald-900/30 text-emerald-900 dark:text-emerald-100 rounded-2xl px-5 py-2 hover:scale-105 active:scale-90 transition-transform" href="#">
+<span class="material-symbols-outlined" data-icon="person" data-weight="fill" style="font-variation-settings: 'FILL' 1;">person</span>
+<span class="text-[10px] font-medium font-['Inter']">Profile</span>
+</a>
+</nav>
+</body></html>

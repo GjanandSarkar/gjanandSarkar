@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "outline-variant": "#c3c9bb",
+                    "on-surface": "#1a1c18",
+                    "on-tertiary-container": "#f6fff5",
+                    "background": "#fafaf3",
+                    "tertiary-fixed": "#bfedce",
+                    "surface-container": "#eeeee7",
+                    "on-primary-fixed-variant": "#2a4f1d",
+                    "on-primary-container": "#f8ffee",
+                    "on-tertiary": "#ffffff",
+                    "surface-variant": "#e3e3dc",
+                    "secondary-fixed-dim": "#ffb787",
+                    "on-primary-fixed": "#042100",
+                    "surface-dim": "#dadad4",
+                    "tertiary-fixed-dim": "#a4d1b3",
+                    "on-tertiary-fixed-variant": "#264f38",
+                    "inverse-surface": "#2f312d",
+                    "secondary-container": "#fdb07d",
+                    "on-tertiary-fixed": "#002111",
+                    "on-surface-variant": "#43493e",
+                    "surface-container-lowest": "#ffffff",
+                    "on-secondary": "#ffffff",
+                    "on-error": "#ffffff",
+                    "primary-container": "#577f46",
+                    "on-secondary-container": "#774117",
+                    "primary-fixed-dim": "#a7d392",
+                    "inverse-primary": "#a7d392",
+                    "error": "#ba1a1a",
+                    "outline": "#73796d",
+                    "secondary-fixed": "#ffdcc7",
+                    "surface-tint": "#426832",
+                    "on-secondary-fixed": "#311300",
+                    "on-primary": "#ffffff",
+                    "secondary": "#8a5025",
+                    "primary-fixed": "#c2efac",
+                    "surface-container-low": "#f4f4ed",
+                    "tertiary": "#3b644c",
+                    "surface-bright": "#fafaf3",
+                    "tertiary-container": "#537e64",
+                    "on-background": "#1a1c18",
+                    "primary": "#3f6530",
+                    "on-secondary-fixed-variant": "#6e3910",
+                    "inverse-on-surface": "#f1f1ea",
+                    "error-container": "#ffdad6",
+                    "surface": "#fafaf3",
+                    "surface-container-highest": "#e3e3dc",
+                    "on-error-container": "#93000a",
+                    "surface-container-high": "#e8e9e2"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px"
+            },
+            "fontFamily": {
+                    "headline": ["Inter"],
+                    "body": ["Inter"],
+                    "label": ["Inter"]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        body { font-family: 'Inter', sans-serif; background-color: #fafaf3; }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+    </style>
+</head>
+<body class="text-on-surface">
+<div class="flex min-h-screen">
+<!-- SideNavBar -->
+<aside class="h-screen w-64 fixed left-0 top-0 bg-[#fafaf3] flex flex-col p-4 space-y-2 z-40">
+<div class="px-4 py-6 mb-4">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded-full bg-primary flex items-center justify-center text-on-primary">
+<span class="material-symbols-outlined">eco</span>
+</div>
+<div>
+<h1 class="text-lg font-black text-[#3f6530] leading-none">The Modern Pastoral</h1>
+<p class="text-[10px] uppercase tracking-widest text-stone-500 font-bold mt-1">Admin Control Center</p>
+</div>
+</div>
+</div>
+<nav class="flex-1 space-y-1">
+<!-- Orders Active -->
+<a class="flex items-center gap-3 px-4 py-3 text-[#3f6530] font-semibold bg-[#f4f4ed] rounded-lg active:translate-x-1 transition-all" href="#">
+<span class="material-symbols-outlined" data-icon="receipt_long">receipt_long</span>
+<span>Orders</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-stone-600 hover:text-[#3f6530] hover:bg-[#f4f4ed] rounded-lg active:translate-x-1 transition-all" href="#">
+<span class="material-symbols-outlined" data-icon="calendar_today">calendar_today</span>
+<span>Subscriptions</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-stone-600 hover:text-[#3f6530] hover:bg-[#f4f4ed] rounded-lg active:translate-x-1 transition-all" href="#">
+<span class="material-symbols-outlined" data-icon="report_problem">report_problem</span>
+<span>Complaints</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-stone-600 hover:text-[#3f6530] hover:bg-[#f4f4ed] rounded-lg active:translate-x-1 transition-all" href="#">
+<span class="material-symbols-outlined" data-icon="bar_chart">bar_chart</span>
+<span>Analytics</span>
+</a>
+</nav>
+<button class="w-full mt-4 bg-primary text-on-primary py-3 rounded-xl font-bold flex items-center justify-center gap-2 shadow-lg shadow-primary/10 hover:bg-primary-container transition-colors">
+<span class="material-symbols-outlined">add</span>
+                New Delivery
+            </button>
+<div class="pt-8 mt-auto space-y-1">
+<a class="flex items-center gap-3 px-4 py-3 text-stone-600 hover:text-[#3f6530] hover:bg-[#f4f4ed] rounded-lg transition-all" href="#">
+<span class="material-symbols-outlined" data-icon="help_outline">help_outline</span>
+<span>Support</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-stone-600 hover:text-[#3f6530] hover:bg-[#f4f4ed] rounded-lg transition-all" href="#">
+<span class="material-symbols-outlined" data-icon="logout">logout</span>
+<span>Logout</span>
+</a>
+</div>
+</aside>
+<!-- Main Content -->
+<main class="ml-64 flex-1 min-h-screen">
+<!-- TopNavBar -->
+<header class="w-full sticky top-0 z-30 bg-[#fafaf3]/80 backdrop-blur-md flex justify-between items-center px-8 h-16 shadow-[0_12px_32px_rgba(63,101,48,0.05)]">
+<div class="flex items-center gap-4">
+<span class="text-stone-400">Orders</span>
+<span class="material-symbols-outlined text-sm text-stone-400">chevron_right</span>
+<span class="font-bold text-[#3f6530]">#DD-8221</span>
+</div>
+<div class="flex items-center gap-6">
+<div class="relative">
+<span class="material-symbols-outlined text-stone-500 cursor-pointer hover:bg-[#f4f4ed] p-2 rounded-full transition-colors" data-icon="notifications">notifications</span>
+<span class="absolute top-2 right-2 w-2 h-2 bg-secondary rounded-full"></span>
+</div>
+<span class="material-symbols-outlined text-stone-500 cursor-pointer hover:bg-[#f4f4ed] p-2 rounded-full transition-colors" data-icon="settings">settings</span>
+<div class="flex items-center gap-3 pl-4 border-l border-stone-200">
+<img alt="Admin profile" class="w-8 h-8 rounded-full bg-stone-200" data-alt="Close up portrait of a professional male administrator in a light workspace with soft natural lighting" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDmUQYy-D6YaL589-WgoaPrMp4rxBJEHye2XLSvrwN_LdYD1c0JRj3yuTwCqQcn5rCNUuffD-Cuk7OsT-HSUVwl3VGMzya2MP3k-F7B0n2uB3V3DmcwhsaZ71L9Q8cnxHpl_dRyY0UOIRWTMGvHVy1xjsSlkoZyDV5WC_4oPWPWZ-HsPPEdhqZmOb8hWTlXdR3eacgLQ1dEVu3D8tMakm_Jm0rF2BWN5I7-5lF3r01WrKtR_FWHuDfMXMYr0RF_ghEc5MPbcc8Cou4"/>
+<span class="text-sm font-semibold text-[#3f6530]">Admin Sarah</span>
+</div>
+</div>
+</header>
+<div class="p-8 max-w-7xl mx-auto">
+<!-- Header Actions -->
+<div class="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-10">
+<div>
+<div class="flex items-center gap-3 mb-2">
+<span class="px-3 py-1 bg-tertiary-fixed text-on-tertiary-fixed text-xs font-bold rounded-full">CONFIRMED</span>
+<span class="text-stone-400 text-sm">Placed on Oct 24, 2023 • 08:42 AM</span>
+</div>
+<h2 class="text-4xl font-black tracking-tight text-on-surface">Order #DD-8221</h2>
+</div>
+<div class="flex flex-wrap gap-3">
+<div class="relative group">
+<label class="block text-[10px] font-bold text-stone-500 uppercase tracking-widest mb-1.5 ml-1">Status Update</label>
+<select class="appearance-none bg-surface-container-high border-none rounded-xl px-5 py-3 pr-12 text-sm font-semibold focus:ring-2 focus:ring-primary/20 cursor-pointer min-w-[180px]">
+<option>Confirmed</option>
+<option>Preparing</option>
+<option>Out for Delivery</option>
+<option>Delivered</option>
+</select>
+<span class="material-symbols-outlined absolute right-4 bottom-3.5 pointer-events-none text-stone-500">expand_more</span>
+</div>
+<button class="self-end px-6 py-3 bg-white text-primary border border-primary/10 font-bold rounded-xl shadow-sm hover:bg-[#f4f4ed] transition-all flex items-center gap-2 active:scale-95">
+<span class="material-symbols-outlined text-lg">print</span>
+                            Print Invoice
+                        </button>
+</div>
+</div>
+<!-- Bento Grid Content -->
+<div class="grid grid-cols-12 gap-6">
+<!-- Left Column: Items and Payment -->
+<div class="col-span-12 lg:col-span-8 space-y-6">
+<!-- Items Card -->
+<div class="bg-surface-container-lowest rounded-2xl overflow-hidden shadow-[0_8px_24px_rgba(0,0,0,0.02)]">
+<div class="p-6 border-b border-[#f4f4ed] bg-surface-container-low/30">
+<h3 class="text-lg font-bold text-[#3f6530]">Items Ordered</h3>
+</div>
+<div class="overflow-x-auto">
+<table class="w-full text-left">
+<thead>
+<tr class="text-[11px] uppercase tracking-widest text-stone-500 font-bold">
+<th class="px-6 py-4">Product</th>
+<th class="px-6 py-4 text-center">Quantity</th>
+<th class="px-6 py-4 text-right">Price</th>
+<th class="px-6 py-4 text-right">Total</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-[#f4f4ed]">
+<tr>
+<td class="px-6 py-4">
+<div class="flex items-center gap-4">
+<img class="w-14 h-14 rounded-xl object-cover" data-alt="Classic glass bottle of fresh organic milk against a soft beige background with morning sunlight" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDK6bLw74P1h-iqbmi0l7AEMfOePcESiHYIEWdcFC35pgjRS0hN00TkmJtXywzc0jsYLPzJWHdE3ZEGQ2RJiZ9IlpxyJOrJ09x5G_hHk0MlGbiifK8pS0T5GviPjzqSr-8yYbO6hc2NPQ25eTCPgE00SZfXvHZOinbQuGFoaXbqwLkoOROWfZS8ZsP9NWtXwUbgJ88ne_Kp3nN7o2YSZEfmbTfngvKbVidjUIB6G7DaVJ44hkrhyHad-HXw423dZZYGYR1bCIZO3CM"/>
+<div>
+<p class="font-bold text-on-surface">Farm Fresh Whole Milk</p>
+<p class="text-xs text-stone-500">1 Liter Glass Bottle</p>
+</div>
+</div>
+</td>
+<td class="px-6 py-4 text-center font-semibold text-stone-600">3</td>
+<td class="px-6 py-4 text-right text-stone-600">$4.50</td>
+<td class="px-6 py-4 text-right font-bold text-[#3f6530]">$13.50</td>
+</tr>
+<tr>
+<td class="px-6 py-4">
+<div class="flex items-center gap-4">
+<img class="w-14 h-14 rounded-xl object-cover" data-alt="A block of artisan gold butter on a ceramic plate with rustic wooden background" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCygO1AelTsZ4JunSFdtHdPhKrgG7mK5vfcraTNbabZAHR7bG3eD0laeBuMh56Pse5NIpqnarpFzDta2SF0E2EmgjCXDhUTXlkjnI6kjLQOpV4iwJx6r3ba34vpAmniip17UT64H7zrZs0T-gHfvas3mgXESk33zCMpCS65GnlhPhLihnXR2DX8TyOEz0aS74tk1CPhfGHQ6SCKX40lOgkyBhHxxcbU-V0bdnTwsh4QY62Lr8p4B57GQI35g52Xh9obR-KXnsWZfc8"/>
+<div>
+<p class="font-bold text-on-surface">Artisan Salted Butter</p>
+<p class="text-xs text-stone-500">250g Hand-Churned</p>
+</div>
+</div>
+</td>
+<td class="px-6 py-4 text-center font-semibold text-stone-600">1</td>
+<td class="px-6 py-4 text-right text-stone-600">$6.25</td>
+<td class="px-6 py-4 text-right font-bold text-[#3f6530]">$6.25</td>
+</tr>
+<tr>
+<td class="px-6 py-4">
+<div class="flex items-center gap-4">
+<img class="w-14 h-14 rounded-xl object-cover" data-alt="White ceramic bowl of thick Greek yogurt with fresh honey drizzle and wooden spoon" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAsf5i1s1cCjat45tMXi7oJTjEb89-V-nksjyG2s3tS254WWwUhfX_RiQzw4CKy7V0vBlsaSldWK-vNcoWLo0Bi7Fj7s6Ahg60itJHwAv4G_0a5a6cOOrkgSmRiArH8UL-snu_SDLGBQ3DjF1O0ws8bQQfVC1uVGOhfCvOTQbEiKBoTagnAgI3oYWEDnAdWhFZy-XwK_Shb4FCr_j5trr1BWvZaZktxOCwMtjKSGbYlFjfPAdWS5IQFwehoKqYkwGbuoOaPOvTk47I"/>
+<div>
+<p class="font-bold text-on-surface">Greek Style Yogurt</p>
+<p class="text-xs text-stone-500">500g Tub</p>
+</div>
+</div>
+</td>
+<td class="px-6 py-4 text-center font-semibold text-stone-600">2</td>
+<td class="px-6 py-4 text-right text-stone-600">$5.80</td>
+<td class="px-6 py-4 text-right font-bold text-[#3f6530]">$11.60</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<!-- Payment & Summary -->
+<div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+<div class="bg-surface-container-lowest p-6 rounded-2xl shadow-[0_8px_24px_rgba(0,0,0,0.02)]">
+<h3 class="text-sm font-bold text-stone-400 uppercase tracking-widest mb-6">Payment Method</h3>
+<div class="flex items-center gap-4 p-4 bg-surface-container-low rounded-xl">
+<div class="w-12 h-8 bg-stone-800 rounded flex items-center justify-center">
+<span class="text-[10px] text-white font-bold tracking-tighter">VISA</span>
+</div>
+<div>
+<p class="font-bold text-on-surface">Visa ending in 4242</p>
+<p class="text-xs text-stone-500">Expiry 08/26</p>
+</div>
+<span class="material-symbols-outlined ml-auto text-tertiary">verified_user</span>
+</div>
+<div class="mt-6 flex items-center gap-2 text-sm text-stone-500">
+<span class="material-symbols-outlined text-sm">schedule</span>
+                                    Transaction ID: #TXN-9021-X
+                                </div>
+</div>
+<div class="bg-primary p-8 rounded-2xl text-on-primary shadow-xl shadow-primary/10">
+<div class="space-y-4">
+<div class="flex justify-between text-sm opacity-80">
+<span>Subtotal</span>
+<span class="font-semibold">$31.35</span>
+</div>
+<div class="flex justify-between text-sm opacity-80">
+<span>Delivery Fee</span>
+<span class="font-semibold">$2.50</span>
+</div>
+<div class="flex justify-between text-sm opacity-80">
+<span>Packaging (Bottle Deposit)</span>
+<span class="font-semibold">$5.00</span>
+</div>
+<div class="pt-4 border-t border-white/10 flex justify-between items-end">
+<span class="font-bold">Total Amount</span>
+<span class="text-3xl font-black">$38.85</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Right Column: Customer and Assignment -->
+<div class="col-span-12 lg:col-span-4 space-y-6">
+<!-- Customer Card -->
+<div class="bg-surface-container-lowest p-6 rounded-2xl shadow-[0_8px_24px_rgba(0,0,0,0.02)]">
+<h3 class="text-sm font-bold text-stone-400 uppercase tracking-widest mb-6">Customer Details</h3>
+<div class="flex items-center gap-4 mb-6">
+<img alt="Customer avatar" class="w-14 h-14 rounded-full bg-stone-100" data-alt="Portrait of a friendly middle-aged woman with a warm smile, natural look, and soft focus kitchen background" src="https://lh3.googleusercontent.com/aida-public/AB6AXuB6F3f__9TddRRU8amk0Ph7mt6XgK1dKStO7d6Pd2YQXmVpWoO8fV0FMUw38UwilRH7pgrirsq1KZODUCaM2Fr0guMx_GyYWkMEJmvHpagjG9FFikMX75X_QJllmvnq0-UL9JHORjgIbqzT7Iz0f-B-DIscLM3xm2DpWK26N6tHxOr-JCbrbVxBvHa-6E09PmUeCS1fIDP87RHfZdPEcGkjgfOrPWOPTFKIwPGKGDMzVLhZVUsL9_6Puctc6ABNCRSO3DX52QHQX14"/>
+<div>
+<p class="text-lg font-bold text-on-surface">Eleanor Bennett</p>
+<p class="text-sm text-stone-500">eleanor.b@example.com</p>
+</div>
+</div>
+<div class="space-y-4">
+<div class="flex items-start gap-3">
+<span class="material-symbols-outlined text-primary bg-primary-fixed p-2 rounded-lg text-sm">call</span>
+<div>
+<p class="text-[10px] font-bold text-stone-400 uppercase">Phone</p>
+<p class="text-sm font-semibold">+1 (555) 012-3456</p>
+</div>
+</div>
+<div class="flex items-start gap-3">
+<span class="material-symbols-outlined text-primary bg-primary-fixed p-2 rounded-lg text-sm">location_on</span>
+<div>
+<p class="text-[10px] font-bold text-stone-400 uppercase">Delivery Address</p>
+<p class="text-sm font-semibold leading-snug">42nd Willow Lane, Greenfield District, East Side, 10221</p>
+</div>
+</div>
+</div>
+<!-- Map Preview -->
+<div class="mt-6 h-32 rounded-xl overflow-hidden relative grayscale opacity-80 hover:grayscale-0 hover:opacity-100 transition-all cursor-pointer group">
+<img alt="Map view" class="w-full h-full object-cover" data-alt="A clean, minimalist satellite map view of a residential suburban neighborhood with green lawns and curved roads" data-location="Chicago" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCxu6Xyb84qAJbplIA-QxgMpidvGH7TzIknudPxa6_aEWJfmvOOd5FSPpo9YWiYE7y25tZKQh_6AymyTRHJ66UJ7hovPK8xIXX_zkrEvXEcrTAq37BDo-rcpAeH0hU90i9Z91xxaUznlJ3LLZZAlznskLhBGkS2oML00a3wDFsre31R1WNpFUqEobUXYCSGRIqzKJT9aSkAWNHevIpyqZOeapUJeHw48N0s6cZktL6PVR0D_rZYyLYeQ8EgKL81V-VrN84G1uT6qhg"/>
+<div class="absolute inset-0 bg-primary/10 group-hover:bg-transparent"></div>
+<div class="absolute inset-0 flex items-center justify-center">
+<span class="bg-white/90 backdrop-blur-sm px-3 py-1 rounded-full text-xs font-bold text-primary shadow-lg">View Full Map</span>
+</div>
+</div>
+</div>
+<!-- Staff Assignment Card -->
+<div class="bg-surface-container-lowest p-6 rounded-2xl shadow-[0_8px_24px_rgba(0,0,0,0.02)]">
+<h3 class="text-sm font-bold text-stone-400 uppercase tracking-widest mb-6">Delivery Assignment</h3>
+<div class="relative group mb-6">
+<label class="block text-[10px] font-bold text-stone-500 uppercase tracking-widest mb-2">Assign Driver</label>
+<select class="w-full appearance-none bg-surface-container-low border-none rounded-xl px-4 py-3.5 pr-12 text-sm font-semibold focus:ring-2 focus:ring-primary/20 cursor-pointer">
+<option disabled="" selected="" value="">Select staff member...</option>
+<option>Marcus Chen (Route A)</option>
+<option>Sarah Johnson (Route B)</option>
+<option>David Miller (Route A)</option>
+<option>Jessica Lee (Express)</option>
+</select>
+<span class="material-symbols-outlined absolute right-4 top-[38px] pointer-events-none text-stone-500">person_search</span>
+</div>
+<div class="p-4 bg-tertiary-fixed/20 rounded-xl">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-tertiary">info</span>
+<p class="text-xs text-on-tertiary-fixed-variant leading-relaxed">
+                                        Estimated delivery time for this zone is between <b>5:00 AM - 7:00 AM</b> tomorrow morning.
+                                    </p>
+</div>
+</div>
+</div>
+<!-- Internal Notes -->
+<div class="bg-[#f4f4ed] p-6 rounded-2xl">
+<h3 class="text-sm font-bold text-stone-500 uppercase tracking-widest mb-4">Internal Notes</h3>
+<textarea class="w-full bg-white border-none rounded-xl p-4 text-sm text-stone-600 placeholder-stone-400 focus:ring-2 focus:ring-primary/20 h-24" placeholder="Add a private note for the delivery team..."></textarea>
+<button class="mt-3 w-full text-xs font-bold text-primary hover:underline transition-all text-left px-2">
+                                Save Note
+                            </button>
+</div>
+</div>
+</div>
+</div>
+</main>
+</div>
+</body></html>

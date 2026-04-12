@@ -99,6 +99,9 @@ cp .env.example .env
 ```bash
 cd ../frontend
 npm install
+
+# Create frontend env file
+cp .env.local.example .env.local
 ```
 
 ### 4. Database Setup
@@ -122,8 +125,15 @@ cd frontend
 npm run dev
 ```
 
-- Backend: http://localhost:3000
-- Frontend: http://localhost:5173
+- Backend API: http://localhost:4000
+- Frontend (Next.js): http://localhost:3000
+
+### 6. Integration Notes (Frontend <-> Backend)
+
+- Product listing pages now fetch from backend `GET /api/products`.
+- If backend is unavailable, frontend automatically falls back to local demo products.
+- Set `NEXT_PUBLIC_API_BASE_URL` in `frontend/.env.local`.
+- Ensure backend `ALLOWED_ORIGINS` includes `http://localhost:3000`.
 
 ## 📚 API Documentation
 
