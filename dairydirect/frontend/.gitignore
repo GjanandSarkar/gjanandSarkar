@@ -1,30 +1,21 @@
-# React
-node_modules/
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-
-# Build
-dist/
-build/
+# Next.js Specific
 .next/
 out/
-coverage/
-*.tsbuildinfo
+build/
+
+# Dependencies
+node_modules/
 
 # Environment
 .env
-.env.*
-!.env.local.example
-!.env.example
-!.env.*.example
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
 
-# IDE
-.vscode/
-.idea/
-*.swp
-*.swo
+# Testing
+coverage/
 
-# OS
+# Misc
 .DS_Store
-Thumbs.db
+*.pem

@@ -1,109 +1,77 @@
-# DairyDirect Backend API
+# ⚙️ DairyDirect Backend — Express.js API
 
-A Node.js/Express API for the DairyDirect e-commerce platform. Provides authentication, product management, orders, and subscription services.
+The backend services for DairyDirect, providing core business logic, database management, and administrative API endpoints.
 
-## Setup
+## 🚀 Key Updates
 
-### Prerequisites
+*   **🔐 Firebase Auth Integration**: Shifted from traditional email/password to Firebase ID Token verification for secure mobile authentication.
+*   **📊 Admin Services**: Robust endpoints for managing products, orders, and subscription lifecycles.
+*   **📡 Real-time Synchronization**: Works in tandem with Supabase to provide live updates to the frontend.
 
-- Node.js v16+
-- Supabase account
-- npm or yarn
+## 🛠️ Tech Stack
 
-### Installation
+*   **Runtime**: Node.js
+*   **Framework**: Express.js
+*   **Database**: PostgreSQL (via Supabase)
+*   **Auth**: Firebase Admin SDK
+*   **Validation**: Joi / express-validator
 
+## 🚀 Getting Started
+
+### 1. Installation
 ```bash
 npm install
 ```
 
-### Environment Variables
-
+### 2. Environment Variables
 Create a `.env` file from `.env.example`:
-
 ```bash
-cp .env.example .env
+# General
+PORT=4000
+NODE_ENV=development
+
+# Supabase
+SUPABASE_URL=your_url
+SUPABASE_KEY=your_service_role_key
+
+# Firebase Admin
+FIREBASE_PROJECT_ID=your_project_id
+FIREBASE_PRIVATE_KEY=your_private_key
+FIREBASE_CLIENT_EMAIL=your_client_email
 ```
 
-Update with your credentials:
+### 3. Running the Server
 
-- `SUPABASE_URL` - Your Supabase project URL
-- `SUPABASE_SERVICE_ROLE_KEY` - Supabase service role key
-- `SUPABASE_JWT_SECRET` - JWT secret from Supabase
-- `JWT_SECRET` - Your custom JWT secret
-- `JWT_EXPIRES_IN` - Token expiration (default: 7d)
-
-## Running the Server
-
-Development:
-
+**Development Mode (Nodemon):**
 ```bash
 npm run dev
 ```
 
-Production:
-
+**Production Mode:**
 ```bash
 npm start
 ```
+Server runs on `http://localhost:4000`.
 
-Server runs on `http://localhost:3000`
+## 📁 API Surface
 
-## API Endpoints
+### 1. Authentication
+*   `POST /api/auth/verify-token`: Verifies Firebase ID tokens and returns application session info.
 
-### Authentication
+### 2. Products
+*   `GET /api/products`: List all products.
+*   `GET /api/products/:id`: Get product details.
+*   `POST /api/admin/products`: (Admin) Create/Update products.
 
-- `POST /api/auth/signup` - Create new user
-- `POST /api/auth/login` - User login
-- `POST /api/auth/refresh` - Refresh token
+### 3. Orders & Subscriptions
+*   `POST /api/orders`: Place a new order.
+*   `GET /api/subscriptions`: View subscription status.
+*   `PATCH /api/admin/orders/:id`: (Admin) Update order/delivery status.
 
-### Products
+## 📁 Project Structure
 
-- `GET /api/products` - Get all products
-- `GET /api/products/:id` - Get product by ID
-
-### Users
-
-- `GET /api/users/profile` - Get user profile
-- `PATCH /api/users/profile` - Update profile
-
-### Orders
-
-- `POST /api/orders` - Create order
-- `GET /api/orders` - Get user orders
-- `GET /api/orders/:id` - Get order details
-
-### Subscriptions
-
-- `GET /api/subscriptions` - Get subscriptions
-- `POST /api/subscriptions` - Create subscription
-
-## Project Structure
-
-```
-backend/
-├── src/
-│   ├── app.js              # Express app
-│   ├── controllers/        # Business logic
-│   ├── models/            # Data models
-│   ├── routes/            # API routes
-│   ├── middlewares/       # Custom middleware
-│   ├── validators/        # Input validators
-│   ├── utils/             # Utilities
-│   └── config/            # Configuration
-├── index.js               # Server entry point
-└── package.json
-```
-
-## Documentation
-
-API documentation: See `docs/DairyDirect_API.postman_collection.json`
-
-## Testing
-
-```bash
-npm test
-```
-
-## License
-
-MIT
+*   `src/controllers`: Request handlers and business logic.
+*   `src/routes`: API endpoint definitions.
+*   `src/models`: Database schema and integration logic.
+*   `src/middlewares`: Auth guards and error handlers.
+*   `index.js`: Main entry point.
