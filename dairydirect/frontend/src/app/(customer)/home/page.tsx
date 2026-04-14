@@ -7,17 +7,18 @@ import { useTranslation } from '@/lib/i18n';
 import { useStore } from '@/store/useStore';
 import { getProducts } from '@/lib/api/products';
 import { getUserSubscriptions } from '@/lib/api/subscriptions';
+import { getUserOrders, getUserBuyAgainHistory } from '@/lib/api/orders';
 import type { ProductWithVariants } from '@/lib/api/products';
 import type { SubscriptionWithProduct } from '@/lib/api/subscriptions';
 import { ProductCard } from '@/components/shared/ProductCard';
-import { CalendarDays, ArrowRight, Truck, Star, Shield, Leaf, TrendingUp, Clock, Droplets, Package, FlaskConical, Activity, GlassWater, MapPin, ChevronDown } from 'lucide-react';
+import { CalendarDays, ArrowRight, Truck, Star, Shield, Leaf, TrendingUp, Clock, Droplets, Package, FlaskConical, Activity, GlassWater, MapPin, ChevronDown, ShoppingBag } from 'lucide-react';
 import { motion, Variants } from 'framer-motion';
 
 const container: Variants = {
   hidden: { opacity: 0 },
   show: { opacity: 1, transition: { staggerChildren: 0.06 } }
 };
-const item: Variants = {
+const itemVariants: Variants = {
   hidden: { opacity: 0, y: 16 },
   show: { opacity: 1, y: 0, transition: { duration: 0.35, ease: [0.4, 0, 0.2, 1] } }
 };
@@ -26,30 +27,16 @@ export default function HomeScreen() {
   const { t } = useTranslation();
   const user = useStore(state => state.user);
   const router = useRouter();
-  const [activeCategory, setActiveCategory] = useState<string>('All');
   const [isMounted, setIsMounted] = useState(false);
 
   const [products, setProducts] = useState<ProductWithVariants[]>([]);
   const [subscriptions, setSubscriptions] = useState<SubscriptionWithProduct[]>([]);
-  const [featuredProducts, setFeaturedProducts] = useState<ProductWithVariants[]>([]);
+  const [newlyAddedProducts, setNewlyAddedProducts] = useState<ProductWithVariants[]>([]);
+  const [buyAgainProducts, setBuyAgainProducts] = useState<ProductWithVariants[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
   const hasSubscription = subscriptions.length > 0;
   const activeSub = subscriptions[0];
-
-  const categories = [
-    { id: 'All', label: t('all'), Icon: Leaf },
-    { id: 'Milk', label: t('milk'), Icon: Droplets },
-    { id: 'Paneer', label: t('paneer'), Icon: Package },
-    { id: 'Ghee', label: t('ghee'), Icon: FlaskConical },
-    { id: 'Buttermilk', label: t('buttermilk'), Icon: Activity },
-    { id: 'Curd', label: t('curd'), Icon: Package },
-    { id: 'Lassi', label: t('lassi'), Icon: GlassWater },
-  ];
-
-  const filteredProducts = activeCategory === 'All'
-    ? products
-    : products.filter(p => p.category === activeCategory);
 
   const getGreetingKey = () => {
     const hour = new Date().getHours();
@@ -58,40 +45,45 @@ export default function HomeScreen() {
     return "goodEvening";
   };
 
-  const gujaratiQuotes = [
-    "દૂધ પીશો તો જ લડશો! 💪",
-    "શુદ્ધ દૂધ, શુદ્ધ સ્વાદ. 🥛",
-    "તાજગી એ જ અમારી ઓળખ. 🌿",
-    "ખુશ ગાય, શ્રેષ્ઠ દાય. ✨",
-    "શક્તિશાળી ગુજરાત, શક્તિશાળી દૂધ! 🥛"
-  ];
-  const [quoteIdx, setQuoteIdx] = useState(0);
-
   useEffect(() => {
     setIsMounted(true);
-    setQuoteIdx(Math.floor(Math.random() * gujaratiQuotes.length));
 
     async function loadData() {
-      const [prods, subs] = await Promise.all([
-        getProducts({ activeOnly: true }),
-        user ? getUserSubscriptions(user.id) : Promise.resolve([]),
-      ]);
-      setProducts(prods);
-      setSubscriptions(subs.filter(s => s.status !== 'Cancelled'));
+      setIsLoading(true);
+      try {
+        const [prods, subs, historyIds] = await Promise.all([
+          getProducts({ activeOnly: true }),
+          user ? getUserSubscriptions(user.id) : Promise.resolve([]),
+          user ? getUserBuyAgainHistory() : Promise.resolve([]),
+        ]);
 
-      // Staff picks: random 3
-      const shuffled = [...prods].sort(() => 0.5 - Math.random()).slice(0, 3);
-      setFeaturedProducts(shuffled);
-      setIsLoading(false);
+        setProducts(prods);
+        setSubscriptions(subs.filter(s => s.status !== 'cancelled'));
+
+        // Newly Added: Sort by created_at DESC, limit 5
+        const sorted = [...prods].sort((a, b) => 
+          new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+        ).slice(0, 5);
+        setNewlyAddedProducts(sorted);
+
+        // Buy Again: Filter products by history IDs
+        if (historyIds.length > 0) {
+          const buyAgain = prods.filter(p => historyIds.includes(p.id));
+          setBuyAgainProducts(buyAgain);
+        }
+
+      } catch (err) {
+        console.error('Home load error:', err);
+      } finally {
+        setIsLoading(false);
+      }
     }
 
     loadData();
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user?.id]);
 
   if (!isMounted) return <div className="min-h-screen" style={{ background: 'var(--color-surface)' }} />;
 
-  // Format next delivery date
   const formatNextDelivery = (dateStr: string | null) => {
     if (!dateStr) return t('tomorrowMorning');
     const date = new Date(dateStr);
@@ -120,7 +112,7 @@ export default function HomeScreen() {
               <div className="flex flex-col items-start">
                 <span className="text-[10px] font-bold uppercase tracking-wider text-primary leading-none">{t('deliveringTo')}</span>
                 <span className="text-[12px] font-bold text-on-surface flex items-center gap-1 group-hover:text-primary transition-colors">
-                  Home (Plot 23, Satellite...)
+                   {user?.saved_addresses?.[0]?.label || 'Select Address'}
                   <ChevronDown className="w-3 h-3 translate-y-[0.5px]" />
                 </span>
               </div>
@@ -130,18 +122,13 @@ export default function HomeScreen() {
               style={{ color: 'var(--color-on-surface)', fontSize: 'clamp(28px, 4vw, 48px)', letterSpacing: '-0.025em' }}>
               {t('greetingName', {
                 greeting: t(getGreetingKey()),
-                name: user?.name?.split(' ')[0] || t('navProfile')
+                name: user?.name?.split(' ')[0] || 'User'
               })}
               .<br />
-              <span className="font-normal text-[0.65em]" style={{ color: 'var(--color-on-surface-variant)', letterSpacing: '-0.01em' }}>
-                {hasSubscription ? t('favoriteDairy') : t('freshHarvest')}
+              <span className="font-bold text-[0.8em]" style={{ color: 'var(--color-primary)', letterSpacing: '-0.01em' }}>
+                શુદ્ધ દૂધ, શુદ્ધ સ્વાદ. 🥛
               </span>
             </h1>
-
-            {/* Easter Egg */}
-            <p className="text-[13px] font-medium text-primary/80 italic mt-2 animate-pulse">
-               {gujaratiQuotes[quoteIdx]}
-            </p>
           </motion.div>
         </div>
       </section>
@@ -202,26 +189,22 @@ export default function HomeScreen() {
               <div className="relative z-10">
                 <div className="flex items-center gap-2 mb-3">
                   <div className="px-2 py-0.5 rounded-full bg-white/20 text-white text-[10px] font-black uppercase tracking-widest border border-white/10">
-                    Limited Time Offer
+                    LIMITED TIME OFFER
                   </div>
                 </div>
                 
                 <h2 className="text-white font-extrabold leading-tight mb-3"
                   style={{ fontSize: 'clamp(24px, 3.5vw, 32px)', letterSpacing: '-0.02em' }}>
-                  Get <span className="text-[#ffeb3b]">FREE Delivery</span> forever with a Monthly Subscription! 🥛
+                  Subscribe & save instantly. Get free delivery and fresh dairy daily. 🥛
                 </h2>
                 
                 <div className="flex flex-col gap-3 mb-7">
                   <div className="flex items-center gap-2.5 text-white/90">
-                    <div className="w-5 h-5 rounded-full bg-white/10 flex items-center justify-center shrink-0">
-                      <Star className="w-3 h-3 text-[#ffeb3b]" />
-                    </div>
+                    <Star className="w-4 h-4 text-[#ffeb3b]" fill="#ffeb3b" />
                     <span className="text-sm font-medium">Extra 5% off on all items</span>
                   </div>
                   <div className="flex items-center gap-2.5 text-white/90">
-                    <div className="w-5 h-5 rounded-full bg-white/10 flex items-center justify-center shrink-0">
-                      <Shield className="w-3 h-3 text-[#ffeb3b]" />
-                    </div>
+                    <Shield className="w-4 h-4 text-[#ffeb3b]" />
                     <span className="text-sm font-medium">Priority 6:00 AM delivery</span>
                   </div>
                 </div>
@@ -237,18 +220,18 @@ export default function HomeScreen() {
         </motion.div>
       </section>
 
-      {/* ══ FEATURED PICKS ══ */}
-      <section className="mb-12" style={{ background: 'var(--color-surface)' }}>
+      {/* ══ NEWLY ADDED PRODUCTS ══ */}
+      <section className="mb-12">
         <div className="px-5 md:px-10 mb-5">
           <div className="flex items-end justify-between">
             <div>
               <div className="flex items-center gap-2 mb-1">
-                <TrendingUp className="w-4 h-4" style={{ color: 'var(--color-secondary)' }} strokeWidth={2.5} />
+                <Clock className="w-4 h-4" style={{ color: 'var(--color-secondary)' }} strokeWidth={2.5} />
                 <span className="text-[11px] font-black uppercase tracking-widest"
-                  style={{ color: 'var(--color-secondary)' }}>{t('staffPicks')}</span>
+                  style={{ color: 'var(--color-secondary)' }}>FRESH ADDITIONS</span>
               </div>
               <h2 className="font-bold text-[24px] tracking-tight" style={{ color: 'var(--color-on-surface)' }}>
-                {t('freshPasture')}
+                Newly Added Products
               </h2>
             </div>
             <Link href="/products" className="flex items-center gap-1 text-sm font-semibold"
@@ -261,92 +244,71 @@ export default function HomeScreen() {
         {isLoading ? (
           <div className="flex gap-4 overflow-x-auto no-scrollbar pl-5 md:pl-10 pr-5 pb-4">
             {[1,2,3].map(i => (
-              <div key={i} className="w-[180px] h-[240px] shrink-0 rounded-[16px] animate-pulse"
+              <div key={i} className="w-[160px] h-[220px] shrink-0 rounded-[20px] animate-pulse"
                 style={{ background: 'var(--color-surface-container-low)' }} />
             ))}
           </div>
         ) : (
-          <>
-            <div className="flex gap-4 overflow-x-auto no-scrollbar pl-5 md:pl-10 pr-5 md:hidden pb-4">
-              {featuredProducts.map((product, i) => (
-                <motion.div key={product.id} className="w-[180px] shrink-0"
-                  initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }}
-                  transition={{ duration: 0.35, delay: i * 0.08 }}>
-                  <ProductCard product={product} />
-                </motion.div>
-              ))}
-            </div>
-            <div className="hidden md:grid grid-cols-3 gap-6 px-10">
-              {featuredProducts.map((product, i) => (
-                <motion.div key={product.id}
-                  initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.35, delay: i * 0.08 }}>
-                  <ProductCard product={product} />
-                </motion.div>
-              ))}
-            </div>
-          </>
-        )}
-      </section>
-
-      {/* ══ CATEGORY BROWSE ══ */}
-      <section className="px-5 md:px-10 mb-10">
-        <div className="flex justify-between items-center mb-6">
-          <h3 className="font-bold text-[20px] tracking-tight" style={{ color: 'var(--color-on-surface)' }}>
-            {t('browseCategories')}
-          </h3>
-        </div>
-
-        <div className="grid grid-cols-4 md:grid-cols-7 gap-3 mb-10">
-          {categories.map((cat) => {
-            const CatIcon = cat.Icon;
-            return (
-              <button
-                key={cat.id}
-                onClick={() => setActiveCategory(cat.id)}
-                className="flex flex-col items-center gap-2 p-3 rounded-2xl transition-all group"
-                style={activeCategory === cat.id ? {
-                  background: 'var(--color-primary-fixed)',
-                } : {
-                  background: 'var(--color-surface-container-low)',
-                }}
-              >
-                <div className={`w-10 h-10 rounded-full flex items-center justify-center transition-colors ${
-                  activeCategory === cat.id ? 'bg-primary text-white shadow-lg' : 'bg-white text-primary group-hover:bg-primary/5'
-                }`}>
-                  <CatIcon className="w-5 h-5" strokeWidth={2} />
-                </div>
-                <span className={`text-[11px] font-bold text-center ${
-                  activeCategory === cat.id ? 'text-primary' : 'text-on-surface-variant'
-                }`}>{cat.label}</span>
-              </button>
-            );
-          })}
-        </div>
-        
-        {isLoading ? (
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
-            {[1,2,3,4].map(i => (
-              <div key={i} className="h-[240px] rounded-[16px] animate-pulse"
-                style={{ background: 'var(--color-surface-container-low)' }} />
-            ))}
-          </div>
-        ) : (
-          <motion.div 
-            className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4"
-            variants={container}
-            initial="hidden"
-            animate="show"
-            key={activeCategory}
-          >
-            {filteredProducts.map((product) => (
-              <motion.div key={product.id} variants={item} className="h-full">
+          <div className="flex gap-4 overflow-x-auto no-scrollbar pl-5 md:pl-10 pr-5 pb-4">
+            {newlyAddedProducts.map((product, i) => (
+              <motion.div key={product.id} className="w-[165px] shrink-0"
+                initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }}
+                transition={{ duration: 0.35, delay: i * 0.08 }}>
                 <ProductCard product={product} />
               </motion.div>
             ))}
-          </motion.div>
+          </div>
         )}
       </section>
+
+      {/* ══ BUY AGAIN / PREVIOUS ORDERS ══ */}
+      {buyAgainProducts.length > 0 && (
+        <section className="mb-12">
+          <div className="px-5 md:px-10 mb-5">
+            <div className="flex items-end justify-between">
+              <div>
+                <div className="flex items-center gap-2 mb-1">
+                  <ShoppingBag className="w-4 h-4" style={{ color: 'var(--color-tertiary)' }} strokeWidth={2.5} />
+                  <span className="text-[11px] font-black uppercase tracking-widest"
+                    style={{ color: 'var(--color-tertiary)' }}>PERSONALIZED</span>
+                </div>
+                <h2 className="font-bold text-[24px] tracking-tight" style={{ color: 'var(--color-on-surface)' }}>
+                  Buy It Again
+                </h2>
+              </div>
+            </div>
+          </div>
+
+          <div className="flex gap-4 overflow-x-auto no-scrollbar pl-5 md:pl-10 pr-5 pb-4">
+            {buyAgainProducts.map((product, i) => (
+              <motion.div key={`buy-again-${product.id}`} className="w-[165px] shrink-0"
+                initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }}
+                transition={{ duration: 0.35, delay: i * 0.08 }}>
+                <ProductCard product={product} />
+              </motion.div>
+            ))}
+          </div>
+        </section>
+      )}
+
+      {/* Fallback for Empty Buy Again or just more products */}
+      {!isLoading && buyAgainProducts.length === 0 && user && (
+         <section className="px-5 md:px-10 mb-12">
+            <div className="bg-surface-container-low rounded-[24px] p-8 text-center border border-dashed border-outline-variant">
+               <ShoppingBag className="w-10 h-10 mx-auto mb-4 opacity-20" />
+               <h3 className="font-bold text-lg mb-1">No previous orders yet</h3>
+               <p className="text-sm text-on-surface-variant max-w-[240px] mx-auto">
+                  Start shopping to build your favorites and see them here!
+               </p>
+               <button 
+                  onClick={() => router.push('/products')}
+                  className="mt-6 px-6 py-2.5 rounded-full bg-primary text-white font-bold text-sm shadow-lg shadow-primary/20">
+                  {t('browseProducts')}
+               </button>
+            </div>
+         </section>
+      )}
+
     </div>
   );
 }

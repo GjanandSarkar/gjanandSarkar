@@ -13,12 +13,23 @@ export default function CustomerLayout({ children }: { children: React.ReactNode
   const router = useRouter();
   const pathname = usePathname();
 
+  const isAuthLoading = useStore(state => state.isAuthLoading);
+
   useEffect(() => {
+    if (isAuthLoading) return; // Wait until Supabase finishes the initial auth check
+
     const isAuthRoute = pathname === '/login' || pathname === '/verify'
       || pathname === '/' || pathname === '/onboarding';
 
+    // Not logged in -> go to login
     if (!user && !isAuthRoute) {
       router.replace('/login');
+      return;
+    }
+
+    // Already logged in -> leave login pages
+    if (user && (pathname === '/login' || pathname === '/verify')) {
+      router.replace('/home');
       return;
     }
 

@@ -50,12 +50,12 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Failed to create OTP' }, { status: 500 });
     }
 
-    console.log(`[OTP] Demo mode - OTP for ${normalizedPhone}: ${otp}`);
-    console.log(`[OTP] In production, SMS would be sent here`);
+    // OTP generated and stored successfully.
+    // In production, an SMS gateway would be triggered here.
 
     return NextResponse.json({ 
       success: true, 
-      message: 'OTP sent (demo mode: check server logs)',
+      message: 'OTP sent (demo mode: success)',
       demoOtp: otp
     });
   } catch (error) {

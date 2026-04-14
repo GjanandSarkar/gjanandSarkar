@@ -134,7 +134,7 @@ export function ProductCard({ product }: ProductCardProps) {
         }}
       >
         {/* Image */}
-        <div className="relative" style={{ paddingTop: '100%' }}>
+        <div className="relative" style={{ paddingTop: '85%' }}>
           <div
             className="absolute inset-0 rounded-t-[16px] overflow-hidden"
             style={{ background: categoryStyle.bg }}

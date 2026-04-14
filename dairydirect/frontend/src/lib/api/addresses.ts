@@ -25,8 +25,8 @@ export async function saveAddressAPI(addressData: {
       user_id: addressData.userId,
       label: addressData.label,
       address: addressData.address,
-      latitude: addressData.lat,
-      longitude: addressData.lng,
+      lat: addressData.lat,
+      lng: addressData.lng,
       is_default: addressData.isDefault ?? true,
     });
 

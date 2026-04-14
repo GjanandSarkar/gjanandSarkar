@@ -95,7 +95,7 @@ export async function pauseSubscription(
   subId: string,
   currentStatus: string
 ): Promise<{ success: boolean; error?: string }> {
-  const newStatus = currentStatus === 'Paused' ? 'Active' : 'Paused';
+  const newStatus = currentStatus === 'paused' ? 'active' : 'paused';
   const { error } = await supabase
     .from('subscriptions')
     .update({ status: newStatus })

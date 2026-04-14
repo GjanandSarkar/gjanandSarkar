@@ -1,27 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { supabaseAdmin } from '@/lib/db';
-import crypto from 'crypto';
-
-function getTokenHash(token: string): string {
-  return crypto.createHash('sha256').update(token).digest('hex');
-}
 
 async function verifySession(token: string | null): Promise<string | null> {
   if (!token || token === 'new_user') return null;
-  
-  const tokenHash = getTokenHash(token);
-  const { data: session } = await supabaseAdmin
-    .from('sessions')
-    .select('user_id, expires_at')
-    .eq('token_hash', tokenHash)
-    .single();
-
-  if (!session) return null;
-  
-  const expiresAt = new Date(session.expires_at);
-  if (new Date() > expiresAt) return null;
-  
-  return session.user_id;
+  const { data: { user }, error } = await supabaseAdmin.auth.getUser(token);
+  if (error || !user) return null;
+  return user.id;
 }
 
 export async function POST(request: NextRequest) {

@@ -93,7 +93,6 @@ export default function MapComponent({
         {...viewState}
         onMove={handleMove}
         ref={mapRef}
-        mapboxAccessToken={mapboxToken}
         mapStyle={mapStyle}
         scrollZoom={interactive}
         dragPan={interactive}

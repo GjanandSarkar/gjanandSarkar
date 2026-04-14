@@ -49,14 +49,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setAuthLoading(true);
 
     // Supabase listener
-    const { data: { subscription: subSubscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
-      console.log('Auth state change:', event);
-      
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event: any, session: any) => {
       if (session) {
         try {
           await hydrateUser(session.access_token);
         } catch (error) {
-          console.error("Error hydrating user", error);
           logout();
         }
       } else {
@@ -66,7 +63,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     });
 
     return () => {
-      subSubscription.unsubscribe();
+      subscription.unsubscribe();
     };
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -80,17 +77,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     });
     
     if (!res.ok) {
-       const errData = await res.text();
-       console.error("Failed to synchronize user session. Status:", res.status, errData);
        // Do not throw! If synchronization fails (e.g. database column missing), 
        // we simply fallback to basic Supabase payload to avoid forcing a logout loop.
-       const { data: fallbackSession } = await supabase.auth.getUser(token);
-       if (fallbackSession.user) {
+       const { data: { user }, error } = await supabase.auth.getUser();
+       if (user && !error) {
          setUser({
-           id: fallbackSession.user.id,
+           id: user.id,
            name: '',
-           phone: fallbackSession.user.phone || '',
-           email: fallbackSession.user.email || '',
+           phone: user.phone || '',
+           email: user.email || '',
            avatar_url: '',
            role: 'customer'
          });

@@ -15,7 +15,9 @@ export default function OrderConfirmedScreen({ params }: { params: Promise<{ id:
   const [orderId, setOrderId] = useState<string>('');
 
   useEffect(() => {
-    params.then(p => setOrderId(p.id));
+    params.then(p => {
+      setOrderId(p.id);
+    });
   }, [params]);
 
   return (
@@ -63,13 +65,12 @@ export default function OrderConfirmedScreen({ params }: { params: Promise<{ id:
         >
           <div className="p-4 border-b border-sand bg-sand/10">
             <h3 className="font-bold text-dark text-sm flex items-center">
-              <MapPin className="w-4 h-4 mr-2 text-primary" /> Delivery Address
+              <MapPin className="w-4 h-4 mr-2 text-primary" /> Delivery Details
             </h3>
           </div>
           <div className="p-4">
-            <p className="font-semibold text-dark text-sm">Home</p>
-            <p className="text-muted text-sm mt-1 leading-relaxed">
-              14, Green Park Society, Satellite, Ahmedabad, 380015
+            <p className="text-muted text-sm leading-relaxed">
+              Your order is being prepared and will be delivered to your selected address.
             </p>
           </div>
         </motion.div>
@@ -80,9 +81,9 @@ export default function OrderConfirmedScreen({ params }: { params: Promise<{ id:
           transition={{ delay: 0.5 }}
           className="flex flex-col gap-3 mt-auto"
         >
-          <Link href={`/tracking/${orderId}`} className="block w-full">
+          <Link href="/orders" className="block w-full">
             <Button size="full" className="w-full shadow-active text-lg">
-              Track My Order
+              View All Orders
             </Button>
           </Link>
           <Link href="/home" className="block w-full">

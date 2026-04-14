@@ -2,10 +2,9 @@
 
 import { useState, useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { ArrowLeft, Loader2, ShieldCheck, Timer } from 'lucide-react';
+import { ArrowLeft, Loader2 } from 'lucide-react';
 import { useTranslation } from '@/lib/i18n';
 import { OTPInput } from '@/components/ui/OTPInput';
-import { Button } from '@/components/ui/Button';
 import { motion } from 'framer-motion';
 import { supabase } from '@/lib/supabase';
 
@@ -19,19 +18,18 @@ function VerifyContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const phone = searchParams.get('phone') || '';
-  const email = searchParams.get('email') || '';
   const { t } = useTranslation();
 
   useEffect(() => {
     // Basic validation
-    if (!phone && !email) {
+    if (!phone) {
        router.replace('/login');
        return;
     }
     
     const interval = setInterval(() => setTimer(prev => prev > 0 ? prev - 1 : 0), 1000);
     return () => clearInterval(interval);
-  }, [phone, email, router]);
+  }, [phone, router]);
 
   const handleVerify = async (code: string = otp) => {
     if (code.length < 6) return;
@@ -39,38 +37,24 @@ function VerifyContent() {
     setError('');
 
     try {
-      let session;
-      
-      if (phone) {
-        const { data: verifyData, error: verifyError } = await supabase.auth.verifyOtp({
-          phone: `+91${phone}`,
-          token: code,
-          type: 'sms'
-        });
+      const { data: verifyData, error: verifyError } = await supabase.auth.verifyOtp({
+        phone: `+91${phone}`,
+        token: code,
+        type: 'sms'
+      });
 
-        if (verifyError) throw verifyError;
-        session = verifyData.session;
-      } else if (email) {
-        const { data: verifyData, error: verifyError } = await supabase.auth.verifyOtp({
-          email,
-          token: code,
-          type: 'email'
-        });
-
-        if (verifyError) throw verifyError;
-        session = verifyData.session;
-      }
+      if (verifyError) throw verifyError;
+      const session = verifyData.session;
 
       if (!session) throw new Error('Verification failed. No session created.');
 
-      // Sync with backend (now only Supabase source)
+      // Sync with backend (ensure profile is fully created/updated)
       const res = await fetch('/api/auth/sync', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ 
           token: session.access_token, 
           type: 'supabase',
-          email: email || session.user.email,
           phone: phone || session.user.phone
         })
       });
@@ -94,20 +78,11 @@ function VerifyContent() {
     setError('');
 
     try {
-      if (phone) {
-        const { error: resendError } = await supabase.auth.signInWithOtp({
-          phone: `+91${phone}`,
-        });
-        if (resendError) throw resendError;
-      } else if (email) {
-        const { error: resendError } = await supabase.auth.signInWithOtp({
-          email,
-          options: {
-            shouldCreateUser: true,
-          }
-        });
-        if (resendError) throw resendError;
-      }
+      const { error: resendError } = await supabase.auth.signInWithOtp({
+        phone: `+91${phone}`,
+      });
+      if (resendError) throw resendError;
+      
       setTimer(60); // Longer cooldown
     } catch (err: any) {
       setError(err.message || 'Failed to resend OTP.');
@@ -126,7 +101,7 @@ function VerifyContent() {
 
       {/* Back button */}
       <button onClick={() => router.back()}
-        className="absolute top-6 left-5 w-9 h-9 rounded-[10px] flex items-center justify-center transition-all active:scale-95"
+        className="absolute top-6 left-5 w-9 h-9 rounded-[10px] flex items-center justify-center transition-all active:scale-95 z-20"
         style={{ background: 'var(--color-surface-container-low)', color: 'var(--color-on-surface)' }}>
         <ArrowLeft className="w-4.5 h-4.5" />
       </button>
@@ -137,13 +112,13 @@ function VerifyContent() {
         transition={{ duration: 0.4, ease: [0.4, 0, 0.2, 1] }}
         className="w-full max-w-[380px] relative z-10"
       >
-        <h1 className="font-extrabold text-[28px] tracking-tight mb-2"
+        <h1 className="font-extrabold text-[28px] tracking-tight mb-2 text-center"
           style={{ color: 'var(--color-on-surface)' }}>
           {t('enterOtp')}
         </h1>
-        <p className="text-[15px] mb-8" style={{ color: 'var(--color-on-surface-variant)' }}>
+        <p className="text-[15px] mb-8 text-center" style={{ color: 'var(--color-on-surface-variant)' }}>
           {t('sentCodeTo')} <span className="font-bold" style={{ color: 'var(--color-primary)' }}>
-            {phone ? `+91 ${phone.substring(0, 5)} ${phone.substring(5)}` : email}
+            +91 {phone.substring(0, 5)} {phone.substring(5)}
           </span>
         </p>
 

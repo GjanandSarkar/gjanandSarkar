@@ -1,30 +1,52 @@
 "use client";
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { ArrowLeft, MapPin, Plus } from 'lucide-react';
+import { ArrowLeft, MapPin, Plus, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import { cn } from '@/lib/utils';
 import { useTranslation } from '@/lib/i18n';
+import { useStore } from '@/store/useStore';
+import { getUserAddresses } from '@/lib/api/addresses';
+import type { UserAddress } from '@/lib/api/addresses';
 
 export default function AddressScreen() {
   const router = useRouter();
   const { t } = useTranslation();
+  const user = useStore(state => state.user);
+  const checkoutAddressId = useStore(state => state.checkoutAddressId);
+  const setCheckoutAddressId = useStore(state => state.setCheckoutAddressId);
   
-  const [selectedAddress, setSelectedAddress] = useState(1);
+  const [addresses, setAddresses] = useState<UserAddress[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
   const [selectedSlot, setSelectedSlot] = useState('morning1');
 
-  const addresses = [
-    { id: 1, type: 'Home', text: '14, Green Park Society, Satellite, Ahmedabad, 380015' },
-    { id: 2, type: 'Work', text: 'Silver Radiance, Sindhu Bhavan Road, Bodakdev, Ahmedabad, 380054' }
-  ];
+  useEffect(() => {
+    if (user) {
+      getUserAddresses(user.id).then(data => {
+        setAddresses(data);
+        if (data.length > 0 && !checkoutAddressId) {
+          setCheckoutAddressId(data[0].id);
+        }
+        setIsLoading(false);
+      });
+    }
+  }, [user, checkoutAddressId, setCheckoutAddressId]);
 
   const slots = [
     { id: 'morning1', time: '6:00 AM - 8:00 AM', avail: 'Fastest' },
     { id: 'morning2', time: '8:00 AM - 10:00 AM', avail: 'Available' },
     { id: 'evening', time: '5:00 PM - 7:00 PM', avail: 'Available' },
   ];
+
+  if (isLoading) {
+    return (
+      <div className="flex flex-col min-h-screen items-center justify-center bg-cream">
+        <Loader2 className="w-8 h-8 animate-spin text-primary" />
+      </div>
+    );
+  }
 
   return (
     <div className="flex flex-col min-h-screen bg-cream pb-24">
@@ -58,10 +80,10 @@ export default function AddressScreen() {
             {addresses.map((addr) => (
               <div 
                 key={addr.id}
-                onClick={() => setSelectedAddress(addr.id)}
+                onClick={() => setCheckoutAddressId(addr.id)}
                 className={cn(
                   "p-4 rounded-[16px] border transition-all cursor-pointer flex gap-3",
-                  selectedAddress === addr.id 
+                  checkoutAddressId === addr.id 
                     ? "border-primary bg-mint/10 shadow-sm" 
                     : "border-sand bg-white"
                 )}
@@ -69,23 +91,25 @@ export default function AddressScreen() {
                 <div className="pt-1">
                   <div className={cn(
                     "w-5 h-5 rounded-full border-2 flex items-center justify-center",
-                    selectedAddress === addr.id ? "border-primary" : "border-sand"
+                    checkoutAddressId === addr.id ? "border-primary" : "border-sand"
                   )}>
-                    {selectedAddress === addr.id && <div className="w-2.5 h-2.5 rounded-full bg-primary" />}
+                    {checkoutAddressId === addr.id && <div className="w-2.5 h-2.5 rounded-full bg-primary" />}
                   </div>
                 </div>
                 <div>
                   <div className="flex items-center mb-1">
-                    <span className="font-bold text-dark text-sm">{addr.type}</span>
+                    <span className="font-bold text-dark text-sm">{addr.label}</span>
                   </div>
-                  <p className="text-sm text-muted leading-relaxed pr-6">{addr.text}</p>
+                  <p className="text-sm text-muted leading-relaxed pr-6">{addr.address}</p>
                 </div>
               </div>
             ))}
 
-            <button className="w-full p-4 rounded-[16px] border border-dashed border-clay text-clay bg-white hover:bg-clay/5 flex items-center justify-center font-semibold text-sm transition-colors">
-              <Plus className="w-5 h-5 mr-2" /> Add New Address
-            </button>
+            <Link href="/profile/saved-addresses" className="block">
+              <button className="w-full p-4 rounded-[16px] border border-dashed border-clay text-clay bg-white hover:bg-clay/5 flex items-center justify-center font-semibold text-sm transition-colors">
+                <Plus className="w-5 h-5 mr-2" /> Add/Manage Addresses
+              </button>
+            </Link>
           </div>
         </div>
 
@@ -120,7 +144,7 @@ export default function AddressScreen() {
       <div className="fixed bottom-0 left-0 right-0 md:left-[260px] p-4 bg-white border-t border-sand z-40 pb-safe shadow-[0_-10px_20px_rgba(0,0,0,0.03)]">
         <div className="max-w-[800px] mx-auto">
           <Link href="/checkout/payment" className="block w-full">
-            <Button size="full" className="w-full shadow-active text-lg" disabled={!selectedAddress || !selectedSlot}>
+            <Button size="full" className="w-full shadow-active text-lg" disabled={!checkoutAddressId || !selectedSlot}>
               Continue to Payment
             </Button>
           </Link>

@@ -102,5 +102,12 @@ export async function updateProfileName(
   userId: string,
   name: string
 ): Promise<{ success: boolean; error?: string }> {
-  return { success: true };
+  try {
+    const { supabase } = await import('@/lib/supabase');
+    const { error } = await supabase.from('profiles').update({ name }).eq('id', userId);
+    if (error) return { success: false, error: error.message };
+    return { success: true };
+  } catch (err: any) {
+    return { success: false, error: err.message };
+  }
 }

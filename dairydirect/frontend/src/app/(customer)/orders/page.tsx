@@ -12,12 +12,12 @@ import { motion, AnimatePresence } from 'framer-motion';
 import Link from 'next/link';
 
 const STATUS_STYLES: Record<string, { bg: string; color: string; dot: string; icon: typeof Clock }> = {
-  'Pending':          { bg: '#ffdcc7', color: '#774117', dot: '#d4712a', icon: Clock },
-  'Confirmed':        { bg: '#c2efac', color: '#042100', dot: '#3f6530', icon: CheckCircle2 },
-  'Preparing':        { bg: '#bfedce', color: '#002111', dot: '#3b644c', icon: Package },
-  'Out for Delivery': { bg: '#fff8e6', color: '#7d5200', dot: '#c78c2e', icon: Truck },
-  'Delivered':        { bg: '#eaf4e2', color: '#2a4f1d', dot: '#3f6530', icon: CheckCircle2 },
-  'Cancelled':        { bg: '#e3e3dc', color: '#43493e', dot: '#73796d', icon: AlertCircle },
+  'pending':          { bg: '#ffdcc7', color: '#774117', dot: '#d4712a', icon: Clock },
+  'confirmed':        { bg: '#c2efac', color: '#042100', dot: '#3f6530', icon: CheckCircle2 },
+  'preparing':        { bg: '#bfedce', color: '#002111', dot: '#3b644c', icon: Package },
+  'out_for_delivery': { bg: '#fff8e6', color: '#7d5200', dot: '#c78c2e', icon: Truck },
+  'delivered':        { bg: '#eaf4e2', color: '#2a4f1d', dot: '#3f6530', icon: CheckCircle2 },
+  'cancelled':        { bg: '#e3e3dc', color: '#43493e', dot: '#73796d', icon: AlertCircle },
 };
 
 const TABS = ['All', 'Active', 'Delivered', 'Cancelled'];
@@ -33,11 +33,11 @@ export default function OrdersScreen() {
   const filteredOrders = (() => {
     switch (activeTab) {
       case 'Active':
-        return orders.filter(o => ['Pending', 'Confirmed', 'Preparing', 'Out for Delivery'].includes(o.status));
+        return orders.filter(o => ['pending', 'confirmed', 'preparing', 'out_for_delivery'].includes(o.status));
       case 'Delivered':
-        return orders.filter(o => o.status === 'Delivered');
+        return orders.filter(o => o.status === 'delivered');
       case 'Cancelled':
-        return orders.filter(o => o.status === 'Cancelled');
+        return orders.filter(o => o.status === 'cancelled');
       default:
         return orders;
     }
@@ -139,7 +139,7 @@ export default function OrdersScreen() {
           ) : (
             <motion.div key="list" initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex flex-col gap-3">
               {filteredOrders.map((order, i) => {
-                const ss = STATUS_STYLES[order.status] ?? STATUS_STYLES['Pending'];
+                const ss = STATUS_STYLES[order.status.toLowerCase()] ?? STATUS_STYLES['pending'];
                 const StatusIcon = ss.icon;
                 const isExpanded = expandedId === order.id;
                 return (
@@ -203,7 +203,7 @@ export default function OrdersScreen() {
                             </div>
 
                             {/* Track button */}
-                            {(order.status === 'Out for Delivery' || order.status === 'Confirmed') && (
+                            {(order.status === 'out_for_delivery' || order.status === 'confirmed') && (
                               <Link href={`/tracking/${order.id}`}
                                 className="flex items-center justify-center gap-2 w-full py-3 rounded-[12px] font-bold text-sm text-white"
                                 style={{ background: 'linear-gradient(135deg, #3f6530, #577f46)' }}>

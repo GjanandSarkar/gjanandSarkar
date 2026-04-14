@@ -9,15 +9,15 @@ import { getAllOrders, updateOrderStatus } from '@/lib/api/orders';
 import type { OrderWithItems, OrderStatus } from '@/lib/api/orders';
 
 const STATUS_STYLES: Record<string, { bg: string; color: string; dot: string }> = {
-  'Pending':          { bg: '#ffdcc7', color: '#774117', dot: '#d4712a' },
-  'Confirmed':        { bg: '#c2efac', color: '#042100', dot: '#3f6530' },
-  'Preparing':        { bg: '#bfedce', color: '#002111', dot: '#3b644c' },
-  'Out for Delivery': { bg: '#fff8e6', color: '#7d5200', dot: '#c78c2e' },
-  'Delivered':        { bg: '#eaf4e2', color: '#2a4f1d', dot: '#3f6530' },
-  'Cancelled':        { bg: '#e3e3dc', color: '#43493e', dot: '#73796d' },
+  'pending':          { bg: '#ffdcc7', color: '#774117', dot: '#d4712a' },
+  'confirmed':        { bg: '#c2efac', color: '#042100', dot: '#3f6530' },
+  'preparing':        { bg: '#bfedce', color: '#002111', dot: '#3b644c' },
+  'out_for_delivery': { bg: '#fff8e6', color: '#7d5200', dot: '#c78c2e' },
+  'delivered':        { bg: '#eaf4e2', color: '#2a4f1d', dot: '#3f6530' },
+  'cancelled':        { bg: '#e3e3dc', color: '#43493e', dot: '#73796d' },
 };
 
-const ORDER_STATUSES: OrderStatus[] = ['Pending', 'Confirmed', 'Preparing', 'Out for Delivery', 'Delivered', 'Cancelled'];
+const ORDER_STATUSES: OrderStatus[] = ['pending', 'confirmed', 'preparing', 'out_for_delivery', 'delivered', 'cancelled'];
 
 export default function AdminOrdersPage() {
   const { t } = useTranslation();
@@ -43,8 +43,8 @@ export default function AdminOrdersPage() {
     setIsUpdating(null);
   };
 
-  const tabs = ['All', 'Confirmed', 'Preparing', 'Out for Delivery', 'Delivered', 'Cancelled'];
-  const filtered = activeTab === 'All' ? orders : orders.filter(o => o.status === activeTab);
+  const tabs = ['all', 'confirmed', 'preparing', 'out_for_delivery', 'delivered', 'cancelled'];
+  const filtered = activeTab === 'all' ? orders : orders.filter(o => o.status === activeTab);
 
   if (isLoading) {
     return (
@@ -69,7 +69,7 @@ export default function AdminOrdersPage() {
           <div className="flex gap-2 overflow-x-auto no-scrollbar -mx-6 px-6 pb-1">
             {tabs.map(tab => (
               <button key={tab} onClick={() => setActiveTab(tab)}
-                className="whitespace-nowrap px-4 py-2 rounded-full text-[12px] font-semibold transition-all duration-200 shrink-0"
+                className="whitespace-nowrap px-4 py-2 rounded-full text-[12px] font-semibold transition-all duration-200 shrink-0 capitalize"
                 style={activeTab === tab ? {
                   background: 'linear-gradient(135deg, #3f6530, #577f46)',
                   color: 'white',
@@ -78,7 +78,7 @@ export default function AdminOrdersPage() {
                   background: 'var(--color-surface-container-low)',
                   color: 'var(--color-on-surface-variant)',
                 }}>
-                {tab}
+                {tab.replace(/_/g, ' ')}
               </button>
             ))}
           </div>
@@ -105,7 +105,7 @@ export default function AdminOrdersPage() {
             <motion.div key="list" initial={{ opacity: 0 }} animate={{ opacity: 1 }}
               className="flex flex-col gap-3">
               {filtered.map((order, i) => {
-                const statusStyle = STATUS_STYLES[order.status] || STATUS_STYLES['Cancelled'];
+                const statusStyle = STATUS_STYLES[order.status] || STATUS_STYLES['cancelled'];
                 const isExpanded = expandedId === order.id;
                 return (
                   <motion.div key={order.id}
@@ -196,7 +196,7 @@ export default function AdminOrdersPage() {
                                         background: 'var(--color-surface-container)',
                                         color: 'var(--color-on-surface-variant)',
                                       }}>
-                                      {status}
+                                      <span className="capitalize">{status.replace(/_/g, ' ')}</span>
                                     </button>
                                   );
                                 })}

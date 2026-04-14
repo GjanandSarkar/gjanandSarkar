@@ -52,9 +52,9 @@ export default function AdminDashboard() {
     });
   }, []);
 
-  const totalRevenue = orders.reduce((s, o) => s + (o.status !== 'Cancelled' ? o.total : 0), 0);
-  const pendingOrders = orders.filter(o => o.status === 'Pending' || o.status === 'Confirmed').length;
-  const deliveredOrders = orders.filter(o => o.status === 'Delivered').length;
+  const totalRevenue = orders.reduce((s, o) => s + (o.status !== 'cancelled' ? o.total : 0), 0);
+  const pendingOrders = orders.filter(o => o.status === 'pending' || o.status === 'confirmed').length;
+  const deliveredOrders = orders.filter(o => o.status === 'delivered').length;
   const recentOrders = [...orders].slice(0, 8);
 
   const stats = [

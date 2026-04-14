@@ -21,6 +21,11 @@ export type PlaceOrderInput = {
     price: number;
   }[];
   total: number;
+  addressId: string;
+  paymentMethod: string;
+  paymentStatus: string;
+  couponCode?: string;
+  upiId?: string;
 };
 
 export type OrderStatus = DBOrder['status'];
@@ -44,6 +49,16 @@ export async function getUserOrders(userId: string): Promise<OrderWithItems[]> {
   }
 
   return (data as OrderWithItems[]) ?? [];
+}
+
+// ─── Get Buy Again History ───────────────────────────────────
+export async function getUserBuyAgainHistory(): Promise<string[]> {
+  const { data: { session } } = await supabase.auth.getSession();
+  if (!session) return [];
+  
+  const res = await fetch(`/api/orders?token=${session.access_token}&history=true`);
+  const data = await res.json();
+  return data.productIds || [];
 }
 
 // ─── Get All Orders (Admin) ───────────────────────────────────
@@ -102,6 +117,32 @@ export async function placeOrder(
   } catch (error: any) {
     console.error('placeOrder error:', error);
     return { success: false, error: error.message };
+  }
+}
+
+// ─── Validate Coupon ──────────────────────────────────────────
+export async function validateCoupon(
+  items: { variantId: string; quantity: number }[],
+  couponCode: string
+): Promise<{ 
+  valid: boolean; 
+  discount: number; 
+  total: number; 
+  subtotal: number;
+  deliveryFee: number;
+  nextTierAmount?: number;
+  message?: string;
+}> {
+  try {
+    const res = await fetch('/api/coupons/validate', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ items, couponCode })
+    });
+    return await res.json();
+  } catch (error) {
+    console.error('validateCoupon error:', error);
+    return { valid: false, discount: 0, total: 0, subtotal: 0, deliveryFee: 0, message: 'Connection error' };
   }
 }
 

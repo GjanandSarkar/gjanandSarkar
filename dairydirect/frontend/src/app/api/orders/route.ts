@@ -1,38 +1,19 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { supabaseAdmin } from '@/lib/db';
-import crypto from 'crypto';
-
-function getTokenHash(token: string): string {
-  return crypto.createHash('sha256').update(token).digest('hex');
-}
-
-function generateOrderId(): string {
-  return `ORD-${Math.floor(1000 + Math.random() * 9000)}`;
-}
 
 async function verifySession(token: string | null): Promise<{ userId: string; isAdmin: boolean } | null> {
   if (!token || token === 'new_user') return null;
-  
-  const tokenHash = getTokenHash(token);
-  const { data: session } = await supabaseAdmin
-    .from('sessions')
-    .select('user_id, expires_at')
-    .eq('token_hash', tokenHash)
-    .single();
-
-  if (!session) return null;
-  
-  const expiresAt = new Date(session.expires_at);
-  if (new Date() > expiresAt) return null;
+  const { data: { user }, error } = await supabaseAdmin.auth.getUser(token);
+  if (error || !user) return null;
   
   const { data: profile } = await supabaseAdmin
     .from('profiles')
     .select('role')
-    .eq('id', session.user_id)
+    .eq('id', user.id)
     .single();
 
   return {
-    userId: session.user_id,
+    userId: user.id,
     isAdmin: profile?.role === 'admin'
   };
 }
@@ -46,6 +27,28 @@ export async function GET(request: NextRequest) {
     const auth = await verifySession(token);
     if (!auth) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    const isHistory = searchParams.get('history') === 'true';
+
+    if (isHistory) {
+      const { data, error } = await supabaseAdmin
+        .from('orders')
+        .select('order_items(product_id)')
+        .eq('user_id', auth.userId)
+        .order('created_at', { ascending: false })
+        .limit(10); // Look at last 10 orders
+
+      if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+
+      const productIds = new Set<string>();
+      data?.forEach(order => {
+        (order.order_items as any[])?.forEach(item => {
+          if (productIds.size < 5) productIds.add(item.product_id);
+        });
+      });
+
+      return NextResponse.json({ productIds: Array.from(productIds) });
     }
 
     let query = supabaseAdmin

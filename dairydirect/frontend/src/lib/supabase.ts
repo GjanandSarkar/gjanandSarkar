@@ -64,7 +64,7 @@ export type DBOrder = {
   customer_name: string | null;
   customer_phone: string | null;
   total: number;
-  status: 'Pending' | 'Confirmed' | 'Preparing' | 'Out for Delivery' | 'Delivered' | 'Cancelled';
+  status: 'pending' | 'confirmed' | 'preparing' | 'out_for_delivery' | 'delivered' | 'cancelled';
   delivery_date: string | null;
   created_at: string;
   order_items?: DBOrderItem[];
@@ -87,7 +87,7 @@ export type DBSubscription = {
   product_id: string;
   volume: number;
   plan: 'weekly' | 'monthly';
-  status: 'Active' | 'Paused' | 'Pending Review' | 'Cancelled';
+  status: 'active' | 'paused' | 'pending_review' | 'cancelled';
   start_date: string;
   next_delivery_date: string | null;
   created_at: string;
@@ -100,7 +100,7 @@ export type DBModificationReport = {
   user_id: string;
   new_volume: number | null;
   new_plan: string | null;
-  status: 'Pending' | 'Accepted' | 'Rejected';
+  status: 'pending' | 'accepted' | 'rejected';
   created_at: string;
 };
 

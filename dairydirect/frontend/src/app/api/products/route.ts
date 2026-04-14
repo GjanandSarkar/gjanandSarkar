@@ -1,27 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { supabaseAdmin } from '@/lib/db';
-import crypto from 'crypto';
-
-function getTokenHash(token: string): string {
-  return crypto.createHash('sha256').update(token).digest('hex');
-}
 
 async function verifySession(token: string | null): Promise<string | null> {
   if (!token || token === 'new_user') return null;
-  
-  const tokenHash = getTokenHash(token);
-  const { data: session } = await supabaseAdmin
-    .from('sessions')
-    .select('user_id, expires_at')
-    .eq('token_hash', tokenHash)
-    .single();
-
-  if (!session) return null;
-  
-  const expiresAt = new Date(session.expires_at);
-  if (new Date() > expiresAt) return null;
-  
-  return session.user_id;
+  const { data: { user }, error } = await supabaseAdmin.auth.getUser(token);
+  if (error || !user) return null;
+  return user.id;
 }
 
 export async function GET(request: NextRequest) {
@@ -37,7 +21,7 @@ export async function GET(request: NextRequest) {
     let query = supabaseAdmin
       .from('products')
       .select('*, product_variants(*)')
-      .order('created_at', { ascending: true });
+      .order('created_at', { ascending: false });
 
     if (category && category !== 'All') {
       query = query.eq('category', category);
@@ -88,6 +72,31 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     const { name, category, description, image_url, is_freshness_guarantee, variants } = body;
 
+    // Fetch Business Settings for validation
+    const { data: settings } = await supabaseAdmin
+      .from('business_settings')
+      .select('min_profit_margin_percent')
+      .single();
+    
+    const minMargin = settings?.min_profit_margin_percent || 20;
+
+    // Validate Variants Profit Margin
+    if (variants && variants.length > 0) {
+      for (const v of variants) {
+        const cost = v.cost_price || 0;
+        const selling = v.price || 0;
+        if (cost <= 0) {
+          return NextResponse.json({ error: `Cost price must be greater than 0 for variant ${v.weight}` }, { status: 400 });
+        }
+        const minSelling = cost * (1 + minMargin / 100);
+        if (selling < minSelling) {
+          return NextResponse.json({ 
+            error: `Selling price for ${v.weight} must be at least ₹${minSelling.toFixed(2)} (Min ${minMargin}% margin)` 
+          }, { status: 400 });
+        }
+      }
+    }
+
     const { data: productData, error: productError } = await supabaseAdmin
       .from('products')
       .insert({
@@ -115,6 +124,7 @@ export async function POST(request: NextRequest) {
             product_id: productId,
             weight: v.weight,
             price: v.price,
+            cost_price: v.cost_price,
             original_price: v.original_price ?? null,
             stock: v.stock ?? 0,
           }))

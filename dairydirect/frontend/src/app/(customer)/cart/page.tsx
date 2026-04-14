@@ -8,8 +8,9 @@ import { useStore } from '@/store/useStore';
 import { getProducts } from '@/lib/api/products';
 import { updateCartItem, removeFromCart, clearCart as apiClearCart } from '@/lib/api/cart';
 import type { ProductWithVariants } from '@/lib/api/products';
-import { Trash2, ArrowLeft, Plus, Minus, Tag, ShoppingBag, Clock, ArrowRight, Leaf, Droplets, Package, Cylinder, CupSoda, GlassWater } from 'lucide-react';
+import { Trash2, ArrowLeft, Plus, Minus, Tag, ShoppingBag, Clock, ArrowRight, Leaf, Droplets, Package, Cylinder, CupSoda, GlassWater, ShieldCheck } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { cn } from '@/lib/utils';
 
 export default function CartScreen() {
   const { t } = useTranslation();
@@ -23,6 +24,7 @@ export default function CartScreen() {
 
   const [products, setProducts] = useState<ProductWithVariants[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [settings, setSettings] = useState({ free_delivery_threshold: 299, delivery_cost: 25 });
 
   useEffect(() => {
     getProducts({ activeOnly: true }).then(data => {
@@ -46,8 +48,11 @@ export default function CartScreen() {
   }, [cart, products]);
 
   const subtotal = cartItemsData.reduce((sum, item) => sum + (item.variant.price * item.quantity), 0);
-  const delivery = subtotal > 0 ? (subtotal >= 299 ? 0 : 30) : 0;
+  const isFreeDelivery = subtotal >= settings.free_delivery_threshold;
+  const delivery = subtotal > 0 ? (isFreeDelivery ? 0 : settings.delivery_cost) : 0;
   const total = subtotal + delivery;
+  const deliveryProgress = Math.min((subtotal / settings.free_delivery_threshold) * 100, 100);
+  const neededForFree = settings.free_delivery_threshold - subtotal;
 
   const handleUpdateQuantity = async (productId: string, variantId: string, quantity: number) => {
     if (quantity === 0) {
@@ -167,6 +172,49 @@ export default function CartScreen() {
       <div className="flex flex-col md:flex-row gap-6 px-5 md:px-10 md:items-start max-w-7xl mx-auto w-full">
         {/* Cart Items List */}
         <div className="flex-1 flex flex-col gap-3">
+          {/* Free Delivery Progress */}
+          <div className="bg-white rounded-[20px] p-5 shadow-sm border border-sand mb-2 overflow-hidden relative group">
+            <div className="relative z-10">
+              <div className="flex justify-between items-center mb-2.5">
+                <div className="flex items-center gap-2">
+                  <div className={cn(
+                    "w-8 h-8 rounded-full flex items-center justify-center transition-all",
+                    isFreeDelivery ? "bg-green-100 text-green-600" : "bg-primary-fixed text-primary"
+                  )}>
+                    {isFreeDelivery ? <ShieldCheck className="w-5 h-5" /> : <Package className="w-4.5 h-4.5" />}
+                  </div>
+                  <div>
+                    <h4 className="text-[14px] font-bold text-dark leading-tight">
+                      {isFreeDelivery ? 'Free Delivery Unlocked!' : 'Free Delivery Goal'}
+                    </h4>
+                    <p className="text-[11px] text-muted font-medium">
+                      {isFreeDelivery 
+                        ? 'Shop worry-free, shipping is on us! 🥛' 
+                        : `Add items worth ₹${Math.floor(neededForFree)} more for FREE Delivery`}
+                    </p>
+                  </div>
+                </div>
+              </div>
+              
+              <div className="relative h-2 w-full bg-sand/30 rounded-full overflow-hidden">
+                <motion.div 
+                  initial={{ width: 0 }}
+                  animate={{ width: `${deliveryProgress}%` }}
+                  className={cn(
+                    "absolute top-0 left-0 h-full transition-all duration-700",
+                    isFreeDelivery ? "bg-green-500 shadow-[0_0_10px_rgba(34,197,94,0.3)]" : "bg-primary"
+                  )}
+                />
+              </div>
+            </div>
+            
+            {!isFreeDelivery && (
+              <div className="absolute top-0 right-0 p-3 opacity-10 group-hover:opacity-20 transition-opacity">
+                <Droplets className="w-12 h-12 text-primary" />
+              </div>
+            )}
+          </div>
+
           <AnimatePresence initial={false}>
             {cartItemsData.map((item) => (
               <motion.div
@@ -237,21 +285,6 @@ export default function CartScreen() {
 
         {/* Order Summary Panel (Desktop) */}
         <div className="w-full md:w-[360px] lg:w-[400px] md:sticky md:top-24 shrink-0 flex flex-col gap-4">
-          <div className="flex items-center gap-2 rounded-[14px] p-4"
-            style={{ background: 'var(--color-surface-container-lowest)' }}>
-            <Tag className="w-4 h-4 shrink-0" style={{ color: 'var(--color-outline)' }} />
-            <input
-              type="text"
-              placeholder={t('promoCode') as string}
-              className="flex-1 text-[13px] font-medium outline-none bg-transparent"
-              style={{ color: 'var(--color-on-surface)' }}
-            />
-            <button className="text-[12px] font-bold px-3 py-1.5 rounded-[8px] transition-all active:scale-95"
-              style={{ background: 'var(--color-surface-container)', color: 'var(--color-primary)' }}>
-              {t('apply')}
-            </button>
-          </div>
-
           <div className="rounded-[16px] p-5" style={{ background: 'var(--color-surface-container-lowest)' }}>
             <h3 className="font-bold text-[16px] mb-5" style={{ color: 'var(--color-on-surface)' }}>
               {t('paymentSummary')}
@@ -269,12 +302,6 @@ export default function CartScreen() {
                 ) : `${t('currency')}${delivery}`}
                 </span>
               </div>
-              {subtotal < 299 && subtotal > 0 && (
-                <div className="text-[11px] px-3 py-2 rounded-[8px]"
-                  style={{ background: 'var(--color-secondary-fixed)', color: 'var(--color-on-secondary-container)' }}>
-                  {t('addMoreForFree', { amount: (299 - subtotal).toString() })}
-                </div>
-              )}
               
               <div className="h-px" style={{ background: 'var(--color-outline-variant)', opacity: 0.4 }} />
               

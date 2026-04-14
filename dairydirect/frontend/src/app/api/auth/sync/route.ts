@@ -24,7 +24,7 @@ export async function POST(request: Request) {
     // Check if profile exists
     let { data: profile, error: fetchError } = await supabaseAdmin
       .from('profiles')
-      .select('*')
+      .select('*, saved_addresses:user_addresses(label, address)')
       .eq('id', uid)
       .single();
 

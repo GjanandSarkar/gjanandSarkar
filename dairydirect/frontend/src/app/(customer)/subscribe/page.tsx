@@ -55,7 +55,7 @@ export default function MySubscriptionsScreen() {
     setActiveMenu(null);
     const result = await pauseSub(sub.id, sub.status);
     if (result.success) {
-      const newStatus = sub.status === 'Paused' ? 'Active' : 'Paused';
+      const newStatus = sub.status === 'paused' ? 'active' : 'paused';
       setSubs((prev) => prev.map((s) => s.id === sub.id ? { ...s, status: newStatus as any } : s));
     }
     setBusy(null);
@@ -94,7 +94,7 @@ export default function MySubscriptionsScreen() {
 
       <div className="px-5 md:px-10 py-5">
         {/* Active delivery alert */}
-        {subs.some((s) => s.status === 'Active') && (
+        {subs.some((s) => s.status === 'active') && (
           <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }}
             className="rounded-[12px] p-3 mb-6 flex items-center shadow-sm"
             style={{ background: 'var(--color-primary-fixed)', border: '1px solid rgba(63,101,48,0.15)' }}>
@@ -118,7 +118,7 @@ export default function MySubscriptionsScreen() {
           <div className="space-y-4">
             {subs.map((sub) => {
               const product = sub.products;
-              const isPending = sub.status === 'Pending Review';
+              const isPending = sub.status === 'pending_review';
 
               return (
                 <div key={sub.id} className="rounded-[24px] overflow-hidden relative"
@@ -159,7 +159,7 @@ export default function MySubscriptionsScreen() {
                                 onClick={() => handlePause(sub)}
                                 className="w-full px-4 py-3 text-left text-[13px] font-bold transition-colors"
                                 style={{ color: 'var(--color-on-surface)' }}>
-                                {sub.status === 'Paused' ? 'Resume Subscription' : 'Pause Subscription'}
+                                {sub.status === 'paused' ? 'Resume Subscription' : 'Pause Subscription'}
                               </button>
                               <div className="h-px mx-2" style={{ background: 'var(--color-outline-variant)' }} />
                               <button

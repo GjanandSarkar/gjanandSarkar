@@ -32,6 +32,7 @@ export type User = {
   email?: string;
   avatar_url?: string;
   address?: string;
+  saved_addresses?: { label: string; address: string }[];
   role: 'customer' | 'admin';
 };
 
@@ -66,6 +67,12 @@ type AppState = {
   setOrdersLoading: (v: boolean) => void;
   isSubsLoading: boolean;
   setSubsLoading: (v: boolean) => void;
+
+  // ── Checkout State (Temp) ──────────────────────────────────
+  checkoutAddressId: string | null;
+  setCheckoutAddressId: (id: string | null) => void;
+  checkoutPaymentMethod: string | null;
+  setCheckoutPaymentMethod: (method: string | null) => void;
 };
 
 export const useStore = create<AppState>()(
@@ -160,6 +167,12 @@ export const useStore = create<AppState>()(
 
       isSubsLoading: false,
       setSubsLoading: (v) => set({ isSubsLoading: v }),
+
+      // ── Checkout Selection ─────────────────────────────────
+      checkoutAddressId: null,
+      setCheckoutAddressId: (id) => set({ checkoutAddressId: id }),
+      checkoutPaymentMethod: 'upi',
+      setCheckoutPaymentMethod: (method) => set({ checkoutPaymentMethod: method }),
     }),
     {
       name: 'dairydirect-storage',

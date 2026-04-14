@@ -1,0 +1,32 @@
+# DairyDirect Monorepo Ignore Rules
+
+# Dependencies
+node_modules/
+**/node_modules/
+
+# Environment
+.env
+.env.local
+.env.*
+!.env.example
+!.env.*.example
+
+# Build Outputs
+.next/
+out/
+dist/
+build/
+.cache/
+.turbo/
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+
+# OS/IDEs
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+*.swp
