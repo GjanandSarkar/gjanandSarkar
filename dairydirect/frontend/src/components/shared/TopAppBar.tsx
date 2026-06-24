@@ -15,10 +15,10 @@ export function TopAppBar() {
       <div className="flex justify-between items-center px-5 py-3.5 w-full">
         
         <Link href="/home" className="flex items-center gap-2">
-          <img src="/logo.svg" alt="DairyDirect Logo" className="w-8 h-8 object-contain" />
+          <img src="/logo.svg" alt="Gjanand Sarkar Logo" className="w-8 h-8 object-contain" />
           <span className="font-extrabold text-[17px] tracking-tight" 
             style={{ color: 'var(--color-on-surface)' }}>
-            Dairy<span style={{ color: 'var(--color-primary)' }}>Direct</span>
+            Gjanand <span style={{ color: 'var(--color-primary)' }}>Sarkar</span>
           </span>
         </Link>
         

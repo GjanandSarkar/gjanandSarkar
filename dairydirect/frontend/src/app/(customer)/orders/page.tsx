@@ -14,7 +14,6 @@ import Link from 'next/link';
 const STATUS_STYLES: Record<string, { bg: string; color: string; dot: string; icon: typeof Clock }> = {
   'pending':          { bg: '#ffdcc7', color: '#774117', dot: '#d4712a', icon: Clock },
   'confirmed':        { bg: '#c2efac', color: '#042100', dot: '#3f6530', icon: CheckCircle2 },
-  'preparing':        { bg: '#bfedce', color: '#002111', dot: '#3b644c', icon: Package },
   'out_for_delivery': { bg: '#fff8e6', color: '#7d5200', dot: '#c78c2e', icon: Truck },
   'delivered':        { bg: '#eaf4e2', color: '#2a4f1d', dot: '#3f6530', icon: CheckCircle2 },
   'cancelled':        { bg: '#e3e3dc', color: '#43493e', dot: '#73796d', icon: AlertCircle },
@@ -139,7 +138,7 @@ export default function OrdersScreen() {
           ) : (
             <motion.div key="list" initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex flex-col gap-3">
               {filteredOrders.map((order, i) => {
-                const ss = STATUS_STYLES[order.status.toLowerCase()] ?? STATUS_STYLES['pending'];
+                 const ss = STATUS_STYLES[order.status] ?? STATUS_STYLES['pending'];
                 const StatusIcon = ss.icon;
                 const isExpanded = expandedId === order.id;
                 return (
@@ -160,7 +159,7 @@ export default function OrdersScreen() {
                       </div>
                       <div className="flex items-center gap-3">
                         <span className="font-extrabold text-[15px]" style={{ color: 'var(--color-primary)' }}>
-                          {t('currency')}{order.total}
+                           {t('currency')}{order.total_amount}
                         </span>
                         <div className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-full"
                           style={{ background: ss.bg, color: ss.color }}>
@@ -193,7 +192,7 @@ export default function OrdersScreen() {
                                 <div key={j} className="flex justify-between text-[13px] py-1"
                                   style={{ borderTop: j > 0 ? '1px solid rgba(195, 201, 187, 0.25)' : undefined }}>
                                   <span style={{ color: 'var(--color-on-surface-variant)' }}>
-                                    {item.quantity}× {item.product_name} ({item.variant_weight})
+                                    {item.quantity}× Item #{item.product_id?.slice(0, 8)}
                                   </span>
                                   <span className="font-semibold" style={{ color: 'var(--color-on-surface)' }}>
                                     {t('currency')}{item.price * item.quantity}

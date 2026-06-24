@@ -10,17 +10,17 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "DairyDirect — Farm Fresh Dairy, Delivered Daily",
-  description: "Premium A2 milk, artisanal paneer, and fresh dairy delivered from farm to your doorstep before sunrise. FSSAI certified. DairyDirect.",
+  title: "Gjanand Sarkar — Farm Fresh Dairy, Delivered Daily",
+  description: "Premium A2 milk, artisanal paneer, and fresh dairy delivered from farm to your doorstep before sunrise. FSSAI certified. Gjanand Sarkar.",
   keywords: ["dairy delivery", "fresh milk", "A2 milk", "paneer", "farm fresh", "subscription"],
-  authors: [{ name: "DairyDirect" }],
+  authors: [{ name: "Gjanand Sarkar" }],
   appleWebApp: {
     capable: true,
-    title: "DairyDirect",
+    title: "Gjanand Sarkar",
     statusBarStyle: "default",
   },
   openGraph: {
-    title: "DairyDirect — Farm Fresh Dairy",
+    title: "Gjanand Sarkar — Farm Fresh Dairy",
     description: "A2 milk & artisanal dairy delivered fresh daily.",
     type: "website",
   },

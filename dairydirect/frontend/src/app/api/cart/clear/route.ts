@@ -1,23 +1,18 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { supabaseAdmin } from '@/lib/db';
-
-async function verifySession(token: string | null): Promise<string | null> {
-  if (!token || token === 'new_user') return null;
-  const { data: { user }, error } = await supabaseAdmin.auth.getUser(token);
-  if (error || !user) return null;
-  return user.id;
-}
+import { getAuthUser } from '@/lib/api/auth-middleware';
 
 export async function POST(request: NextRequest) {
   try {
-    const { token, userId } = await request.json();
-
-    const authenticatedUserId = await verifySession(token);
-    if (!authenticatedUserId) {
+    const auth = await getAuthUser(request);
+    if (!auth) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    if (authenticatedUserId !== userId) {
+    const body = await request.json();
+    const { userId } = body;
+
+    if (auth.userId !== userId) {
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
     }
 

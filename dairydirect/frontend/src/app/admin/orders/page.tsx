@@ -6,24 +6,23 @@ import { format } from 'date-fns';
 import { ShoppingBag, ChevronDown, Loader2 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { getAllOrders, updateOrderStatus } from '@/lib/api/orders';
-import type { OrderWithItems, OrderStatus } from '@/lib/api/orders';
+import type { OrderWithItems } from '@/lib/api/orders';
 
 const STATUS_STYLES: Record<string, { bg: string; color: string; dot: string }> = {
   'pending':          { bg: '#ffdcc7', color: '#774117', dot: '#d4712a' },
   'confirmed':        { bg: '#c2efac', color: '#042100', dot: '#3f6530' },
-  'preparing':        { bg: '#bfedce', color: '#002111', dot: '#3b644c' },
   'out_for_delivery': { bg: '#fff8e6', color: '#7d5200', dot: '#c78c2e' },
   'delivered':        { bg: '#eaf4e2', color: '#2a4f1d', dot: '#3f6530' },
   'cancelled':        { bg: '#e3e3dc', color: '#43493e', dot: '#73796d' },
 };
 
-const ORDER_STATUSES: OrderStatus[] = ['pending', 'confirmed', 'preparing', 'out_for_delivery', 'delivered', 'cancelled'];
+const ORDER_STATUSES: OrderWithItems['status'][] = ['pending', 'confirmed', 'out_for_delivery', 'delivered', 'cancelled'];
 
 export default function AdminOrdersPage() {
   const { t } = useTranslation();
   const [orders, setOrders] = useState<OrderWithItems[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState('All');
+  const [activeTab, setActiveTab] = useState('all');
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [isUpdating, setIsUpdating] = useState<string | null>(null);
 
@@ -34,7 +33,7 @@ export default function AdminOrdersPage() {
     });
   }, []);
 
-  const handleUpdateStatus = async (orderId: string, status: OrderStatus, userId: string | null) => {
+  const handleUpdateStatus = async (orderId: string, status: OrderWithItems['status'], userId: string | null) => {
     setIsUpdating(orderId);
     const result = await updateOrderStatus(orderId, status, userId || undefined);
     if (result.success) {
@@ -43,7 +42,6 @@ export default function AdminOrdersPage() {
     setIsUpdating(null);
   };
 
-  const tabs = ['all', 'confirmed', 'preparing', 'out_for_delivery', 'delivered', 'cancelled'];
   const filtered = activeTab === 'all' ? orders : orders.filter(o => o.status === activeTab);
 
   if (isLoading) {
@@ -56,7 +54,6 @@ export default function AdminOrdersPage() {
 
   return (
     <div className="flex flex-col min-h-screen">
-      {/* Header */}
       <div className="sticky top-0 z-30 glass-surface">
         <div className="px-6 md:px-10 pt-6 pb-0">
           <h1 className="font-extrabold text-[24px] tracking-tight mb-4"
@@ -67,7 +64,7 @@ export default function AdminOrdersPage() {
             </span>
           </h1>
           <div className="flex gap-2 overflow-x-auto no-scrollbar -mx-6 px-6 pb-1">
-            {tabs.map(tab => (
+            {['all', 'confirmed', 'out_for_delivery', 'delivered', 'cancelled'].map(tab => (
               <button key={tab} onClick={() => setActiveTab(tab)}
                 className="whitespace-nowrap px-4 py-2 rounded-full text-[12px] font-semibold transition-all duration-200 shrink-0 capitalize"
                 style={activeTab === tab ? {
@@ -86,7 +83,6 @@ export default function AdminOrdersPage() {
         <div className="h-px mt-2 opacity-25" style={{ background: 'var(--color-outline-variant)' }} />
       </div>
 
-      {/* Orders */}
       <div className="px-6 md:px-10 py-5 flex flex-col gap-3">
         <AnimatePresence mode="wait">
           {filtered.length === 0 ? (
@@ -114,26 +110,25 @@ export default function AdminOrdersPage() {
                     className="rounded-[16px] overflow-hidden"
                     style={{ background: 'var(--color-surface-container-lowest)', border: '1px solid rgba(195,201,187,0.3)' }}>
 
-                    {/* Order header row */}
                     <div className="flex items-center justify-between px-5 py-4 cursor-pointer"
                       onClick={() => setExpandedId(isExpanded ? null : order.id)}>
                       <div className="flex items-center gap-3">
                         <div>
                           <p className="font-bold text-[14px]" style={{ color: 'var(--color-primary)' }}>{order.id}</p>
                           <p className="text-[11px]" style={{ color: 'var(--color-outline)' }}>
-                            {order.customer_name || 'Customer'} · {format(new Date(order.created_at), 'MMM d, hh:mm a')}
+                            {order.profiles?.name || 'Customer'} · {format(new Date(order.created_at), 'MMM d, hh:mm a')}
                           </p>
                         </div>
                       </div>
                       <div className="flex items-center gap-3">
                         <span className="font-extrabold text-[15px]" style={{ color: 'var(--color-primary)' }}>
-                          {t('currency')}{order.total}
+                          {t('currency')}{order.total_amount}
                         </span>
                         <div className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-full"
                           style={{ background: statusStyle.bg, color: statusStyle.color }}>
                           <div className="w-1.5 h-1.5 rounded-full shrink-0" style={{ background: statusStyle.dot }} />
                           <span className="text-[10px] font-bold uppercase tracking-wide whitespace-nowrap">
-                            {order.status}
+                            {order.status.replace(/_/g, ' ')}
                           </span>
                         </div>
                         <ChevronDown className="w-4 h-4 shrink-0 transition-transform duration-200"
@@ -144,7 +139,6 @@ export default function AdminOrdersPage() {
                       </div>
                     </div>
 
-                    {/* Expanded details */}
                     <AnimatePresence>
                       {isExpanded && (
                         <motion.div
@@ -154,14 +148,13 @@ export default function AdminOrdersPage() {
                           transition={{ duration: 0.25 }}
                           style={{ overflow: 'hidden', borderTop: '1px solid rgba(195, 201, 187, 0.3)' }}>
                           <div className="px-5 py-4">
-                            {/* Items */}
                             <div className="rounded-[10px] p-3 mb-4"
                               style={{ background: 'var(--color-surface-container-low)' }}>
-                              {order.order_items.map((item, j) => (
+                              {order.order_items?.map((item, j) => (
                                 <div key={j} className="flex justify-between text-[13px] py-1"
                                   style={{ borderTop: j > 0 ? '1px solid rgba(195, 201, 187, 0.25)' : undefined }}>
                                   <span style={{ color: 'var(--color-on-surface-variant)' }}>
-                                    {item.quantity}× {item.product_name} ({item.variant_weight})
+                                    {item.quantity}× Item #{item.product_id?.slice(0, 8) || 'Unknown'}
                                   </span>
                                   <span className="font-semibold" style={{ color: 'var(--color-on-surface)' }}>
                                     {t('currency')}{item.price * item.quantity}
@@ -170,7 +163,6 @@ export default function AdminOrdersPage() {
                               ))}
                             </div>
 
-                            {/* Status update */}
                             <div className="relative">
                               {isUpdating === order.id && (
                                 <div className="absolute inset-0 bg-white/50 flex items-center justify-center z-10">

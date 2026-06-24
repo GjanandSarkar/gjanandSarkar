@@ -1,22 +1,15 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { supabaseAdmin } from '@/lib/db';
-
-async function verifySession(token: string | null): Promise<string | null> {
-  if (!token || token === 'new_user') return null;
-  const { data: { user }, error } = await supabaseAdmin.auth.getUser(token);
-  if (error || !user) return null;
-  return user.id;
-}
+import { getAuthUser } from '@/lib/api/auth-middleware';
 
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
     const category = searchParams.get('category');
     const activeOnly = searchParams.get('activeOnly') !== 'false';
-    const token = searchParams.get('token');
 
-    const userId = await verifySession(token);
-    const isAdmin = userId ? await checkAdmin(userId) : false;
+    const auth = await getAuthUser(request);
+    const isAdmin = auth?.isAdmin ?? false;
 
     let query = supabaseAdmin
       .from('products')
@@ -45,34 +38,20 @@ export async function GET(request: NextRequest) {
   }
 }
 
-async function checkAdmin(userId: string): Promise<boolean> {
-  const { data } = await supabaseAdmin
-    .from('profiles')
-    .select('role')
-    .eq('id', userId)
-    .single();
-  return data?.role === 'admin';
-}
-
 export async function POST(request: NextRequest) {
   try {
-    const { searchParams } = new URL(request.url);
-    const token = searchParams.get('token');
-    const userId = await verifySession(token);
-
-    if (!userId) {
+    const auth = await getAuthUser(request);
+    if (!auth) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const isAdminUser = await checkAdmin(userId);
-    if (!isAdminUser) {
+    if (!auth.isAdmin) {
       return NextResponse.json({ error: 'Admin only' }, { status: 403 });
     }
 
     const body = await request.json();
     const { name, category, description, image_url, is_freshness_guarantee, variants } = body;
 
-    // Fetch Business Settings for validation
     const { data: settings } = await supabaseAdmin
       .from('business_settings')
       .select('min_profit_margin_percent')
@@ -80,7 +59,6 @@ export async function POST(request: NextRequest) {
     
     const minMargin = settings?.min_profit_margin_percent || 20;
 
-    // Validate Variants Profit Margin
     if (variants && variants.length > 0) {
       for (const v of variants) {
         const cost = v.cost_price || 0;

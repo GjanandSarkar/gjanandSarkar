@@ -166,7 +166,7 @@ export default function NotificationsPage() {
                         </span>
                       </div>
                       <p className="text-[13px] leading-relaxed text-muted line-clamp-2">
-                        {notif.body}
+                        {notif.message}
                       </p>
                     </div>
 

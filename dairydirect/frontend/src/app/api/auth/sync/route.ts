@@ -3,14 +3,17 @@ import { createClient } from '@supabase/supabase-js';
 
 export async function POST(request: Request) {
   try {
-    const { token, email, phone } = await request.json();
+    const { token } = await request.json();
+
+    if (!token) {
+      return NextResponse.json({ error: 'Token required' }, { status: 400 });
+    }
 
     const supabaseAdmin = createClient(
       process.env.NEXT_PUBLIC_SUPABASE_URL!,
       process.env.SUPABASE_SERVICE_ROLE_KEY!
     );
 
-    // Verify token with Supabase Admin SDK
     const { data: { user }, error: authError } = await supabaseAdmin.auth.getUser(token);
     if (authError || !user) {
       console.error('Invalid token or auth error fetching user:', authError);
@@ -18,10 +21,11 @@ export async function POST(request: Request) {
     }
 
     const uid = user.id;
-    let userPhone = user.phone || phone || null;
-    let userEmail = user.email || email || null;
+    let userPhone = user.phone || null;
+    let userEmail = user.email || null;
+    let userName = user.user_metadata?.full_name || user.user_metadata?.name || null;
+    let userAvatar = user.user_metadata?.avatar_url || null;
 
-    // Check if profile exists
     let { data: profile, error: fetchError } = await supabaseAdmin
       .from('profiles')
       .select('*, saved_addresses:user_addresses(label, address)')
@@ -33,22 +37,22 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Database error' }, { status: 500 });
     }
 
-    // Hardcoded admins (can be moved to ENV or DB table)
-    const ADMIN_EMAILS = ['admin@dairydirect.com', 'nathh@example.com'];
-    const ADMIN_PHONES = ['+919999999999', '+911234567890'];
+    const adminEmails = (process.env.NEXT_PUBLIC_ADMIN_EMAILS || 'admin@gjanandsarkar.com')
+      .split(',')
+      .map(e => e.trim().toLowerCase());
 
-    const isAdmin = (userEmail && ADMIN_EMAILS.includes(userEmail)) || 
-                    (userPhone && ADMIN_PHONES.includes(userPhone));
+    const isAdmin = !!(userEmail && adminEmails.includes(userEmail.toLowerCase()));
 
     if (!profile) {
-      // Create new profile
       const insertData: any = {
         id: uid,
-        role: isAdmin ? 'admin' : 'customer'
+        role: isAdmin ? 'admin' : 'customer',
+        name: userName,
+        email: userEmail,
+        avatar_url: userAvatar,
       };
       
       if (userPhone) insertData.phone = userPhone;
-      if (userEmail) insertData.email = userEmail;
 
       const { data: newProfile, error: insertError } = await supabaseAdmin
         .from('profiles')
@@ -67,7 +71,6 @@ export async function POST(request: Request) {
       }
       profile = newProfile;
     } else {
-      // Update existing profile - only update role if they became an admin
       if (isAdmin && profile.role === 'customer') {
         const { data: updatedProfile, error: updateError } = await supabaseAdmin
           .from('profiles')

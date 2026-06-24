@@ -1,15 +1,30 @@
 const API_BASE = '';
 
+async function getAuthToken(): Promise<string | null> {
+  if (typeof window === 'undefined') return null;
+  try {
+    const { supabase } = await import('@/lib/supabase');
+    const { data: { session } } = await supabase.auth.getSession();
+    return session?.access_token ?? null;
+  } catch {
+    return null;
+  }
+}
+
 async function fetchApi<T = any>(
   endpoint: string,
   options: RequestInit = {}
 ): Promise<T> {
+  const token = await getAuthToken();
+
   const res = await fetch(`${API_BASE}${endpoint}`, {
     ...options,
     headers: {
       'Content-Type': 'application/json',
+      ...(token ? { 'Authorization': `Bearer ${token}` } : {}),
       ...options.headers,
     },
+    credentials: 'include',
   });
 
   const data = await res.json();
@@ -23,13 +38,13 @@ async function fetchApi<T = any>(
 
 export const api = {
   auth: {
-    sendOtp: (phone: string) =>
+    sendOtp: (_phone: string) =>
       fetchApi<{ success: boolean; demoOtp?: string }>('/api/auth/send-otp', {
         method: 'POST',
-        body: JSON.stringify({ phone }),
+        body: JSON.stringify({ phone: _phone }),
       }),
 
-    verifyOtp: (phone: string, otp: string) =>
+    verifyOtp: (_phone: string, _otp: string) =>
       fetchApi<{
         success: boolean;
         token: string;
@@ -38,118 +53,115 @@ export const api = {
         isNewUser: boolean;
       }>('/api/auth/verify-otp', {
         method: 'POST',
-        body: JSON.stringify({ phone, otp }),
+        body: JSON.stringify({ phone: _phone, otp: _otp }),
       }),
 
-    session: (token: string) =>
+    session: (_token: string) =>
       fetchApi<{ success: boolean; user: any }>('/api/auth/session', {
         method: 'POST',
-        body: JSON.stringify({ token }),
+        body: JSON.stringify({ token: _token }),
       }),
   },
 
   products: {
-    get: (params?: { category?: string; activeOnly?: boolean; token?: string }) => {
+    get: (params?: { category?: string; activeOnly?: boolean }) => {
       const searchParams = new URLSearchParams();
       if (params?.category) searchParams.set('category', params.category);
       if (params?.activeOnly !== undefined) searchParams.set('activeOnly', String(params.activeOnly));
-      if (params?.token) searchParams.set('token', params.token);
       const query = searchParams.toString();
       return fetchApi<{ products: any[] }>(`/api/products${query ? `?${query}` : ''}`);
     },
 
-    create: (data: any, token: string) =>
-      fetchApi<{ success: boolean; id: string }>(`/api/products?token=${token}`, {
+    create: (_data: any) =>
+      fetchApi<{ success: boolean; id: string }>(`/api/products`, {
         method: 'POST',
-        body: JSON.stringify(data),
+        body: JSON.stringify(_data),
       }),
   },
 
   orders: {
-    get: (token: string, orderId?: string) => {
-      const params = new URLSearchParams({ token });
-      if (orderId) params.set('id', orderId);
+    get: (_orderId?: string) => {
+      const params = new URLSearchParams();
+      if (_orderId) params.set('id', _orderId);
       return fetchApi<{ orders: any[] }>(`/api/orders?${params}`);
     },
 
-    place: (token: string, orderData: any) =>
+    place: (_orderData: any) =>
       fetchApi<{ success: boolean; orderId: string }>('/api/orders/place', {
         method: 'POST',
-        body: JSON.stringify({ token, orderData }),
+        body: JSON.stringify({ orderData: _orderData }),
       }),
   },
 
   cart: {
-    get: (userId: string, token: string) =>
-      fetchApi<{ cart: any[] }>(`/api/cart?userId=${userId}&token=${token}`),
+    get: (_userId: string) =>
+      fetchApi<{ cart: any[] }>(`/api/cart?userId=${_userId}`),
 
-    add: (userId: string, token: string, productId: string, variantId: string, quantity: number) =>
+    add: (_userId: string, _productId: string, _variantId: string, _quantity: number) =>
       fetchApi<{ success: boolean }>('/api/cart', {
         method: 'POST',
-        body: JSON.stringify({ userId, token, productId, variantId, quantity }),
+        body: JSON.stringify({ userId: _userId, productId: _productId, variantId: _variantId, quantity: _quantity }),
       }),
 
-    update: (userId: string, token: string, productId: string, variantId: string, quantity: number) =>
+    update: (_userId: string, _productId: string, _variantId: string, _quantity: number) =>
       fetchApi<{ success: boolean }>('/api/cart', {
         method: 'PUT',
-        body: JSON.stringify({ userId, token, productId, variantId, quantity }),
+        body: JSON.stringify({ userId: _userId, productId: _productId, variantId: _variantId, quantity: _quantity }),
       }),
 
-    remove: (userId: string, token: string, productId: string, variantId: string) =>
+    remove: (_userId: string, _productId: string, _variantId: string) =>
       fetchApi<{ success: boolean }>(
-        `/api/cart?userId=${userId}&token=${token}&productId=${productId}&variantId=${variantId}`,
+        `/api/cart?userId=${_userId}&productId=${_productId}&variantId=${_variantId}`,
         { method: 'DELETE' }
       ),
 
-    clear: (userId: string, token: string) =>
+    clear: (_userId: string) =>
       fetchApi<{ success: boolean }>('/api/cart/clear', {
         method: 'POST',
-        body: JSON.stringify({ userId, token }),
+        body: JSON.stringify({ userId: _userId }),
       }),
   },
 
   subscriptions: {
-    get: (token: string) =>
-      fetchApi<{ subscriptions: any[] }>(`/api/subscriptions?token=${token}`),
+    get: () =>
+      fetchApi<{ subscriptions: any[] }>(`/api/subscriptions`),
 
-    create: (token: string, data: { userId: string; productId: string; volume: number; plan: string }) =>
+    create: (_data: { userId: string; productId: string; volume: number; plan: string }) =>
       fetchApi<{ success: boolean; id: string }>('/api/subscriptions', {
         method: 'POST',
-        body: JSON.stringify({ token, ...data }),
+        body: JSON.stringify(_data),
       }),
 
     update: (
-      token: string,
-      data: { subId: string; action: string; newVolume?: number; newPlan?: string }
+      _data: { subId: string; action: string; newVolume?: number; newPlan?: string }
     ) =>
       fetchApi<{ success: boolean }>('/api/subscriptions', {
         method: 'PUT',
-        body: JSON.stringify({ token, ...data }),
+        body: JSON.stringify(_data),
       }),
   },
 
   notifications: {
-    get: (token: string) =>
-      fetchApi<{ notifications: any[] }>(`/api/notifications?token=${token}`),
+    get: () =>
+      fetchApi<{ notifications: any[] }>(`/api/notifications`),
 
-    markRead: (token: string, notificationId?: string, all?: boolean) =>
+    markRead: (_notificationId?: string, _all?: boolean) =>
       fetchApi<{ success: boolean }>('/api/notifications', {
         method: 'POST',
-        body: JSON.stringify({ token, notificationId, all }),
+        body: JSON.stringify({ notificationId: _notificationId, all: _all }),
       }),
   },
 
   addresses: {
-    get: (userId: string, token: string) =>
-      fetchApi<{ addresses: any[] }>(`/api/addresses?userId=${userId}&token=${token}`),
+    get: (_userId: string) =>
+      fetchApi<{ addresses: any[] }>(`/api/addresses?userId=${_userId}`),
 
     save: (
-      token: string,
-      data: { userId: string; label: string; address: string; lat?: number; lng?: number; isDefault?: boolean }
+      _data: { userId: string; label: string; address: string; lat?: number; lng?: number; isDefault?: boolean }
     ) =>
       fetchApi<{ success: boolean }>('/api/addresses', {
         method: 'POST',
-        body: JSON.stringify({ token, ...data }),
+        body: JSON.stringify(_data),
       }),
   },
 };

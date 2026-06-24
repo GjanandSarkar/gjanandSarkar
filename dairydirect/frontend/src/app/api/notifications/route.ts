@@ -1,29 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { supabaseAdmin } from '@/lib/db';
-
-async function verifySession(token: string | null): Promise<{ userId: string; role: string } | null> {
-  if (!token || token === 'new_user') return null;
-  const { data: { user }, error } = await supabaseAdmin.auth.getUser(token);
-  if (error || !user) return null;
-  
-  const { data: profile } = await supabaseAdmin
-    .from('profiles')
-    .select('role')
-    .eq('id', user.id)
-    .single();
-
-  return {
-    userId: user.id,
-    role: profile?.role ?? 'customer'
-  };
-}
+import { getAuthUser } from '@/lib/api/auth-middleware';
 
 export async function GET(request: NextRequest) {
   try {
-    const { searchParams } = new URL(request.url);
-    const token = searchParams.get('token');
-
-    const auth = await verifySession(token);
+    const auth = await getAuthUser(request);
     if (!auth) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
@@ -53,13 +34,13 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   try {
-    const body = await request.json();
-    const { token, notificationId, all } = body;
-
-    const auth = await verifySession(token);
+    const auth = await getAuthUser(request);
     if (!auth) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
+
+    const body = await request.json();
+    const { notificationId, all } = body;
 
     if (notificationId) {
       const { error } = await supabaseAdmin

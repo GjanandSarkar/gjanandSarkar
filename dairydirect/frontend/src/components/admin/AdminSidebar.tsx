@@ -54,7 +54,7 @@ export function AdminSidebar() {
             <p className="font-extrabold text-[16px] leading-none tracking-tight"
               style={{ color: 'var(--color-on-surface)' }}>Admin Panel</p>
             <p className="text-[10px] font-bold uppercase tracking-widest mt-0.5"
-              style={{ color: 'var(--color-primary)' }}>DairyDirect</p>
+              style={{ color: 'var(--color-primary)' }}>Gjanand Sarkar</p>
           </div>
         </div>
       </div>

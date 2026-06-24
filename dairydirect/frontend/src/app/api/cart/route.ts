@@ -1,21 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { supabaseAdmin } from '@/lib/db';
-
-async function verifySession(token: string | null): Promise<string | null> {
-  if (!token || token === 'new_user') return null;
-  const { data: { user }, error } = await supabaseAdmin.auth.getUser(token);
-  if (error || !user) return null;
-  return user.id;
-}
+import { getAuthUser } from '@/lib/api/auth-middleware';
 
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
-    const token = searchParams.get('token');
     const userId = searchParams.get('userId');
 
-    const authenticatedUserId = await verifySession(token);
-    if (!authenticatedUserId || authenticatedUserId !== userId) {
+    const auth = await getAuthUser(request);
+    if (!auth || auth.userId !== userId) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
@@ -39,12 +32,16 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   try {
-    const body = await request.json();
-    const { token, userId, productId, variantId, quantity } = body;
-
-    const authenticatedUserId = await verifySession(token);
-    if (!authenticatedUserId || authenticatedUserId !== userId) {
+    const auth = await getAuthUser(request);
+    if (!auth) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    const body = await request.json();
+    const { userId, productId, variantId, quantity } = body;
+
+    if (auth.userId !== userId) {
+      return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
     }
 
     const { data: existing } = await supabaseAdmin
@@ -84,12 +81,16 @@ export async function POST(request: NextRequest) {
 
 export async function PUT(request: NextRequest) {
   try {
-    const body = await request.json();
-    const { token, userId, productId, variantId, quantity } = body;
-
-    const authenticatedUserId = await verifySession(token);
-    if (!authenticatedUserId || authenticatedUserId !== userId) {
+    const auth = await getAuthUser(request);
+    if (!auth) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    const body = await request.json();
+    const { userId, productId, variantId, quantity } = body;
+
+    if (auth.userId !== userId) {
+      return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
     }
 
     if (quantity <= 0) {
@@ -121,15 +122,18 @@ export async function PUT(request: NextRequest) {
 
 export async function DELETE(request: NextRequest) {
   try {
+    const auth = await getAuthUser(request);
+    if (!auth) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
     const { searchParams } = new URL(request.url);
-    const token = searchParams.get('token');
     const userId = searchParams.get('userId');
     const productId = searchParams.get('productId');
     const variantId = searchParams.get('variantId');
 
-    const authenticatedUserId = await verifySession(token);
-    if (!authenticatedUserId || authenticatedUserId !== userId) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    if (auth.userId !== userId) {
+      return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
     }
 
     const { error } = await supabaseAdmin

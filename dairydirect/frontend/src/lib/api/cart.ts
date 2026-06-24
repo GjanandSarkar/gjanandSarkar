@@ -8,7 +8,6 @@ export type CartItemWithDetails = DBCartItem & {
   product_variants: NonNullable<DBCartItem['product_variants']>;
 };
 
-// ─── Get Cart ─────────────────────────────────────────────────
 export async function getCart(userId: string): Promise<CartItemWithDetails[]> {
   const { data, error } = await supabase
     .from('cart_items')
@@ -24,14 +23,12 @@ export async function getCart(userId: string): Promise<CartItemWithDetails[]> {
   return (data as CartItemWithDetails[]) ?? [];
 }
 
-// ─── Add to Cart ──────────────────────────────────────────────
 export async function addToCart(
   userId: string,
   productId: string,
   variantId: string,
   quantity: number = 1
 ): Promise<{ success: boolean; error?: string }> {
-  // Check if item already exists
   const { data: existing } = await supabase
     .from('cart_items')
     .select('id, quantity')
@@ -41,7 +38,6 @@ export async function addToCart(
     .single();
 
   if (existing) {
-    // Increment quantity
     const { error } = await supabase
       .from('cart_items')
       .update({ quantity: existing.quantity + quantity })
@@ -51,7 +47,6 @@ export async function addToCart(
     return { success: true };
   }
 
-  // Insert new item
   const { error } = await supabase.from('cart_items').insert({
     user_id: userId,
     product_id: productId,
@@ -63,7 +58,6 @@ export async function addToCart(
   return { success: true };
 }
 
-// ─── Update Cart Item Quantity ────────────────────────────────
 export async function updateCartItem(
   userId: string,
   productId: string,
@@ -85,7 +79,6 @@ export async function updateCartItem(
   return { success: true };
 }
 
-// ─── Remove From Cart ─────────────────────────────────────────
 export async function removeFromCart(
   userId: string,
   productId: string,
@@ -102,17 +95,18 @@ export async function removeFromCart(
   return { success: true };
 }
 
-// ─── Clear Cart ───────────────────────────────────────────────
 export async function clearCart(userId: string): Promise<{ success: boolean; error?: string }> {
   try {
     const { data: { session } } = await supabase.auth.getSession();
     if (!session) throw new Error('Not authenticated');
-    const token = session.access_token;
 
     const res = await fetch('/api/cart/clear', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ token, userId })
+      headers: { 
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${session.access_token}`,
+      },
+      body: JSON.stringify({ userId })
     });
 
     const data = await res.json();
@@ -125,15 +119,12 @@ export async function clearCart(userId: string): Promise<{ success: boolean; err
   }
 }
 
-// ─── Merge Local Cart into DB ─────────────────────────────────
-// Called after login: DB wins for conflicts
 export async function mergeLocalCart(
   userId: string,
   localItems: { productId: string; variantId: string; quantity: number }[]
 ): Promise<void> {
   if (localItems.length === 0) return;
 
-  // Get existing DB cart
   const { data: dbCart } = await supabase
     .from('cart_items')
     .select('product_id, variant_id, quantity')
@@ -143,7 +134,6 @@ export async function mergeLocalCart(
     (dbCart ?? []).map((i: any) => `${i.product_id}-${i.variant_id}`)
   );
 
-  // Only add items that don't conflict with DB (DB wins)
   const toInsert = localItems
     .filter((i) => !dbSet.has(`${i.productId}-${i.variantId}`))
     .map((i) => ({

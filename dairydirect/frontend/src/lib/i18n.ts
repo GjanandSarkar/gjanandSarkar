@@ -1,5 +1,5 @@
 /**
- * DairyDirect i18n — DB-backed with static fallback
+ * Gjanand Sarkar i18n — DB-backed with static fallback
  *
  * Translations are loaded from Supabase `translations` table on app init
  * and cached in Zustand. Falls back to the bundled static strings if

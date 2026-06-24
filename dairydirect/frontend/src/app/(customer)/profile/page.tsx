@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useTranslation } from '@/lib/i18n';
 import { useStore } from '@/store/useStore';
-import { updateProfile as updateProfileAPI, logout as supabaseLogout } from '@/lib/api/auth';
+import { updateProfileName, logout as supabaseLogout } from '@/lib/api/auth';
 import { Button } from '@/components/ui/Button';
 import {
   ChevronRight, Settings, MapPin, Bell, Receipt,
@@ -42,10 +42,7 @@ export default function ProfileScreen() {
   const handleUpdateProfile = async () => {
     if (!profileName.trim() || !user) return;
     setIsUpdating(true);
-    const result = await updateProfileAPI(user.id, { 
-      name: profileName.trim(),
-      avatar_url: avatarUrl
-    });
+    const result = await updateProfileName(user.id, profileName.trim());
     if (result.success) {
       updateProfileLocal({ name: profileName.trim(), avatar_url: avatarUrl });
     }
@@ -208,7 +205,7 @@ export default function ProfileScreen() {
           </Button>
 
           <div className="text-center mt-12 mb-6">
-            <p className="text-xs font-bold mb-1" style={{ color: 'var(--color-outline)' }}>DairyDirect v2.0.0</p>
+            <p className="text-xs font-bold mb-1" style={{ color: 'var(--color-outline)' }}>Gjanand Sarkar v2.0.0</p>
             <p className="text-xs flex items-center justify-center gap-1" style={{ color: 'var(--color-outline)' }}>
               Made with <Leaf className="w-3 h-3" style={{ color: 'var(--color-primary)' }} /> in Ahmedabad
             </p>

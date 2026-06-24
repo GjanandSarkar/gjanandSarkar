@@ -52,7 +52,7 @@ export default function AdminDashboard() {
     });
   }, []);
 
-  const totalRevenue = orders.reduce((s, o) => s + (o.status !== 'cancelled' ? o.total : 0), 0);
+  const totalRevenue = orders.reduce((s, o) => s + (o.status !== 'cancelled' ? o.total_amount : 0), 0);
   const pendingOrders = orders.filter(o => o.status === 'pending' || o.status === 'confirmed').length;
   const deliveredOrders = orders.filter(o => o.status === 'delivered').length;
   const recentOrders = [...orders].slice(0, 8);
@@ -219,20 +219,20 @@ export default function AdminDashboard() {
                         </td>
                         <td className="px-5 py-4">
                           <p className="font-semibold text-[13px]" style={{ color: 'var(--color-on-surface)' }}>
-                            {order.customer_name || 'Customer'}
+                            {order.profiles?.name || 'Customer'}
                           </p>
                           <p className="text-[11px]" style={{ color: 'var(--color-outline)' }}>
-                            {order.customer_phone ? `+91 ${order.customer_phone}` : '—'}
+                            {order.profiles?.phone ? `+91 ${order.profiles.phone}` : '—'}
                           </p>
                         </td>
                         <td className="px-5 py-4">
                           <p className="text-[12px] max-w-[180px] truncate" style={{ color: 'var(--color-on-surface-variant)' }}>
-                            {order.order_items.map(i => `${i.quantity}× ${i.product_name}`).join(', ')}
+                            {order.order_items?.map(i => `${i.quantity}× ${i.variant_id}`).join(', ')}
                           </p>
                         </td>
                         <td className="px-5 py-4">
                           <span className="font-extrabold text-[14px]" style={{ color: 'var(--color-primary)' }}>
-                            {t('currency')}{order.total}
+                            {t('currency')}{order.total_amount}
                           </span>
                         </td>
                         <td className="px-5 py-4">

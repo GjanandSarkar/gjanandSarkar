@@ -1,30 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { supabaseAdmin } from '@/lib/db';
-
-async function verifySession(token: string | null): Promise<{ userId: string; isAdmin: boolean } | null> {
-  if (!token || token === 'new_user') return null;
-  const { data: { user }, error } = await supabaseAdmin.auth.getUser(token);
-  if (error || !user) return null;
-  
-  const { data: profile } = await supabaseAdmin
-    .from('profiles')
-    .select('role')
-    .eq('id', user.id)
-    .single();
-
-  return {
-    userId: user.id,
-    isAdmin: profile?.role === 'admin'
-  };
-}
+import { getAuthUser } from '@/lib/api/auth-middleware';
 
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
-    const token = searchParams.get('token');
     const orderId = searchParams.get('id');
 
-    const auth = await verifySession(token);
+    const auth = await getAuthUser(request);
     if (!auth) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
@@ -37,7 +20,7 @@ export async function GET(request: NextRequest) {
         .select('order_items(product_id)')
         .eq('user_id', auth.userId)
         .order('created_at', { ascending: false })
-        .limit(10); // Look at last 10 orders
+        .limit(10);
 
       if (error) return NextResponse.json({ error: error.message }, { status: 500 });
 
@@ -53,7 +36,7 @@ export async function GET(request: NextRequest) {
 
     let query = supabaseAdmin
       .from('orders')
-      .select('*, order_items(*)')
+      .select('*, order_items(*), profiles:user_id(name, phone)')
       .order('created_at', { ascending: false });
 
     if (orderId) {

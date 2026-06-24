@@ -1,21 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { supabaseAdmin } from '@/lib/db';
-
-async function verifySession(token: string | null): Promise<string | null> {
-  if (!token || token === 'new_user') return null;
-  const { data: { user }, error } = await supabaseAdmin.auth.getUser(token);
-  if (error || !user) return null;
-  return user.id;
-}
+import { getAuthUser } from '@/lib/api/auth-middleware';
 
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
-    const token = searchParams.get('token');
     const userId = searchParams.get('userId');
 
-    const authenticatedUserId = await verifySession(token);
-    if (!authenticatedUserId || authenticatedUserId !== userId) {
+    const auth = await getAuthUser(request);
+    if (!auth || auth.userId !== userId) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
@@ -39,12 +32,16 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   try {
-    const body = await request.json();
-    const { token, userId, label, address, lat, lng, isDefault } = body;
-
-    const authenticatedUserId = await verifySession(token);
-    if (!authenticatedUserId || authenticatedUserId !== userId) {
+    const auth = await getAuthUser(request);
+    if (!auth) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    const body = await request.json();
+    const { userId, label, address, lat, lng, isDefault } = body;
+
+    if (auth.userId !== userId) {
+      return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
     }
 
     if (isDefault) {
@@ -60,8 +57,8 @@ export async function POST(request: NextRequest) {
         user_id: userId,
         label,
         address,
-        latitude: lat ?? null,
-        longitude: lng ?? null,
+        lat: lat ?? null,
+        lng: lng ?? null,
         is_default: isDefault ?? true,
       });
 

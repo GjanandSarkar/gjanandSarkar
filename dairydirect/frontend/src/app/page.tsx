@@ -41,7 +41,7 @@ export default function SplashScreen() {
           DD
         </div>
         
-        <h1 className="text-3xl font-bold text-dark mb-2 tracking-tight">DairyDirect</h1>
+        <h1 className="text-3xl font-bold text-dark mb-2 tracking-tight">Gjanand Sarkar</h1>
         <p className="text-sm font-medium text-muted">{t('tagline')}</p>
       </motion.div>
 

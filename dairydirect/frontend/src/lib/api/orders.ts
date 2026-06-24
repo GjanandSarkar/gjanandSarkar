@@ -35,7 +35,6 @@ function generateOrderId(): string {
   return `ORD-${Math.floor(1000 + Math.random() * 9000)}`;
 }
 
-// ─── Get User Orders ─────────────────────────────────────────
 export async function getUserOrders(userId: string): Promise<OrderWithItems[]> {
   const { data, error } = await supabase
     .from('orders')
@@ -51,14 +50,20 @@ export async function getUserOrders(userId: string): Promise<OrderWithItems[]> {
   return (data as OrderWithItems[]) ?? [];
 }
 
-// ─── Get Buy Again History ───────────────────────────────────
 export async function getUserBuyAgainHistory(): Promise<string[]> {
-  const { data: { session } } = await supabase.auth.getSession();
-  if (!session) return [];
-  
-  const res = await fetch(`/api/orders?token=${session.access_token}&history=true`);
-  const data = await res.json();
-  return data.productIds || [];
+  try {
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session) return [];
+    
+    const res = await fetch('/api/orders?history=true', {
+      headers: { 'Authorization': `Bearer ${session.access_token}` },
+    });
+    const data = await res.json();
+    return data.productIds || [];
+  } catch (error) {
+    console.error('getUserBuyAgainHistory error:', error);
+    return [];
+  }
 }
 
 // ─── Get All Orders (Admin) ───────────────────────────────────
@@ -99,15 +104,14 @@ export async function placeOrder(
   try {
     const { data: { session } } = await supabase.auth.getSession();
     if (!session) throw new Error('User not authenticated');
-    const token = session.access_token;
 
     const res = await fetch('/api/orders/place', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        token,
-        orderData: input
-      })
+      headers: { 
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${session.access_token}`,
+      },
+      body: JSON.stringify({ orderData: input })
     });
 
     const data = await res.json();

@@ -1,5 +1,5 @@
 {
-  "name": "dairydirect-frontend",
+  "name": "gjanand-sarkar-frontend",
   "version": "0.1.0",
   "private": true,
   "scripts": {
@@ -29,17 +29,11 @@
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "date-fns": "^4.1.0",
-    "dotenv": "^17.4.2",
-    "firebase": "^12.12.0",
-    "firebase-admin": "^13.8.0",
     "framer-motion": "^12.38.0",
     "lucide-react": "^1.8.0",
-    "mapbox-gl": "^3.21.0",
-    "maplibre-gl": "^5.23.0",
     "next": "^16.2.3",
     "react": "^19.2.5",
     "react-dom": "^19.2.5",
-    "react-map-gl": "^8.1.1",
     "tailwind-merge": "^3.5.0",
     "zustand": "^5.0.12"
   },

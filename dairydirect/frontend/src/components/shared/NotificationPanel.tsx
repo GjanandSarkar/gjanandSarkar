@@ -288,7 +288,7 @@ function NotificationSheet({
                     </p>
                     <p className="text-[12px] mt-0.5 leading-relaxed"
                       style={{ color: 'var(--color-on-surface-variant)' }}>
-                      {notif.body}
+                      {notif.message}
                     </p>
                     <p className="text-[10px] mt-1.5 font-semibold uppercase tracking-wide"
                       style={{ color: 'var(--color-outline)' }}>

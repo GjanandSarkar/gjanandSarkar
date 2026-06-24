@@ -1,5 +1,5 @@
 /**
- * DairyDirect — Zustand Store
+ * Gjanand Sarkar — Zustand Store
  *
  * Only UI state lives here:
  *  - language preference + translations cache
@@ -175,7 +175,7 @@ export const useStore = create<AppState>()(
       setCheckoutPaymentMethod: (method) => set({ checkoutPaymentMethod: method }),
     }),
     {
-      name: 'dairydirect-storage',
+      name: 'gjanand-sarkar-storage',
       // Only persist UI preferences, not loading states
       partialize: (state) => ({
         user: state.user,

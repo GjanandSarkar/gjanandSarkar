@@ -1,5 +1,4 @@
 import { api } from './client';
-import { getAuthToken } from './auth';
 
 export type ProductWithVariants = {
   id: string;
@@ -39,11 +38,9 @@ export async function getProducts(
   options: { category?: string; activeOnly?: boolean } = {}
 ): Promise<ProductWithVariants[]> {
   try {
-    const token = getAuthToken();
     const result = await api.products.get({
       category: options.category,
       activeOnly: options.activeOnly,
-      token: token ?? undefined,
     });
     return result.products ?? [];
   } catch (error) {
@@ -54,8 +51,8 @@ export async function getProducts(
 
 export async function getProductById(id: string): Promise<ProductWithVariants | null> {
   try {
-    const products = await api.products.get();
-    return products.products?.find((p: ProductWithVariants) => p.id === id) ?? null;
+    const result = await api.products.get();
+    return result.products?.find((p: ProductWithVariants) => p.id === id) ?? null;
   } catch (error) {
     console.error('getProductById error:', error);
     return null;
@@ -67,10 +64,7 @@ export async function createProduct(
   variants: NewVariantInput[]
 ): Promise<{ success: boolean; id?: string; error?: string }> {
   try {
-    const token = getAuthToken();
-    if (!token) return { success: false, error: 'Not authenticated' };
-
-    const result = await api.products.create({ ...product, variants }, token);
+    const result = await api.products.create({ ...product, variants });
     return { success: result.success, id: result.id };
   } catch (error: any) {
     return { success: false, error: error.message };

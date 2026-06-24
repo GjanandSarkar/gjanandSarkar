@@ -105,7 +105,7 @@ function NewSubscriptionContent() {
         <p className="text-muted text-sm max-w-[280px]">
           {editId 
             ? 'Your modification report has been sent to the farm. You’ll be notified once it’s accepted.' 
-            : 'Welcome to the DairyDirect family. Your first delivery arrives tomorrow!'}
+            : 'Welcome to the Gjanand Sarkar family. Your first delivery arrives tomorrow!'}
         </p>
       </div>
     );

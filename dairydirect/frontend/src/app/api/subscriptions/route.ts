@@ -1,30 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { supabaseAdmin } from '@/lib/db';
-
-
-async function verifySession(token: string | null): Promise<{ userId: string; isAdmin: boolean } | null> {
-  if (!token || token === 'new_user') return null;
-  const { data: { user }, error } = await supabaseAdmin.auth.getUser(token);
-  if (error || !user) return null;
-  
-  const { data: profile } = await supabaseAdmin
-    .from('profiles')
-    .select('role')
-    .eq('id', user.id)
-    .single();
-
-  return {
-    userId: user.id,
-    isAdmin: profile?.role === 'admin'
-  };
-}
+import { getAuthUser } from '@/lib/api/auth-middleware';
 
 export async function GET(request: NextRequest) {
   try {
-    const { searchParams } = new URL(request.url);
-    const token = searchParams.get('token');
-
-    const auth = await verifySession(token);
+    const auth = await getAuthUser(request);
     if (!auth) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
@@ -35,7 +15,7 @@ export async function GET(request: NextRequest) {
       .order('created_at', { ascending: false });
 
     if (!auth.isAdmin) {
-      query = query.eq('user_id', auth.userId).neq('status', 'Cancelled');
+      query = query.eq('user_id', auth.userId).neq('status', 'cancelled');
     }
 
     const { data, error } = await query;
@@ -54,12 +34,16 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   try {
-    const body = await request.json();
-    const { token, userId, productId, volume, plan } = body;
-
-    const auth = await verifySession(token);
-    if (!auth || auth.userId !== userId) {
+    const auth = await getAuthUser(request);
+    if (!auth) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    const body = await request.json();
+    const { userId, productId, volume, plan } = body;
+
+    if (auth.userId !== userId && !auth.isAdmin) {
+      return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
     }
 
     const nextDeliveryDate = new Date(Date.now() + 86400000).toISOString().split('T')[0];
@@ -101,13 +85,13 @@ export async function POST(request: NextRequest) {
 
 export async function PUT(request: NextRequest) {
   try {
-    const body = await request.json();
-    const { token, subId, action, newVolume, newPlan } = body;
-
-    const auth = await verifySession(token);
+    const auth = await getAuthUser(request);
     if (!auth) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
+
+    const body = await request.json();
+    const { subId, action, newVolume, newPlan } = body;
 
     if (action === 'pause' || action === 'resume') {
       const { data: current } = await supabaseAdmin
@@ -148,7 +132,7 @@ export async function PUT(request: NextRequest) {
 
       await supabaseAdmin
         .from('subscriptions')
-        .update({ status: 'Pending Review' })
+        .update({ status: 'pending_review' })
         .eq('id', subId);
 
       await supabaseAdmin.from('notifications').insert({

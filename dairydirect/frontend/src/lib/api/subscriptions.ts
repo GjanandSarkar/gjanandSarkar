@@ -30,7 +30,7 @@ export async function getUserSubscriptions(userId: string): Promise<Subscription
     .from('subscriptions')
     .select('*, products(*)')
     .eq('user_id', userId)
-    .neq('status', 'Cancelled')
+    .neq('status', 'cancelled')
     .order('created_at', { ascending: false });
 
   if (error) {
@@ -62,16 +62,14 @@ export async function getAllSubscriptions(): Promise<
 export async function createSubscription(
   input: NewSubscriptionInput
 ): Promise<{ success: boolean; id?: string; error?: string }> {
-  const id = genSubId();
   const nextDeliveryDate = new Date(Date.now() + 86400000).toISOString().split('T')[0]; // tomorrow
 
   const { error } = await supabase.from('subscriptions').insert({
-    id,
     user_id: input.userId,
     product_id: input.productId,
     volume: input.volume,
     plan: input.plan,
-    status: 'Active',
+    status: 'active',
     next_delivery_date: nextDeliveryDate,
   });
 
@@ -82,12 +80,12 @@ export async function createSubscription(
     userId: input.userId,
     roleTarget: 'customer',
     title: 'Subscription Active! 🥛',
-    body: `Your daily milk subscription (${id}) starts tomorrow, 7–9 AM.`,
+    body: `Your daily milk subscription starts tomorrow, 7–9 AM.`,
     type: 'subscription',
-    relatedId: id,
+    relatedId: '',
   });
 
-  return { success: true, id };
+  return { success: true };
 }
 
 // ─── Pause / Resume Subscription ─────────────────────────────
@@ -111,7 +109,7 @@ export async function cancelSubscription(
 ): Promise<{ success: boolean; error?: string }> {
   const { error } = await supabase
     .from('subscriptions')
-    .update({ status: 'Cancelled' })
+    .update({ status: 'cancelled' })
     .eq('id', subId);
 
   if (error) return { success: false, error: error.message };
@@ -125,27 +123,21 @@ export async function submitModificationReport(input: {
   newVolume: number;
   newPlan: 'weekly' | 'monthly';
 }): Promise<{ success: boolean; id?: string; error?: string }> {
-  const id = genRepId();
-
-  // Insert report
   const { error: reportError } = await supabase.from('modification_reports').insert({
-    id,
     subscription_id: input.subscriptionId,
     user_id: input.userId,
     new_volume: input.newVolume,
     new_plan: input.newPlan,
-    status: 'Pending',
+    status: 'pending',
   });
 
   if (reportError) return { success: false, error: reportError.message };
 
-  // Update subscription status to Pending Review
   await supabase
     .from('subscriptions')
-    .update({ status: 'Pending Review' })
+    .update({ status: 'pending_review' })
     .eq('id', input.subscriptionId);
 
-  // Notify admin
   await createNotification({
     userId: null,
     roleTarget: 'admin',
@@ -155,7 +147,7 @@ export async function submitModificationReport(input: {
     relatedId: input.subscriptionId,
   });
 
-  return { success: true, id };
+  return { success: true };
 }
 
 // ─── Admin: Get Pending Modification Reports ──────────────────
@@ -184,27 +176,24 @@ export async function acceptModificationReport(
   reportId: string,
   report: { subscription_id: string; new_volume: number; new_plan: string; user_id: string }
 ): Promise<{ success: boolean; error?: string }> {
-  // Update report status
   const { error: rErr } = await supabase
     .from('modification_reports')
-    .update({ status: 'Accepted' })
+    .update({ status: 'accepted' })
     .eq('id', reportId);
 
   if (rErr) return { success: false, error: rErr.message };
 
-  // Update subscription with new volume/plan and restore Active status
   const { error: sErr } = await supabase
     .from('subscriptions')
     .update({
       volume: report.new_volume,
       plan: report.new_plan,
-      status: 'Active',
+      status: 'active',
     })
     .eq('id', report.subscription_id);
 
   if (sErr) return { success: false, error: sErr.message };
 
-  // Notify customer
   await createNotification({
     userId: report.user_id,
     roleTarget: 'customer',
@@ -217,25 +206,23 @@ export async function acceptModificationReport(
   return { success: true };
 }
 
-// ─── Admin: Reject Modification Report ───────────────────────
+// ─── Admin: Reject Modification Report ────────────────────────
 export async function rejectModificationReport(
   reportId: string,
   report: { subscription_id: string; user_id: string }
 ): Promise<{ success: boolean; error?: string }> {
   const { error: rErr } = await supabase
     .from('modification_reports')
-    .update({ status: 'Rejected' })
+    .update({ status: 'rejected' })
     .eq('id', reportId);
 
   if (rErr) return { success: false, error: rErr.message };
 
-  // Restore subscription to Active
   await supabase
     .from('subscriptions')
-    .update({ status: 'Active' })
+    .update({ status: 'active' })
     .eq('id', report.subscription_id);
 
-  // Notify customer
   await createNotification({
     userId: report.user_id,
     roleTarget: 'customer',

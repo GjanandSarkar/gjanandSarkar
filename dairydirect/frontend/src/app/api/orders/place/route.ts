@@ -1,27 +1,20 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { supabaseAdmin } from '@/lib/db';
 import { calculateOrderPricing } from '@/lib/pricing';
-
-async function verifySession(token: string | null): Promise<string | null> {
-  if (!token || token === 'new_user') return null;
-  const { data: { user }, error } = await supabaseAdmin.auth.getUser(token);
-  if (error || !user) return null;
-  return user.id;
-}
+import { getAuthUser } from '@/lib/api/auth-middleware';
 
 export async function POST(request: NextRequest) {
   try {
-    const body = await request.json();
-    const { token, orderData } = body;
-
-    const userId = await verifySession(token);
-    if (!userId) {
+    const auth = await getAuthUser(request);
+    if (!auth) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
+    const body = await request.json();
+    const { orderData } = body;
+
     const { items, addressId, paymentMethod, paymentStatus, couponCode, upiId } = orderData;
     
-    // 1. Recalculate Pricing (Source of truth)
     const pricingItems = items.map((i: any) => ({ variantId: i.variantId, quantity: i.quantity }));
     const pricing = await calculateOrderPricing(pricingItems, couponCode);
 
@@ -31,25 +24,22 @@ export async function POST(request: NextRequest) {
       }, { status: 400 });
     }
 
-    // 2. Payment Validation
     if (paymentMethod === 'upi') {
       if (!upiId) return NextResponse.json({ error: 'UPI ID is required' }, { status: 400 });
       if (!upiId.includes('@')) return NextResponse.json({ error: 'Invalid UPI ID format' }, { status: 400 });
       
-      // Persist UPI ID to profile
       await supabaseAdmin
         .from('profiles')
         .update({ default_upi_id: upiId })
-        .eq('id', userId);
+        .eq('id', auth.userId);
     }
 
     const deliveryDate = new Date(Date.now() + 86400000).toISOString();
 
-    // 3. Insert Order
     const { data: newOrder, error: orderError } = await supabaseAdmin
       .from('orders')
       .insert({
-        user_id: userId,
+        user_id: auth.userId,
         address_id: addressId,
         total_amount: pricing.total,
         status: 'confirmed',
@@ -68,8 +58,6 @@ export async function POST(request: NextRequest) {
 
     const orderId = newOrder.id;
 
-    // 4. Fetch Variant names for order_items if needed, but we can iterate items
-    // Since pricing engine already fetched variants, we should ideally reuse them or fetch here.
     const { data: variants } = await supabaseAdmin
       .from('product_variants')
       .select('id, weight, price, products(name)')
@@ -81,8 +69,6 @@ export async function POST(request: NextRequest) {
         order_id: orderId,
         product_id: item.productId,
         variant_id: item.variantId,
-        // product_name: (v?.products as any)?.name || 'Product',
-        // variant_weight: v?.weight || '',
         quantity: item.quantity,
         price: v ? parseFloat(v.price) : 0,
       };
@@ -96,15 +82,14 @@ export async function POST(request: NextRequest) {
       console.error('Insert order items error:', itemsError);
     }
 
-    // 5. Notifications
     const { data: profile } = await supabaseAdmin
       .from('profiles')
       .select('name')
-      .eq('id', userId)
+      .eq('id', auth.userId)
       .single();
 
     await supabaseAdmin.from('notifications').insert({
-      user_id: userId,
+      user_id: auth.userId,
       role_target: 'customer',
       title: 'Order Confirmed! 🎉',
       message: `Your order has been confirmed. Total: ₹${pricing.total}`,

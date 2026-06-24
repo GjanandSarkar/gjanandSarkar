@@ -11,7 +11,7 @@ export function getSupabaseClient() {
     if (!url || !key) {
       // In dev without env, return a dummy client that fails gracefully
       console.warn(
-        '[DairyDirect] Supabase env vars not set. ' +
+        '[Gjanand Sarkar] Supabase env vars not set. ' +
         'Copy .env.local.example → .env.local and fill in your values.'
       );
     }
@@ -33,6 +33,7 @@ export type DBProfile = {
   avatar_url: string | null;
   address: string | null;
   role: 'customer' | 'admin';
+  default_upi_id?: string | null;
   created_at: string;
 };
 
@@ -54,6 +55,7 @@ export type DBProductVariant = {
   weight: string;
   price: number;
   original_price: number | null;
+  cost_price: number;
   stock: number;
   created_at: string;
 };
@@ -61,12 +63,11 @@ export type DBProductVariant = {
 export type DBOrder = {
   id: string;
   user_id: string | null;
-  customer_name: string | null;
-  customer_phone: string | null;
-  total: number;
-  status: 'pending' | 'confirmed' | 'preparing' | 'out_for_delivery' | 'delivered' | 'cancelled';
+  total_amount: number;
+  status: 'pending' | 'confirmed' | 'out_for_delivery' | 'delivered' | 'cancelled';
   delivery_date: string | null;
   created_at: string;
+  profiles?: { name: string | null; phone: string | null };
   order_items?: DBOrderItem[];
 };
 
@@ -75,8 +76,6 @@ export type DBOrderItem = {
   order_id: string;
   product_id: string | null;
   variant_id: string | null;
-  product_name: string | null;
-  variant_weight: string | null;
   quantity: number;
   price: number;
 };
@@ -85,22 +84,23 @@ export type DBSubscription = {
   id: string;
   user_id: string;
   product_id: string;
+  variant_id: string;
   volume: number;
-  plan: 'weekly' | 'monthly';
-  status: 'active' | 'paused' | 'pending_review' | 'cancelled';
+  plan: string;
+  status: 'active' | 'paused' | 'cancelled' | 'pending_review';
   start_date: string;
   next_delivery_date: string | null;
   created_at: string;
-  products?: DBProduct;
+  products?: any;
 };
 
 export type DBModificationReport = {
   id: string;
   subscription_id: string;
   user_id: string;
+  action: string;
   new_volume: number | null;
   new_plan: string | null;
-  status: 'pending' | 'accepted' | 'rejected';
   created_at: string;
 };
 
@@ -109,7 +109,7 @@ export type DBNotification = {
   user_id: string | null;
   role_target: string;
   title: string;
-  body: string;
+  message: string;
   type: 'order' | 'subscription' | 'system' | 'delivery' | null;
   is_read: boolean;
   related_id: string | null;
