@@ -2,7 +2,7 @@
 .next/
 out/
 build/
-
+.kilo/
 # Dependencies
 node_modules/
 

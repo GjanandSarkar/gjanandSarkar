@@ -31,9 +31,11 @@
     "date-fns": "^4.1.0",
     "framer-motion": "^12.38.0",
     "lucide-react": "^1.8.0",
+    "maplibre-gl": "^5.24.0",
     "next": "^16.2.3",
     "react": "^19.2.5",
     "react-dom": "^19.2.5",
+    "react-map-gl": "^8.1.1",
     "tailwind-merge": "^3.5.0",
     "zustand": "^5.0.12"
   },
