@@ -19,3 +19,7 @@ coverage/
 # Misc
 .DS_Store
 *.pem
+
+# macOS metadata
+.DS_Store
+._*
