@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import { useTranslation } from '@/lib/i18n';
 import { getProducts } from '@/lib/api/products';
 import type { ProductWithVariants } from '@/lib/api/products';
@@ -26,6 +27,7 @@ const categoryColors: Record<string, { bg: string; color: string }> = {
 };
 
 export default function AdminProductsPage() {
+  const router = useRouter();
   const { t } = useTranslation();
   const [products, setProducts] = useState<ProductWithVariants[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -59,7 +61,7 @@ export default function AdminProductsPage() {
             {products.length} products in catalogue
           </p>
         </div>
-        <button className="flex items-center gap-2 px-4 py-2.5 rounded-[12px] font-bold text-[13px] text-white transition-all active:scale-95"
+        <button onClick={() => router.push('/admin/products/add')} className="flex items-center gap-2 px-4 py-2.5 rounded-[12px] font-bold text-[13px] text-white transition-all active:scale-95"
           style={{
             background: 'linear-gradient(135deg, #3f6530, #577f46)',
             boxShadow: '0 4px 12px rgba(63, 101, 48, 0.25)',

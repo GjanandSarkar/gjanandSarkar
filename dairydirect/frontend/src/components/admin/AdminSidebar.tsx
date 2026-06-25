@@ -43,21 +43,15 @@ export function AdminSidebar() {
       <div className="absolute top-0 left-0 w-full h-48 opacity-10 pointer-events-none"
         style={{ background: 'linear-gradient(180deg, #3f6530 0%, transparent 100%)' }} />
 
-      {/* Brand */}
-      <div className="px-5 py-5 relative z-10">
-        <div className="flex items-center gap-3 mb-1">
-          <div className="w-9 h-9 rounded-[10px] flex items-center justify-center"
-            style={{ background: 'linear-gradient(135deg, #3f6530, #577f46)' }}>
-            <ShieldCheck className="w-4.5 h-4.5 text-white" strokeWidth={2.5} />
-          </div>
-          <div>
-            <p className="font-extrabold text-[16px] leading-none tracking-tight"
-              style={{ color: 'var(--color-on-surface)' }}>Admin Panel</p>
-            <p className="text-[10px] font-bold uppercase tracking-widest mt-0.5"
-              style={{ color: 'var(--color-primary)' }}>Gjanand Sarkar</p>
+{/* Brand */}
+        <div className="px-5 py-5 relative z-10">
+          <div className="flex items-center gap-3 mb-1">
+            <div className="w-9 h-9 rounded-[10px] flex items-center justify-center"
+              style={{ background: 'linear-gradient(135deg, #3f6530, #577f46)' }}>
+              <img src="/logo.svg" alt="Logo" className="w-6 h-6 object-contain" />
+            </div>
           </div>
         </div>
-      </div>
 
       {/* Admin user chip */}
       <div className="mx-4 mb-3 px-3.5 py-3 rounded-[12px]"

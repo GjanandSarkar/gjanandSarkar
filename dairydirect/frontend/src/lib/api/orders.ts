@@ -70,7 +70,7 @@ export async function getUserBuyAgainHistory(): Promise<string[]> {
 export async function getAllOrders(): Promise<OrderWithItems[]> {
   const { data, error } = await supabase
     .from('orders')
-    .select('*, order_items(*)')
+    .select('*, order_items(*), profiles:user_id(name, phone)')
     .order('created_at', { ascending: false });
 
   if (error) {

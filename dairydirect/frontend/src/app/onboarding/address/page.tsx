@@ -1,7 +1,7 @@
 "use client";
 
-import { useState, useCallback, useRef, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+import { useState, useCallback, useRef, useEffect, Suspense } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { useTranslation } from '@/lib/i18n';
 import { Navigation, Home, Briefcase, Plus, Search, Loader2, Check } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -10,8 +10,10 @@ import { updateProfileName } from '@/lib/api/auth';
 import { saveAddressAPI } from '@/lib/api/addresses';
 import OrderTrackingMap from '@/components/shared/OrderTrackingMap';
 
-export default function AddressOnboarding() {
+function AddressOnboardingInner() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const returnTo = searchParams.get('return_to') || '/home';
   const { t } = useTranslation();
   const [address, setAddress] = useState('');
   const [name, setName] = useState('');
@@ -130,9 +132,11 @@ export default function AddressOnboarding() {
       
       if (addressResult.success) {
         setIsSuccess(true);
-        updateProfileLocal({ name, address });
+        // Update profile with name only - saved_addresses will be fetched fresh
+        updateProfileLocal({ name });
         setTimeout(() => {
-          router.replace('/home');
+          // Return to checkout or home based on return_to param
+          router.replace(returnTo);
         }, 1500);
       } else {
         if (addressResult.code === '42P01' || (addressResult.error && addressResult.error.includes('column'))) {
@@ -168,7 +172,7 @@ export default function AddressOnboarding() {
       <div className="flex-1 px-6 space-y-8 pb-32">
         {/* Name Input */}
         <div className="space-y-2">
-          <label className="text-[10px] font-bold uppercase tracking-widest text-muted ml-1">{t('addressLabel')}</label>
+          <label className="text-[10px] font-bold uppercase tracking-widest text-muted ml-1">{t('fullName')}</label>
           <div className="relative">
             <input 
               type="text" 
@@ -307,5 +311,20 @@ export default function AddressOnboarding() {
         </button>
       </div>
     </div>
+  );
+}
+
+export default function AddressOnboarding() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen flex items-center justify-center" style={{ background: 'var(--color-surface)' }}>
+        <div className="flex flex-col items-center gap-4">
+          <div className="w-10 h-10 rounded-full border-4 border-primary border-t-transparent animate-spin" />
+          <p className="text-sm font-medium" style={{ color: 'var(--color-on-surface-variant)' }}>Loading...</p>
+        </div>
+      </div>
+    }>
+      <AddressOnboardingInner />
+    </Suspense>
   );
 }

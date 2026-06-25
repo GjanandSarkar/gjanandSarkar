@@ -5,8 +5,8 @@ export type UserAddress = {
   user_id: string;
   label: string;
   address: string;
-  latitude: number | null;
-  longitude: number | null;
+  lat: number | null;
+  lng: number | null;
   is_default: boolean;
   created_at: string;
 };
@@ -48,4 +48,15 @@ export async function getUserAddresses(userId: string) {
 
   if (error) return [];
   return data as UserAddress[];
+}
+
+export async function deleteAddress(userId: string, addressId: string): Promise<{ success: boolean; error?: string }> {
+  const { error } = await supabase
+    .from('user_addresses')
+    .delete()
+    .eq('id', addressId)
+    .eq('user_id', userId);
+
+  if (error) return { success: false, error: error.message };
+  return { success: true };
 }

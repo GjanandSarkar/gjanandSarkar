@@ -1,16 +1,48 @@
 "use client";
 
+import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { MapPin, ChevronLeft, Plus, Trash2, Home, Briefcase, Navigation } from 'lucide-react';
 import { motion } from 'framer-motion';
+import { useStore } from '@/store/useStore';
+import { getUserAddresses, deleteAddress } from '@/lib/api/addresses';
+import type { UserAddress } from '@/lib/api/addresses';
 
 export default function SavedAddressesScreen() {
   const router = useRouter();
+  const user = useStore(state => state.user);
+  const [addresses, setAddresses] = useState<UserAddress[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
 
-  const addresses = [
-    { id: 1, type: 'Home', address: 'Plot 23, Satellite Apartments, Ahmedabad, Gujarat - 380015', icon: Home, isDefault: true },
-    { id: 2, type: 'Office', address: 'Block C, Pinnacle Business Park, Prahlad Nagar, Ahmedabad - 380051', icon: Briefcase, isDefault: false },
-  ];
+  useEffect(() => {
+    if (user) {
+      loadAddresses();
+    }
+  }, [user]);
+
+  const loadAddresses = async () => {
+    if (!user) return;
+    setIsLoading(true);
+    const data = await getUserAddresses(user.id);
+    setAddresses(data);
+    setIsLoading(false);
+  };
+
+  const handleDelete = async (id: string) => {
+    if (!user) return;
+    const result = await deleteAddress(user.id, id);
+    if (result.success) {
+      setAddresses(prev => prev.filter(a => a.id !== id));
+    }
+  };
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-surface flex items-center justify-center">
+        <div className="w-8 h-8 rounded-full border-4 border-primary border-t-transparent animate-spin" />
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-surface pb-24">
@@ -27,7 +59,7 @@ export default function SavedAddressesScreen() {
       <div className="px-5 pt-6 space-y-4">
         {/* Add New */}
         <button 
-          onClick={() => router.push('/onboarding/address')}
+          onClick={() => router.push('/onboarding/address?return_to=/checkout/payment')}
           className="w-full p-5 rounded-[24px] border-2 border-dashed border-primary/20 bg-primary/5 flex items-center gap-4 transition-all active:scale-[0.98]"
         >
           <div className="w-12 h-12 rounded-[14px] bg-primary text-white flex items-center justify-center shadow-lg shadow-primary/20">
@@ -41,37 +73,42 @@ export default function SavedAddressesScreen() {
 
         <div className="space-y-4 pt-4">
           <h2 className="text-[10px] font-black text-muted uppercase tracking-[0.2em] ml-2">Your Addresses</h2>
-          {addresses.map((addr) => {
-            const Icon = addr.icon;
-            return (
-              <div key={addr.id} className="bg-white rounded-[24px] p-5 border border-sand shadow-sm relative overflow-hidden group">
-                {addr.isDefault && (
-                  <div className="absolute top-0 right-0 px-3 py-1 bg-primary text-white text-[9px] font-black uppercase tracking-widest rounded-bl-xl">
-                    Default
+          {addresses.length === 0 ? (
+            <p className="text-sm text-muted text-center py-8">No addresses saved yet. Add your first address above.</p>
+          ) : (
+            addresses.map((addr) => {
+              const Icon = addr.label === 'Home' ? Home : addr.label === 'Office' ? Briefcase : Navigation;
+              return (
+                <div key={addr.id} className="bg-white rounded-[24px] p-5 border border-sand shadow-sm relative overflow-hidden group">
+                  {addr.is_default && (
+                    <div className="absolute top-0 right-0 px-3 py-1 bg-primary text-white text-[9px] font-black uppercase tracking-widest rounded-bl-xl">
+                      Default
+                    </div>
+                  )}
+                  <div className="flex items-start gap-4">
+                    <div className="w-12 h-12 rounded-[14px] bg-surface-container flex items-center justify-center text-on-surface">
+                      <Icon className="w-6 h-6" />
+                    </div>
+                    <div className="flex-1 pr-8">
+                      <p className="font-black text-[16px] text-on-surface mb-1">{addr.label}</p>
+                      <p className="text-[13px] text-muted leading-relaxed">{addr.address}</p>
+                    </div>
                   </div>
-                )}
-                <div className="flex items-start gap-4">
-                  <div className="w-12 h-12 rounded-[14px] bg-surface-container flex items-center justify-center text-on-surface">
-                    <Icon className="w-6 h-6" />
-                  </div>
-                  <div className="flex-1 pr-8">
-                    <h3 className="font-black text-[16px] text-on-surface mb-1">{addr.type}</h3>
-                    <p className="text-[13px] text-muted leading-relaxed font-medium">
-                      {addr.address}
-                    </p>
+                  
+                  <div className="flex items-center gap-4 mt-6 pt-4 border-t border-sand/50">
+                    <button className="text-[12px] font-bold text-primary px-2 py-1">Edit</button>
+                    <button 
+                      onClick={() => handleDelete(addr.id)}
+                      className="text-[12px] font-bold text-red-500 px-2 py-1 flex items-center gap-1"
+                    >
+                      <Trash2 className="w-3.5 h-3.5" />
+                      Delete
+                    </button>
                   </div>
                 </div>
-                
-                <div className="flex items-center gap-4 mt-6 pt-4 border-t border-sand/50">
-                  <button className="text-[12px] font-bold text-primary px-2 py-1">Edit</button>
-                  <button className="text-[12px] font-bold text-red-500 px-2 py-1 flex items-center gap-1">
-                    <Trash2 className="w-3.5 h-3.5" />
-                    Delete
-                  </button>
-                </div>
-              </div>
-            );
-          })}
+              );
+            })
+          )}
         </div>
       </div>
     </div>

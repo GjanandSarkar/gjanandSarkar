@@ -102,7 +102,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       phone: userProfile.phone || '', 
       email: userProfile.email || '', 
       avatar_url: userProfile.avatar_url || '',
-      role: userProfile.role ?? 'customer' 
+      role: userProfile.role ?? 'customer',
+      saved_addresses: userProfile.saved_addresses || [],
     });
 
     // Merge local cart into DB, then load DB cart

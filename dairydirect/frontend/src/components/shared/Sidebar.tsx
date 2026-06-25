@@ -42,13 +42,7 @@ export function Sidebar() {
       {/* Brand */}
       <div className="h-[72px] flex items-center px-6 relative z-10">
         <Link href="/home" className="flex items-center gap-3 group">
-          <img src="/logo.svg" alt="Gjanand Sarkar Logo" className="w-9 h-9 object-contain" />
-          <div className="flex flex-col">
-            <span className="font-extrabold text-[17px] leading-none tracking-tight"
-              style={{ color: 'var(--color-on-surface)' }}>Gjanand Sarkar</span>
-            <span className="text-[10px] font-semibold uppercase tracking-widest mt-0.5"
-              style={{ color: 'var(--color-primary)' }}>Farm to Doorstep</span>
-          </div>
+          <img src="/logo.svg" alt="Logo" className="w-9 h-9 object-contain" />
         </Link>
       </div>
 

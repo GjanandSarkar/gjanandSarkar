@@ -14,12 +14,8 @@ export function TopAppBar() {
       style={{ background: 'rgba(250, 250, 243, 0.88)', backdropFilter: 'blur(20px)', WebkitBackdropFilter: 'blur(20px)' }}>
       <div className="flex justify-between items-center px-5 py-3.5 w-full">
         
-        <Link href="/home" className="flex items-center gap-2">
-          <img src="/logo.svg" alt="Gjanand Sarkar Logo" className="w-8 h-8 object-contain" />
-          <span className="font-extrabold text-[17px] tracking-tight" 
-            style={{ color: 'var(--color-on-surface)' }}>
-            Gjanand <span style={{ color: 'var(--color-primary)' }}>Sarkar</span>
-          </span>
+        <Link href="/home" className="flex items-center">
+          <img src="/logo.svg" alt="Logo" className="w-9 h-9 object-contain" />
         </Link>
         
         <div className="flex items-center gap-1.5">

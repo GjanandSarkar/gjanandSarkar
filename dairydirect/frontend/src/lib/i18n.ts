@@ -9,9 +9,8 @@ import { useStore } from '@/store/useStore';
 
 export type Language = 'en' | 'hi' | 'gu';
 
-// ─── STATIC FALLBACK (English only — hi/gu come from DB) ─────
-// Kept here so the app works even without a Supabase connection.
-const STATIC_FALLBACK: Record<string, string> = {
+// ─── STATIC FALLBACKS ─────────────────────────────────────────────────────
+const EN_STATIC: Record<string, string> = {
   tagline: 'Fresh from our farm to your door',
   dailyFresh: 'Daily Fresh Milk at Your Door',
   dailyFreshSub: 'Subscribe once. We deliver every morning.',
@@ -149,6 +148,36 @@ const STATIC_FALLBACK: Record<string, string> = {
   markAllRead: 'Mark all read',
 };
 
+const HI_STATIC: Record<string, string> = {
+  tagline: 'हमारे फार्म से आपके दरवाज़े तक ताज़ा',
+  dailyFresh: 'दैनिक ताज़ा दूध आपके द्वार',
+  dailyFreshSub: 'एक बार सब्सक्राइब करें। हम हर सुबह डिलीवर करते हैं।',
+  ourProducts: 'हमारे उत्पाद, हमारी गुणवत्ता',
+  ourProductsSub: 'हर वस्तु हमने ही बनाई है। बीच में दलाल नहीं। शुद्ध स्वाद।',
+  skip: 'छोड़ें',
+  getStarted: 'शुरू करें',
+  welcomeBack: 'वापस स्वागत है👋',
+  goodMorning: 'सुबह का नमस्ते',
+  goodAfternoon: 'दोपहर का नमस्ते',
+  goodEvening: 'शाम का नमस्ते',
+  deliveringTo: 'डिलीवर कर रहे हैं',
+};
+
+const GU_STATIC: Record<string, string> = {
+  tagline: 'અમારા ખેતૃક પાસેથી તમારા દરવાજા સુધી તાજા',
+  dailyFresh: 'દૈનિક તાજા દૂધ તમારા દરવાજા પર',
+  dailyFreshSub: 'એક વાર સબ્સક્રાઇબ કરો. અમે દરરોજ સવારે વહેંચવામાં આવે છે.',
+  ourProducts: 'અમારા ઉત્પાદનો, અમારી ગુણવત્તા',
+  ourProductsSub: 'દરેક વસ્તુ અમે જ બનાવ્યું છે। વચ્ચે કોઈ વચી નથી. શુદ્ધ સ્વાદ.',
+  skip: 'દૂર કરો',
+  getStarted: 'શરૂઆત કરો',
+  welcomeBack: 'પાછા સ્વાગત છે👋',
+  goodMorning: 'સુવર્ણ સુવર્ણ',
+  goodAfternoon: 'બપોરનું નમસ્તે',
+  goodEvening: 'સાંજનું નમસ્તે',
+  deliveringTo: 'વિતરણ કરી રહ્યા છીએ',
+};
+
 // ─── Translation hook ─────────────────────────────────────────
 export function useTranslation() {
   const language = useStore((state) => state.language);
@@ -157,12 +186,15 @@ export function useTranslation() {
   // Get cached translations for current language, fall back to English cache, then static
   const currentLangMap: Record<string, string> = translationsCache[language] ?? {};
   const englishMap: Record<string, string> = translationsCache['en'] ?? {};
+  
+  // Get static fallback based on language
+  const staticFallback = language === 'hi' ? HI_STATIC : language === 'gu' ? GU_STATIC : EN_STATIC;
 
   const t = (key: string, params?: Record<string, string>): string => {
     let str =
       currentLangMap[key] ??
       englishMap[key] ??
-      STATIC_FALLBACK[key] ??
+      staticFallback[key] ??
       key; // worst case: return the key itself
 
     if (params) {

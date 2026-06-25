@@ -1,15 +1,15 @@
 "use client";
 
-import { useState, useEffect, Suspense } from 'react';
+import { useState, useEffect, useCallback, Suspense } from 'react';
+import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { ArrowLeft, Minus, Plus, Calendar, MapPin, Droplets, CheckCircle2 } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import { cn } from '@/lib/utils';
 import { useTranslation } from '@/lib/i18n';
 import { useStore } from '@/store/useStore';
-import { createSubscription, submitModificationReport, getUserSubscriptions } from '@/lib/api/subscriptions';
+import { getUserSubscriptions } from '@/lib/api/subscriptions';
 import { getProducts } from '@/lib/api/products';
-import Link from 'next/link';
 
 function NewSubscriptionContent() {
   const router = useRouter();
@@ -52,37 +52,46 @@ function NewSubscriptionContent() {
     if (!user) return;
     setIsProcessing(true);
     
-    let result;
-    if (editId) {
-      result = await submitModificationReport({
-        subscriptionId: editId,
-        userId: user.id,
-        newVolume: volume,
-        newPlan: plan
-      });
-    } else {
-      if (!milkProductId) {
-        alert('Product not available');
-        setIsProcessing(false);
-        return;
+    try {
+      let response;
+      if (editId) {
+        response = await fetch('/api/subscriptions', {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            subId: editId,
+            action: 'modify',
+            newVolume: volume,
+            newPlan: plan,
+          }),
+        });
+      } else {
+        response = await fetch('/api/subscriptions', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            userId: user.id,
+            productId: milkProductId,
+            volume,
+            plan,
+          }),
+        });
       }
-      result = await createSubscription({
-        userId: user.id,
-        productId: milkProductId,
-        volume,
-        plan
-      });
-    }
 
-    if (result.success) {
+      const result = await response.json();
+      
+      if (!response.ok) {
+        throw new Error(result.error || 'Action failed. Please try again.');
+      }
+      
       setIsProcessing(false);
       setIsSuccess(true);
       setTimeout(() => {
         router.replace('/subscribe');
       }, 2000);
-    } else {
+    } catch (error: any) {
       setIsProcessing(false);
-      alert('Action failed. Please try again.');
+      alert(error.message || 'Action failed. Please try again.');
     }
   };
 

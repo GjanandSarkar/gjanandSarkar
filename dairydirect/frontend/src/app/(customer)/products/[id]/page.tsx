@@ -1,6 +1,6 @@
 "use client";
 
-import { use, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import { useTranslation } from '@/lib/i18n';
 import { useStore } from '@/store/useStore';
@@ -71,7 +71,7 @@ export default function ProductDetailScreen() {
   return (
     <div className="flex flex-col min-h-screen pb-32" style={{ background: 'var(--color-surface)' }}>
       {/* Header */}
-      <div className="relative aspect-square w-full bg-white overflow-hidden">
+      <div className="relative w-full bg-white overflow-hidden">
         <div className="absolute top-0 left-0 right-0 z-20 flex items-center justify-between p-4 bg-gradient-to-b from-black/20 to-transparent">
           <button onClick={() => router.back()} className="w-10 h-10 rounded-full bg-white/20 backdrop-blur-md flex items-center justify-center text-white">
             <ChevronLeft className="w-6 h-6" />
@@ -89,11 +89,11 @@ export default function ProductDetailScreen() {
         <img 
           src={product.image_url || '/milk.png'} 
           alt={product.name} 
-          className="w-full h-full object-cover"
+          className="w-full h-64 object-cover"
         />
         
         {product.is_freshness_guarantee && (
-          <div className="absolute bottom-6 left-6 flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/90 backdrop-blur-md shadow-lg">
+          <div className="absolute bottom-4 left-4 flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/90 backdrop-blur-md shadow-lg">
              <Sparkles className="w-4 h-4 text-primary" strokeWidth={2.5} />
              <span className="text-xs font-bold text-primary uppercase tracking-wider">Fresh Guarantee</span>
           </div>

@@ -64,16 +64,18 @@ export async function createSubscription(
 ): Promise<{ success: boolean; id?: string; error?: string }> {
   const nextDeliveryDate = new Date(Date.now() + 86400000).toISOString().split('T')[0]; // tomorrow
 
-  const { error } = await supabase.from('subscriptions').insert({
+  const { data, error } = await supabase.from('subscriptions').insert({
     user_id: input.userId,
     product_id: input.productId,
     volume: input.volume,
     plan: input.plan,
     status: 'active',
     next_delivery_date: nextDeliveryDate,
-  });
+  }).select('id').single();
 
   if (error) return { success: false, error: error.message };
+
+  const subscriptionId = data?.id;
 
   // Notify customer
   await createNotification({
@@ -82,10 +84,10 @@ export async function createSubscription(
     title: 'Subscription Active! 🥛',
     body: `Your daily milk subscription starts tomorrow, 7–9 AM.`,
     type: 'subscription',
-    relatedId: '',
+    relatedId: subscriptionId || '',
   });
 
-  return { success: true };
+  return { success: true, id: subscriptionId };
 }
 
 // ─── Pause / Resume Subscription ─────────────────────────────

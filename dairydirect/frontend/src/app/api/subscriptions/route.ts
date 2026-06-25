@@ -93,24 +93,6 @@ export async function PUT(request: NextRequest) {
     const body = await request.json();
     const { subId, action, newVolume, newPlan } = body;
 
-    if (action === 'pause' || action === 'resume') {
-      const { data: current } = await supabaseAdmin
-        .from('subscriptions')
-        .select('status')
-        .eq('id', subId)
-        .single();
-
-      const newStatus = current?.status === 'paused' ? 'active' : 'paused';
-      
-      const { error } = await supabaseAdmin
-        .from('subscriptions')
-        .update({ status: newStatus })
-        .eq('id', subId);
-
-      if (error) return NextResponse.json({ error: error.message }, { status: 500 });
-      return NextResponse.json({ success: true });
-    }
-
     if (action === 'cancel') {
       const { error } = await supabaseAdmin
         .from('subscriptions')
