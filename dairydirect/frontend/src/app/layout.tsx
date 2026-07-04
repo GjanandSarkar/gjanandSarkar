@@ -10,7 +10,10 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "Gjanand Sarkar — Farm Fresh Dairy, Delivered Daily",
+  title: {
+    template: "%s | Gjanand Sarkar",
+    default: "Gjanand Sarkar — Farm Fresh Dairy, Delivered Daily",
+  },
   description: "Premium A2 milk, artisanal paneer, and fresh dairy delivered from farm to your doorstep before sunrise. FSSAI certified. Gjanand Sarkar.",
   keywords: ["dairy delivery", "fresh milk", "A2 milk", "paneer", "farm fresh", "subscription"],
   authors: [{ name: "Gjanand Sarkar" }],
@@ -40,6 +43,31 @@ export const viewport: Viewport = {
 
 import { LanguageManager } from "@/components/shared/LanguageManager";
 import { AuthProvider } from "@/components/shared/AuthProvider";
+import { JsonLd } from "@/components/seo/JsonLd";
+
+const orgStructuredData = {
+  "@context": "https://schema.org",
+  "@type": "Organization",
+  "name": "Gjanand Sarkar",
+  "url": "https://gjanandsarkar.com",
+  "logo": "https://gjanandsarkar.com/logo.svg",
+  "sameAs": [
+    "https://facebook.com/gjanandsarkar",
+    "https://instagram.com/gjanandsarkar"
+  ]
+};
+
+const webSiteStructuredData = {
+  "@context": "https://schema.org",
+  "@type": "WebSite",
+  "name": "Gjanand Sarkar",
+  "url": "https://gjanandsarkar.com",
+  "potentialAction": {
+    "@type": "SearchAction",
+    "target": "https://gjanandsarkar.com/search?q={search_term_string}",
+    "query-input": "required name=search_term_string"
+  }
+};
 
 export default function RootLayout({
   children,
@@ -49,6 +77,8 @@ export default function RootLayout({
   return (
     <html lang="en" data-scroll-behavior="smooth" className={`${inter.variable}`} suppressHydrationWarning>
       <head>
+        <JsonLd data={orgStructuredData} />
+        <JsonLd data={webSiteStructuredData} />
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         <link rel="icon" href="/logo.svg" type="image/svg+xml" />

@@ -1,4 +1,5 @@
 import { api } from './client';
+import { supabaseAdmin } from '@/lib/db';
 
 export type ProductWithVariants = {
   id: string;
@@ -49,12 +50,57 @@ export async function getProducts(
   }
 }
 
+export async function getProductsServer(
+  options: { category?: string; activeOnly?: boolean } = {}
+): Promise<ProductWithVariants[]> {
+  try {
+    let query = supabaseAdmin
+      .from('products')
+      .select('*, product_variants(*)')
+      .order('created_at', { ascending: false });
+
+    if (options.category && options.category !== 'All') {
+      query = query.eq('category', options.category);
+    }
+
+    if (options.activeOnly !== false) {
+      query = query.eq('is_active', true);
+    }
+
+    const { data, error } = await query;
+    if (error) throw error;
+    return data as ProductWithVariants[];
+  } catch (error) {
+    console.error('getProductsServer error:', error);
+    return [];
+  }
+}
+
 export async function getProductById(id: string): Promise<ProductWithVariants | null> {
   try {
     const result = await api.products.get();
     return result.products?.find((p: ProductWithVariants) => p.id === id) ?? null;
   } catch (error) {
     console.error('getProductById error:', error);
+    return null;
+  }
+}
+
+export async function getProductByIdServer(id: string): Promise<ProductWithVariants | null> {
+  try {
+    const { data, error } = await supabaseAdmin
+      .from('products')
+      .select(`
+        *,
+        product_variants (*)
+      `)
+      .eq('id', id)
+      .single();
+
+    if (error) throw error;
+    return data as ProductWithVariants;
+  } catch (error) {
+    console.error('getProductByIdServer error:', error);
     return null;
   }
 }

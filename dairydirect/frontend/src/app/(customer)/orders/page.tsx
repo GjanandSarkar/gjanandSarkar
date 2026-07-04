@@ -10,6 +10,8 @@ import { format } from 'date-fns';
 import { ShoppingBag, ChevronDown, ArrowRight, Package, Truck, CheckCircle2, Clock, AlertCircle } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import Link from 'next/link';
+import { BuyAgainCarousel } from '@/components/discovery/BuyAgainCarousel';
+import { EmptyState } from '@/components/discovery/EmptyState';
 
 const STATUS_STYLES: Record<string, { bg: string; color: string; dot: string; icon: typeof Clock }> = {
   'pending':          { bg: '#ffdcc7', color: '#774117', dot: '#d4712a', icon: Clock },
@@ -107,6 +109,12 @@ export default function OrdersScreen() {
       </div>
 
       <div className="px-5 md:px-10 py-5 flex flex-col gap-3">
+        {filteredOrders.length > 0 && activeTab === 'All' && (
+          <div className="mb-6 -mx-5 px-5 md:mx-0 md:px-0">
+            <BuyAgainCarousel />
+          </div>
+        )}
+        
         <AnimatePresence mode="wait">
           {isLoading ? (
             <motion.div key="loading" initial={{ opacity: 0 }} animate={{ opacity: 1 }}
@@ -117,23 +125,8 @@ export default function OrdersScreen() {
               ))}
             </motion.div>
           ) : filteredOrders.length === 0 ? (
-            <motion.div key="empty" initial={{ opacity: 0 }} animate={{ opacity: 1 }}
-              className="flex flex-col items-center justify-center py-24 text-center">
-              <div className="w-16 h-16 rounded-full flex items-center justify-center mb-4"
-                style={{ background: 'var(--color-surface-container-low)' }}>
-                <ShoppingBag className="w-7 h-7" style={{ color: 'var(--color-outline)' }} strokeWidth={1.5} />
-              </div>
-              <p className="font-bold text-[18px]" style={{ color: 'var(--color-on-surface)' }}>
-                {t('noOrders')}
-              </p>
-              <p className="text-[13px] mt-1" style={{ color: 'var(--color-outline)' }}>
-                {t('noOrdersSub')}
-              </p>
-              <Link href="/products"
-                className="mt-6 flex items-center gap-2 px-6 py-3 rounded-[12px] font-bold text-sm text-white"
-                style={{ background: 'linear-gradient(135deg, #3f6530, #577f46)' }}>
-                {t('browseProducts')} <ArrowRight className="w-4 h-4" />
-              </Link>
+            <motion.div key="empty" initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
+              <EmptyState type="orders" />
             </motion.div>
           ) : (
             <motion.div key="list" initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex flex-col gap-3">

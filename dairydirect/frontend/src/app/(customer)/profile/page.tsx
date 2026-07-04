@@ -1,16 +1,29 @@
 "use client";
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useTranslation } from '@/lib/i18n';
 import { useStore } from '@/store/useStore';
-import { updateProfileName, logout as supabaseLogout } from '@/lib/api/auth';
-import { Button } from '@/components/ui/Button';
-import {
-  ChevronRight, Settings, MapPin, Bell, Receipt,
-  RefreshCw, HeartHandshake, HelpCircle, FileText,
-  LogOut, Globe, AlertTriangle, Leaf, Loader2, Camera, User
-} from 'lucide-react';
+import { logout as supabaseLogout } from '@/lib/api/auth';
+import { getUserOrders } from '@/lib/api/orders';
+import { getUserSubscriptions } from '@/lib/api/subscriptions';
+import { getUserAddresses } from '@/lib/api/addresses';
+import type { OrderWithItems } from '@/lib/api/orders';
+import type { SubscriptionWithProduct } from '@/lib/api/subscriptions';
+import type { UserAddress } from '@/lib/api/addresses';
+
+// Components
+import { ProfileSummary } from '@/components/profile/ProfileSummary';
+import { RecentOrders } from '@/components/profile/RecentOrders';
+import { ActiveSubscriptions } from '@/components/profile/ActiveSubscriptions';
+import { AddressSnippet } from '@/components/profile/AddressSnippet';
+import { QuickActions } from '@/components/profile/QuickActions';
+import { BuyAgainCarousel } from '@/components/discovery/BuyAgainCarousel';
+import { EngagementBanner } from '@/components/profile/EngagementBanner';
+import { RewardsPreview } from '@/components/profile/RewardsPreview';
+
+// Language Settings Modal components
+import { X, Check } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import type { Language } from '@/store/useStore';
 
@@ -21,346 +34,170 @@ export default function ProfileScreen() {
   const logoutLocal = useStore((s) => s.logout);
   const setLanguage = useStore((s) => s.setLanguage);
   const updateProfileLocal = useStore((s) => s.updateProfile);
+  const addToCartLocal = useStore(state => state.addToCartLocal);
 
+  const [orders, setOrders] = useState<OrderWithItems[]>([]);
+  const [subscriptions, setSubscriptions] = useState<SubscriptionWithProduct[]>([]);
+  const [addresses, setAddresses] = useState<UserAddress[]>([]);
+  
+  const [isLoading, setIsLoading] = useState(true);
   const [showLanguageSettings, setShowLanguageSettings] = useState(false);
-  const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
-  const [showEditProfile, setShowEditProfile] = useState(false);
 
-  const [profileName, setProfileName] = useState(user?.name || '');
-  const [avatarUrl, setAvatarUrl] = useState(user?.avatar_url || '');
-  const [isUpdating, setIsUpdating] = useState(false);
-  const [isLoggingOut, setIsLoggingOut] = useState(false);
-  const [isUploading, setIsUploading] = useState(false);
+  useEffect(() => {
+    if (!user) {
+      router.replace('/login');
+      return;
+    }
+
+    Promise.all([
+      getUserOrders(user.id),
+      getUserSubscriptions(user.id),
+      getUserAddresses(user.id)
+    ]).then(([ordersData, subsData, addrsData]) => {
+      setOrders(ordersData);
+      setSubscriptions(subsData);
+      setAddresses(addrsData);
+      setIsLoading(false);
+    });
+  }, [user, router]);
 
   const handleLogout = async () => {
-    setIsLoggingOut(true);
     await supabaseLogout();
     logoutLocal();
     router.replace('/login');
   };
 
-  const handleUpdateProfile = async () => {
-    if (!profileName.trim() || !user) return;
-    setIsUpdating(true);
-    const result = await updateProfileName(user.id, profileName.trim());
-    if (result.success) {
-      updateProfileLocal({ name: profileName.trim(), avatar_url: avatarUrl });
+  const handleReorder = async (order: OrderWithItems) => {
+    if (!order.order_items) return;
+    
+    // Dynamically import to prevent circular dependency
+    const { addToCart } = await import('@/lib/api/cart');
+    
+    const promises: Promise<any>[] = [];
+
+    for (const item of order.order_items) {
+      if (item.product_id && item.variant_id) {
+        addToCartLocal(item.product_id, item.variant_id, item.quantity);
+        if (user) {
+          promises.push(addToCart(user.id, item.product_id, item.variant_id, item.quantity));
+        }
+      }
     }
-    setIsUpdating(false);
-    setShowEditProfile(false);
+    
+    if (promises.length > 0) {
+      await Promise.all(promises);
+    }
+    
+    router.push('/cart');
   };
 
-  const handleAvatarUpload = () => {
-    setIsUploading(true);
-    // Simulation: in a real app, this would open a file picker and upload to Supabase Storage
-    setTimeout(() => {
-      const mockAvatars = [
-        'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=200&h=200&fit=crop',
-        'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=200&h=200&fit=crop',
-        'https://images.unsplash.com/photo-1599566150163-29194dcaad36?w=200&h=200&fit=crop'
-      ];
-      const newAvatar = mockAvatars[Math.floor(Math.random() * mockAvatars.length)];
-      setAvatarUrl(newAvatar);
-      setIsUploading(false);
-    }, 1500);
-  };
-
-  const sections = [
-    {
-      title: t('account'),
-      items: [
-        { icon: Globe, label: t('languageSettings'), onClick: () => setShowLanguageSettings(true) },
-        { icon: MapPin, label: t('savedAddresses'), onClick: () => router.push('/profile/saved-addresses') },
-        { icon: Bell, label: t('notificationPrefs'), badge: t('soon'), onClick: () => {} },
-      ],
-    },
-    {
-      title: t('ordersSubs'),
-      items: [
-        { icon: Receipt, label: t('myOrders'), onClick: () => router.push('/orders') },
-        { icon: RefreshCw, label: t('mySubscriptions'), onClick: () => router.push('/subscribe') },
-        { icon: HeartHandshake, label: t('qualityReports'), onClick: () => router.push('/profile/quality-reports') },
-      ],
-    },
-    {
-      title: t('supportLegal'),
-      items: [
-        { icon: HelpCircle, label: t('helpCentre'), badge: t('soon'), onClick: () => {} },
-        { icon: FileText, label: t('termsPolicy'), badge: t('soon'), onClick: () => {} },
-      ],
-    },
-  ];
+  if (isLoading) {
+    return (
+      <div className="flex flex-col min-h-screen pb-[100px] bg-surface-container animate-pulse p-4 gap-6 pt-10">
+        <div className="h-32 bg-sand/30 rounded-[24px]" />
+        <div className="h-48 bg-sand/30 rounded-[24px]" />
+        <div className="h-40 bg-sand/30 rounded-[24px]" />
+        <div className="h-32 bg-sand/30 rounded-[24px]" />
+      </div>
+    );
+  }
 
   return (
-    <>
-      <div className="flex flex-col min-h-screen pb-24 relative" style={{ background: 'var(--color-surface)' }}>
-        {/* Hero */}
-        <div className="px-6 pt-10 pb-8 border-b text-center relative overflow-hidden"
-          style={{ background: 'var(--color-surface-container-lowest)', borderColor: 'rgba(195,201,187,0.3)' }}>
-          <div className="absolute -top-10 -right-10 w-32 h-32 rounded-full blur-2xl opacity-30"
-            style={{ background: 'var(--color-primary-fixed)' }} />
-          <div className="absolute -bottom-10 -left-10 w-32 h-32 rounded-full blur-2xl opacity-20"
-            style={{ background: 'var(--color-tertiary-fixed)' }} />
+    <div className="flex flex-col min-h-screen pb-[120px] bg-surface-container">
+      <div className="flex-1 max-w-[800px] mx-auto w-full p-4 pt-6 space-y-8">
+        
+        {/* Profile Summary */}
+        <ProfileSummary 
+          user={user} 
+          onUpdateProfile={updateProfileLocal} 
+          onLogout={handleLogout} 
+        />
 
-          <div className="relative z-10">
-            <div className="relative w-24 h-24 mx-auto mb-4">
-              <div className="w-full h-full rounded-full flex items-center justify-center font-black text-4xl shadow-md border-4 overflow-hidden"
-                style={{
-                  background: 'linear-gradient(135deg, var(--color-primary-fixed), var(--color-tertiary-fixed))',
-                  color: 'var(--color-primary)',
-                  borderColor: 'white',
-                }}>
-                {user?.avatar_url ? (
-                  <img src={user.avatar_url} alt="Profile" className="w-full h-full object-cover" />
-                ) : (
-                  user?.name?.charAt(0)?.toUpperCase() || <User className="w-12 h-12" />
-                )}
-              </div>
-              <button 
-                onClick={handleAvatarUpload}
-                disabled={isUploading}
-                className="absolute bottom-0 right-0 w-8 h-8 rounded-full bg-primary text-white flex items-center justify-center shadow-lg border-2 border-white active:scale-90 transition-all"
-              >
-                {isUploading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Camera className="w-4 h-4" />}
-              </button>
-            </div>
-            <h1 className="text-[24px] font-black tracking-tight" style={{ color: 'var(--color-on-surface)' }}>
-              {user?.name || 'Welcome!'}
-            </h1>
-            <p className="text-sm font-bold mt-1 tracking-wider" style={{ color: 'var(--color-outline)' }}>
-              +91 {user?.phone || '—'}
-            </p>
-            {user?.role === 'admin' && (
-              <span className="mt-2 inline-block text-[10px] font-black uppercase tracking-widest px-3 py-1 rounded-full"
-                style={{ background: 'var(--color-primary-fixed)', color: 'var(--color-primary)' }}>
-                Admin
-              </span>
-            )}
-            <button
-              onClick={() => setShowEditProfile(true)}
-              className="mt-5 text-[11px] font-black uppercase tracking-widest px-6 py-2 rounded-full transition-all active:scale-95"
-              style={{ background: 'var(--color-primary-fixed)', color: 'var(--color-primary)' }}>
-              {t('editProfile')}
-            </button>
-          </div>
+        {/* Smart Commerce: Buy Again / Replenishment */}
+        <div className="-mx-4 bg-white py-4 border-y border-sand/50 shadow-sm">
+          <BuyAgainCarousel />
         </div>
 
-        {/* Sections */}
-        <div className="p-4 flex-1">
-          {sections.map((section, idx) => (
-            <div key={idx} className="mb-6">
-              <h2 className="text-[10px] font-black uppercase tracking-[0.2em] mb-4 ml-4"
-                style={{ color: 'var(--color-outline)' }}>
-                {section.title}
-              </h2>
-              <div className="rounded-[24px] overflow-hidden shadow-sm"
-                style={{ background: 'var(--color-surface-container-lowest)', border: '1px solid rgba(195,201,187,0.3)' }}>
-                {section.items.map((item, itemIdx) => {
-                  const Icon = item.icon;
-                  return (
-                    <div key={itemIdx}>
-                      <button
-                        onClick={item.onClick}
-                        className="w-full flex items-center justify-between p-5 transition-colors group"
-                        style={{ background: 'transparent' }}
-                        onMouseEnter={(e) => (e.currentTarget.style.background = 'var(--color-surface-container-low)')}
-                        onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}>
-                        <div className="flex items-center gap-4">
-                          <div className="w-11 h-11 rounded-[14px] flex items-center justify-center transition-colors"
-                            style={{ background: 'var(--color-surface-container)', color: 'var(--color-on-surface-variant)' }}>
-                            <Icon className="w-5 h-5" strokeWidth={2.2} />
-                          </div>
-                          <div className="flex flex-col items-start">
-                            <span className="font-bold text-[15px]" style={{ color: 'var(--color-on-surface)' }}>
-                              {item.label}
-                            </span>
-                            {item.badge && (
-                              <span className="text-[8px] font-black uppercase tracking-widest"
-                                style={{ color: 'var(--color-primary)' }}>
-                                {item.badge}
-                              </span>
-                            )}
-                          </div>
-                        </div>
-                        <ChevronRight className="w-5 h-5" style={{ color: 'var(--color-outline)' }} />
-                      </button>
-                      {itemIdx < section.items.length - 1 && (
-                        <div className="h-px ml-20 opacity-40" style={{ background: 'var(--color-outline-variant)' }} />
-                      )}
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
-          ))}
+        {/* Recent Orders */}
+        <RecentOrders 
+          orders={orders} 
+          onReorder={handleReorder} 
+        />
 
-          <Button
-            variant="outline"
-            size="full"
-            className="w-full h-14 mt-4 font-bold rounded-[18px]"
-            style={{ color: '#ef4444', borderColor: '#fecaca', background: 'transparent' }}
-            onClick={() => setShowLogoutConfirm(true)}>
-            <LogOut className="w-5 h-5 mr-3" />
-            {t('logoutAccount')}
-          </Button>
+        {/* Active Subscriptions */}
+        <ActiveSubscriptions 
+          subscriptions={subscriptions} 
+        />
 
-          <div className="text-center mt-12 mb-6">
-            <p className="text-xs font-bold mb-1" style={{ color: 'var(--color-outline)' }}>Gjanand Sarkar v2.0.0</p>
-            <p className="text-xs flex items-center justify-center gap-1" style={{ color: 'var(--color-outline)' }}>
-              Made with <Leaf className="w-3 h-3" style={{ color: 'var(--color-primary)' }} /> in Ahmedabad
-            </p>
-          </div>
-        </div>
+        {/* Saved Addresses */}
+        <AddressSnippet 
+          addresses={addresses} 
+        />
+
+        {/* Quick Actions / Settings */}
+        <QuickActions 
+          onLanguageClick={() => setShowLanguageSettings(true)} 
+        />
+
+        <EngagementBanner />
+
+        <RewardsPreview />
+
       </div>
 
-      {/* ── Language Sheet ── */}
+      {/* Language Modal (Reused from previous design) */}
       <AnimatePresence>
         {showLanguageSettings && (
-          <>
-            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-              className="fixed inset-0 bg-black/50 z-50"
-              onClick={() => setShowLanguageSettings(false)} />
+          <div className="fixed inset-0 z-50 flex items-end justify-center sm:items-center p-4 bg-black/40 backdrop-blur-sm">
             <motion.div
-              initial={{ y: '100%' }} animate={{ y: 0 }} exit={{ y: '100%' }}
-              transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-              className="fixed bottom-0 left-0 right-0 rounded-t-[20px] z-[60] p-6 max-w-[430px] mx-auto"
-              style={{ background: 'var(--color-surface)' }}>
-              <div className="w-12 h-1.5 rounded-full mx-auto mb-6" style={{ background: 'var(--color-outline-variant)' }} />
-              <h2 className="text-lg font-bold mb-6" style={{ color: 'var(--color-on-surface)' }}>
-                {t('languageSettings')}
-              </h2>
-              <div className="space-y-3 mb-8">
-                {([
-                  { code: 'en', label: 'English' },
-                  { code: 'hi', label: 'हिंदी (Hindi)' },
-                  { code: 'gu', label: 'ગુજરાતી (Gujarati)' },
-                ] as { code: Language; label: string }[]).map((lang) => (
+              initial={{ opacity: 0, y: 100 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: 100 }}
+              className="bg-white w-full max-w-sm rounded-3xl overflow-hidden shadow-2xl relative"
+            >
+              <div className="flex justify-between items-center p-6 border-b border-sand/50">
+                <h3 className="text-xl font-bold text-dark">{t('languageSettings')}</h3>
+                <button
+                  onClick={() => setShowLanguageSettings(false)}
+                  className="w-10 h-10 rounded-full bg-sand/30 flex items-center justify-center text-dark hover:bg-sand/50 transition-colors"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+              <div className="p-4 space-y-2">
+                {[
+                  { code: 'en', label: 'English', sub: 'English' },
+                  { code: 'hi', label: 'हिंदी', sub: 'Hindi' },
+                  { code: 'gu', label: 'ગુજરાતી', sub: 'Gujarati' },
+                ].map((lang) => (
                   <button
                     key={lang.code}
-                    onClick={() => { setLanguage(lang.code); setTimeout(() => setShowLanguageSettings(false), 200); }}
-                    className="w-full flex items-center justify-between p-4 rounded-[12px] border font-bold transition-all"
-                    style={language === lang.code ? {
-                      borderColor: 'var(--color-primary)',
-                      background: 'var(--color-primary-fixed)',
-                      color: 'var(--color-primary)',
-                    } : {
-                      borderColor: 'var(--color-outline-variant)',
-                      background: 'var(--color-surface-container-lowest)',
-                      color: 'var(--color-on-surface)',
-                    }}>
-                    {lang.label}
+                    onClick={() => {
+                      setLanguage(lang.code as Language);
+                      setTimeout(() => setShowLanguageSettings(false), 300);
+                    }}
+                    className={`w-full flex items-center justify-between p-4 rounded-[16px] border transition-all ${
+                      language === lang.code
+                        ? 'border-primary bg-primary/5 shadow-[0_4px_20px_rgba(63,101,48,0.08)]'
+                        : 'border-transparent bg-white hover:bg-sand/10'
+                    }`}
+                  >
+                    <div className="text-left">
+                      <span className="block font-bold text-dark text-base">{lang.label}</span>
+                      <span className="block text-xs font-medium text-muted mt-0.5">{lang.sub}</span>
+                    </div>
                     {language === lang.code && (
-                      <div className="w-2.5 h-2.5 rounded-full" style={{ background: 'var(--color-primary)' }} />
+                      <div className="w-6 h-6 rounded-full bg-primary flex items-center justify-center">
+                        <Check className="w-3.5 h-3.5 text-white" />
+                      </div>
                     )}
                   </button>
                 ))}
               </div>
             </motion.div>
-          </>
+          </div>
         )}
       </AnimatePresence>
-
-      {/* ── Edit Profile Sheet ── */}
-      <AnimatePresence>
-        {showEditProfile && (
-          <>
-            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-              className="fixed inset-0 bg-black/50 z-50"
-              onClick={() => setShowEditProfile(false)} />
-            <motion.div
-              initial={{ y: '100%' }} animate={{ y: 0 }} exit={{ y: '100%' }}
-              transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-              className="fixed bottom-0 left-0 right-0 rounded-t-[24px] z-[60] p-6 max-w-[430px] mx-auto"
-              style={{ background: 'var(--color-surface)' }}>
-              <div className="w-12 h-1.5 rounded-full mx-auto mb-6" style={{ background: 'var(--color-outline-variant)' }} />
-              <h2 className="text-xl font-black mb-6" style={{ color: 'var(--color-on-surface)' }}>
-                {t('editProfile')}
-              </h2>
-              <div className="space-y-6 mb-8">
-                <div>
-                  <label className="text-[10px] font-black uppercase tracking-[0.15em] mb-2 block ml-1"
-                    style={{ color: 'var(--color-outline)' }}>{t('fullName')}</label>
-                  <input
-                    type="text"
-                    value={profileName}
-                    onChange={(e) => setProfileName(e.target.value)}
-                    placeholder="Enter your name"
-                    className="w-full h-14 rounded-[16px] px-5 font-bold outline-none transition-all"
-                    style={{
-                      background: 'var(--color-surface-container)',
-                      color: 'var(--color-on-surface)',
-                      border: '1px solid var(--color-outline-variant)',
-                    }}
-                    onFocus={(e) => { e.target.style.borderColor = 'var(--color-primary)'; }}
-                    onBlur={(e) => { e.target.style.borderColor = 'var(--color-outline-variant)'; }}
-                  />
-                </div>
-                <div>
-                  <label className="text-[10px] font-black uppercase tracking-[0.15em] mb-2 block ml-1"
-                    style={{ color: 'var(--color-outline)' }}>{t('phoneNumber')}</label>
-                  <div className="w-full h-14 rounded-[16px] px-5 flex items-center font-bold opacity-70"
-                    style={{ background: 'var(--color-surface-container-low)', color: 'var(--color-on-surface-variant)' }}>
-                    +91 {user?.phone}
-                    <span className="ml-auto text-[9px] font-black uppercase tracking-widest">{t('verified')}</span>
-                  </div>
-                  <p className="text-[10px] mt-2 ml-1" style={{ color: 'var(--color-outline)' }}>
-                    Phone number cannot be changed for security reasons.
-                  </p>
-                </div>
-              </div>
-              <Button
-                size="full"
-                className="h-14 rounded-[18px] font-black text-sm tracking-wide"
-                onClick={handleUpdateProfile}
-                disabled={isUpdating || !profileName.trim()}>
-                {isUpdating ? <Loader2 className="w-5 h-5 animate-spin" /> : t('saveDetails')}
-              </Button>
-            </motion.div>
-          </>
-        )}
-      </AnimatePresence>
-
-      {/* ── Logout Confirm ── */}
-      <AnimatePresence>
-        {showLogoutConfirm && (
-          <motion.div
-            initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4 backdrop-blur-sm"
-            onClick={() => setShowLogoutConfirm(false)}>
-            <motion.div
-              initial={{ scale: 0.9, y: 20 }} animate={{ scale: 1, y: 0 }} exit={{ scale: 0.9, y: 20 }}
-              className="w-full max-w-[320px] rounded-[20px] p-6 flex flex-col items-center text-center shadow-xl"
-              style={{ background: 'var(--color-surface)' }}
-              onClick={(e) => e.stopPropagation()}>
-              <div className="w-16 h-16 rounded-full flex items-center justify-center mb-4"
-                style={{ background: '#fef2f2' }}>
-                <AlertTriangle className="w-8 h-8 text-red-500" />
-              </div>
-              <h2 className="text-xl font-bold mb-2" style={{ color: 'var(--color-on-surface)' }}>
-                {t('logoutConfirm')}
-              </h2>
-              <p className="text-sm mb-8 leading-relaxed" style={{ color: 'var(--color-outline)' }}>
-                {t('logoutConfirmSub')}
-              </p>
-              <div className="flex flex-col w-full gap-3">
-                <Button
-                  className="w-full h-12 rounded-xl font-bold"
-                  style={{ background: '#ef4444', color: 'white' }}
-                  onClick={handleLogout}
-                  disabled={isLoggingOut}>
-                  {isLoggingOut ? <Loader2 className="w-5 h-5 animate-spin" /> : t('yesLogout')}
-                </Button>
-                <Button
-                  variant="outline"
-                  className="w-full h-12 rounded-xl font-bold border-sand"
-                  onClick={() => setShowLogoutConfirm(false)}>
-                  {t('cancel')}
-                </Button>
-              </div>
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-    </>
+    </div>
   );
 }

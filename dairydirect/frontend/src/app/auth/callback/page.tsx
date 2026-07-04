@@ -37,8 +37,8 @@ function AuthCallbackInner() {
         let redirectTarget = next;
         
         if (addrError || !addresses || addresses.length === 0) {
-          // User has no addresses, redirect to onboarding
-          redirectTarget = '/onboarding/address';
+          // User has no addresses, redirect to onboarding but preserve the final destination
+          redirectTarget = '/onboarding/address?return_to=' + encodeURIComponent(next);
         }
 
         // Sync with backend

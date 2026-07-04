@@ -8,9 +8,12 @@ import { useStore } from '@/store/useStore';
 import { addToCart, updateCartItem } from '@/lib/api/cart';
 import type { ProductWithVariants } from '@/lib/api/products';
 import { motion, AnimatePresence } from 'framer-motion';
+import { SmartBadge } from '@/components/discovery/SmartBadges';
+import Image from 'next/image';
 
 interface ProductCardProps {
   product: ProductWithVariants;
+  priority?: boolean;
 }
 
 const categoryGradients: Record<string, { bg: string; icon: string; blob: string }> = {
@@ -22,7 +25,7 @@ const categoryGradients: Record<string, { bg: string; icon: string; blob: string
   'Lassi':     { bg: '#e8f4fd', icon: '#4a90d9', blob: '#bde3ff' },
 };
 
-export function ProductCard({ product }: ProductCardProps) {
+export function ProductCard({ product, priority = false }: ProductCardProps) {
   const { t } = useTranslation();
   const router = useRouter();
 
@@ -144,12 +147,15 @@ export function ProductCard({ product }: ProductCardProps) {
               style={{ background: categoryStyle.blob }}
             />
 
-            <img
-              src={product.image_url ?? '/milk.png'}
+            <Image
+              src={product.image_url || '/milk.png'}
               alt={product.name}
+              fill
+              sizes="(max-width: 768px) 50vw, 33vw"
+              priority={priority}
               className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
               onError={(e) => {
-                (e.currentTarget as HTMLImageElement).src = `/milk.png`;
+                (e.currentTarget as HTMLImageElement).srcset = `/milk.png`;
               }}
             />
             <div className="absolute inset-0 bg-black/5 group-hover:bg-transparent transition-colors" />
@@ -165,6 +171,12 @@ export function ProductCard({ product }: ProductCardProps) {
                 </span>
               </div>
             )}
+
+            <div className={`absolute ${product.is_freshness_guarantee ? 'top-10' : 'top-2.5'} left-2.5 flex flex-col gap-1 z-10`}>
+              {product.category === 'Milk' && <SmartBadge type="bestseller" />}
+              {product.category === 'Ghee' && <SmartBadge type="trending" />}
+              {product.category === 'Paneer' && <SmartBadge type="popular" />}
+            </div>
 
             {isInCart && (
               <div
@@ -199,13 +211,14 @@ export function ProductCard({ product }: ProductCardProps) {
               <button
                 onClick={handleAdd}
                 disabled={busy}
-                className="w-8 h-8 rounded-[10px] flex items-center justify-center transition-all duration-150 active:scale-90 hover:brightness-110 disabled:opacity-50"
+                className="h-8 px-5 rounded-[8px] flex items-center justify-center transition-all duration-150 active:scale-95 hover:opacity-90 disabled:opacity-50"
                 style={{
                   background: 'linear-gradient(135deg, #3f6530, #577f46)',
-                  boxShadow: '0 3px 8px rgba(63, 101, 48, 0.30)',
+                  color: 'white',
+                  boxShadow: '0 3px 8px rgba(63, 101, 48, 0.25)',
                 }}
               >
-                <Plus className="w-4 h-4 text-white" strokeWidth={2.5} />
+                <span className="text-[12px] font-black tracking-wide">ADD</span>
               </button>
             ) : (
               <div className="flex items-center rounded-[10px] overflow-hidden"

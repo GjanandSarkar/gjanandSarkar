@@ -2,19 +2,22 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Home, Grid3x3, Receipt, CalendarDays, User } from 'lucide-react';
+import { Home, Search, ShoppingCart, User, Bell } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useTranslation } from '@/lib/i18n';
+import { useStore } from '@/store/useStore';
 
 export function BottomNav() {
   const pathname = usePathname();
   const { t } = useTranslation();
+  const cart = useStore(state => state.cart);
+  const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
 
   const navItems = [
     { href: '/home', icon: Home, label: t('navHome') },
-    { href: '/products', icon: Grid3x3, label: t('navProducts') },
-    { href: '/orders', icon: Receipt, label: t('navOrders') },
-    { href: '/subscribe', icon: CalendarDays, label: t('navSubscribe') },
+    { href: '/search', icon: Search, label: 'Search' },
+    { href: '#', isNotification: true, icon: Bell, label: 'Alerts', badge: 2 }, // Using 2 as mock unread
+    { href: '/cart', icon: ShoppingCart, label: 'Cart', badge: totalItems },
     { href: '/profile', icon: User, label: t('navProfile') },
   ];
 
@@ -33,15 +36,11 @@ export function BottomNav() {
         style={{ background: 'var(--color-outline-variant)' }} />
 
       {navItems.map((item, idx) => {
-        const isActive = pathname.startsWith(item.href);
+        const isActive = item.href !== '#' && pathname.startsWith(item.href);
         const Icon = item.icon;
         
-        return (
-          <Link
-            key={item.href}
-            href={item.href}
-            className="flex flex-col items-center gap-1 flex-1 py-1 relative"
-          >
+        const content = (
+          <div className="flex flex-col items-center gap-1 flex-1 py-1 relative w-full h-full cursor-pointer">
             {/* Active indicator pill */}
             <div className={cn(
               "flex items-center justify-center w-12 h-7 rounded-full transition-all duration-300",
@@ -52,7 +51,6 @@ export function BottomNav() {
               style={isActive ? { 
                 background: 'linear-gradient(135deg, #c2efac, #a7d392)',
               } : {}}>
-              {/* ghost */}
             </div>
             
             {/* Icon positioned over pill */}
@@ -66,15 +64,54 @@ export function BottomNav() {
                   strokeWidth: isActive ? 2.5 : 1.75,
                 }} 
               />
+              {item.badge ? (
+                <span className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full text-[9px] font-bold text-white bg-secondary border border-white">
+                  {item.badge}
+                </span>
+              ) : null}
             </div>
 
             <span className="text-[10px] font-semibold leading-none mt-[30px]"
               style={{ color: isActive ? 'var(--color-primary)' : 'var(--color-outline)' }}>
               {item.label}
             </span>
+          </div>
+        );
+
+        // If it's the notification trigger, we use a separate handler instead of Link
+        if (item.isNotification) {
+          return (
+            <NotificationTrigger key="notifications" content={content} />
+          );
+        }
+
+        return (
+          <Link
+            key={item.href}
+            href={item.href}
+            className="flex-1"
+          >
+            {content}
           </Link>
         );
       })}
     </nav>
+  );
+}
+
+import { NotificationCenter } from '@/components/notifications/NotificationCenter';
+import { useMediaQuery } from '@/hooks/useMediaQuery';
+import { useState } from 'react';
+
+function NotificationTrigger({ content }: { content: React.ReactNode }) {
+  const [isOpen, setIsOpen] = useState(false);
+  const isMobile = useMediaQuery('(max-width: 768px)');
+  return (
+    <>
+      <div className="flex-1" onClick={() => setIsOpen(true)}>
+        {content}
+      </div>
+      <NotificationCenter isOpen={isOpen} onClose={() => setIsOpen(false)} isMobile={isMobile} />
+    </>
   );
 }

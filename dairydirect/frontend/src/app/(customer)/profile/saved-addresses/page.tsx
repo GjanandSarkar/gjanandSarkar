@@ -59,7 +59,7 @@ export default function SavedAddressesScreen() {
       <div className="px-5 pt-6 space-y-4">
         {/* Add New */}
         <button 
-          onClick={() => router.push('/onboarding/address?return_to=/checkout/payment')}
+          onClick={() => router.push('/onboarding/address?return_to=/checkout')}
           className="w-full p-5 rounded-[24px] border-2 border-dashed border-primary/20 bg-primary/5 flex items-center gap-4 transition-all active:scale-[0.98]"
         >
           <div className="w-12 h-12 rounded-[14px] bg-primary text-white flex items-center justify-center shadow-lg shadow-primary/20">

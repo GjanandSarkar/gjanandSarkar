@@ -4,27 +4,23 @@ import { cva, type VariantProps } from "class-variance-authority"
 import { cn } from "@/lib/utils"
 
 const buttonVariants = cva(
-  "inline-flex items-center justify-center whitespace-nowrap font-semibold transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-40 active:scale-[0.97]",
+  "inline-flex items-center justify-center whitespace-nowrap font-semibold transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 interactive",
   {
     variants: {
       variant: {
-        // Primary — Deep Meadow gradient  
-        default: "text-white",
-        // Secondary — Terracotta
-        secondary: "text-white",
-        // Outline ghost
-        outline: "border font-medium",
-        // Ghost — transparent  
-        ghost: "font-medium",
-        // Link style
-        link: "font-semibold underline-offset-4 hover:underline p-0 h-auto",
+        default: "bg-primary text-foreground-inverse shadow-card hover:bg-primary-hover active:bg-primary-active",
+        secondary: "bg-secondary text-foreground-inverse shadow-card hover:bg-secondary-hover",
+        outline: "border-1.5 border-primary/30 text-primary hover:bg-primary/5",
+        ghost: "text-foreground-muted hover:bg-surface-muted hover:text-foreground",
+        link: "font-semibold text-primary underline-offset-4 hover:underline p-0 h-auto",
+        destructive: "bg-error text-foreground-inverse shadow-card hover:brightness-110",
       },
       size: {
-        default: "h-[48px] px-6 py-2 rounded-[12px] text-[14px]",
-        sm: "h-9 px-4 rounded-[10px] text-[13px]",
-        lg: "h-[56px] px-8 rounded-[14px] text-[16px]",
-        icon: "h-[44px] w-[44px] rounded-[12px]",
-        full: "h-[52px] w-full px-6 rounded-[14px] text-[15px]",
+        default: "h-12 px-6 py-2 rounded-xl text-body-md",
+        sm: "h-11 px-4 rounded-lg text-body-sm",
+        lg: "h-14 px-8 rounded-2xl text-body-lg",
+        icon: "h-11 w-11 rounded-xl",
+        full: "h-12 w-full px-6 rounded-xl text-body-md",
       },
     },
     defaultVariants: {
@@ -41,44 +37,13 @@ export interface ButtonProps
 }
 
 const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
-  ({ className, variant, size, asChild = false, style, ...props }, ref) => {
+  ({ className, variant, size, asChild = false, ...props }, ref) => {
     const Comp = asChild ? Slot : "button"
     
-    // Build inline styles for variants (avoids Tailwind arbitrary value issues)
-    const variantStyles: React.CSSProperties = {};
-    if (variant === 'default' || !variant) {
-      Object.assign(variantStyles, {
-        background: 'linear-gradient(135deg, #3f6530, #577f46)',
-        boxShadow: '0 4px 14px rgba(63, 101, 48, 0.28)',
-      });
-    } else if (variant === 'secondary') {
-      Object.assign(variantStyles, {
-        background: 'linear-gradient(135deg, #8a5025, #a8622e)',
-        boxShadow: '0 4px 14px rgba(138, 80, 37, 0.22)',
-      });
-    } else if (variant === 'outline') {
-      Object.assign(variantStyles, {
-        border: '1.5px solid rgba(63, 101, 48, 0.30)',
-        color: 'var(--color-primary)',
-        background: 'transparent',
-      });
-    } else if (variant === 'ghost') {
-      Object.assign(variantStyles, {
-        color: 'var(--color-on-surface-variant)',
-        background: 'transparent',
-      });
-    } else if (variant === 'link') {
-      Object.assign(variantStyles, {
-        color: 'var(--color-primary)',
-        background: 'transparent',
-      });
-    }
-
     return (
       <Comp
         className={cn(buttonVariants({ variant, size, className }))}
         ref={ref}
-        style={{ ...variantStyles, ...style }}
         {...props}
       />
     )

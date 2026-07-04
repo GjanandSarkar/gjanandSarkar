@@ -4,8 +4,17 @@ import { createNotification } from './notifications';
 
 // ─── Types ────────────────────────────────────────────────────
 
-export type OrderWithItems = DBOrder & {
-  order_items: DBOrderItem[];
+export type OrderWithItems = Omit<DBOrder, 'order_items'> & {
+  order_items: (DBOrderItem & {
+    products?: { name: string; image_url: string | null };
+    product_variants?: { weight: string };
+  })[];
+  user_addresses?: { 
+    id: string;
+    label: string;
+    address: string;
+    apartment?: string;
+  };
 };
 
 export type PlaceOrderInput = {
@@ -38,7 +47,7 @@ function generateOrderId(): string {
 export async function getUserOrders(userId: string): Promise<OrderWithItems[]> {
   const { data, error } = await supabase
     .from('orders')
-    .select('*, order_items(*)')
+    .select('*, order_items(*, products(name, image_url), product_variants(weight)), user_addresses(*)')
     .eq('user_id', userId)
     .order('created_at', { ascending: false });
 
@@ -70,7 +79,7 @@ export async function getUserBuyAgainHistory(): Promise<string[]> {
 export async function getAllOrders(): Promise<OrderWithItems[]> {
   const { data, error } = await supabase
     .from('orders')
-    .select('*, order_items(*), profiles:user_id(name, phone)')
+    .select('*, order_items(*, products(name, image_url), product_variants(weight)), user_addresses(*), profiles:user_id(name, phone)')
     .order('created_at', { ascending: false });
 
   if (error) {
@@ -85,7 +94,7 @@ export async function getAllOrders(): Promise<OrderWithItems[]> {
 export async function getOrderById(orderId: string): Promise<OrderWithItems | null> {
   const { data, error } = await supabase
     .from('orders')
-    .select('*, order_items(*)')
+    .select('*, order_items(*, products(name, image_url), product_variants(weight)), user_addresses(*)')
     .eq('id', orderId)
     .single();
 

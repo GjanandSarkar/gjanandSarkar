@@ -1,17 +1,21 @@
 "use client";
 
-import { useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useState, Suspense } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { useTranslation } from '@/lib/i18n';
 import { motion } from 'framer-motion';
 import { Loader2, User } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
+import { getURL } from '@/lib/utils';
 
-export default function LoginScreen() {
+function LoginScreenInner() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { t } = useTranslation();
+  
+  const nextParam = searchParams.get('next') || '/home';
 
   const handleGoogleLogin = async () => {
     setIsLoading(true);
@@ -21,7 +25,7 @@ export default function LoginScreen() {
       const { error: oauthError } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
-          redirectTo: `${window.location.origin}/auth/callback?next=/home`,
+          redirectTo: `${getURL()}/auth/callback?next=${encodeURIComponent(nextParam)}`,
           queryParams: {
             access_type: 'offline',
             prompt: 'consent',
@@ -101,3 +105,10 @@ export default function LoginScreen() {
   );
 }
 
+export default function LoginScreen() {
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-surface" />}>
+      <LoginScreenInner />
+    </Suspense>
+  );
+}

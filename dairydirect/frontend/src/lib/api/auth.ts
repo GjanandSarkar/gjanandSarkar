@@ -63,3 +63,17 @@ export async function updateProfileName(
     return { success: false, error: err.message };
   }
 }
+
+export async function updateProfileAvatar(
+  userId: string,
+  avatarUrl: string
+): Promise<{ success: boolean; error?: string }> {
+  try {
+    const { supabase } = await import('@/lib/supabase');
+    const { error } = await supabase.from('profiles').update({ avatar_url: avatarUrl }).eq('id', userId);
+    if (error) return { success: false, error: error.message };
+    return { success: true };
+  } catch (err: any) {
+    return { success: false, error: err.message };
+  }
+}
