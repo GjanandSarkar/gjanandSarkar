@@ -81,7 +81,7 @@ export async function createNotification(
     user_id: input.userId,
     role_target: input.roleTarget,
     title: input.title,
-    body: input.body,
+    message: input.body,
     type: input.type ?? 'system',
     related_id: input.relatedId ?? null,
     is_read: false,

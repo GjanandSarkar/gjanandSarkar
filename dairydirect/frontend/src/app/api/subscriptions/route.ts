@@ -40,7 +40,7 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json();
-    const { userId, productId, volume, plan } = body;
+    const { userId, productId, volume, plan, startDate } = body;
 
     if (auth.userId !== userId && !auth.isAdmin) {
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
@@ -56,6 +56,7 @@ export async function POST(request: NextRequest) {
         volume,
         plan,
         status: 'active',
+        start_date: startDate,
         next_delivery_date: nextDeliveryDate,
       })
       .select('id')

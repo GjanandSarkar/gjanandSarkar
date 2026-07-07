@@ -100,18 +100,16 @@ export function BottomNav() {
 }
 
 import { NotificationCenter } from '@/components/notifications/NotificationCenter';
-import { useMediaQuery } from '@/hooks/useMediaQuery';
 import { useState } from 'react';
 
 function NotificationTrigger({ content }: { content: React.ReactNode }) {
   const [isOpen, setIsOpen] = useState(false);
-  const isMobile = useMediaQuery('(max-width: 768px)');
   return (
     <>
       <div className="flex-1" onClick={() => setIsOpen(true)}>
         {content}
       </div>
-      <NotificationCenter isOpen={isOpen} onClose={() => setIsOpen(false)} isMobile={isMobile} />
+      <NotificationCenter isOpen={isOpen} onClose={() => setIsOpen(false)} />
     </>
   );
 }

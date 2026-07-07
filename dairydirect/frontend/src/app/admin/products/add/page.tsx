@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useTranslation } from '@/lib/i18n';
-import { getProducts, uploadProductImage } from '@/lib/api/products';
+import { getProducts, uploadProductImage, createProduct } from '@/lib/api/products';
 import { ArrowLeft, Plus, Trash2, Loader2, UploadCloud } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -63,28 +63,24 @@ function AddProductPage() {
         image_url = uploadRes.url;
       }
 
-      const response = await fetch('/api/products', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
+      const res = await createProduct(
+        {
           name,
           category,
           description,
           image_url,
           is_freshness_guarantee: true,
-          variants: validVariants.map(v => ({
-            weight: v.weight,
-            price: parseFloat(v.price),
-            cost_price: parseFloat(v.cost_price),
-            stock: parseInt(v.stock) || 0,
-          })),
-        }),
-      });
+        },
+        validVariants.map(v => ({
+          weight: v.weight,
+          price: parseFloat(v.price),
+          cost_price: parseFloat(v.cost_price),
+          stock: parseInt(v.stock) || 0,
+        }))
+      );
 
-      const data = await response.json();
-      
-      if (!response.ok) {
-        throw new Error(data.error || 'Failed to create product');
+      if (!res.success) {
+        throw new Error(res.error || 'Failed to create product');
       }
 
       router.replace('/admin/products');

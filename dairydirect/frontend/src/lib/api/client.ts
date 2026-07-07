@@ -126,7 +126,7 @@ export const api = {
     get: () =>
       fetchApi<{ subscriptions: any[] }>(`/api/subscriptions`),
 
-    create: (_data: { userId: string; productId: string; volume: number; plan: string }) =>
+    create: (_data: { userId: string; productId: string; volume: number; plan: string; startDate: string }) =>
       fetchApi<{ success: boolean; id: string }>('/api/subscriptions', {
         method: 'POST',
         body: JSON.stringify(_data),

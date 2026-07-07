@@ -89,7 +89,7 @@ export function ProductClient({ product }: ProductClientProps) {
         <img
           src={product.image_url || '/milk.png'}
           alt={product.name}
-          className="w-full h-64 object-cover"
+          className="w-full h-72 md:h-96 object-contain p-4 bg-surface-container-lowest"
         />
 
         {product.is_freshness_guarantee && (

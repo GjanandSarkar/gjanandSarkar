@@ -4,7 +4,8 @@ import { ProductCarousel } from '@/components/home/ProductCarousel';
 import { BuyAgainCarousel } from '@/components/discovery/BuyAgainCarousel';
 import { TrustSection } from '@/components/home/TrustSection';
 import { SocialProof } from '@/components/home/SocialProof';
-import { Sparkles, TrendingUp } from 'lucide-react';
+import { Sparkles, TrendingUp, CalendarDays } from 'lucide-react';
+import Link from 'next/link';
 import dynamic from 'next/dynamic';
 
 // Dynamic imports for below-the-fold content
@@ -34,6 +35,32 @@ export default async function HomeScreen() {
     <div className="flex flex-col pb-20 pt-4">
       {/* ══ CATEGORY QUICK ACCESS ══ */}
       <CategorySection categories={uniqueCategories} isLoading={false} />
+
+      {/* ══ SUBSCRIPTION BANNER ══ */}
+      <div className="px-4 md:px-10 mt-6 mb-2">
+        <Link href="/subscribe/new" className="block relative overflow-hidden bg-primary rounded-[24px] p-6 shadow-sm transition-transform active:scale-[0.98]">
+          <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -mr-16 -mt-16 blur-2xl" />
+          <div className="absolute bottom-0 left-0 w-24 h-24 bg-mint/20 rounded-full -ml-8 -mb-8 blur-xl" />
+          
+          <div className="relative z-10 flex items-center justify-between">
+            <div className="flex-1">
+              <div className="flex items-center gap-2 mb-2">
+                <CalendarDays className="w-4 h-4 text-mint" />
+                <span className="text-[10px] font-black uppercase tracking-widest text-mint">Daily Essentials</span>
+              </div>
+              <h2 className="text-[19px] font-black text-white leading-tight mb-1 tracking-tight">
+                Subscribe & Save 5%
+              </h2>
+              <p className="text-xs font-medium text-white/80 max-w-[200px] leading-relaxed">
+                Fresh A2 milk delivered to your door every morning.
+              </p>
+            </div>
+            <div className="w-20 h-20 shrink-0 flex items-center justify-center">
+              <img src="/final_images/A2_Gir_Cow_Milk.png" alt="Milk" className="w-full h-full object-contain drop-shadow-lg scale-125 origin-right" />
+            </div>
+          </div>
+        </Link>
+      </div>
 
       {/* ══ BUY AGAIN (Personalized) ══ */}
       <BuyAgainCarousel allProducts={prods} />

@@ -45,6 +45,11 @@ function AuthCallbackInner() {
 
         if (!res.ok) {
           console.error('Sync failed:', await res.text());
+        } else {
+          const data = await res.json();
+          if (data.user?.role === 'admin') {
+            redirectTarget = '/admin';
+          }
         }
 
         // Mark callback as processed to prevent loops

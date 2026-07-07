@@ -233,7 +233,7 @@ export function ProductCard({ product, priority = false }: ProductCardProps) {
                 </button>
                 <span className="px-2 text-center text-[12px] font-black"
                   style={{ color: 'var(--color-on-surface)' }}>
-                  {variants.length > 1 ? '·' : currentVariantQty}
+                  {variants.length > 1 ? totalQuantity : currentVariantQty}
                 </span>
                 <button
                   onClick={(e) => handleUpdate(e, 'inc')}

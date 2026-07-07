@@ -117,14 +117,20 @@ export async function createProduct(
   }
 }
 
+import { supabase } from '@/lib/supabase';
+
 export async function updateProduct(
   id: string,
   updates: Partial<NewProductInput>
 ): Promise<{ success: boolean; error?: string }> {
+  const { error } = await supabase.from('products').update(updates).eq('id', id);
+  if (error) return { success: false, error: error.message };
   return { success: true };
 }
 
 export async function deleteProduct(id: string): Promise<{ success: boolean; error?: string }> {
+  const { error } = await supabase.from('products').delete().eq('id', id);
+  if (error) return { success: false, error: error.message };
   return { success: true };
 }
 
@@ -132,11 +138,36 @@ export async function upsertVariants(
   productId: string,
   variants: (NewVariantInput & { id?: string })[]
 ): Promise<{ success: boolean; error?: string }> {
+  const { error } = await supabase.from('product_variants').upsert(
+    variants.map(v => ({
+      ...v,
+      product_id: productId,
+    }))
+  );
+  if (error) return { success: false, error: error.message };
   return { success: true };
 }
 
 export async function uploadProductImage(
   file: File
 ): Promise<{ url?: string; error?: string }> {
-  return { error: 'Not implemented yet' };
+  try {
+    const fileExt = file.name.split('.').pop();
+    const fileName = `${Math.random()}.${fileExt}`;
+    const filePath = `${fileName}`;
+
+    const { error: uploadError } = await supabase.storage
+      .from('products')
+      .upload(filePath, file);
+
+    if (uploadError) throw uploadError;
+
+    const { data } = supabase.storage
+      .from('products')
+      .getPublicUrl(filePath);
+
+    return { url: data.publicUrl };
+  } catch (error: any) {
+    return { error: error.message };
+  }
 }
