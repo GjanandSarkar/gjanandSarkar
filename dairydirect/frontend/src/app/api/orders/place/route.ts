@@ -2,9 +2,22 @@ import { NextRequest, NextResponse } from 'next/server';
 import { supabaseAdmin } from '@/lib/db';
 import { calculateOrderPricing } from '@/lib/pricing';
 import { getAuthUser } from '@/lib/api/auth-middleware';
+import { rateLimit } from '@/lib/rate-limit';
+
+const limiter = rateLimit({
+  interval: 60 * 1000, // 1 minute
+  uniqueTokenPerInterval: 20, // 20 requests per minute per IP
+});
 
 export async function POST(request: NextRequest) {
   try {
+    const ip = request.headers.get('x-forwarded-for') || '127.0.0.1';
+    try {
+      await limiter.check(5, ip); // Max 5 order placements per minute per IP
+    } catch {
+      return NextResponse.json({ error: 'Too Many Requests. Please try again later.' }, { status: 429 });
+    }
+
     const auth = await getAuthUser(request);
     if (!auth) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });

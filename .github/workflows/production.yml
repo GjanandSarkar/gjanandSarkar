@@ -1,0 +1,38 @@
+name: Production Verification
+
+on:
+  push:
+    branches: [ "main", "upgrade" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout Repository
+      uses: actions/checkout@v4
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: 18
+        cache: 'npm'
+        cache-dependency-path: dairydirect/frontend/package-lock.json
+
+    - name: Install Dependencies
+      working-directory: dairydirect/frontend
+      run: npm ci
+
+    - name: Type Check
+      working-directory: dairydirect/frontend
+      run: npx tsc --noEmit
+
+    - name: Build Verification
+      working-directory: dairydirect/frontend
+      run: npm run build
+      env:
+        # Mock environment variables for build to succeed
+        NEXT_PUBLIC_SUPABASE_URL: "https://mock-supabase-url.supabase.co"
+        NEXT_PUBLIC_SUPABASE_ANON_KEY: "mock-anon-key"
