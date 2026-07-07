@@ -160,19 +160,7 @@ export function ProductCard({ product, priority = false }: ProductCardProps) {
             />
             <div className="absolute inset-0 bg-black/5 group-hover:bg-transparent transition-colors" />
 
-            {product.is_freshness_guarantee && (
-              <div
-                className="absolute top-2.5 left-2.5 flex items-center gap-1 px-2 py-1 rounded-full"
-                style={{ background: 'rgba(255,255,255,0.88)', backdropFilter: 'blur(8px)' }}
-              >
-                <Sparkles className="w-2.5 h-2.5" style={{ color: 'var(--color-primary)' }} strokeWidth={2.5} />
-                <span className="text-[9px] font-bold uppercase tracking-wider" style={{ color: 'var(--color-primary)' }}>
-                  {t('fresh')}
-                </span>
-              </div>
-            )}
-
-            <div className={`absolute ${product.is_freshness_guarantee ? 'top-10' : 'top-2.5'} left-2.5 flex flex-col gap-1 z-10`}>
+            <div className="absolute top-2.5 left-2.5 flex flex-col gap-1 z-10">
               {product.category === 'Milk' && <SmartBadge type="bestseller" />}
               {product.category === 'Ghee' && <SmartBadge type="trending" />}
               {product.category === 'Paneer' && <SmartBadge type="popular" />}

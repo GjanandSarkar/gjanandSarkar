@@ -42,20 +42,29 @@ export function Sidebar() {
       {/* Brand */}
       <div className="h-[72px] flex items-center px-6 relative z-10">
         <Link href="/home" className="flex items-center gap-3 group">
-          <img src="/logo.svg" alt="Logo" className="w-9 h-9 object-contain" />
+          <img src="/logo.svg" alt="Logo" className="w-12 h-12 object-contain" />
         </Link>
       </div>
 
       {/* User Greeting */}
       {user && (
-        <div className="mx-4 mb-2 px-4 py-3 rounded-[14px]"
+        <div className="mx-4 mb-2 px-4 py-3 rounded-[14px] flex items-center gap-3"
           style={{ background: 'var(--color-surface-container-low)' }}>
-          <p className="text-[11px] font-semibold uppercase tracking-wider"
-            style={{ color: 'var(--color-outline)' }}>Good morning</p>
-          <p className="font-bold text-[15px] leading-tight mt-0.5"
-            style={{ color: 'var(--color-on-surface)' }}>
-            {user.name?.split(' ')[0] || 'Guest'} 👋
-          </p>
+          <div className="w-10 h-10 rounded-full overflow-hidden bg-sand/30 border border-sand flex items-center justify-center shrink-0">
+            {user.avatar_url ? (
+              <img src={user.avatar_url} alt="Profile" className="w-full h-full object-cover" />
+            ) : (
+              <User className="w-5 h-5 text-primary/40" />
+            )}
+          </div>
+          <div className="flex-1 min-w-0">
+            <p className="text-[11px] font-semibold uppercase tracking-wider"
+              style={{ color: 'var(--color-outline)' }}>Good morning</p>
+            <p className="font-bold text-[15px] leading-tight mt-0.5 truncate"
+              style={{ color: 'var(--color-on-surface)' }}>
+              {user.name?.split(' ')[0] || 'Guest'} 👋
+            </p>
+          </div>
         </div>
       )}
 

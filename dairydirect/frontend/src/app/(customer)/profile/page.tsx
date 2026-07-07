@@ -113,8 +113,10 @@ export default function ProfileScreen() {
           onLogout={handleLogout} 
         />
 
+        <RewardsPreview />
+
         {/* Smart Commerce: Buy Again / Replenishment */}
-        <div className="-mx-4 bg-white py-4 border-y border-sand/50 shadow-sm">
+        <div className="bg-white rounded-[24px] py-4 shadow-sm border border-sand/50">
           <BuyAgainCarousel />
         </div>
 
@@ -140,8 +142,6 @@ export default function ProfileScreen() {
         />
 
         <EngagementBanner />
-
-        <RewardsPreview />
 
       </div>
 

@@ -92,12 +92,7 @@ export function ProductClient({ product }: ProductClientProps) {
           className="w-full h-72 md:h-96 object-contain p-4 bg-surface-container-lowest"
         />
 
-        {product.is_freshness_guarantee && (
-          <div className="absolute bottom-4 left-4 flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/90 backdrop-blur-md shadow-lg">
-            <Sparkles className="w-4 h-4 text-primary" strokeWidth={2.5} />
-            <span className="text-xs font-bold text-primary uppercase tracking-wider">Fresh Guarantee</span>
-          </div>
-        )}
+
       </div>
 
       {/* Content */}

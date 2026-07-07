@@ -23,8 +23,12 @@ export function AccountMenu({ className }: AccountMenuProps) {
       )}
       aria-label={user ? "Go to profile" : "Log in"}
     >
-      <div className="w-8 h-8 rounded-full bg-surface-muted border border-border flex items-center justify-center shrink-0">
-        <User className="w-4 h-4 text-foreground-muted" />
+      <div className="w-8 h-8 rounded-full bg-surface-muted border border-border flex items-center justify-center shrink-0 overflow-hidden">
+        {user?.avatar_url ? (
+          <img src={user.avatar_url} alt="Profile" className="w-full h-full object-cover" />
+        ) : (
+          <User className="w-4 h-4 text-foreground-muted" />
+        )}
       </div>
       <span className="text-body-md font-medium hidden lg:block">
         {user ? user.name?.split(' ')[0] || 'Account' : 'Login'}
