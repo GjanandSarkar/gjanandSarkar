@@ -77,3 +77,18 @@ export async function updateProfileAvatar(
     return { success: false, error: err.message };
   }
 }
+
+export async function getAllProfiles(): Promise<any[]> {
+  try {
+    const { supabase } = await import('@/lib/supabase');
+    const { data, error } = await supabase.from('profiles').select('*');
+    if (error) {
+      console.error('getAllProfiles error:', error);
+      return [];
+    }
+    return data || [];
+  } catch (err) {
+    console.error('getAllProfiles exception:', err);
+    return [];
+  }
+}

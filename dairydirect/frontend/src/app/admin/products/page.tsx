@@ -33,6 +33,8 @@ export default function AdminProductsPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [search, setSearch] = useState('');
   const [category, setCategory] = useState('All');
+  const [status, setStatus] = useState('All'); // 'All' | 'Active' | 'Draft'
+  const [sortBy, setSortBy] = useState('Name A-Z'); // 'Name A-Z' | 'Price L-H' | 'Price H-L'
 
   useEffect(() => {
     getProducts({ activeOnly: false }).then(data => {
@@ -42,10 +44,20 @@ export default function AdminProductsPage() {
   }, []);
 
   const categories = ['All', 'Milk', 'Paneer', 'Ghee', 'Buttermilk', 'Curd', 'Lassi'];
-  const filtered = products.filter(p => {
+  let filtered = products.filter(p => {
     const matchCat = category === 'All' || p.category === category;
     const matchSearch = p.name.toLowerCase().includes(search.toLowerCase());
-    return matchCat && matchSearch;
+    const matchStatus = status === 'All' ? true : (status === 'Active' ? p.is_active : !p.is_active);
+    return matchCat && matchSearch && matchStatus;
+  });
+
+  filtered.sort((a, b) => {
+    if (sortBy === 'Name A-Z') return a.name.localeCompare(b.name);
+    const priceA = a.product_variants?.[0]?.price || 0;
+    const priceB = b.product_variants?.[0]?.price || 0;
+    if (sortBy === 'Price L-H') return priceA - priceB;
+    if (sortBy === 'Price H-L') return priceB - priceA;
+    return 0;
   });
 
   return (
@@ -102,6 +114,30 @@ export default function AdminProductsPage() {
                 {cat}
               </button>
             ))}
+          </div>
+          
+          <div className="flex gap-2">
+            <select
+              value={status}
+              onChange={e => setStatus(e.target.value)}
+              className="px-4 py-2.5 rounded-[12px] text-[13px] font-semibold outline-none appearance-none"
+              style={{ background: 'var(--color-surface-container)', color: 'var(--color-on-surface)' }}
+            >
+              <option value="All">All Status</option>
+              <option value="Active">Active</option>
+              <option value="Draft">Draft</option>
+            </select>
+            
+            <select
+              value={sortBy}
+              onChange={e => setSortBy(e.target.value)}
+              className="px-4 py-2.5 rounded-[12px] text-[13px] font-semibold outline-none appearance-none"
+              style={{ background: 'var(--color-surface-container)', color: 'var(--color-on-surface)' }}
+            >
+              <option value="Name A-Z">Name A-Z</option>
+              <option value="Price L-H">Price L-H</option>
+              <option value="Price H-L">Price H-L</option>
+            </select>
           </div>
         </div>
 

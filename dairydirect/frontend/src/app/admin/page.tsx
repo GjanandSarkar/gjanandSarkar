@@ -5,11 +5,13 @@ import { useTranslation } from '@/lib/i18n';
 import { useState, useEffect } from 'react';
 import { getAllOrders } from '@/lib/api/orders';
 import { getProducts } from '@/lib/api/products';
+import { getAllProfiles } from '@/lib/api/auth';
+import { getAllSubscriptions } from '@/lib/api/subscriptions';
 import type { OrderWithItems } from '@/lib/api/orders';
 import type { ProductWithVariants } from '@/lib/api/products';
 import {
   TrendingUp, ShoppingBag, Truck, Package, ArrowRight,
-  Clock, CheckCircle2, AlertCircle, BarChart3, Leaf, Loader2
+  Clock, CheckCircle2, AlertCircle, BarChart3, Leaf, Loader2, Users, CalendarDays
 } from 'lucide-react';
 import { format } from 'date-fns';
 import Link from 'next/link';
@@ -39,15 +41,21 @@ export default function AdminDashboard() {
 
   const [orders, setOrders] = useState<OrderWithItems[]>([]);
   const [productsCount, setProductsCount] = useState(0);
+  const [customersCount, setCustomersCount] = useState(0);
+  const [activeSubscriptions, setActiveSubscriptions] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     Promise.all([
       getAllOrders(),
       getProducts({ activeOnly: false }),
-    ]).then(([ordersData, productsData]) => {
+      getAllProfiles(),
+      getAllSubscriptions()
+    ]).then(([ordersData, productsData, profilesData, subsData]) => {
       setOrders(ordersData);
       setProductsCount(productsData.length);
+      setCustomersCount(profilesData.length);
+      setActiveSubscriptions(subsData.filter(s => s.status === 'active').length);
       setIsLoading(false);
     });
   }, []);
@@ -94,6 +102,24 @@ export default function AdminDashboard() {
       bg: '#e8f4fd',
       trend: 'Active',
     },
+    {
+      label: 'Active Subscriptions',
+      value: activeSubscriptions.toString(),
+      sub: 'Recurring revenue',
+      icon: CalendarDays,
+      color: '#8b5cf6',
+      bg: '#f3e8ff',
+      trend: 'Stable',
+    },
+    {
+      label: 'Total Customers',
+      value: customersCount.toString(),
+      sub: 'Registered accounts',
+      icon: Users,
+      color: '#10b981',
+      bg: '#d1fae5',
+      trend: 'Growing',
+    },
   ];
 
   if (isLoading) {
@@ -134,7 +160,7 @@ export default function AdminDashboard() {
 
         {/* ═══ STAT CARDS ═══ */}
         <motion.div
-          className="grid grid-cols-2 lg:grid-cols-4 gap-4"
+          className="grid grid-cols-2 lg:grid-cols-3 gap-4"
           variants={container} initial="hidden" animate="show">
           {stats.map((stat, i) => {
             const Icon = stat.icon;

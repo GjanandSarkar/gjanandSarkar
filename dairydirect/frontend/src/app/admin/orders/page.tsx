@@ -169,8 +169,27 @@ export default function AdminOrdersPage() {
                                   <Loader2 className="w-5 h-5 animate-spin text-primary" />
                                 </div>
                               )}
-                              <p className="text-[11px] font-bold uppercase tracking-wider mb-2"
-                                style={{ color: 'var(--color-outline)' }}>Update Status</p>
+                              <p className="text-[11px] font-bold uppercase tracking-wider mb-4"
+                                style={{ color: 'var(--color-outline)' }}>Order Timeline & Status</p>
+                              
+                              <div className="flex items-center gap-2 mb-6 w-full max-w-xl">
+                                {['pending', 'confirmed', 'out_for_delivery', 'delivered'].map((status, idx, arr) => {
+                                  const isActive = order.status === status || arr.indexOf(order.status as any) > idx && order.status !== 'cancelled';
+                                  const isCurrent = order.status === status;
+                                  return (
+                                    <div key={status} className="flex items-center flex-1 last:flex-none">
+                                      <div className={`w-8 h-8 rounded-full flex items-center justify-center transition-colors ${isActive ? 'bg-primary text-white' : 'bg-surface text-outline border border-outline/30'}`}
+                                           style={{ boxShadow: isCurrent ? '0 0 0 3px rgba(63, 101, 48, 0.2)' : 'none' }}>
+                                        {idx + 1}
+                                      </div>
+                                      {idx < arr.length - 1 && (
+                                        <div className={`flex-1 h-1 mx-2 rounded-full transition-colors ${isActive && !isCurrent ? 'bg-primary' : 'bg-outline/20'}`} />
+                                      )}
+                                    </div>
+                                  );
+                                })}
+                              </div>
+
                               <div className="flex flex-wrap gap-2">
                                 {ORDER_STATUSES.map(status => {
                                   const sStyle = STATUS_STYLES[status];

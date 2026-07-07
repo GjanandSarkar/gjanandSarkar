@@ -3,7 +3,8 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useTranslation } from '@/lib/i18n';
-import { ArrowLeft, Plus, Trash2, Loader2 } from 'lucide-react';
+import { getProducts, uploadProductImage } from '@/lib/api/products';
+import { ArrowLeft, Plus, Trash2, Loader2, UploadCloud } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 const CATEGORIES = ['Milk', 'Paneer', 'Ghee', 'Buttermilk', 'Curd', 'Lassi'];
@@ -18,6 +19,8 @@ function AddProductPage() {
   const [variants, setVariants] = useState([{ weight: '', price: '', cost_price: '', stock: '' }]);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState('');
+  const [imageFile, setImageFile] = useState<File | null>(null);
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
 
   const addVariant = () => {
     setVariants([...variants, { weight: '', price: '', cost_price: '', stock: '' }]);
@@ -51,6 +54,15 @@ function AddProductPage() {
     setError('');
 
     try {
+      let image_url = '';
+      if (imageFile) {
+        const uploadRes = await uploadProductImage(imageFile);
+        if (uploadRes.error || !uploadRes.url) {
+          throw new Error(uploadRes.error || 'Failed to upload image');
+        }
+        image_url = uploadRes.url;
+      }
+
       const response = await fetch('/api/products', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -58,6 +70,7 @@ function AddProductPage() {
           name,
           category,
           description,
+          image_url,
           is_freshness_guarantee: true,
           variants: validVariants.map(v => ({
             weight: v.weight,
@@ -132,6 +145,36 @@ function AddProductPage() {
             className="w-full min-h-24 px-4 py-3 rounded-[12px] text-[15px] font-medium outline-none resize-none"
             style={{ background: 'var(--color-surface-container)', color: 'var(--color-on-surface)' }}
           />
+        </div>
+
+        <div>
+          <label className="text-[12px] font-bold uppercase tracking-wider mb-2 block"
+            style={{ color: 'var(--color-outline)' }}>Product Image (Optional)</label>
+          <div className="flex items-center gap-4">
+            <label className="cursor-pointer flex flex-col items-center justify-center w-24 h-24 rounded-[12px] border-2 border-dashed transition-colors hover:border-primary"
+              style={{ borderColor: 'rgba(195,201,187,0.5)', background: 'var(--color-surface-container)' }}>
+              <input type="file" className="hidden" accept="image/*" onChange={(e) => {
+                const file = e.target.files?.[0];
+                if (file) {
+                  setImageFile(file);
+                  setImagePreview(URL.createObjectURL(file));
+                }
+              }} />
+              {imagePreview ? (
+                <img src={imagePreview} alt="Preview" className="w-full h-full object-cover rounded-[10px]" />
+              ) : (
+                <>
+                  <UploadCloud className="w-6 h-6 mb-1" style={{ color: 'var(--color-outline)' }} />
+                  <span className="text-[10px] font-medium" style={{ color: 'var(--color-outline)' }}>Upload</span>
+                </>
+              )}
+            </label>
+            {imagePreview && (
+              <button onClick={() => { setImageFile(null); setImagePreview(null); }} className="text-[12px] font-bold text-red-600">
+                Remove
+              </button>
+            )}
+          </div>
         </div>
 
         <div>

@@ -11,7 +11,9 @@ function AuthCallbackInner() {
   const next = searchParams.get('next') || '/home';
 
   useEffect(() => {
-    const handleCallback = async () => {
+    let mounted = true;
+
+    const executeCallback = async (session: any) => {
       // Skip if we've already processed this callback (prevent double execution)
       if (typeof window !== 'undefined' && sessionStorage.getItem('auth_callback_processed')) {
         router.replace(next);
@@ -19,13 +21,6 @@ function AuthCallbackInner() {
       }
 
       try {
-        const { data: { session }, error } = await supabase.auth.getSession();
-        
-        if (error || !session) {
-          router.replace('/login');
-          return;
-        }
-
         // Check if user has saved addresses - need to fetch this
         const { data: addresses, error: addrError } = await supabase
           .from('user_addresses')
@@ -63,7 +58,26 @@ function AuthCallbackInner() {
       }
     };
 
-    handleCallback();
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      if (event === 'SIGNED_IN' && session && mounted) {
+        executeCallback(session);
+      }
+    });
+
+    // Also check if already signed in (in case the event fired before we mounted)
+    supabase.auth.getSession().then(({ data: { session }, error }) => {
+      if (session && mounted) {
+        executeCallback(session);
+      } else if (error) {
+        if (mounted) router.replace('/login');
+      }
+      // If no session and no error, we just wait for onAuthStateChange
+    });
+
+    return () => {
+      mounted = false;
+      subscription.unsubscribe();
+    };
   }, [router, next]);
 
   return (

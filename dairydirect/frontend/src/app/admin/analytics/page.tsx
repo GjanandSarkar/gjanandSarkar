@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useTranslation } from '@/lib/i18n';
 import { supabase } from '@/lib/supabase';
-import { BarChart3, Loader2, TrendingUp, Package, ShoppingBag, Truck, Clock } from 'lucide-react';
+import { BarChart3, Loader2, TrendingUp, Package, ShoppingBag, Truck, Clock, Repeat } from 'lucide-react';
 import { motion } from 'framer-motion';
 
 export default function AdminAnalyticsPage() {
@@ -15,6 +15,7 @@ export default function AdminAnalyticsPage() {
     deliveredOrders: 0,
     pendingOrders: 0,
     avgOrderValue: 0,
+    activeSubscribers: 0,
   });
   const [isLoading, setIsLoading] = useState(true);
 
@@ -28,6 +29,11 @@ export default function AdminAnalyticsPage() {
         .from('products')
         .select('*', { count: 'exact', head: true });
 
+      const { count: subsCount } = await supabase
+        .from('subscriptions')
+        .select('*', { count: 'exact', head: true })
+        .eq('status', 'active');
+
       const totalRevenue = orders?.reduce((sum: number, o: any) => sum + (o.status !== 'cancelled' ? o.total_amount : 0), 0) || 0;
       const deliveredOrders = orders?.filter((o: any) => o.status === 'delivered').length || 0;
       const pendingOrders = orders?.filter((o: any) => o.status === 'pending' || o.status === 'confirmed').length || 0;
@@ -39,6 +45,7 @@ export default function AdminAnalyticsPage() {
         deliveredOrders,
         pendingOrders,
         avgOrderValue: orders?.length ? totalRevenue / orders.length : 0,
+        activeSubscribers: subsCount || 0,
       });
       setIsLoading(false);
     };
@@ -54,12 +61,12 @@ export default function AdminAnalyticsPage() {
   }
 
   const cards = [
-    { label: 'Total Revenue', value: `₹${stats.totalRevenue.toLocaleString()}`, icon: TrendingUp, color: '#3f6530', bg: '#eaf4e2' },
+    { label: 'Total Revenue', value: `${t('currency')}${stats.totalRevenue.toLocaleString()}`, icon: TrendingUp, color: '#3f6530', bg: '#eaf4e2' },
     { label: 'Total Orders', value: stats.totalOrders.toString(), icon: ShoppingBag, color: '#4a90d9', bg: '#e8f4fd' },
+    { label: 'Active Subscribers', value: stats.activeSubscribers.toString(), icon: Repeat, color: '#d4712a', bg: '#ffdcc7' },
     { label: 'Products', value: stats.totalProducts.toString(), icon: Package, color: '#c78c2e', bg: '#fff8e6' },
-    { label: 'Delivered', value: stats.deliveredOrders.toString(), icon: Truck, color: '#2a4f1d', bg: '#eaf4e2' },
-    { label: 'Pending', value: stats.pendingOrders.toString(), icon: Clock, color: '#d4712a', bg: '#ffdcc7' },
-    { label: 'Avg Order Value', value: `₹${stats.avgOrderValue.toFixed(0)}`, icon: BarChart3, color: '#7d5200', bg: '#fff8e6' },
+    { label: 'Avg Order Value', value: `${t('currency')}${stats.avgOrderValue.toFixed(0)}`, icon: BarChart3, color: '#7d5200', bg: '#fff8e6' },
+    { label: 'Delivered / Pending', value: `${stats.deliveredOrders} / ${stats.pendingOrders}`, icon: Truck, color: '#2a4f1d', bg: '#eaf4e2' },
   ];
 
   return (
