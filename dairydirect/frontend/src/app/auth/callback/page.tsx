@@ -58,14 +58,14 @@ function AuthCallbackInner() {
       }
     };
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event: any, session: any) => {
       if (event === 'SIGNED_IN' && session && mounted) {
         executeCallback(session);
       }
     });
 
     // Also check if already signed in (in case the event fired before we mounted)
-    supabase.auth.getSession().then(({ data: { session }, error }) => {
+    supabase.auth.getSession().then(({ data: { session }, error }: any) => {
       if (session && mounted) {
         executeCallback(session);
       } else if (error) {
