@@ -72,11 +72,28 @@ export const api = {
       return fetchApi<{ products: any[] }>(`/api/products${query ? `?${query}` : ''}`);
     },
 
+    getById: (id: string) =>
+      fetchApi<{ product: any }>(`/api/products/${id}`),
+
     create: (_data: any) =>
       fetchApi<{ success: boolean; id: string }>(`/api/products`, {
         method: 'POST',
         body: JSON.stringify(_data),
       }),
+
+    update: (id: string, _data: any) =>
+      fetchApi<{ success: boolean; product: any }>(`/api/products/${id}`, {
+        method: 'PUT',
+        body: JSON.stringify(_data),
+      }),
+
+    delete: (id: string, permanent: boolean = false) =>
+      fetchApi<{ success: boolean; softDeleted?: boolean; permanent?: boolean; message?: string }>(
+        `/api/products/${id}?permanent=${permanent}`,
+        {
+          method: 'DELETE',
+        }
+      ),
   },
 
   orders: {

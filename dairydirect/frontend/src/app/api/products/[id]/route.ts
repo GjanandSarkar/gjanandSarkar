@@ -2,126 +2,33 @@ import { NextRequest, NextResponse } from 'next/server';
 import { supabaseAdmin } from '@/lib/db';
 import { getAuthUser } from '@/lib/api/auth-middleware';
 
-export async function GET(request: NextRequest) {
+interface Props {
+  params: Promise<{ id: string }>;
+}
+
+export async function GET(request: NextRequest, { params }: Props) {
   try {
-    const { searchParams } = new URL(request.url);
-    const category = searchParams.get('category');
-    const activeOnly = searchParams.get('activeOnly') !== 'false';
-
-    const auth = await getAuthUser(request);
-    const isAdmin = auth?.isAdmin ?? false;
-
-    let query = supabaseAdmin
+    const { id } = await params;
+    const { data, error } = await supabaseAdmin
       .from('products')
       .select('*, product_variants(*)')
-      .order('created_at', { ascending: false });
+      .eq('id', id)
+      .single();
 
-    if (category && category !== 'All') {
-      query = query.eq('category', category);
+    if (error || !data) {
+      return NextResponse.json({ error: 'Product not found' }, { status: 404 });
     }
 
-    if (activeOnly) {
-      query = query.eq('is_active', true);
-    }
-
-    const { data, error } = await query;
-
-    if (error) {
-      console.error('getProducts error:', error);
-      return NextResponse.json({ error: error.message }, { status: 500 });
-    }
-
-    return NextResponse.json({ products: data });
-  } catch (error) {
-    console.error('Products GET error:', error);
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+    return NextResponse.json({ product: data });
+  } catch (error: any) {
+    console.error('Product GET error:', error);
+    return NextResponse.json({ error: error.message || 'Internal server error' }, { status: 500 });
   }
 }
 
-export async function POST(request: NextRequest) {
+export async function PUT(request: NextRequest, { params }: Props) {
   try {
-    const auth = await getAuthUser(request);
-    if (!auth) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
-
-    if (!auth.isAdmin) {
-      return NextResponse.json({ error: 'Admin only' }, { status: 403 });
-    }
-
-    const body = await request.json();
-    const { name, category, description, image_url, is_freshness_guarantee, variants } = body;
-
-    const { data: settings } = await supabaseAdmin
-      .from('business_settings')
-      .select('min_profit_margin_percent')
-      .single();
-    
-    const minMargin = settings?.min_profit_margin_percent || 20;
-
-    if (variants && variants.length > 0) {
-      for (const v of variants) {
-        const cost = v.cost_price || 0;
-        const selling = v.price || 0;
-        if (cost <= 0) {
-          return NextResponse.json({ error: `Cost price must be greater than 0 for variant ${v.weight}` }, { status: 400 });
-        }
-        const minSelling = cost * (1 + minMargin / 100);
-        if (selling < minSelling) {
-          return NextResponse.json({ 
-            error: `Selling price for ${v.weight} must be at least ₹${minSelling.toFixed(2)} (Min ${minMargin}% margin)` 
-          }, { status: 400 });
-        }
-      }
-    }
-
-    const { data: productData, error: productError } = await supabaseAdmin
-      .from('products')
-      .insert({
-        name,
-        category,
-        description,
-        image_url,
-        is_freshness_guarantee: is_freshness_guarantee ?? false,
-        is_active: true,
-      })
-      .select('id')
-      .single();
-
-    if (productError) {
-      return NextResponse.json({ error: productError.message }, { status: 500 });
-    }
-
-    const productId = productData.id;
-
-    if (variants && variants.length > 0) {
-      const { error: variantError } = await supabaseAdmin
-        .from('product_variants')
-        .insert(
-          variants.map((v: any) => ({
-            product_id: productId,
-            weight: v.weight,
-            price: v.price,
-            cost_price: v.cost_price,
-            original_price: v.original_price ?? null,
-            stock: v.stock ?? 0,
-          }))
-        );
-
-      if (variantError) {
-        console.error('Variant insert error:', variantError);
-      }
-    }
-
-    return NextResponse.json({ success: true, id: productId });
-  } catch (error) {
-    console.error('Products POST error:', error);
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
-  }
-}
-
-export async function PUT(request: NextRequest) {
-  try {
+    const { id } = await params;
     const auth = await getAuthUser(request);
     if (!auth) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
@@ -132,12 +39,9 @@ export async function PUT(request: NextRequest) {
     }
 
     const body = await request.json();
-    const { id, name, category, description, image_url, is_freshness_guarantee, is_active, variants } = body;
+    const { name, category, description, image_url, is_freshness_guarantee, is_active, variants } = body;
 
-    if (!id) {
-      return NextResponse.json({ error: 'Product ID is required' }, { status: 400 });
-    }
-
+    // Fetch minimum profit margin
     const { data: settings } = await supabaseAdmin
       .from('business_settings')
       .select('min_profit_margin_percent')
@@ -145,6 +49,7 @@ export async function PUT(request: NextRequest) {
 
     const minMargin = settings?.min_profit_margin_percent || 20;
 
+    // Validate variants if provided
     if (variants && Array.isArray(variants) && variants.length > 0) {
       for (const v of variants) {
         const cost = Number(v.cost_price) || 0;
@@ -167,6 +72,7 @@ export async function PUT(request: NextRequest) {
       }
     }
 
+    // Update product table
     const productUpdatePayload: Record<string, any> = {
       updated_at: new Date().toISOString(),
     };
@@ -186,7 +92,9 @@ export async function PUT(request: NextRequest) {
       return NextResponse.json({ error: productError.message }, { status: 500 });
     }
 
+    // Handle variants sync if supplied
     if (variants && Array.isArray(variants)) {
+      // Get existing variants for this product
       const { data: existingVariants } = await supabaseAdmin
         .from('product_variants')
         .select('id')
@@ -194,9 +102,12 @@ export async function PUT(request: NextRequest) {
 
       const existingIds = (existingVariants || []).map((ev) => ev.id);
       const incomingIds = variants.filter((v: any) => v.id).map((v: any) => v.id);
+
+      // Identify variants to delete
       const toDeleteIds = existingIds.filter((evId) => !incomingIds.includes(evId));
 
       for (const delId of toDeleteIds) {
+        // Check references before deleting
         const { data: orderRefs } = await supabaseAdmin
           .from('order_items')
           .select('id')
@@ -210,18 +121,22 @@ export async function PUT(request: NextRequest) {
           .limit(1);
 
         if ((orderRefs && orderRefs.length > 0) || (subRefs && subRefs.length > 0)) {
+          // If referenced in order history or subscriptions, set stock to 0 rather than breaking foreign key
           await supabaseAdmin
             .from('product_variants')
             .update({ stock: 0 })
             .eq('id', delId);
         } else {
+          // Safe to delete
           await supabaseAdmin.from('cart_items').delete().eq('variant_id', delId);
           await supabaseAdmin.from('product_variants').delete().eq('id', delId);
         }
       }
 
+      // Upsert/Insert variants
       for (const v of variants) {
         if (v.id && existingIds.includes(v.id)) {
+          // Update existing variant
           await supabaseAdmin
             .from('product_variants')
             .update({
@@ -233,6 +148,7 @@ export async function PUT(request: NextRequest) {
             })
             .eq('id', v.id);
         } else {
+          // Insert new variant
           await supabaseAdmin.from('product_variants').insert({
             product_id: id,
             weight: v.weight,
@@ -245,6 +161,7 @@ export async function PUT(request: NextRequest) {
       }
     }
 
+    // Return updated product
     const { data: updatedProduct } = await supabaseAdmin
       .from('products')
       .select('*, product_variants(*)')
@@ -253,13 +170,14 @@ export async function PUT(request: NextRequest) {
 
     return NextResponse.json({ success: true, product: updatedProduct });
   } catch (error: any) {
-    console.error('Products PUT error:', error);
+    console.error('Product PUT error:', error);
     return NextResponse.json({ error: error.message || 'Internal server error' }, { status: 500 });
   }
 }
 
-export async function DELETE(request: NextRequest) {
+export async function DELETE(request: NextRequest, { params }: Props) {
   try {
+    const { id } = await params;
     const auth = await getAuthUser(request);
     if (!auth) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
@@ -270,13 +188,9 @@ export async function DELETE(request: NextRequest) {
     }
 
     const { searchParams } = new URL(request.url);
-    const id = searchParams.get('id');
     const permanent = searchParams.get('permanent') === 'true';
 
-    if (!id) {
-      return NextResponse.json({ error: 'Product ID is required' }, { status: 400 });
-    }
-
+    // Check if product is referenced in order_items or subscriptions
     const { data: orderRefs } = await supabaseAdmin
       .from('order_items')
       .select('id')
@@ -292,6 +206,7 @@ export async function DELETE(request: NextRequest) {
     const isReferenced = (orderRefs && orderRefs.length > 0) || (subRefs && subRefs.length > 0);
 
     if (permanent && !isReferenced) {
+      // Hard delete from database
       await supabaseAdmin.from('cart_items').delete().eq('product_id', id);
       await supabaseAdmin.from('product_variants').delete().eq('product_id', id);
       const { error: deleteError } = await supabaseAdmin.from('products').delete().eq('id', id);
@@ -307,11 +222,13 @@ export async function DELETE(request: NextRequest) {
       });
     }
 
+    // Soft delete: Deactivate product so historical orders & subscriptions remain intact
     const { error: updateError } = await supabaseAdmin
       .from('products')
       .update({ is_active: false, updated_at: new Date().toISOString() })
       .eq('id', id);
 
+    // Remove from active shopping carts
     await supabaseAdmin.from('cart_items').delete().eq('product_id', id);
 
     if (updateError) {
@@ -326,7 +243,7 @@ export async function DELETE(request: NextRequest) {
         : 'Product deactivated and removed from storefront.',
     });
   } catch (error: any) {
-    console.error('Products DELETE error:', error);
+    console.error('Product DELETE error:', error);
     return NextResponse.json({ error: error.message || 'Internal server error' }, { status: 500 });
   }
 }

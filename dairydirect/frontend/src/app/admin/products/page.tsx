@@ -5,7 +5,8 @@ import { useRouter } from 'next/navigation';
 import { useTranslation } from '@/lib/i18n';
 import { getProducts } from '@/lib/api/products';
 import type { ProductWithVariants } from '@/lib/api/products';
-import { Search, Plus, Pencil, Droplets, Package, Cylinder, CupSoda, GlassWater, Loader2 } from 'lucide-react';
+import { ProductEditModal } from '@/components/admin/ProductEditModal';
+import { Search, Plus, Pencil, Droplets, Package, Cylinder, CupSoda, GlassWater, Loader2, Trash2 } from 'lucide-react';
 import { motion } from 'framer-motion';
 
 const categoryIcons: Record<string, any> = {
@@ -35,12 +36,18 @@ export default function AdminProductsPage() {
   const [category, setCategory] = useState('All');
   const [status, setStatus] = useState('All'); // 'All' | 'Active' | 'Draft'
   const [sortBy, setSortBy] = useState('Name A-Z'); // 'Name A-Z' | 'Price L-H' | 'Price H-L'
+  const [editingProduct, setEditingProduct] = useState<ProductWithVariants | null>(null);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
 
-  useEffect(() => {
+  const fetchProductList = () => {
     getProducts({ activeOnly: false }).then(data => {
       setProducts(data);
       setIsLoading(false);
     });
+  };
+
+  useEffect(() => {
+    fetchProductList();
   }, []);
 
   const categories = ['All', 'Milk', 'Paneer', 'Ghee', 'Buttermilk', 'Curd', 'Lassi'];
@@ -172,17 +179,30 @@ export default function AdminProductsPage() {
                         Fresh
                       </div>
                     )}
-                    <button className="absolute top-2.5 right-2.5 w-7 h-7 rounded-full bg-white/85 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity z-10"
-                      style={{ color: 'var(--color-primary)' }}>
-                      <Pencil className="w-3 h-3" strokeWidth={2.5} />
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setEditingProduct(product);
+                        setIsEditModalOpen(true);
+                      }}
+                      className="absolute top-2.5 right-2.5 w-8 h-8 rounded-full bg-white/95 shadow-md flex items-center justify-center opacity-90 group-hover:opacity-100 transition-all hover:scale-110 active:scale-95 z-10 hover:bg-white text-primary"
+                      title="Edit Product"
+                    >
+                      <Pencil className="w-3.5 h-3.5" strokeWidth={2.5} />
                     </button>
                   </div>
 
                   {/* Details */}
-                  <div className="p-4">
+                  <div
+                    className="p-4 cursor-pointer"
+                    onClick={() => {
+                      setEditingProduct(product);
+                      setIsEditModalOpen(true);
+                    }}
+                  >
                     <div className="flex items-start justify-between mb-2">
                       <div>
-                        <h3 className="font-semibold text-[14px] leading-tight" style={{ color: 'var(--color-on-surface)' }}>
+                        <h3 className="font-semibold text-[14px] leading-tight group-hover:text-primary transition-colors" style={{ color: 'var(--color-on-surface)' }}>
                           {product.name}
                         </h3>
                         <span className="inline-block mt-1 px-2 py-0.5 rounded-full text-[10px] font-bold"
@@ -218,6 +238,25 @@ export default function AdminProductsPage() {
           </div>
         )}
       </div>
+
+      {/* Reusable Product Edit Modal */}
+      <ProductEditModal
+        product={editingProduct}
+        isOpen={isEditModalOpen}
+        onClose={() => {
+          setIsEditModalOpen(false);
+          setEditingProduct(null);
+        }}
+        onProductUpdated={(updated) => {
+          setProducts((prev) =>
+            prev.map((p) => (p.id === updated.id ? updated : p))
+          );
+        }}
+        onProductDeleted={(deletedId) => {
+          setProducts((prev) => prev.filter((p) => p.id !== deletedId));
+          fetchProductList();
+        }}
+      />
     </div>
   );
 }

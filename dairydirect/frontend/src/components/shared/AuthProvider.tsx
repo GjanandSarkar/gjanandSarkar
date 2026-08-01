@@ -54,9 +54,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         try {
           await hydrateUser(session.access_token);
         } catch (error) {
+          sessionStorage.removeItem('auth_callback_processed');
           logout();
         }
       } else {
+        sessionStorage.removeItem('auth_callback_processed');
         logout();
       }
       setAuthLoading(false);

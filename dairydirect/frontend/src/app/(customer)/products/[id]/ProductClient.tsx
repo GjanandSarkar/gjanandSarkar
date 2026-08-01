@@ -7,18 +7,19 @@ import { Analytics } from '@/lib/analytics';
 import { useStore } from '@/store/useStore';
 import { updateCartItem } from '@/lib/api/cart';
 import type { ProductWithVariants } from '@/lib/api/products';
-import { ChevronLeft, Share2, Heart, Plus, Minus, ShieldCheck, Truck, Star, Sparkles, Loader2 } from 'lucide-react';
+import { ChevronLeft, Share2, Heart, Plus, Minus, ShieldCheck, Truck, Star, Sparkles, Loader2, Pencil } from 'lucide-react';
 import { SmartBadge } from '@/components/discovery/SmartBadges';
 import { SubscriptionUpsellBanner } from '@/components/discovery/SubscriptionUpsellBanner';
 import { RelatedProducts } from '@/components/discovery/RelatedProducts';
 import { BrandStory } from '@/components/trust/BrandStory';
 import { TrustBadges } from '@/components/trust/TrustBadges';
+import { ProductEditModal } from '@/components/admin/ProductEditModal';
 
 interface ProductClientProps {
   product: ProductWithVariants;
 }
 
-export function ProductClient({ product }: ProductClientProps) {
+export function ProductClient({ product: initialProduct }: ProductClientProps) {
   const router = useRouter();
   const { t } = useTranslation();
 
@@ -27,6 +28,13 @@ export function ProductClient({ product }: ProductClientProps) {
   const updateCartQuantityLocal = useStore(state => state.updateCartQuantityLocal);
   const addToCartLocal = useStore(state => state.addToCartLocal);
   const removeFromCartLocal = useStore(state => state.removeFromCartLocal);
+
+  const [product, setProduct] = useState<ProductWithVariants>(initialProduct);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+
+  useEffect(() => {
+    setProduct(initialProduct);
+  }, [initialProduct]);
 
   useEffect(() => {
     Analytics.trackEvent('Product Viewed', { 
@@ -38,7 +46,8 @@ export function ProductClient({ product }: ProductClientProps) {
 
   const [selectedVariantIdx, setSelectedVariantIdx] = useState(0);
 
-  const selectedVariant = product.product_variants[selectedVariantIdx];
+  const variants = product.product_variants || [];
+  const selectedVariant = variants[selectedVariantIdx] || variants[0];
   if (!selectedVariant) return <div className="p-10 text-center">No variants available</div>;
 
   const cartItem = cart.find(item => item.productId === product.id && item.variantId === selectedVariant.id);
@@ -73,14 +82,24 @@ export function ProductClient({ product }: ProductClientProps) {
       {/* Header */}
       <div className="relative w-full bg-white overflow-hidden">
         <div className="absolute top-0 left-0 right-0 z-20 flex items-center justify-between p-4 bg-gradient-to-b from-black/20 to-transparent">
-          <button onClick={() => router.back()} className="w-10 h-10 rounded-full bg-white/20 backdrop-blur-md flex items-center justify-center text-white">
+          <button onClick={() => router.back()} className="w-10 h-10 rounded-full bg-white/20 backdrop-blur-md flex items-center justify-center text-white hover:bg-white/30 transition-colors">
             <ChevronLeft className="w-6 h-6" />
           </button>
-          <div className="flex gap-2">
-            <button className="w-10 h-10 rounded-full bg-white/20 backdrop-blur-md flex items-center justify-center text-white">
+          <div className="flex items-center gap-2">
+            {user?.role === 'admin' && (
+              <button
+                onClick={() => setIsEditModalOpen(true)}
+                className="h-10 px-3.5 rounded-full bg-white/95 text-emerald-900 hover:bg-white text-xs font-bold flex items-center gap-1.5 shadow-md backdrop-blur-md transition-all active:scale-95 border border-emerald-100"
+                title="Admin: Edit or Remove Product"
+              >
+                <Pencil className="w-3.5 h-3.5 text-emerald-700" strokeWidth={2.5} />
+                <span>Edit Product</span>
+              </button>
+            )}
+            <button className="w-10 h-10 rounded-full bg-white/20 backdrop-blur-md flex items-center justify-center text-white hover:bg-white/30 transition-colors">
               <Share2 className="w-5 h-5" />
             </button>
-            <button className="w-10 h-10 rounded-full bg-white/20 backdrop-blur-md flex items-center justify-center text-white">
+            <button className="w-10 h-10 rounded-full bg-white/20 backdrop-blur-md flex items-center justify-center text-white hover:bg-white/30 transition-colors">
               <Heart className="w-5 h-5" />
             </button>
           </div>
@@ -195,6 +214,21 @@ export function ProductClient({ product }: ProductClientProps) {
           )}
         </div>
       </div>
+
+      {/* Admin Edit / Delete Modal */}
+      {user?.role === 'admin' && (
+        <ProductEditModal
+          product={product}
+          isOpen={isEditModalOpen}
+          onClose={() => setIsEditModalOpen(false)}
+          onProductUpdated={(updated) => {
+            setProduct(updated);
+          }}
+          onProductDeleted={() => {
+            router.push('/home');
+          }}
+        />
+      )}
     </div>
   );
 }

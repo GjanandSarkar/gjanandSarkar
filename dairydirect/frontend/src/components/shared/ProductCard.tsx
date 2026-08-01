@@ -1,19 +1,22 @@
 "use client";
 
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { Plus, Minus, Sparkles } from 'lucide-react';
+import { Plus, Minus, Sparkles, Pencil } from 'lucide-react';
 import { useTranslation } from '@/lib/i18n';
 import { useStore } from '@/store/useStore';
 import { addToCart, updateCartItem } from '@/lib/api/cart';
 import type { ProductWithVariants } from '@/lib/api/products';
 import { motion, AnimatePresence } from 'framer-motion';
 import { SmartBadge } from '@/components/discovery/SmartBadges';
+import { ProductEditModal } from '@/components/admin/ProductEditModal';
 import Image from 'next/image';
 
 interface ProductCardProps {
   product: ProductWithVariants;
   priority?: boolean;
+  onProductUpdated?: (updated: ProductWithVariants) => void;
+  onProductDeleted?: (id: string) => void;
 }
 
 const categoryGradients: Record<string, { bg: string; icon: string; blob: string }> = {
@@ -25,7 +28,12 @@ const categoryGradients: Record<string, { bg: string; icon: string; blob: string
   'Lassi':     { bg: '#e8f4fd', icon: '#4a90d9', blob: '#bde3ff' },
 };
 
-export function ProductCard({ product, priority = false }: ProductCardProps) {
+export function ProductCard({
+  product: initialProduct,
+  priority = false,
+  onProductUpdated,
+  onProductDeleted,
+}: ProductCardProps) {
   const { t } = useTranslation();
   const router = useRouter();
 
@@ -34,8 +42,15 @@ export function ProductCard({ product, priority = false }: ProductCardProps) {
   const addToCartLocal = useStore((s) => s.addToCartLocal);
   const updateCartQuantityLocal = useStore((s) => s.updateCartQuantityLocal);
 
-  const variants = product.product_variants ?? [];
+  const [product, setProduct] = useState<ProductWithVariants>(initialProduct);
+  const [isDeleted, setIsDeleted] = useState(false);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
 
+  useEffect(() => {
+    setProduct(initialProduct);
+  }, [initialProduct]);
+
+  const variants = product.product_variants ?? [];
   const firstVariant = variants[0];
 
   const [selectedVariant, setSelectedVariant] = useState(() => {
@@ -46,6 +61,12 @@ export function ProductCard({ product, priority = false }: ProductCardProps) {
       ? variants.find((v) => v.id === firstInCart.variantId) ?? firstVariant
       : firstVariant;
   });
+
+  useEffect(() => {
+    if (variants.length > 0 && (!selectedVariant || !variants.some(v => v.id === selectedVariant.id))) {
+      setSelectedVariant(variants[0]);
+    }
+  }, [variants, selectedVariant]);
 
   const [showDrawer, setShowDrawer] = useState(false);
   const [busy, setBusy] = useState(false);
@@ -114,12 +135,12 @@ export function ProductCard({ product, priority = false }: ProductCardProps) {
     [selectedVariant, variants, product.id, user, cart, updateCartQuantityLocal, busy]
   );
 
-  if (!firstVariant) return null;
+  if (isDeleted || !firstVariant) return null;
 
   return (
     <>
       <div
-        className="flex flex-col h-full rounded-[16px] overflow-hidden transition-all duration-250 cursor-pointer group"
+        className="flex flex-col h-full rounded-[16px] overflow-hidden transition-all duration-250 cursor-pointer group relative"
         style={{
           background: 'var(--color-surface-container-lowest)',
           boxShadow: '0 2px 8px rgba(63, 101, 48, 0.04), 0 1px 2px rgba(0,0,0,0.02)',
@@ -166,9 +187,25 @@ export function ProductCard({ product, priority = false }: ProductCardProps) {
               {product.category === 'Paneer' && <SmartBadge type="popular" />}
             </div>
 
+            {/* Admin Quick-Edit Button */}
+            {user?.role === 'admin' && (
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  setIsEditModalOpen(true);
+                }}
+                className="absolute top-2.5 right-2.5 w-8 h-8 rounded-full bg-white/95 shadow-md flex items-center justify-center transition-all duration-200 hover:scale-110 active:scale-95 z-20 hover:bg-white text-primary"
+                title="Admin: Edit or Remove Product"
+              >
+                <Pencil className="w-4 h-4 text-emerald-800" strokeWidth={2.5} />
+              </button>
+            )}
+
             {isInCart && (
               <div
-                className="absolute top-2.5 right-2.5 w-6 h-6 rounded-full flex items-center justify-center text-[11px] font-black text-white shadow-lg"
+                className={`absolute ${user?.role === 'admin' ? 'top-2.5 right-12' : 'top-2.5 right-2.5'} w-6 h-6 rounded-full flex items-center justify-center text-[11px] font-black text-white shadow-lg z-10`}
                 style={{ background: 'var(--color-primary)' }}
               >
                 {totalQuantity}
@@ -345,6 +382,23 @@ export function ProductCard({ product, priority = false }: ProductCardProps) {
           </>
         )}
       </AnimatePresence>
+
+      {/* Admin Edit / Delete Modal */}
+      {user?.role === 'admin' && (
+        <ProductEditModal
+          product={product}
+          isOpen={isEditModalOpen}
+          onClose={() => setIsEditModalOpen(false)}
+          onProductUpdated={(updated) => {
+            setProduct(updated);
+            if (onProductUpdated) onProductUpdated(updated);
+          }}
+          onProductDeleted={(id) => {
+            setIsDeleted(true);
+            if (onProductDeleted) onProductDeleted(id);
+          }}
+        />
+      )}
     </>
   );
 }

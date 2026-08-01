@@ -78,11 +78,18 @@ export async function getProductsServer(
 
 export async function getProductById(id: string): Promise<ProductWithVariants | null> {
   try {
-    const result = await api.products.get();
-    return result.products?.find((p: ProductWithVariants) => p.id === id) ?? null;
+    const result = await api.products.getById(id);
+    if (result.product) return result.product;
+    const all = await api.products.get({ activeOnly: false });
+    return all.products?.find((p: ProductWithVariants) => p.id === id) ?? null;
   } catch (error) {
     console.error('getProductById error:', error);
-    return null;
+    try {
+      const all = await api.products.get({ activeOnly: false });
+      return all.products?.find((p: ProductWithVariants) => p.id === id) ?? null;
+    } catch {
+      return null;
+    }
   }
 }
 
@@ -121,31 +128,34 @@ import { supabase } from '@/lib/supabase';
 
 export async function updateProduct(
   id: string,
-  updates: Partial<NewProductInput>
-): Promise<{ success: boolean; error?: string }> {
-  const { error } = await supabase.from('products').update(updates).eq('id', id);
-  if (error) return { success: false, error: error.message };
-  return { success: true };
+  updates: Partial<NewProductInput> & {
+    is_active?: boolean;
+    variants?: (NewVariantInput & { id?: string })[];
+  }
+): Promise<{ success: boolean; product?: ProductWithVariants; error?: string }> {
+  try {
+    const result = await api.products.update(id, updates);
+    return { success: result.success, product: result.product };
+  } catch (error: any) {
+    return { success: false, error: error.message };
+  }
 }
 
-export async function deleteProduct(id: string): Promise<{ success: boolean; error?: string }> {
-  const { error } = await supabase.from('products').delete().eq('id', id);
-  if (error) return { success: false, error: error.message };
-  return { success: true };
-}
-
-export async function upsertVariants(
-  productId: string,
-  variants: (NewVariantInput & { id?: string })[]
-): Promise<{ success: boolean; error?: string }> {
-  const { error } = await supabase.from('product_variants').upsert(
-    variants.map(v => ({
-      ...v,
-      product_id: productId,
-    }))
-  );
-  if (error) return { success: false, error: error.message };
-  return { success: true };
+export async function deleteProduct(
+  id: string,
+  permanent: boolean = false
+): Promise<{ success: boolean; softDeleted?: boolean; permanent?: boolean; message?: string; error?: string }> {
+  try {
+    const result = await api.products.delete(id, permanent);
+    return {
+      success: result.success,
+      softDeleted: result.softDeleted,
+      permanent: result.permanent,
+      message: result.message,
+    };
+  } catch (error: any) {
+    return { success: false, error: error.message };
+  }
 }
 
 export async function uploadProductImage(

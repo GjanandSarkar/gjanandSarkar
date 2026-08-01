@@ -44,7 +44,7 @@ export function CategorySection({ categories, isLoading }: CategorySectionProps)
           return (
             <Link 
               href={`/categories/${encodeURIComponent(category)}`} 
-              key={category}
+              key={category || `cat-${idx}`}
               className="group flex flex-col items-center gap-2 shrink-0 w-[80px] md:w-auto"
             >
               <motion.div 
