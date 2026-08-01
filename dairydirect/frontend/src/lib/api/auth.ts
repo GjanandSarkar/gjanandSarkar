@@ -64,6 +64,20 @@ export async function updateProfileName(
   }
 }
 
+export async function updateProfilePhone(
+  userId: string,
+  phone: string
+): Promise<{ success: boolean; error?: string }> {
+  try {
+    const { supabase } = await import('@/lib/supabase');
+    const { error } = await supabase.from('profiles').update({ phone }).eq('id', userId);
+    if (error) return { success: false, error: error.message };
+    return { success: true };
+  } catch (err: any) {
+    return { success: false, error: err.message };
+  }
+}
+
 export async function updateProfileAvatar(
   userId: string,
   avatarUrl: string
@@ -75,5 +89,20 @@ export async function updateProfileAvatar(
     return { success: true };
   } catch (err: any) {
     return { success: false, error: err.message };
+  }
+}
+
+export async function getAllProfiles(): Promise<any[]> {
+  try {
+    const { supabase } = await import('@/lib/supabase');
+    const { data, error } = await supabase.from('profiles').select('*');
+    if (error) {
+      console.error('getAllProfiles error:', error);
+      return [];
+    }
+    return data || [];
+  } catch (err) {
+    console.error('getAllProfiles exception:', err);
+    return [];
   }
 }

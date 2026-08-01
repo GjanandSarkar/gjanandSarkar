@@ -26,6 +26,7 @@
   --color-foreground: var(--foreground);
   --color-foreground-muted: var(--foreground-muted);
   --color-foreground-inverse: var(--foreground-inverse);
+  --color-muted: var(--foreground-muted);
   
   --color-border: var(--border);
   --color-border-hover: var(--border-hover);

@@ -6,14 +6,16 @@ import { useRouter } from 'next/navigation';
 import { useStore } from '@/store/useStore';
 import {
   LayoutDashboard, ShoppingBag, Users, Package, BarChart3,
-  Truck, LogOut, Leaf, ShieldCheck, Bell, Settings
+  Truck, LogOut, Leaf, ShieldCheck, Bell, Settings, Tags, CalendarDays, User
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 const navItems = [
   { href: '/admin', icon: LayoutDashboard, label: 'Dashboard', exact: true },
   { href: '/admin/orders', icon: ShoppingBag, label: 'Orders' },
+  { href: '/admin/subscriptions', icon: CalendarDays, label: 'Subscriptions' },
   { href: '/admin/products', icon: Package, label: 'Products' },
+  { href: '/admin/categories', icon: Tags, label: 'Categories' },
   { href: '/admin/customers', icon: Users, label: 'Customers' },
   { href: '/admin/delivery', icon: Truck, label: 'Deliveries' },
   { href: '/admin/analytics', icon: BarChart3, label: 'Analytics' },
@@ -46,24 +48,33 @@ export function AdminSidebar() {
 {/* Brand */}
         <div className="px-5 py-5 relative z-10">
           <div className="flex items-center gap-3 mb-1">
-            <div className="w-9 h-9 rounded-[10px] flex items-center justify-center"
+            <div className="w-12 h-12 rounded-[12px] flex items-center justify-center"
               style={{ background: 'linear-gradient(135deg, #3f6530, #577f46)' }}>
-              <img src="/logo.svg" alt="Logo" className="w-6 h-6 object-contain" />
+              <img src="/logo.svg" alt="Logo" className="w-8 h-8 object-contain" />
             </div>
           </div>
         </div>
 
       {/* Admin user chip */}
-      <div className="mx-4 mb-3 px-3.5 py-3 rounded-[12px]"
+      <div className="mx-4 mb-3 px-3.5 py-3 rounded-[12px] flex items-center gap-3"
         style={{ background: 'var(--color-surface-container-low)' }}>
-        <p className="text-[11px] font-semibold uppercase tracking-wider mb-0.5"
-          style={{ color: 'var(--color-outline)' }}>Signed in as</p>
-        <p className="font-bold text-[14px]" style={{ color: 'var(--color-on-surface)' }}>
-          {user?.name || 'Admin'}
-        </p>
-        <p className="text-[11px] font-medium" style={{ color: 'var(--color-outline)' }}>
-          +91 {user?.phone}
-        </p>
+        <div className="w-10 h-10 rounded-full overflow-hidden bg-sand/30 border border-sand flex items-center justify-center shrink-0">
+          {user?.avatar_url ? (
+            <img src={user.avatar_url} alt="Profile" className="w-full h-full object-cover" />
+          ) : (
+            <User className="w-5 h-5 text-primary/40" />
+          )}
+        </div>
+        <div className="flex-1 min-w-0">
+          <p className="text-[11px] font-semibold uppercase tracking-wider mb-0.5"
+            style={{ color: 'var(--color-outline)' }}>Signed in as</p>
+          <p className="font-bold text-[14px] truncate" style={{ color: 'var(--color-on-surface)' }}>
+            {user?.name || 'Admin'}
+          </p>
+          <p className="text-[11px] font-medium truncate" style={{ color: 'var(--color-outline)' }}>
+            +91 {user?.phone}
+          </p>
+        </div>
       </div>
 
       {/* Nav */}

@@ -1,6 +1,7 @@
 import { supabase } from '@/lib/supabase';
 import type { DBSubscription, DBModificationReport } from '@/lib/supabase';
 import { createNotification } from './notifications';
+import { api } from './client';
 
 // ─── Types ────────────────────────────────────────────────────
 
@@ -13,6 +14,7 @@ export type NewSubscriptionInput = {
   productId: string;
   volume: number;
   plan: 'weekly' | 'monthly';
+  startDate: string;
 };
 
 // ─── Generate IDs ─────────────────────────────────────────────
@@ -62,32 +64,18 @@ export async function getAllSubscriptions(): Promise<
 export async function createSubscription(
   input: NewSubscriptionInput
 ): Promise<{ success: boolean; id?: string; error?: string }> {
-  const nextDeliveryDate = new Date(Date.now() + 86400000).toISOString().split('T')[0]; // tomorrow
-
-  const { data, error } = await supabase.from('subscriptions').insert({
-    user_id: input.userId,
-    product_id: input.productId,
-    volume: input.volume,
-    plan: input.plan,
-    status: 'active',
-    next_delivery_date: nextDeliveryDate,
-  }).select('id').single();
-
-  if (error) return { success: false, error: error.message };
-
-  const subscriptionId = data?.id;
-
-  // Notify customer
-  await createNotification({
-    userId: input.userId,
-    roleTarget: 'customer',
-    title: 'Subscription Active! 🥛',
-    body: `Your daily milk subscription starts tomorrow, 7–9 AM.`,
-    type: 'subscription',
-    relatedId: subscriptionId || '',
-  });
-
-  return { success: true, id: subscriptionId };
+  try {
+    const result = await api.subscriptions.create({
+      userId: input.userId,
+      productId: input.productId,
+      volume: input.volume,
+      plan: input.plan,
+      startDate: input.startDate,
+    });
+    return { success: result.success, id: result.id };
+  } catch (err: any) {
+    return { success: false, error: err.message };
+  }
 }
 
 // ─── Pause / Resume Subscription ─────────────────────────────
@@ -125,31 +113,17 @@ export async function submitModificationReport(input: {
   newVolume: number;
   newPlan: 'weekly' | 'monthly';
 }): Promise<{ success: boolean; id?: string; error?: string }> {
-  const { error: reportError } = await supabase.from('modification_reports').insert({
-    subscription_id: input.subscriptionId,
-    user_id: input.userId,
-    new_volume: input.newVolume,
-    new_plan: input.newPlan,
-    status: 'pending',
-  });
-
-  if (reportError) return { success: false, error: reportError.message };
-
-  await supabase
-    .from('subscriptions')
-    .update({ status: 'pending_review' })
-    .eq('id', input.subscriptionId);
-
-  await createNotification({
-    userId: null,
-    roleTarget: 'admin',
-    title: 'Modification Request',
-    body: `A customer requested to modify subscription ${input.subscriptionId}.`,
-    type: 'subscription',
-    relatedId: input.subscriptionId,
-  });
-
-  return { success: true };
+  try {
+    const result = await api.subscriptions.update({
+      subId: input.subscriptionId,
+      action: 'modify',
+      newVolume: input.newVolume,
+      newPlan: input.newPlan,
+    });
+    return { success: result.success };
+  } catch (err: any) {
+    return { success: false, error: err.message };
+  }
 }
 
 // ─── Admin: Get Pending Modification Reports ──────────────────

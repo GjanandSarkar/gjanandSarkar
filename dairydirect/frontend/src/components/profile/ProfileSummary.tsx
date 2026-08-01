@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { Camera, Check, Edit2, Loader2, LogOut, User, AlertCircle } from 'lucide-react';
 import { useTranslation } from '@/lib/i18n';
-import { updateProfileName, updateProfileAvatar } from '@/lib/api/auth';
+import { updateProfileName, updateProfileAvatar, updateProfilePhone } from '@/lib/api/auth';
 import type { User as StoreUser } from '@/store/useStore';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -17,6 +17,8 @@ export function ProfileSummary({ user, onUpdateProfile, onLogout }: ProfileSumma
   const { t } = useTranslation();
   const [isEditing, setIsEditing] = useState(false);
   const [profileName, setProfileName] = useState(user?.name || '');
+  const [isEditingPhone, setIsEditingPhone] = useState(false);
+  const [profilePhone, setProfilePhone] = useState(user?.phone || '');
   const [isUploading, setIsUploading] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
@@ -40,6 +42,25 @@ export function ProfileSummary({ user, onUpdateProfile, onLogout }: ProfileSumma
       onUpdateProfile({ name: previousName });
       setProfileName(previousName);
       setErrorMsg("Failed to update name. Please try again.");
+    }
+  };
+
+  const handleUpdatePhone = async () => {
+    if (!profilePhone.trim() || !user) return;
+    
+    const previousPhone = user.phone;
+    const newPhone = profilePhone.trim();
+    
+    onUpdateProfile({ phone: newPhone });
+    setIsEditingPhone(false);
+    setErrorMsg(null);
+
+    const result = await updateProfilePhone(user.id, newPhone);
+    
+    if (!result.success) {
+      onUpdateProfile({ phone: previousPhone });
+      setProfilePhone(previousPhone || '');
+      setErrorMsg("Failed to update phone number. Please try again.");
     }
   };
 
@@ -156,14 +177,63 @@ export function ProfileSummary({ user, onUpdateProfile, onLogout }: ProfileSumma
               </motion.div>
             )}
           </AnimatePresence>
-          <p className="text-muted text-sm font-medium flex items-center gap-2">
-            {user?.phone || '+91 -'}
+          <div className="flex items-center gap-2 mt-1">
+            <AnimatePresence mode="wait">
+              {isEditingPhone ? (
+                <motion.div
+                  key="editPhone"
+                  initial={{ opacity: 0, y: 5 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -5 }}
+                  className="flex items-center gap-2 flex-1"
+                >
+                  <input
+                    type="tel"
+                    value={profilePhone}
+                    onChange={(e) => setProfilePhone(e.target.value)}
+                    placeholder="+91..."
+                    className="bg-sand/30 text-muted font-medium text-sm rounded-lg px-2 py-1 w-full focus:outline-none focus:ring-2 focus:ring-primary/50"
+                    autoFocus
+                  />
+                  <button
+                    onClick={handleUpdatePhone}
+                    disabled={!profilePhone.trim()}
+                    className="bg-primary text-white w-7 h-7 rounded-lg flex items-center justify-center shrink-0 disabled:opacity-50 hover:bg-primary/90 transition-colors"
+                  >
+                    <Check className="w-3 h-3" />
+                  </button>
+                </motion.div>
+              ) : (
+                <motion.div
+                  key="viewPhone"
+                  initial={{ opacity: 0, y: 5 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -5 }}
+                  className="flex items-center gap-2 flex-1"
+                >
+                  <p className="text-muted text-sm font-medium">
+                    {user?.phone || '+91 -'}
+                  </p>
+                  <button
+                    onClick={() => {
+                      setIsEditingPhone(true);
+                      setProfilePhone(user?.phone || '');
+                    }}
+                    className="text-muted/50 hover:text-primary transition-colors p-1"
+                    aria-label="Edit phone"
+                  >
+                    <Edit2 className="w-3 h-3" />
+                  </button>
+                </motion.div>
+              )}
+            </AnimatePresence>
+            
             {user?.role === 'admin' && (
-              <span className="bg-dark text-white text-[10px] uppercase font-bold px-2 py-0.5 rounded-md tracking-wider">
+              <span className="bg-dark text-white text-[10px] uppercase font-bold px-2 py-0.5 rounded-md tracking-wider shrink-0">
                 Admin
               </span>
             )}
-          </p>
+          </div>
         </div>
       </div>
 

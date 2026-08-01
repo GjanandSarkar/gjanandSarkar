@@ -6,7 +6,7 @@ import { ArrowLeft, CheckCircle2, Calendar, Droplets } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import { cn } from '@/lib/utils';
 import { useStore } from '@/store/useStore';
-import { getUserSubscriptions } from '@/lib/api/subscriptions';
+import { getUserSubscriptions, createSubscription, submitModificationReport } from '@/lib/api/subscriptions';
 import { getProducts } from '@/lib/api/products';
 import { format, addDays } from 'date-fns';
 
@@ -24,6 +24,8 @@ function NewSubscriptionContent() {
   const [milkProductId, setMilkProductId] = useState<string>('');
   const [milkProductName, setMilkProductName] = useState('Farm Fresh Cow Milk');
   const [milkProductImage, setMilkProductImage] = useState('/milk.png');
+  const [startDate, setStartDate] = useState(format(addDays(new Date(), 1), 'yyyy-MM-dd'));
+  const [deliveryTime, setDeliveryTime] = useState('07:00');
 
   useEffect(() => {
     async function loadData() {
@@ -56,34 +58,26 @@ function NewSubscriptionContent() {
     setIsProcessing(true);
     
     try {
-      let response;
+      let result;
       if (editId) {
-        response = await fetch('/api/subscriptions', {
-          method: 'PUT',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            subId: editId,
-            action: 'modify',
-            newVolume: volume,
-            newPlan: plan,
-          }),
+        result = await submitModificationReport({
+          subscriptionId: editId,
+          userId: user.id,
+          newVolume: volume,
+          newPlan: plan,
         });
       } else {
-        response = await fetch('/api/subscriptions', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            userId: user.id,
-            productId: milkProductId,
-            volume,
-            plan,
-          }),
+        const combinedDateTime = new Date(`${startDate}T${deliveryTime}:00`).toISOString();
+        result = await createSubscription({
+          userId: user.id,
+          productId: milkProductId,
+          volume,
+          plan,
+          startDate: combinedDateTime,
         });
       }
-
-      const result = await response.json();
       
-      if (!response.ok) {
+      if (!result.success) {
         throw new Error(result.error || 'Action failed. Please try again.');
       }
       
@@ -225,20 +219,45 @@ function NewSubscriptionContent() {
             </div>
             <div className="text-xs text-muted font-medium mb-4">30 Days Delivery</div>
             <div className="font-black text-xl text-dark flex items-baseline gap-2">
-              ₹{Math.round(total)}
+              ₹{Math.round(dailyCost * 30 * 0.95)}
               <span className="text-[10px] text-muted line-through">₹{Math.round(dailyCost * 30)}</span>
             </div>
           </div>
         </div>
 
-        {/* Start Date */}
-        <div className="bg-white rounded-[16px] p-4 border border-sand/50 shadow-sm flex items-center gap-4">
-          <div className="w-10 h-10 rounded-full bg-mint/30 flex items-center justify-center text-primary shrink-0">
-            <Calendar className="w-5 h-5" />
+        {/* Start Date & Time */}
+        <div className="bg-white rounded-[16px] p-4 border border-sand/50 shadow-sm flex flex-col gap-4">
+          <div className="flex items-center gap-4 border-b border-sand/30 pb-4">
+            <div className="w-10 h-10 rounded-full bg-mint/30 flex items-center justify-center text-primary shrink-0">
+              <Calendar className="w-5 h-5" />
+            </div>
+            <div className="flex-1">
+              <p className="text-[10px] font-black uppercase tracking-widest text-muted mb-1">First Delivery</p>
+              <input 
+                type="date"
+                min={format(addDays(new Date(), 1), 'yyyy-MM-dd')}
+                value={startDate}
+                onChange={(e) => setStartDate(e.target.value)}
+                className="w-full text-sm font-bold text-dark bg-transparent outline-none cursor-pointer"
+              />
+            </div>
           </div>
-          <div>
-            <p className="text-[10px] font-black uppercase tracking-widest text-muted">First Delivery</p>
-            <p className="text-sm font-bold text-dark">Tomorrow, {format(addDays(new Date(), 1), 'd MMM')}</p>
+          
+          <div className="flex items-center gap-4">
+            <div className="w-10 h-10 rounded-full bg-mint/30 flex items-center justify-center text-primary shrink-0">
+              <Droplets className="w-5 h-5" />
+            </div>
+            <div className="flex-1">
+              <p className="text-[10px] font-black uppercase tracking-widest text-muted mb-1">Delivery Time</p>
+              <select 
+                value={deliveryTime}
+                onChange={(e) => setDeliveryTime(e.target.value)}
+                className="w-full text-sm font-bold text-dark bg-transparent outline-none cursor-pointer"
+              >
+                <option value="07:00">Morning (7:00 AM - 9:00 AM)</option>
+                <option value="17:00">Evening (5:00 PM - 7:00 PM)</option>
+              </select>
+            </div>
           </div>
         </div>
       </div>

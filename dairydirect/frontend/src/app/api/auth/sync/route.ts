@@ -1,5 +1,11 @@
 import { NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
+import { rateLimit } from '@/lib/rate-limit';
+
+const limiter = rateLimit({
+  interval: 60 * 1000, // 1 minute
+  uniqueTokenPerInterval: 30, // 30 requests per minute per IP
+});
 
 export async function POST(request: Request) {
   try {
@@ -7,6 +13,13 @@ export async function POST(request: Request) {
 
     if (!token) {
       return NextResponse.json({ error: 'Token required' }, { status: 400 });
+    }
+
+    try {
+      const ip = request.headers.get('x-forwarded-for') || '127.0.0.1';
+      await limiter.check(10, ip); // Limit to 10 auth syncs per minute
+    } catch {
+      return NextResponse.json({ error: 'Too Many Requests' }, { status: 429 });
     }
 
     const supabaseAdmin = createClient(
@@ -37,7 +50,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Database error' }, { status: 500 });
     }
 
-    const adminEmails = (process.env.NEXT_PUBLIC_ADMIN_EMAILS || 'admin@gjanandsarkar.com')
+    const adminEmails = (process.env.ADMIN_EMAILS || 'admin@gjanandsarkar.com')
       .split(',')
       .map(e => e.trim().toLowerCase());
 

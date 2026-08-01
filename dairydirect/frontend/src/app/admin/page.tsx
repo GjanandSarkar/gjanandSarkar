@@ -3,15 +3,12 @@
 import { useStore } from '@/store/useStore';
 import { useTranslation } from '@/lib/i18n';
 import { useState, useEffect } from 'react';
-import { getAllOrders } from '@/lib/api/orders';
-import { getProducts } from '@/lib/api/products';
-import type { OrderWithItems } from '@/lib/api/orders';
-import type { ProductWithVariants } from '@/lib/api/products';
+import { getBusinessIntelligence, BIOrder } from '@/lib/api/analytics';
 import {
   TrendingUp, ShoppingBag, Truck, Package, ArrowRight,
   Clock, CheckCircle2, AlertCircle, BarChart3, Leaf, Loader2
 } from 'lucide-react';
-import { format } from 'date-fns';
+import { format, isToday } from 'date-fns';
 import Link from 'next/link';
 import { motion, Variants } from 'framer-motion';
 
@@ -27,72 +24,91 @@ const item: Variants = {
 const STATUS_CONFIG: Record<string, { bg: string; color: string; dot: string; icon: any }> = {
   'Confirmed':        { bg: '#c2efac', color: '#042100', dot: '#3f6530', icon: CheckCircle2 },
   'Preparing':        { bg: '#bfedce', color: '#002111', dot: '#3b644c', icon: Package },
-  'Out for Delivery': { bg: '#fff8e6', color: '#7d5200', dot: '#c78c2e', icon: Truck },
-  'Delivered':        { bg: '#eaf4e2', color: '#2a4f1d', dot: '#3f6530', icon: CheckCircle2 },
-  'Pending':          { bg: '#ffdcc7', color: '#774117', dot: '#d4712a', icon: Clock },
-  'Cancelled':        { bg: '#e3e3dc', color: '#43493e', dot: '#73796d', icon: AlertCircle },
+  'out_for_delivery': { bg: '#fff8e6', color: '#7d5200', dot: '#c78c2e', icon: Truck },
+  'delivered':        { bg: '#eaf4e2', color: '#2a4f1d', dot: '#3f6530', icon: CheckCircle2 },
+  'pending':          { bg: '#ffdcc7', color: '#774117', dot: '#d4712a', icon: Clock },
+  'cancelled':        { bg: '#e3e3dc', color: '#43493e', dot: '#73796d', icon: AlertCircle },
 };
 
 export default function AdminDashboard() {
   const { t } = useTranslation();
   const user = useStore(state => state.user);
 
-  const [orders, setOrders] = useState<OrderWithItems[]>([]);
-  const [productsCount, setProductsCount] = useState(0);
+  const [orders, setOrders] = useState<BIOrder[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    Promise.all([
-      getAllOrders(),
-      getProducts({ activeOnly: false }),
-    ]).then(([ordersData, productsData]) => {
-      setOrders(ordersData);
-      setProductsCount(productsData.length);
+    getBusinessIntelligence().then((data) => {
+      setOrders(data.orders);
       setIsLoading(false);
     });
   }, []);
 
   const totalRevenue = orders.reduce((s, o) => s + (o.status !== 'cancelled' ? o.total_amount : 0), 0);
-  const pendingOrders = orders.filter(o => o.status === 'pending' || o.status === 'confirmed').length;
+  const revenueToday = orders.filter(o => isToday(new Date(o.created_at))).reduce((s, o) => s + (o.status !== 'cancelled' ? o.total_amount : 0), 0);
+  
+  const pendingOrders = orders.filter(o => o.status === 'pending').length;
+  const confirmedOrders = orders.filter(o => o.status === 'confirmed').length;
+  const outForDelivery = orders.filter(o => o.status === 'out_for_delivery').length;
   const deliveredOrders = orders.filter(o => o.status === 'delivered').length;
+  const cancelledOrders = orders.filter(o => o.status === 'cancelled').length;
+  
   const recentOrders = [...orders].slice(0, 8);
 
   const stats = [
     {
-      label: 'Total Revenue',
-      value: `${t('currency')}${totalRevenue.toLocaleString()}`,
-      sub: `${orders.length} orders total`,
+      label: 'Revenue Today',
+      value: `${t('currency')}${revenueToday.toLocaleString()}`,
+      sub: `Lifetime: ${t('currency')}${totalRevenue.toLocaleString()}`,
       icon: TrendingUp,
       color: 'var(--color-primary)',
       bg: 'var(--color-primary-fixed)',
-      trend: '+12%',
+      trend: 'Today',
     },
     {
-      label: 'Active Orders',
+      label: 'Pending',
       value: pendingOrders.toString(),
-      sub: 'Pending & Confirmed',
-      icon: ShoppingBag,
+      sub: 'Action required',
+      icon: Clock,
+      color: '#d4712a',
+      bg: '#ffdcc7',
+      trend: 'Alert',
+    },
+    {
+      label: 'Confirmed',
+      value: confirmedOrders.toString(),
+      sub: 'Ready for fulfillment',
+      icon: CheckCircle2,
+      color: '#3f6530',
+      bg: '#c2efac',
+      trend: 'Active',
+    },
+    {
+      label: 'Out For Delivery',
+      value: outForDelivery.toString(),
+      sub: 'In transit',
+      icon: Truck,
       color: '#c78c2e',
       bg: '#fff8e6',
-      trend: '+3',
+      trend: 'Moving',
     },
     {
-      label: 'Delivered Today',
+      label: 'Delivered',
       value: deliveredOrders.toString(),
       sub: 'Successfully completed',
-      icon: Truck,
-      color: 'var(--color-tertiary)',
-      bg: 'var(--color-tertiary-fixed)',
-      trend: '+8',
+      icon: Package,
+      color: '#2a4f1d',
+      bg: '#eaf4e2',
+      trend: 'Done',
     },
     {
-      label: 'Products',
-      value: productsCount.toString(),
-      sub: 'In catalogue',
-      icon: Package,
-      color: '#4a90d9',
-      bg: '#e8f4fd',
-      trend: 'Active',
+      label: 'Cancelled',
+      value: cancelledOrders.toString(),
+      sub: 'Failed or rejected',
+      icon: AlertCircle,
+      color: '#43493e',
+      bg: '#e3e3dc',
+      trend: 'Alert',
     },
   ];
 
@@ -123,48 +139,49 @@ export default function AdminDashboard() {
             {format(new Date(), 'EEEE, MMMM d, yyyy')}
           </p>
         </div>
-        <div className="hidden md:flex items-center gap-2 px-4 py-2.5 rounded-[12px]"
-          style={{ background: 'var(--color-surface-container)', color: 'var(--color-on-surface-variant)' }}>
+        <Link href="/admin/analytics" className="hidden md:flex items-center gap-2 px-4 py-2.5 rounded-[12px] bg-primary text-on-primary transition-opacity hover:opacity-90">
           <BarChart3 className="w-4 h-4" />
-          <span className="text-[13px] font-semibold">Live Dashboard</span>
-        </div>
+          <span className="text-[13px] font-semibold">Business Intelligence</span>
+        </Link>
       </div>
 
       <div className="px-6 md:px-10 py-6 flex flex-col gap-6">
-
         {/* ═══ STAT CARDS ═══ */}
-        <motion.div
-          className="grid grid-cols-2 lg:grid-cols-4 gap-4"
-          variants={container} initial="hidden" animate="show">
-          {stats.map((stat, i) => {
-            const Icon = stat.icon;
-            return (
-              <motion.div key={i} variants={item}
-                className="rounded-[16px] p-5 flex flex-col gap-3"
-                style={{ background: 'var(--color-surface-container-lowest)', border: '1px solid rgba(195,201,187,0.3)' }}>
-                <div className="flex items-start justify-between">
-                  <div className="w-10 h-10 rounded-[10px] flex items-center justify-center"
-                    style={{ background: stat.bg, color: stat.color }}>
-                    <Icon className="w-5 h-5" strokeWidth={2} />
+        <div>
+          <h2 className="font-bold text-[16px] mb-4 text-on-surface">Operational Health</h2>
+          <motion.div
+            className="grid grid-cols-2 lg:grid-cols-3 gap-4"
+            variants={container} initial="hidden" animate="show">
+            {stats.map((stat, i) => {
+              const Icon = stat.icon;
+              return (
+                <motion.div key={i} variants={item}
+                  className="rounded-[16px] p-5 flex flex-col gap-3"
+                  style={{ background: 'var(--color-surface-container-lowest)', border: '1px solid rgba(195,201,187,0.3)' }}>
+                  <div className="flex items-start justify-between">
+                    <div className="w-10 h-10 rounded-[10px] flex items-center justify-center"
+                      style={{ background: stat.bg, color: stat.color }}>
+                      <Icon className="w-5 h-5" strokeWidth={2} />
+                    </div>
+                    <span className="text-[11px] font-bold px-2 py-1 rounded-full"
+                      style={{ background: '#eaf4e2', color: '#3f6530' }}>
+                      {stat.trend}
+                    </span>
                   </div>
-                  <span className="text-[11px] font-bold px-2 py-1 rounded-full"
-                    style={{ background: '#eaf4e2', color: '#3f6530' }}>
-                    {stat.trend}
-                  </span>
-                </div>
-                <div>
-                  <p className="font-extrabold text-[22px] leading-tight tracking-tight"
-                    style={{ color: 'var(--color-on-surface)' }}>{stat.value}</p>
-                  <p className="text-[12px] font-semibold leading-tight mt-0.5"
-                    style={{ color: 'var(--color-on-surface)' }}>{stat.label}</p>
-                  <p className="text-[11px] mt-0.5" style={{ color: 'var(--color-outline)' }}>
-                    {stat.sub}
-                  </p>
-                </div>
-              </motion.div>
-            );
-          })}
-        </motion.div>
+                  <div>
+                    <p className="font-extrabold text-[22px] leading-tight tracking-tight"
+                      style={{ color: 'var(--color-on-surface)' }}>{stat.value}</p>
+                    <p className="text-[12px] font-semibold leading-tight mt-0.5"
+                      style={{ color: 'var(--color-on-surface)' }}>{stat.label}</p>
+                    <p className="text-[11px] mt-0.5" style={{ color: 'var(--color-outline)' }}>
+                      {stat.sub}
+                    </p>
+                  </div>
+                </motion.div>
+              );
+            })}
+          </motion.div>
+        </div>
 
         {/* ═══ RECENT ORDERS ═══ */}
         <div className="rounded-[16px] overflow-hidden" 
@@ -199,15 +216,14 @@ export default function AdminDashboard() {
               <table className="w-full">
                 <thead>
                   <tr style={{ background: 'var(--color-surface-container-low)' }}>
-                    {['Order ID', 'Customer', 'Items', 'Total', 'Status', 'Date'].map(h => (
-                      <th key={h} className="text-left px-5 py-3 text-[11px] font-bold uppercase tracking-wider"
-                        style={{ color: 'var(--color-outline)' }}>{h}</th>
+                    {['Order ID', 'Total', 'Status', 'Date'].map(h => (
+                      <th key={h} className="text-left px-5 py-3 text-[11px] font-bold uppercase tracking-wider text-muted">{h}</th>
                     ))}
                   </tr>
                 </thead>
                 <tbody>
                   {recentOrders.map((order, i) => {
-                    const statusCfg = STATUS_CONFIG[order.status] || STATUS_CONFIG['Pending'];
+                    const statusCfg = STATUS_CONFIG[order.status] || STATUS_CONFIG['pending'];
                     return (
                       <tr key={order.id}
                         className="transition-all hover:bg-black/5"
@@ -217,37 +233,20 @@ export default function AdminDashboard() {
                             {order.id}
                           </span>
                         </td>
-                        <td className="px-5 py-4">
-                          <p className="font-semibold text-[13px]" style={{ color: 'var(--color-on-surface)' }}>
-                            {order.profiles?.name || 'Customer'}
-                          </p>
-                          <p className="text-[11px]" style={{ color: 'var(--color-outline)' }}>
-                            {order.profiles?.phone ? `+91 ${order.profiles.phone}` : '—'}
-                          </p>
+                        <td className="px-5 py-4 font-semibold text-[13px] text-on-surface">
+                          {t('currency')}{order.total_amount}
                         </td>
                         <td className="px-5 py-4">
-                          <p className="text-[12px] max-w-[180px] truncate" style={{ color: 'var(--color-on-surface-variant)' }}>
-                            {order.order_items?.map(i => `${i.quantity}× ${i.variant_id}`).join(', ')}
-                          </p>
-                        </td>
-                        <td className="px-5 py-4">
-                          <span className="font-extrabold text-[14px]" style={{ color: 'var(--color-primary)' }}>
-                            {t('currency')}{order.total_amount}
-                          </span>
-                        </td>
-                        <td className="px-5 py-4">
-                          <div className="flex items-center gap-1.5 w-fit px-2.5 py-1.5 rounded-full"
-                            style={{ background: statusCfg.bg, color: statusCfg.color }}>
+                          <div className="inline-flex items-center gap-1.5 px-2 py-1 rounded-[6px]"
+                            style={{ background: statusCfg.bg }}>
                             <div className="w-1.5 h-1.5 rounded-full" style={{ background: statusCfg.dot }} />
-                            <span className="text-[10px] font-bold uppercase tracking-wide whitespace-nowrap">
-                              {order.status}
+                            <span className="text-[11px] font-bold capitalize" style={{ color: statusCfg.color }}>
+                              {order.status.replace(/_/g, ' ')}
                             </span>
                           </div>
                         </td>
-                        <td className="px-5 py-4">
-                          <span className="text-[12px]" style={{ color: 'var(--color-outline)' }}>
-                            {format(new Date(order.created_at), 'MMM d, hh:mm a')}
-                          </span>
+                        <td className="px-5 py-4 text-[12px] font-medium text-muted">
+                          {format(new Date(order.created_at), 'MMM d, h:mm a')}
                         </td>
                       </tr>
                     );

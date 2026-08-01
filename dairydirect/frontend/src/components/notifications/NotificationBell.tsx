@@ -37,7 +37,6 @@ export function NotificationBell() {
         <NotificationCenter 
           isOpen={isOpen} 
           onClose={() => setIsOpen(false)} 
-          isMobile={isMobile}
         />
       )}
     </>

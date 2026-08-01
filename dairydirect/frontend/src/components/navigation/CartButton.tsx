@@ -4,6 +4,7 @@ import React from 'react';
 import Link from 'next/link';
 import { ShoppingCart } from 'lucide-react';
 import { useStore } from '@/store/useStore';
+import { useCartDetails } from '@/hooks/useCartDetails';
 import { cn } from '@/lib/utils';
 
 interface CartButtonProps {
@@ -12,7 +13,7 @@ interface CartButtonProps {
 
 export function CartButton({ className }: CartButtonProps) {
   const cart = useStore(state => state.cart);
-  const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
+  const { totalItems, subtotal, isLoading } = useCartDetails();
 
   return (
     <Link
@@ -28,7 +29,9 @@ export function CartButton({ className }: CartButtonProps) {
       {totalItems > 0 ? (
         <div className="flex flex-col items-start leading-none ml-1">
           <span className="text-[12px] font-medium opacity-90">{totalItems} item{totalItems !== 1 ? 's' : ''}</span>
-          <span className="text-[14px] font-bold">₹ --</span>
+          <span className="text-[14px] font-bold">
+            {isLoading ? '₹...' : `₹${subtotal}`}
+          </span>
         </div>
       ) : (
         <span className="text-body-md font-bold ml-1">Cart</span>

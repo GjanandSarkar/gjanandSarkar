@@ -23,3 +23,5 @@ coverage/
 # macOS metadata
 .DS_Store
 ._*
+# Sentry Config File
+.env.sentry-build-plugin

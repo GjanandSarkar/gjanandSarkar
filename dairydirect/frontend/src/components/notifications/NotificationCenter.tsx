@@ -9,7 +9,6 @@ import { NotificationEmptyState } from './NotificationEmptyState';
 interface NotificationCenterProps {
   isOpen: boolean;
   onClose: () => void;
-  isMobile?: boolean;
 }
 
 // Dummy data for visual preview. In real app, fetch from backend.
@@ -19,7 +18,7 @@ const DUMMY_NOTIFICATIONS: NotificationData[] = [
   { id: '3', type: 'order', title: 'Subscription Paused', message: 'Your delivery for tomorrow has been successfully paused.', isRead: true, time: 'Yesterday' },
 ];
 
-export function NotificationCenter({ isOpen, onClose, isMobile = false }: NotificationCenterProps) {
+export function NotificationCenter({ isOpen, onClose }: NotificationCenterProps) {
   const [notifications, setNotifications] = useState<NotificationData[]>(DUMMY_NOTIFICATIONS);
 
   const unreadCount = notifications.filter(n => !n.isRead).length;
@@ -85,36 +84,31 @@ export function NotificationCenter({ isOpen, onClose, isMobile = false }: Notifi
     </div>
   );
 
-  if (isMobile) {
-    return (
-      <AnimatePresence>
-        {isOpen && (
-          <motion.div
-            initial={{ y: '100%' }}
-            animate={{ y: 0 }}
-            exit={{ y: '100%' }}
-            transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-            className="fixed inset-0 z-50 bg-surface md:hidden"
-          >
-            {content}
-          </motion.div>
-        )}
-      </AnimatePresence>
-    );
-  }
-
-  // Desktop Drawer Slide-over
   return (
     <AnimatePresence>
       {isOpen && (
         <>
+          {/* Backdrop (shared) */}
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             onClick={onClose}
-            className="fixed inset-0 bg-black/20 backdrop-blur-sm z-50 hidden md:block"
+            className="fixed inset-0 bg-black/20 backdrop-blur-sm z-50"
           />
+
+          {/* Mobile Bottom Sheet */}
+          <motion.div
+            initial={{ y: '100%' }}
+            animate={{ y: 0 }}
+            exit={{ y: '100%' }}
+            transition={{ type: 'spring', damping: 25, stiffness: 200 }}
+            className="fixed inset-x-0 bottom-0 top-[10%] md:hidden z-50 rounded-t-3xl overflow-hidden shadow-2xl"
+          >
+            {content}
+          </motion.div>
+
+          {/* Desktop Right Drawer */}
           <motion.div
             initial={{ x: '100%' }}
             animate={{ x: 0 }}

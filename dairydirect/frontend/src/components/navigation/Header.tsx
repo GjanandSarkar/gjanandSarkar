@@ -18,7 +18,7 @@ export function Header() {
         {/* Left: Brand & Location */}
         <div className="flex items-center gap-4 md:gap-8 shrink-0">
           <Link href="/home" className="flex items-center active:scale-95 transition-transform focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary rounded-lg">
-            <img src="/logo.svg" alt="Gjanand Sarkar" className="w-10 h-10 md:w-12 md:h-12 object-contain" />
+            <img src="/logo.svg" alt="Gjanand Sarkar" className="w-12 h-12 md:w-16 md:h-16 object-contain" />
           </Link>
           
           <div className="hidden sm:block border-l border-border h-8 mx-2" />
