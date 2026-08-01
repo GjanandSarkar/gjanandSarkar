@@ -79,6 +79,7 @@ export function BuyAgainCarousel({ allProducts }: BuyAgainCarouselProps = {}) {
       icon={<Repeat className="w-4 h-4 text-primary" strokeWidth={2.5} />}
       products={products} 
       isLoading={isLoading} 
+      priority={true}
     />
   );
 }

@@ -35,12 +35,21 @@ export function AuthGuard() {
       return;
     }
 
-    // Already logged in -> leave login page, optionally preserving a return URL
+    // Already logged in -> leave login page
     if (user && pathname === '/login') {
-      router.replace('/home');
+      router.replace(user.role === 'admin' ? '/admin' : '/home');
       return;
     }
 
+    // Admins bypass onboarding and must stay in /admin
+    if (user?.role === 'admin') {
+      if (!pathname.startsWith('/admin')) {
+        router.replace('/admin');
+      }
+      return;
+    }
+
+    // Normal users onboarding logic
     if (user && !isAuthRoute) {
       const needsProfileSetup = !user.name || user.name.trim() === '';
       if (needsProfileSetup && pathname !== '/onboarding/profile') {
@@ -57,10 +66,6 @@ export function AuthGuard() {
         };
         checkAddresses();
       }
-    }
-
-    if (user?.role === 'admin' && !pathname.startsWith('/admin')) {
-      router.replace('/admin');
     }
   }, [user, pathname, router, isAuthLoading]);
 

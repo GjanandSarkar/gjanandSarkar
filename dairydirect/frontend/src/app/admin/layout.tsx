@@ -12,7 +12,10 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const router = useRouter();
   const pathname = usePathname();
 
+  const isAuthLoading = useStore(state => state.isAuthLoading);
+
   useEffect(() => {
+    if (isAuthLoading) return;
     if (!user) {
       router.replace('/login');
       return;
@@ -20,7 +23,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     if (user.role !== 'admin') {
       router.replace('/home');
     }
-  }, [user, pathname, router]);
+  }, [user, pathname, router, isAuthLoading]);
 
   if (!user || user.role !== 'admin') {
     return (

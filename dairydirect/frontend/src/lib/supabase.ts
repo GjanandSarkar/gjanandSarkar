@@ -1,7 +1,11 @@
 import { createBrowserClient } from '@supabase/ssr';
 
 // Singleton pattern — reuse across the app
-let supabaseInstance: ReturnType<typeof createBrowserClient> | null = null;
+const globalForSupabase = globalThis as unknown as {
+  __supabaseInstance: ReturnType<typeof createBrowserClient> | undefined;
+};
+
+let supabaseInstance = globalForSupabase.__supabaseInstance;
 
 export function getSupabaseClient() {
   if (!supabaseInstance) {
@@ -17,6 +21,7 @@ export function getSupabaseClient() {
     }
 
     supabaseInstance = createBrowserClient(url ?? '', key ?? '');
+    globalForSupabase.__supabaseInstance = supabaseInstance;
   }
   return supabaseInstance;
 }

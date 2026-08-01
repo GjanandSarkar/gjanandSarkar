@@ -2,13 +2,15 @@
 
 import { useRouter, useSearchParams, usePathname } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
-import { useEffect, Suspense } from 'react';
+import React, { useEffect, Suspense, useRef } from 'react';
 
 function AuthCallbackInner() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const pathname = usePathname();
   const next = searchParams.get('next') || '/home';
+
+  const isProcessing = React.useRef(false);
 
   useEffect(() => {
     let mounted = true;
@@ -19,6 +21,9 @@ function AuthCallbackInner() {
         router.replace(next);
         return;
       }
+
+      if (isProcessing.current) return;
+      isProcessing.current = true;
 
       try {
         // Check if user has saved addresses - need to fetch this
