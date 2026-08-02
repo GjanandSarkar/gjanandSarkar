@@ -6,15 +6,18 @@ import { TrustSection } from '@/components/home/TrustSection';
 import { SocialProof } from '@/components/home/SocialProof';
 import { Sparkles, TrendingUp, CalendarDays } from 'lucide-react';
 import Link from 'next/link';
-import dynamic from 'next/dynamic';
+import nextDynamic from 'next/dynamic';
 
 // Dynamic imports for below-the-fold content
-const DynamicTrustSection = dynamic(() => import('@/components/home/TrustSection').then(mod => mod.TrustSection), {
+const DynamicTrustSection = nextDynamic(() => import('@/components/home/TrustSection').then(mod => mod.TrustSection), {
   loading: () => <div className="h-64 bg-surface-container-low animate-pulse my-8 rounded-[24px]" />
 });
-const DynamicSocialProof = dynamic(() => import('@/components/home/SocialProof').then(mod => mod.SocialProof), {
+const DynamicSocialProof = nextDynamic(() => import('@/components/home/SocialProof').then(mod => mod.SocialProof), {
   loading: () => <div className="h-64 bg-surface-container-low animate-pulse my-8 rounded-[24px]" />
 });
+
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
 
 export default async function HomeScreen() {
   // Fetch on the server using direct DB query

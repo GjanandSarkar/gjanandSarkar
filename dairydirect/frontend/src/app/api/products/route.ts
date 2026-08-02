@@ -2,14 +2,13 @@ import { NextRequest, NextResponse } from 'next/server';
 import { supabaseAdmin } from '@/lib/db';
 import { getAuthUser } from '@/lib/api/auth-middleware';
 
+export const dynamic = 'force-dynamic';
+
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
     const category = searchParams.get('category');
     const activeOnly = searchParams.get('activeOnly') !== 'false';
-
-    const auth = await getAuthUser(request);
-    const isAdmin = auth?.isAdmin ?? false;
 
     let query = supabaseAdmin
       .from('products')
@@ -31,7 +30,10 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: error.message }, { status: 500 });
     }
 
-    return NextResponse.json({ products: data });
+    return NextResponse.json(
+      { products: data },
+      { headers: { 'Cache-Control': 'no-store, max-age=0' } }
+    );
   } catch (error) {
     console.error('Products GET error:', error);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
@@ -61,8 +63,8 @@ export async function POST(request: NextRequest) {
 
     if (variants && variants.length > 0) {
       for (const v of variants) {
-        const cost = v.cost_price || 0;
-        const selling = v.price || 0;
+        const cost = Number(v.cost_price) || 0;
+        const selling = Number(v.price) || 0;
         if (cost <= 0) {
           return NextResponse.json({ error: `Cost price must be greater than 0 for variant ${v.weight}` }, { status: 400 });
         }
@@ -101,10 +103,10 @@ export async function POST(request: NextRequest) {
           variants.map((v: any) => ({
             product_id: productId,
             weight: v.weight,
-            price: v.price,
-            cost_price: v.cost_price,
-            original_price: v.original_price ?? null,
-            stock: v.stock ?? 0,
+            price: Number(v.price),
+            cost_price: Number(v.cost_price) || 0,
+            original_price: v.original_price ? Number(v.original_price) : null,
+            stock: Number(v.stock) || 0,
           }))
         );
 
