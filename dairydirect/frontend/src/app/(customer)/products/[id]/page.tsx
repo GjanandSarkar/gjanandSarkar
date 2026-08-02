@@ -30,6 +30,9 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   };
 }
 
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
 export default async function ProductPage({ params }: Props) {
   const { id } = await params;
   const product = await getProductByIdServer(id);

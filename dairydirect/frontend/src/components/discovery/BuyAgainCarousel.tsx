@@ -56,7 +56,7 @@ export function BuyAgainCarousel({ allProducts }: BuyAgainCarouselProps = {}) {
         const buyAgainProducts = sortedProductIds
           .map(id => productsToUse.find(p => p.id === id))
           .filter((p): p is ProductWithVariants => 
-            p !== undefined && p.product_variants.some(v => v.stock > 0)
+            p !== undefined && p.is_active && p.product_variants.some(v => v.stock > 0)
           );
 
         setProducts(buyAgainProducts);
