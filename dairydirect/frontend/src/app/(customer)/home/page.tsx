@@ -1,11 +1,11 @@
 import { getProductsServer } from '@/lib/api/products';
 import { HeroBanner } from '@/components/home/HeroBanner';
 import { TrustBar } from '@/components/home/TrustBar';
-import { CircularCategories } from '@/components/home/CircularCategories';
+
 import { DealsAndBrands } from '@/components/home/DealsAndBrands';
 import { HeritageBanner } from '@/components/home/HeritageBanner';
 import { TrendingProducts } from '@/components/home/TrendingProducts';
-import { ShopByState } from '@/components/home/ShopByState';
+
 import { ImpactAndTestimonial } from '@/components/home/ImpactAndTestimonial';
 
 export const dynamic = 'force-dynamic';
@@ -23,8 +23,6 @@ export default async function HomeScreen() {
       {/* 2. Trust Proposition Strip (5 Pillars) */}
       <TrustBar />
 
-      {/* 3. Circular Category Strip */}
-      <CircularCategories />
 
       {/* 4. Deal of the Day (Countdown) + Trusted Indian Brands (Grid) */}
       <DealsAndBrands products={prods} />
@@ -34,9 +32,6 @@ export default async function HomeScreen() {
 
       {/* 6. Trending Products (Live Store Catalog) */}
       <TrendingProducts products={prods} />
-
-      {/* 7. Shop by State (GI & Regional Specialties) */}
-      <ShopByState />
 
       {/* 8. Impact Stats, Why Choose & Verified Testimonial */}
       <ImpactAndTestimonial />

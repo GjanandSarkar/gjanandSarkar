@@ -1,67 +1,38 @@
+/**
+ * GET/POST/PUT/DELETE /api/addresses
+ * User address book — AWS PostgreSQL version.
+ */
+
 import { NextRequest, NextResponse } from 'next/server';
-import { supabaseAdmin } from '@/lib/db';
+import { query, withTransaction } from '@/lib/aws/rds';
 import { getAuthUser } from '@/lib/api/auth-middleware';
+import { isValidUUID } from '@/lib/security/sanitize';
 
 export async function GET(request: NextRequest) {
   try {
-    const { searchParams } = new URL(request.url);
-    const userId = searchParams.get('userId');
-
     const auth = await getAuthUser(request);
-    if (!auth || auth.userId !== userId) {
+    if (!auth) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const { data, error } = await supabaseAdmin
-      .from('user_addresses')
-      .select('*')
-      .eq('user_id', userId)
-      .order('created_at', { ascending: false });
+    const { searchParams } = new URL(request.url);
+    const userId = searchParams.get('userId') || auth.userId;
 
-    if (error) {
-      console.error('getAddresses error:', error);
-      return NextResponse.json({ error: error.message }, { status: 500 });
+    if (!auth.isAdmin && auth.userId !== userId) {
+      return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
     }
 
-    const rawList = (data || []).filter((item: any) => !item.is_deleted);
-    
-    // Ensure only 1 address is default
-    const defaultIndices: number[] = [];
-    rawList.forEach((addr: any, idx: number) => {
-      if (addr.is_default) defaultIndices.push(idx);
-    });
+    const result = await query(
+      `SELECT * FROM user_addresses 
+       WHERE user_id = $1 AND is_deleted = false
+       ORDER BY is_default DESC, created_at DESC`,
+      [userId]
+    );
 
-    let sanitized = rawList;
-    if (defaultIndices.length > 1) {
-      const trueDefaultIdx = defaultIndices[0];
-      const nonDefaultIds: string[] = [];
-      sanitized = rawList.map((addr: any, idx: number) => {
-        if (idx === trueDefaultIdx) return { ...addr, is_default: true };
-        if (addr.is_default) nonDefaultIds.push(addr.id);
-        return { ...addr, is_default: false };
-      });
-
-      if (nonDefaultIds.length > 0) {
-        // Clean up asynchronously in Supabase
-        (async () => {
-          try {
-            await supabaseAdmin
-              .from('user_addresses')
-              .update({ is_default: false })
-              .in('id', nonDefaultIds);
-          } catch (e) {
-            console.warn('Failed to clean non-default addresses in background:', e);
-          }
-        })();
-      }
-    }
-
-    sanitized.sort((a: any, b: any) => (b.is_default ? 1 : 0) - (a.is_default ? 1 : 0));
-
-    return NextResponse.json({ addresses: sanitized });
-  } catch (error) {
-    console.error('Addresses GET error:', error);
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+    return NextResponse.json({ addresses: result.rows });
+  } catch (error: any) {
+    console.error('[Addresses GET] Error:', error.message);
+    return NextResponse.json({ error: 'Failed to fetch addresses' }, { status: 500 });
   }
 }
 
@@ -73,40 +44,35 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json();
-    const { userId, label, address, lat, lng, isDefault } = body;
+    const { label, address, lat, lng, isDefault } = body;
 
-    if (auth.userId !== userId) {
-      return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+    if (!address || typeof address !== 'string' || address.trim().length < 5) {
+      return NextResponse.json({ error: 'Please provide a valid address' }, { status: 400 });
     }
 
-    if (isDefault) {
-      await supabaseAdmin
-        .from('user_addresses')
-        .update({ is_default: false })
-        .eq('user_id', userId);
-    }
+    const newAddress = await withTransaction(async (client) => {
+      if (isDefault) {
+        await client.query('UPDATE user_addresses SET is_default = false WHERE user_id = $1', [auth.userId]);
+      }
 
-    const { data, error } = await supabaseAdmin
-      .from('user_addresses')
-      .insert({
-        user_id: userId,
-        label,
-        address,
-        lat: lat ?? null,
-        lng: lng ?? null,
-        is_default: Boolean(isDefault),
-      })
-      .select()
-      .single();
+      // Check if first address, make it default automatically
+      const countRes = await client.query('SELECT COUNT(*) FROM user_addresses WHERE user_id = $1 AND is_deleted = false', [auth.userId]);
+      const shouldBeDefault = isDefault || parseInt(countRes.rows[0].count) === 0;
 
-    if (error) {
-      return NextResponse.json({ error: error.message }, { status: 500 });
-    }
+      const insertRes = await client.query(
+        `INSERT INTO user_addresses (user_id, label, address, lat, lng, is_default)
+         VALUES ($1, $2, $3, $4, $5, $6)
+         RETURNING *`,
+        [auth.userId, label || 'Home', address.trim(), lat || null, lng || null, shouldBeDefault]
+      );
 
-    return NextResponse.json({ success: true, address: data });
-  } catch (error) {
-    console.error('Addresses POST error:', error);
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+      return insertRes.rows[0];
+    });
+
+    return NextResponse.json({ success: true, address: newAddress });
+  } catch (error: any) {
+    console.error('[Addresses POST] Error:', error.message);
+    return NextResponse.json({ error: 'Failed to add address' }, { status: 500 });
   }
 }
 
@@ -118,57 +84,46 @@ export async function PUT(request: NextRequest) {
     }
 
     const body = await request.json();
-    const { addressId, userId, label, address, lat, lng, isDefault, makeDefaultOnly } = body;
+    const { addressId, label, address, lat, lng, isDefault, makeDefaultOnly } = body;
 
-    if (auth.userId !== userId) {
-      return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+    if (!addressId || !isValidUUID(addressId)) {
+      return NextResponse.json({ error: 'Valid address ID required' }, { status: 400 });
     }
 
-    if (makeDefaultOnly) {
-      await supabaseAdmin
-        .from('user_addresses')
-        .update({ is_default: false })
-        .eq('user_id', userId);
+    const updated = await withTransaction(async (client) => {
+      if (makeDefaultOnly || isDefault) {
+        await client.query('UPDATE user_addresses SET is_default = false WHERE user_id = $1', [auth.userId]);
+      }
 
-      const { error } = await supabaseAdmin
-        .from('user_addresses')
-        .update({ is_default: true })
-        .eq('id', addressId)
-        .eq('user_id', userId);
+      if (makeDefaultOnly) {
+        const res = await client.query(
+          'UPDATE user_addresses SET is_default = true, updated_at = now() WHERE id = $1 AND user_id = $2 RETURNING *',
+          [addressId, auth.userId]
+        );
+        return res.rows[0];
+      }
 
-      if (error) return NextResponse.json({ error: error.message }, { status: 500 });
-      return NextResponse.json({ success: true });
-    }
+      const setParts = ['updated_at = now()'];
+      const values: any[] = [addressId, auth.userId];
+      let pIdx = 3;
 
-    if (isDefault) {
-      await supabaseAdmin
-        .from('user_addresses')
-        .update({ is_default: false })
-        .eq('user_id', userId);
-    }
+      if (label !== undefined) { setParts.push(`label = $${pIdx++}`); values.push(label); }
+      if (address !== undefined) { setParts.push(`address = $${pIdx++}`); values.push(address); }
+      if (lat !== undefined) { setParts.push(`lat = $${pIdx++}`); values.push(lat); }
+      if (lng !== undefined) { setParts.push(`lng = $${pIdx++}`); values.push(lng); }
+      if (isDefault !== undefined) { setParts.push(`is_default = $${pIdx++}`); values.push(Boolean(isDefault)); }
 
-    const updatePayload: Record<string, any> = { is_default: Boolean(isDefault) };
-    if (label !== undefined) updatePayload.label = label;
-    if (address !== undefined) updatePayload.address = address;
-    if (lat !== undefined) updatePayload.lat = lat;
-    if (lng !== undefined) updatePayload.lng = lng;
+      const res = await client.query(
+        `UPDATE user_addresses SET ${setParts.join(', ')} WHERE id = $1 AND user_id = $2 RETURNING *`,
+        values
+      );
+      return res.rows[0];
+    });
 
-    const { data, error } = await supabaseAdmin
-      .from('user_addresses')
-      .update(updatePayload)
-      .eq('id', addressId)
-      .eq('user_id', userId)
-      .select()
-      .single();
-
-    if (error) {
-      return NextResponse.json({ error: error.message }, { status: 500 });
-    }
-
-    return NextResponse.json({ success: true, address: data });
-  } catch (error) {
-    console.error('Addresses PUT error:', error);
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+    return NextResponse.json({ success: true, address: updated });
+  } catch (error: any) {
+    console.error('[Addresses PUT] Error:', error.message);
+    return NextResponse.json({ error: 'Failed to update address' }, { status: 500 });
   }
 }
 
@@ -181,57 +136,20 @@ export async function DELETE(request: NextRequest) {
 
     const { searchParams } = new URL(request.url);
     const addressId = searchParams.get('id');
-    const userId = searchParams.get('userId');
 
-    if (!addressId || !userId || auth.userId !== userId) {
-      return NextResponse.json({ error: 'Invalid parameters' }, { status: 400 });
+    if (!addressId || !isValidUUID(addressId)) {
+      return NextResponse.json({ error: 'Valid address ID required' }, { status: 400 });
     }
 
-    // 1. Direct delete
-    const { error } = await supabaseAdmin
-      .from('user_addresses')
-      .delete()
-      .eq('id', addressId)
-      .eq('user_id', userId);
-
-    if (error) {
-      // If foreign key constraint on orders
-      if (
-        error.code === '23503' || 
-        error.message?.toLowerCase().includes('foreign key') || 
-        error.message?.includes('orders_address_id_fkey')
-      ) {
-        // Unlink past orders
-        await supabaseAdmin
-          .from('orders')
-          .update({ address_id: null })
-          .eq('address_id', addressId);
-
-        // Retry delete
-        const { error: retryError } = await supabaseAdmin
-          .from('user_addresses')
-          .delete()
-          .eq('id', addressId)
-          .eq('user_id', userId);
-
-        if (!retryError) return NextResponse.json({ success: true });
-
-        // Fallback soft delete
-        await supabaseAdmin
-          .from('user_addresses')
-          .update({ is_deleted: true, is_default: false })
-          .eq('id', addressId)
-          .eq('user_id', userId);
-
-        return NextResponse.json({ success: true });
-      }
-
-      return NextResponse.json({ error: error.message }, { status: 500 });
-    }
+    // Soft delete to protect past orders foreign keys
+    await query(
+      'UPDATE user_addresses SET is_deleted = true, is_default = false, updated_at = now() WHERE id = $1 AND user_id = $2',
+      [addressId, auth.userId]
+    );
 
     return NextResponse.json({ success: true });
-  } catch (error) {
-    console.error('Addresses DELETE error:', error);
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+  } catch (error: any) {
+    console.error('[Addresses DELETE] Error:', error.message);
+    return NextResponse.json({ error: 'Failed to delete address' }, { status: 500 });
   }
 }

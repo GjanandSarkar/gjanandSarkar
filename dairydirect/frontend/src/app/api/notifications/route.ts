@@ -1,6 +1,12 @@
+/**
+ * GET/POST /api/notifications
+ * Notifications API — AWS PostgreSQL version.
+ */
+
 import { NextRequest, NextResponse } from 'next/server';
-import { supabaseAdmin } from '@/lib/db';
+import { query } from '@/lib/aws/rds';
 import { getAuthUser } from '@/lib/api/auth-middleware';
+import { isValidUUID } from '@/lib/security/sanitize';
 
 export async function GET(request: NextRequest) {
   try {
@@ -9,26 +15,20 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const { data, error } = await supabaseAdmin
-      .from('notifications')
-      .select('*')
-      .or(
-        `user_id.eq.${auth.userId},` +
-        `and(user_id.is.null,role_target.eq.${auth.role}),` +
-        `and(user_id.is.null,role_target.eq.all)`
-      )
-      .order('created_at', { ascending: false })
-      .limit(50);
+    const result = await query(
+      `SELECT * FROM notifications
+       WHERE user_id = $1 
+          OR (user_id IS NULL AND role_target = $2)
+          OR (user_id IS NULL AND role_target = 'all')
+       ORDER BY created_at DESC
+       LIMIT 50`,
+      [auth.userId, auth.role]
+    );
 
-    if (error) {
-      console.error('getNotifications error:', error);
-      return NextResponse.json({ error: error.message }, { status: 500 });
-    }
-
-    return NextResponse.json({ notifications: data });
-  } catch (error) {
-    console.error('Notifications GET error:', error);
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+    return NextResponse.json({ notifications: result.rows });
+  } catch (error: any) {
+    console.error('[Notifications GET] Error:', error.message);
+    return NextResponse.json({ error: 'Failed to fetch notifications' }, { status: 500 });
   }
 }
 
@@ -43,29 +43,27 @@ export async function POST(request: NextRequest) {
     const { notificationId, all } = body;
 
     if (notificationId) {
-      const { error } = await supabaseAdmin
-        .from('notifications')
-        .update({ is_read: true })
-        .eq('id', notificationId);
-
-      if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+      if (!isValidUUID(notificationId)) {
+        return NextResponse.json({ error: 'Invalid notification ID' }, { status: 400 });
+      }
+      await query(
+        'UPDATE notifications SET is_read = true WHERE id = $1 AND (user_id = $2 OR role_target IN ($3, \'all\'))',
+        [notificationId, auth.userId, auth.role]
+      );
       return NextResponse.json({ success: true });
     }
 
     if (all) {
-      const { error } = await supabaseAdmin
-        .from('notifications')
-        .update({ is_read: true })
-        .eq('user_id', auth.userId)
-        .eq('is_read', false);
-
-      if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+      await query(
+        'UPDATE notifications SET is_read = true WHERE user_id = $1 AND is_read = false',
+        [auth.userId]
+      );
       return NextResponse.json({ success: true });
     }
 
     return NextResponse.json({ error: 'Invalid request' }, { status: 400 });
-  } catch (error) {
-    console.error('Notifications POST error:', error);
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+  } catch (error: any) {
+    console.error('[Notifications POST] Error:', error.message);
+    return NextResponse.json({ error: 'Failed to update notification' }, { status: 500 });
   }
 }

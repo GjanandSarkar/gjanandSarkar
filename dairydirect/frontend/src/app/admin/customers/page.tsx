@@ -2,69 +2,57 @@
 
 import { useState, useEffect } from 'react';
 import { useTranslation } from '@/lib/i18n';
-import { supabase } from '@/lib/supabase';
-import { Users, Loader2, Mail, Phone, Search, X, Package, Repeat, DollarSign } from 'lucide-react';
+import { Users, Loader2, Mail, Phone, Search, X, Package, Repeat, IndianRupee, ArrowLeft } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { getAllOrders } from '@/lib/api/orders';
-import { getAllSubscriptions } from '@/lib/api/subscriptions';
+import Link from 'next/link';
 
 export default function AdminCustomersPage() {
   const { t } = useTranslation();
   const [customers, setCustomers] = useState<any[]>([]);
-  const [orders, setOrders] = useState<any[]>([]);
-  const [subscriptions, setSubscriptions] = useState<any[]>([]);
+  const [total, setTotal] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
   const [search, setSearch] = useState('');
   const [selectedCustomer, setSelectedCustomer] = useState<any | null>(null);
 
-  useEffect(() => {
-    const fetchData = async () => {
-      const [
-        { data: profiles },
-        allOrders,
-        allSubs
-      ] = await Promise.all([
-        supabase.from('profiles').select('*').eq('role', 'customer').order('created_at', { ascending: false }),
-        getAllOrders(),
-        getAllSubscriptions()
-      ]);
-      setCustomers(profiles ?? []);
-      setOrders(allOrders);
-      setSubscriptions(allSubs);
+  const fetchCustomers = async (query = '') => {
+    setIsLoading(true);
+    try {
+      const res = await fetch(`/api/admin/customers?search=${encodeURIComponent(query)}`);
+      const data = await res.json();
+      if (data.customers) {
+        setCustomers(data.customers);
+        setTotal(data.total || data.customers.length);
+      }
+    } catch (e) {
+      console.error('Failed to fetch customers:', e);
+    } finally {
       setIsLoading(false);
-    };
-    fetchData();
-  }, []);
-
-  const filteredCustomers = customers.filter(c => {
-    const q = search.toLowerCase();
-    const name = c.name?.toLowerCase() || '';
-    const email = c.email?.toLowerCase() || '';
-    const phone = c.phone || '';
-    return name.includes(q) || email.includes(q) || phone.includes(q);
-  });
-
-  const getCustomerStats = (userId: string) => {
-    const userOrders = orders.filter(o => o.user_id === userId);
-    const userSubs = subscriptions.filter(s => s.user_id === userId);
-    const ltv = userOrders.filter(o => o.status !== 'cancelled').reduce((sum, o) => sum + o.total_amount, 0);
-    return { userOrders, userSubs, ltv };
+    }
   };
 
-  if (isLoading) {
-    return (
-      <div className="flex flex-col min-h-screen items-center justify-center pt-20 px-6" style={{ background: 'var(--color-surface)' }}>
-        <Loader2 className="w-8 h-8 animate-spin" style={{ color: 'var(--color-primary)' }} />
-      </div>
-    );
-  }
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      fetchCustomers(search);
+    }, 300);
+    return () => clearTimeout(timer);
+  }, [search]);
 
   return (
-    <div className="flex flex-col min-h-screen">
-      <div className="px-6 md:px-10 pt-6 pb-5" style={{ background: 'var(--color-surface-container-lowest)' }}>
-        <h1 className="font-extrabold text-[24px] tracking-tight mb-4" style={{ color: 'var(--color-on-surface)' }}>
-          Customers
-        </h1>
+    <div className="flex flex-col min-h-screen" style={{ background: 'var(--color-background)' }}>
+      {/* Header */}
+      <div className="px-6 md:px-10 pt-8 pb-6" style={{ background: 'var(--color-surface-container-lowest)', borderBottom: '1px solid rgba(195,201,187,0.2)' }}>
+        <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center gap-3">
+            <Link href="/admin" className="p-1.5 rounded-[8px] hover:opacity-70 transition-opacity" style={{ background: 'var(--color-surface-container-low)' }}>
+              <ArrowLeft className="w-4 h-4" style={{ color: 'var(--color-on-surface)' }} />
+            </Link>
+            <div>
+              <h1 className="font-extrabold text-[24px]" style={{ color: 'var(--color-on-surface)' }}>Customer Directory</h1>
+              <p className="text-[12px]" style={{ color: 'var(--color-outline)' }}>{total} registered customers</p>
+            </div>
+          </div>
+        </div>
+
         <div className="flex items-center bg-white rounded-[12px] px-4 h-12"
           style={{ border: '1px solid rgba(195,201,187,0.5)' }}>
           <Search className="w-5 h-5" style={{ color: 'var(--color-outline)' }} />
@@ -72,64 +60,76 @@ export default function AdminCustomersPage() {
             type="text"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            placeholder="Search by name, email, or phone..."
+            placeholder="Search by name, email, or phone number..."
             className="flex-1 bg-transparent border-none outline-none px-3 text-[14px] font-medium"
             style={{ color: 'var(--color-on-surface)' }}
           />
+          {search && (
+            <button onClick={() => setSearch('')} className="p-1 text-gray-400 hover:text-gray-600">
+              <X className="w-4 h-4" />
+            </button>
+          )}
         </div>
       </div>
 
-      <div className="px-6 md:px-10 py-5">
-        {filteredCustomers.length === 0 ? (
+      <div className="px-6 md:px-10 py-6">
+        {isLoading ? (
+          <div className="flex justify-center py-20"><Loader2 className="w-7 h-7 animate-spin" style={{ color: 'var(--color-primary)' }} /></div>
+        ) : customers.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-24 text-center">
             <Users className="w-12 h-12 mb-4" style={{ color: 'var(--color-outline)' }} strokeWidth={1.5} />
             <p className="font-bold text-[18px]" style={{ color: 'var(--color-on-surface)' }}>No customers found</p>
           </div>
         ) : (
           <div className="flex flex-col gap-3">
-            {filteredCustomers.map((customer, i) => {
-              const { userOrders, userSubs } = getCustomerStats(customer.id);
-              return (
-                <motion.div key={customer.id}
-                  onClick={() => setSelectedCustomer(customer)}
-                  initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.25, delay: i * 0.03 }}
-                  className="rounded-[14px] p-4 flex items-center gap-4 cursor-pointer hover:bg-black/5 transition-colors"
-                  style={{ background: 'var(--color-surface-container-lowest)', border: '1px solid rgba(195,201,187,0.3)' }}>
-                  <div className="w-10 h-10 rounded-full flex items-center justify-center font-bold text-white"
-                    style={{ background: 'linear-gradient(135deg, #3f6530, #577f46)' }}>
-                    {(customer.name || customer.email || 'C')[0].toUpperCase()}
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="font-semibold text-[14px] truncate" style={{ color: 'var(--color-on-surface)' }}>
-                      {customer.name || customer.email || 'Unknown'}
-                    </p>
-                    <div className="flex items-center gap-3 mt-0.5">
-                      {customer.email && (
-                        <span className="text-[11px] flex items-center gap-1" style={{ color: 'var(--color-outline)' }}>
-                          <Mail className="w-3 h-3" /> {customer.email}
-                        </span>
-                      )}
-                      {customer.phone && (
-                        <span className="text-[11px] flex items-center gap-1" style={{ color: 'var(--color-outline)' }}>
-                          <Phone className="w-3 h-3" /> +91 {customer.phone}
-                        </span>
-                      )}
-                    </div>
-                  </div>
-                  <div className="text-right flex flex-col items-end gap-1">
-                    <span className="text-[11px] font-bold px-2 py-0.5 rounded-full bg-primary/10 text-primary">
-                      {userOrders.length} Orders
-                    </span>
-                    {userSubs.length > 0 && (
-                      <span className="text-[11px] font-bold px-2 py-0.5 rounded-full bg-orange-100 text-orange-700">
-                        {userSubs.length} Subs
+            {customers.map((c, i) => (
+              <motion.div
+                key={c.id}
+                onClick={() => setSelectedCustomer(c)}
+                initial={{ opacity: 0, y: 8 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.2, delay: i * 0.02 }}
+                className="rounded-[14px] p-4 flex items-center gap-4 cursor-pointer hover:shadow-sm transition-all"
+                style={{ background: 'var(--color-surface-container-lowest)', border: '1px solid rgba(195,201,187,0.3)' }}
+              >
+                <div className="w-11 h-11 rounded-full flex items-center justify-center font-bold text-white text-[15px]"
+                  style={{ background: 'linear-gradient(135deg, #3f6530, #577f46)' }}>
+                  {(c.name || c.email || 'C')[0].toUpperCase()}
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="font-bold text-[14px] truncate" style={{ color: 'var(--color-on-surface)' }}>
+                    {c.name || 'Anonymous Customer'}
+                  </p>
+                  <div className="flex flex-wrap items-center gap-3 mt-1">
+                    {c.phone && (
+                      <span className="text-[11px] flex items-center gap-1" style={{ color: 'var(--color-outline)' }}>
+                        <Phone className="w-3 h-3" /> +91 {c.phone}
+                      </span>
+                    )}
+                    {c.email && (
+                      <span className="text-[11px] flex items-center gap-1" style={{ color: 'var(--color-outline)' }}>
+                        <Mail className="w-3 h-3" /> {c.email}
                       </span>
                     )}
                   </div>
-                </motion.div>
-              );
-            })}
+                </div>
+                <div className="text-right flex flex-col items-end gap-1">
+                  <span className="font-extrabold text-[14px]" style={{ color: 'var(--color-primary)' }}>
+                    ₹{parseFloat(c.total_spent || '0').toLocaleString('en-IN', { maximumFractionDigits: 0 })}
+                  </span>
+                  <div className="flex items-center gap-1.5">
+                    <span className="text-[10px] font-bold px-2 py-0.5 rounded-full" style={{ background: '#dce8ff', color: '#4a6fa5' }}>
+                      {c.total_orders} Orders
+                    </span>
+                    {parseInt(c.active_subscriptions) > 0 && (
+                      <span className="text-[10px] font-bold px-2 py-0.5 rounded-full" style={{ background: '#ffdcc7', color: '#774117' }}>
+                        {c.active_subscriptions} Subs
+                      </span>
+                    )}
+                  </div>
+                </div>
+              </motion.div>
+            ))}
           </div>
         )}
       </div>
@@ -138,94 +138,75 @@ export default function AdminCustomersPage() {
       <AnimatePresence>
         {selectedCustomer && (
           <motion.div
-            initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-            className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/40 p-4 sm:p-6"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4"
             onClick={() => setSelectedCustomer(null)}
           >
             <motion.div
-              initial={{ y: '100%' }} animate={{ y: 0 }} exit={{ y: '100%' }}
-              transition={{ type: 'spring', damping: 25, stiffness: 200 }}
+              initial={{ scale: 0.95 }}
+              animate={{ scale: 1 }}
+              exit={{ scale: 0.95 }}
               onClick={e => e.stopPropagation()}
-              className="w-full max-w-md bg-white rounded-t-[24px] sm:rounded-[24px] overflow-hidden flex flex-col max-h-[85vh]"
+              className="w-full max-w-lg bg-white rounded-[20px] overflow-hidden shadow-2xl p-6 flex flex-col gap-6"
             >
-              {(() => {
-                const { userOrders, userSubs, ltv } = getCustomerStats(selectedCustomer.id);
-                return (
-                  <>
-                    <div className="p-5 flex justify-between items-center border-b border-black/5 bg-surface">
-                      <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-full flex items-center justify-center font-bold text-white bg-primary">
-                          {(selectedCustomer.name || selectedCustomer.email || 'C')[0].toUpperCase()}
-                        </div>
-                        <div>
-                          <h2 className="font-bold text-[16px] text-on-surface">{selectedCustomer.name || 'Customer'}</h2>
-                          <p className="text-[12px] text-outline">{selectedCustomer.email || selectedCustomer.phone}</p>
-                        </div>
-                      </div>
-                      <button onClick={() => setSelectedCustomer(null)} className="p-2 rounded-full hover:bg-black/5 text-outline">
-                        <X className="w-5 h-5" />
-                      </button>
-                    </div>
+              <div className="flex justify-between items-center pb-4 border-b border-gray-100">
+                <div className="flex items-center gap-3">
+                  <div className="w-12 h-12 rounded-full flex items-center justify-center font-bold text-white text-[18px]" style={{ background: '#4a8c3f' }}>
+                    {(selectedCustomer.name || selectedCustomer.email || 'C')[0].toUpperCase()}
+                  </div>
+                  <div>
+                    <h2 className="font-extrabold text-[18px]" style={{ color: 'var(--color-on-surface)' }}>
+                      {selectedCustomer.name || 'Customer'}
+                    </h2>
+                    <p className="text-[12px]" style={{ color: 'var(--color-outline)' }}>
+                      Member since {new Date(selectedCustomer.created_at).toLocaleDateString('en-IN', { month: 'short', year: 'numeric' })}
+                    </p>
+                  </div>
+                </div>
+                <button onClick={() => setSelectedCustomer(null)} className="p-2 rounded-full hover:bg-gray-100 text-gray-500">
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
 
-                    <div className="overflow-y-auto p-5 flex flex-col gap-6">
-                      <div className="grid grid-cols-3 gap-3">
-                        <div className="p-3 rounded-[12px] bg-surface-container-low border border-black/5">
-                          <DollarSign className="w-4 h-4 mb-1 text-primary" />
-                          <p className="text-[11px] font-bold text-outline uppercase">LTV</p>
-                          <p className="font-bold text-[15px] text-on-surface">{t('currency')}{ltv}</p>
-                        </div>
-                        <div className="p-3 rounded-[12px] bg-surface-container-low border border-black/5">
-                          <Package className="w-4 h-4 mb-1 text-primary" />
-                          <p className="text-[11px] font-bold text-outline uppercase">Orders</p>
-                          <p className="font-bold text-[15px] text-on-surface">{userOrders.length}</p>
-                        </div>
-                        <div className="p-3 rounded-[12px] bg-surface-container-low border border-black/5">
-                          <Repeat className="w-4 h-4 mb-1 text-primary" />
-                          <p className="text-[11px] font-bold text-outline uppercase">Active Subs</p>
-                          <p className="font-bold text-[15px] text-on-surface">
-                            {userSubs.filter(s => s.status === 'active').length}
-                          </p>
-                        </div>
-                      </div>
+              <div className="grid grid-cols-3 gap-3">
+                <div className="p-3 rounded-[12px] bg-green-50 border border-green-100 text-center">
+                  <p className="text-[10px] font-bold uppercase text-green-800">Total Spent</p>
+                  <p className="font-extrabold text-[16px] text-green-900 mt-1">
+                    ₹{parseFloat(selectedCustomer.total_spent || '0').toLocaleString('en-IN', { maximumFractionDigits: 0 })}
+                  </p>
+                </div>
+                <div className="p-3 rounded-[12px] bg-blue-50 border border-blue-100 text-center">
+                  <p className="text-[10px] font-bold uppercase text-blue-800">Orders</p>
+                  <p className="font-extrabold text-[16px] text-blue-900 mt-1">{selectedCustomer.total_orders}</p>
+                </div>
+                <div className="p-3 rounded-[12px] bg-orange-50 border border-orange-100 text-center">
+                  <p className="text-[10px] font-bold uppercase text-orange-800">Active Subs</p>
+                  <p className="font-extrabold text-[16px] text-orange-900 mt-1">{selectedCustomer.active_subscriptions}</p>
+                </div>
+              </div>
 
-                      {userSubs.length > 0 && (
-                        <div>
-                          <h3 className="font-bold text-[14px] mb-3 text-on-surface">Subscriptions</h3>
-                          <div className="flex flex-col gap-2">
-                            {userSubs.map(s => (
-                              <div key={s.id} className="p-3 rounded-[10px] bg-surface-container-lowest border border-black/5 flex justify-between items-center">
-                                <div>
-                                  <p className="font-semibold text-[13px] text-on-surface">{s.products?.name || 'Product'} ({s.volume}{t('volume_unit')})</p>
-                                  <p className="text-[11px] text-outline capitalize">{s.plan} · {s.status}</p>
-                                </div>
-                              </div>
-                            ))}
-                          </div>
-                        </div>
-                      )}
-
-                      <div>
-                        <h3 className="font-bold text-[14px] mb-3 text-on-surface">Recent Orders</h3>
-                        {userOrders.length > 0 ? (
-                          <div className="flex flex-col gap-2">
-                            {userOrders.slice(0, 5).map(o => (
-                              <div key={o.id} className="p-3 rounded-[10px] bg-surface-container-lowest border border-black/5 flex justify-between items-center">
-                                <div>
-                                  <p className="font-semibold text-[13px] text-on-surface">{o.id.slice(0,8).toUpperCase()}</p>
-                                  <p className="text-[11px] text-outline capitalize">{o.status.replace(/_/g, ' ')}</p>
-                                </div>
-                                <span className="font-bold text-[13px] text-primary">{t('currency')}{o.total_amount}</span>
-                              </div>
-                            ))}
-                          </div>
-                        ) : (
-                          <p className="text-[13px] text-outline">No orders found.</p>
-                        )}
-                      </div>
-                    </div>
-                  </>
-                );
-              })()}
+              <div className="flex flex-col gap-2 text-[13px]">
+                <div className="flex justify-between py-2 border-b border-gray-100">
+                  <span className="text-gray-500">Phone</span>
+                  <span className="font-semibold">+91 {selectedCustomer.phone || 'N/A'}</span>
+                </div>
+                <div className="flex justify-between py-2 border-b border-gray-100">
+                  <span className="text-gray-500">Email</span>
+                  <span className="font-semibold">{selectedCustomer.email || 'N/A'}</span>
+                </div>
+                <div className="flex justify-between py-2 border-b border-gray-100">
+                  <span className="text-gray-500">Loyalty Points</span>
+                  <span className="font-bold text-[#4a8c3f]">{selectedCustomer.loyalty_points || 0} pts</span>
+                </div>
+                <div className="flex justify-between py-2">
+                  <span className="text-gray-500">Last Login</span>
+                  <span className="font-semibold">
+                    {selectedCustomer.last_login_at ? new Date(selectedCustomer.last_login_at).toLocaleString('en-IN') : 'Never'}
+                  </span>
+                </div>
+              </div>
             </motion.div>
           </motion.div>
         )}

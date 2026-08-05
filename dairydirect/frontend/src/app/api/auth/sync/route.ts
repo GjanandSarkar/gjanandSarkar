@@ -1,104 +1,80 @@
-import { NextResponse } from 'next/server';
-import { createClient } from '@supabase/supabase-js';
-import { rateLimit } from '@/lib/rate-limit';
+/**
+ * POST /api/auth/sync
+ * Syncs auth state with profile — used after login to get full user data.
+ * AWS version: validates JWT instead of Supabase token.
+ */
 
-const limiter = rateLimit({
-  interval: 60 * 1000, // 1 minute
-  uniqueTokenPerInterval: 30, // 30 requests per minute per IP
-});
+import { NextRequest, NextResponse } from 'next/server';
+import { query } from '@/lib/aws/rds';
+import { verifyAccessToken, extractTokenFromRequest } from '@/lib/auth/jwt';
+import { cacheUserProfile, checkRateLimit } from '@/lib/aws/redis';
+import { getClientIP } from '@/lib/api/auth-middleware';
 
-export async function POST(request: Request) {
+export async function POST(request: NextRequest) {
   try {
-    const { token } = await request.json();
+    const ip = getClientIP(request);
+    const rateResult = await checkRateLimit(ip, 'auth_sync', 30, 60);
+    if (!rateResult.allowed) {
+      return NextResponse.json({ error: 'Too Many Requests' }, { status: 429 });
+    }
+
+    // Get token from body or header
+    const body = await request.json().catch(() => ({}));
+    const headerToken = extractTokenFromRequest(request);
+    const bodyToken = body.token;
+    const token = headerToken || bodyToken;
 
     if (!token) {
       return NextResponse.json({ error: 'Token required' }, { status: 400 });
     }
 
-    try {
-      const ip = request.headers.get('x-forwarded-for') || '127.0.0.1';
-      await limiter.check(10, ip); // Limit to 10 auth syncs per minute
-    } catch {
-      return NextResponse.json({ error: 'Too Many Requests' }, { status: 429 });
+    const payload = await verifyAccessToken(token);
+    if (!payload?.userId) {
+      return NextResponse.json({ error: 'Invalid or expired token' }, { status: 401 });
     }
 
-    const supabaseAdmin = createClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.SUPABASE_SERVICE_ROLE_KEY!
+    // Get full profile from DB
+    const result = await query<{
+      id: string;
+      phone: string | null;
+      email: string | null;
+      name: string | null;
+      avatar_url: string | null;
+      role: string;
+      default_upi_id: string | null;
+      loyalty_points: number;
+      referral_code: string;
+      created_at: string;
+    }>(
+      `SELECT id, phone, email, name, avatar_url, role, default_upi_id, 
+              loyalty_points, referral_code, created_at
+       FROM profiles WHERE id = $1`,
+      [payload.userId]
     );
 
-    const { data: { user }, error: authError } = await supabaseAdmin.auth.getUser(token);
-    if (authError || !user) {
-      console.error('Invalid token or auth error fetching user:', authError);
-      return NextResponse.json({ error: 'Invalid auth token', details: authError }, { status: 401 });
+    if (result.rows.length === 0) {
+      return NextResponse.json({ error: 'User not found' }, { status: 404 });
     }
 
-    const uid = user.id;
-    let userPhone = user.phone || null;
-    let userEmail = user.email || null;
-    let userName = user.user_metadata?.full_name || user.user_metadata?.name || null;
-    let userAvatar = user.user_metadata?.avatar_url || null;
+    const profile = result.rows[0];
 
-    let { data: profile, error: fetchError } = await supabaseAdmin
-      .from('profiles')
-      .select('*, saved_addresses:user_addresses(label, address)')
-      .eq('id', uid)
-      .single();
+    // Get saved addresses
+    const addressResult = await query<{ label: string; address: string }>(
+      'SELECT label, address FROM user_addresses WHERE user_id = $1 AND is_default = true LIMIT 1',
+      [profile.id]
+    );
 
-    if (fetchError && fetchError.code !== 'PGRST116') {
-      console.error('Supabase fetch error:', fetchError);
-      return NextResponse.json({ error: 'Database error' }, { status: 500 });
-    }
+    const profileWithAddresses = {
+      ...profile,
+      saved_addresses: addressResult.rows,
+    };
 
-    const adminEmails = (process.env.ADMIN_EMAILS || 'admin@gjanandsarkar.com')
-      .split(',')
-      .map(e => e.trim().toLowerCase());
+    // Refresh cache
+    await cacheUserProfile(profile.id, profileWithAddresses);
 
-    const isAdmin = !!(userEmail && adminEmails.includes(userEmail.toLowerCase()));
-
-    if (!profile) {
-      const insertData: any = {
-        id: uid,
-        role: isAdmin ? 'admin' : 'customer',
-        name: userName,
-        email: userEmail,
-        avatar_url: userAvatar,
-      };
-      
-      if (userPhone) insertData.phone = userPhone;
-
-      const { data: newProfile, error: insertError } = await supabaseAdmin
-        .from('profiles')
-        .insert(insertData)
-        .select()
-        .single();
-
-      if (insertError) {
-        console.error('Supabase insert error details:', insertError);
-        return NextResponse.json({ 
-          error: 'Database error creating profile', 
-          details: insertError.message,
-          code: insertError.code,
-          hint: 'Ensure phone/email columns exist in profiles table and are nullable.'
-        }, { status: 500 });
-      }
-      profile = newProfile;
-    } else {
-      if (isAdmin && profile.role === 'customer') {
-        const { data: updatedProfile, error: updateError } = await supabaseAdmin
-          .from('profiles')
-          .update({ role: 'admin' })
-          .eq('id', uid)
-          .select()
-          .single();
-        
-        if (!updateError) profile = updatedProfile;
-      }
-    }
-
-    return NextResponse.json({ success: true, user: profile });
+    return NextResponse.json({ success: true, data: { user: profileWithAddresses } });
   } catch (error: any) {
-    console.error('Auth sync error:', error);
+    console.error('[AuthSync] Error:', error.message);
     return NextResponse.json({ error: 'Authentication failed', details: error.message }, { status: 401 });
   }
 }

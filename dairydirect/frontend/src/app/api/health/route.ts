@@ -1,25 +1,37 @@
+/**
+ * GET /api/health
+ * Health check endpoint — verifies AWS RDS PostgreSQL and Redis connections.
+ * Used by monitoring tools (CloudWatch, UptimeRobot, ALB Health Checks)
+ */
+
 import { NextResponse } from 'next/server';
-import { supabaseAdmin } from '@/lib/db';
+import { checkDbConnection } from '@/lib/aws/rds';
+import { checkRedisConnection } from '@/lib/aws/redis';
+
+export const dynamic = 'force-dynamic';
 
 export async function GET() {
-  try {
-    const start = Date.now();
-    
-    // Perform a lightweight database query to ensure connection is alive
-    const { error } = await supabaseAdmin.from('products').select('id').limit(1);
-    
-    const latency = Date.now() - start;
+  const startTime = Date.now();
 
-    if (error) {
-      return NextResponse.json({ status: 'error', error: error.message }, { status: 503 });
-    }
+  const [dbOk, redisOk] = await Promise.all([
+    checkDbConnection(),
+    checkRedisConnection(),
+  ]);
 
-    return NextResponse.json({ 
-      status: 'ok', 
-      timestamp: new Date().toISOString(),
-      database_latency_ms: latency
-    });
-  } catch (error: any) {
-    return NextResponse.json({ status: 'error', error: error.message }, { status: 500 });
-  }
+  const status = {
+    status: dbOk ? (redisOk ? 'healthy' : 'degraded') : 'unhealthy',
+    services: {
+      database: dbOk ? 'up' : 'down',
+      redis: redisOk ? 'up' : 'down',
+    },
+    responseTime: `${Date.now() - startTime}ms`,
+    timestamp: new Date().toISOString(),
+    version: process.env.npm_package_version || '2.0.0',
+    environment: process.env.NODE_ENV,
+    region: process.env.AWS_REGION || 'ap-south-1',
+  };
+
+  const httpStatus = !dbOk ? 503 : 200;
+
+  return NextResponse.json(status, { status: httpStatus });
 }
