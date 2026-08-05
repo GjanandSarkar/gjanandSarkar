@@ -1,55 +1,67 @@
-# 🏗️ DairyDirect Architecture
+# 🏛️ DairyDirect — Enterprise AWS Architecture & System Design
 
-This document explains the technical design and data flow of the DairyDirect platform.
-
-## 🏛️ System Overview
-
-DairyDirect follows a **Monorepo** structure, providing everything needed for a dairy commerce business in one place.
-
-### 1. Frontend (Next.js 14+)
-- **Primary Framework**: Next.js App Router for server-side rendering and API routes.
-- **Client State**: **Zustand** is used for the cart and user session persistence.
-- **Styling**: Vanilla CSS with **Tailwind CSS** for a premium, custom aesthetic.
-- **Animations**: **Framer Motion** for liquid-smooth transitions.
-
-### 2. Backend Strategy (Dual-Tier)
-DairyDirect is unique in offering two ways to handle backend logic:
-- **Built-in (Primary)**: Heavy usage of Next.js API Routes (`/src/app/api`). This handles Auth, Order Placement, and Pricing.
-- **Standalone (Optional)**: A dedicated Node.js/Express service in the `backend/` directory. This is intended for developers who want to migrate to a microservices architecture.
-
-### 3. Database (Supabase / PostgreSQL)
-- **Supabase** handles authentication and real-time database updates.
-- **RLS (Row Level Security)** is strictly enforced: users can only see their own orders and cart items.
-- **Schema Safety**: Business logic is partially enforced via PostgreSQL `CHECK` constraints (e.g., `profit_check`).
+DairyDirect (Gjanand Sarkar) is built on an enterprise-grade AWS infrastructure engineered specifically for high-reliability dairy commerce, automated subscription fulfillment, freshness guarantee tracking, and payment processing.
 
 ---
 
-## 💰 The Profit-Safe Pricing Engine
+## 📐 High-Level Architecture Diagram
 
-At the heart of the platform is the **Pricing Engine** (`lib/pricing.ts`).
-
-### How it works:
-1. **Source of Truth**: When an order is placed, the backend ignores prices sent from the client.
-2. **Re-calculation**: Every item is fetched from the database to get its `cost_price` and `selling_price`.
-3. **Margin Protection**: The engine calculates:
-   `Final Selling Price - Discount >= Cost Price + Min Profit Margin`
-4. **Safety Valve**: If a coupon makes an order unprofitable, the engine automatically reduces the discount or rejects the order.
+```
+                              [ Cloudflare / AWS Route 53 + ACM SSL ]
+                                                 │
+                                                 ▼
+                                     [ AWS CloudFront CDN ]
+                             (Static Assets, Product Media, Edge Caching)
+                                                 │
+                                                 ▼
+                              [ AWS App Runner / ECS Fargate / EC2 ]
+                               (Next.js 16 Full-Stack Application)
+                                                 │
+                      ┌──────────────────────────┼──────────────────────────┐
+                      │                          │                          │
+                      ▼                          ▼                          ▼
+          [ Amazon RDS PostgreSQL ]    [ Amazon ElastiCache Redis ]     [ Amazon S3 Bucket ]
+           (ap-south-1 Multi-AZ)           (Session & Rate Limiting)      (Product & Batch Images)
+                      │                          │
+                      ▼                          ▼
+             [ Amazon SES ]                [ Amazon SNS ]               [ Razorpay Gateway ]
+         (Transactional Emails)             (SMS / OTPs)               (UPI / Cards / Webhooks)
+```
 
 ---
 
-## 🚦 Data Flow
+## 🛠️ Core Technology Stack
 
-1. **Ordering**:
-   `Frontend (Cart)` → `API (/api/orders/place)` → `Pricing Engine` → `PostgreSQL (Orders)` → `Notification Service`
-
-2. **Delivery Fees**:
-   `Frontend` → `API (/api/coupons/validate)` → `Pricing Engine` (checks against `business_settings` table).
+| Layer | Technology | Role & Key Features |
+|---|---|---|
+| **Frontend UI** | Next.js 16 (App Router), React 19, Tailwind CSS | SSR + CSR, Responsive Mobile-First, Framer Motion |
+| **Backend API** | Next.js Server Route Handlers | Node.js Runtime, strict Zod validation, parameterised SQL |
+| **Primary Database** | Amazon RDS PostgreSQL 16 (ap-south-1) | Connection pooling (`pg`), ACID transactions, stock locking |
+| **In-Memory Cache** | Amazon ElastiCache Redis (or Redis Cloud) | OTP storage, session caching, Sliding Window Rate-Limiting |
+| **Storage & CDN** | Amazon S3 + Amazon CloudFront | Pre-signed uploads, low latency asset delivery across India |
+| **Communications** | Amazon SES & Amazon SNS | Order confirmation emails, SMS OTP verification |
+| **Payment Engine** | Razorpay Node.js SDK | UPI Instant Autopay, Cards, NetBanking, HMAC verification |
+| **Auth & Security** | Web Crypto HS256 JWT, CSRF Tokens | HttpOnly SameSite cookies, XSS & SQLi sanitization |
 
 ---
 
-## 🤖 AI Development Flow
+## 🔒 Security & Risk Defense
 
-The project is structured to be "Self-Documenting" for AI tools:
-- Database changes should be documented in `dairydirect/database/supabase/schema.sql`.
-- API endpoints map directly to folder names in `frontend/src/app/api`.
-- All shared logic is localized in `frontend/src/lib`.
+1. **Payment Bypass Prevention**: Every payment signature (`razorpay_order_id`, `razorpay_payment_id`, `razorpay_signature`) is verified using cryptographic `HMAC-SHA256` in constant time (`timingSafeEqual`).
+2. **Profit-Safety Guard**: Server-side pricing engine (`lib/pricing.ts`) computes profit margins dynamically against database cost prices. Coupons are capped to prevent negative margins.
+3. **Atomic Stock Decrement**: Order placements execute inside PostgreSQL ACID transactions (`withTransaction` in `lib/aws/rds.ts`) with `FOR UPDATE` row-level locks, preventing overselling during traffic spikes.
+4. **Brute-Force & DDoS Mitigation**: Redis token-bucket rate-limiting blocks OTP brute-forcing and API abuse.
+5. **Role-Based Access Control**: Server-side JWT role claims (`role: 'admin'`) protect all admin routes and API handlers.
+
+---
+
+## 📊 Database Schema Summary (`database/rds/schema.sql`)
+
+- **`profiles`**: User identities, phone/email, role (`customer` / `admin`), loyalty points, referral codes.
+- **`products` & `product_variants`**: Catalog with weights, prices, cost prices, stock count, low-stock threshold, expiry dates, batch numbers.
+- **`orders` & `order_items`**: Order lifecycle (`pending` → `confirmed` → `out_for_delivery` → `delivered` → `cancelled`), slot selection, payment status.
+- **`subscriptions`**: Daily/alternate milk subscriptions, delivery slots, auto-renewal.
+- **`return_requests`**: 100% Freshness Guarantee return claims, photo evidence, refund processing.
+- **`delivery_slots`**: Time slots (`5:00 AM - 7:00 AM`, `7:00 AM - 9:00 AM`, `5:00 PM - 7:00 PM`) with capacity tracking.
+- **`business_settings`**: Minimum order values, delivery fees, free delivery thresholds, profit margin minimums.
+- **`audit_logs`**: Admin activity and financial adjustments tracking.
