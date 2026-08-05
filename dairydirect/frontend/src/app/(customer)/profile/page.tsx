@@ -23,7 +23,7 @@ import { EngagementBanner } from '@/components/profile/EngagementBanner';
 import { RewardsPreview } from '@/components/profile/RewardsPreview';
 
 // Language Settings Modal components
-import { X, Check } from 'lucide-react';
+import { X, Check, Loader2 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import type { Language } from '@/store/useStore';
 
@@ -31,6 +31,7 @@ export default function ProfileScreen() {
   const router = useRouter();
   const { t, language } = useTranslation();
   const user = useStore((s) => s.user);
+  const isAuthLoading = useStore((s) => s.isAuthLoading);
   const logoutLocal = useStore((s) => s.logout);
   const setLanguage = useStore((s) => s.setLanguage);
   const updateProfileLocal = useStore((s) => s.updateProfile);
@@ -44,6 +45,9 @@ export default function ProfileScreen() {
   const [showLanguageSettings, setShowLanguageSettings] = useState(false);
 
   useEffect(() => {
+    // Wait for Supabase session check to finish before deciding to redirect
+    if (isAuthLoading) return;
+
     if (!user) {
       router.replace('/login');
       return;
@@ -59,7 +63,7 @@ export default function ProfileScreen() {
       setAddresses(addrsData);
       setIsLoading(false);
     });
-  }, [user, router]);
+  }, [user, router, isAuthLoading]);
 
   const handleLogout = async () => {
     await supabaseLogout();
@@ -90,6 +94,16 @@ export default function ProfileScreen() {
     
     router.push('/cart');
   };
+
+  // Show a spinner while Supabase is still checking the persisted session.
+  // Without this, the page briefly sees user=null and redirects to /login on refresh.
+  if (isAuthLoading) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-surface">
+        <Loader2 className="w-8 h-8 animate-spin text-primary" />
+      </div>
+    );
+  }
 
   if (isLoading) {
     return (

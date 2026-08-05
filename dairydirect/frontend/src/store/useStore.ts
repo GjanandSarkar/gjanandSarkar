@@ -5,10 +5,9 @@
  *  - language preference + translations cache
  *  - auth user info (synced from Supabase session)
  *  - local cart state (mirror of DB, synced on login)
+ *  - wishlist state (synced with DB)
+ *  - seller store state
  *  - loading flags per feature
- *
- * All persistent data (orders, subscriptions, products) is fetched
- * directly from Supabase in the pages/components that need them.
  */
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
@@ -33,7 +32,22 @@ export type User = {
   avatar_url?: string;
   address?: string;
   saved_addresses?: { label: string; address: string }[];
-  role: 'customer' | 'admin';
+  role: 'customer' | 'admin' | 'seller';
+};
+
+// ─── Seller Store shape ──────────────────────────────────────
+export type SellerStore = {
+  id: string;
+  user_id: string;
+  store_name: string;
+  slug: string;
+  state: string;
+  plan: 'starter' | 'growth' | 'enterprise';
+  commission_rate: number;
+  status: 'active' | 'pending_kyc' | 'suspended';
+  gstin?: string;
+  pan?: string;
+  total_revenue?: number;
 };
 
 // ─── App State ────────────────────────────────────────────────
@@ -43,6 +57,10 @@ type AppState = {
   setUser: (user: User | null) => void;
   logout: () => void;
   updateProfile: (updates: Partial<User>) => void;
+
+  // ── Seller Info ───────────────────────────────────────────
+  sellerStore: SellerStore | null;
+  setSellerStore: (store: SellerStore | null) => void;
 
   // ── Language + Translations ───────────────────────────────
   language: Language;
@@ -57,6 +75,12 @@ type AppState = {
   updateCartQuantityLocal: (productId: string, variantId: string, quantity: number) => void;
   removeFromCartLocal: (productId: string, variantId: string) => void;
   clearCartLocal: () => void;
+
+  // ── Wishlist (Product IDs) ─────────────────────────────────
+  wishlist: string[];
+  setWishlist: (productIds: string[]) => void;
+  toggleWishlistLocal: (productId: string) => void;
+  isInWishlist: (productId: string) => boolean;
 
   // ── UI / Loading ──────────────────────────────────────────
   isAuthLoading: boolean;
@@ -86,13 +110,19 @@ export const useStore = create<AppState>()(
       logout: () =>
         set({
           user: null,
-          cart: [], // clear local cart on logout (DB cart persists)
+          sellerStore: null,
+          cart: [],
+          wishlist: [],
         }),
 
       updateProfile: (updates) =>
         set((state) => ({
           user: state.user ? { ...state.user, ...updates } : null,
         })),
+
+      // ── Seller Store ───────────────────────────────────────
+      sellerStore: null,
+      setSellerStore: (sellerStore) => set({ sellerStore }),
 
       // ── Language + Translations ───────────────────────────
       language: 'en',
@@ -155,7 +185,23 @@ export const useStore = create<AppState>()(
 
       clearCartLocal: () => set({ cart: [] }),
 
+      // ── Wishlist ───────────────────────────────────────────
+      wishlist: [],
+      setWishlist: (wishlist) => set({ wishlist }),
+      toggleWishlistLocal: (productId) =>
+        set((state) => {
+          const exists = state.wishlist.includes(productId);
+          return {
+            wishlist: exists
+              ? state.wishlist.filter((id) => id !== productId)
+              : [...state.wishlist, productId],
+          };
+        }),
+      isInWishlist: (productId) => get().wishlist.includes(productId),
+
       // ── UI / Loading ────────────────────────────────────────
+      // IMPORTANT: Start as true so pages wait for Supabase session check
+      // before deciding to redirect. AuthProvider sets this false after getSession().
       isAuthLoading: true,
       setAuthLoading: (v) => set({ isAuthLoading: v }),
 
@@ -176,12 +222,13 @@ export const useStore = create<AppState>()(
     }),
     {
       name: 'gjanand-sarkar-storage',
-      // Only persist UI preferences, not loading states
       partialize: (state) => ({
         user: state.user,
+        sellerStore: state.sellerStore,
         language: state.language,
         translationsCache: state.translationsCache,
         cart: state.cart,
+        wishlist: state.wishlist,
       }),
     }
   )

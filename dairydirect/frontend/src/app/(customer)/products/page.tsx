@@ -1,39 +1,39 @@
 "use client";
 
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, Suspense } from 'react';
+import { useSearchParams } from 'next/navigation';
 import { useTranslation } from '@/lib/i18n';
 import { getProducts } from '@/lib/api/products';
 import type { ProductWithVariants } from '@/lib/api/products';
 import { ProductCard } from '@/components/shared/ProductCard';
 import { useStore } from '@/store/useStore';
-import { ShoppingBag, ArrowRight } from 'lucide-react';
-import Link from 'next/link';
-import { motion, AnimatePresence, Variants } from 'framer-motion';
-import { EmptyState } from '@/components/discovery/EmptyState';
-import { CategoryRail } from '@/components/discovery/CategoryRail';
-import { FilterBar } from '@/components/discovery/FilterBar';
+import { 
+  Sparkles, 
+  MapPin, 
+  Filter, 
+  SlidersHorizontal, 
+  ChevronDown, 
+  X,
+  Search,
+  Check
+} from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 
-const container: Variants = {
-  hidden: { opacity: 0 },
-  show: { opacity: 1, transition: { staggerChildren: 0.05, when: 'beforeChildren' } },
-};
-const gridItem: Variants = {
-  hidden: { opacity: 0, y: 14 },
-  show: { opacity: 1, y: 0, transition: { duration: 0.3, ease: [0.4, 0, 0.2, 1] } },
-};
+function ProductsScreenContent() {
+  const searchParams = useSearchParams();
+  const initialCategory = searchParams.get('category') || 'All';
+  const initialSearch = searchParams.get('search') || searchParams.get('q') || '';
+  const initialState = searchParams.get('state') || 'All';
 
-export default function ProductsScreen() {
-  const { t } = useTranslation();
   const [products, setProducts] = useState<ProductWithVariants[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   
-  // Filtering state
-  const [activeCategory, setActiveCategory] = useState<string>('All');
-  const [searchQuery, setSearchQuery] = useState('');
-  const [freshnessFilter, setFreshnessFilter] = useState(false);
-
-  const cart = useStore((s) => s.cart);
-  const cartItemsCount = cart.reduce((sum, item) => sum + item.quantity, 0);
+  // Filtering & Sorting State
+  const [activeCategory, setActiveCategory] = useState<string>(initialCategory);
+  const [activeState, setActiveState] = useState<string>(initialState);
+  const [searchQuery, setSearchQuery] = useState(initialSearch);
+  const [sortBy, setSortBy] = useState<'featured' | 'price_asc' | 'price_desc' | 'rating'>('featured');
+  const [priceRange, setPriceRange] = useState<'all' | 'under500' | '500to1500' | 'above1500'>('all');
 
   useEffect(() => {
     getProducts({ activeOnly: true }).then((data) => {
@@ -42,83 +42,302 @@ export default function ProductsScreen() {
     });
   }, []);
 
-  const uniqueCategories = useMemo(() => {
-    return Array.from(new Set(products.map(p => p.category)));
+  // Sync state if query params change
+  useEffect(() => {
+    const cat = searchParams.get('category');
+    if (cat) setActiveCategory(cat);
+    const q = searchParams.get('search') || searchParams.get('q');
+    if (q !== null) setSearchQuery(q);
+    const st = searchParams.get('state');
+    if (st) setActiveState(st);
+  }, [searchParams]);
+
+  const states = [
+    'All', 'Gujarat', 'Rajasthan', 'Kerala', 'Kashmir', 
+    'Punjab', 'Tamil Nadu', 'Himachal Pradesh', 'West Bengal'
+  ];
+
+  const defaultCategories = [
+    'All',
+    'Milk',
+    'Ghee',
+    'Paneer',
+    'Curd',
+    'Lassi',
+    'Cold-Pressed Oils',
+    'Ayurveda',
+    'Handicrafts',
+    'Spices',
+    'Organic Groceries',
+    'Fashion',
+    'Electronics',
+    'Home & Kitchen',
+    'Beauty & Personal Care',
+    'Sports',
+    'Books',
+  ];
+
+  const categories = useMemo(() => {
+    const list = Array.from(new Set(products.map((p) => p.category).filter(Boolean)));
+    return Array.from(new Set([...defaultCategories, ...list]));
   }, [products]);
 
-  const filteredProducts = useMemo(() =>
-    products.filter((p) => {
-      const matchCat = activeCategory === 'All' || p.category === activeCategory;
-      const matchSearch = p.name.toLowerCase().includes(searchQuery.toLowerCase());
-      const matchFreshness = freshnessFilter ? p.is_freshness_guarantee : true;
-      return matchCat && matchSearch && matchFreshness;
-    }),
-  [products, activeCategory, searchQuery, freshnessFilter]);
+  const filteredProducts = useMemo(() => {
+    return products
+      .filter((p) => {
+        // Category filter
+        const prodCat = (p.category || '').toLowerCase();
+        const activeCat = (activeCategory || 'All').toLowerCase();
+
+        let matchCat = activeCat === 'all';
+        if (!matchCat) {
+          if (prodCat === activeCat) {
+            matchCat = true;
+          } else if (activeCat === 'curd & lassi' || activeCat === 'curd' || activeCat === 'lassi') {
+            matchCat = prodCat.includes('curd') || prodCat.includes('lassi');
+          } else if (activeCat.includes('dairy') || activeCat.includes('essentials')) {
+            matchCat = ['milk', 'ghee', 'paneer', 'curd', 'lassi', 'butter', 'dairy'].some(c => prodCat.includes(c));
+          } else if (activeCat.includes('oil') || activeCat.includes('spice')) {
+            matchCat = prodCat.includes('oil') || prodCat.includes('spice');
+          } else {
+            matchCat = prodCat.includes(activeCat) || activeCat.includes(prodCat);
+          }
+        }
+        
+        // Search filter
+        const matchSearch = 
+          !searchQuery.trim() ||
+          p.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          (p.category && p.category.toLowerCase().includes(searchQuery.toLowerCase())) ||
+          (p.description && p.description.toLowerCase().includes(searchQuery.toLowerCase()));
+
+        // Price range filter
+        const firstPrice = p.product_variants?.[0]?.price || 0;
+        let matchPrice = true;
+        if (priceRange === 'under500') matchPrice = firstPrice < 500;
+        else if (priceRange === '500to1500') matchPrice = firstPrice >= 500 && firstPrice <= 1500;
+        else if (priceRange === 'above1500') matchPrice = firstPrice > 1500;
+
+        return matchCat && matchSearch && matchPrice;
+      })
+      .sort((a, b) => {
+        const priceA = a.product_variants?.[0]?.price || 0;
+        const priceB = b.product_variants?.[0]?.price || 0;
+        if (sortBy === 'price_asc') return priceA - priceB;
+        if (sortBy === 'price_desc') return priceB - priceA;
+        return 0;
+      });
+  }, [products, activeCategory, searchQuery, priceRange, sortBy]);
 
   const handleClearFilters = () => {
-    setSearchQuery('');
-    setFreshnessFilter(false);
     setActiveCategory('All');
+    setActiveState('All');
+    setSearchQuery('');
+    setPriceRange('all');
+    setSortBy('featured');
   };
 
   return (
-    <div className="flex flex-col min-h-screen pb-20 pt-4 bg-surface">
-      <div className="md:grid md:grid-cols-[180px_1fr] lg:grid-cols-[220px_1fr] max-w-7xl mx-auto w-full px-5 md:px-8 gap-6 lg:gap-8">
+    <div className="min-h-screen bg-[#fafaf8] py-6 px-4 sm:px-6 lg:px-8">
+      <div className="max-w-[1440px] mx-auto">
         
-        {/* Left Column / Mobile Top: Category Rail */}
-        <aside className="mb-6 md:mb-0 md:sticky md:top-24 md:h-[calc(100vh-120px)] md:overflow-y-auto no-scrollbar">
-          <CategoryRail 
-            categories={uniqueCategories}
-            activeCategory={activeCategory}
-            onSelect={setActiveCategory}
-            isLoading={isLoading}
-          />
-        </aside>
+        {/* Top Header Banner */}
+        <div className="mb-6 bg-gradient-to-r from-[#0f3e26] via-[#144f31] to-[#0f3e26] rounded-2xl p-6 sm:p-8 text-white relative overflow-hidden shadow-md">
+          <div className="relative z-10 max-w-2xl">
+            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/10 backdrop-blur-xs border border-white/20 text-[#c88a23] text-xs font-black uppercase tracking-wider mb-2">
+              <Sparkles className="w-3.5 h-3.5" />
+              <span>Authentic Bharat Heritage</span>
+            </div>
+            <h1 className="text-2xl sm:text-3xl font-black tracking-tight">
+              Direct-from-Farm & Artisan Marketplace
+            </h1>
+            <p className="text-xs text-gray-200 mt-1">
+              Explore 100% lab-tested Gir A2 dairy, cold-pressed oils, handlooms, and state specialities.
+            </p>
+          </div>
+        </div>
 
-        {/* Right Column: Filters and Grid */}
-        <main className="flex-1 flex flex-col">
-          <FilterBar 
-            searchQuery={searchQuery}
-            onSearchChange={setSearchQuery}
-            freshnessFilter={freshnessFilter}
-            onFreshnessToggle={() => setFreshnessFilter(!freshnessFilter)}
-            resultCount={filteredProducts.length}
-          />
+        {/* Layout Grid: Sidebar Filters + Main Product Grid */}
+        <div className="grid grid-cols-1 lg:grid-cols-[260px_1fr] gap-8">
+          
+          {/* Left Sidebar Filters */}
+          <aside className="space-y-6">
+            
+            {/* Search within page */}
+            <div className="bg-white rounded-2xl border border-gray-200/90 p-4 shadow-2xs">
+              <label className="block text-xs font-black text-gray-900 mb-2 uppercase tracking-wider">
+                Search Catalog
+              </label>
+              <div className="relative">
+                <Search className="w-4 h-4 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2" />
+                <input
+                  type="text"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  placeholder="Filter by name, spice, ghee..."
+                  className="w-full pl-9 pr-3 py-2 text-xs rounded-xl border border-gray-300 text-gray-900 focus:border-[#0f3e26] outline-none"
+                />
+              </div>
+            </div>
 
-          <div className="flex-1">
-            {isLoading ? (
-              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-                {[1, 2, 3, 4, 5, 6].map((i) => (
-                  <div key={i} className="h-[260px] rounded-[16px] animate-pulse bg-surface-container-low" />
+            {/* Categories Filter */}
+            <div className="bg-white rounded-2xl border border-gray-200/90 p-4 shadow-2xs">
+              <h3 className="text-xs font-black text-gray-900 mb-3 uppercase tracking-wider">
+                Categories
+              </h3>
+              <div className="space-y-1">
+                {categories.map((cat) => (
+                  <button
+                    key={cat}
+                    onClick={() => setActiveCategory(cat)}
+                    className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-bold transition-colors ${
+                      activeCategory.toLowerCase() === cat.toLowerCase()
+                        ? 'bg-[#0f3e26] text-white shadow-2xs'
+                        : 'text-gray-600 hover:bg-gray-100'
+                    }`}
+                  >
+                    <span>{cat}</span>
+                    {activeCategory.toLowerCase() === cat.toLowerCase() && (
+                      <Check className="w-3.5 h-3.5" />
+                    )}
+                  </button>
                 ))}
               </div>
-            ) : (
-              <AnimatePresence mode="wait">
-                {filteredProducts.length > 0 ? (
-                  <motion.div
-                    key={activeCategory + searchQuery + freshnessFilter}
-                    className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4"
-                    variants={container} initial="hidden" animate="show" exit={{ opacity: 0 }}>
-                    {filteredProducts.map((product) => (
-                      <motion.div key={product.id} variants={gridItem} className="h-full">
-                        <ProductCard product={product} />
-                      </motion.div>
-                    ))}
-                  </motion.div>
-                ) : (
-                  <motion.div key="empty" initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
-                    <EmptyState 
-                      type={searchQuery ? 'search' : 'category'} 
-                      onClear={handleClearFilters} 
-                    />
-                  </motion.div>
-                )}
-              </AnimatePresence>
-            )}
-          </div>
-        </main>
-      </div>
+            </div>
 
+            {/* State Origin Filter */}
+            <div className="bg-white rounded-2xl border border-gray-200/90 p-4 shadow-2xs">
+              <h3 className="text-xs font-black text-gray-900 mb-3 uppercase tracking-wider flex items-center gap-1.5">
+                <MapPin className="w-3.5 h-3.5 text-[#c88a23]" />
+                <span>Shop by State Origin</span>
+              </h3>
+              <div className="space-y-1">
+                {states.map((st) => (
+                  <button
+                    key={st}
+                    onClick={() => setActiveState(st)}
+                    className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-bold transition-colors ${
+                      activeState === st
+                        ? 'bg-[#c88a23] text-white shadow-2xs'
+                        : 'text-gray-600 hover:bg-gray-100'
+                    }`}
+                  >
+                    <span>{st}</span>
+                    {activeState === st && <Check className="w-3.5 h-3.5" />}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Price Range Filter */}
+            <div className="bg-white rounded-2xl border border-gray-200/90 p-4 shadow-2xs">
+              <h3 className="text-xs font-black text-gray-900 mb-3 uppercase tracking-wider">
+                Price Filter
+              </h3>
+              <div className="space-y-1">
+                {[
+                  { id: 'all', label: 'All Prices' },
+                  { id: 'under500', label: 'Under ₹500' },
+                  { id: '500to1500', label: '₹500 - ₹1,500' },
+                  { id: 'above1500', label: 'Above ₹1,500' },
+                ].map((p) => (
+                  <button
+                    key={p.id}
+                    onClick={() => setPriceRange(p.id as any)}
+                    className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-bold transition-colors ${
+                      priceRange === p.id
+                        ? 'bg-emerald-100 text-emerald-900'
+                        : 'text-gray-600 hover:bg-gray-100'
+                    }`}
+                  >
+                    <span>{p.label}</span>
+                    {priceRange === p.id && <Check className="w-3.5 h-3.5 text-emerald-700" />}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+          </aside>
+
+          {/* Right Product Grid */}
+          <main className="space-y-4">
+            
+            {/* Top Toolbar (Sort + Count + Active Filter Tags) */}
+            <div className="bg-white rounded-2xl border border-gray-200/90 p-4 shadow-2xs flex flex-wrap items-center justify-between gap-4">
+              <div className="text-xs font-bold text-gray-700">
+                Showing <strong className="text-[#0f3e26]">{filteredProducts.length}</strong> authentic products
+              </div>
+
+              <div className="flex items-center gap-3">
+                <span className="text-xs text-gray-500 font-bold">Sort By:</span>
+                <select
+                  value={sortBy}
+                  onChange={(e) => setSortBy(e.target.value as any)}
+                  className="px-3 py-1.5 rounded-xl border border-gray-300 text-xs font-bold text-gray-800 bg-white focus:border-[#0f3e26] outline-none"
+                >
+                  <option value="featured">Featured / Popular</option>
+                  <option value="price_asc">Price: Low to High</option>
+                  <option value="price_desc">Price: High to Low</option>
+                </select>
+
+                {(activeCategory !== 'All' || activeState !== 'All' || searchQuery || priceRange !== 'all') && (
+                  <button
+                    onClick={handleClearFilters}
+                    className="text-xs font-bold text-rose-600 hover:underline flex items-center gap-1"
+                  >
+                    <X className="w-3.5 h-3.5" />
+                    <span>Clear Filters</span>
+                  </button>
+                )}
+              </div>
+            </div>
+
+            {/* Products Grid */}
+            {isLoading ? (
+              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+                {[1, 2, 3, 4, 5, 6, 7, 8].map((i) => (
+                  <div key={i} className="h-72 rounded-2xl bg-white animate-pulse border border-gray-200" />
+                ))}
+              </div>
+            ) : filteredProducts.length === 0 ? (
+              <div className="bg-white rounded-2xl border border-gray-200/90 p-12 text-center space-y-4">
+                <div className="text-4xl">🌾</div>
+                <h3 className="text-base font-black text-gray-900">
+                  No products found matching your filters
+                </h3>
+                <p className="text-xs text-gray-500 max-w-sm mx-auto">
+                  Try clearing your search term or selecting a different category or state.
+                </p>
+                <button
+                  onClick={handleClearFilters}
+                  className="px-5 py-2.5 bg-[#0f3e26] text-white text-xs font-bold rounded-xl shadow-sm hover:bg-[#144f31] transition-colors"
+                >
+                  Reset All Filters
+                </button>
+              </div>
+            ) : (
+              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+                {filteredProducts.map((prod) => (
+                  <div key={prod.id} className="h-full">
+                    <ProductCard product={prod} />
+                  </div>
+                ))}
+              </div>
+            )}
+
+          </main>
+
+        </div>
+
+      </div>
     </div>
+  );
+}
+
+export default function ProductsScreen() {
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-[#fafaf8]" />}>
+      <ProductsScreenContent />
+    </Suspense>
   );
 }

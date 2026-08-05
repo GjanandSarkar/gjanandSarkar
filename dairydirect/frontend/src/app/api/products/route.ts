@@ -15,8 +15,14 @@ export async function GET(request: NextRequest) {
       .select('*, product_variants(*)')
       .order('created_at', { ascending: false });
 
-    if (category && category !== 'All') {
-      query = query.eq('category', category);
+    if (category && category !== 'All' && category !== 'All Categories') {
+      // Clean category slug if any (e.g. home-kitchen -> home kitchen)
+      const cleanCat = category.replace(/-/g, ' ').trim();
+      if (cleanCat.toLowerCase() === 'dairy & essentials' || cleanCat.toLowerCase() === 'dairy') {
+        query = query.or('category.ilike.%Milk%,category.ilike.%Ghee%,category.ilike.%Paneer%,category.ilike.%Curd%,category.ilike.%Lassi%,category.ilike.%Dairy%');
+      } else {
+        query = query.ilike('category', `%${cleanCat}%`);
+      }
     }
 
     if (activeOnly) {
