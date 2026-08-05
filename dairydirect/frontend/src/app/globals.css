@@ -203,6 +203,10 @@
   .animate-fade-in { animation: fadeIn 0.3s cubic-bezier(0.4, 0, 0.2, 1) forwards; }
   .animate-slide-up { animation: slideUp 0.3s cubic-bezier(0.4, 0, 0.2, 1) forwards; }
   .animate-pulse-slow { animation: pulse 2.5s cubic-bezier(0.4, 0, 0.6, 1) infinite; }
+  .animate-pulse-gentle { animation: pulseGentle 3s ease-in-out infinite; }
+  .animate-bounce-gentle { animation: floatSway 2s ease-in-out infinite; }
+  .animate-spin-slow { animation: spinSlow 60s linear infinite; }
+  .animate-float-subtle { animation: floatSubtle 3s ease-in-out infinite; }
   
   @keyframes fadeIn {
     from { opacity: 0; }
@@ -215,6 +219,29 @@
   @keyframes pulse {
     0%, 100% { opacity: 1; }
     50% { opacity: .5; }
+  }
+  @keyframes pulseGentle {
+    0%, 100% { transform: translate(-50%, 0) scale(1); }
+    50% { transform: translate(-50%, -2px) scale(1.03); }
+  }
+  @keyframes floatSway {
+    0%, 100% { transform: translateY(0px) rotate(12deg); }
+    50% { transform: translateY(-8px) rotate(8deg); }
+  }
+  @keyframes spinSlow {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+  }
+  @keyframes floatSubtle {
+    0%, 100% { transform: translateY(0px); }
+    50% { transform: translateY(-5px); }
+  }
+
+  .perspective-1000 {
+    perspective: 1000px;
+  }
+  .preserve-3d {
+    transform-style: preserve-3d;
   }
 
   /* === Miscellaneous === */

@@ -1,30 +1,37 @@
 import React from 'react';
+import { TopBar } from '@/components/navigation/TopBar';
 import { Header } from '@/components/navigation/Header';
+import { CategoryNavBar } from '@/components/navigation/CategoryNavBar';
+import { Footer } from '@/components/navigation/Footer';
 import { BottomNav } from '@/components/shared/BottomNav';
 import { AuthGuard } from '@/components/auth/AuthGuard';
 import { CartContainer } from '@/components/cart/CartContainer';
 
 export default function CustomerLayout({ children }: { children: React.ReactNode }) {
-
   return (
-    <div className="flex min-h-screen bg-surface" suppressHydrationWarning>
-      <div className="flex-1 flex flex-col min-h-screen relative w-full">
-        <AuthGuard />
-        <Header />
+    <div className="flex flex-col min-h-screen bg-[#fafaf8]" suppressHydrationWarning>
+      <AuthGuard />
+      
+      {/* Top Announcement Bar */}
+      <TopBar />
 
-        <main className="flex-1 overflow-x-hidden"
-          style={{
-            paddingBottom: 'max(80px, calc(64px + env(safe-area-inset-bottom, 0px)))',
-          }}>
-          <div className="w-full max-w-[1400px] mx-auto">
-            {children}
-          </div>
-        </main>
+      {/* Main Brand & Search Navigation */}
+      <Header />
 
-        <CartContainer />
+      {/* Secondary Department / Category Bar */}
+      <CategoryNavBar />
 
-        <BottomNav />
-      </div>
+      {/* Main Content Area */}
+      <main className="flex-1 w-full pb-20 md:pb-0">
+        {children}
+      </main>
+
+      {/* Full Marketplace Footer */}
+      <Footer />
+
+      {/* Floating Cart Drawer & Mobile Navigation */}
+      <CartContainer />
+      <BottomNav />
     </div>
   );
 }

@@ -15,7 +15,7 @@ export type CreateNotificationInput = {
 // ─── Get Notifications for User ──────────────────────────────
 export async function getNotifications(
   userId: string,
-  userRole: 'customer' | 'admin'
+  userRole: 'customer' | 'admin' | 'seller'
 ): Promise<DBNotification[]> {
   // Fetch personal + broadcast notifications for this role
   const { data, error } = await supabase
@@ -40,7 +40,7 @@ export async function getNotifications(
 // ─── Get Unread Count ─────────────────────────────────────────
 export async function getUnreadCount(
   userId: string,
-  userRole: 'customer' | 'admin'
+  userRole: 'customer' | 'admin' | 'seller'
 ): Promise<number> {
   const { count, error } = await supabase
     .from('notifications')

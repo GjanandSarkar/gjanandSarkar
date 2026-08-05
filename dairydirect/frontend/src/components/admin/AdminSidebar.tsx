@@ -6,12 +6,13 @@ import { useRouter } from 'next/navigation';
 import { useStore } from '@/store/useStore';
 import {
   LayoutDashboard, ShoppingBag, Users, Package, BarChart3,
-  Truck, LogOut, Leaf, ShieldCheck, Bell, Settings, Tags, CalendarDays, User
+  Truck, LogOut, Leaf, ShieldCheck, Bell, Settings, Tags, CalendarDays, User, Building2
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 const navItems = [
   { href: '/admin', icon: LayoutDashboard, label: 'Dashboard', exact: true },
+  { href: '/admin/vendor-inquiries', icon: Building2, label: 'Seller Inquiries' },
   { href: '/admin/orders', icon: ShoppingBag, label: 'Orders' },
   { href: '/admin/subscriptions', icon: CalendarDays, label: 'Subscriptions' },
   { href: '/admin/products', icon: Package, label: 'Products' },

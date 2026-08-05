@@ -3,20 +3,10 @@
 import { useEffect, useRef } from 'react';
 import { useStore } from '@/store/useStore';
 import { fetchTranslations } from '@/lib/api/translations';
-import { mergeLocalCart } from '@/lib/api/cart';
-import { getCart } from '@/lib/api/cart';
+import { mergeLocalCart, getCart } from '@/lib/api/cart';
 import type { Language } from '@/lib/i18n';
-import type { DBProfile } from '@/lib/supabase';
 import { supabase } from '@/lib/supabase';
 
-/**
- * AuthProvider — mounts once at root layout.
- * Responsible for:
- *  1. Listening to Supabase auth state changes
- *  2. Fetching user profile and loading it into Zustand
- *  3. Merging local cart with DB cart on login
- *  4. Pre-loading translations for all 3 languages
- */
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const setUser = useStore((s) => s.setUser);
   const logout = useStore((s) => s.logout);
@@ -25,42 +15,65 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const setCart = useStore((s) => s.setCart);
   const localCart = useStore((s) => s.cart);
   const translationsCache = useStore((s) => s.translationsCache);
-  const initialized = useRef(false);
+  
+  const isHydrating = useRef(false);
+  const hasInitialized = useRef(false);
 
-  // Load translations once (cache persists in Zustand → localStorage)
+  // Preload translations once in background
   useEffect(() => {
     const langs: Language[] = ['en', 'hi', 'gu'];
     langs.forEach(async (lang) => {
-      // Skip if already cached with content
       if (Object.keys(translationsCache[lang] ?? {}).length > 0) return;
-      const map = await fetchTranslations(lang);
-      if (Object.keys(map).length > 0) {
-        setTranslationsCache(lang, map);
+      try {
+        const map = await fetchTranslations(lang);
+        if (Object.keys(map).length > 0) {
+          setTranslationsCache(lang, map);
+        }
+      } catch (err) {
+        // Silently skip translation fetch errors
       }
     });
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // Auth state listener mapped to Firebase
+  // Supabase Auth listener
   useEffect(() => {
-    if (initialized.current) return;
-    initialized.current = true;
-
+    // Always start loading = true on mount so guards wait
     setAuthLoading(true);
 
-    // Supabase listener
+    // onAuthStateChange fires INITIAL_SESSION immediately on mount with the
+    // persisted session (if any). This is the correct hook for refresh persistence.
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event: any, session: any) => {
-      if (session) {
-        try {
+      if (event === 'INITIAL_SESSION') {
+        // First load / refresh: if session exists, hydrate user
+        if (session) {
           await hydrateUser(session.access_token);
-        } catch (error) {
-          sessionStorage.removeItem('auth_callback_processed');
-          logout();
+        } else {
+          // No session at all — user is genuinely not logged in
+          setAuthLoading(false);
         }
-      } else {
+        hasInitialized.current = true;
+        return;
+      }
+
+      if (event === 'SIGNED_IN' && session) {
+        await hydrateUser(session.access_token);
+        return;
+      }
+
+      if (event === 'TOKEN_REFRESHED' && session) {
+        // Token was silently refreshed; re-hydrate in background
+        await hydrateUser(session.access_token);
+        return;
+      }
+
+      if (event === 'SIGNED_OUT') {
         sessionStorage.removeItem('auth_callback_processed');
         logout();
+        setAuthLoading(false);
+        return;
       }
+
       setAuthLoading(false);
     });
 
@@ -71,63 +84,62 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   async function hydrateUser(token: string) {
-    // Sync with generic API endpoint to ensure profile exists and is updated
-    const res = await fetch('/api/auth/sync', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ token, type: 'supabase' })
-    });
-    
-    if (!res.ok) {
-       // Do not throw! If synchronization fails (e.g. database column missing), 
-       // we simply fallback to basic Supabase payload to avoid forcing a logout loop.
-       const { data: { user }, error } = await supabase.auth.getUser();
-       if (user && !error) {
-         setUser({
-           id: user.id,
-           name: '',
-           phone: user.phone || '',
-           email: user.email || '',
-           avatar_url: '',
-           role: 'customer'
-         });
-       }
-       return;
-    }
-    
-    const data = await res.json();
-    const userProfile = data.user;
-    
-    setUser({ 
-      id: userProfile.id, 
-      name: userProfile.name ?? '', 
-      phone: userProfile.phone || '', 
-      email: userProfile.email || '', 
-      avatar_url: userProfile.avatar_url || '',
-      role: userProfile.role ?? 'customer',
-      saved_addresses: userProfile.saved_addresses || [],
-    });
+    if (isHydrating.current) return;
+    isHydrating.current = true;
 
-    // Merge local cart into DB, then load DB cart
-    if (localCart.length > 0) {
-      await mergeLocalCart(
-        userProfile.id,
-        localCart.map((i) => ({
-          productId: i.productId,
-          variantId: i.variantId,
-          quantity: i.quantity,
-        }))
-      );
-    }
+    try {
+      const res = await fetch('/api/auth/sync', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ token, type: 'supabase' }),
+      });
 
-    const dbCart = await getCart(userProfile.id);
-    setCart(
-      dbCart.map((item) => ({
-        productId: item.product_id,
-        variantId: item.variant_id,
-        quantity: item.quantity,
-      }))
-    );
+      if (res.ok) {
+        const data = await res.json();
+        const userProfile = data.user;
+        if (userProfile) {
+          setUser({
+            id: userProfile.id,
+            name: userProfile.name ?? '',
+            phone: userProfile.phone || '',
+            email: userProfile.email || '',
+            avatar_url: userProfile.avatar_url || '',
+            role: userProfile.role ?? 'customer',
+            saved_addresses: userProfile.saved_addresses || [],
+          });
+
+          // Sync cart in background
+          const cart = localCart;
+          if (cart.length > 0) {
+            mergeLocalCart(
+              userProfile.id,
+              cart.map((i) => ({
+                productId: i.productId,
+                variantId: i.variantId,
+                quantity: i.quantity,
+              }))
+            ).catch(() => {});
+          }
+
+          getCart(userProfile.id).then((dbCart) => {
+            if (dbCart && dbCart.length > 0) {
+              setCart(
+                dbCart.map((item) => ({
+                  productId: item.product_id,
+                  variantId: item.variant_id,
+                  quantity: item.quantity,
+                }))
+              );
+            }
+          }).catch(() => {});
+        }
+      }
+    } catch (err) {
+      console.warn('Auth hydration notice:', err);
+    } finally {
+      isHydrating.current = false;
+      setAuthLoading(false);
+    }
   }
 
   return <>{children}</>;

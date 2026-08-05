@@ -3,11 +3,12 @@
 import { useState, useCallback, useRef, useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useTranslation } from '@/lib/i18n';
-import { Navigation, Home, Briefcase, Plus, Search, Loader2, Check } from 'lucide-react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { Navigation, Home, Briefcase, Plus, Search, Loader2, Check, CheckSquare, Square, Info } from 'lucide-react';
+import { motion } from 'framer-motion';
 import { useStore } from '@/store/useStore';
 import { updateProfileName } from '@/lib/api/auth';
-import { saveAddressAPI } from '@/lib/api/addresses';
+import { saveAddressAPI, getUserAddresses } from '@/lib/api/addresses';
+import { getCurrentUserLocation, reverseGeocodeCoords } from '@/lib/utils/geolocation';
 import OrderTrackingMap from '@/components/shared/OrderTrackingMap';
 
 function AddressOnboardingInner() {
@@ -18,11 +19,14 @@ function AddressOnboardingInner() {
   const [address, setAddress] = useState('');
   const [name, setName] = useState('');
   const [type, setType] = useState('Home');
+  const [isDefault, setIsDefault] = useState(false);
+  const [hasExistingAddresses, setHasExistingAddresses] = useState(false);
   const [isLocating, setIsLocating] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
   const [isGeocoding, setIsGeocoding] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [customLabel, setCustomLabel] = useState('');
+  const [locationNotice, setLocationNotice] = useState<string | null>(null);
   
   // Default coordinate (India - Delhi)
   const [coords, setCoords] = useState({ lat: 28.6139, lng: 77.2090 });
@@ -31,25 +35,31 @@ function AddressOnboardingInner() {
   const user = useStore(s => s.user);
   const updateProfileLocal = useStore(s => s.updateProfile);
 
-  // Pre-fill name if available
+  // Check user profile & existing addresses
   useEffect(() => {
     if (user?.name && !name) {
       setName(user.name);
+    }
+    if (user?.id) {
+      getUserAddresses(user.id).then(existing => {
+        if (existing.length === 0) {
+          // If first address ever, make it default
+          setIsDefault(true);
+          setHasExistingAddresses(false);
+        } else {
+          // User already has addresses: do NOT make default unless user chooses
+          setIsDefault(false);
+          setHasExistingAddresses(true);
+        }
+      });
     }
   }, [user]);
 
   const reverseGeocode = async (lat: number, lng: number) => {
     setIsGeocoding(true);
     try {
-      const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`);
-      const data = await res.json();
-      if (data && data.display_name) {
-        setAddress(data.display_name);
-      } else if (typeof lat === 'number' && typeof lng === 'number' && !isNaN(lat)) {
-        setAddress(`${lat.toFixed(4)}, ${lng.toFixed(4)}`);
-      } else {
-        setAddress('Manual entry required');
-      }
+      const formatted = await reverseGeocodeCoords(lat, lng);
+      setAddress(formatted);
     } catch (error) {
       console.error("Geocoding failed", error);
     } finally {
@@ -67,30 +77,26 @@ function AddressOnboardingInner() {
     }, 800);
   }, []);
 
-  const handleUseLocation = () => {
+  const handleUseLocation = async () => {
     setIsLocating(true);
-    
-    if (!navigator.geolocation) {
-      alert("Geolocation is not supported by your browser");
+    setLocationNotice(null);
+    try {
+      const loc = await getCurrentUserLocation();
+      setCoords({ lat: loc.lat, lng: loc.lng });
+      if (loc.address) {
+        setAddress(loc.address);
+      }
+      setLocationNotice(
+        loc.source === 'gps' 
+          ? 'Pinpointed using GPS' 
+          : 'Detected approximate location from network'
+      );
+    } catch (err: any) {
+      console.warn("Location lookup error", err);
+      setLocationNotice("Could not auto-detect location. Please enter or search your address.");
+    } finally {
       setIsLocating(false);
-      return;
     }
-
-    navigator.geolocation.getCurrentPosition(
-      async (position) => {
-        const { latitude, longitude } = position.coords;
-        const newCoords = { lat: latitude, lng: longitude };
-        setCoords(newCoords);
-        await reverseGeocode(latitude, longitude);
-        setIsLocating(false);
-      },
-      (error) => {
-        console.error("Error obtaining location", error);
-        alert("Failed to get your location. Please ensure location services are enabled.");
-        setIsLocating(false);
-      },
-      { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
-    );
   };
 
   const handleSave = async () => {
@@ -98,12 +104,12 @@ function AddressOnboardingInner() {
       alert("User session not found. Please try logging in again.");
       return;
     }
-    if (!address) {
-      alert("Please select or enter an address first.");
+    if (!address.trim()) {
+      alert("Please select or enter a valid delivery address.");
       return;
     }
-    if (!name) {
-      alert("Please enter your name.");
+    if (!name.trim()) {
+      alert("Please enter recipient name.");
       return;
     }
 
@@ -111,38 +117,35 @@ function AddressOnboardingInner() {
     setIsSuccess(false);
     
     try {
-      // 1. Update Profile Name
-      const nameResult = await updateProfileName(user.id, name);
-      if (!nameResult.success) {
-        throw new Error(`Failed to save name: ${nameResult.error}`);
+      // 1. Update Profile Name if changed
+      if (name.trim() !== user.name) {
+        await updateProfileName(user.id, name.trim());
+        updateProfileLocal({ name: name.trim() });
       }
 
       // 2. Determine the save label
-      const finalType = type === 'Other' ? (customLabel || 'Other') : type;
+      const finalType = type === 'Other' ? (customLabel.trim() || 'Other') : type;
 
-      // 3. Save Address to user_addresses table
+      // 3. Save Address to user_addresses table with proper is_default flag
       const addressResult = await saveAddressAPI({
         userId: user.id,
         label: finalType,
-        address: address,
+        address: address.trim(),
         lat: coords.lat,
         lng: coords.lng,
-        isDefault: true
+        isDefault: isDefault
       });
       
       if (addressResult.success) {
         setIsSuccess(true);
-        // Update profile with name only - saved_addresses will be fetched fresh
-        updateProfileLocal({ name });
         setTimeout(() => {
-          // Return to checkout or home based on return_to param
           router.replace(returnTo);
-        }, 1500);
+        }, 1200);
       } else {
         if (addressResult.code === '42P01' || (addressResult.error && addressResult.error.includes('column'))) {
            alert("CRITICAL: Your database is missing the 'user_addresses' table. \n\nPLEASE RUN THE SQL MIGRATION IN SUPABASE DASHBOARD.");
         } else {
-           throw new Error(addressResult.error || 'Unknown database error');
+           throw new Error(addressResult.error || 'Failed to save address');
         }
       }
     } catch (err: any) {
@@ -154,85 +157,96 @@ function AddressOnboardingInner() {
   };
 
   const addressTypes = [
-    { id: 'Home', label: t('homeType'), icon: Home },
-    { id: 'Office', label: t('officeType'), icon: Briefcase },
-    { id: 'Other', label: t('otherType'), icon: Plus }
+    { id: 'Home', label: t('homeType') || 'Home', icon: Home },
+    { id: 'Office', label: t('officeType') || 'Office', icon: Briefcase },
+    { id: 'Other', label: t('otherType') || 'Other', icon: Plus }
   ];
 
   return (
     <div className="min-h-screen flex flex-col bg-white">
       {/* Header */}
-      <div className="px-6 pt-12 pb-6">
-        <h1 className="text-3xl font-black text-on-surface tracking-tight mb-2">{t('deliveryAddressTitle')}</h1>
-        <p className="text-muted text-sm leading-relaxed">
-          {t('whereDeliver')}
+      <div className="px-6 pt-10 pb-4 max-w-xl mx-auto w-full">
+        <h1 className="text-2xl sm:text-3xl font-black text-on-surface tracking-tight mb-1">
+          {t('deliveryAddressTitle') || 'Add Delivery Address'}
+        </h1>
+        <p className="text-muted text-xs sm:text-sm leading-relaxed">
+          {t('whereDeliver') || 'Where should we deliver your fresh farm products?'}
         </p>
       </div>
 
-      <div className="flex-1 px-6 space-y-8 pb-32">
+      <div className="flex-1 px-6 space-y-6 pb-32 max-w-xl mx-auto w-full">
         {/* Name Input */}
-        <div className="space-y-2">
-          <label className="text-[10px] font-bold uppercase tracking-widest text-muted ml-1">{t('fullName')}</label>
+        <div className="space-y-1.5">
+          <label className="text-[10px] font-bold uppercase tracking-widest text-muted ml-1">
+            {t('fullName') || 'Recipient Name'}
+          </label>
           <div className="relative">
             <input 
               type="text" 
-              placeholder={t('addressNamePlaceholder')}
+              placeholder={t('addressNamePlaceholder') || 'Enter your full name'}
               value={name}
               onChange={(e) => setName(e.target.value)}
-              className="w-full h-14 bg-surface-container rounded-2xl px-5 text-sm font-bold border-2 border-transparent focus:border-primary outline-none transition-all shadow-sm"
+              className="w-full h-12 bg-surface-container rounded-2xl px-4 text-sm font-bold border-2 border-transparent focus:border-primary outline-none transition-all shadow-sm"
             />
           </div>
         </div>
 
         {/* Search Bar / Manual Input */}
-        <div className="space-y-4">
-          <label className="text-[10px] font-bold uppercase tracking-widest text-muted ml-1">{t('deliveryAddressTitle')}</label>
-          <div className="relative">
-            <div className="absolute left-4 top-1/2 -translate-y-1/2">
-              {isGeocoding ? <Loader2 className="w-5 h-5 text-primary animate-spin" /> : <Search className="w-5 h-5 text-muted" />}
-            </div>
-            <textarea 
-              placeholder={t('searchAddressPlaceholder')}
-              value={address}
-              onChange={(e) => setAddress(e.target.value)}
-              className="w-full min-h-[80px] bg-surface-container rounded-2xl pl-12 pr-5 py-4 text-sm font-medium border-2 border-transparent focus:border-primary outline-none transition-all resize-none shadow-sm"
-            />
-          </div>
-          
+        <div className="space-y-3">
           <div className="flex items-center justify-between">
+            <label className="text-[10px] font-bold uppercase tracking-widest text-muted ml-1">
+              Complete Address
+            </label>
             <button 
+              type="button"
               onClick={handleUseLocation}
               disabled={isLocating}
-              className="flex items-center gap-2.5 text-primary text-[13px] font-bold active:scale-95 transition-all"
+              className="flex items-center gap-1.5 text-primary text-xs font-bold hover:underline active:scale-95 transition-all cursor-pointer"
             >
-              {isLocating ? <Loader2 className="w-4 h-4 animate-spin" /> : <Navigation className="w-4 h-4" />}
-              {t('useCurrentLocation')}
+              {isLocating ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Navigation className="w-3.5 h-3.5" />}
+              {isLocating ? 'Locating...' : 'Use Current Location'}
             </button>
-            
-            <div className="text-[10px] text-muted-foreground italic">
-              Drag map to pinpoint location
-            </div>
           </div>
-          
-          <div className="mt-2 rounded-3xl overflow-hidden shadow-2xl border-2 border-sand relative group">
+
+          <div className="relative">
+            <div className="absolute left-4 top-4">
+              {isGeocoding ? <Loader2 className="w-4 h-4 text-primary animate-spin" /> : <Search className="w-4 h-4 text-muted" />}
+            </div>
+            <textarea 
+              placeholder="House/Flat number, Building, Street name, Area, City, Pincode"
+              value={address}
+              onChange={(e) => setAddress(e.target.value)}
+              rows={3}
+              className="w-full bg-surface-container rounded-2xl pl-11 pr-4 py-3 text-sm font-medium border-2 border-transparent focus:border-primary outline-none transition-all resize-none shadow-sm"
+            />
+          </div>
+
+          {locationNotice && (
+            <div className="flex items-center gap-2 px-3 py-2 bg-emerald-50 text-emerald-800 rounded-xl text-xs font-medium border border-emerald-200">
+              <Info className="w-4 h-4 shrink-0 text-emerald-600" />
+              <span>{locationNotice}</span>
+            </div>
+          )}
+
+          {/* Map Preview with Pinpoint */}
+          <div className="rounded-2xl overflow-hidden shadow-sm border border-sand relative group">
             <OrderTrackingMap 
               customerLocation={coords} 
-              height="350px" 
+              height="220px" 
               interactive={true} 
               showCenterMarker={true}
               onLocationChange={handleLocationChange}
             />
-            {/* Center crosshair helper */}
-            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none">
-               <div className="w-2 h-2 bg-primary rounded-full ring-8 ring-primary/20" />
+            <div className="absolute bottom-2 right-2 px-2.5 py-1 bg-white/90 backdrop-blur rounded-lg text-[10px] font-bold text-gray-700 shadow-sm pointer-events-none">
+              📍 Drag map to adjust pin
             </div>
           </div>
         </div>
 
         {/* Address Type Chips */}
-        <div className="space-y-3">
-          <label className="text-[10px] font-bold uppercase tracking-widest text-muted ml-1">{t('saveAs')}</label>
-          <div className="flex flex-wrap gap-3">
+        <div className="space-y-2">
+          <label className="text-[10px] font-bold uppercase tracking-widest text-muted ml-1">{t('saveAs') || 'Save Address As'}</label>
+          <div className="flex flex-wrap gap-2.5">
             {addressTypes.map(item => {
               const Icon = item.icon;
               const isSelected = type === item.id;
@@ -243,19 +257,20 @@ function AddressOnboardingInner() {
                     key="custom-input"
                     initial={{ width: 0, opacity: 0 }}
                     animate={{ width: 'auto', opacity: 1 }}
-                    className="flex-1 min-w-[200px] relative"
+                    className="flex-1 min-w-[180px] relative"
                   >
                     <input
                       type="text"
                       autoFocus
-                      placeholder="e.g. Grandma's House"
+                      placeholder="e.g. Grandma's House, Farm"
                       value={customLabel}
                       onChange={(e) => setCustomLabel(e.target.value)}
-                      className="w-full h-[46px] bg-primary/5 border-2 border-primary rounded-2xl px-4 text-sm font-bold text-primary outline-none"
+                      className="w-full h-11 bg-primary/5 border-2 border-primary rounded-xl px-3 text-xs font-bold text-primary outline-none"
                     />
                     <button 
+                      type="button"
                       onClick={() => { setType('Home'); setCustomLabel(''); }}
-                      className="absolute right-3 top-1/2 -translate-y-1/2 text-[10px] font-black uppercase text-primary/60"
+                      className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[10px] font-black uppercase text-primary/60 hover:text-primary"
                     >
                       Reset
                     </button>
@@ -265,50 +280,73 @@ function AddressOnboardingInner() {
 
               return (
                 <button
+                  type="button"
                   key={item.id}
                   onClick={() => setType(item.id)}
-                  className={`flex items-center gap-2 px-5 py-3 rounded-2xl text-[13px] font-bold transition-all border-2 ${
+                  className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold transition-all border-2 ${
                     isSelected 
                       ? 'bg-primary/10 border-primary text-primary shadow-sm' 
                       : 'bg-white border-sand text-on-surface hover:bg-surface-container'
                   }`}
                 >
-                  <Icon className="w-4 h-4" />
+                  <Icon className="w-3.5 h-3.5" />
                   {item.label}
                 </button>
               );
             })}
           </div>
         </div>
+
+        {/* Default Address Checkbox */}
+        <div 
+          onClick={() => setIsDefault(prev => !prev)}
+          className="flex items-center gap-3 p-3.5 bg-surface-container rounded-2xl cursor-pointer hover:bg-gray-100 transition-colors select-none"
+        >
+          {isDefault ? (
+            <CheckSquare className="w-5 h-5 text-primary" />
+          ) : (
+            <Square className="w-5 h-5 text-gray-400" />
+          )}
+          <div>
+            <p className="text-xs font-bold text-gray-900">Make this my default delivery address</p>
+            <p className="text-[11px] text-gray-500">
+              {hasExistingAddresses 
+                ? 'Will be used as your primary address for quick checkouts.' 
+                : 'Your primary delivery location.'}
+            </p>
+          </div>
+        </div>
       </div>
 
       {/* Footer Button */}
-      <div className="fixed bottom-0 left-0 right-0 p-6 bg-white/80 backdrop-blur-xl border-t border-sand z-50">
-        <button
-          onClick={handleSave}
-          disabled={!address || !name || isSaving || isSuccess}
-          className={`w-full h-14 rounded-2xl font-bold flex items-center justify-center gap-2 transition-all active:scale-95 shadow-xl ${
-            isSuccess 
-              ? 'bg-green-600 text-white shadow-green-200'
-              : isSaving
-                ? 'bg-primary/70 text-white cursor-wait'
-                : 'bg-primary text-white shadow-primary/20 disabled:opacity-50'
-          }`}
-        >
-          {isSuccess ? (
-            <>
-              <Check className="w-5 h-5" strokeWidth={3} />
-              {t('savedSuccessfully')}
-            </>
-          ) : isSaving ? (
-            <>
-              <Loader2 className="w-5 h-5 animate-spin" />
-              Saving...
-            </>
-          ) : (
-            t('confirmSaveAddress')
-          )}
-        </button>
+      <div className="fixed bottom-0 left-0 right-0 p-4 bg-white/90 backdrop-blur-xl border-t border-sand z-50">
+        <div className="max-w-xl mx-auto w-full">
+          <button
+            onClick={handleSave}
+            disabled={!address.trim() || !name.trim() || isSaving || isSuccess}
+            className={`w-full h-12 sm:h-14 rounded-2xl font-bold flex items-center justify-center gap-2 transition-all active:scale-95 shadow-xl ${
+              isSuccess 
+                ? 'bg-emerald-600 text-white shadow-emerald-200'
+                : isSaving
+                  ? 'bg-primary/70 text-white cursor-wait'
+                  : 'bg-primary text-white shadow-primary/20 disabled:opacity-50'
+            }`}
+          >
+            {isSuccess ? (
+              <>
+                <Check className="w-5 h-5" strokeWidth={3} />
+                Address Saved Successfully!
+              </>
+            ) : isSaving ? (
+              <>
+                <Loader2 className="w-5 h-5 animate-spin" />
+                Saving Address...
+              </>
+            ) : (
+              'Save Delivery Address'
+            )}
+          </button>
+        </div>
       </div>
     </div>
   );

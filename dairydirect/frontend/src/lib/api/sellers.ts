@@ -1,0 +1,211 @@
+import { supabase } from '@/lib/supabase';
+
+export interface SellerInquiryPayload {
+  userId?: string;
+  fullName: string;
+  businessName: string;
+  phone: string;
+  email: string;
+  city?: string;
+  state: string;
+  category: string;
+  productRange?: string;
+  monthlyVolume?: string;
+  gstin?: string;
+  fssaiNumber?: string;
+  notes?: string;
+}
+
+export interface SellerInquiry {
+  id: string;
+  user_id?: string;
+  full_name: string;
+  business_name: string;
+  phone: string;
+  email: string;
+  city?: string;
+  state: string;
+  category: string;
+  product_range?: string;
+  monthly_volume?: string;
+  gstin?: string;
+  fssai_number?: string;
+  notes?: string;
+  status: 'pending' | 'contacted' | 'approved' | 'rejected';
+  admin_notes?: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface SellerRegistrationPayload {
+  userId: string;
+  storeName: string;
+  state: string;
+  category: string;
+  description?: string;
+  plan: 'starter' | 'growth' | 'enterprise';
+  gstin?: string;
+  pan?: string;
+  bankAccount?: string;
+  ifscCode?: string;
+}
+
+export interface SellerDashboardData {
+  store: {
+    id: string;
+    storeName: string;
+    state: string;
+    plan: string;
+    commissionRate: number;
+    status: string;
+    totalSales: number;
+  };
+  inquiry?: SellerInquiry | null;
+  metrics: {
+    grossRevenue: number;
+    platformCommission: number;
+    netPayout: number;
+    totalOrders: number;
+    totalProducts: number;
+    pendingDeliveries: number;
+  };
+  recentOrders: Array<{
+    id: string;
+    customerName: string;
+    itemsCount: number;
+    amount: number;
+    status: string;
+    date: string;
+  }>;
+  payoutHistory: Array<{
+    id: string;
+    amount: number;
+    fee: number;
+    net: number;
+    status: string;
+    date: string;
+  }>;
+}
+
+/**
+ * Submit seller onboarding inquiry for manual verification
+ */
+export async function submitSellerInquiry(payload: SellerInquiryPayload): Promise<{ success: boolean; inquiry: SellerInquiry; message: string }> {
+  const res = await fetch('/api/sellers/inquiries', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload),
+  });
+
+  if (!res.ok) {
+    const data = await res.json();
+    throw new Error(data.error || 'Failed to submit seller inquiry');
+  }
+
+  return await res.json();
+}
+
+/**
+ * Fetch all seller inquiries (for Admin)
+ */
+export async function getSellerInquiries(status?: string): Promise<SellerInquiry[]> {
+  try {
+    const url = status && status !== 'all' 
+      ? `/api/sellers/inquiries?status=${encodeURIComponent(status)}`
+      : '/api/sellers/inquiries';
+    
+    const res = await fetch(url);
+    if (!res.ok) throw new Error('Failed to fetch inquiries');
+    const data = await res.json();
+    return data.inquiries || [];
+  } catch (err) {
+    console.error('getSellerInquiries error:', err);
+    return [];
+  }
+}
+
+/**
+ * Update seller inquiry status & internal notes (for Admin)
+ */
+export async function updateSellerInquiryStatus(id: string, status: string, adminNotes?: string) {
+  const res = await fetch('/api/sellers/inquiries', {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ id, status, adminNotes }),
+  });
+
+  if (!res.ok) {
+    const data = await res.json();
+    throw new Error(data.error || 'Failed to update inquiry status');
+  }
+
+  return await res.json();
+}
+
+/**
+ * Legacy direct register helper (defaults to inquiry submission)
+ */
+export async function registerSeller(payload: SellerRegistrationPayload) {
+  return await submitSellerInquiry({
+    userId: payload.userId,
+    fullName: payload.storeName,
+    businessName: payload.storeName,
+    phone: '9825123456',
+    email: 'vendor@' + payload.storeName.toLowerCase().replace(/\s+/g, '') + '.com',
+    state: payload.state,
+    category: payload.category,
+    gstin: payload.gstin,
+    notes: payload.description,
+  });
+}
+
+/**
+ * Fetch seller dashboard data including inquiry approval state
+ */
+export async function getSellerDashboard(userId: string): Promise<SellerDashboardData> {
+  try {
+    // Check inquiry status first
+    const inqRes = await fetch(`/api/sellers/inquiries?userId=${encodeURIComponent(userId)}`);
+    let userInquiry: SellerInquiry | null = null;
+    if (inqRes.ok) {
+      const inqData = await inqRes.json();
+      if (inqData.inquiries && inqData.inquiries.length > 0) {
+        userInquiry = inqData.inquiries[0];
+      }
+    }
+
+    const res = await fetch(`/api/sellers?userId=${encodeURIComponent(userId)}`);
+    if (res.ok) {
+      const data = await res.json();
+      return {
+        ...data,
+        inquiry: userInquiry
+      };
+    }
+  } catch (e) {
+    // Handled below
+  }
+
+  return {
+    store: {
+      id: 'store-demo',
+      storeName: 'Gir Organic & Vedic Dairy',
+      state: 'Gujarat',
+      plan: 'growth',
+      commissionRate: 5.0,
+      status: 'pending_review',
+      totalSales: 0,
+    },
+    inquiry: null,
+    metrics: {
+      grossRevenue: 0,
+      platformCommission: 0,
+      netPayout: 0,
+      totalOrders: 0,
+      totalProducts: 0,
+      pendingDeliveries: 0,
+    },
+    recentOrders: [],
+    payoutHistory: [],
+  };
+}
