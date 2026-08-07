@@ -1,0 +1,42 @@
+import { createClient } from '@supabase/supabase-js';
+
+// Server-side Admin client bypassing RLS with service role key
+let adminClient: ReturnType<typeof createClient> | null = null;
+
+function sanitizeSupabaseUrl(rawUrl?: string): string {
+  if (!rawUrl || rawUrl.trim() === '') return 'https://placeholder.supabase.co';
+  let url = rawUrl.trim();
+  if (!url.startsWith('http://') && !url.startsWith('https://')) {
+    if (!url.includes('.')) {
+      url = `https://${url}.supabase.co`;
+    } else {
+      url = `https://${url}`;
+    }
+  }
+  return url;
+}
+
+import { getSupabaseBrowserClient } from './client';
+
+export function getAdminSupabase(): any {
+  if (typeof window !== 'undefined') {
+    return getSupabaseBrowserClient();
+  }
+
+  if (!adminClient) {
+    const rawUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+    const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+    const url = sanitizeSupabaseUrl(rawUrl);
+
+    adminClient = createClient(url, serviceRoleKey || 'placeholder-key', {
+      auth: {
+        autoRefreshToken: false,
+        persistSession: false,
+      },
+    });
+  }
+  return adminClient;
+}
+
+export const adminSupabase = typeof window === 'undefined' ? getAdminSupabase() : null;
+

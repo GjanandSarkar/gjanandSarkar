@@ -10,32 +10,57 @@
 import { Redis } from 'ioredis';
 
 // ─── Singleton Redis Client ───────────────────────────────────
-const globalForRedis = globalThis as unknown as { _redis: Redis | undefined };
+const globalForRedis = globalThis as unknown as { 
+  _redis: Redis | undefined;
+  _memoryCache: Map<string, { value: any; expiresAt: number }> | undefined;
+};
+
+// In-memory fallback cache
+const memoryCache = globalForRedis._memoryCache ?? new Map<string, { value: any; expiresAt: number }>();
+if (process.env.NODE_ENV !== 'production') globalForRedis._memoryCache = memoryCache;
+
+function getMemory(key: string): any | null {
+  const item = memoryCache.get(key);
+  if (!item) return null;
+  if (Date.now() > item.expiresAt) {
+    memoryCache.delete(key);
+    return null;
+  }
+  return item.value;
+}
+
+function setMemory(key: string, value: any, ttlSeconds: number) {
+  memoryCache.set(key, { value, expiresAt: Date.now() + ttlSeconds * 1000 });
+}
+
+let redisIsAvailable = false;
 
 function createRedisClient(): Redis {
-  const redisUrl = process.env.REDIS_URL || 'redis://localhost:6379';
+  const redisUrl = process.env.REDIS_URL;
 
-  const client = new Redis(redisUrl, {
-    maxRetriesPerRequest: 3,
-    enableReadyCheck: true,
+  const client = new Redis(redisUrl || 'redis://127.0.0.1:6379', {
+    maxRetriesPerRequest: 1,
+    enableReadyCheck: false,
     lazyConnect: true,
     retryStrategy(times) {
-      if (times > 5) {
-        console.error('[Redis] Max retries reached. Connection failed.');
-        return null;
+      if (!redisUrl && times > 1) {
+        return null; // Don't spam retries if no REDIS_URL configured
       }
-      return Math.min(times * 200, 2000);
+      if (times > 3) return null;
+      return Math.min(times * 300, 2000);
     },
   });
 
   client.on('error', (err) => {
-    // Don't crash the server on Redis errors — degrade gracefully
-    if (!err.message.includes('ECONNREFUSED')) {
+    redisIsAvailable = false;
+    // Don't crash or spam logs on missing Redis in development
+    if (process.env.REDIS_URL && !err.message.includes('ECONNREFUSED')) {
       console.error('[Redis] Error:', err.message);
     }
   });
 
   client.on('ready', () => {
+    redisIsAvailable = true;
     if (process.env.NODE_ENV !== 'production') {
       console.log('[Redis] Connected');
     }
@@ -57,27 +82,34 @@ const OTP_MAX_ATTEMPTS = 5;
  */
 export async function storeOTP(phone: string, otp: string): Promise<{ success: boolean; error?: string }> {
   try {
-    const attemptsKey = `otp:attempts:${phone}`;
-    const attempts = await redis.get(attemptsKey);
+    if (redisIsAvailable) {
+      const attemptsKey = `otp:attempts:${phone}`;
+      const attempts = await redis.get(attemptsKey);
 
-    if (parseInt(attempts || '0') >= OTP_MAX_ATTEMPTS) {
-      return { success: false, error: 'Too many OTP requests. Please try again in 10 minutes.' };
+      if (parseInt(attempts || '0') >= OTP_MAX_ATTEMPTS) {
+        return { success: false, error: 'Too many OTP requests. Please try again in 10 minutes.' };
+      }
+
+      await redis.setex(`otp:${phone}`, OTP_TTL_SECONDS, otp);
+      await redis.multi()
+        .incr(attemptsKey)
+        .expire(attemptsKey, OTP_TTL_SECONDS)
+        .exec();
+
+      return { success: true };
     }
-
-    // Store the OTP
-    await redis.setex(`otp:${phone}`, OTP_TTL_SECONDS, otp);
-    // Increment attempt counter
-    await redis.multi()
-      .incr(attemptsKey)
-      .expire(attemptsKey, OTP_TTL_SECONDS)
-      .exec();
-
-    return { success: true };
   } catch (err: any) {
-    console.error('[Redis] storeOTP error:', err.message);
-    // Fallback: allow OTP if Redis is down (in-memory alternative would be needed in prod)
-    return { success: true };
+    // Fall back to memory
   }
+
+  // Memory fallback
+  const attempts = getMemory(`otp:attempts:${phone}`) || 0;
+  if (attempts >= OTP_MAX_ATTEMPTS) {
+    return { success: false, error: 'Too many OTP requests. Please try again in 10 minutes.' };
+  }
+  setMemory(`otp:${phone}`, otp, OTP_TTL_SECONDS);
+  setMemory(`otp:attempts:${phone}`, attempts + 1, OTP_TTL_SECONDS);
+  return { success: true };
 }
 
 /**
@@ -85,117 +117,121 @@ export async function storeOTP(phone: string, otp: string): Promise<{ success: b
  */
 export async function verifyOTP(phone: string, submittedOtp: string): Promise<{ valid: boolean; error?: string }> {
   try {
-    const storedOtp = await redis.get(`otp:${phone}`);
-
-    if (!storedOtp) {
-      return { valid: false, error: 'OTP expired or not found. Please request a new one.' };
+    if (redisIsAvailable) {
+      const storedOtp = await redis.get(`otp:${phone}`);
+      if (storedOtp) {
+        if (storedOtp !== submittedOtp) {
+          return { valid: false, error: 'Invalid OTP. Please check and try again.' };
+        }
+        await redis.del(`otp:${phone}`);
+        await redis.del(`otp:attempts:${phone}`);
+        return { valid: true };
+      }
     }
+  } catch {}
 
-    if (storedOtp !== submittedOtp) {
-      return { valid: false, error: 'Invalid OTP. Please check and try again.' };
-    }
-
-    // Delete OTP so it can't be reused
-    await redis.del(`otp:${phone}`);
-    await redis.del(`otp:attempts:${phone}`);
-
-    return { valid: true };
-  } catch (err: any) {
-    console.error('[Redis] verifyOTP error:', err.message);
-    // If Redis is down, we can't verify — reject for security
-    return { valid: false, error: 'Verification service unavailable. Please try again.' };
+  const memOtp = getMemory(`otp:${phone}`);
+  if (!memOtp) {
+    return { valid: false, error: 'OTP expired or not found. Please request a new one.' };
   }
+  if (memOtp !== submittedOtp) {
+    return { valid: false, error: 'Invalid OTP. Please check and try again.' };
+  }
+  memoryCache.delete(`otp:${phone}`);
+  memoryCache.delete(`otp:attempts:${phone}`);
+  return { valid: true };
 }
 
 // ─── Session Cache ───────────────────────────────────────────
 
-/**
- * Cache user profile in Redis for 15 minutes to reduce DB hits
- */
 export async function cacheUserProfile(userId: string, profile: any): Promise<void> {
+  setMemory(`profile:${userId}`, profile, 900);
   try {
-    await redis.setex(`profile:${userId}`, 900, JSON.stringify(profile));
+    if (redisIsAvailable) {
+      await redis.setex(`profile:${userId}`, 900, JSON.stringify(profile));
+    }
   } catch {}
 }
 
 export async function getCachedUserProfile(userId: string): Promise<any | null> {
   try {
-    const cached = await redis.get(`profile:${userId}`);
-    return cached ? JSON.parse(cached) : null;
-  } catch {
-    return null;
-  }
+    if (redisIsAvailable) {
+      const cached = await redis.get(`profile:${userId}`);
+      if (cached) return JSON.parse(cached);
+    }
+  } catch {}
+  return getMemory(`profile:${userId}`);
 }
 
 export async function invalidateUserProfileCache(userId: string): Promise<void> {
+  memoryCache.delete(`profile:${userId}`);
   try {
-    await redis.del(`profile:${userId}`);
+    if (redisIsAvailable) {
+      await redis.del(`profile:${userId}`);
+    }
   } catch {}
 }
 
 // ─── Rate Limiting ───────────────────────────────────────────
 
-/**
- * IP-based rate limiter using Redis sliding window
- * Returns true if the request should be allowed, false if rate limited
- */
 export async function checkRateLimit(
-  identifier: string, // IP address or user ID
-  action: string,     // e.g. 'otp', 'order', 'api'
+  identifier: string,
+  action: string,
   maxRequests: number,
   windowSeconds: number
 ): Promise<{ allowed: boolean; remaining: number; resetIn: number }> {
   const key = `ratelimit:${action}:${identifier}`;
 
   try {
-    const current = await redis.incr(key);
-
-    if (current === 1) {
-      await redis.expire(key, windowSeconds);
+    if (redisIsAvailable) {
+      const current = await redis.incr(key);
+      if (current === 1) await redis.expire(key, windowSeconds);
+      const ttl = await redis.ttl(key);
+      if (current > maxRequests) {
+        return { allowed: false, remaining: 0, resetIn: ttl };
+      }
+      return { allowed: true, remaining: maxRequests - current, resetIn: ttl };
     }
+  } catch {}
 
-    const ttl = await redis.ttl(key);
-
-    if (current > maxRequests) {
-      return {
-        allowed: false,
-        remaining: 0,
-        resetIn: ttl,
-      };
-    }
-
-    return {
-      allowed: true,
-      remaining: maxRequests - current,
-      resetIn: ttl,
-    };
-  } catch {
-    // If Redis is down, allow the request (fail open for non-critical paths)
-    return { allowed: true, remaining: maxRequests, resetIn: windowSeconds };
+  const current = (getMemory(key) || 0) + 1;
+  setMemory(key, current, windowSeconds);
+  if (current > maxRequests) {
+    return { allowed: false, remaining: 0, resetIn: windowSeconds };
   }
+  return { allowed: true, remaining: maxRequests - current, resetIn: windowSeconds };
 }
 
 // ─── Product Cache ───────────────────────────────────────────
 
 export async function cacheProducts(key: string, data: any, ttlSeconds = 60): Promise<void> {
+  setMemory(`products:${key}`, data, ttlSeconds);
   try {
-    await redis.setex(`products:${key}`, ttlSeconds, JSON.stringify(data));
+    if (redisIsAvailable) {
+      await redis.setex(`products:${key}`, ttlSeconds, JSON.stringify(data));
+    }
   } catch {}
 }
 
 export async function getCachedProducts(key: string): Promise<any | null> {
   try {
-    const cached = await redis.get(`products:${key}`);
-    return cached ? JSON.parse(cached) : null;
-  } catch {
-    return null;
-  }
+    if (redisIsAvailable) {
+      const cached = await redis.get(`products:${key}`);
+      if (cached) return JSON.parse(cached);
+    }
+  } catch {}
+  return getMemory(`products:${key}`);
 }
 
 export async function invalidateProductsCache(): Promise<void> {
+  for (const k of Array.from(memoryCache.keys())) {
+    if (k.startsWith('products:')) memoryCache.delete(k);
+  }
   try {
-    const keys = await redis.keys('products:*');
-    if (keys.length > 0) await redis.del(...keys);
+    if (redisIsAvailable) {
+      const keys = await redis.keys('products:*');
+      if (keys.length > 0) await redis.del(...keys);
+    }
   } catch {}
 }
 

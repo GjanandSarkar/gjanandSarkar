@@ -11,6 +11,8 @@ import { saveAddressAPI, getUserAddresses } from '@/lib/api/addresses';
 import { getCurrentUserLocation, reverseGeocodeCoords } from '@/lib/utils/geolocation';
 import OrderTrackingMap from '@/components/shared/OrderTrackingMap';
 
+import { supabase } from '@/lib/supabase';
+
 function AddressOnboardingInner() {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -33,26 +35,49 @@ function AddressOnboardingInner() {
   const debounceTimer = useRef<NodeJS.Timeout | null>(null);
 
   const user = useStore(s => s.user);
+  const setUser = useStore(s => s.setUser);
   const updateProfileLocal = useStore(s => s.updateProfile);
 
   // Check user profile & existing addresses
   useEffect(() => {
-    if (user?.name && !name) {
-      setName(user.name);
-    }
-    if (user?.id) {
-      getUserAddresses(user.id).then(existing => {
-        if (existing.length === 0) {
-          // If first address ever, make it default
-          setIsDefault(true);
-          setHasExistingAddresses(false);
-        } else {
-          // User already has addresses: do NOT make default unless user chooses
-          setIsDefault(false);
-          setHasExistingAddresses(true);
+    async function initUserAndAddresses() {
+      let activeUserId = user?.id;
+
+      if (!activeUserId) {
+        const { data: { user: sbUser } } = await supabase.auth.getUser();
+        if (sbUser) {
+          activeUserId = sbUser.id;
+          const fallbackUser = {
+            id: sbUser.id,
+            name: sbUser.user_metadata?.full_name || sbUser.user_metadata?.name || '',
+            phone: sbUser.phone || '',
+            email: sbUser.email || '',
+            avatar_url: sbUser.user_metadata?.avatar_url || '',
+            role: 'customer' as const,
+          };
+          setUser(fallbackUser);
+          if (!name && fallbackUser.name) {
+            setName(fallbackUser.name);
+          }
         }
-      });
+      } else if (user?.name && !name) {
+        setName(user.name);
+      }
+
+      if (activeUserId) {
+        getUserAddresses(activeUserId).then(existing => {
+          if (existing.length === 0) {
+            setIsDefault(true);
+            setHasExistingAddresses(false);
+          } else {
+            setIsDefault(false);
+            setHasExistingAddresses(true);
+          }
+        });
+      }
     }
+
+    initUserAndAddresses();
   }, [user]);
 
   const reverseGeocode = async (lat: number, lng: number) => {
@@ -100,8 +125,25 @@ function AddressOnboardingInner() {
   };
 
   const handleSave = async () => {
-    if (!user) {
+    let activeUser = user;
+    if (!activeUser) {
+      const { data: { user: sbUser } } = await supabase.auth.getUser();
+      if (sbUser) {
+        activeUser = {
+          id: sbUser.id,
+          name: sbUser.user_metadata?.full_name || sbUser.user_metadata?.name || '',
+          phone: sbUser.phone || '',
+          email: sbUser.email || '',
+          avatar_url: sbUser.user_metadata?.avatar_url || '',
+          role: 'customer',
+        };
+        setUser(activeUser);
+      }
+    }
+
+    if (!activeUser) {
       alert("User session not found. Please try logging in again.");
+      router.replace('/login');
       return;
     }
     if (!address.trim()) {
@@ -118,8 +160,8 @@ function AddressOnboardingInner() {
     
     try {
       // 1. Update Profile Name if changed
-      if (name.trim() !== user.name) {
-        await updateProfileName(user.id, name.trim());
+      if (name.trim() !== activeUser.name) {
+        await updateProfileName(activeUser.id, name.trim());
         updateProfileLocal({ name: name.trim() });
       }
 
@@ -128,7 +170,7 @@ function AddressOnboardingInner() {
 
       // 3. Save Address to user_addresses table with proper is_default flag
       const addressResult = await saveAddressAPI({
-        userId: user.id,
+        userId: activeUser.id,
         label: finalType,
         address: address.trim(),
         lat: coords.lat,
@@ -140,7 +182,7 @@ function AddressOnboardingInner() {
         setIsSuccess(true);
         setTimeout(() => {
           router.replace(returnTo);
-        }, 1200);
+        }, 1000);
       } else {
         if (addressResult.code === '42P01' || (addressResult.error && addressResult.error.includes('column'))) {
            alert("CRITICAL: Your database is missing the 'user_addresses' table. \n\nPLEASE RUN THE SQL MIGRATION IN SUPABASE DASHBOARD.");

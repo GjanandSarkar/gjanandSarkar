@@ -61,7 +61,15 @@ export function AdminSidebar() {
         style={{ background: 'var(--color-surface-container-low)' }}>
         <div className="w-10 h-10 rounded-full overflow-hidden bg-sand/30 border border-sand flex items-center justify-center shrink-0">
           {user?.avatar_url ? (
-            <img src={user.avatar_url} alt="Profile" className="w-full h-full object-cover" />
+            <img 
+              src={user.avatar_url} 
+              alt="Profile" 
+              className="w-full h-full object-cover" 
+              referrerPolicy="no-referrer"
+              onError={(e) => {
+                (e.currentTarget as HTMLImageElement).style.display = 'none';
+              }}
+            />
           ) : (
             <User className="w-5 h-5 text-primary/40" />
           )}

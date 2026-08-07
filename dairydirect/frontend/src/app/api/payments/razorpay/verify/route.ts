@@ -7,7 +7,7 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server';
-import crypto from 'crypto';
+import { verifyRazorpayPaymentSignature } from '@/lib/razorpay';
 import { query } from '@/lib/aws/rds';
 import { getAuthUser } from '@/lib/api/auth-middleware';
 import { sendOrderStatusEmail } from '@/lib/aws/ses';
@@ -37,14 +37,10 @@ export async function POST(request: NextRequest) {
 
     // ═══ CRITICAL: Verify HMAC-SHA256 Signature ═══
     // This prevents payment bypass — any tampered payment will fail here.
-    const expectedSignature = crypto
-      .createHmac('sha256', process.env.RAZORPAY_KEY_SECRET!)
-      .update(`${razorpay_order_id}|${razorpay_payment_id}`)
-      .digest('hex');
-
-    const isSignatureValid = crypto.timingSafeEqual(
-      Buffer.from(expectedSignature, 'hex'),
-      Buffer.from(razorpay_signature, 'hex')
+    const isSignatureValid = verifyRazorpayPaymentSignature(
+      razorpay_order_id,
+      razorpay_payment_id,
+      razorpay_signature
     );
 
     if (!isSignatureValid) {

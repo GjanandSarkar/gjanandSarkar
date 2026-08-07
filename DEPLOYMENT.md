@@ -1,178 +1,166 @@
-# 🚀 AWS Production Deployment Guide — Gjanand Sarkar (DairyDirect)
+# 🚀 Production Deployment & Manual Work Setup Guide — Gjanand Sarkar
 
-This guide walks you through deploying the DairyDirect production stack to **Amazon Web Services (ap-south-1 Mumbai)** and configuring **Razorpay Payments**.
-
----
-
-## 📋 Prerequisites
-
-1. **AWS Account**: Configured in region `ap-south-1` (Mumbai).
-2. **AWS CLI** installed & authenticated: `aws configure`.
-3. **Razorpay Account**: Live & Test API Keys from [Razorpay Dashboard](https://dashboard.razorpay.com/).
-4. **Domain & SSL**: Registered domain (Route 53 or external) + ACM SSL certificate.
+This comprehensive guide covers all manual steps and configuration required to launch **Gjanand Sarkar (DairyDirect)** on **Supabase Pro** with **Razorpay Payments** and **Vercel / Next.js Hosting**.
 
 ---
 
-## 🗄️ Step 1: Amazon RDS PostgreSQL Provisioning
-
-1. Open **AWS RDS Console** > **Create Database**.
-2. Select **PostgreSQL 16**.
-3. Choose **Production** template (or **Dev/Test** for staging).
-4. Settings:
-   - **DB Identifier**: `dairydirect-prod-db`
-   - **Master Username**: `postgres` (or `dairydirect_admin`)
-   - **Master Password**: *Generate a secure 32-character password*
-   - **Instance Class**: `db.t4g.medium` or `db.t4g.micro`
-   - **Storage**: 20GB – 100GB GP3 with autoscaling
-   - **VPC / Subnet**: Default VPC or private VPC subnet
-   - **Public Access**: `Yes` (if accessing directly from outside VPC) or `No` (with bastion/VPC peering)
-5. Initialize the database schema:
-   ```bash
-   psql -h <RDS_ENDPOINT> -U postgres -d postgres -f dairydirect/database/rds/schema.sql
-   psql -h <RDS_ENDPOINT> -U postgres -d dairydirect -f dairydirect/database/rds/seed.sql
-   ```
+## 📑 Table of Contents
+1. [Step 1: Supabase Pro Project Setup](#step-1-supabase-pro-project-setup)
+2. [Step 2: Database Schema & Seed Execution](#step-2-database-schema--seed-execution)
+3. [Step 3: Supabase Storage Buckets Setup](#step-3-supabase-storage-buckets-setup)
+4. [Step 4: Supabase Authentication Setup (Google OAuth & Phone OTP)](#step-4-supabase-authentication-setup)
+5. [Step 5: Razorpay Payment Gateway Integration](#step-5-razorpay-payment-gateway-integration)
+6. [Step 6: Environment Variables Configuration](#step-6-environment-variables-configuration)
+7. [Step 7: Vercel / Cloud Hosting Deployment](#step-7-vercel--cloud-hosting-deployment)
+8. [Step 8: Post-Deployment Verification Checklist](#step-8-post-deployment-verification-checklist)
 
 ---
 
-## ⚡ Step 2: Amazon ElastiCache (Redis) Setup
+## 🗄️ Step 1: Supabase Pro Project Setup
 
-1. Go to **AWS ElastiCache** > **Redis Clusters** > **Create**.
-2. Choose **Redis (Cluster Mode Disabled)**.
-3. Node type: `cache.t4g.micro` (or use a managed Redis such as Redis Cloud / Upstash).
-4. Note your Redis Primary Endpoint: `redis://<endpoint>:6379`.
-
----
-
-## 📦 Step 3: Amazon S3 Bucket & CloudFront CDN
-
-1. Go to **AWS S3** > **Create Bucket**:
-   - **Bucket Name**: `gjanandsarkar-product-media`
-   - **Region**: `ap-south-1` (Mumbai)
-   - Enable **CORS** for uploads:
-     ```json
-     [
-       {
-         "AllowedHeaders": ["*"],
-         "AllowedMethods": ["GET", "PUT", "POST", "HEAD"],
-         "AllowedOrigins": ["https://gjanandsarkar.com", "http://localhost:3000"],
-         "ExposeHeaders": ["ETag"]
-       }
-     ]
-     ```
-2. (Optional) Create a **CloudFront Distribution** pointing to your S3 bucket for lightning-fast asset delivery across India.
+1. Log in to [Supabase Dashboard](https://supabase.com/dashboard).
+2. Click **New Project**:
+   - **Name**: `gjanand-sarkar-prod`
+   - **Database Password**: *Generate and save a strong 32-character password*
+   - **Region**: `ap-south-1` (Mumbai, India) — *Crucial for ultra-low latency for Indian customers*
+   - **Pricing Plan**: Pro Tier
+3. Once provisioned, navigate to **Project Settings > API**:
+   - Copy **Project URL** (`https://xxxxxxxx.supabase.co`)
+   - Copy **anon / public key**
+   - Copy **service_role / secret key**
+4. Navigate to **Project Settings > Database**:
+   - Copy the **Connection string (URI / Transaction pooler port 6543)**
 
 ---
 
-## 📧 Step 4: Amazon SES (Email) & SNS (SMS) Setup
+## 📜 Step 2: Database Schema & Seed Execution
 
-1. **Amazon SES**:
-   - Go to **SES Console** > **Verified Identities**.
-   - Verify your sending domain (e.g. `gjanandsarkar.com`) or email (`orders@gjanandsarkar.com`).
-   - Request Production Access in `ap-south-1` if currently in sandbox.
-2. **Amazon SNS**:
-   - Enable SMS preferences under SNS Console > Text messaging (SMS).
-   - Set Default Sender ID (e.g., `GJANAND`).
+1. In your Supabase Dashboard, open the **SQL Editor** from the left navigation.
+2. Click **New Query**.
+3. Open [schema.sql](file:///Users/roshanpatel193052005gmail.com/Data/PROJECTS(2026)/GjanandSarkar/gjanandSarkar/dairydirect/database/supabase/schema.sql), copy the entire SQL script, paste it into the SQL Editor, and click **Run**.
+   - *This creates all tables, enums, triggers, RLS policies, and atomic order placement functions (`place_order_atomic`).*
+4. Click **New Query** again.
+5. Open [seed.sql](file:///Users/roshanpatel193052005gmail.com/Data/PROJECTS(2026)/GjanandSarkar/gjanandSarkar/dairydirect/database/supabase/seed.sql), copy the contents, paste into the SQL Editor, and click **Run**.
+   - *This populates active products (A2 Cow Milk, Pure Desi Ghee, Farm Fresh Paneer, Buffalo Milk), delivery slots, coupons (`WELCOME100`, `FREEDEL`), and store settings.*
 
 ---
 
-## 💳 Step 5: Razorpay Gateway Configuration
+## 📦 Step 3: Supabase Storage Buckets Setup
+
+Navigate to **Storage** in the Supabase Dashboard:
+
+1. **Bucket 1: `products`**
+   - Click **New Bucket** → Name: `products`
+   - Toggle **Public Bucket**: `ON`
+   - Allowed MIME types: `image/jpeg, image/png, image/webp, image/svg+xml`
+   - Max file size: `5 MB`
+2. **Bucket 2: `quality-reports`**
+   - Click **New Bucket** → Name: `quality-reports`
+   - Toggle **Public Bucket**: `ON`
+   - Allowed MIME types: `application/pdf, image/jpeg, image/png`
+   - Max file size: `10 MB`
+3. **Bucket 3: `return-claims`**
+   - Click **New Bucket** → Name: `return-claims`
+   - Toggle **Public Bucket**: `OFF` (Private — access controlled via signed URLs)
+   - Allowed MIME types: `image/jpeg, image/png, image/webp`
+   - Max file size: `10 MB`
+
+---
+
+## 🔐 Step 4: Supabase Authentication Setup
+
+Navigate to **Authentication > Providers** in the Supabase Dashboard:
+
+### 1. Google OAuth (One-Tap & Social Login)
+1. Go to [Google Cloud Console](https://console.cloud.google.com/) > **APIs & Services > Credentials**.
+2. Create **OAuth 2.0 Client ID** (Web application).
+3. Add Authorized Redirect URI from Supabase: `https://<YOUR-PROJECT-ID>.supabase.co/auth/v1/callback`.
+4. In Supabase Dashboard, toggle **Google** to `ON`, enter your `Client ID` and `Client Secret`, and save.
+
+### 2. Phone OTP (SMS Verification)
+1. In Supabase Dashboard, navigate to **Authentication > Providers > Phone**.
+2. Toggle **Phone** to `ON`.
+3. Choose your SMS Provider (e.g. **Twilio**, **MessageBird**, or **Custom HTTP Gateway** like Msg91):
+   - Enter your SMS API credentials.
+   - Configure the SMS template (e.g., `Your Gjanand Sarkar verification code is: {{ .Code }}`).
+
+---
+
+## 💳 Step 5: Razorpay Payment Gateway Integration
 
 1. Log in to [Razorpay Dashboard](https://dashboard.razorpay.com/).
-2. Navigate to **Settings > API Keys** > Generate `RAZORPAY_KEY_ID` & `RAZORPAY_KEY_SECRET`.
-3. Navigate to **Settings > Webhooks** > Add new Webhook:
-   - **Webhook URL**: `https://gjanandsarkar.com/api/payments/webhook`
-   - **Secret**: *Set a secure string for `RAZORPAY_WEBHOOK_SECRET`*
-   - **Active Events**: `order.paid`, `payment.captured`, `payment.failed`, `refund.processed`
+2. Navigate to **Account & Settings > API Keys**:
+   - Generate your `Key ID` and `Key Secret` (switch to **Live Mode** when ready for live transactions).
+3. Navigate to **Account & Settings > Webhooks**:
+   - Click **Add New Webhook**.
+   - **Webhook URL**: `https://your-domain.com/api/payments/webhook`
+   - **Secret**: *Enter a secure random string (save this as `RAZORPAY_WEBHOOK_SECRET`)*
+   - **Active Events**:
+     - `order.paid`
+     - `payment.captured`
+     - `payment.failed`
+     - `refund.processed`
+4. Click **Save**.
 
 ---
 
-## ⚙️ Step 6: Production Environment Variables
+## ⚙️ Step 6: Environment Variables Configuration
 
-Create `.env.production` (or configure in AWS App Runner / Amplify / ECS environment):
+Create a `.env.production` file or add these in your Vercel Project Settings:
 
 ```env
-# ─── App Environment ─────────────────────────────────────────
+# ─── Next.js App ─────────────────────────────────────────────────────────────
 NODE_ENV=production
 NEXT_PUBLIC_APP_URL=https://gjanandsarkar.com
 
-# ─── AWS RDS PostgreSQL ──────────────────────────────────────
-AWS_RDS_HOST=dairydirect-prod-db.xxxxxx.ap-south-1.rds.amazonaws.com
-AWS_RDS_PORT=5432
-AWS_RDS_DATABASE=dairydirect
-AWS_RDS_USERNAME=postgres
-AWS_RDS_PASSWORD=your_secure_rds_password
+# ─── Supabase Pro Credentials ────────────────────────────────────────────────
+NEXT_PUBLIC_SUPABASE_URL=https://your-project-id.supabase.co
+NEXT_PUBLIC_SUPABASE_ANON_KEY=eyJhbGciOi...
+SUPABASE_SERVICE_ROLE_KEY=eyJhbGciOi...
 
-# ─── AWS ElastiCache / Redis ─────────────────────────────────
-REDIS_URL=redis://your-elasticache-endpoint.ap-south-1.cache.amazonaws.com:6379
+# PostgreSQL Connection String (Transaction Pooler - Port 6543)
+DATABASE_URL=postgresql://postgres.your-project-id:your-password@aws-0-ap-south-1.pooler.supabase.com:6543/postgres
 
-# ─── AWS S3 & CloudFront ─────────────────────────────────────
-AWS_REGION=ap-south-1
-AWS_S3_BUCKET=gjanandsarkar-product-media
-AWS_CLOUDFRONT_DOMAIN=d123456789.cloudfront.net
-AWS_ACCESS_KEY_ID=AKIAXXXXXXXXXXXXXXXX
-AWS_SECRET_ACCESS_KEY=xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
-
-# ─── AWS SES (Email) & SNS (SMS) ─────────────────────────────
-SES_FROM_EMAIL=orders@gjanandsarkar.com
-SNS_SENDER_ID=GJANAND
-
-# ─── JWT Authentication ──────────────────────────────────────
-JWT_SECRET=your-production-jwt-secret-min-32-chars-long-secure
-JWT_REFRESH_SECRET=your-production-refresh-secret-min-32-chars-long-secure
-
-# ─── Razorpay Payment Gateway ────────────────────────────────
+# ─── Razorpay Payment Gateway ────────────────────────────────────────────────
+NEXT_PUBLIC_RAZORPAY_KEY_ID=rzp_live_xxxxxxxxxxxxxxxx
 RAZORPAY_KEY_ID=rzp_live_xxxxxxxxxxxxxxxx
-RAZORPAY_KEY_SECRET=xxxxxxxxxxxxxxxxxxxxxxxx
-RAZORPAY_WEBHOOK_SECRET=your_webhook_secret_key
+RAZORPAY_KEY_SECRET=your_razorpay_secret
+RAZORPAY_WEBHOOK_SECRET=your_webhook_secret
 
-# ─── Admin Configuration ─────────────────────────────────────
-ADMIN_PHONES=+919876543210,+919988776655
-ADMIN_EMAILS=admin@gjanandsarkar.com
+# ─── Redis Caching & Rate Limiting ───────────────────────────────────────────
+REDIS_URL=redis://default:password@your-redis-host:6379
+
+# ─── Session Security (JWT) ──────────────────────────────────────────────────
+JWT_SECRET=your-32-character-secret-key-for-jwt-signing
+JWT_REFRESH_SECRET=your-32-character-secret-for-refresh-token
+
+# ─── Admin Access Whitelist ──────────────────────────────────────────────────
+ADMIN_EMAILS=admin@gjanandsarkar.com,patelroshu1218@gmail.com
+ADMIN_PHONES=+919876543210
 ```
 
 ---
 
-## 🚀 Step 7: Application Deployment Options
+## 🚢 Step 7: Vercel / Cloud Hosting Deployment
 
-### Option A: AWS App Runner (Fastest & Fully Managed Container)
-1. Go to **AWS App Runner** > **Create Service**.
-2. Source: **Source code repository** (GitHub) or **Container registry** (ECR).
-3. Build command: `npm run build`
-4. Start command: `npm start`
-5. Port: `3000`
-6. Add environment variables.
-
-### Option B: Docker / ECS Fargate
-```bash
-cd dairydirect/frontend
-docker build -t dairydirect-app .
-# Push to Amazon ECR and deploy to ECS Fargate service behind an Application Load Balancer
-```
-
-### Option C: Vercel / AWS Amplify with Native AWS Backend
-- Deploy frontend to Vercel or AWS Amplify.
-- Point database and AWS environment variables directly to your AWS RDS, Redis, S3, and SES instances in `ap-south-1`.
+1. Push your code to your GitHub repository.
+2. Go to [Vercel Dashboard](https://vercel.com/) and click **Add New Project**.
+3. Import your GitHub repository.
+4. Set **Root Directory** to `dairydirect/frontend`.
+5. Paste all Environment Variables from Step 6.
+6. Click **Deploy**.
 
 ---
 
-## 🔄 Step 8: Historical Data Migration (from Supabase)
+## ✅ Step 8: Post-Deployment Verification Checklist
 
-If migrating existing customer records and past orders from Supabase:
-```bash
-cd dairydirect/database/rds
-# Ensure .env.local has both old Supabase and new AWS RDS credentials
-npx ts-node migrate-supabase-to-rds.ts
-```
-
----
-
-## ✅ Post-Deployment Verification Checklist
-
-- [ ] Health Check: `GET /api/health` returns `{"status":"ok","database":true,"redis":true}`
-- [ ] Admin Portal: Access `/admin` with an authenticated admin phone/email
-- [ ] Product Catalog: View products on `/products`
-- [ ] Cart & Pricing: Add items to cart and check automated profit margin & discount calculation
-- [ ] Payment Flow: Place an order with Razorpay test/live checkout
-- [ ] Webhook Verification: Confirm `order.paid` webhook marks orders as paid automatically
-- [ ] Freshness Guarantee: Submit a return request on `/returns` and verify in `/admin/returns`
-- [ ] Live Tracking: Track order delivery status on `/tracking/[id]`
+- [ ] **Health Check**: Visit `https://your-domain.com/api/health` — should return `{"status":"ok","database":true}`.
+- [ ] **Catalog Display**: Browse `/products` and ensure all dairy items (Milk, Ghee, Paneer) render with correct prices and stock.
+- [ ] **Authentication**: Test login with Google One-Tap or Phone OTP.
+- [ ] **Cart & Checkout**: Add items to cart, enter delivery address, choose a delivery slot (Morning/Evening), and apply coupon `WELCOME100`.
+- [ ] **Razorpay Payment**: Complete a test/live payment and verify immediate redirect to `/order-confirmed/[id]`.
+- [ ] **Admin Portal**: Log in as an admin and access `/admin` to verify:
+  - Live order overview & status transitions (`pending` → `confirmed` → `out_for_delivery` → `delivered`)
+  - Inventory stock level adjustments and low-stock alerts
+  - Return requests review and freshness guarantee approvals
+  - Financial reports and daily revenue statistics

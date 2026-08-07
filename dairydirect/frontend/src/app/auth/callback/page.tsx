@@ -4,11 +4,13 @@ import { useRouter, useSearchParams, usePathname } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
 import React, { useEffect, Suspense, useRef } from 'react';
 
+import { useStore } from '@/store/useStore';
+
 function AuthCallbackInner() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const pathname = usePathname();
-  const next = searchParams.get('next') || '/home';
+  const next = searchParams.get('redirect') || searchParams.get('next') || '/home';
 
   const isProcessing = React.useRef(false);
 
@@ -26,20 +28,7 @@ function AuthCallbackInner() {
       isProcessing.current = true;
 
       try {
-        // Check if user has saved addresses - need to fetch this
-        const { data: addresses, error: addrError } = await supabase
-          .from('user_addresses')
-          .select('id')
-          .eq('user_id', session.user.id)
-          .limit(1);
-
-        // Determine redirect target based on whether onboarding is needed
-        let redirectTarget = next;
-        
-        if (addrError || !addresses || addresses.length === 0) {
-          // User has no addresses, redirect to onboarding but preserve the final destination
-          redirectTarget = '/onboarding/address?return_to=' + encodeURIComponent(next);
-        }
+        let redirectTarget = next || '/home';
 
         // Sync with backend
         const res = await fetch('/api/auth/sync', {
@@ -48,19 +37,42 @@ function AuthCallbackInner() {
           body: JSON.stringify({ token: session.access_token }),
         });
 
-        if (!res.ok) {
-          console.error('Sync failed:', await res.text());
-        } else {
-          const data = await res.json();
-          if (data.user?.role === 'admin') {
-            redirectTarget = '/admin';
+        if (res.ok) {
+          const raw = await res.json();
+          const userProfile = raw.user || raw.data?.user;
+          const accessToken = raw.data?.accessToken || raw.accessToken;
+
+          if (accessToken) {
+            try {
+              document.cookie = `gs_access_token=${accessToken}; path=/; max-age=604800; SameSite=Lax`;
+            } catch {}
+          }
+
+          if (userProfile) {
+            const resolvedName = (userProfile.name && userProfile.name.trim())
+              ? userProfile.name.trim()
+              : (session.user?.user_metadata?.full_name || session.user?.user_metadata?.name || userProfile.email?.split('@')[0] || 'Customer');
+
+            useStore.getState().setUser({
+              id: userProfile.id,
+              name: resolvedName,
+              phone: userProfile.phone || '',
+              email: userProfile.email || '',
+              avatar_url: userProfile.avatar_url || session.user?.user_metadata?.avatar_url || session.user?.user_metadata?.picture || '',
+              role: userProfile.role ?? 'customer',
+              saved_addresses: userProfile.saved_addresses || [],
+            });
+
+            if (userProfile.role === 'admin' && (!next || next === '/home' || next === '/')) {
+              redirectTarget = '/admin';
+            }
           }
         }
 
         // Mark callback as processed to prevent loops
         sessionStorage.setItem('auth_callback_processed', 'true');
         
-        // Single redirect only
+        // Direct redirect to intended target
         router.replace(redirectTarget);
       } catch (err) {
         console.error('Auth callback error:', err);

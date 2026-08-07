@@ -1,5 +1,6 @@
 import { api } from './client';
-import { supabaseAdmin } from '@/lib/db';
+import { supabase } from '@/lib/supabase';
+import { getAdminSupabase } from '@/lib/supabase/admin';
 
 export type ProductWithVariants = {
   id: string;
@@ -54,7 +55,8 @@ export async function getProductsServer(
   options: { category?: string; activeOnly?: boolean } = {}
 ): Promise<ProductWithVariants[]> {
   try {
-    let query = supabaseAdmin
+    const admin = getAdminSupabase();
+    let query = admin
       .from('products')
       .select('*, product_variants(*)')
       .order('created_at', { ascending: false });
@@ -100,7 +102,8 @@ export async function getProductById(id: string): Promise<ProductWithVariants | 
 
 export async function getProductByIdServer(id: string): Promise<ProductWithVariants | null> {
   try {
-    const { data, error } = await supabaseAdmin
+    const admin = getAdminSupabase();
+    const { data, error } = await admin
       .from('products')
       .select(`
         *,
@@ -128,8 +131,6 @@ export async function createProduct(
     return { success: false, error: error.message };
   }
 }
-
-import { supabase } from '@/lib/supabase';
 
 export async function updateProduct(
   id: string,

@@ -348,11 +348,11 @@ function HeaderContent() {
                   
                   <div className="max-h-60 overflow-y-auto p-1.5 space-y-1">
                     {userAddresses.length > 0 ? (
-                      userAddresses.map((addr) => {
+                      userAddresses.map((addr, idx) => {
                         const isSelected = activeAddress?.id === addr.id || (activeAddress?.label === addr.label && activeAddress?.address === addr.address);
                         return (
                           <button
-                            key={addr.id || addr.label}
+                            key={addr.id || `addr-${idx}-${addr.label}`}
                             type="button"
                             onClick={() => {
                               setCheckoutAddressId(addr.id || addr.label);
@@ -441,7 +441,15 @@ function HeaderContent() {
             >
               <div className="w-7 h-7 rounded-full bg-gray-100 flex items-center justify-center overflow-hidden border border-gray-200 group-hover:border-[#0f3e26] transition-colors shadow-2xs">
                 {user?.avatar_url ? (
-                  <img src={user.avatar_url} alt="Profile" className="w-full h-full object-cover" />
+                  <img 
+                    src={user.avatar_url} 
+                    alt={user.name || "Profile"} 
+                    className="w-full h-full object-cover" 
+                    referrerPolicy="no-referrer"
+                    onError={(e) => {
+                      (e.currentTarget as HTMLImageElement).style.display = 'none';
+                    }}
+                  />
                 ) : (
                   <User className="w-4 h-4 text-gray-600 group-hover:text-[#0f3e26] transition-colors" />
                 )}

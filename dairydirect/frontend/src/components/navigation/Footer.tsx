@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import Link from 'next/link';
-import { Send, Heart } from 'lucide-react';
+import { Send, Heart, ShieldCheck, CheckCircle2 } from 'lucide-react';
 
 export function Footer() {
   const [email, setEmail] = useState('');
@@ -53,7 +53,7 @@ export function Footer() {
             </Link>
 
             <p className="text-xs text-emerald-100/80 leading-relaxed max-w-sm">
-              Proudly Indian. Purely Authentic. Connecting millions of conscious buyers directly with certified Indian businesses, farmers, and artisans.
+              Proudly Indian. Purely Authentic. Connecting conscious families directly with certified Vedic Gaushalas, traditional organic farmers, and regional artisans.
             </p>
 
             <div className="flex items-center gap-3 pt-2">
@@ -62,7 +62,7 @@ export function Footer() {
                 href="https://instagram.com" 
                 target="_blank" 
                 rel="noreferrer" 
-                className="w-8 h-8 rounded-full bg-white/10 hover:bg-[#c88a23] flex items-center justify-center text-white transition-colors" 
+                className="w-8 h-8 rounded-full bg-white/10 hover:bg-[#c88a23] flex items-center justify-center text-white transition-colors cursor-pointer" 
                 aria-label="Instagram"
               >
                 <svg className="w-4 h-4 fill-current" viewBox="0 0 24 24">
@@ -75,7 +75,7 @@ export function Footer() {
                 href="https://facebook.com" 
                 target="_blank" 
                 rel="noreferrer" 
-                className="w-8 h-8 rounded-full bg-white/10 hover:bg-[#c88a23] flex items-center justify-center text-white transition-colors" 
+                className="w-8 h-8 rounded-full bg-white/10 hover:bg-[#c88a23] flex items-center justify-center text-white transition-colors cursor-pointer" 
                 aria-label="Facebook"
               >
                 <svg className="w-4 h-4 fill-current" viewBox="0 0 24 24">
@@ -88,7 +88,7 @@ export function Footer() {
                 href="https://youtube.com" 
                 target="_blank" 
                 rel="noreferrer" 
-                className="w-8 h-8 rounded-full bg-white/10 hover:bg-[#c88a23] flex items-center justify-center text-white transition-colors" 
+                className="w-8 h-8 rounded-full bg-white/10 hover:bg-[#c88a23] flex items-center justify-center text-white transition-colors cursor-pointer" 
                 aria-label="YouTube"
               >
                 <svg className="w-4 h-4 fill-current" viewBox="0 0 24 24">
@@ -101,7 +101,7 @@ export function Footer() {
                 href="https://linkedin.com" 
                 target="_blank" 
                 rel="noreferrer" 
-                className="w-8 h-8 rounded-full bg-white/10 hover:bg-[#c88a23] flex items-center justify-center text-white transition-colors" 
+                className="w-8 h-8 rounded-full bg-white/10 hover:bg-[#c88a23] flex items-center justify-center text-white transition-colors cursor-pointer" 
                 aria-label="LinkedIn"
               >
                 <svg className="w-4 h-4 fill-current" viewBox="0 0 24 24">
@@ -114,7 +114,7 @@ export function Footer() {
                 href="https://twitter.com" 
                 target="_blank" 
                 rel="noreferrer" 
-                className="w-8 h-8 rounded-full bg-white/10 hover:bg-[#c88a23] flex items-center justify-center text-white transition-colors" 
+                className="w-8 h-8 rounded-full bg-white/10 hover:bg-[#c88a23] flex items-center justify-center text-white transition-colors cursor-pointer" 
                 aria-label="Twitter"
               >
                 <svg className="w-4 h-4 fill-current" viewBox="0 0 24 24">
@@ -131,38 +131,38 @@ export function Footer() {
             </h4>
             <ul className="space-y-2 text-xs text-emerald-100/80">
               <li><Link href="/about" className="hover:text-white transition-colors">About Us</Link></li>
-              <li><Link href="/about" className="hover:text-white transition-colors">Careers</Link></li>
-              <li><Link href="/about" className="hover:text-white transition-colors">Blog</Link></li>
-              <li><Link href="/about" className="hover:text-white transition-colors">Contact Us</Link></li>
-              <li><Link href="/about" className="hover:text-white transition-colors">Press & Media</Link></li>
+              <li><Link href="/contact" className="hover:text-white transition-colors">Contact Us</Link></li>
+              <li><Link href="/faq" className="hover:text-white transition-colors">FAQs & Help</Link></li>
+              <li><Link href="/become-seller" className="hover:text-white transition-colors">Gaushala Partners</Link></li>
+              <li><Link href="/about#fssai" className="hover:text-white transition-colors">FSSAI Verification</Link></li>
             </ul>
           </div>
 
           {/* Column 3: Help & Support */}
           <div className="space-y-3">
             <h4 className="text-xs font-bold uppercase tracking-wider text-amber-300">
-              Help
+              Help & Orders
             </h4>
             <ul className="space-y-2 text-xs text-emerald-100/80">
-              <li><Link href="/profile" className="hover:text-white transition-colors">FAQs</Link></li>
-              <li><Link href="/orders" className="hover:text-white transition-colors">Shipping & Delivery</Link></li>
-              <li><Link href="/orders" className="hover:text-white transition-colors">Returns & Refunds</Link></li>
-              <li><Link href="/orders" className="hover:text-white transition-colors">Track Order</Link></li>
-              <li><Link href="/profile" className="hover:text-white transition-colors">Customer Care</Link></li>
+              <li><Link href="/orders" className="hover:text-white transition-colors">Track Orders</Link></li>
+              <li><Link href="/returns" className="hover:text-white transition-colors">Returns & Refunds</Link></li>
+              <li><Link href="/tracking" className="hover:text-white transition-colors">Delivery Timings (5:30 AM)</Link></li>
+              <li><Link href="/subscribe" className="hover:text-white transition-colors">Manage Subscriptions</Link></li>
+              <li><Link href="/contact" className="hover:text-white transition-colors">Customer Care (24/7)</Link></li>
             </ul>
           </div>
 
           {/* Column 4: Sell on Gjanand Sarkar */}
           <div className="space-y-3">
             <h4 className="text-xs font-bold uppercase tracking-wider text-amber-300">
-              Sell on Platform
+              Partnerships
             </h4>
             <ul className="space-y-2 text-xs text-emerald-100/80">
-              <li><Link href="/admin" className="hover:text-white transition-colors">Become a Seller</Link></li>
-              <li><Link href="/admin" className="hover:text-white transition-colors">Business Account</Link></li>
-              <li><Link href="/admin" className="hover:text-white transition-colors">Seller Support</Link></li>
-              <li><Link href="/admin" className="hover:text-white transition-colors">Supplier Guidelines</Link></li>
-              <li><Link href="/admin" className="hover:text-white transition-colors">Fulfillment by GS</Link></li>
+              <li><Link href="/become-seller" className="hover:text-white transition-colors">Become a Seller</Link></li>
+              <li><Link href="/seller/dashboard" className="hover:text-white transition-colors">Seller Portal Login</Link></li>
+              <li><Link href="/become-seller" className="hover:text-white transition-colors">Farmer Guidelines</Link></li>
+              <li><Link href="/about" className="hover:text-white transition-colors">Quality Standards</Link></li>
+              <li><Link href="/contact" className="hover:text-white transition-colors">Bulk & Corporate Supply</Link></li>
             </ul>
           </div>
 
@@ -172,7 +172,7 @@ export function Footer() {
               Stay Connected
             </h4>
             <p className="text-xs text-emerald-100/80 leading-relaxed">
-              Get updates on new regional launches, festive offers & authentic stories.
+              Get updates on fresh seasonal harvest, Vedic ghee batches, and festive offers.
             </p>
 
             <form onSubmit={handleSubscribe} className="space-y-2">
@@ -188,7 +188,7 @@ export function Footer() {
               </div>
               <button
                 type="submit"
-                className="w-full py-2 bg-[#c88a23] hover:bg-[#b0781c] text-white font-bold text-xs rounded-lg transition-colors flex items-center justify-center gap-1.5 shadow-xs"
+                className="w-full py-2 bg-[#c88a23] hover:bg-[#b0781c] text-white font-bold text-xs rounded-lg transition-colors flex items-center justify-center gap-1.5 shadow-xs cursor-pointer"
               >
                 <Send className="w-3.5 h-3.5" />
                 <span>{subscribed ? 'Subscribed!' : 'Subscribe'}</span>
@@ -205,11 +205,11 @@ export function Footer() {
           </div>
 
           <div className="flex items-center gap-4 text-[11px]">
-            <Link href="/about" className="hover:text-white transition-colors">Privacy Policy</Link>
+            <Link href="/privacy" className="hover:text-white transition-colors">Privacy Policy</Link>
             <span>•</span>
-            <Link href="/about" className="hover:text-white transition-colors">Terms of Service</Link>
+            <Link href="/terms" className="hover:text-white transition-colors">Terms of Service</Link>
             <span>•</span>
-            <Link href="/about" className="hover:text-white transition-colors">FSSAI Certified</Link>
+            <Link href="/about#fssai" className="hover:text-white transition-colors">FSSAI Certified</Link>
           </div>
 
           <div className="flex items-center gap-1 text-emerald-200">

@@ -4,8 +4,9 @@
  */
 
 import { NextResponse } from 'next/server';
-import { query } from '@/lib/aws/rds';
+import { query, isPgConfigured } from '@/lib/aws/rds';
 import { getAuthUser } from '@/lib/api/auth-middleware';
+import { getAdminSupabase } from '@/lib/supabase/admin';
 
 export const dynamic = 'force-dynamic';
 
@@ -16,21 +17,52 @@ export async function GET(request: Request) {
       return NextResponse.json({ error: 'Admin access required' }, { status: 403 });
     }
 
-    const [ordersToday, pendingOrders, pendingReturns, lowStockCount] = await Promise.all([
-      query("SELECT COUNT(*) as count, COALESCE(SUM(total_amount), 0) as revenue FROM orders WHERE created_at >= CURRENT_DATE AND status != 'cancelled'"),
-      query("SELECT COUNT(*) as count FROM orders WHERE status = 'pending'"),
-      query("SELECT COUNT(*) as count FROM return_requests WHERE status = 'pending'"),
-      query("SELECT COUNT(*) as count FROM product_variants WHERE stock <= low_stock_threshold"),
+    if (isPgConfigured) {
+      try {
+        const [ordersToday, pendingOrders, pendingReturns, lowStockCount] = await Promise.all([
+          query(
+            "SELECT COUNT(*) as count, COALESCE(SUM(total_amount), 0) as revenue FROM orders WHERE created_at >= CURRENT_DATE AND status != 'cancelled'"
+          ),
+          query("SELECT COUNT(*) as count FROM orders WHERE status = 'pending' OR status = 'confirmed'"),
+          query("SELECT COUNT(*) as count FROM return_requests WHERE status = 'pending'"),
+          query("SELECT COUNT(*) as count FROM product_variants WHERE stock <= 10"),
+        ]);
+
+        return NextResponse.json({
+          today: {
+            orders: parseInt(ordersToday.rows[0]?.count || '0'),
+            revenue: parseFloat(ordersToday.rows[0]?.revenue || '0'),
+          },
+          pendingOrders: parseInt(pendingOrders.rows[0]?.count || '0'),
+          pendingReturns: parseInt(pendingReturns.rows[0]?.count || '0'),
+          lowStockCount: parseInt(lowStockCount.rows[0]?.count || '0'),
+        });
+      } catch (err: any) {
+        console.warn('[AdminStats GET] RDS failed, fallback to Supabase:', err.message);
+      }
+    }
+
+    const sb = getAdminSupabase();
+    const todayIso = new Date();
+    todayIso.setHours(0, 0, 0, 0);
+
+    const [ordersTodayRes, pendingOrdersRes, returnsRes, lowStockRes] = await Promise.all([
+      sb.from('orders').select('total_amount').gte('created_at', todayIso.toISOString()).neq('status', 'cancelled'),
+      sb.from('orders').select('*', { count: 'exact', head: true }).in('status', ['pending', 'confirmed']),
+      sb.from('return_requests').select('*', { count: 'exact', head: true }).eq('status', 'pending'),
+      sb.from('product_variants').select('*', { count: 'exact', head: true }).lte('stock', 10),
     ]);
+
+    const revenueToday = (ordersTodayRes.data || []).reduce((sum: number, o: any) => sum + (parseFloat(o.total_amount) || 0), 0);
 
     return NextResponse.json({
       today: {
-        orders: parseInt(ordersToday.rows[0].count),
-        revenue: parseFloat(ordersToday.rows[0].revenue),
+        orders: ordersTodayRes.data?.length || 0,
+        revenue: revenueToday,
       },
-      pendingOrders: parseInt(pendingOrders.rows[0].count),
-      pendingReturns: parseInt(pendingReturns.rows[0].count),
-      lowStockCount: parseInt(lowStockCount.rows[0].count),
+      pendingOrders: pendingOrdersRes.count || 0,
+      pendingReturns: returnsRes.count || 0,
+      lowStockCount: lowStockRes.count || 0,
     });
   } catch (error: any) {
     console.error('[AdminStats GET] Error:', error.message);

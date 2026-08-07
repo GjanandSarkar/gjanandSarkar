@@ -23,6 +23,7 @@ export function FloatingCartBar({ onOpen }: FloatingCartBarProps) {
     <AnimatePresence>
       {!isHidden && (
         <motion.div
+          key="floating-cart-bar"
           initial={{ y: 80, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
           exit={{ y: 80, opacity: 0 }}

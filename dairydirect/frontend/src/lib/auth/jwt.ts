@@ -12,9 +12,11 @@ const JWT_REFRESH_SECRET = process.env.JWT_REFRESH_SECRET || 'gjanandsarkar-supe
 
 export type JWTPayload = {
   userId: string;
+  name?: string;
+  avatar_url?: string;
   phone?: string;
   email?: string;
-  role: 'customer' | 'admin';
+  role: 'customer' | 'admin' | 'seller';
   type?: 'access' | 'refresh';
   iss?: string;
   aud?: string;

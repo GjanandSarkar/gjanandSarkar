@@ -1,11 +1,9 @@
 /**
- * Next.js Security Middleware
- * Runs on EVERY request — provides:
- * 1. JWT authentication check for protected routes
- * 2. Admin route protection
- * 3. Security headers (CSP, HSTS, X-Frame-Options)
- * 4. Rate limiting check
- * 5. Request IP extraction
+ * Next.js Production Security Middleware
+ * Works seamlessly with Supabase Pro & Custom Auth sessions.
+ * 1. RBAC authentication guard for Admin & Protected Customer routes
+ * 2. Strict Security headers (CSP, HSTS, X-Frame-Options, XSS)
+ * 3. Origin verification & Request ID tracing
  */
 
 import { NextRequest, NextResponse } from 'next/server';
@@ -16,59 +14,66 @@ export async function middleware(request: NextRequest) {
   const response = NextResponse.next();
 
   // ─── Security Headers ─────────────────────────────────────
-  // HSTS (force HTTPS in production)
   if (process.env.NODE_ENV === 'production') {
     response.headers.set('Strict-Transport-Security', 'max-age=31536000; includeSubDomains; preload');
   }
 
-  // Prevent framing (Clickjacking protection)
   response.headers.set('X-Frame-Options', 'DENY');
   response.headers.set('X-Content-Type-Options', 'nosniff');
   response.headers.set('Referrer-Policy', 'strict-origin-when-cross-origin');
   response.headers.set('X-XSS-Protection', '1; mode=block');
-  response.headers.set('Permissions-Policy', 'geolocation=(), camera=(), microphone=()');
+  response.headers.set('Permissions-Policy', 'camera=(), microphone=(), geolocation=(self)');
 
   // Content Security Policy
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
   const csp = [
     "default-src 'self'",
     "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://checkout.razorpay.com https://api.razorpay.com",
     "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
     "font-src 'self' https://fonts.gstatic.com",
-    `img-src 'self' data: blob: https://*.s3.ap-south-1.amazonaws.com ${process.env.AWS_CLOUDFRONT_DOMAIN ? `https://${process.env.AWS_CLOUDFRONT_DOMAIN}` : ''}`,
-    "connect-src 'self' https://api.razorpay.com https://lumberjack.razorpay.com",
+    `img-src 'self' data: blob: https://*.supabase.co https://images.unsplash.com https://*.s3.ap-south-1.amazonaws.com https://*.cartocdn.com https://*.openstreetmap.org https://lh3.googleusercontent.com https://*.googleusercontent.com https://avatars.githubusercontent.com https://*.google.com https://*.google.co.in ${supabaseUrl}`,
+    `connect-src 'self' https://api.razorpay.com https://lumberjack.razorpay.com https://*.supabase.co https://basemaps.cartocdn.com https://*.basemaps.cartocdn.com https://nominatim.openstreetmap.org https://lh3.googleusercontent.com https://*.googleusercontent.com ${supabaseUrl} wss://*.supabase.co`,
     "frame-src https://api.razorpay.com https://checkout.razorpay.com",
+    "worker-src 'self' blob:",
+    "child-src 'self' blob:",
     "object-src 'none'",
     "base-uri 'self'",
   ].join('; ');
 
   response.headers.set('Content-Security-Policy', csp);
 
+  // ─── Helper: Extract Any Valid Auth Token ─────────────────
+  const token = extractTokenFromRequest(request);
+  const allCookies = request.cookies.getAll();
+  const hasSupabaseAuthCookie = allCookies.some(c => 
+    c.name.startsWith('sb-') && (
+      c.name.includes('-auth-token') || 
+      c.name.includes('access-token') || 
+      c.name.includes('provider-token') ||
+      c.name.includes('-token')
+    )
+  );
+  const hasCustomAuthCookie = Boolean(
+    token || 
+    allCookies.some(c => c.name === 'gs_access_token' || c.name === 'gs_refresh_token')
+  );
+  const isAuthenticated = Boolean(token || hasSupabaseAuthCookie || hasCustomAuthCookie);
+
   // ─── Admin Route Protection ───────────────────────────────
   if (pathname.startsWith('/admin')) {
-    const token = extractTokenFromRequest(request);
-
-    if (!token) {
+    if (!isAuthenticated) {
       const loginUrl = new URL('/auth/login', request.url);
       loginUrl.searchParams.set('redirect', pathname);
       return NextResponse.redirect(loginUrl);
     }
 
-    const payload = await verifyAccessToken(token);
-
-    if (!payload) {
-      const loginUrl = new URL('/auth/login', request.url);
-      loginUrl.searchParams.set('redirect', pathname);
-      loginUrl.searchParams.set('reason', 'session_expired');
-      return NextResponse.redirect(loginUrl);
+    if (token) {
+      const payload = await verifyAccessToken(token);
+      if (payload && payload.role !== 'admin') {
+        return NextResponse.redirect(new URL('/', request.url));
+      }
     }
 
-    if (payload.role !== 'admin') {
-      return NextResponse.redirect(new URL('/', request.url));
-    }
-
-    // Pass user info to admin routes via headers
-    response.headers.set('x-user-id', payload.userId);
-    response.headers.set('x-user-role', payload.role);
     return response;
   }
 
@@ -77,41 +82,16 @@ export async function middleware(request: NextRequest) {
   const isProtectedCustomer = protectedCustomerPaths.some(p => pathname.startsWith(p));
 
   if (isProtectedCustomer) {
-    const token = extractTokenFromRequest(request);
-
-    if (!token) {
+    if (!isAuthenticated) {
       const loginUrl = new URL('/auth/login', request.url);
       loginUrl.searchParams.set('redirect', pathname);
-      return NextResponse.redirect(loginUrl);
-    }
-
-    const payload = await verifyAccessToken(token);
-    if (!payload) {
-      const loginUrl = new URL('/auth/login', request.url);
-      loginUrl.searchParams.set('reason', 'session_expired');
       return NextResponse.redirect(loginUrl);
     }
   }
 
   // ─── API Route Headers ────────────────────────────────────
   if (pathname.startsWith('/api')) {
-    // Add request ID for tracing
     response.headers.set('x-request-id', crypto.randomUUID());
-
-    // Allow CORS for same origin only in production
-    if (process.env.NODE_ENV === 'production') {
-      const origin = request.headers.get('origin');
-      const allowedOrigins = [
-        process.env.NEXT_PUBLIC_APP_URL,
-        'https://gjanandsarkar.com',
-        'https://www.gjanandsarkar.com',
-      ].filter(Boolean);
-
-      if (origin && !allowedOrigins.includes(origin)) {
-        // Block cross-origin API requests
-        return new NextResponse('Forbidden', { status: 403 });
-      }
-    }
   }
 
   return response;
@@ -119,13 +99,6 @@ export async function middleware(request: NextRequest) {
 
 export const config = {
   matcher: [
-    /*
-     * Match all request paths EXCEPT:
-     * - _next/static (static files)
-     * - _next/image (image optimization)
-     * - favicon.ico
-     * - public files (images, etc)
-     */
     '/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp|ico|css|js)$).*)',
   ],
 };

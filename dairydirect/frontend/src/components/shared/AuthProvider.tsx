@@ -95,12 +95,22 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       });
 
       if (res.ok) {
-        const data = await res.json();
-        const userProfile = data.user;
+        const raw = await res.json();
+        const userProfile = raw.user || raw.data?.user;
+        const accessToken = raw.data?.accessToken || raw.accessToken;
+        if (accessToken) {
+          try {
+            document.cookie = `gs_access_token=${accessToken}; path=/; max-age=604800; SameSite=Lax`;
+          } catch {}
+        }
         if (userProfile) {
+          const resolvedName = (userProfile.name && userProfile.name.trim())
+            ? userProfile.name.trim()
+            : (userProfile.email ? userProfile.email.split('@')[0] : (userProfile.phone ? `User (${userProfile.phone.slice(-4)})` : 'Customer'));
+
           setUser({
             id: userProfile.id,
-            name: userProfile.name ?? '',
+            name: resolvedName,
             phone: userProfile.phone || '',
             email: userProfile.email || '',
             avatar_url: userProfile.avatar_url || '',
@@ -132,7 +142,27 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
               );
             }
           }).catch(() => {});
+          return;
         }
+      }
+
+      // Fallback if sync API failed to return profile
+      const { data: { user: sbUser } } = await supabase.auth.getUser();
+      if (sbUser) {
+        const fallbackName = sbUser.user_metadata?.full_name 
+          || sbUser.user_metadata?.name 
+          || sbUser.user_metadata?.display_name 
+          || (sbUser.email ? sbUser.email.split('@')[0] : (sbUser.phone ? `User (${sbUser.phone.slice(-4)})` : 'Customer'));
+
+        setUser({
+          id: sbUser.id,
+          name: fallbackName,
+          phone: sbUser.phone || '',
+          email: sbUser.email || '',
+          avatar_url: sbUser.user_metadata?.avatar_url || sbUser.user_metadata?.picture || sbUser.user_metadata?.image || '',
+          role: 'customer',
+          saved_addresses: [],
+        });
       }
     } catch (err) {
       console.warn('Auth hydration notice:', err);

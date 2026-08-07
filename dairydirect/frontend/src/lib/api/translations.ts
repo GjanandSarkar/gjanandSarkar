@@ -7,17 +7,23 @@ export type TranslationMap = Record<string, string>;
 export async function fetchTranslations(
   language: Language
 ): Promise<TranslationMap> {
-  const { data, error } = await supabase
-    .from('translations')
-    .select('key, value')
-    .eq('language', language);
+  try {
+    const { data, error } = await supabase
+      .from('translations')
+      .select('key, value')
+      .eq('language', language);
 
-  if (error || !data) {
-    console.error(`fetchTranslations(${language}) error:`, error);
+    if (error || !data) {
+      if (error && error.code !== 'PGRST205') {
+        console.warn(`fetchTranslations(${language}) notice:`, error.message);
+      }
+      return {};
+    }
+
+    return Object.fromEntries(data.map((row: any) => [row.key, row.value]));
+  } catch {
     return {};
   }
-
-  return Object.fromEntries(data.map((row: any) => [row.key, row.value]));
 }
 
 // ─── Admin: Upsert a translation key ─────────────────────────

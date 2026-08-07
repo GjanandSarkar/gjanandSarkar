@@ -18,9 +18,25 @@ export function PaymentSelection({
   onChangeUpiId
 }: PaymentSelectionProps) {
   const methods = [
-    { id: 'upi', name: 'UPI', desc: 'Google Pay, PhonePe, Paytm', icon: Wallet },
-    { id: 'card', name: 'Credit / Debit Card', desc: 'Visa, Mastercard, RuPay', icon: CreditCard },
-    { id: 'cod', name: 'Cash on Delivery', desc: 'Pay at your doorstep', icon: Banknote },
+    { 
+      id: 'razorpay', 
+      name: 'Razorpay Online Checkout', 
+      desc: 'UPI, Credit/Debit Cards, Netbanking, Wallets', 
+      icon: CreditCard,
+      badge: 'Fast & Secure'
+    },
+    { 
+      id: 'upi', 
+      name: 'Direct UPI ID', 
+      desc: 'Google Pay, PhonePe, Paytm (VPA ID)', 
+      icon: Wallet 
+    },
+    { 
+      id: 'cod', 
+      name: 'Cash on Delivery', 
+      desc: 'Pay at your doorstep upon morning delivery', 
+      icon: Banknote 
+    },
   ];
 
   return (
@@ -54,8 +70,13 @@ export function PaymentSelection({
                   </div>
                 </div>
                 <div className="flex-1 min-w-0">
-                  <div className="flex items-center mb-0.5">
+                  <div className="flex items-center gap-2 mb-0.5">
                     <span className="font-bold text-dark text-sm leading-tight">{method.name}</span>
+                    {method.badge && (
+                      <span className="text-[9px] font-extrabold uppercase px-1.5 py-0.5 rounded-md bg-[#1b4332]/10 text-[#1b4332] tracking-wider">
+                        {method.badge}
+                      </span>
+                    )}
                   </div>
                   <p className="text-[11px] text-muted leading-relaxed truncate">{method.desc}</p>
                   

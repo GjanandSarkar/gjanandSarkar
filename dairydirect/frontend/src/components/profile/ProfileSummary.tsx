@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Camera, Check, Edit2, Loader2, LogOut, User, AlertCircle } from 'lucide-react';
 import { useTranslation } from '@/lib/i18n';
 import { updateProfileName, updateProfileAvatar, updateProfilePhone } from '@/lib/api/auth';
@@ -21,6 +21,15 @@ export function ProfileSummary({ user, onUpdateProfile, onLogout }: ProfileSumma
   const [profilePhone, setProfilePhone] = useState(user?.phone || '');
   const [isUploading, setIsUploading] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (user?.name && !isEditing) {
+      setProfileName(user.name);
+    }
+    if (user?.phone && !isEditingPhone) {
+      setProfilePhone(user.phone);
+    }
+  }, [user?.name, user?.phone, isEditing, isEditingPhone]);
 
   const handleUpdate = async () => {
     if (!profileName.trim() || !user) return;
@@ -112,7 +121,15 @@ export function ProfileSummary({ user, onUpdateProfile, onLogout }: ProfileSumma
             {isUploading ? (
               <Loader2 className="w-6 h-6 animate-spin text-primary" />
             ) : user?.avatar_url ? (
-              <img src={user.avatar_url} alt="Profile" className="w-full h-full object-cover" />
+              <img 
+                src={user.avatar_url} 
+                alt="Profile" 
+                className="w-full h-full object-cover" 
+                referrerPolicy="no-referrer"
+                onError={(e) => {
+                  (e.currentTarget as HTMLImageElement).style.display = 'none';
+                }}
+              />
             ) : (
               <User className="w-8 h-8 text-primary/40" />
             )}

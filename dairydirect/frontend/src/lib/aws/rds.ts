@@ -1,11 +1,7 @@
 /**
- * AWS RDS PostgreSQL Connection Pool
- * Replaces all Supabase database operations
- * 
- * Setup: Create RDS PostgreSQL in ap-south-1 (Mumbai)
- * Env vars required:
- *   AWS_RDS_HOST, AWS_RDS_PORT, AWS_RDS_DATABASE
- *   AWS_RDS_USERNAME, AWS_RDS_PASSWORD
+ * Unified PostgreSQL Connection Pool (Supabase Pro & PostgreSQL)
+ * Supports connection string (DATABASE_URL / POSTGRES_URL) or individual host/port parameters.
+ * Handles ACID transactions, row-level locks, and connection reuse.
  */
 
 import { Pool, PoolClient, QueryResult, QueryResultRow } from 'pg';
@@ -13,28 +9,83 @@ import { Pool, PoolClient, QueryResult, QueryResultRow } from 'pg';
 // ─── Singleton Connection Pool ───────────────────────────────
 const globalForPg = globalThis as unknown as { _pgPool: Pool | undefined };
 
-function createPool(): Pool {
-  const pool = new Pool({
-    host: process.env.AWS_RDS_HOST,
-    port: parseInt(process.env.AWS_RDS_PORT || '5432'),
-    database: process.env.AWS_RDS_DATABASE || 'dairydirect',
-    user: process.env.AWS_RDS_USERNAME,
-    password: process.env.AWS_RDS_PASSWORD,
-    ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: true } : false,
-    max: 20,                  // max connections in pool
-    idleTimeoutMillis: 30000, // close idle clients after 30s
-    connectionTimeoutMillis: 5000, // return error if cannot connect within 5s
-  });
+export const isPgConfigured = Boolean(
+  process.env.DATABASE_URL ||
+  process.env.POSTGRES_URL ||
+  process.env.SUPABASE_DB_URL ||
+  process.env.AWS_RDS_HOST ||
+  process.env.SUPABASE_DB_HOST
+);
+
+function createPool(): Pool | null {
+  if (!isPgConfigured) {
+    return null;
+  }
+
+  const connectionString =
+    process.env.DATABASE_URL ||
+    process.env.POSTGRES_URL ||
+    process.env.SUPABASE_DB_URL;
+
+  let poolConfig: any;
+
+  if (connectionString) {
+    poolConfig = {
+      connectionString,
+      ssl: { rejectUnauthorized: false }, // Required for Supabase connection pooler
+      max: 20,
+      idleTimeoutMillis: 30000,
+      connectionTimeoutMillis: 10000,
+    };
+  } else {
+    const host =
+      process.env.SUPABASE_DB_HOST ||
+      process.env.AWS_RDS_HOST ||
+      'localhost';
+    const port = parseInt(
+      process.env.SUPABASE_DB_PORT ||
+      process.env.AWS_RDS_PORT ||
+      '5432'
+    );
+    const database =
+      process.env.SUPABASE_DB_NAME ||
+      process.env.AWS_RDS_DATABASE ||
+      'postgres';
+    const user =
+      process.env.SUPABASE_DB_USER ||
+      process.env.AWS_RDS_USERNAME ||
+      'postgres';
+    const password =
+      process.env.SUPABASE_DB_PASSWORD ||
+      process.env.AWS_RDS_PASSWORD ||
+      '';
+
+    const isCloudHost = host.includes('supabase') || host.includes('rds.amazonaws.com');
+
+    poolConfig = {
+      host,
+      port,
+      database,
+      user,
+      password,
+      ssl: isCloudHost || process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false,
+      max: 20,
+      idleTimeoutMillis: 30000,
+      connectionTimeoutMillis: 10000,
+    };
+  }
+
+  const pool = new Pool(poolConfig);
 
   pool.on('error', (err) => {
-    console.error('[RDS] Unexpected pool error:', err.message);
+    console.error('[PostgreSQL Pool] Unexpected pool error:', err.message);
   });
 
   return pool;
 }
 
-export const pool: Pool = globalForPg._pgPool ?? createPool();
-if (process.env.NODE_ENV !== 'production') globalForPg._pgPool = pool;
+export const pool: Pool | null = globalForPg._pgPool ?? createPool();
+if (process.env.NODE_ENV !== 'production' && pool) globalForPg._pgPool = pool;
 
 // ─── Query Helper ─────────────────────────────────────────────
 
@@ -46,16 +97,20 @@ export async function query<T extends QueryResultRow = any>(
   text: string,
   params?: any[]
 ): Promise<QueryResult<T>> {
+  if (!pool) {
+    throw new Error('PostgreSQL database not configured in environment variables');
+  }
+
   const start = Date.now();
   try {
     const result = await pool.query<T>(text, params);
     const duration = Date.now() - start;
     if (process.env.NODE_ENV !== 'production' && duration > 500) {
-      console.warn(`[RDS] Slow query (${duration}ms):`, text.slice(0, 100));
+      console.warn(`[Database] Slow query (${duration}ms):`, text.slice(0, 100));
     }
     return result;
   } catch (error: any) {
-    console.error('[RDS] Query error:', error.message, '\nQuery:', text.slice(0, 200));
+    console.error('[Database] Query error:', error.message, '\nQuery:', text.slice(0, 200));
     throw error;
   }
 }
@@ -65,23 +120,22 @@ export async function query<T extends QueryResultRow = any>(
  * ALWAYS release the client in a finally block
  */
 export async function getClient(): Promise<PoolClient> {
+  if (!pool) {
+    throw new Error('PostgreSQL database not configured in environment variables');
+  }
   return pool.connect();
 }
 
 /**
  * Runs a function inside a PostgreSQL transaction.
  * Automatically commits on success, rolls back on error.
- * 
- * Usage:
- *   const result = await withTransaction(async (client) => {
- *     await client.query('INSERT INTO orders...')
- *     await client.query('UPDATE product_variants SET stock...')
- *     return orderId;
- *   })
  */
 export async function withTransaction<T>(
   fn: (client: PoolClient) => Promise<T>
 ): Promise<T> {
+  if (!pool) {
+    throw new Error('PostgreSQL database not configured in environment variables');
+  }
   const client = await pool.connect();
   try {
     await client.query('BEGIN');
@@ -100,6 +154,7 @@ export async function withTransaction<T>(
  * Health check — call from /api/health
  */
 export async function checkDbConnection(): Promise<boolean> {
+  if (!pool) return false;
   try {
     await pool.query('SELECT 1');
     return true;
@@ -107,117 +162,3 @@ export async function checkDbConnection(): Promise<boolean> {
     return false;
   }
 }
-
-// ─── Type Helpers ─────────────────────────────────────────────
-
-export type DBProfile = {
-  id: string;
-  name: string | null;
-  phone: string | null;
-  email: string | null;
-  avatar_url: string | null;
-  role: 'customer' | 'admin';
-  default_upi_id: string | null;
-  loyalty_points: number;
-  referral_code: string;
-  created_at: string;
-  updated_at: string;
-};
-
-export type DBProduct = {
-  id: string;
-  name: string;
-  category: string;
-  description: string | null;
-  image_url: string | null;
-  is_freshness_guarantee: boolean;
-  is_active: boolean;
-  created_at: string;
-  updated_at: string;
-};
-
-export type DBProductVariant = {
-  id: string;
-  product_id: string;
-  weight: string;
-  price: number;
-  original_price: number | null;
-  cost_price: number;
-  stock: number;
-  low_stock_threshold: number;
-  expiry_date: string | null;
-  batch_number: string | null;
-  created_at: string;
-};
-
-export type DBOrder = {
-  id: string;
-  user_id: string;
-  address_id: string | null;
-  status: 'pending' | 'confirmed' | 'out_for_delivery' | 'delivered' | 'cancelled';
-  total_amount: number;
-  subtotal: number;
-  delivery_fee: number;
-  discount_amount: number;
-  payment_method: string;
-  payment_status: 'pending' | 'paid' | 'failed' | 'refunded';
-  payment_id: string | null;
-  razorpay_order_id: string | null;
-  coupon_code: string | null;
-  delivery_slot: string | null;
-  notes: string | null;
-  delivery_date: string | null;
-  created_at: string;
-  updated_at: string;
-};
-
-export type DBOrderItem = {
-  id: string;
-  order_id: string;
-  product_id: string;
-  variant_id: string;
-  quantity: number;
-  unit_price: number;
-  created_at: string;
-};
-
-export type DBSubscription = {
-  id: string;
-  user_id: string;
-  product_id: string;
-  variant_id: string;
-  volume: number;
-  plan: string;
-  status: 'active' | 'paused' | 'cancelled' | 'pending_review';
-  start_date: string;
-  next_delivery_date: string | null;
-  delivery_slot: string | null;
-  address_id: string | null;
-  created_at: string;
-  updated_at: string;
-};
-
-export type DBNotification = {
-  id: string;
-  user_id: string | null;
-  role_target: string;
-  title: string;
-  message: string;
-  type: string;
-  related_id: string | null;
-  is_read: boolean;
-  created_at: string;
-};
-
-export type DBReturnRequest = {
-  id: string;
-  order_id: string;
-  user_id: string;
-  reason: string;
-  description: string | null;
-  status: 'pending' | 'approved' | 'rejected' | 'refunded';
-  refund_amount: number | null;
-  admin_notes: string | null;
-  created_at: string;
-  updated_at: string;
-};

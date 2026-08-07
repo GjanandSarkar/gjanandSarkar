@@ -135,32 +135,33 @@ export function CartDrawer({ isOpen, onClose }: CartDrawerProps) {
     return bgs[category] || '#eaf6ef';
   };
 
-  if (!isOpen) return null;
-
   return (
     <AnimatePresence>
-      {/* Backdrop */}
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        exit={{ opacity: 0 }}
-        onClick={onClose}
-        className="fixed inset-0 z-50 bg-black/40 backdrop-blur-sm"
-        aria-hidden="true"
-      />
+      {isOpen && (
+        <motion.div
+          key="cart-drawer-backdrop"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          onClick={onClose}
+          className="fixed inset-0 z-50 bg-black/40 backdrop-blur-sm"
+          aria-hidden="true"
+        />
+      )}
 
-      {/* Drawer */}
-      <motion.div
-        ref={drawerRef}
-        role="dialog"
-        aria-modal="true"
-        aria-labelledby="cart-title"
-        initial={{ y: '100%', x: 0 }}
-        animate={{ y: 0, x: 0 }}
-        exit={{ y: '100%', x: 0 }}
-        transition={{ type: 'spring', stiffness: 300, damping: 30 }}
-        className="fixed z-[60] bottom-0 left-0 right-0 h-[85vh] bg-surface rounded-t-[24px] md:top-0 md:bottom-0 md:left-auto md:right-0 md:h-full md:w-[420px] md:rounded-none flex flex-col shadow-2xl"
-      >
+      {isOpen && (
+        <motion.div
+          key="cart-drawer-panel"
+          ref={drawerRef}
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="cart-title"
+          initial={{ y: '100%', x: 0 }}
+          animate={{ y: 0, x: 0 }}
+          exit={{ y: '100%', x: 0 }}
+          transition={{ type: 'spring', stiffness: 300, damping: 30 }}
+          className="fixed z-[60] bottom-0 left-0 right-0 h-[85vh] bg-surface rounded-t-[24px] md:top-0 md:bottom-0 md:left-auto md:right-0 md:h-full md:w-[420px] md:rounded-none flex flex-col shadow-2xl"
+        >
         {/* Header */}
         <div className="flex items-center justify-between p-5 border-b border-outline-variant/30 shrink-0">
           <div>
@@ -324,6 +325,7 @@ export function CartDrawer({ isOpen, onClose }: CartDrawerProps) {
           </div>
         )}
       </motion.div>
+      )}
     </AnimatePresence>
   );
 }

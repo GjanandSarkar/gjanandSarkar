@@ -21,6 +21,7 @@ import { OrderReview } from '@/components/checkout/OrderReview';
 import { OrderSummary } from '@/components/cart/OrderSummary';
 import { PaymentSelection } from '@/components/checkout/PaymentSelection';
 import { CheckoutConfidence } from '@/components/trust/CheckoutConfidence';
+import { initiateRazorpayPayment } from '@/lib/razorpay-client';
 
 export default function CheckoutScreen() {
   const router = useRouter();
@@ -32,7 +33,7 @@ export default function CheckoutScreen() {
 
   const checkoutAddressId = useStore(state => state.checkoutAddressId);
   const setCheckoutAddressId = useStore(state => state.setCheckoutAddressId);
-  const selectedMethod = useStore(state => state.checkoutPaymentMethod) || 'upi';
+  const selectedMethod = useStore(state => state.checkoutPaymentMethod) || 'razorpay';
   const setSelectedMethod = useStore(state => state.setCheckoutPaymentMethod);
 
   const [addresses, setAddresses] = useState<UserAddress[]>([]);
@@ -153,8 +154,6 @@ export default function CheckoutScreen() {
       }
     }
 
-    setIsProcessing(true);
-
     const orderItems = cartItemsData.map(item => ({
       productId: item.productId,
       variantId: item.variantId,
@@ -163,6 +162,67 @@ export default function CheckoutScreen() {
       quantity: item.quantity,
       price: item.variant.price,
     }));
+
+    // ─── Razorpay Online Payment Flow ───
+    if (selectedMethod === 'razorpay') {
+      const amountInPaise = Math.round((pricing?.total || 0) * 100);
+
+      await initiateRazorpayPayment({
+        amount: amountInPaise,
+        currency: 'INR',
+        name: 'Gjanand Sarkar',
+        description: `Order with ${orderItems.length} item(s)`,
+        prefill: {
+          name: user.name || 'Customer',
+          email: user.email || '',
+          contact: user.phone || '',
+        },
+        notes: {
+          userId: user.id,
+          addressId: checkoutAddressId,
+        },
+        onSuccess: async (razorpayResponse, verificationData) => {
+          setIsProcessing(true);
+          const result = await placeOrder({
+            userId: user.id,
+            customerName: user.name || 'Customer',
+            customerPhone: user.phone || '',
+            items: orderItems,
+            total: pricing?.total || 0,
+            addressId: checkoutAddressId,
+            paymentMethod: 'razorpay',
+            paymentStatus: 'paid',
+            couponCode: couponCode || undefined,
+          });
+
+          if (result.success && result.orderId) {
+            Analytics.trackEvent('Checkout Completed', {
+              orderId: result.orderId,
+              total: pricing?.total || 0,
+              cartSize: cartItemsData.length,
+              paymentMethod: 'razorpay',
+              razorpayPaymentId: razorpayResponse.razorpay_payment_id,
+            });
+            clearCartLocal();
+            await clearCartApi(user.id);
+            router.replace(`/order-confirmed/${result.orderId}`);
+          } else {
+            setIsProcessing(false);
+            alert(result.error || 'Payment verified but order creation failed. Please contact support.');
+          }
+        },
+        onError: (error) => {
+          setIsProcessing(false);
+          alert(error.message || 'Payment failed or was cancelled.');
+        },
+        onDismiss: () => {
+          setIsProcessing(false);
+        },
+      });
+      return;
+    }
+
+    setIsProcessing(true);
 
     const result = await placeOrder({
       userId: user.id,
@@ -310,7 +370,11 @@ export default function CheckoutScreen() {
               onClick={handlePlaceOrder}
               disabled={isProcessing || !checkoutAddressId || cartItemsData.length === 0}
             >
-              Place Order
+              {selectedMethod === 'razorpay' 
+                ? `Pay ₹${pricing.total} with Razorpay` 
+                : selectedMethod === 'cod' 
+                  ? 'Place Order (Cash on Delivery)' 
+                  : 'Place Order'}
             </Button>
           </div>
         </div>

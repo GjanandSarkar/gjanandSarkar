@@ -49,7 +49,7 @@ export default function ProfileScreen() {
     if (isAuthLoading) return;
 
     if (!user) {
-      router.replace('/login');
+      router.replace('/auth/login?redirect=' + encodeURIComponent('/profile'));
       return;
     }
 
@@ -68,7 +68,7 @@ export default function ProfileScreen() {
   const handleLogout = async () => {
     await supabaseLogout();
     logoutLocal();
-    router.replace('/login');
+    router.replace('/auth/login');
   };
 
   const handleReorder = async (order: OrderWithItems) => {

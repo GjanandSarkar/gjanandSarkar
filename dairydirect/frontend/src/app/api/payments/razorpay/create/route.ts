@@ -10,21 +10,12 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server';
-import Razorpay from 'razorpay';
+import { getRazorpayClient } from '@/lib/razorpay';
 import { calculateOrderPricing } from '@/lib/pricing';
 import { getAuthUser, getClientIP } from '@/lib/api/auth-middleware';
 import { checkRateLimit } from '@/lib/aws/redis';
 import { query } from '@/lib/aws/rds';
 import { z } from 'zod';
-
-function getRazorpayInstance() {
-  const key_id = process.env.RAZORPAY_KEY_ID;
-  const key_secret = process.env.RAZORPAY_KEY_SECRET;
-  if (!key_id || !key_secret) {
-    throw new Error('Razorpay credentials not configured');
-  }
-  return new Razorpay({ key_id, key_secret });
-}
 
 const CreateOrderSchema = z.object({
   items: z.array(z.object({
@@ -63,7 +54,7 @@ export async function POST(request: NextRequest) {
 
     // Create Razorpay order (amount in paise = total * 100)
     const amountInPaise = Math.round(pricing.total * 100);
-    const razorpay = getRazorpayInstance();
+    const razorpay = getRazorpayClient();
 
     const razorpayOrder = await razorpay.orders.create({
       amount: amountInPaise,

@@ -47,6 +47,7 @@ export const PlaceOrderSchema = z.object({
     productId: z.string().uuid(),
     variantId: z.string().uuid(),
     quantity: z.number().int().min(1).max(100),
+    price: z.number().optional(),
   })).min(1).max(50),
   addressId: z.string().uuid(),
   paymentMethod: z.enum(['cod', 'upi', 'razorpay', 'card']),

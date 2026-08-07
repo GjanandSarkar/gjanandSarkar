@@ -106,12 +106,12 @@ export function SubscriptionCard({ subscription, onPauseToggle, onCancel }: Subs
               {product?.name || 'A2 Milk'}
             </h3>
             <p className="text-xs font-bold uppercase tracking-wider text-muted mb-2">
-              {subscription.plan === 'monthly' ? 'Monthly' : 'Weekly'} Delivery
+              {subscription.plan === 'daily' ? 'Daily' : subscription.plan === 'alternate' ? 'Alternate Days' : 'Custom'} Delivery
             </p>
             <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-mint/20 text-primary">
               <Droplets className="w-3 h-3" />
               <span className="text-[12px] font-black">
-                {subscription.volume}L Daily
+                {subscription.volume}L
               </span>
             </div>
           </div>

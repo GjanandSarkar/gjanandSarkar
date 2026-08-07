@@ -1,10 +1,12 @@
 import { api } from './client';
-import type { User } from '@/store/useStore';
+import { useStore, type User } from '@/store/useStore';
 
 export async function logout(): Promise<void> {
   try {
     const { supabase } = await import('@/lib/supabase');
     await supabase.auth.signOut();
+    // Clear cookies
+    document.cookie = 'gs_access_token=; path=/; max-age=0';
   } catch (err) {
     console.error('Logout error:', err);
   }
@@ -27,23 +29,49 @@ export async function getCurrentUser(): Promise<User | null> {
     });
 
     if (!res.ok) {
+      const fallbackName = user.user_metadata?.full_name 
+        || user.user_metadata?.name 
+        || (user.email ? user.email.split('@')[0] : 'Customer');
+
       return {
         id: user.id,
-        name: user.user_metadata?.full_name || user.user_metadata?.name || '',
+        name: fallbackName,
         phone: user.phone || '',
         email: user.email || '',
+        avatar_url: user.user_metadata?.avatar_url || user.user_metadata?.picture || '',
         role: 'customer',
       };
     }
 
-    const { data } = await res.json();
-    const profile = data.user;
+    const raw = await res.json();
+    const profile = raw.user || raw.data?.user;
+    if (!profile) {
+      const fallbackName = user.user_metadata?.full_name 
+        || user.user_metadata?.name 
+        || (user.email ? user.email.split('@')[0] : 'Customer');
+
+      return {
+        id: user.id,
+        name: fallbackName,
+        phone: user.phone || '',
+        email: user.email || '',
+        avatar_url: user.user_metadata?.avatar_url || user.user_metadata?.picture || '',
+        role: 'customer',
+      };
+    }
+
+    const resolvedName = (profile.name && profile.name.trim()) 
+      ? profile.name.trim() 
+      : (user.user_metadata?.full_name || user.user_metadata?.name || (profile.email ? profile.email.split('@')[0] : 'Customer'));
+
     return {
       id: profile.id,
-      name: profile.name ?? '',
+      name: resolvedName,
       phone: profile.phone || '',
       email: profile.email || '',
+      avatar_url: profile.avatar_url || user.user_metadata?.avatar_url || user.user_metadata?.picture || '',
       role: profile.role ?? 'customer',
+      saved_addresses: profile.saved_addresses || [],
     };
   } catch {
     return null;
@@ -55,9 +83,36 @@ export async function updateProfileName(
   name: string
 ): Promise<{ success: boolean; error?: string }> {
   try {
+    const res = await fetch('/api/auth/profile', {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name }),
+    });
+
+    if (res.ok) {
+      const data = await res.json();
+      const currentUser = useStore.getState().user;
+      if (currentUser) {
+        useStore.getState().setUser({
+          ...currentUser,
+          name,
+        });
+      }
+      return { success: true };
+    }
+
+    // Fallback to direct supabase
     const { supabase } = await import('@/lib/supabase');
     const { error } = await supabase.from('profiles').update({ name }).eq('id', userId);
     if (error) return { success: false, error: error.message };
+    
+    const currentUser = useStore.getState().user;
+    if (currentUser) {
+      useStore.getState().setUser({
+        ...currentUser,
+        name,
+      });
+    }
     return { success: true };
   } catch (err: any) {
     return { success: false, error: err.message };
@@ -69,9 +124,34 @@ export async function updateProfilePhone(
   phone: string
 ): Promise<{ success: boolean; error?: string }> {
   try {
+    const res = await fetch('/api/auth/profile', {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ phone }),
+    });
+
+    if (res.ok) {
+      const currentUser = useStore.getState().user;
+      if (currentUser) {
+        useStore.getState().setUser({
+          ...currentUser,
+          phone,
+        });
+      }
+      return { success: true };
+    }
+
     const { supabase } = await import('@/lib/supabase');
     const { error } = await supabase.from('profiles').update({ phone }).eq('id', userId);
     if (error) return { success: false, error: error.message };
+
+    const currentUser = useStore.getState().user;
+    if (currentUser) {
+      useStore.getState().setUser({
+        ...currentUser,
+        phone,
+      });
+    }
     return { success: true };
   } catch (err: any) {
     return { success: false, error: err.message };
@@ -83,9 +163,34 @@ export async function updateProfileAvatar(
   avatarUrl: string
 ): Promise<{ success: boolean; error?: string }> {
   try {
+    const res = await fetch('/api/auth/profile', {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ avatar_url: avatarUrl }),
+    });
+
+    if (res.ok) {
+      const currentUser = useStore.getState().user;
+      if (currentUser) {
+        useStore.getState().setUser({
+          ...currentUser,
+          avatar_url: avatarUrl,
+        });
+      }
+      return { success: true };
+    }
+
     const { supabase } = await import('@/lib/supabase');
     const { error } = await supabase.from('profiles').update({ avatar_url: avatarUrl }).eq('id', userId);
     if (error) return { success: false, error: error.message };
+
+    const currentUser = useStore.getState().user;
+    if (currentUser) {
+      useStore.getState().setUser({
+        ...currentUser,
+        avatar_url: avatarUrl,
+      });
+    }
     return { success: true };
   } catch (err: any) {
     return { success: false, error: err.message };

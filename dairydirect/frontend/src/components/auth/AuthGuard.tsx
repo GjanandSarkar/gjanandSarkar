@@ -15,6 +15,7 @@ export function AuthGuard() {
 
     const isAuthRoute = 
       pathname === '/login' || 
+      pathname === '/auth/login' ||
       pathname === '/' ||
       pathname === '/auth/callback';
 
@@ -27,12 +28,12 @@ export function AuthGuard() {
 
     // Not logged in -> go to login if on protected route
     if (!user && isProtectedRoute) {
-      router.replace('/login?next=' + encodeURIComponent(pathname));
+      router.replace('/auth/login?redirect=' + encodeURIComponent(pathname));
       return;
     }
 
     // Already logged in -> leave login page
-    if (user && pathname === '/login') {
+    if (user && (pathname === '/login' || pathname === '/auth/login')) {
       if (user.role === 'admin') {
         router.replace('/admin');
       } else if (user.role === 'seller') {

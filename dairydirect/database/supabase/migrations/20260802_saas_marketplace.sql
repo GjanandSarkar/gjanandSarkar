@@ -1,78 +1,82 @@
 -- ============================================================
 -- Gjanand Sarkar — SaaS Multi-Vendor Marketplace Migration
+-- Idempotent & Safe
 -- ============================================================
 
 -- ─── 1. Sellers / Vendor Stores ──────────────────────────────
-create table if not exists sellers (
-  id              uuid primary key default gen_random_uuid(),
-  user_id         uuid not null references profiles(id) on delete cascade,
-  store_name      text not null,
-  slug            text unique not null,
-  state           text not null,
-  category        text not null default 'General',
-  description     text,
-  logo_url        text,
-  banner_url      text,
-  plan            text not null default 'growth', -- 'starter' (8%), 'growth' (5%), 'enterprise' (3%)
-  commission_rate decimal(5,2) not null default 5.00,
-  status          text not null default 'active', -- 'active', 'pending_kyc', 'suspended'
-  gstin           text,
-  pan             text,
-  bank_account    text,
-  ifsc_code       text,
-  total_sales     decimal(12,2) not null default 0.00,
-  created_at      timestamptz not null default now(),
-  updated_at      timestamptz not null default now()
+CREATE TABLE IF NOT EXISTS sellers (
+  id              UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id         UUID REFERENCES profiles(id) ON DELETE SET NULL,
+  store_name      TEXT NOT NULL,
+  slug            TEXT UNIQUE NOT NULL,
+  state           TEXT NOT NULL DEFAULT 'Gujarat',
+  category        TEXT NOT NULL DEFAULT 'A2 Organic Dairy',
+  description     TEXT,
+  logo_url        TEXT,
+  banner_url      TEXT,
+  plan            TEXT NOT NULL DEFAULT 'growth', -- 'starter' (8%), 'growth' (5%), 'enterprise' (3%)
+  commission_rate DECIMAL(5,2) NOT NULL DEFAULT 5.00,
+  status          TEXT NOT NULL DEFAULT 'active', -- 'active', 'pending_kyc', 'suspended'
+  gstin           TEXT,
+  pan             TEXT,
+  bank_account    TEXT,
+  ifsc_code       TEXT,
+  total_sales     DECIMAL(12,2) NOT NULL DEFAULT 0.00,
+  created_at      TIMESTAMPTZ NOT NULL DEFAULT now(),
+  updated_at      TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 
-create index if not exists sellers_user_id_idx on sellers(user_id);
-create index if not exists sellers_state_idx on sellers(state);
+CREATE INDEX IF NOT EXISTS idx_sellers_user_id ON sellers(user_id);
+CREATE INDEX IF NOT EXISTS idx_sellers_state ON sellers(state);
 
 -- ─── 2. Seller Payouts / Financials ──────────────────────────
-create table if not exists seller_payouts (
-  id           uuid primary key default gen_random_uuid(),
-  seller_id    uuid not null references sellers(id) on delete cascade,
-  amount       decimal(10,2) not null,
-  fee_deducted decimal(10,2) not null,
-  net_amount   decimal(10,2) not null,
-  status       text not null default 'completed', -- 'pending', 'processing', 'completed'
-  payout_date  timestamptz not null default now(),
-  reference_no text
+CREATE TABLE IF NOT EXISTS seller_payouts (
+  id           UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  seller_id    UUID NOT NULL REFERENCES sellers(id) ON DELETE CASCADE,
+  amount       DECIMAL(10,2) NOT NULL,
+  fee_deducted DECIMAL(10,2) NOT NULL DEFAULT 0.00,
+  net_amount   DECIMAL(10,2) NOT NULL,
+  status       TEXT NOT NULL DEFAULT 'completed',
+  payout_date  TIMESTAMPTZ NOT NULL DEFAULT now(),
+  reference_no TEXT,
+  created_at   TIMESTAMPTZ NOT NULL DEFAULT now()
 );
+
+CREATE INDEX IF NOT EXISTS idx_seller_payouts_seller_id ON seller_payouts(seller_id);
 
 -- ─── 3. Customer Wishlists ───────────────────────────────────
-create table if not exists wishlists (
-  id         uuid primary key default gen_random_uuid(),
-  user_id    uuid not null references profiles(id) on delete cascade,
-  product_id uuid not null references products(id) on delete cascade,
-  created_at timestamptz not null default now(),
-  unique(user_id, product_id)
+CREATE TABLE IF NOT EXISTS wishlists (
+  id         UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id    UUID NOT NULL REFERENCES profiles(id) ON DELETE CASCADE,
+  product_id UUID NOT NULL REFERENCES products(id) ON DELETE CASCADE,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+  UNIQUE(user_id, product_id)
 );
 
-create index if not exists wishlists_user_id_idx on wishlists(user_id);
+CREATE INDEX IF NOT EXISTS idx_wishlists_user_id ON wishlists(user_id);
 
 -- ─── 4. Product Reviews & Ratings ────────────────────────────
-create table if not exists reviews (
-  id                uuid primary key default gen_random_uuid(),
-  product_id        uuid not null references products(id) on delete cascade,
-  user_id           uuid not null references profiles(id) on delete cascade,
-  user_name         text not null,
-  rating            integer not null check (rating >= 1 and rating <= 5),
-  title             text,
-  comment           text not null,
-  state_origin      text,
-  is_verified_buyer boolean not null default true,
-  created_at        timestamptz not null default now()
+CREATE TABLE IF NOT EXISTS reviews (
+  id                UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  product_id        UUID NOT NULL REFERENCES products(id) ON DELETE CASCADE,
+  user_id           UUID REFERENCES profiles(id) ON DELETE SET NULL,
+  user_name         TEXT NOT NULL,
+  rating            INTEGER NOT NULL CHECK (rating >= 1 AND rating <= 5),
+  title             TEXT,
+  comment           TEXT NOT NULL,
+  state_origin      TEXT DEFAULT 'Gujarat',
+  is_verified_buyer BOOLEAN NOT NULL DEFAULT true,
+  created_at        TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 
-create index if not exists reviews_product_id_idx on reviews(product_id);
+CREATE INDEX IF NOT EXISTS idx_reviews_product_id ON reviews(product_id);
 
 -- ─── 5. Alter Products with SaaS Marketplace Attributes ───────
-alter table products add column if not exists seller_id uuid references sellers(id) on delete set null;
-alter table products add column if not exists state_origin text default 'Gujarat';
-alter table products add column if not exists brand text default 'Gjanand Farm';
-alter table products add column if not exists rating decimal(3,2) default 4.80;
-alter table products add column if not exists reviews_count integer default 128;
-alter table products add column if not exists is_deal_of_the_day boolean default false;
-alter table products add column if not exists discount_pct integer default 15;
-alter table products add column if not exists tags text[] default array['Made in India', 'Authentic'];
+ALTER TABLE products ADD COLUMN IF NOT EXISTS seller_id UUID REFERENCES sellers(id) ON DELETE SET NULL;
+ALTER TABLE products ADD COLUMN IF NOT EXISTS state_origin TEXT DEFAULT 'Gujarat';
+ALTER TABLE products ADD COLUMN IF NOT EXISTS brand TEXT DEFAULT 'Gjanand Farm';
+ALTER TABLE products ADD COLUMN IF NOT EXISTS rating DECIMAL(3,2) DEFAULT 4.80;
+ALTER TABLE products ADD COLUMN IF NOT EXISTS reviews_count INTEGER DEFAULT 128;
+ALTER TABLE products ADD COLUMN IF NOT EXISTS is_deal_of_the_day BOOLEAN DEFAULT false;
+ALTER TABLE products ADD COLUMN IF NOT EXISTS discount_pct INTEGER DEFAULT 15;
+ALTER TABLE products ADD COLUMN IF NOT EXISTS tags TEXT[] DEFAULT ARRAY['Made in India', 'Authentic', '100% Pure'];
