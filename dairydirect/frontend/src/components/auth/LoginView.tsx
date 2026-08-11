@@ -48,13 +48,14 @@ function LoginScreenInner() {
 
     try {
       if (isSignUp) {
+        const displayName = name.trim() || email.split('@')[0];
         const { data, error: signUpError } = await supabase.auth.signUp({
           email,
           password,
           options: {
             data: {
-              name: name || email.split('@')[0],
-              full_name: name || email.split('@')[0],
+              name: displayName,
+              full_name: displayName,
             }
           }
         });
@@ -62,12 +63,74 @@ function LoginScreenInner() {
         if (signUpError) throw signUpError;
 
         if (data.user) {
-          setUser({
+          let userProfile: any = null;
+          const syncPayload = {
             id: data.user.id,
-            name: name || email.split('@')[0],
             email: data.user.email || email,
-            role: 'customer'
+            name: displayName,
+            role: 'customer',
+            token: data.session?.access_token,
+          };
+
+          // 1. Sync & persist user to database profiles table via Next.js API
+          try {
+            const syncRes = await fetch('/api/auth/sync', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify(syncPayload),
+            });
+            if (syncRes.ok) {
+              const syncData = await syncRes.json();
+              userProfile = syncData.profile || syncData.user || syncData.data?.user;
+            }
+          } catch (syncErr) {
+            console.warn('[LoginView] Next.js API sync notice during signup:', syncErr);
+          }
+
+          // 2. Sync to Express Backend on port 4000 if configured
+          try {
+            const apiBase = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000';
+            fetch(`${apiBase}/api/auth/sync`, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify(syncPayload),
+            }).catch(() => {});
+          } catch {}
+
+          // 3. Client-side fallback to direct Supabase profile & users table
+          try {
+            await supabase.from('profiles').upsert({
+              id: data.user.id,
+              email: data.user.email || email,
+              name: displayName,
+              role: 'customer',
+              loyalty_points: 100,
+            }, { onConflict: 'id' });
+          } catch (sbErr) {
+            console.warn('[LoginView] Direct Supabase profile upsert notice:', sbErr);
+          }
+
+          try {
+            await supabase.from('users').upsert({
+              id: data.user.id,
+              phone: data.user.phone || null,
+              name: displayName,
+              email: data.user.email || email,
+            }, { onConflict: 'id' });
+          } catch (sbUsersErr) {
+            console.warn('[LoginView] Direct Supabase users table upsert notice:', sbUsersErr);
+          }
+
+          setUser({
+            id: userProfile?.id || data.user.id,
+            name: userProfile?.name || displayName,
+            email: userProfile?.email || data.user.email || email,
+            phone: userProfile?.phone || '',
+            avatar_url: userProfile?.avatar_url || '',
+            role: userProfile?.role || 'customer',
+            saved_addresses: userProfile?.saved_addresses || [],
           });
+
           setSuccessMsg('Account created successfully! Redirecting...');
           setTimeout(() => router.replace(nextParam), 500);
         }
@@ -81,18 +144,83 @@ function LoginScreenInner() {
 
         if (data.user) {
           const isAdmin = email.toLowerCase().includes('admin') || (process.env.ADMIN_EMAILS || '').includes(email.toLowerCase());
+          const displayName = data.user.user_metadata?.full_name || data.user.user_metadata?.name || email.split('@')[0];
+
+          let userProfile: any = null;
+
+          // 1. Sync & retrieve full profile from database
+          try {
+            const syncRes = await fetch('/api/auth/sync', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                id: data.user.id,
+                email: data.user.email || email,
+                name: displayName,
+                role: isAdmin ? 'admin' : 'customer',
+                token: data.session?.access_token,
+              }),
+            });
+            if (syncRes.ok) {
+              const syncData = await syncRes.json();
+              userProfile = syncData.profile || syncData.user || syncData.data?.user;
+            }
+          } catch (syncErr) {
+            console.warn('[LoginView] API sync notice during login:', syncErr);
+          }
+
+          // 2. Client-side fallback to direct Supabase profile & users table
+          try {
+            const { data: existingProfile } = await supabase
+              .from('profiles')
+              .select('*')
+              .eq('id', data.user.id)
+              .maybeSingle();
+
+            if (!existingProfile) {
+              const { data: created } = await supabase.from('profiles').upsert({
+                id: data.user.id,
+                email: data.user.email || email,
+                name: displayName,
+                role: isAdmin ? 'admin' : 'customer',
+              }, { onConflict: 'id' }).select().single();
+              if (created && !userProfile) userProfile = created;
+            } else if (existingProfile && !userProfile) {
+              userProfile = existingProfile;
+            }
+          } catch (sbErr) {
+            console.warn('[LoginView] Supabase profile check notice:', sbErr);
+          }
+
+          try {
+            await supabase.from('users').upsert({
+              id: data.user.id,
+              phone: data.user.phone || null,
+              name: displayName,
+              email: data.user.email || email,
+            }, { onConflict: 'id' });
+          } catch (sbUsersErr) {
+            console.warn('[LoginView] Supabase users check notice:', sbUsersErr);
+          }
+
+          const finalRole = userProfile?.role || (isAdmin ? 'admin' : 'customer');
+
           setUser({
-            id: data.user.id,
-            name: data.user.user_metadata?.full_name || email.split('@')[0],
-            email: data.user.email || email,
-            role: isAdmin ? 'admin' : 'customer'
+            id: userProfile?.id || data.user.id,
+            name: userProfile?.name || displayName,
+            email: userProfile?.email || data.user.email || email,
+            phone: userProfile?.phone || '',
+            avatar_url: userProfile?.avatar_url || '',
+            role: finalRole,
+            saved_addresses: userProfile?.saved_addresses || [],
           });
+
           setSuccessMsg('Signed in successfully! Redirecting...');
-          setTimeout(() => router.replace(isAdmin ? '/admin' : nextParam), 400);
+          setTimeout(() => router.replace(finalRole === 'admin' ? '/admin' : nextParam), 400);
         }
       }
     } catch (err: any) {
-      console.error(err);
+      console.error('[LoginView] Auth error:', err);
       setError(err.message || 'Authentication failed. Please check your credentials.');
     } finally {
       setIsLoading(false);
@@ -125,27 +253,70 @@ function LoginScreenInner() {
   };
 
   // ── Fast Instant Demo Access (Zero Wait / No Network Lag) ───
-  const handleQuickLogin = (role: 'customer' | 'admin' | 'seller') => {
+  const handleQuickLogin = async (role: 'customer' | 'admin' | 'seller') => {
     setIsLoading(true);
     
+    let demoPayload: any = null;
+    let targetUrl = nextParam;
+
     if (role === 'admin') {
-      setUser({
+      demoPayload = {
         id: 'admin-demo-user-id',
         name: 'Gjanand Sarkar Admin',
         email: 'admin@gjanandsarkar.com',
         phone: '+91 98765 43210',
         role: 'admin',
-      });
-      sessionStorage.setItem('auth_callback_processed', 'true');
-      router.replace('/admin');
+      };
+      targetUrl = '/admin';
     } else if (role === 'seller') {
-      setUser({
+      demoPayload = {
         id: 'seller-demo-user-id',
         name: 'Gir Organic Farms',
         email: 'seller@gjanandsarkar.com',
         phone: '+91 98234 56789',
         role: 'seller',
+      };
+      targetUrl = '/seller/dashboard';
+    } else {
+      demoPayload = {
+        id: 'customer-demo-user-id',
+        name: 'Rajesh Sharma',
+        email: 'customer@gjanandsarkar.com',
+        phone: '+91 91234 56789',
+        role: 'customer',
+        address: 'Sector 14, Gandhinagar, Gujarat',
+        saved_addresses: [
+          { label: 'Home', address: 'A-402, Royal Palms, Gandhinagar, Gujarat - 382010' },
+          { label: 'Office', address: 'Block C, Infocity, Gandhinagar, Gujarat - 382007' }
+        ]
+      };
+    }
+
+    try {
+      const res = await fetch('/api/auth/sync', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(demoPayload),
       });
+
+      if (res.ok) {
+        const raw = await res.json();
+        const accessToken = raw.data?.accessToken || raw.accessToken || raw.token;
+        if (accessToken) {
+          try {
+            document.cookie = `gs_access_token=${accessToken}; path=/; max-age=604800; SameSite=Lax`;
+          } catch {}
+        }
+      }
+    } catch (err) {
+      console.warn('[handleQuickLogin] sync notice:', err);
+    }
+
+    setUser(demoPayload);
+    useStore.getState().setAuthLoading(false);
+    sessionStorage.setItem('auth_callback_processed', 'true');
+
+    if (role === 'seller') {
       setSellerStore({
         id: 'store-demo-001',
         user_id: 'seller-demo-user-id',
@@ -157,25 +328,12 @@ function LoginScreenInner() {
         status: 'active',
         total_revenue: 284500
       });
-      sessionStorage.setItem('auth_callback_processed', 'true');
-      router.replace('/seller/dashboard');
-    } else {
-      setUser({
-        id: 'customer-demo-user-id',
-        name: 'Rajesh Sharma',
-        email: 'customer@gjanandsarkar.com',
-        phone: '+91 91234 56789',
-        role: 'customer',
-        address: 'Sector 14, Gandhinagar, Gujarat',
-        saved_addresses: [
-          { label: 'Home', address: 'A-402, Royal Palms, Gandhinagar, Gujarat - 382010' },
-          { label: 'Office', address: 'Block C, Infocity, Gandhinagar, Gujarat - 382007' }
-        ]
-      });
-      sessionStorage.setItem('auth_callback_processed', 'true');
-      router.replace(nextParam);
     }
+
+    setIsLoading(false);
+    router.replace(targetUrl);
   };
+
 
   return (
     <div className="min-h-screen flex items-center justify-center p-4 bg-[#fafaf8] relative overflow-hidden" suppressHydrationWarning>

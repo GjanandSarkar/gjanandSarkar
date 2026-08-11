@@ -1,40 +1,40 @@
 @echo off
-REM Development setup script for Windows
+REM ============================================================
+REM DairyDirect (Gjanand Sarkar) — Windows Setup & Launch Script
+REM ============================================================
 
-echo 🚀 Setting up DairyDirect development environment...
+echo 🥛 Setting up DairyDirect Full-Stack Environment...
 
-REM Install root dependencies
+REM 1. Install root dependencies
 echo 📦 Installing root dependencies...
 call npm install
 
-REM Install backend dependencies
+REM 2. Install backend dependencies
 echo 📦 Installing backend dependencies...
 cd backend
 call npm install
 echo ✅ Backend setup complete
 
-REM Install frontend dependencies
+REM 3. Install frontend dependencies
 echo 📦 Installing frontend dependencies...
-cd ../frontend
+cd ..\frontend
 call npm install
 echo ✅ Frontend setup complete
 
 cd ..
 
 echo.
-echo ✅ All dependencies installed!
+echo ✅ All dependencies installed successfully!
 echo.
-echo 📋 Next steps:
-echo 1. Configure your .env files:
-echo    - Backend: Copy backend\.env.example to backend\.env
-echo    - Add your Supabase credentials
+echo 📋 Next Steps to Start:
+echo    - Run development environment (Frontend + Backend concurrently):
+echo        npm run dev
 echo.
-echo 2. Setup database:
-echo    - Go to Supabase dashboard
-echo    - Run schema.sql from database\supabase\schema.sql
-echo    - Run seed.sql from database\supabase\seed.sql
+echo    - Or run separately:
+echo        npm run dev:backend   (Port 4000)
+echo        npm run dev:frontend  (Port 3000)
 echo.
-echo 3. Start development:
-echo    npm run dev
+echo    - Run backend tests:
+echo        npm run test
 echo.
-echo 🎉 Happy coding!
+echo 🎉 Happy Coding!

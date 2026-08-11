@@ -1,8 +1,24 @@
-const API_BASE = '';
+const API_BASE = typeof window !== 'undefined' ? '' : (process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000');
 
 async function getAuthToken(): Promise<string | null> {
   if (typeof window === 'undefined') return null;
   try {
+    // 1. Direct JWT stored from OTP verification
+    const localToken = localStorage.getItem('token') || localStorage.getItem('auth_token');
+    if (localToken) return localToken;
+
+    // 2. Zustand persistent store
+    const storeRaw = localStorage.getItem('gjanand-sarkar-storage');
+    if (storeRaw) {
+      try {
+        const parsed = JSON.parse(storeRaw);
+        if (parsed?.state?.user?.token) return parsed.state.user.token;
+      } catch {
+        // ignore parse error
+      }
+    }
+
+    // 3. Supabase Auth session
     const { supabase } = await import('@/lib/supabase');
     const { data: { session } } = await supabase.auth.getSession();
     return session?.access_token ?? null;
@@ -17,7 +33,9 @@ async function fetchApi<T = any>(
 ): Promise<T> {
   const token = await getAuthToken();
 
-  const res = await fetch(`${API_BASE}${endpoint}`, {
+  const url = endpoint.startsWith('http') ? endpoint : `${API_BASE}${endpoint}`;
+
+  const res = await fetch(url, {
     ...options,
     headers: {
       'Content-Type': 'application/json',
@@ -30,10 +48,11 @@ async function fetchApi<T = any>(
   const data = await res.json();
 
   if (!res.ok) {
-    throw new Error(data.error ?? 'API error');
+    throw new Error(data.error?.message || data.error || data.message || 'API error');
   }
 
-  return data;
+  // Handle standard { success: true, data: {...} } envelope or direct payload
+  return (data.data !== undefined && data.success !== undefined ? { ...data.data, success: data.success } : data) as T;
 }
 
 export const api = {

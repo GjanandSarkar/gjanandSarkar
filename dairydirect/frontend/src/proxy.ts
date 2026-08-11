@@ -1,5 +1,5 @@
 /**
- * Next.js Production Security Middleware
+ * Next.js 16 Production Security Proxy
  * Works seamlessly with Supabase Pro & Custom Auth sessions.
  * 1. RBAC authentication guard for Admin & Protected Customer routes
  * 2. Strict Security headers (CSP, HSTS, X-Frame-Options, XSS)
@@ -9,7 +9,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { verifyAccessToken, extractTokenFromRequest } from '@/lib/auth/jwt';
 
-export async function middleware(request: NextRequest) {
+export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
   const response = NextResponse.next();
 
@@ -62,15 +62,15 @@ export async function middleware(request: NextRequest) {
   // ─── Admin Route Protection ───────────────────────────────
   if (pathname.startsWith('/admin')) {
     if (!isAuthenticated) {
-      const loginUrl = new URL('/auth/login', request.url);
+      const loginUrl = new URL('/login', request.url);
       loginUrl.searchParams.set('redirect', pathname);
       return NextResponse.redirect(loginUrl);
     }
 
     if (token) {
       const payload = await verifyAccessToken(token);
-      if (payload && payload.role !== 'admin') {
-        return NextResponse.redirect(new URL('/', request.url));
+      if (payload && payload.role && payload.role !== 'admin') {
+        return NextResponse.redirect(new URL('/login', request.url));
       }
     }
 
@@ -83,11 +83,12 @@ export async function middleware(request: NextRequest) {
 
   if (isProtectedCustomer) {
     if (!isAuthenticated) {
-      const loginUrl = new URL('/auth/login', request.url);
+      const loginUrl = new URL('/login', request.url);
       loginUrl.searchParams.set('redirect', pathname);
       return NextResponse.redirect(loginUrl);
     }
   }
+
 
   // ─── API Route Headers ────────────────────────────────────
   if (pathname.startsWith('/api')) {

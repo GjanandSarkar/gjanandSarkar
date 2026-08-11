@@ -28,7 +28,7 @@ export function AuthGuard() {
 
     // Not logged in -> go to login if on protected route
     if (!user && isProtectedRoute) {
-      router.replace('/auth/login?redirect=' + encodeURIComponent(pathname));
+      router.replace('/login?redirect=' + encodeURIComponent(pathname));
       return;
     }
 
@@ -42,6 +42,7 @@ export function AuthGuard() {
         router.replace('/home');
       }
     }
+
   }, [user, pathname, router, isAuthLoading]);
 
   return null;

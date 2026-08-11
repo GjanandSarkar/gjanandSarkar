@@ -1,19 +1,23 @@
 #!/bin/bash
-# Development setup script
+# ============================================================
+# DairyDirect (Gjanand Sarkar) — Linux/macOS Setup Script
+# ============================================================
 
-echo "🚀 Setting up DairyDirect development environment..."
+set -e
 
-# Install root dependencies
+echo "🥛 Setting up DairyDirect Full-Stack Environment..."
+
+# 1. Install root dependencies
 echo "📦 Installing root dependencies..."
 npm install
 
-# Install backend dependencies
+# 2. Install backend dependencies
 echo "📦 Installing backend dependencies..."
 cd backend
 npm install
 echo "✅ Backend setup complete"
 
-# Install frontend dependencies
+# 3. Install frontend dependencies
 echo "📦 Installing frontend dependencies..."
 cd ../frontend
 npm install
@@ -22,19 +26,17 @@ echo "✅ Frontend setup complete"
 cd ..
 
 echo ""
-echo "✅ All dependencies installed!"
+echo "✅ All dependencies installed successfully!"
 echo ""
-echo "📋 Next steps:"
-echo "1. Configure your .env files:"
-echo "   - Backend: Copy backend/.env.example to backend/.env"
-echo "   - Add your Supabase credentials"
+echo "📋 Next Steps to Start:"
+echo "   - Run development environment (Frontend + Backend concurrently):"
+echo "       npm run dev"
 echo ""
-echo "2. Setup database:"
-echo "   - Go to Supabase dashboard"
-echo "   - Run schema.sql from database/supabase/schema.sql"
-echo "   - Run seed.sql from database/supabase/seed.sql"
+echo "   - Or run separately:"
+echo "       npm run dev:backend   (Port 4000)"
+echo "       npm run dev:frontend  (Port 3000)"
 echo ""
-echo "3. Start development:"
-echo "   npm run dev"
+echo "   - Run backend tests:"
+echo "       npm run test"
 echo ""
-echo "🎉 Happy coding!"
+echo "🎉 Happy Coding!"

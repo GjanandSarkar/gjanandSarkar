@@ -1,39 +1,61 @@
-# Docker Compose for DairyDirect
 version: "3.8"
 
 services:
-  # PostgreSQL Database (if not using Supabase)
+  # PostgreSQL Database Service
   postgres:
-    image: postgres:15-alpine
+    image: postgres:16-alpine
+    container_name: dairydirect-postgres
+    restart: unless-stopped
     environment:
+      POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
       POSTGRES_DB: dairydirect
     ports:
       - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
+      - ./database/supabase/schema.sql:/docker-entrypoint-initdb.d/01_schema.sql
+      - ./database/supabase/seed.sql:/docker-entrypoint-initdb.d/02_seed.sql
 
-  # Backend API
+  # Express.js REST API Backend
   backend:
-    build: ./backend
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: dairydirect-backend
+    restart: unless-stopped
     ports:
-      - "3000:3000"
+      - "4000:4000"
     environment:
-      PORT: 3000
+      PORT: 4000
       NODE_ENV: development
       DATABASE_URL: postgres://postgres:postgres@postgres:5432/dairydirect
+      FRONTEND_URL: http://localhost:3000
     depends_on:
       - postgres
     volumes:
       - ./backend:/app
+      - /app/node_modules
 
-  # Frontend
+  # Next.js 16 App Router Frontend
   frontend:
-    build: ./frontend
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: dairydirect-frontend
+    restart: unless-stopped
     ports:
-      - "5173:5173"
+      - "3000:3000"
+    environment:
+      NEXT_PUBLIC_API_URL: http://backend:4000
+      NEXT_PUBLIC_APP_URL: http://localhost:3000
+    depends_on:
+      - backend
     volumes:
       - ./frontend:/app
+      - /app/node_modules
+      - /app/.next
 
 volumes:
   postgres_data:
+    driver: local

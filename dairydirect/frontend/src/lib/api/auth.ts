@@ -106,6 +106,11 @@ export async function updateProfileName(
     const { error } = await supabase.from('profiles').update({ name }).eq('id', userId);
     if (error) return { success: false, error: error.message };
     
+    // Also update users table
+    try {
+      await supabase.from('users').update({ name }).eq('id', userId);
+    } catch {}
+
     const currentUser = useStore.getState().user;
     if (currentUser) {
       useStore.getState().setUser({
@@ -144,6 +149,11 @@ export async function updateProfilePhone(
     const { supabase } = await import('@/lib/supabase');
     const { error } = await supabase.from('profiles').update({ phone }).eq('id', userId);
     if (error) return { success: false, error: error.message };
+
+    // Also update users table
+    try {
+      await supabase.from('users').update({ phone }).eq('id', userId);
+    } catch {}
 
     const currentUser = useStore.getState().user;
     if (currentUser) {

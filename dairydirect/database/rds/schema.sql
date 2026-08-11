@@ -414,3 +414,59 @@ CREATE TRIGGER trg_products_updated_at BEFORE UPDATE ON products FOR EACH ROW EX
 
 DROP TRIGGER IF EXISTS trg_orders_updated_at ON orders;
 CREATE TRIGGER trg_orders_updated_at BEFORE UPDATE ON orders FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+
+-- ─── Auth Trigger for Supabase / External Auth ───────────────
+CREATE OR REPLACE FUNCTION public.handle_new_user()
+RETURNS TRIGGER AS $$
+DECLARE
+  v_name TEXT;
+  v_avatar_url TEXT;
+  v_phone TEXT;
+BEGIN
+  v_name := COALESCE(
+    NEW.raw_user_meta_data->>'full_name',
+    NEW.raw_user_meta_data->>'name',
+    NEW.raw_user_meta_data->>'display_name',
+    SPLIT_PART(NEW.email, '@', 1),
+    'Customer'
+  );
+
+  v_avatar_url := COALESCE(
+    NEW.raw_user_meta_data->>'avatar_url',
+    NEW.raw_user_meta_data->>'picture',
+    NEW.raw_user_meta_data->>'image'
+  );
+
+  v_phone := COALESCE(NEW.phone, NEW.raw_user_meta_data->>'phone');
+
+  INSERT INTO public.profiles (id, email, phone, name, avatar_url, role, loyalty_points)
+  VALUES (
+    NEW.id,
+    NEW.email,
+    v_phone,
+    v_name,
+    v_avatar_url,
+    'customer',
+    100
+  )
+  ON CONFLICT (id) DO UPDATE
+  SET
+    email = COALESCE(EXCLUDED.email, profiles.email),
+    phone = COALESCE(EXCLUDED.phone, profiles.phone),
+    name = COALESCE(NULLIF(EXCLUDED.name, ''), profiles.name),
+    avatar_url = COALESCE(NULLIF(EXCLUDED.avatar_url, ''), profiles.avatar_url),
+    updated_at = now();
+
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+DO $$
+BEGIN
+  IF EXISTS (SELECT 1 FROM information_schema.tables WHERE table_schema = 'auth' AND table_name = 'users') THEN
+    DROP TRIGGER IF EXISTS on_auth_user_created ON auth.users;
+    CREATE TRIGGER on_auth_user_created
+      AFTER INSERT OR UPDATE ON auth.users
+      FOR EACH ROW EXECUTE FUNCTION public.handle_new_user();
+  END IF;
+END $$;

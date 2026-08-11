@@ -49,8 +49,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         if (session) {
           await hydrateUser(session.access_token);
         } else {
-          // No session at all — user is genuinely not logged in
-          setAuthLoading(false);
+          const hasCustomCookie = typeof document !== 'undefined' && document.cookie.includes('gs_access_token');
+          if (hasCustomCookie) {
+            await hydrateUser('');
+          } else {
+            setAuthLoading(false);
+          }
         }
         hasInitialized.current = true;
         return;

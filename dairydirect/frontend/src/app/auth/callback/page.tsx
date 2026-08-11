@@ -30,17 +30,64 @@ function AuthCallbackInner() {
       try {
         let redirectTarget = next || '/home';
 
-        // Sync with backend
+        // Sync with backend — send user profile data, not just the token
+        const supaUser = session.user;
+        const syncPayload = {
+          id: supaUser.id,
+          email: supaUser.email,
+          name: supaUser.user_metadata?.full_name || supaUser.user_metadata?.name || supaUser.email?.split('@')[0],
+          avatar_url: supaUser.user_metadata?.avatar_url || supaUser.user_metadata?.picture,
+          phone: supaUser.phone || supaUser.user_metadata?.phone,
+          token: session.access_token,
+        };
+
+        // 1. Direct Supabase client profile & users table upsert
+        try {
+          await supabase.from('profiles').upsert({
+            id: supaUser.id,
+            email: supaUser.email,
+            name: syncPayload.name,
+            avatar_url: syncPayload.avatar_url,
+            phone: syncPayload.phone || null,
+            role: 'customer',
+            loyalty_points: 100,
+          }, { onConflict: 'id' });
+        } catch (sbDirectErr) {
+          console.warn('[AuthCallback] Direct Supabase profile notice:', sbDirectErr);
+        }
+
+        try {
+          await supabase.from('users').upsert({
+            id: supaUser.id,
+            phone: syncPayload.phone || null,
+            name: syncPayload.name,
+            email: supaUser.email,
+          }, { onConflict: 'id' });
+        } catch (sbUsersErr) {
+          console.warn('[AuthCallback] Direct Supabase users notice:', sbUsersErr);
+        }
+
+        // 2. Sync with Express backend on port 4000 if configured
+        try {
+          const apiBase = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000';
+          fetch(`${apiBase}/api/auth/sync`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(syncPayload),
+          }).catch(() => {});
+        } catch {}
+
+        // 3. Sync via Next.js API Route
         const res = await fetch('/api/auth/sync', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ token: session.access_token }),
+          body: JSON.stringify(syncPayload),
         });
 
         if (res.ok) {
           const raw = await res.json();
-          const userProfile = raw.user || raw.data?.user;
-          const accessToken = raw.data?.accessToken || raw.accessToken;
+          const userProfile = raw.profile || raw.user || raw.data?.profile || raw.data?.user;
+          const accessToken = raw.token || raw.accessToken || raw.data?.token || raw.data?.accessToken;
 
           if (accessToken) {
             try {

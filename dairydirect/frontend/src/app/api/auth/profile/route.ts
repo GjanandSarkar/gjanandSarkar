@@ -68,6 +68,19 @@ export async function PATCH(request: Request) {
       if (updateRes.rows && updateRes.rows.length > 0) {
         updatedProfile = updateRes.rows[0];
       }
+
+      // Also update users table in PostgreSQL
+      try {
+        await query(
+          `UPDATE users
+           SET name = COALESCE($2, name),
+               phone = COALESCE($3, phone)
+           WHERE id = $1`,
+          [userId, name !== undefined ? name : null, phone !== undefined ? phone : null]
+        );
+      } catch (uPgErr) {
+        console.warn('[AuthProfile] PG users table update notice:', uPgErr);
+      }
     } catch (pgErr) {
       console.warn('[AuthProfile] PostgreSQL update warning:', pgErr);
     }
@@ -89,6 +102,18 @@ export async function PATCH(request: Request) {
 
       if (!error && data) {
         updatedProfile = updatedProfile || data;
+      }
+
+      // Also update public.users table in Supabase
+      try {
+        const userUpdates: any = {};
+        if (name !== undefined) userUpdates.name = name;
+        if (phone !== undefined) userUpdates.phone = phone;
+        if (Object.keys(userUpdates).length > 0) {
+          await supabase.from('users').update(userUpdates).eq('id', userId);
+        }
+      } catch (uSbErr) {
+        console.warn('[AuthProfile] Supabase users table update notice:', uSbErr);
       }
 
       // Also update Supabase Auth user metadata

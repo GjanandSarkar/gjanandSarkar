@@ -38,6 +38,19 @@ CREATE INDEX IF NOT EXISTS idx_profiles_email         ON profiles(email);
 CREATE INDEX IF NOT EXISTS idx_profiles_role          ON profiles(role);
 CREATE INDEX IF NOT EXISTS idx_profiles_referral_code ON profiles(referral_code);
 
+-- ─── 1b. Users Table (Direct User Entity) ───────────────────────────────────
+CREATE TABLE IF NOT EXISTS users (
+  id          TEXT        PRIMARY KEY,
+  phone       TEXT,
+  name        TEXT,
+  email       TEXT,
+  created_at  TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+
+CREATE INDEX IF NOT EXISTS idx_users_phone ON users(phone);
+CREATE INDEX IF NOT EXISTS idx_users_email ON users(email);
+
+
 -- ─── 2. User Addresses ──────────────────────────────────────────────────────
 CREATE TABLE IF NOT EXISTS user_addresses (
   id          UUID        PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -738,23 +751,133 @@ ALTER TABLE notifications      ENABLE ROW LEVEL SECURITY;
 ALTER TABLE translations       ENABLE ROW LEVEL SECURITY;
 ALTER TABLE audit_logs         ENABLE ROW LEVEL SECURITY;
 
--- ── Profiles ────────────────────────────────────────────────────────────────
+-- ── Auth Trigger: Auto Create Profile for Supabase Auth ──────────────────
+CREATE OR REPLACE FUNCTION public.handle_new_user()
+RETURNS TRIGGER AS $$
+DECLARE
+  v_name TEXT;
+  v_avatar_url TEXT;
+  v_phone TEXT;
+BEGIN
+  -- Extract name from metadata if available
+  v_name := COALESCE(
+    NEW.raw_user_meta_data->>'full_name',
+    NEW.raw_user_meta_data->>'name',
+    NEW.raw_user_meta_data->>'display_name',
+    SPLIT_PART(NEW.email, '@', 1),
+    'Customer'
+  );
+
+  -- Extract avatar from metadata
+  v_avatar_url := COALESCE(
+    NEW.raw_user_meta_data->>'avatar_url',
+    NEW.raw_user_meta_data->>'picture',
+    NEW.raw_user_meta_data->>'image'
+  );
+
+  -- Extract phone
+  v_phone := COALESCE(NEW.phone, NEW.raw_user_meta_data->>'phone');
+
+  -- 1. Sync to public.profiles
+  BEGIN
+    INSERT INTO public.profiles (id, email, phone, name, avatar_url, role, loyalty_points)
+    VALUES (
+      NEW.id,
+      NEW.email,
+      v_phone,
+      v_name,
+      v_avatar_url,
+      'customer',
+      100
+    )
+    ON CONFLICT (id) DO UPDATE
+    SET
+      email = COALESCE(EXCLUDED.email, profiles.email),
+      phone = COALESCE(EXCLUDED.phone, profiles.phone),
+      name = COALESCE(NULLIF(EXCLUDED.name, ''), profiles.name),
+      avatar_url = COALESCE(NULLIF(EXCLUDED.avatar_url, ''), profiles.avatar_url),
+      updated_at = now();
+  EXCEPTION WHEN OTHERS THEN
+    NULL;
+  END;
+
+  -- 2. Sync to public.users
+  BEGIN
+    INSERT INTO public.users (id, phone, name, email, created_at)
+    VALUES (
+      NEW.id::TEXT,
+      v_phone,
+      v_name,
+      NEW.email,
+      COALESCE(NEW.created_at, NOW())
+    )
+    ON CONFLICT (id) DO UPDATE
+    SET
+      phone = COALESCE(EXCLUDED.phone, users.phone),
+      name = COALESCE(NULLIF(EXCLUDED.name, ''), users.name),
+      email = COALESCE(EXCLUDED.email, users.email);
+  EXCEPTION WHEN OTHERS THEN
+    NULL;
+  END;
+
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+-- Trigger attached to auth.users (runs on Supabase signup)
+DO $$
+BEGIN
+  IF EXISTS (SELECT 1 FROM information_schema.tables WHERE table_schema = 'auth' AND table_name = 'users') THEN
+    DROP TRIGGER IF EXISTS on_auth_user_created ON auth.users;
+    CREATE TRIGGER on_auth_user_created
+      AFTER INSERT OR UPDATE ON auth.users
+      FOR EACH ROW EXECUTE FUNCTION public.handle_new_user();
+  END IF;
+END $$;
+
+-- ── Profiles RLS Policies ───────────────────────────────────────────────────
 DROP POLICY IF EXISTS "Profiles: public read"    ON profiles;
 CREATE POLICY "Profiles: public read"
   ON profiles FOR SELECT USING (true);
 
 DROP POLICY IF EXISTS "Profiles: own update"     ON profiles;
 CREATE POLICY "Profiles: own update"
-  ON profiles FOR UPDATE USING (auth.uid() = id);
+  ON profiles FOR UPDATE USING (auth.uid() = id OR is_admin(auth.uid()));
 
 DROP POLICY IF EXISTS "Profiles: admin all"      ON profiles;
 CREATE POLICY "Profiles: admin all"
   ON profiles FOR ALL USING (is_admin(auth.uid()));
 
--- Allow service_role to insert new profiles (from auth trigger)
+-- Allow insert by authenticated users for own profile or service_role
 DROP POLICY IF EXISTS "Profiles: service insert" ON profiles;
-CREATE POLICY "Profiles: service insert"
-  ON profiles FOR INSERT WITH CHECK (true);
+DROP POLICY IF EXISTS "Profiles: own insert"     ON profiles;
+CREATE POLICY "Profiles: own insert"
+  ON profiles FOR INSERT WITH CHECK (
+    auth.uid() = id OR
+    auth.role() = 'authenticated' OR
+    auth.role() = 'anon' OR
+    auth.role() = 'service_role'
+  );
+
+-- ── Users Table RLS Policies ────────────────────────────────────────────────
+ALTER TABLE users ENABLE ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS "Allow public read of users" ON users;
+CREATE POLICY "Allow public read of users" ON users
+  FOR SELECT USING (true);
+
+DROP POLICY IF EXISTS "Allow insert of users" ON users;
+CREATE POLICY "Allow insert of users" ON users
+  FOR INSERT WITH CHECK (true);
+
+DROP POLICY IF EXISTS "Allow update of users" ON users;
+CREATE POLICY "Allow update of users" ON users
+  FOR UPDATE USING (true) WITH CHECK (true);
+
+DROP POLICY IF EXISTS "Allow all for authenticated users" ON users;
+CREATE POLICY "Allow all for authenticated users" ON users
+  FOR ALL USING (true) WITH CHECK (true);
+
 
 -- ── User Addresses ───────────────────────────────────────────────────────────
 DROP POLICY IF EXISTS "Addresses: own all"       ON user_addresses;
