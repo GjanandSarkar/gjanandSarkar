@@ -13,6 +13,8 @@ CREATE TABLE IF NOT EXISTS profiles (
   id              UUID        PRIMARY KEY DEFAULT gen_random_uuid(),
   phone           TEXT        UNIQUE,
   email           TEXT        UNIQUE,
+  first_name      TEXT,
+  last_name       TEXT,
   name            TEXT,
   avatar_url      TEXT,
   role            TEXT        NOT NULL DEFAULT 'customer'

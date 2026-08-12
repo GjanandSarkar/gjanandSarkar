@@ -170,7 +170,9 @@ export default function TestPaymentPage() {
                   <input
                     type="tel"
                     value={customerPhone}
-                    onChange={(e) => setCustomerPhone(e.target.value)}
+                    onChange={(e) => setCustomerPhone(e.target.value.replace(/\D/g, '').slice(0, 10))}
+                    placeholder="9876543210"
+                    maxLength={10}
                     className="w-full px-3.5 py-2 rounded-xl border border-stone-200 bg-stone-50/50 text-xs font-medium focus:outline-none focus:ring-2 focus:ring-[#1b4332]/20 focus:border-[#1b4332]"
                   />
                 </div>

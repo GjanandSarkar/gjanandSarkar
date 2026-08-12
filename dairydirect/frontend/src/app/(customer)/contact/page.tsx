@@ -25,8 +25,16 @@ export default function ContactPage() {
   const [submitted, setSubmitted] = useState(false);
   const [loading, setLoading] = useState(false);
 
+  const [errorMsg, setErrorMsg] = useState('');
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    setErrorMsg('');
+    const cleanPhone = form.phone.trim().replace(/\D/g, '');
+    if (!cleanPhone || !/^[6-9][0-9]{9}$/.test(cleanPhone)) {
+      setErrorMsg('Please enter a valid 10-digit mobile number.');
+      return;
+    }
     setLoading(true);
     setTimeout(() => {
       setLoading(false);
@@ -181,10 +189,14 @@ export default function ContactPage() {
                       type="tel"
                       required
                       value={form.phone}
-                      onChange={e => setForm({ ...form, phone: e.target.value })}
-                      placeholder="+91 98765 43210"
+                      onChange={e => setForm({ ...form, phone: e.target.value.replace(/\D/g, '').slice(0, 10) })}
+                      placeholder="9876543210"
+                      maxLength={10}
                       className="w-full px-3.5 py-2.5 text-xs rounded-xl border border-gray-300 focus:border-[#0f3e26] focus:ring-1 focus:ring-[#0f3e26] outline-none"
                     />
+                    {errorMsg && (
+                      <p className="text-xs text-rose-500 font-semibold mt-1">{errorMsg}</p>
+                    )}
                   </div>
                 </div>
 

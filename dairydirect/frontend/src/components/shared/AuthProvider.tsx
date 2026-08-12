@@ -123,6 +123,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
           setUser({
             id: userProfile.id,
+            first_name: userProfile.first_name || '',
+            last_name: userProfile.last_name || '',
             name: resolvedName,
             phone: userProfile.phone || '',
             email: userProfile.email || '',

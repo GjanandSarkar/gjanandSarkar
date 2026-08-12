@@ -19,7 +19,7 @@ export const submitInquirySchema = z.object({
   body: z.object({
     fullName: z.string().min(2, 'Full name is required'),
     businessName: z.string().min(2, 'Business name is required'),
-    phone: z.string().min(10, 'Phone must be at least 10 digits'),
+    phone: z.string().trim().regex(/^[6-9][0-9]{9}$/, 'Please enter a valid 10-digit mobile number.'),
     email: z.string().email().optional(),
     city: z.string().optional(),
     state: z.string().optional(),

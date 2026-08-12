@@ -8,7 +8,36 @@ export async function PATCH(request: Request) {
   try {
     const token = extractTokenFromRequest(request);
     const body = await request.json().catch(() => ({}));
-    const { name, phone, avatar_url, address } = body;
+    let { first_name, last_name, name, phone, avatar_url, address } = body;
+
+    if (
+      (first_name && /\d/.test(first_name)) ||
+      (last_name && /\d/.test(last_name)) ||
+      (name && /\d/.test(name))
+    ) {
+      return NextResponse.json(
+        { error: 'Name cannot contain numbers.' },
+        { status: 400 }
+      );
+    }
+
+    if (first_name !== undefined || last_name !== undefined) {
+      const cleanFirst = (first_name || '').trim();
+      const cleanLast = (last_name || '').trim();
+      first_name = cleanFirst;
+      last_name = cleanLast;
+      name = `${cleanFirst} ${cleanLast}`.trim();
+    }
+
+    if (phone !== undefined && phone !== null && phone !== '') {
+      const cleanPhone = String(phone).trim().replace(/\D/g, '');
+      if (!/^[6-9][0-9]{9}$/.test(cleanPhone)) {
+        return NextResponse.json(
+          { error: 'Please enter a valid 10-digit mobile number.' },
+          { status: 400 }
+        );
+      }
+    }
 
     let userId: string | null = null;
     let userEmail: string | null = null;
@@ -49,6 +78,8 @@ export async function PATCH(request: Request) {
         id: string;
         phone: string | null;
         email: string | null;
+        first_name: string | null;
+        last_name: string | null;
         name: string | null;
         avatar_url: string | null;
         role: string;
@@ -57,26 +88,43 @@ export async function PATCH(request: Request) {
         created_at: string;
       }>(
         `UPDATE profiles
-         SET name = COALESCE($2, name),
-             phone = COALESCE($3, phone),
-             avatar_url = COALESCE($4, avatar_url),
+         SET first_name = COALESCE($2, first_name),
+             last_name = COALESCE($3, last_name),
+             name = COALESCE($4, name),
+             phone = COALESCE($5, phone),
+             avatar_url = COALESCE($6, avatar_url),
              updated_at = now()
          WHERE id = $1
-         RETURNING id, phone, email, name, avatar_url, role, loyalty_points, referral_code, created_at`,
-        [userId, name !== undefined ? name : null, phone !== undefined ? phone : null, avatar_url !== undefined ? avatar_url : null]
+         RETURNING id, phone, email, first_name, last_name, name, avatar_url, role, loyalty_points, referral_code, created_at`,
+        [
+          userId,
+          first_name !== undefined ? first_name : null,
+          last_name !== undefined ? last_name : null,
+          name !== undefined ? name : null,
+          phone !== undefined ? phone : null,
+          avatar_url !== undefined ? avatar_url : null
+        ]
       );
       if (updateRes.rows && updateRes.rows.length > 0) {
         updatedProfile = updateRes.rows[0];
       }
 
-      // Also update users table in PostgreSQL
+      // Sync into users table in PostgreSQL
       try {
         await query(
           `UPDATE users
-           SET name = COALESCE($2, name),
-               phone = COALESCE($3, phone)
+           SET first_name = COALESCE($2, first_name),
+               last_name = COALESCE($3, last_name),
+               name = COALESCE($4, name),
+               phone = COALESCE($5, phone)
            WHERE id = $1`,
-          [userId, name !== undefined ? name : null, phone !== undefined ? phone : null]
+          [
+            userId,
+            first_name !== undefined ? first_name : null,
+            last_name !== undefined ? last_name : null,
+            name !== undefined ? name : null,
+            phone !== undefined ? phone : null
+          ]
         );
       } catch (uPgErr) {
         console.warn('[AuthProfile] PG users table update notice:', uPgErr);
@@ -89,6 +137,8 @@ export async function PATCH(request: Request) {
     try {
       const supabase = getAdminSupabase();
       const updates: any = {};
+      if (first_name !== undefined) updates.first_name = first_name;
+      if (last_name !== undefined) updates.last_name = last_name;
       if (name !== undefined) updates.name = name;
       if (phone !== undefined) updates.phone = phone;
       if (avatar_url !== undefined) updates.avatar_url = avatar_url;
@@ -107,6 +157,8 @@ export async function PATCH(request: Request) {
       // Also update public.users table in Supabase
       try {
         const userUpdates: any = {};
+        if (first_name !== undefined) userUpdates.first_name = first_name;
+        if (last_name !== undefined) userUpdates.last_name = last_name;
         if (name !== undefined) userUpdates.name = name;
         if (phone !== undefined) userUpdates.phone = phone;
         if (Object.keys(userUpdates).length > 0) {

@@ -881,7 +881,9 @@ export default function AdminVendorInquiriesPage() {
                     type="tel"
                     required
                     value={testForm.phone}
-                    onChange={(e) => setTestForm(prev => ({ ...prev, phone: e.target.value }))}
+                    onChange={(e) => setTestForm(prev => ({ ...prev, phone: e.target.value.replace(/\D/g, '').slice(0, 10) }))}
+                    placeholder="9876543210"
+                    maxLength={10}
                     className="w-full px-3 py-2 rounded-xl border border-gray-300 focus:border-[#0f3e26] outline-none"
                   />
                 </div>

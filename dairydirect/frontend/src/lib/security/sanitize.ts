@@ -10,7 +10,7 @@ import { z } from 'zod';
 export const PhoneSchema = z
   .string()
   .trim()
-  .regex(/^(\+91)?[6-9]\d{9}$/, 'Invalid Indian phone number');
+  .regex(/^[6-9][0-9]{9}$/, 'Please enter a valid 10-digit mobile number.');
 
 export const OTPSchema = z
   .string()
@@ -32,7 +32,24 @@ export const NameSchema = z
   .trim()
   .min(1, 'Name is required')
   .max(100, 'Name too long')
-  .regex(/^[a-zA-Z\s\u0900-\u097F]+$/, 'Name can only contain letters');
+  .regex(/^[a-zA-Z\s\u0900-\u097F\-']+$/, 'Name cannot contain numbers.')
+  .refine((val) => !/\d/.test(val), { message: 'Name cannot contain numbers.' });
+
+export const FirstNameSchema = z
+  .string()
+  .trim()
+  .min(1, 'First name is required')
+  .max(50, 'First name too long')
+  .regex(/^[a-zA-Z\s\u0900-\u097F\-']+$/, 'Name cannot contain numbers.')
+  .refine((val) => !/\d/.test(val), { message: 'Name cannot contain numbers.' });
+
+export const LastNameSchema = z
+  .string()
+  .trim()
+  .min(1, 'Last name is required')
+  .max(50, 'Last name too long')
+  .regex(/^[a-zA-Z\s\u0900-\u097F\-']+$/, 'Name cannot contain numbers.')
+  .refine((val) => !/\d/.test(val), { message: 'Name cannot contain numbers.' });
 
 export const AddressSchema = z.object({
   label: z.string().trim().min(1).max(50),
@@ -112,8 +129,7 @@ export function sanitizeForSQL(input: string): string {
  */
 export function sanitizePhone(phone: string): string | null {
   const cleaned = phone.replace(/\D/g, '');
-  if (cleaned.length === 10 && /^[6-9]/.test(cleaned)) return `+91${cleaned}`;
-  if (cleaned.length === 12 && cleaned.startsWith('91')) return `+${cleaned}`;
+  if (/^[6-9][0-9]{9}$/.test(cleaned)) return cleaned;
   return null;
 }
 

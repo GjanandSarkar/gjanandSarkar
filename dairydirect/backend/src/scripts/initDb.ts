@@ -11,6 +11,8 @@ CREATE TABLE IF NOT EXISTS profiles (
   id              UUID        PRIMARY KEY DEFAULT gen_random_uuid(),
   phone           TEXT        UNIQUE,
   email           TEXT        UNIQUE,
+  first_name      TEXT,
+  last_name       TEXT,
   name            TEXT,
   avatar_url      TEXT,
   role            TEXT        NOT NULL DEFAULT 'customer' CHECK (role IN ('customer', 'admin', 'seller')),
@@ -348,6 +350,40 @@ export async function initializeDatabase(): Promise<void> {
   try {
     const pool = getPool();
     await pool.query(SCHEMA_SQL);
+
+    // Schema Migrations & Backfill for First Name & Last Name
+    try {
+      await pool.query(`
+        ALTER TABLE profiles ADD COLUMN IF NOT EXISTS first_name TEXT;
+        ALTER TABLE profiles ADD COLUMN IF NOT EXISTS last_name TEXT;
+
+        ALTER TABLE users ADD COLUMN IF NOT EXISTS first_name TEXT;
+        ALTER TABLE users ADD COLUMN IF NOT EXISTS last_name TEXT;
+
+        -- Automatic Backfill for profiles table
+        UPDATE profiles
+        SET first_name = split_part(trim(name), ' ', 1),
+            last_name = CASE 
+              WHEN position(' ' in trim(name)) > 0 
+              THEN substring(trim(name) from position(' ' in trim(name)) + 1) 
+              ELSE '' 
+            END
+        WHERE (first_name IS NULL OR first_name = '') AND name IS NOT NULL AND name != '' AND name !~ '[0-9]';
+
+        -- Automatic Backfill for users table
+        UPDATE users
+        SET first_name = split_part(trim(name), ' ', 1),
+            last_name = CASE 
+              WHEN position(' ' in trim(name)) > 0 
+              THEN substring(trim(name) from position(' ' in trim(name)) + 1) 
+              ELSE '' 
+            END
+        WHERE (first_name IS NULL OR first_name = '') AND name IS NOT NULL AND name != '' AND name !~ '[0-9]';
+      `);
+    } catch (migErr) {
+      console.warn('Migration warning:', migErr);
+    }
+
     console.log('✅ Core database schema tables created/verified successfully');
 
     await pool.query(SEED_SQL);

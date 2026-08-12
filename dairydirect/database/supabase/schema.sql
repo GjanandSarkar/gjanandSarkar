@@ -20,6 +20,8 @@ CREATE TABLE IF NOT EXISTS profiles (
   id              UUID        PRIMARY KEY REFERENCES auth.users(id) ON DELETE CASCADE,
   phone           TEXT        UNIQUE,
   email           TEXT        UNIQUE,
+  first_name      TEXT,
+  last_name       TEXT,
   name            TEXT,
   avatar_url      TEXT,
   role            TEXT        NOT NULL DEFAULT 'customer'
@@ -42,6 +44,8 @@ CREATE INDEX IF NOT EXISTS idx_profiles_referral_code ON profiles(referral_code)
 CREATE TABLE IF NOT EXISTS users (
   id          TEXT        PRIMARY KEY,
   phone       TEXT,
+  first_name  TEXT,
+  last_name   TEXT,
   name        TEXT,
   email       TEXT,
   created_at  TIMESTAMPTZ NOT NULL DEFAULT now()

@@ -63,15 +63,25 @@ export const profileRepository = {
     id?: string;
     phone?: string | null;
     email?: string | null;
+    first_name?: string | null;
+    last_name?: string | null;
     name?: string | null;
     avatar_url?: string | null;
     role?: UserRole;
     referred_by?: string | null;
   }): Promise<Profile> {
+    const firstName = data.first_name ? data.first_name.trim() : null;
+    const lastName = data.last_name ? data.last_name.trim() : null;
+    const computedName = (firstName || lastName)
+      ? `${firstName || ''} ${lastName || ''}`.trim()
+      : (data.name || (data.email ? data.email.split('@')[0] : 'Customer'));
+
     const payload: any = {
       phone: data.phone || null,
       email: data.email ? data.email.toLowerCase().trim() : null,
-      name: data.name || (data.email ? data.email.split('@')[0] : 'Customer'),
+      first_name: firstName,
+      last_name: lastName,
+      name: computedName,
       avatar_url: data.avatar_url || null,
       role: data.role || 'customer',
       referred_by: data.referred_by || null,
@@ -82,14 +92,16 @@ export const profileRepository = {
     try {
       const res = await query<Profile>(
         `INSERT INTO profiles (
-          id, phone, email, name, avatar_url, role, referred_by, loyalty_points
+          id, phone, email, first_name, last_name, name, avatar_url, role, referred_by, loyalty_points
         ) VALUES (
-          COALESCE($1, gen_random_uuid()), $2, $3, $4, $5, COALESCE($6, 'customer'), $7, 100
+          COALESCE($1, gen_random_uuid()), $2, $3, $4, $5, $6, $7, COALESCE($8, 'customer'), $9, 100
         ) RETURNING *`,
         [
           data.id || null,
           payload.phone,
           payload.email,
+          payload.first_name,
+          payload.last_name,
           payload.name,
           payload.avatar_url,
           payload.role,
@@ -100,13 +112,15 @@ export const profileRepository = {
         // Also sync into users table
         try {
           await query(
-            `INSERT INTO users (id, phone, name, email, created_at)
-             VALUES ($1, $2, $3, $4, now())
+            `INSERT INTO users (id, phone, first_name, last_name, name, email, created_at)
+             VALUES ($1, $2, $3, $4, $5, $6, now())
              ON CONFLICT (id) DO UPDATE
              SET phone = COALESCE(EXCLUDED.phone, users.phone),
+                 first_name = COALESCE(EXCLUDED.first_name, users.first_name),
+                 last_name = COALESCE(EXCLUDED.last_name, users.last_name),
                  name = COALESCE(NULLIF(EXCLUDED.name, ''), users.name),
                  email = COALESCE(EXCLUDED.email, users.email)`,
-            [res.rows[0].id, payload.phone, payload.name, payload.email]
+            [res.rows[0].id, payload.phone, payload.first_name, payload.last_name, payload.name, payload.email]
           );
         } catch {}
         return res.rows[0];
@@ -126,6 +140,8 @@ export const profileRepository = {
             await supabase.from('users').upsert({
               id: created.id,
               phone: payload.phone,
+              first_name: payload.first_name,
+              last_name: payload.last_name,
               name: payload.name,
               email: payload.email,
             }, { onConflict: 'id' });
@@ -155,7 +171,7 @@ export const profileRepository = {
     let idx = 1;
 
     for (const [key, val] of Object.entries(updates)) {
-      if (['name', 'phone', 'email', 'avatar_url', 'role', 'default_upi_id', 'loyalty_points', 'is_active'].includes(key)) {
+      if (['first_name', 'last_name', 'name', 'phone', 'email', 'avatar_url', 'role', 'default_upi_id', 'loyalty_points', 'is_active'].includes(key)) {
         fields.push(`${key} = $${idx++}`);
         values.push(val);
       }
@@ -169,15 +185,24 @@ export const profileRepository = {
           values
         );
 
-        // Also update users table in PostgreSQL
+        // Sync into users table in PostgreSQL
         try {
           await query(
             `UPDATE users
-             SET name = COALESCE($2, name),
-                 phone = COALESCE($3, phone),
-                 email = COALESCE($4, email)
+             SET first_name = COALESCE($2, first_name),
+                 last_name = COALESCE($3, last_name),
+                 name = COALESCE($4, name),
+                 phone = COALESCE($5, phone),
+                 email = COALESCE($6, email)
              WHERE id = $1`,
-            [id, updates.name !== undefined ? updates.name : null, updates.phone !== undefined ? updates.phone : null, updates.email !== undefined ? updates.email : null]
+            [
+              id,
+              updates.first_name !== undefined ? updates.first_name : null,
+              updates.last_name !== undefined ? updates.last_name : null,
+              updates.name !== undefined ? updates.name : null,
+              updates.phone !== undefined ? updates.phone : null,
+              updates.email !== undefined ? updates.email : null
+            ]
           );
         } catch {}
 
@@ -193,9 +218,10 @@ export const profileRepository = {
             .select('*')
             .maybeSingle();
 
-          // Also update users table in Supabase
           try {
             const userUpdates: any = {};
+            if (updates.first_name !== undefined) userUpdates.first_name = updates.first_name;
+            if (updates.last_name !== undefined) userUpdates.last_name = updates.last_name;
             if (updates.name !== undefined) userUpdates.name = updates.name;
             if (updates.phone !== undefined) userUpdates.phone = updates.phone;
             if (updates.email !== undefined) userUpdates.email = updates.email;

@@ -130,6 +130,8 @@ export async function POST(request: NextRequest) {
           id: string;
           phone: string | null;
           email: string | null;
+          first_name: string | null;
+          last_name: string | null;
           name: string | null;
           avatar_url: string | null;
           role: string;
@@ -146,7 +148,7 @@ export async function POST(request: NextRequest) {
                avatar_url = COALESCE(NULLIF(EXCLUDED.avatar_url, ''), profiles.avatar_url),
                role = CASE WHEN $7 = 'admin' THEN 'admin' ELSE profiles.role END,
                updated_at = now()
-           RETURNING id, phone, email, name, avatar_url, role, loyalty_points, referral_code, created_at`,
+           RETURNING id, phone, email, first_name, last_name, name, avatar_url, role, loyalty_points, referral_code, created_at`,
           [userId, userEmail, userPhone, userName, userAvatar, initialRole, initialRole]
         );
         profile = profileRes.rows[0];

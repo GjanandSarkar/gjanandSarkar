@@ -26,6 +26,8 @@ export type CartItem = {
 // ─── User shape (from profile row) ───────────────────────────
 export type User = {
   id: string;
+  first_name?: string;
+  last_name?: string;
   name: string;
   phone?: string;
   email?: string;

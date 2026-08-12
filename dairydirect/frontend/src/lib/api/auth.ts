@@ -78,44 +78,69 @@ export async function getCurrentUser(): Promise<User | null> {
   }
 }
 
-export async function updateProfileName(
+export async function updateProfileNames(
   userId: string,
-  name: string
+  firstName: string,
+  lastName: string
 ): Promise<{ success: boolean; error?: string }> {
+  if (/\d/.test(firstName) || /\d/.test(lastName)) {
+    return { success: false, error: 'Name cannot contain numbers.' };
+  }
+  const cleanFirst = firstName.trim();
+  const cleanLast = lastName.trim();
+  if (!cleanFirst || !cleanLast) {
+    return { success: false, error: 'Please enter both First Name and Last Name.' };
+  }
+  const fullName = `${cleanFirst} ${cleanLast}`.trim();
+
   try {
     const res = await fetch('/api/auth/profile', {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ name }),
+      body: JSON.stringify({ first_name: cleanFirst, last_name: cleanLast, name: fullName }),
     });
 
     if (res.ok) {
-      const data = await res.json();
       const currentUser = useStore.getState().user;
       if (currentUser) {
         useStore.getState().setUser({
           ...currentUser,
-          name,
+          first_name: cleanFirst,
+          last_name: cleanLast,
+          name: fullName,
         });
       }
       return { success: true };
     }
 
+    const errJson = await res.json().catch(() => ({}));
+    if (errJson.error) return { success: false, error: errJson.error };
+
     // Fallback to direct supabase
     const { supabase } = await import('@/lib/supabase');
-    const { error } = await supabase.from('profiles').update({ name }).eq('id', userId);
-    if (error) return { success: false, error: error.message };
-    
-    // Also update users table
-    try {
-      await supabase.from('users').update({ name }).eq('id', userId);
-    } catch {}
+    const { error } = await supabase.from('profiles').update({
+      first_name: cleanFirst,
+      last_name: cleanLast,
+      name: fullName,
+    }).eq('id', userId);
 
+    if (error) return { success: false, error: error.message };
+
+    // Also update users table in Supabase
+    try {
+      await supabase.from('users').update({
+        first_name: cleanFirst,
+        last_name: cleanLast,
+        name: fullName,
+      }).eq('id', userId);
+    } catch {}
     const currentUser = useStore.getState().user;
     if (currentUser) {
       useStore.getState().setUser({
         ...currentUser,
-        name,
+        first_name: cleanFirst,
+        last_name: cleanLast,
+        name: fullName,
       });
     }
     return { success: true };
@@ -124,15 +149,32 @@ export async function updateProfileName(
   }
 }
 
+export async function updateProfileName(
+  userId: string,
+  name: string
+): Promise<{ success: boolean; error?: string }> {
+  if (/\d/.test(name)) {
+    return { success: false, error: 'Name cannot contain numbers.' };
+  }
+  const parts = name.trim().split(/\s+/);
+  const firstName = parts[0] || '';
+  const lastName = parts.slice(1).join(' ') || '';
+  return updateProfileNames(userId, firstName, lastName);
+}
+
 export async function updateProfilePhone(
   userId: string,
   phone: string
 ): Promise<{ success: boolean; error?: string }> {
+  const cleanPhone = phone.trim().replace(/\D/g, '');
+  if (!/^[6-9][0-9]{9}$/.test(cleanPhone)) {
+    return { success: false, error: 'Please enter a valid 10-digit mobile number.' };
+  }
   try {
     const res = await fetch('/api/auth/profile', {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ phone }),
+      body: JSON.stringify({ phone: cleanPhone }),
     });
 
     if (res.ok) {
@@ -140,7 +182,7 @@ export async function updateProfilePhone(
       if (currentUser) {
         useStore.getState().setUser({
           ...currentUser,
-          phone,
+          phone: cleanPhone,
         });
       }
       return { success: true };

@@ -16,49 +16,95 @@ interface ProfileSummaryProps {
 export function ProfileSummary({ user, onUpdateProfile, onLogout }: ProfileSummaryProps) {
   const { t } = useTranslation();
   const [isEditing, setIsEditing] = useState(false);
-  const [profileName, setProfileName] = useState(user?.name || '');
+  const [firstName, setFirstName] = useState('');
+  const [lastName, setLastName] = useState('');
   const [isEditingPhone, setIsEditingPhone] = useState(false);
   const [profilePhone, setProfilePhone] = useState(user?.phone || '');
   const [isUploading, setIsUploading] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
+  // Derive initial first and last name from user profile
+  const initNames = () => {
+    let fn = '';
+    let ln = '';
+    if (user?.first_name && !/\d/.test(user.first_name)) {
+      fn = user.first_name;
+    }
+    if (user?.last_name && !/\d/.test(user.last_name)) {
+      ln = user.last_name;
+    }
+    if ((!fn || !ln) && user?.name && !/\d/.test(user.name)) {
+      const parts = user.name.trim().split(/\s+/);
+      if (!fn) fn = parts[0] || '';
+      if (!ln) ln = parts.slice(1).join(' ') || '';
+    }
+    setFirstName(fn);
+    setLastName(ln);
+  };
+
   useEffect(() => {
-    if (user?.name && !isEditing) {
-      setProfileName(user.name);
+    if (!isEditing) {
+      initNames();
     }
     if (user?.phone && !isEditingPhone) {
       setProfilePhone(user.phone);
     }
-  }, [user?.name, user?.phone, isEditing, isEditingPhone]);
+  }, [user?.name, user?.first_name, user?.last_name, user?.phone, isEditing, isEditingPhone]);
+
+  const hasNumbersInName = /\d/.test(firstName) || /\d/.test(lastName);
+  const autoFullName = `${firstName.trim()} ${lastName.trim()}`.trim();
 
   const handleUpdate = async () => {
-    if (!profileName.trim() || !user) return;
+    if (!user) return;
+
+    if (hasNumbersInName) {
+      setErrorMsg("Name cannot contain numbers.");
+      return;
+    }
+
+    if (!firstName.trim() || !lastName.trim()) {
+      setErrorMsg("Please enter both First Name and Last Name.");
+      return;
+    }
     
     // Save previous state for rollback
-    const previousName = user.name;
-    const newName = profileName.trim();
+    const previousState = {
+      first_name: user.first_name,
+      last_name: user.last_name,
+      name: user.name,
+    };
     
     // Optimistic Update
-    onUpdateProfile({ name: newName });
+    onUpdateProfile({
+      first_name: firstName.trim(),
+      last_name: lastName.trim(),
+      name: autoFullName,
+    });
     setIsEditing(false);
     setErrorMsg(null);
 
     // Persist to DB
-    const result = await updateProfileName(user.id, newName);
+    const { updateProfileNames } = await import('@/lib/api/auth');
+    const result = await updateProfileNames(user.id, firstName.trim(), lastName.trim());
     
     if (!result.success) {
       // Rollback on failure
-      onUpdateProfile({ name: previousName });
-      setProfileName(previousName);
-      setErrorMsg("Failed to update name. Please try again.");
+      onUpdateProfile(previousState);
+      initNames();
+      setErrorMsg(result.error || "Failed to update name. Please try again.");
     }
   };
 
   const handleUpdatePhone = async () => {
-    if (!profilePhone.trim() || !user) return;
+    const rawPhone = profilePhone.trim().replace(/\D/g, '');
+    if (!/^[6-9][0-9]{9}$/.test(rawPhone)) {
+      setErrorMsg("Please enter a valid 10-digit mobile number.");
+      return;
+    }
+    if (!user) return;
     
     const previousPhone = user.phone;
-    const newPhone = profilePhone.trim();
+    const newPhone = rawPhone;
     
     onUpdateProfile({ phone: newPhone });
     setIsEditingPhone(false);
@@ -69,7 +115,7 @@ export function ProfileSummary({ user, onUpdateProfile, onLogout }: ProfileSumma
     if (!result.success) {
       onUpdateProfile({ phone: previousPhone });
       setProfilePhone(previousPhone || '');
-      setErrorMsg("Failed to update phone number. Please try again.");
+      setErrorMsg(result.error || "Please enter a valid 10-digit mobile number.");
     }
   };
 
@@ -152,23 +198,66 @@ export function ProfileSummary({ user, onUpdateProfile, onLogout }: ProfileSumma
                 initial={{ opacity: 0, y: 5 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -5 }}
-                className="flex items-center gap-2 mb-1"
+                className="space-y-2 mb-2 w-full"
               >
-                <input
-                  type="text"
-                  value={profileName}
-                  onChange={(e) => setProfileName(e.target.value)}
-                  placeholder={t('name')}
-                  className="bg-sand/30 text-dark font-bold text-lg rounded-xl px-3 py-1.5 w-full focus:outline-none focus:ring-2 focus:ring-primary/50 placeholder:text-muted/50"
-                  autoFocus
-                />
-                <button
-                  onClick={handleUpdate}
-                  disabled={!profileName.trim()}
-                  className="bg-primary text-white w-9 h-9 rounded-xl flex items-center justify-center shrink-0 disabled:opacity-50 hover:bg-primary/90 transition-colors"
-                >
-                  <Check className="w-4 h-4" />
-                </button>
+                <div className="flex items-end gap-2">
+                  <div className="grid grid-cols-2 gap-2 flex-1 min-w-0">
+                    <div>
+                      <label className="block text-[10px] font-bold text-muted uppercase mb-0.5">First Name</label>
+                      <input
+                        type="text"
+                        value={firstName}
+                        onChange={(e) => {
+                          setFirstName(e.target.value);
+                          setErrorMsg(null);
+                        }}
+                        placeholder="First Name"
+                        className="bg-sand/30 text-dark font-bold text-sm rounded-xl px-2.5 py-1.5 w-full focus:outline-none focus:ring-2 focus:ring-primary/50 placeholder:text-muted/50"
+                        autoFocus
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-[10px] font-bold text-muted uppercase mb-0.5">Last Name</label>
+                      <input
+                        type="text"
+                        value={lastName}
+                        onChange={(e) => {
+                          setLastName(e.target.value);
+                          setErrorMsg(null);
+                        }}
+                        placeholder="Last Name"
+                        className="bg-sand/30 text-dark font-bold text-sm rounded-xl px-2.5 py-1.5 w-full focus:outline-none focus:ring-2 focus:ring-primary/50 placeholder:text-muted/50"
+                      />
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-1 shrink-0 pb-0.5">
+                    <button
+                      onClick={handleUpdate}
+                      disabled={hasNumbersInName || !firstName.trim() || !lastName.trim()}
+                      className="bg-primary text-white w-8 h-8 rounded-xl flex items-center justify-center shrink-0 disabled:opacity-50 hover:bg-primary/90 transition-colors cursor-pointer"
+                      title="Save name"
+                    >
+                      <Check className="w-4 h-4" />
+                    </button>
+                    <button
+                      onClick={() => {
+                        setIsEditing(false);
+                        initNames();
+                        setErrorMsg(null);
+                      }}
+                      className="bg-sand/40 text-dark w-8 h-8 rounded-xl flex items-center justify-center shrink-0 hover:bg-sand/60 transition-colors cursor-pointer text-xs font-bold"
+                      title="Cancel"
+                    >
+                      ✕
+                    </button>
+                  </div>
+                </div>
+
+                {hasNumbersInName && (
+                  <p className="text-[11px] font-medium text-red-600">
+                    Name cannot contain numbers.
+                  </p>
+                )}
               </motion.div>
             ) : (
               <motion.div
@@ -184,9 +273,9 @@ export function ProfileSummary({ user, onUpdateProfile, onLogout }: ProfileSumma
                 <button
                   onClick={() => {
                     setIsEditing(true);
-                    setProfileName(user?.name || '');
+                    initNames();
                   }}
-                  className="text-muted hover:text-primary transition-colors p-1"
+                  className="text-muted hover:text-primary transition-colors p-1 cursor-pointer"
                   aria-label="Edit name"
                 >
                   <Edit2 className="w-3.5 h-3.5" />
@@ -207,8 +296,9 @@ export function ProfileSummary({ user, onUpdateProfile, onLogout }: ProfileSumma
                   <input
                     type="tel"
                     value={profilePhone}
-                    onChange={(e) => setProfilePhone(e.target.value)}
-                    placeholder="+91..."
+                    onChange={(e) => setProfilePhone(e.target.value.replace(/\D/g, '').slice(0, 10))}
+                    placeholder="0000000000"
+                    maxLength={10}
                     className="bg-sand/30 text-muted font-medium text-sm rounded-lg px-2 py-1 w-full focus:outline-none focus:ring-2 focus:ring-primary/50"
                     autoFocus
                   />

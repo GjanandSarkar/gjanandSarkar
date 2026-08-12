@@ -84,8 +84,9 @@ export default function BecomeSellerPage() {
       setError('Please enter your farm, brand, or business name');
       return;
     }
-    if (!phone.trim() || phone.trim().length < 10) {
-      setError('Please enter a valid 10-digit mobile number for manual verification');
+    const cleanPhone = phone.trim().replace(/\D/g, '');
+    if (!cleanPhone || !/^[6-9][0-9]{9}$/.test(cleanPhone)) {
+      setError('Please enter a valid 10-digit mobile number.');
       return;
     }
     if (!email.trim() || !email.includes('@')) {
@@ -303,8 +304,9 @@ export default function BecomeSellerPage() {
                         type="tel"
                         required
                         value={phone}
-                        onChange={(e) => setPhone(e.target.value)}
-                        placeholder="98250 XXXXX"
+                        onChange={(e) => setPhone(e.target.value.replace(/\D/g, '').slice(0, 10))}
+                        placeholder="9876543210"
+                        maxLength={10}
                         className="w-full px-4 py-2.5 rounded-r-xl border border-gray-300 text-xs text-gray-900 focus:border-[#0f3e26] focus:ring-1 focus:ring-[#0f3e26] outline-none"
                       />
                     </div>

@@ -25,9 +25,9 @@ export const authService = {
    * Send 6-digit OTP to mobile phone
    */
   async sendOtp(phone: string): Promise<{ success: boolean; demoOtp?: string; message: string }> {
-    const cleanPhone = phone.trim().replace(/\s+/g, '');
-    if (!cleanPhone || cleanPhone.length < 10) {
-      throw new ValidationError('A valid 10-digit mobile number is required');
+    const cleanPhone = phone.trim().replace(/\D/g, '');
+    if (!cleanPhone || !/^[6-9][0-9]{9}$/.test(cleanPhone)) {
+      throw new ValidationError('Please enter a valid 10-digit mobile number.');
     }
 
     const otp = generateOtp();
@@ -56,7 +56,10 @@ export const authService = {
     profile: Profile;
     isNewUser: boolean;
   }> {
-    const cleanPhone = phone.trim().replace(/\s+/g, '');
+    const cleanPhone = phone.trim().replace(/\D/g, '');
+    if (!cleanPhone || !/^[6-9][0-9]{9}$/.test(cleanPhone)) {
+      throw new ValidationError('Please enter a valid 10-digit mobile number.');
+    }
     const cleanOtp = otp.trim();
 
     let isValid = false;
@@ -308,6 +311,28 @@ export const authService = {
    * Update profile
    */
   async updateProfile(userId: string, updates: Partial<Profile>): Promise<Profile> {
+    if (
+      (updates.first_name && /\d/.test(updates.first_name)) ||
+      (updates.last_name && /\d/.test(updates.last_name)) ||
+      (updates.name && /\d/.test(updates.name))
+    ) {
+      throw new ValidationError('Name cannot contain numbers.');
+    }
+
+    if (updates.first_name !== undefined || updates.last_name !== undefined) {
+      const current = await this.getProfile(userId);
+      const cleanFirst = updates.first_name !== undefined
+        ? (updates.first_name || '').trim()
+        : (current.first_name || '').trim();
+      const cleanLast = updates.last_name !== undefined
+        ? (updates.last_name || '').trim()
+        : (current.last_name || '').trim();
+      
+      updates.first_name = cleanFirst;
+      updates.last_name = cleanLast;
+      updates.name = `${cleanFirst} ${cleanLast}`.trim();
+    }
+
     try {
       const updated = await profileRepository.update(userId, updates);
       if (updated) return updated;
