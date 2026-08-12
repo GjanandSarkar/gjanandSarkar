@@ -8,7 +8,18 @@ export type CartItemWithDetails = DBCartItem & {
   product_variants: NonNullable<DBCartItem['product_variants']>;
 };
 
+const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
+export function isValidUUID(id?: string | null): boolean {
+  if (!id) return false;
+  return UUID_REGEX.test(id);
+}
+
 export async function getCart(userId: string): Promise<CartItemWithDetails[]> {
+  if (!isValidUUID(userId)) {
+    return [];
+  }
+
   const { data, error } = await supabase
     .from('cart_items')
     .select('*, products(*), product_variants(*)')
@@ -29,6 +40,10 @@ export async function addToCart(
   variantId: string,
   quantity: number = 1
 ): Promise<{ success: boolean; error?: string }> {
+  if (!isValidUUID(userId)) {
+    return { success: false, error: 'Invalid user ID format' };
+  }
+
   const { data: existing } = await supabase
     .from('cart_items')
     .select('id, quantity')
@@ -36,6 +51,7 @@ export async function addToCart(
     .eq('product_id', productId)
     .eq('variant_id', variantId)
     .single();
+
 
   if (existing) {
     const { error } = await supabase
@@ -64,6 +80,10 @@ export async function updateCartItem(
   variantId: string,
   quantity: number
 ): Promise<{ success: boolean; error?: string }> {
+  if (!isValidUUID(userId)) {
+    return { success: false, error: 'Invalid user ID format' };
+  }
+
   if (quantity <= 0) {
     return removeFromCart(userId, productId, variantId);
   }
@@ -84,6 +104,10 @@ export async function removeFromCart(
   productId: string,
   variantId: string
 ): Promise<{ success: boolean; error?: string }> {
+  if (!isValidUUID(userId)) {
+    return { success: false, error: 'Invalid user ID format' };
+  }
+
   const { error } = await supabase
     .from('cart_items')
     .delete()
@@ -96,6 +120,10 @@ export async function removeFromCart(
 }
 
 export async function clearCart(userId: string): Promise<{ success: boolean; error?: string }> {
+  if (!isValidUUID(userId)) {
+    return { success: true };
+  }
+
   try {
     const { data: { session } } = await supabase.auth.getSession();
     if (!session) throw new Error('Not authenticated');
@@ -123,7 +151,7 @@ export async function mergeLocalCart(
   userId: string,
   localItems: { productId: string; variantId: string; quantity: number }[]
 ): Promise<void> {
-  if (localItems.length === 0) return;
+  if (!isValidUUID(userId) || localItems.length === 0) return;
 
   const { data: dbCart } = await supabase
     .from('cart_items')
@@ -147,3 +175,4 @@ export async function mergeLocalCart(
     await supabase.from('cart_items').insert(toInsert).select();
   }
 }
+

@@ -33,14 +33,11 @@ export function Footer() {
           
           {/* Column 1: Brand & Bio (2 cols on lg) */}
           <div className="lg:col-span-2 space-y-4">
-            <Link href="/home" className="inline-flex items-center gap-2">
+            <Link href="/home" className="inline-flex items-center gap-2.5">
               <img 
-                src="/logo.svg" 
+                src="/logo/gjanand sarkar logo.png" 
                 alt="Gjanand Sarkar" 
-                className="h-12 w-auto object-contain brightness-110" 
-                onError={(e) => {
-                  (e.target as HTMLElement).style.display = 'none';
-                }}
+                className="h-10 md:h-12 w-auto object-contain brightness-110 bg-white/10 rounded-full p-0.5" 
               />
               <div className="flex flex-col">
                 <span className="text-2xl font-black text-white tracking-tight">
@@ -51,6 +48,7 @@ export function Footer() {
                 </span>
               </div>
             </Link>
+
 
             <p className="text-xs text-emerald-100/80 leading-relaxed max-w-sm">
               Proudly Indian. Purely Authentic. Connecting conscious families directly with certified Vedic Gaushalas, traditional organic farmers, and regional artisans.

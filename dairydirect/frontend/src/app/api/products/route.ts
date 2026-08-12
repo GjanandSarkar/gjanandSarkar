@@ -22,15 +22,18 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url);
     const category = searchParams.get('category');
     const activeOnly = searchParams.get('activeOnly') !== 'false';
+    const forceRefresh = searchParams.get('forceRefresh') === 'true';
 
-    // Try cache first (60s TTL)
+    // Try cache first (60s TTL) unless forceRefresh is true
     const cacheKey = `${category || 'all'}_${activeOnly}`;
-    const cached = await getCachedProducts(cacheKey);
-    if (cached) {
-      return NextResponse.json(
-        { products: cached },
-        { headers: { 'X-Cache': 'HIT', 'Cache-Control': 'no-store' } }
-      );
+    if (!forceRefresh) {
+      const cached = await getCachedProducts(cacheKey);
+      if (cached) {
+        return NextResponse.json(
+          { products: cached },
+          { headers: { 'X-Cache': 'HIT', 'Cache-Control': 'no-store' } }
+        );
+      }
     }
 
     // Build parameterized query

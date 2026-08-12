@@ -8,7 +8,6 @@ import { useStore } from '@/store/useStore';
 import { addToCart, updateCartItem } from '@/lib/api/cart';
 import type { ProductWithVariants } from '@/lib/api/products';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ProductEditModal } from '@/components/admin/ProductEditModal';
 import Image from 'next/image';
 
 interface ProductCardProps {
@@ -36,7 +35,6 @@ export function ProductCard({
 
   const [product, setProduct] = useState<ProductWithVariants>(initialProduct);
   const [isDeleted, setIsDeleted] = useState(false);
-  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
 
   useEffect(() => {
     setProduct(initialProduct);
@@ -182,10 +180,10 @@ export function ProductCard({
               onClick={(e) => {
                 e.preventDefault();
                 e.stopPropagation();
-                setIsEditModalOpen(true);
+                router.push(`/admin/products/edit/${product.id}`);
               }}
-              className="absolute top-2 right-10 w-7 h-7 rounded-full bg-white shadow-md border border-gray-200 flex items-center justify-center transition-all hover:scale-110 active:scale-95 z-20 text-[#0f3e26]"
-              title="Admin: Quick Edit"
+              className="absolute top-2 right-10 w-7 h-7 rounded-full bg-white shadow-md border border-gray-200 flex items-center justify-center transition-all hover:scale-110 active:scale-95 z-20 text-[#0f3e26] cursor-pointer"
+              title="Admin: Edit Product"
             >
               <Pencil className="w-3.5 h-3.5" strokeWidth={2.5} />
             </button>
@@ -373,23 +371,6 @@ export function ProductCard({
           </>
         )}
       </AnimatePresence>
-
-      {/* Admin Edit / Delete Modal */}
-      {user?.role === 'admin' && (
-        <ProductEditModal
-          product={product}
-          isOpen={isEditModalOpen}
-          onClose={() => setIsEditModalOpen(false)}
-          onProductUpdated={(updated) => {
-            setProduct(updated);
-            if (onProductUpdated) onProductUpdated(updated);
-          }}
-          onProductDeleted={(id) => {
-            setIsDeleted(true);
-            if (onProductDeleted) onProductDeleted(id);
-          }}
-        />
-      )}
     </>
   );
 }

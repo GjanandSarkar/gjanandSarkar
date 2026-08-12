@@ -1,4 +1,4 @@
-import { query } from '../config/database';
+import { query, getSupabaseAdmin } from '../config/database';
 import { Product, ProductVariant } from '../models/product';
 
 const now = new Date().toISOString();
@@ -336,8 +336,43 @@ export const productRepository = {
         return { products: dataRes.rows, total };
       }
     } catch {
-      // Return default products catalog
+      // Try Supabase fallback first
+      try {
+        const supabase = getSupabaseAdmin();
+        if (supabase) {
+          let query = supabase.from('products').select('*, product_variants(*)', { count: 'exact' }).eq('is_active', true);
+
+          if (category) {
+            query = query.eq('category', category);
+          }
+          if (isDealOfTheDay !== undefined) {
+            query = query.eq('is_deal_of_the_day', isDealOfTheDay);
+          }
+          if (search) {
+            query = query.or(`name.ilike.%${search}%,category.ilike.%${search}%`);
+          }
+
+          const { data, error, count } = await query
+            .order('sort_order', { ascending: true })
+            .order('created_at', { ascending: false })
+            .range(offset, offset + limit - 1);
+
+          if (!error && data && data.length > 0) {
+            const formattedProducts = data.map((p: any) => {
+              const { product_variants, ...rest } = p;
+              return {
+                ...rest,
+                variants: product_variants || []
+              };
+            });
+            return { products: formattedProducts, total: count || formattedProducts.length };
+          }
+        }
+      } catch (err) {
+        // Silent fail, proceed to default products
+      }
     }
+
 
     let filtered = DEFAULT_PRODUCTS;
     if (category) {
@@ -393,7 +428,21 @@ export const productRepository = {
         return res.rows[0];
       }
     } catch {
-      // fallback
+      const sb = getSupabaseAdmin();
+      if (sb) {
+        const { data: prod } = await sb
+          .from('products')
+          .select('*, product_variants(*)')
+          .eq('id', id)
+          .maybeSingle();
+
+        if (prod) {
+          return {
+            ...prod,
+            variants: prod.product_variants || [],
+          };
+        }
+      }
     }
 
     return DEFAULT_PRODUCTS.find((p) => p.id === id) || null;
@@ -412,7 +461,21 @@ export const productRepository = {
         return res.rows[0];
       }
     } catch {
-      // fallback
+      const sb = getSupabaseAdmin();
+      if (sb) {
+        const { data: v } = await sb
+          .from('product_variants')
+          .select('*, products(name)')
+          .eq('id', variantId)
+          .maybeSingle();
+        
+        if (v) {
+          return {
+            ...v,
+            product_name: v.products?.name || ''
+          };
+        }
+      }
     }
 
     for (const prod of DEFAULT_PRODUCTS) {
@@ -436,26 +499,50 @@ export const productRepository = {
     discount_pct?: number;
     tags?: string[];
   }): Promise<Product> {
-    const res = await query<Product>(
-      `INSERT INTO products (
-        name, category, description, image_url, seller_id, brand,
-        state_origin, is_deal_of_the_day, discount_pct, tags
-      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
-      RETURNING *`,
-      [
-        data.name,
-        data.category,
-        data.description || null,
-        data.image_url || null,
-        data.seller_id || null,
-        data.brand || 'Gjanand Farm',
-        data.state_origin || 'Gujarat',
-        data.is_deal_of_the_day || false,
-        data.discount_pct || 0,
-        data.tags || [],
-      ]
-    );
-    return res.rows[0];
+    try {
+      const res = await query<Product>(
+        `INSERT INTO products (
+          name, category, description, image_url, seller_id, brand,
+          state_origin, is_deal_of_the_day, discount_pct, tags
+        ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
+        RETURNING *`,
+        [
+          data.name,
+          data.category,
+          data.description || null,
+          data.image_url || null,
+          data.seller_id || null,
+          data.brand || 'Gjanand Farm',
+          data.state_origin || 'Gujarat',
+          data.is_deal_of_the_day || false,
+          data.discount_pct || 0,
+          data.tags || [],
+        ]
+      );
+      return res.rows[0];
+    } catch {
+      const sb = getSupabaseAdmin();
+      if (sb) {
+        const { data: created, error } = await sb
+          .from('products')
+          .insert({
+            name: data.name,
+            category: data.category,
+            description: data.description || null,
+            image_url: data.image_url || null,
+            seller_id: data.seller_id || null,
+            brand: data.brand || 'Gjanand Farm',
+            state_origin: data.state_origin || 'Gujarat',
+            is_deal_of_the_day: data.is_deal_of_the_day || false,
+            discount_pct: data.discount_pct || 0,
+            tags: data.tags || [],
+          })
+          .select('*')
+          .single();
+        if (!error && created) return created;
+      }
+      throw new Error('Failed to create product');
+    }
   },
 
   async update(id: string, updates: Partial<Product>): Promise<Product | null> {
@@ -487,13 +574,23 @@ export const productRepository = {
 
     if (values.length === 0) return this.findById(id);
 
-    values.push(id);
-    const res = await query<Product>(
-      `UPDATE products SET ${fields.join(', ')} WHERE id = $${idx} RETURNING *`,
-      values
-    );
-
-    return res.rows[0] ? this.findById(res.rows[0].id) : null;
+    try {
+      values.push(id);
+      const res = await query<Product>(
+        `UPDATE products SET ${fields.join(', ')} WHERE id = $${idx} RETURNING *`,
+        values
+      );
+      return res.rows[0] ? this.findById(res.rows[0].id) : null;
+    } catch {
+      const sb = getSupabaseAdmin();
+      if (sb) {
+        const cleanUpdates: any = { ...updates, updated_at: new Date().toISOString() };
+        delete cleanUpdates.variants;
+        const { error } = await sb.from('products').update(cleanUpdates).eq('id', id);
+        if (!error) return this.findById(id);
+      }
+      return null;
+    }
   },
 
   async delete(id: string, permanent = false): Promise<boolean> {
@@ -504,13 +601,31 @@ export const productRepository = {
   },
 
   async softDelete(id: string): Promise<boolean> {
-    const res = await query('UPDATE products SET is_active = false, updated_at = now() WHERE id = $1', [id]);
-    return (res.rowCount ?? 0) > 0;
+    try {
+      const res = await query('UPDATE products SET is_active = false, updated_at = now() WHERE id = $1', [id]);
+      return (res.rowCount ?? 0) > 0;
+    } catch {
+      const sb = getSupabaseAdmin();
+      if (sb) {
+        const { error } = await sb.from('products').update({ is_active: false, updated_at: new Date().toISOString() }).eq('id', id);
+        return !error;
+      }
+      return false;
+    }
   },
 
   async hardDelete(id: string): Promise<boolean> {
-    const res = await query('DELETE FROM products WHERE id = $1', [id]);
-    return (res.rowCount ?? 0) > 0;
+    try {
+      const res = await query('DELETE FROM products WHERE id = $1', [id]);
+      return (res.rowCount ?? 0) > 0;
+    } catch {
+      const sb = getSupabaseAdmin();
+      if (sb) {
+        const { error } = await sb.from('products').delete().eq('id', id);
+        return !error;
+      }
+      return false;
+    }
   },
 
   async createVariant(data: {
@@ -524,25 +639,34 @@ export const productRepository = {
     batch_number?: string;
     expiry_date?: string;
   }): Promise<ProductVariant> {
-    const res = await query<ProductVariant>(
-      `INSERT INTO product_variants (
-        product_id, weight, price, original_price, cost_price,
-        stock, low_stock_threshold, batch_number, expiry_date
-      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
-      RETURNING *`,
-      [
-        data.product_id,
-        data.weight,
-        data.price,
-        data.original_price || null,
-        data.cost_price,
-        data.stock,
-        data.low_stock_threshold || 10,
-        data.batch_number || null,
-        data.expiry_date || null,
-      ]
-    );
-    return res.rows[0];
+    try {
+      const res = await query<ProductVariant>(
+        `INSERT INTO product_variants (
+          product_id, weight, price, original_price, cost_price,
+          stock, low_stock_threshold, batch_number, expiry_date
+        ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+        RETURNING *`,
+        [
+          data.product_id,
+          data.weight,
+          data.price,
+          data.original_price || null,
+          data.cost_price,
+          data.stock,
+          data.low_stock_threshold || 10,
+          data.batch_number || null,
+          data.expiry_date || null,
+        ]
+      );
+      return res.rows[0];
+    } catch {
+      const sb = getSupabaseAdmin();
+      if (sb) {
+        const { data: vCreated, error } = await sb.from('product_variants').insert(data).select('*').single();
+        if (!error && vCreated) return vCreated;
+      }
+      throw new Error('Failed to create variant');
+    }
   },
 
   async updateVariant(id: string, updates: Partial<ProductVariant>): Promise<ProductVariant | null> {
@@ -571,12 +695,21 @@ export const productRepository = {
 
     if (values.length === 0) return null;
 
-    values.push(id);
-    const res = await query<ProductVariant>(
-      `UPDATE product_variants SET ${fields.join(', ')} WHERE id = $${idx} RETURNING *`,
-      values
-    );
-    return res.rows[0] || null;
+    try {
+      values.push(id);
+      const res = await query<ProductVariant>(
+        `UPDATE product_variants SET ${fields.join(', ')} WHERE id = $${idx} RETURNING *`,
+        values
+      );
+      return res.rows[0] || null;
+    } catch {
+      const sb = getSupabaseAdmin();
+      if (sb) {
+        const { data: vUpdated, error } = await sb.from('product_variants').update(updates).eq('id', id).select('*').maybeSingle();
+        if (!error && vUpdated) return vUpdated;
+      }
+      return null;
+    }
   },
 
   async updateVariantStock(

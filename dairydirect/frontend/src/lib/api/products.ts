@@ -10,6 +10,12 @@ export type ProductWithVariants = {
   image_url: string | null;
   is_freshness_guarantee: boolean;
   is_active: boolean;
+  is_deal_of_the_day?: boolean;
+  discount_pct?: number;
+  brand?: string;
+  state_origin?: string;
+  rating?: number;
+  reviews_count?: number;
   created_at: string;
   product_variants: {
     id: string;
@@ -20,6 +26,7 @@ export type ProductWithVariants = {
     stock: number;
   }[];
 };
+
 
 export type NewProductInput = {
   name: string;
@@ -37,12 +44,13 @@ export type NewVariantInput = {
 };
 
 export async function getProducts(
-  options: { category?: string; activeOnly?: boolean } = {}
+  options: { category?: string; activeOnly?: boolean; forceRefresh?: boolean } = {}
 ): Promise<ProductWithVariants[]> {
   try {
     const result = await api.products.get({
       category: options.category,
       activeOnly: options.activeOnly,
+      forceRefresh: options.forceRefresh,
     });
     return result.products ?? [];
   } catch (error) {
@@ -126,7 +134,7 @@ export async function createProduct(
 ): Promise<{ success: boolean; id?: string; error?: string }> {
   try {
     const result = await api.products.create({ ...product, variants });
-    return { success: result.success, id: result.id };
+    return { success: result.success, id: (result as any).productId || result.id };
   } catch (error: any) {
     return { success: false, error: error.message };
   }
@@ -168,6 +176,14 @@ export async function uploadProductImage(
   file: File
 ): Promise<{ url?: string; error?: string }> {
   try {
+    // 1. Try ImageKit upload via backend API
+    const { uploadImageToImageKit } = await import('./upload');
+    const imageKitRes = await uploadImageToImageKit(file, { folder: '/products', tags: ['product'] });
+    if (imageKitRes.url) {
+      return { url: imageKitRes.url };
+    }
+
+    // 2. Supabase Storage fallback
     const fileExt = file.name.split('.').pop();
     const fileName = `${Math.random()}.${fileExt}`;
     const filePath = `${fileName}`;
@@ -186,4 +202,4 @@ export async function uploadProductImage(
   } catch (error: any) {
     return { error: error.message };
   }
-}
+}

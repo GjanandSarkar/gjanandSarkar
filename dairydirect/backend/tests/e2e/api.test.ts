@@ -378,6 +378,32 @@ export async function runE2ETests(): Promise<{ name: string; passed: boolean; er
       results.push({ name: 'HTTP E2E: GET /api/admin/settings', passed: false, error: err.message });
     }
 
+    // ─── 12b. ImageKit Upload Endpoints E2E Tests ─────────────────
+    try {
+      const res = await makeRequest('/api/upload/auth');
+      if (res.status !== 200 || !res.data.token) {
+        throw new Error(`Expected 200 with token, got ${res.status}`);
+      }
+      results.push({ name: 'HTTP E2E: GET /api/upload/auth', passed: true });
+    } catch (err: any) {
+      results.push({ name: 'HTTP E2E: GET /api/upload/auth', passed: false, error: err.message });
+    }
+
+    try {
+      const dummyBase64 = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==';
+      const res = await makeRequest('/api/upload/image', {
+        method: 'POST',
+        body: { image: dummyBase64, fileName: 'e2e_test_image.png', folder: '/test' },
+      });
+      if (res.status !== 201 || !res.data.url) {
+        throw new Error(`Expected 201 with url, got ${res.status}`);
+      }
+      results.push({ name: 'HTTP E2E: POST /api/upload/image (JSON Base64)', passed: true });
+    } catch (err: any) {
+      results.push({ name: 'HTTP E2E: POST /api/upload/image (JSON Base64)', passed: false, error: err.message });
+    }
+
+
     // ─── 13. Security & RBAC Protection Tests ─────────────────────
     try {
       // Non-admin customer attempting to access /api/admin/stats

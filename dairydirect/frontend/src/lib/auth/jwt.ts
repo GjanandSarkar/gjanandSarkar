@@ -200,7 +200,23 @@ export function extractTokenFromRequest(request: Request): string | null {
   const cookieHeader = request.headers.get('cookie');
   if (cookieHeader) {
     const cookies = parseCookies(cookieHeader);
-    return cookies[ACCESS_TOKEN_COOKIE] || null;
+    if (cookies[ACCESS_TOKEN_COOKIE]) {
+      return cookies[ACCESS_TOKEN_COOKIE];
+    }
+    for (const [k, v] of Object.entries(cookies)) {
+      if (k.startsWith('sb-') && (k.includes('-auth-token') || k.includes('access-token') || k.includes('-token'))) {
+        try {
+          if (v.startsWith('[')) {
+            const parsed = JSON.parse(v);
+            if (typeof parsed[0] === 'string') return parsed[0];
+          } else if (v.startsWith('{')) {
+            const parsed = JSON.parse(v);
+            if (parsed.access_token) return parsed.access_token;
+          }
+          return v;
+        } catch {}
+      }
+    }
   }
 
   return null;

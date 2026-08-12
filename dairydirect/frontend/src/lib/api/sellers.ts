@@ -51,7 +51,7 @@ export interface SellerRegistrationPayload {
 }
 
 export interface SellerDashboardData {
-  store: {
+  store?: {
     id: string;
     storeName: string;
     state: string;
@@ -59,8 +59,18 @@ export interface SellerDashboardData {
     commissionRate: number;
     status: string;
     totalSales: number;
-  };
+  } | null;
   inquiry?: SellerInquiry | null;
+  products?: Array<{
+    id: string;
+    name: string;
+    category?: string;
+    price: number;
+    stock: number;
+    status: string;
+    rating: number;
+    image_url?: string;
+  }>;
   metrics: {
     grossRevenue: number;
     platformCommission: number;
@@ -143,6 +153,22 @@ export async function updateSellerInquiryStatus(id: string, status: string, admi
 }
 
 /**
+ * Delete a seller inquiry (for Admin)
+ */
+export async function deleteSellerInquiry(id: string) {
+  const res = await fetch(`/api/sellers/inquiries?id=${encodeURIComponent(id)}`, {
+    method: 'DELETE',
+  });
+
+  if (!res.ok) {
+    const data = await res.json().catch(() => ({}));
+    throw new Error(data.error || 'Failed to delete inquiry');
+  }
+
+  return await res.json();
+}
+
+/**
  * Legacy direct register helper (defaults to inquiry submission)
  */
 export async function registerSeller(payload: SellerRegistrationPayload) {
@@ -187,16 +213,9 @@ export async function getSellerDashboard(userId: string): Promise<SellerDashboar
   }
 
   return {
-    store: {
-      id: 'store-demo',
-      storeName: 'Gir Organic & Vedic Dairy',
-      state: 'Gujarat',
-      plan: 'growth',
-      commissionRate: 5.0,
-      status: 'pending_review',
-      totalSales: 0,
-    },
+    store: null,
     inquiry: null,
+    products: [],
     metrics: {
       grossRevenue: 0,
       platformCommission: 0,

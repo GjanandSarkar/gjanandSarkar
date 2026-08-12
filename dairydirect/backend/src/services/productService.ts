@@ -61,11 +61,54 @@ export const productService = {
   },
 
   async updateProduct(id: string, updates: Partial<Product>): Promise<Product> {
-    const updated = await productRepository.update(id, updates);
+    const { variants, ...productUpdates } = updates;
+
+    // Validate that price >= cost_price for each variant (Profit margin guard)
+    if (variants) {
+      for (const v of variants) {
+        const costPrice = v.cost_price ?? (v as any).costPrice;
+        if (costPrice !== undefined && v.price < costPrice) {
+          throw new ValidationError(
+            `Selling price (₹${v.price}) cannot be less than cost price (₹${costPrice}) for variant ${v.weight}`
+          );
+        }
+      }
+    }
+
+    const updated = await productRepository.update(id, productUpdates);
     if (!updated) {
       throw new NotFoundError('Product not found');
     }
-    return updated;
+
+    if (variants) {
+      const existingProduct = await productRepository.findById(id);
+      const existingVariants = existingProduct?.variants || [];
+      const existingIds = existingVariants.map((v) => v.id);
+      
+      const incomingIds = variants.map((v: any) => v.id).filter(Boolean);
+
+      for (const v of variants) {
+        if (v.id && existingIds.includes(v.id)) {
+          await productRepository.updateVariant(v.id, v);
+        } else {
+          await productRepository.createVariant({
+            ...v,
+            product_id: id,
+            cost_price: v.cost_price || 0,
+            stock: v.stock || 0,
+          } as any);
+        }
+      }
+
+      for (const oldId of existingIds) {
+        if (oldId && !incomingIds.includes(oldId)) {
+          await productRepository.updateVariant(oldId, { is_active: false });
+        }
+      }
+    }
+
+    const finalProduct = await productRepository.findById(id);
+    return finalProduct!;
   },
 
   async deleteProduct(id: string, permanent = false): Promise<boolean> {

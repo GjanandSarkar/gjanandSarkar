@@ -212,29 +212,48 @@ export const profileRepository = {
     return this.findById(id);
   },
 
-  async listCustomers(params: { search?: string; limit?: number; offset?: number }): Promise<{ customers: Profile[]; total: number }> {
+  async listCustomers(params: { search?: string; limit?: number; offset?: number }): Promise<{ customers: any[]; total: number }> {
     const { search, limit = 50, offset = 0 } = params;
-    let whereClause = 'WHERE role = $1';
+    let whereClause = 'WHERE p.role = $1';
     const values: any[] = ['customer'];
     let idx = 2;
 
     if (search) {
-      whereClause += ` AND (name ILIKE $${idx} OR phone ILIKE $${idx} OR email ILIKE $${idx})`;
+      whereClause += ` AND (p.name ILIKE $${idx} OR p.phone ILIKE $${idx} OR p.email ILIKE $${idx})`;
       values.push(`%${search}%`);
       idx++;
     }
 
     try {
-      const countRes = await query<{ count: string }>(`SELECT COUNT(*) FROM profiles ${whereClause}`, values);
+      const countRes = await query<{ count: string }>(`SELECT COUNT(*) FROM profiles p ${whereClause}`, values);
       const total = parseInt(countRes.rows[0]?.count || '0', 10);
 
       values.push(limit, offset);
-      const dataRes = await query<Profile>(
-        `SELECT * FROM profiles ${whereClause} ORDER BY created_at DESC LIMIT $${idx++} OFFSET $${idx++}`,
+      const dataRes = await query<any>(
+        `SELECT 
+           p.*,
+           COUNT(DISTINCT o.id) as total_orders,
+           COALESCE(SUM(o.total_amount) FILTER (WHERE o.status != 'cancelled'), 0) as total_spent,
+           COUNT(DISTINCT s.id) FILTER (WHERE s.status = 'active') as active_subscriptions
+         FROM profiles p
+         LEFT JOIN orders o ON o.user_id = p.id
+         LEFT JOIN subscriptions s ON s.user_id = p.id
+         ${whereClause}
+         GROUP BY p.id
+         ORDER BY p.created_at DESC
+         LIMIT $${idx++} OFFSET $${idx++}`,
         values
       );
 
-      return { customers: dataRes.rows, total };
+      return {
+        customers: dataRes.rows.map((c) => ({
+          ...c,
+          total_orders: parseInt(c.total_orders || '0', 10),
+          total_spent: parseFloat(c.total_spent || '0'),
+          active_subscriptions: parseInt(c.active_subscriptions || '0', 10),
+        })),
+        total,
+      };
     } catch {
       const supabase = getSupabaseAdmin();
       if (supabase) {
@@ -244,7 +263,41 @@ export const profileRepository = {
         }
         const { data, count, error } = await req.range(offset, offset + limit - 1).order('created_at', { ascending: false });
         if (!error && data) {
-          return { customers: data as Profile[], total: count || data.length };
+          const customerIds = data.map((d: any) => d.id);
+          let ordersMap: Record<string, { count: number; spent: number }> = {};
+          let subsMap: Record<string, number> = {};
+
+          if (customerIds.length > 0) {
+            try {
+              const [oRes, sRes] = await Promise.all([
+                supabase.from('orders').select('user_id, total_amount, status').in('user_id', customerIds),
+                supabase.from('subscriptions').select('user_id, status').in('user_id', customerIds).eq('status', 'active'),
+              ]);
+              if (oRes.data) {
+                for (const ord of oRes.data) {
+                  if (ord.status !== 'cancelled') {
+                    if (!ordersMap[ord.user_id]) ordersMap[ord.user_id] = { count: 0, spent: 0 };
+                    ordersMap[ord.user_id].count += 1;
+                    ordersMap[ord.user_id].spent += parseFloat(ord.total_amount || '0');
+                  }
+                }
+              }
+              if (sRes.data) {
+                for (const sub of sRes.data) {
+                  subsMap[sub.user_id] = (subsMap[sub.user_id] || 0) + 1;
+                }
+              }
+            } catch {}
+          }
+
+          const enriched = data.map((p: any) => ({
+            ...p,
+            total_orders: ordersMap[p.id]?.count || 0,
+            total_spent: ordersMap[p.id]?.spent || 0,
+            active_subscriptions: subsMap[p.id] || 0,
+          }));
+
+          return { customers: enriched, total: count || data.length };
         }
       }
     }

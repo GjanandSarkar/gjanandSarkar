@@ -46,6 +46,12 @@ export const config = {
   razorpayKeySecret: process.env.RAZORPAY_KEY_SECRET || 'placeholder_secret',
   razorpayWebhookSecret: process.env.RAZORPAY_WEBHOOK_SECRET || '',
 
+  // ImageKit
+  imagekitPublicKey: process.env.IMAGEKIT_PUBLIC_KEY || process.env.NEXT_PUBLIC_IMAGEKIT_PUBLIC_KEY || '',
+  imagekitPrivateKey: process.env.IMAGEKIT_PRIVATE_KEY || '',
+  imagekitUrlEndpoint: process.env.IMAGEKIT_URL_ENDPOINT || process.env.NEXT_PUBLIC_IMAGEKIT_URL_ENDPOINT || '',
+
   // Demo
   demoMode: process.env.DEMO_MODE !== 'false',
 };
+

@@ -3,11 +3,15 @@ const API_BASE = typeof window !== 'undefined' ? '' : (process.env.NEXT_PUBLIC_A
 async function getAuthToken(): Promise<string | null> {
   if (typeof window === 'undefined') return null;
   try {
-    // 1. Direct JWT stored from OTP verification
-    const localToken = localStorage.getItem('token') || localStorage.getItem('auth_token');
+    // 1. Direct JWT stored in localStorage
+    const localToken = localStorage.getItem('token') || localStorage.getItem('auth_token') || localStorage.getItem('gs_access_token');
     if (localToken) return localToken;
 
-    // 2. Zustand persistent store
+    // 2. Cookie extraction
+    const match = document.cookie.match(/gs_access_token=([^;]+)/);
+    if (match && match[1]) return decodeURIComponent(match[1]);
+
+    // 3. Zustand persistent store
     const storeRaw = localStorage.getItem('gjanand-sarkar-storage');
     if (storeRaw) {
       try {
@@ -18,7 +22,7 @@ async function getAuthToken(): Promise<string | null> {
       }
     }
 
-    // 3. Supabase Auth session
+    // 4. Supabase Auth session
     const { supabase } = await import('@/lib/supabase');
     const { data: { session } } = await supabase.auth.getSession();
     return session?.access_token ?? null;
@@ -33,6 +37,32 @@ async function fetchApi<T = any>(
 ): Promise<T> {
   const token = await getAuthToken();
 
+  // Extract client-side store role & user details for fallback headers
+  const authHeaders: Record<string, string> = {};
+  if (typeof window !== 'undefined') {
+    try {
+      const storeRaw = localStorage.getItem('gjanand-sarkar-storage');
+      if (storeRaw) {
+        const parsed = JSON.parse(storeRaw);
+        const u = parsed?.state?.user;
+        if (u) {
+          if (u.role === 'admin') {
+            authHeaders['x-admin-role'] = 'true';
+          }
+          if (u.id) {
+            authHeaders['x-user-id'] = u.id;
+          }
+          if (u.email) {
+            authHeaders['x-user-email'] = u.email;
+          }
+          if (u.phone) {
+            authHeaders['x-user-phone'] = u.phone;
+          }
+        }
+      }
+    } catch {}
+  }
+
   const url = endpoint.startsWith('http') ? endpoint : `${API_BASE}${endpoint}`;
 
   const res = await fetch(url, {
@@ -40,6 +70,7 @@ async function fetchApi<T = any>(
     headers: {
       'Content-Type': 'application/json',
       ...(token ? { 'Authorization': `Bearer ${token}` } : {}),
+      ...authHeaders,
       ...options.headers,
     },
     credentials: 'include',
@@ -48,7 +79,15 @@ async function fetchApi<T = any>(
   const data = await res.json();
 
   if (!res.ok) {
-    throw new Error(data.error?.message || data.error || data.message || 'API error');
+    let errMsg = data.error?.message || data.error || data.message || 'API error';
+    
+    // Format Zod validation details nicely for the UI
+    if (data.error?.code === 'VALIDATION_ERROR' && Array.isArray(data.error.details)) {
+      const detailsStr = data.error.details.map((d: any) => `${d.field}: ${d.message}`).join(' | ');
+      errMsg = `Validation Error: ${detailsStr}`;
+    }
+    
+    throw new Error(errMsg);
   }
 
   // Handle standard { success: true, data: {...} } envelope or direct payload
@@ -83,10 +122,14 @@ export const api = {
   },
 
   products: {
-    get: (params?: { category?: string; activeOnly?: boolean }) => {
+    get: (params?: { category?: string; activeOnly?: boolean; forceRefresh?: boolean }) => {
       const searchParams = new URLSearchParams();
       if (params?.category) searchParams.set('category', params.category);
       if (params?.activeOnly !== undefined) searchParams.set('activeOnly', String(params.activeOnly));
+      if (params?.forceRefresh) {
+        searchParams.set('forceRefresh', 'true');
+        searchParams.set('t', String(Date.now()));
+      }
       const query = searchParams.toString();
       return fetchApi<{ products: any[] }>(`/api/products${query ? `?${query}` : ''}`);
     },

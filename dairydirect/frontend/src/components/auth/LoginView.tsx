@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, Suspense } from 'react';
+import React, { useState, useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
@@ -11,7 +11,7 @@ import {
   Sparkles, 
   ShieldCheck, 
   Store, 
-  ArrowRight,
+  ArrowRight, 
   CheckCircle2 
 } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
@@ -30,6 +30,7 @@ function LoginScreenInner() {
   // Prevent redirect loops to login page itself
   const nextParam = (redirectUrl.startsWith('/login') || redirectUrl.startsWith('/auth/login')) ? '/home' : redirectUrl;
 
+  const [isMounted, setIsMounted] = useState(false);
   const [mode, setMode] = useState<'password' | 'quick'>('password');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -38,6 +39,11 @@ function LoginScreenInner() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
   const [successMsg, setSuccessMsg] = useState('');
+
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
+
 
   // ── Handle Email/Password Login & Sign Up ─────────────────
   const handleEmailAuth = async (e: React.FormEvent) => {
@@ -261,7 +267,7 @@ function LoginScreenInner() {
 
     if (role === 'admin') {
       demoPayload = {
-        id: 'admin-demo-user-id',
+        id: 'a0000000-0000-0000-0000-000000000001',
         name: 'Gjanand Sarkar Admin',
         email: 'admin@gjanandsarkar.com',
         phone: '+91 98765 43210',
@@ -270,7 +276,7 @@ function LoginScreenInner() {
       targetUrl = '/admin';
     } else if (role === 'seller') {
       demoPayload = {
-        id: 'seller-demo-user-id',
+        id: 'a0000000-0000-0000-0000-000000000002',
         name: 'Gir Organic Farms',
         email: 'seller@gjanandsarkar.com',
         phone: '+91 98234 56789',
@@ -279,7 +285,7 @@ function LoginScreenInner() {
       targetUrl = '/seller/dashboard';
     } else {
       demoPayload = {
-        id: 'customer-demo-user-id',
+        id: 'a0000000-0000-0000-0000-000000000003',
         name: 'Rajesh Sharma',
         email: 'customer@gjanandsarkar.com',
         phone: '+91 91234 56789',
@@ -319,20 +325,21 @@ function LoginScreenInner() {
     if (role === 'seller') {
       setSellerStore({
         id: 'store-demo-001',
-        user_id: 'seller-demo-user-id',
+        user_id: 'a0000000-0000-0000-0000-000000000002',
         store_name: 'Gir Organic & Vedic Dairy',
         slug: 'gir-organic-dairy',
         state: 'Gujarat',
         plan: 'growth',
         commission_rate: 5,
         status: 'active',
-        total_revenue: 284500
+        total_revenue: 0
       });
     }
 
     setIsLoading(false);
     router.replace(targetUrl);
   };
+
 
 
   return (
@@ -346,10 +353,12 @@ function LoginScreenInner() {
         
         {/* Brand Header */}
         <div className="flex flex-col items-center mb-6 text-center">
-          <Link href="/home" className="inline-flex items-center gap-2.5 mb-3 group">
-            <div className="w-12 h-12 rounded-2xl bg-[#0f3e26] flex items-center justify-center shadow-lg border border-[#c88a23]/30 group-hover:scale-105 transition-transform">
-              <span className="text-white font-black text-xl tracking-tight">GS</span>
-            </div>
+          <Link href="/home" className="inline-flex items-center gap-3 mb-3 group">
+            <img 
+              src="/logo/gjanand sarkar logo.png" 
+              alt="Gjanand Sarkar" 
+              className="h-12 w-auto object-contain drop-shadow-md group-hover:scale-105 transition-transform" 
+            />
             <div className="flex flex-col text-left">
               <span className="text-2xl font-black text-[#0f3e26] tracking-tight leading-none">
                 Gjanand<span className="text-[#c88a23]">.</span>
@@ -359,18 +368,20 @@ function LoginScreenInner() {
               </span>
             </div>
           </Link>
+
           <p className="text-xs text-gray-500 font-medium">
             India's Purest Heritage & Artisanal Marketplace
           </p>
         </div>
 
         {/* Main Card */}
-        <div className="bg-white rounded-2xl border border-gray-200/90 shadow-xl p-6 sm:p-8 backdrop-blur-sm">
+        <div className="bg-white rounded-2xl border border-gray-200/90 shadow-xl p-6 sm:p-8 backdrop-blur-sm" suppressHydrationWarning>
           
           {/* Mode Switcher */}
-          <div className="grid grid-cols-2 gap-1 p-1 bg-gray-100/80 rounded-xl mb-6 text-xs font-bold">
+          <div className="grid grid-cols-2 gap-1 p-1 bg-gray-100/80 rounded-xl mb-6 text-xs font-bold" suppressHydrationWarning>
             <button
               type="button"
+              suppressHydrationWarning
               onClick={() => { setMode('password'); setError(''); }}
               className={`py-2 rounded-lg transition-all ${
                 mode === 'password'
@@ -382,6 +393,7 @@ function LoginScreenInner() {
             </button>
             <button
               type="button"
+              suppressHydrationWarning
               onClick={() => { setMode('quick'); setError(''); }}
               className={`py-2 rounded-lg transition-all flex items-center justify-center gap-1 ${
                 mode === 'quick'
@@ -395,22 +407,22 @@ function LoginScreenInner() {
           </div>
 
           {error && (
-            <div className="mb-4 p-3 rounded-xl bg-red-50 border border-red-200 text-xs font-semibold text-red-700">
+            <div className="mb-4 p-3 rounded-xl bg-red-50 border border-red-200 text-xs font-semibold text-red-700" suppressHydrationWarning>
               {error}
             </div>
           )}
 
           {successMsg && (
-            <div className="mb-4 p-3 rounded-xl bg-emerald-50 border border-emerald-200 text-xs font-bold text-[#0f3e26] flex items-center gap-2">
+            <div className="mb-4 p-3 rounded-xl bg-emerald-50 border border-emerald-200 text-xs font-bold text-[#0f3e26] flex items-center gap-2" suppressHydrationWarning>
               <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
               <span>{successMsg}</span>
             </div>
           )}
 
           {mode === 'password' ? (
-            <form onSubmit={handleEmailAuth} className="space-y-4">
+            <form onSubmit={handleEmailAuth} className="space-y-4" suppressHydrationWarning>
               {isSignUp && (
-                <div>
+                <div suppressHydrationWarning>
                   <label className="block text-xs font-bold text-gray-700 mb-1">
                     Full Name
                   </label>
@@ -418,6 +430,7 @@ function LoginScreenInner() {
                     <User className="w-4 h-4 text-gray-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
                     <input
                       type="text"
+                      suppressHydrationWarning
                       value={name}
                       onChange={(e) => setName(e.target.value)}
                       placeholder="e.g. Ramesh Patel"
@@ -428,7 +441,7 @@ function LoginScreenInner() {
                 </div>
               )}
 
-              <div>
+              <div suppressHydrationWarning>
                 <label className="block text-xs font-bold text-gray-700 mb-1">
                   Email Address
                 </label>
@@ -436,6 +449,7 @@ function LoginScreenInner() {
                   <Mail className="w-4 h-4 text-gray-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
                   <input
                     type="email"
+                    suppressHydrationWarning
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     placeholder="you@example.com"
@@ -445,7 +459,7 @@ function LoginScreenInner() {
                 </div>
               </div>
 
-              <div>
+              <div suppressHydrationWarning>
                 <div className="flex items-center justify-between mb-1">
                   <label className="text-xs font-bold text-gray-700">
                     Password
@@ -455,6 +469,7 @@ function LoginScreenInner() {
                   <Lock className="w-4 h-4 text-gray-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
                   <input
                     type="password"
+                    suppressHydrationWarning
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     placeholder="••••••••"
@@ -467,6 +482,7 @@ function LoginScreenInner() {
 
               <button
                 type="submit"
+                suppressHydrationWarning
                 disabled={isLoading}
                 className="w-full py-3 bg-[#0f3e26] hover:bg-[#144f31] text-white font-bold text-xs rounded-xl shadow-md transition-all active:scale-[0.98] disabled:opacity-50 flex items-center justify-center gap-2 mt-2 cursor-pointer"
               >
@@ -485,6 +501,7 @@ function LoginScreenInner() {
 
               <button
                 type="button"
+                suppressHydrationWarning
                 onClick={handleGoogleLogin}
                 disabled={isLoading}
                 className="w-full py-2.5 bg-white border border-gray-300 hover:bg-gray-50 text-gray-700 font-bold text-xs rounded-xl shadow-2xs transition-all flex items-center justify-center gap-2 cursor-pointer"
@@ -501,6 +518,7 @@ function LoginScreenInner() {
               <div className="text-center pt-2">
                 <button
                   type="button"
+                  suppressHydrationWarning
                   onClick={() => { setIsSignUp(!isSignUp); setError(''); }}
                   className="text-xs font-bold text-[#c88a23] hover:underline cursor-pointer"
                 >
@@ -509,7 +527,7 @@ function LoginScreenInner() {
               </div>
             </form>
           ) : (
-            <div className="space-y-3">
+            <div className="space-y-3" suppressHydrationWarning>
               <p className="text-xs text-gray-500 leading-relaxed mb-4 text-center">
                 Select a test profile to jump straight into the application with zero latency:
               </p>
@@ -517,6 +535,7 @@ function LoginScreenInner() {
               {/* 1. Customer Demo */}
               <button
                 type="button"
+                suppressHydrationWarning
                 onClick={() => handleQuickLogin('customer')}
                 className="w-full p-3.5 rounded-xl border border-gray-200 hover:border-[#0f3e26] bg-emerald-50/40 hover:bg-emerald-50 flex items-center justify-between text-left transition-all group cursor-pointer"
               >
@@ -539,6 +558,7 @@ function LoginScreenInner() {
               {/* 2. Seller Demo */}
               <button
                 type="button"
+                suppressHydrationWarning
                 onClick={() => handleQuickLogin('seller')}
                 className="w-full p-3.5 rounded-xl border border-gray-200 hover:border-[#c88a23] bg-amber-50/40 hover:bg-amber-50 flex items-center justify-between text-left transition-all group cursor-pointer"
               >
@@ -561,6 +581,7 @@ function LoginScreenInner() {
               {/* 3. Admin Demo */}
               <button
                 type="button"
+                suppressHydrationWarning
                 onClick={() => handleQuickLogin('admin')}
                 className="w-full p-3.5 rounded-xl border border-gray-200 hover:border-purple-600 bg-purple-50/40 hover:bg-purple-50 flex items-center justify-between text-left transition-all group cursor-pointer"
               >
@@ -579,6 +600,7 @@ function LoginScreenInner() {
                 </div>
                 <ArrowRight className="w-4 h-4 text-gray-400 group-hover:text-purple-900 group-hover:translate-x-0.5 transition-transform" />
               </button>
+
             </div>
           )}
         </div>

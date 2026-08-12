@@ -2,7 +2,9 @@ import { setupMockDatabase } from './mockDatabase';
 import { runPricingTests } from './unit/pricingService.test';
 import { runJwtTests } from './unit/jwt.test';
 import { runCryptoTests } from './unit/crypto.test';
+import { runImageKitTests } from './unit/imageKitService.test';
 import { runAuthIntegrationTests } from './integration/auth.test';
+
 import { runProductsIntegrationTests } from './integration/products.test';
 import { runOrdersIntegrationTests } from './integration/orders.test';
 import { runAdminIntegrationTests } from './integration/admin.test';
@@ -25,6 +27,8 @@ async function main(): Promise<void> {
   allResults.push(...(await runPricingTests()));
   allResults.push(...(await runJwtTests()));
   allResults.push(...(await runCryptoTests()));
+  allResults.push(...(await runImageKitTests()));
+
 
   // 2. Integration Tests
   console.log('🔗 Running Integration Tests...');

@@ -26,7 +26,6 @@ import { SubscriptionUpsellBanner } from '@/components/discovery/SubscriptionUps
 import { RelatedProducts } from '@/components/discovery/RelatedProducts';
 import { BrandStory } from '@/components/trust/BrandStory';
 import { TrustBadges } from '@/components/trust/TrustBadges';
-import { ProductEditModal } from '@/components/admin/ProductEditModal';
 import { getProductReviews, submitProductReview, ReviewItem } from '@/lib/api/reviews';
 
 interface ProductClientProps {
@@ -46,7 +45,6 @@ export function ProductClient({ product: initialProduct }: ProductClientProps) {
   const removeFromCartLocal = useStore((state) => state.removeFromCartLocal);
 
   const [product, setProduct] = useState<ProductWithVariants>(initialProduct);
-  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
 
   // Reviews state
   const [reviews, setReviews] = useState<ReviewItem[]>([]);
@@ -145,8 +143,8 @@ export function ProductClient({ product: initialProduct }: ProductClientProps) {
           <div className="flex items-center gap-2">
             {user?.role === 'admin' && (
               <button
-                onClick={() => setIsEditModalOpen(true)}
-                className="h-9 px-3 rounded-full bg-white text-[#0f3e26] hover:bg-gray-50 text-xs font-bold flex items-center gap-1.5 shadow-md border border-emerald-200"
+                onClick={() => router.push(`/admin/products/edit/${product.id}`)}
+                className="h-9 px-3 rounded-full bg-white text-[#0f3e26] hover:bg-gray-50 text-xs font-bold flex items-center gap-1.5 shadow-md border border-emerald-200 cursor-pointer"
                 title="Admin: Edit Product"
               >
                 <Pencil className="w-3.5 h-3.5 text-[#0f3e26]" />
@@ -377,21 +375,6 @@ export function ProductClient({ product: initialProduct }: ProductClientProps) {
           )}
         </div>
       </div>
-
-      {/* Admin Edit Modal */}
-      {user?.role === 'admin' && (
-        <ProductEditModal
-          product={product}
-          isOpen={isEditModalOpen}
-          onClose={() => setIsEditModalOpen(false)}
-          onProductUpdated={(updated) => {
-            setProduct(updated);
-          }}
-          onProductDeleted={() => {
-            router.push('/home');
-          }}
-        />
-      )}
     </div>
   );
 }

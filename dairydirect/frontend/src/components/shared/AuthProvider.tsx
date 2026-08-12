@@ -92,10 +92,19 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     isHydrating.current = true;
 
     try {
+      const currentUser = useStore.getState().user;
       const res = await fetch('/api/auth/sync', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ token, type: 'supabase' }),
+        body: JSON.stringify({
+          token: token || undefined,
+          id: currentUser?.id || undefined,
+          email: currentUser?.email || undefined,
+          phone: currentUser?.phone || undefined,
+          name: currentUser?.name || undefined,
+          role: currentUser?.role || undefined,
+          type: 'supabase',
+        }),
       });
 
       if (res.ok) {

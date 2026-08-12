@@ -19,7 +19,7 @@ import {
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
-const CATEGORIES = ['Milk', 'Paneer', 'Ghee', 'Buttermilk', 'Curd', 'Lassi'];
+import { DB_CATEGORIES } from '@/lib/categories';
 
 interface ProductEditModalProps {
   product: ProductWithVariants | null;
@@ -331,7 +331,7 @@ export function ProductEditModal({
                     borderColor: 'rgba(195,201,187,0.3)',
                   }}
                 >
-                  {CATEGORIES.map((cat) => (
+                  {DB_CATEGORIES.map((cat) => (
                     <option key={cat} value={cat}>
                       {cat}
                     </option>

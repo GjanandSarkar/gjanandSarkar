@@ -14,9 +14,11 @@ export function TopAppBar() {
       style={{ background: 'rgba(250, 250, 243, 0.88)', backdropFilter: 'blur(20px)', WebkitBackdropFilter: 'blur(20px)' }}>
       <div className="flex justify-between items-center px-5 py-3.5 w-full">
         
-        <Link href="/home" className="flex items-center">
-          <img src="/logo.svg" alt="Logo" className="w-9 h-9 object-contain" />
+        <Link href="/home" className="flex items-center gap-2">
+          <img src="/logo/gjanand sarkar logo.png" alt="Logo" className="w-8 h-8 object-contain" />
+          <span className="text-base font-black text-[#0f3e26] tracking-tight">Gjanand<span className="text-[#c88a23]">.</span></span>
         </Link>
+
         
         <div className="flex items-center gap-1.5">
           <button className="w-9 h-9 rounded-[10px] flex items-center justify-center transition-all active:scale-95"

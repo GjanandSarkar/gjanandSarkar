@@ -1,0 +1,1 @@
+import { getPool } from '../config/database'; async function run() { const pool = getPool(); await pool.query('ALTER TABLE products DROP CONSTRAINT IF EXISTS products_category_check;'); console.log('Constraint dropped!'); process.exit(0); } run().catch(console.error);

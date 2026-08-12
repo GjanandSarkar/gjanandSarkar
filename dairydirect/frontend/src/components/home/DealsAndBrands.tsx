@@ -20,6 +20,11 @@ export function DealsAndBrands({ products }: DealsAndBrandsProps) {
   const user = useStore((s) => s.user);
   const addToCartLocal = useStore((s) => s.addToCartLocal);
 
+  // Filter products explicitly marked as Deal of the Day
+  const dealProducts = (products || [])
+    .filter((p) => p.is_deal_of_the_day === true || (p.discount_pct !== undefined && p.discount_pct > 0))
+    .slice(0, 4);
+
   // Live Countdown State for Deal of the Day
   const [timeLeft, setTimeLeft] = useState({ hours: 8, minutes: 45, seconds: 32 });
 
@@ -35,9 +40,13 @@ export function DealsAndBrands({ products }: DealsAndBrandsProps) {
     return () => clearInterval(timer);
   }, []);
 
-  // Deal items
-  const dealProducts = products.slice(0, 4);
+  // If no Deal of the Day products are available, do not display the section
+  if (dealProducts.length === 0) {
+    return null;
+  }
+
   const discounts = ['40% OFF', '35% OFF', '25% OFF', '30% OFF'];
+
 
   return (
     <section className="w-full max-w-[1440px] mx-auto px-4 md:px-8 py-6">
@@ -78,7 +87,7 @@ export function DealsAndBrands({ products }: DealsAndBrandsProps) {
                   <div className="relative">
                     {/* Discount Badge */}
                     <span className="absolute top-1 left-1 bg-red-600 text-white text-[9px] font-black px-1.5 py-0.5 rounded shadow-xs z-10">
-                      {discounts[idx % discounts.length]}
+                      {prod.discount_pct ? `${prod.discount_pct}% OFF` : discounts[idx % discounts.length]}
                     </span>
 
                     {/* Image */}

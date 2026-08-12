@@ -15,6 +15,8 @@ import { notificationRoutes } from './notificationRoutes';
 import { reviewRoutes } from './reviewRoutes';
 import { wishlistRoutes } from './wishlistRoutes';
 import { translationRoutes } from './translationRoutes';
+import { uploadRoutes } from './uploadRoutes';
+import { categoryRoutes } from './categoryRoutes';
 
 // Direct controller shortcuts for frontend compatibility
 import { paymentController } from '../controllers/paymentController';
@@ -49,6 +51,9 @@ apiRouter.use('/notifications', notificationRoutes);
 apiRouter.use('/reviews', reviewRoutes);
 apiRouter.use('/wishlist', wishlistRoutes);
 apiRouter.use('/translations', translationRoutes);
+apiRouter.use('/upload', uploadRoutes);
+apiRouter.use('/categories', categoryRoutes);
+
 
 // ─── Frontend & Postman Contract Compatibility Shortcuts ─────
 // 1. Direct Razorpay Shortcuts

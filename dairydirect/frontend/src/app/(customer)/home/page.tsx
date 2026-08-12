@@ -18,7 +18,7 @@ export default async function HomeScreen() {
   return (
     <div className="flex flex-col w-full overflow-x-hidden bg-[#fafaf8]">
       {/* 1. Hero Banner (Palace Arch & Heritage Showcase) */}
-      <HeroBanner />
+      <HeroBanner products={prods} />
 
       {/* 2. Trust Proposition Strip (5 Pillars) */}
       <TrustBar />

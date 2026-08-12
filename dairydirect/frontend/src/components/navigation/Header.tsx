@@ -203,15 +203,12 @@ function HeaderContent() {
       <div className="max-w-[1440px] mx-auto px-4 md:px-8 h-18 md:h-20 flex items-center justify-between gap-4 md:gap-8">
         
         {/* ── Brand Logo ── */}
-        <Link href="/home" className="flex items-center gap-2 shrink-0 group active:scale-95 transition-transform">
-          <div className="relative flex items-center">
+        <Link href="/home" className="flex items-center gap-2.5 shrink-0 group active:scale-95 transition-transform">
+          <div className="relative flex items-center gap-2.5">
             <img 
-              src="/logo.svg" 
+              src="/logo/gjanand sarkar logo.png" 
               alt="Gjanand Sarkar" 
-              className="h-12 md:h-14 w-auto object-contain drop-shadow-xs" 
-              onError={(e) => {
-                (e.target as HTMLElement).style.display = 'none';
-              }}
+              className="h-10 md:h-12 w-auto object-contain drop-shadow-xs" 
             />
             <div className="flex flex-col">
               <span className="text-xl md:text-2xl font-black text-[#0f3e26] tracking-tight leading-none">
@@ -223,6 +220,7 @@ function HeaderContent() {
             </div>
           </div>
         </Link>
+
 
         {/* ── Search Bar ── */}
         <form 

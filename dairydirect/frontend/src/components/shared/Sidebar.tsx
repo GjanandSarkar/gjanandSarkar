@@ -41,10 +41,19 @@ export function Sidebar() {
 
       {/* Brand */}
       <div className="h-[72px] flex items-center px-6 relative z-10">
-        <Link href="/home" className="flex items-center gap-3 group">
-          <img src="/logo.svg" alt="Logo" className="w-12 h-12 object-contain" />
+        <Link href="/home" className="flex items-center gap-2.5 group">
+          <img src="/logo/gjanand sarkar logo.png" alt="Logo" className="w-10 h-10 object-contain drop-shadow-xs" />
+          <div className="flex flex-col">
+            <span className="text-lg font-black text-[#0f3e26] tracking-tight leading-none">
+              Gjanand<span className="text-[#c88a23]">.</span>
+            </span>
+            <span className="text-[9px] tracking-[0.2em] font-extrabold text-[#c88a23] uppercase">
+              SARKAR
+            </span>
+          </div>
         </Link>
       </div>
+
 
       {/* User Greeting */}
       {user && (

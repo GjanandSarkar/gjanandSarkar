@@ -46,15 +46,22 @@ export function AdminSidebar() {
       <div className="absolute top-0 left-0 w-full h-48 opacity-10 pointer-events-none"
         style={{ background: 'linear-gradient(180deg, #3f6530 0%, transparent 100%)' }} />
 
-{/* Brand */}
         <div className="px-5 py-5 relative z-10">
           <div className="flex items-center gap-3 mb-1">
-            <div className="w-12 h-12 rounded-[12px] flex items-center justify-center"
-              style={{ background: 'linear-gradient(135deg, #3f6530, #577f46)' }}>
-              <img src="/logo.svg" alt="Logo" className="w-8 h-8 object-contain" />
+            <div className="w-12 h-12 rounded-[12px] flex items-center justify-center p-1 bg-white/90 shadow-xs border border-amber-200/50">
+              <img src="/logo/gjanand sarkar logo.png" alt="Logo" className="w-10 h-10 object-contain" />
+            </div>
+            <div className="flex flex-col">
+              <span className="text-sm font-black text-[#0f3e26] tracking-tight leading-none">
+                Gjanand<span className="text-[#c88a23]">.</span>
+              </span>
+              <span className="text-[9px] tracking-[0.2em] font-extrabold text-[#c88a23] uppercase">
+                ADMIN
+              </span>
             </div>
           </div>
         </div>
+
 
       {/* Admin user chip */}
       <div className="mx-4 mb-3 px-3.5 py-3 rounded-[12px] flex items-center gap-3"

@@ -74,9 +74,6 @@ export async function query<T extends QueryResultRow = any>(
     }
     return result;
   } catch (error: any) {
-    if (config.nodeEnv !== 'test') {
-      console.error('[Database Query Error]:', error.message, '\nQuery:', text.slice(0, 200));
-    }
     throw error;
   }
 }

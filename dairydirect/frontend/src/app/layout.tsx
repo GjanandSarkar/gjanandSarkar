@@ -28,8 +28,8 @@ export const metadata: Metadata = {
     type: "website",
   },
   icons: {
-    icon: "/logo.svg",
-    apple: "/logo.svg",
+    icon: "/logo.png",
+    apple: "/logo.png",
   },
 };
 
@@ -50,7 +50,7 @@ const orgStructuredData = {
   "@type": "Organization",
   "name": "Gjanand Sarkar",
   "url": "https://gjanandsarkar.com",
-  "logo": "https://gjanandsarkar.com/logo.svg",
+  "logo": "https://gjanandsarkar.com/logo.png",
   "sameAs": [
     "https://facebook.com/gjanandsarkar",
     "https://instagram.com/gjanandsarkar"
@@ -81,8 +81,9 @@ export default function RootLayout({
         <JsonLd data={webSiteStructuredData} />
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-        <link rel="icon" href="/logo.svg" type="image/svg+xml" />
+        <link rel="icon" href="/logo.png" type="image/png" />
       </head>
+
       <body className="min-h-screen antialiased" 
         style={{ fontFamily: "'Inter', system-ui, sans-serif", background: '#fafaf3', color: '#1a1c18' }} suppressHydrationWarning>
         <AuthProvider>

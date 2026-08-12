@@ -3,7 +3,7 @@ import { z } from 'zod';
 export const createProductSchema = z.object({
   body: z.object({
     name: z.string().min(2, 'Product name is required'),
-    category: z.enum(['Milk', 'Ghee', 'Paneer', 'Curd', 'Buttermilk', 'Butter', 'Sweets', 'Other']),
+    category: z.string().min(1, 'Category is required'),
     description: z.string().optional(),
     image_url: z.string().optional(),
     seller_id: z.string().uuid().optional(),
@@ -34,7 +34,7 @@ export const updateProductSchema = z.object({
   }),
   body: z.object({
     name: z.string().min(2).optional(),
-    category: z.enum(['Milk', 'Ghee', 'Paneer', 'Curd', 'Buttermilk', 'Butter', 'Sweets', 'Other']).optional(),
+    category: z.string().min(1).optional(),
     description: z.string().optional(),
     image_url: z.string().optional(),
     seller_id: z.string().uuid().optional(),
@@ -44,6 +44,21 @@ export const updateProductSchema = z.object({
     discount_pct: z.number().min(0).max(100).optional(),
     tags: z.array(z.string()).optional(),
     is_active: z.boolean().optional(),
+    is_freshness_guarantee: z.boolean().optional(),
     sort_order: z.number().int().optional(),
+    variants: z
+      .array(
+        z.object({
+          id: z.string().uuid().optional(),
+          weight: z.string().min(1, 'Weight is required'),
+          price: z.number().positive('Price must be greater than 0'),
+          original_price: z.number().positive().optional(),
+          cost_price: z.number().min(0).optional(),
+          stock: z.number().int().min(0).optional(),
+          batch_number: z.string().optional(),
+          expiry_date: z.string().optional(),
+        })
+      )
+      .optional(),
   }),
 });

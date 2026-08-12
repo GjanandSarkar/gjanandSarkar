@@ -163,9 +163,8 @@ CREATE INDEX IF NOT EXISTS idx_seller_inquiries_created_at ON seller_inquiries(c
 CREATE TABLE IF NOT EXISTS products (
   id                      UUID          PRIMARY KEY DEFAULT gen_random_uuid(),
   name                    TEXT          NOT NULL,
-  -- Allowed categories for Gjanand Sarkar dairy business
-  category                TEXT          NOT NULL
-                          CHECK (category IN ('Milk', 'Ghee', 'Paneer', 'Curd', 'Buttermilk', 'Butter', 'Sweets', 'Other')),
+  -- Allowed categories for Gjanand Sarkar dairy business (constraint removed to allow dynamic categories)
+  category                TEXT          NOT NULL,
   description             TEXT,
   image_url               TEXT,
   s3_image_key            TEXT,
