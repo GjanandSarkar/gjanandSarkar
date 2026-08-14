@@ -20,6 +20,7 @@ const navItems = [
   { href: '/admin/customers', icon: Users, label: 'Customers' },
   { href: '/admin/delivery', icon: Truck, label: 'Deliveries' },
   { href: '/admin/analytics', icon: BarChart3, label: 'Analytics' },
+  { href: '/home', icon: Leaf, label: 'Visit Storefront' },
 ];
 
 export function AdminSidebar() {
@@ -47,19 +48,24 @@ export function AdminSidebar() {
         style={{ background: 'linear-gradient(180deg, #3f6530 0%, transparent 100%)' }} />
 
 {/* Brand */}
-        <div className="px-5 py-5 relative z-10">
-          <div className="flex items-center gap-3 mb-1">
-            <div className="w-12 h-12 rounded-[12px] flex items-center justify-center"
-              style={{ background: 'linear-gradient(135deg, #3f6530, #577f46)' }}>
-              <img src="/logo.svg" alt="Logo" className="w-8 h-8 object-contain" />
+        <div className="px-6 py-5 relative z-10">
+          <Link href="/home" className="flex items-center gap-2 group transition-transform">
+            <img src="/logo.svg" alt="Logo" className="w-10 h-10 object-contain" />
+            <div className="flex flex-col">
+              <span className="text-[15px] font-black text-[#0f3e26] tracking-tight leading-none">
+                Gjanand<span className="text-[#c88a23]">.</span>
+              </span>
+              <span className="text-[7.5px] tracking-[0.25em] font-extrabold text-[#c88a23] uppercase">
+                SARKAR
+              </span>
             </div>
-          </div>
+          </Link>
         </div>
 
       {/* Admin user chip */}
       <div className="mx-4 mb-3 px-3.5 py-3 rounded-[12px] flex items-center gap-3"
         style={{ background: 'var(--color-surface-container-low)' }}>
-        <div className="w-10 h-10 rounded-full overflow-hidden bg-sand/30 border border-sand flex items-center justify-center shrink-0">
+        <div className="w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm text-white shrink-0 bg-[#0f3e26] border border-[#0f3e26]/10 relative overflow-hidden">
           {user?.avatar_url ? (
             <img 
               src={user.avatar_url} 
@@ -71,17 +77,16 @@ export function AdminSidebar() {
               }}
             />
           ) : (
-            <User className="w-5 h-5 text-primary/40" />
+            <span>{user?.name ? user.name.charAt(0).toUpperCase() : 'A'}</span>
           )}
         </div>
         <div className="flex-1 min-w-0">
-          <p className="text-[11px] font-semibold uppercase tracking-wider mb-0.5"
-            style={{ color: 'var(--color-outline)' }}>Signed in as</p>
-          <p className="font-bold text-[14px] truncate" style={{ color: 'var(--color-on-surface)' }}>
+          <p className="text-[10px] font-bold uppercase tracking-wider text-gray-400 mb-0.5">Signed in as</p>
+          <p className="font-extrabold text-[13px] text-gray-900 truncate">
             {user?.name || 'Admin'}
           </p>
-          <p className="text-[11px] font-medium truncate" style={{ color: 'var(--color-outline)' }}>
-            +91 {user?.phone}
+          <p className="text-[10px] font-medium text-gray-500 truncate mt-0.5">
+            {user?.phone ? `+91 ${user.phone}` : (user?.email || 'Administrator')}
           </p>
         </div>
       </div>

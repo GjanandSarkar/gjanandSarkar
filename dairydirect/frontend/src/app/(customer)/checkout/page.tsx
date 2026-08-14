@@ -159,13 +159,14 @@ export default function CheckoutScreen() {
       variantId: item.variantId,
       productName: item.product.name,
       variantWeight: item.variant.weight,
-      quantity: item.quantity,
-      price: item.variant.price,
+      quantity: Number(item.quantity),
+      price: parseFloat(String(item.variant.price)) || 0, // Supabase numeric comes as string
     }));
 
     // ─── Razorpay Online Payment Flow ───
     if (selectedMethod === 'razorpay') {
       const amountInPaise = Math.round((pricing?.total || 0) * 100);
+      setIsProcessing(true); // Lock UI immediately before opening Razorpay modal
 
       await initiateRazorpayPayment({
         amount: amountInPaise,
@@ -182,7 +183,7 @@ export default function CheckoutScreen() {
           addressId: checkoutAddressId,
         },
         onSuccess: async (razorpayResponse, verificationData) => {
-          setIsProcessing(true);
+          // Payment is verified — now place the order with razorpay IDs
           const result = await placeOrder({
             userId: user.id,
             customerName: user.name || 'Customer',
@@ -193,6 +194,10 @@ export default function CheckoutScreen() {
             paymentMethod: 'razorpay',
             paymentStatus: 'paid',
             couponCode: couponCode || undefined,
+            // Pass Razorpay IDs so they get stored in the order record
+            razorpayOrderId: razorpayResponse.razorpay_order_id,
+            razorpayPaymentId: razorpayResponse.razorpay_payment_id,
+            razorpaySignature: razorpayResponse.razorpay_signature,
           });
 
           if (result.success && result.orderId) {
@@ -208,7 +213,7 @@ export default function CheckoutScreen() {
             router.replace(`/order-confirmed/${result.orderId}`);
           } else {
             setIsProcessing(false);
-            alert(result.error || 'Payment verified but order creation failed. Please contact support.');
+            alert(result.error || 'Payment verified but order creation failed. Please contact support with your payment ID: ' + razorpayResponse.razorpay_payment_id);
           }
         },
         onError: (error) => {

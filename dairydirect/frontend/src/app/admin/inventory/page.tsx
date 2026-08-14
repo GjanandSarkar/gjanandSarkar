@@ -201,7 +201,7 @@ export default function AdminInventoryPage() {
                 color: filter === f ? '#fff' : 'var(--color-on-surface)',
               }}
             >
-              {f === 'all' ? 'All Items' : f === 'low_stock' ? '⚠️ Low Stock' : '❌ Out of Stock'}
+              {f === 'all' ? 'All Items' : f === 'low_stock' ? 'Low Stock' : 'Out of Stock'}
             </button>
           ))}
 

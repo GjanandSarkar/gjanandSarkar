@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { verifyRazorpayPaymentSignature } from '@/lib/razorpay';
+import { getAuthUser } from '@/lib/api/auth-middleware';
+import { getAdminSupabase } from '@/lib/supabase/admin';
 import { z } from 'zod';
 
 const VerifyPaymentSchema = z.object({
@@ -13,9 +15,23 @@ const VerifyPaymentSchema = z.object({
  * POST /api/verify-payment
  * Verifies Razorpay payment signature (HMAC-SHA256).
  * Cryptographically compares generated HMAC against razorpay_signature.
+ * 
+ * Security:
+ * - Requires authentication to prevent unauthenticated abuse
+ * - Idempotent: returns success if payment_id already processed
+ * - Uses timingSafeEqual to prevent timing attacks
  */
 export async function POST(request: NextRequest) {
   try {
+    // ─── Auth check: only authenticated users can verify payments ───
+    const auth = await getAuthUser(request);
+    if (!auth) {
+      return NextResponse.json(
+        { success: false, error: 'Authentication required' },
+        { status: 401 }
+      );
+    }
+
     const body = await request.json().catch(() => ({}));
     const parseResult = VerifyPaymentSchema.safeParse(body);
 
@@ -31,7 +47,27 @@ export async function POST(request: NextRequest) {
 
     const { razorpay_order_id, razorpay_payment_id, razorpay_signature, order_id } = parseResult.data;
 
-    // Cryptographic HMAC-SHA256 signature verification
+    // ─── Idempotency: check if this payment_id was already verified ───
+    // This prevents replay attacks where the same successful response is submitted twice
+    const sb = getAdminSupabase();
+    const { data: existingOrder } = await sb
+      .from('orders')
+      .select('id, payment_status')
+      .eq('razorpay_payment_id', razorpay_payment_id)
+      .maybeSingle();
+
+    if (existingOrder && existingOrder.payment_status === 'paid') {
+      // Already verified and paid — return success (idempotent)
+      return NextResponse.json({
+        success: true,
+        message: 'Payment already verified',
+        order_id: razorpay_order_id,
+        payment_id: razorpay_payment_id,
+        internal_order_id: existingOrder.id,
+      }, { status: 200 });
+    }
+
+    // ─── Cryptographic HMAC-SHA256 signature verification ───
     const isSignatureValid = verifyRazorpayPaymentSignature(
       razorpay_order_id,
       razorpay_payment_id,
@@ -39,7 +75,10 @@ export async function POST(request: NextRequest) {
     );
 
     if (!isSignatureValid) {
-      console.error('[RazorpayVerify] Signature mismatch for order:', razorpay_order_id);
+      console.error('[RazorpayVerify] Signature mismatch for order:', razorpay_order_id, {
+        userId: auth.userId,
+        ip: request.headers.get('x-forwarded-for'),
+      });
       return NextResponse.json(
         { 
           success: false, 

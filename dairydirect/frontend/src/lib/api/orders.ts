@@ -1,4 +1,5 @@
 import type { DBOrder, DBOrderItem } from '@/lib/supabase';
+import { api } from './client';
 
 // ─── Types ────────────────────────────────────────────────────
 
@@ -41,6 +42,10 @@ export type PlaceOrderInput = {
   paymentStatus: string;
   couponCode?: string;
   upiId?: string;
+  // Razorpay-specific fields (required when paymentMethod is 'razorpay')
+  razorpayOrderId?: string;
+  razorpayPaymentId?: string;
+  razorpaySignature?: string;
 };
 
 export type OrderStatus = DBOrder['status'];
@@ -97,21 +102,25 @@ export async function placeOrder(
   input: PlaceOrderInput
 ): Promise<{ success: boolean; orderId?: string; error?: string }> {
   try {
-    const res = await fetch('/api/orders/place', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ orderData: input })
-    });
+    // Coerce Supabase numeric fields (PostgreSQL `numeric` columns come as strings)
+    const sanitizedInput = {
+      ...input,
+      items: input.items.map(item => ({
+        ...item,
+        price: typeof item.price === 'string' ? parseFloat(item.price as any) : Number(item.price ?? 0),
+        quantity: Number(item.quantity),
+      })),
+    };
 
-    const data = await res.json();
-    if (!res.ok) throw new Error(data.error || 'Failed to place order');
-
+    // Use authenticated fetchApi wrapper (sends Supabase Bearer token automatically)
+    const data = await api.orders.place(sanitizedInput);
     return { success: true, orderId: data.orderId };
   } catch (error: any) {
     console.error('placeOrder error:', error);
     return { success: false, error: error.message };
   }
 }
+
 
 // ─── Validate Coupon ──────────────────────────────────────────
 export async function validateCoupon(

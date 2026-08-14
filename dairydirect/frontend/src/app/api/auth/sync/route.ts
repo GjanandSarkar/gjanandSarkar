@@ -23,7 +23,7 @@ const ADMIN_PHONES = (process.env.ADMIN_PHONES || '+919876543210')
 export async function POST(request: NextRequest) {
   try {
     const ip = getClientIP(request);
-    const rateResult = await checkRateLimit(ip, 'auth_sync', 30, 60);
+    const rateResult = await checkRateLimit(ip, 'auth_sync', 600, 60);
     if (!rateResult.allowed) {
       return NextResponse.json({ error: 'Too Many Requests' }, { status: 429 });
     }

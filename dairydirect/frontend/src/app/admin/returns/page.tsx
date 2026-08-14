@@ -39,6 +39,7 @@ export default function AdminReturnsPage() {
   const [adminNotes, setAdminNotes] = useState('');
   const [isProcessing, setIsProcessing] = useState(false);
   const [toast, setToast] = useState('');
+  const [toastSuccess, setToastSuccess] = useState(false);
 
   const fetchReturns = async () => {
     setIsLoading(true);
@@ -68,7 +69,8 @@ export default function AdminReturnsPage() {
         }),
       });
       if (!res.ok) throw new Error();
-      setToast(action === 'approve' ? 'Return approved & customer notified ✅' : 'Return rejected & customer notified');
+      setToast(action === 'approve' ? 'Return approved — customer has been notified.' : 'Return rejected — customer has been notified.');
+      setToastSuccess(action === 'approve');
       setSelected(null);
       setRefundAmount('');
       setAdminNotes('');
@@ -101,8 +103,8 @@ export default function AdminReturnsPage() {
         {toast && (
           <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }}
             className="px-4 py-3 rounded-[10px] flex items-center gap-2 text-[13px] font-medium"
-            style={{ background: toast.includes('✅') ? '#c2efac' : '#ffdcc7', color: toast.includes('✅') ? '#2d5a27' : '#774117' }}>
-            {toast.includes('✅') ? <CheckCircle2 className="w-4 h-4" /> : <AlertTriangle className="w-4 h-4" />}
+            style={{ background: toastSuccess ? '#c2efac' : '#ffdcc7', color: toastSuccess ? '#2d5a27' : '#774117' }}>
+            {toastSuccess ? <CheckCircle2 className="w-4 h-4" /> : <AlertTriangle className="w-4 h-4" />}
             {toast}
           </motion.div>
         )}

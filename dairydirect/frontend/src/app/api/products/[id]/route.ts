@@ -14,6 +14,55 @@ interface Props {
   params: Promise<{ id: string }>;
 }
 
+async function fetchProductDetails(id: string): Promise<any> {
+  if (isPgConfigured) {
+    try {
+      const result = await query(
+        `SELECT 
+           p.id, p.name, p.category, p.description, p.image_url, p.s3_image_key,
+           p.is_freshness_guarantee, p.is_active, p.tags, p.brand, p.state_origin,
+           p.rating, p.reviews_count, p.created_at, p.updated_at,
+           json_agg(
+             json_build_object(
+               'id', pv.id,
+               'product_id', pv.product_id,
+               'weight', pv.weight,
+               'price', pv.price,
+               'original_price', pv.original_price,
+               'cost_price', pv.cost_price,
+               'stock', pv.stock,
+               'created_at', pv.created_at
+             ) ORDER BY pv.price ASC
+           ) FILTER (WHERE pv.id IS NOT NULL) as product_variants
+         FROM products p
+         LEFT JOIN product_variants pv ON pv.product_id = p.id
+         WHERE p.id = $1
+         GROUP BY p.id`,
+        [id]
+      );
+
+      if (result.rows.length > 0) {
+        return result.rows[0];
+      }
+    } catch (err: any) {
+      console.warn('[fetchProductDetails] RDS failed, fallback to Supabase:', err.message);
+    }
+  }
+
+  const sb = getAdminSupabase();
+  const { data: prodData, error } = await sb
+    .from('products')
+    .select('*, product_variants(*)')
+    .eq('id', id)
+    .maybeSingle();
+
+  if (error || !prodData) {
+    return null;
+  }
+
+  return prodData;
+}
+
 export async function GET(request: NextRequest, { params }: Props) {
   try {
     const { id } = await params;
@@ -21,52 +70,12 @@ export async function GET(request: NextRequest, { params }: Props) {
       return NextResponse.json({ error: 'Invalid product ID' }, { status: 400 });
     }
 
-    if (isPgConfigured) {
-      try {
-        const result = await query(
-          `SELECT 
-             p.id, p.name, p.category, p.description, p.image_url, p.s3_image_key,
-             p.is_freshness_guarantee, p.is_active, p.tags, p.brand, p.state_origin,
-             p.rating, p.reviews_count, p.created_at, p.updated_at,
-             json_agg(
-               json_build_object(
-                 'id', pv.id,
-                 'product_id', pv.product_id,
-                 'weight', pv.weight,
-                 'price', pv.price,
-                 'original_price', pv.original_price,
-                 'cost_price', pv.cost_price,
-                 'stock', pv.stock,
-                 'created_at', pv.created_at
-               ) ORDER BY pv.price ASC
-             ) FILTER (WHERE pv.id IS NOT NULL) as product_variants
-           FROM products p
-           LEFT JOIN product_variants pv ON pv.product_id = p.id
-           WHERE p.id = $1
-           GROUP BY p.id`,
-          [id]
-        );
-
-        if (result.rows.length > 0) {
-          return NextResponse.json({ product: result.rows[0] });
-        }
-      } catch (err: any) {
-        console.warn('[Product GET] RDS failed, fallback to Supabase:', err.message);
-      }
-    }
-
-    const sb = getAdminSupabase();
-    const { data: prodData, error } = await sb
-      .from('products')
-      .select('*, product_variants(*)')
-      .eq('id', id)
-      .maybeSingle();
-
-    if (error || !prodData) {
+    const product = await fetchProductDetails(id);
+    if (!product) {
       return NextResponse.json({ error: 'Product not found' }, { status: 404 });
     }
 
-    return NextResponse.json({ product: prodData });
+    return NextResponse.json({ product });
   } catch (error: any) {
     console.error('[Product GET] Error:', error.message);
     return NextResponse.json({ error: 'Failed to fetch product' }, { status: 500 });
@@ -101,10 +110,29 @@ export async function PUT(request: NextRequest, { params }: Props) {
                  is_active = COALESCE($6, is_active),
                  updated_at = now()
              WHERE id = $7`,
-            [name, category, description, image_url, is_freshness_guarantee, is_active, id]
+            [
+              name !== undefined ? name : null,
+              category !== undefined ? category : null,
+              description !== undefined ? description : null,
+              image_url !== undefined ? image_url : null,
+              is_freshness_guarantee !== undefined ? is_freshness_guarantee : null,
+              is_active !== undefined ? is_active : null,
+              id
+            ]
           );
 
           if (variants && Array.isArray(variants)) {
+            // Delete variants that were removed in the edit modal
+            const incomingIds = variants.map(v => v.id).filter((vid): vid is string => !!vid && isValidUUID(vid));
+            if (incomingIds.length > 0) {
+              await client.query(
+                `DELETE FROM product_variants WHERE product_id = $1 AND id NOT IN (${incomingIds.map((_, i) => `$${i + 2}`).join(',')})`,
+                [id, ...incomingIds]
+              );
+            } else {
+              await client.query(`DELETE FROM product_variants WHERE product_id = $1`, [id]);
+            }
+
             for (const v of variants) {
               if (v.id && isValidUUID(v.id)) {
                 await client.query(
@@ -125,7 +153,8 @@ export async function PUT(request: NextRequest, { params }: Props) {
         });
 
         await invalidateProductsCache();
-        return NextResponse.json({ success: true });
+        const updatedProduct = await fetchProductDetails(id);
+        return NextResponse.json({ success: true, product: updatedProduct });
       } catch (err: any) {
         console.warn('[Product PUT] RDS failed, fallback to Supabase:', err.message);
       }
@@ -146,6 +175,14 @@ export async function PUT(request: NextRequest, { params }: Props) {
       .eq('id', id);
 
     if (variants && Array.isArray(variants)) {
+      // Delete variants that were removed in the edit modal
+      const incomingIds = variants.map(v => v.id).filter((vid): vid is string => !!vid && isValidUUID(vid));
+      if (incomingIds.length > 0) {
+        await sb.from('product_variants').delete().eq('product_id', id).not('id', 'in', `(${incomingIds.join(',')})`);
+      } else {
+        await sb.from('product_variants').delete().eq('product_id', id);
+      }
+
       for (const v of variants) {
         if (v.id) {
           await sb
@@ -173,7 +210,8 @@ export async function PUT(request: NextRequest, { params }: Props) {
     }
 
     await invalidateProductsCache();
-    return NextResponse.json({ success: true });
+    const updatedProduct = await fetchProductDetails(id);
+    return NextResponse.json({ success: true, product: updatedProduct });
   } catch (error: any) {
     console.error('[Product PUT] Error:', error.message);
     return NextResponse.json({ error: 'Failed to update product' }, { status: 500 });
@@ -192,22 +230,43 @@ export async function DELETE(request: NextRequest, { params }: Props) {
       return NextResponse.json({ error: 'Admin access required' }, { status: 403 });
     }
 
+    const { searchParams } = new URL(request.url);
+    const permanent = searchParams.get('permanent') === 'true';
+
     if (isPgConfigured) {
       try {
-        await query('UPDATE products SET is_active = false, updated_at = now() WHERE id = $1', [id]);
-        await invalidateProductsCache();
-        return NextResponse.json({ success: true, message: 'Product archived' });
+        if (permanent) {
+          await withTransaction(async (client) => {
+            await client.query('DELETE FROM product_variants WHERE product_id = $1', [id]);
+            await client.query('DELETE FROM products WHERE id = $1', [id]);
+          });
+          await invalidateProductsCache();
+          return NextResponse.json({ success: true, permanent: true, message: 'Product deleted permanently' });
+        } else {
+          await query('UPDATE products SET is_active = false, updated_at = now() WHERE id = $1', [id]);
+          await invalidateProductsCache();
+          return NextResponse.json({ success: true, softDeleted: true, message: 'Product archived' });
+        }
       } catch (err: any) {
         console.warn('[Product DELETE] RDS failed, fallback to Supabase:', err.message);
       }
     }
 
     const sb = getAdminSupabase();
-    await sb.from('products').update({ is_active: false, updated_at: new Date().toISOString() }).eq('id', id);
-    await invalidateProductsCache();
-    return NextResponse.json({ success: true, message: 'Product archived' });
+    if (permanent) {
+      // Delete variants first
+      await sb.from('product_variants').delete().eq('product_id', id);
+      // Then delete product
+      await sb.from('products').delete().eq('id', id);
+      await invalidateProductsCache();
+      return NextResponse.json({ success: true, permanent: true, message: 'Product deleted permanently' });
+    } else {
+      await sb.from('products').update({ is_active: false, updated_at: new Date().toISOString() }).eq('id', id);
+      await invalidateProductsCache();
+      return NextResponse.json({ success: true, softDeleted: true, message: 'Product archived' });
+    }
   } catch (error: any) {
     console.error('[Product DELETE] Error:', error.message);
-    return NextResponse.json({ error: 'Failed to archive product' }, { status: 500 });
+    return NextResponse.json({ error: 'Failed to delete product' }, { status: 500 });
   }
 }

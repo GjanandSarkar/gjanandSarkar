@@ -187,7 +187,7 @@ export default function AdminDashboard() {
               </span>
             </div>
             <h1 className="font-extrabold text-[28px] tracking-tight" style={{ color: 'var(--color-on-surface)' }}>
-              {greeting()}, {user?.name?.split(' ')[0] || 'Admin'} 👋
+              {greeting()}, {user?.name?.split(' ')[0] || 'Admin'}
             </h1>
             <p className="text-[13px] mt-1" style={{ color: 'var(--color-outline)' }}>
               {format(new Date(), 'EEEE, MMMM d, yyyy')} · Last updated {format(lastRefreshed, 'h:mm a')}

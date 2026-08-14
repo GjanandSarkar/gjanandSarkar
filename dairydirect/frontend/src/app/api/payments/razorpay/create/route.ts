@@ -66,20 +66,20 @@ export async function POST(request: NextRequest) {
       },
     });
 
-    // Store pending transaction record
-    await query(
-      `INSERT INTO payment_transactions (
-         user_id, razorpay_order_id, amount, currency, status
-       ) VALUES ($1, $2, $3, 'INR', 'created')`,
-      [auth.userId, razorpayOrder.id, pricing.total]
-    );
+    // NOTE: payment_transactions table is not in use.
+    // The razorpay_order_id is stored directly in the orders table after payment is confirmed.
 
-    // Get user profile for Razorpay prefill
-    const profileResult = await query<{ name: string | null; email: string | null; phone: string | null }>(
-      'SELECT name, email, phone FROM profiles WHERE id = $1',
-      [auth.userId]
-    );
-    const profile = profileResult.rows[0];
+    // Get user profile for Razorpay prefill (optional, non-blocking)
+    let profile: { name: string | null; email: string | null; phone: string | null } | null = null;
+    try {
+      const profileResult = await query<{ name: string | null; email: string | null; phone: string | null }>(
+        'SELECT name, email, phone FROM profiles WHERE id = $1',
+        [auth.userId]
+      );
+      profile = profileResult.rows[0] || null;
+    } catch {
+      // Non-critical: proceed without prefill
+    }
 
     return NextResponse.json({
       success: true,

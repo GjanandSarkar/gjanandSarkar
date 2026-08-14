@@ -238,17 +238,6 @@ export function HeroBanner() {
             {/* Glowing Aura behind center */}
             <div className="absolute w-48 h-48 rounded-full bg-amber-400/20 blur-3xl pointer-events-none" />
 
-            {/* Floating Peacock Feather with Organic Sway Animation */}
-            <div className="absolute -top-6 right-2 sm:right-6 w-28 sm:w-36 md:w-44 h-28 sm:h-36 md:h-44 pointer-events-none z-40 drop-shadow-xl animate-bounce-gentle">
-              <svg viewBox="0 0 100 100" className="w-full h-full transform rotate-12 transition-transform duration-700 hover:rotate-6">
-                <path d="M50 10 C65 25 80 45 70 70 C60 90 40 95 30 75 C20 55 35 25 50 10 Z" fill="#0f3e26" />
-                <ellipse cx="50" cy="45" rx="16" ry="24" fill="#008080" />
-                <ellipse cx="50" cy="45" rx="11" ry="16" fill="#1e40af" />
-                <ellipse cx="50" cy="45" rx="6" ry="9" fill="#c88a23" />
-                <circle cx="50" cy="45" r="3" fill="#0f3e26" />
-                <path d="M50 70 Q52 85 55 100" stroke="#0f3e26" strokeWidth="2.5" strokeLinecap="round" fill="none" />
-              </svg>
-            </div>
 
             {/* 3D Orbit Container with Rotating Cards */}
             <div className="relative w-full h-full flex items-center justify-center preserve-3d">

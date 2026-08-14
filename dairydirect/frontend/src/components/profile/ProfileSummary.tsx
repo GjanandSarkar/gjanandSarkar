@@ -10,10 +10,9 @@ import { motion, AnimatePresence } from 'framer-motion';
 interface ProfileSummaryProps {
   user: StoreUser | null;
   onUpdateProfile: (updates: Partial<StoreUser>) => void;
-  onLogout: () => void;
 }
 
-export function ProfileSummary({ user, onUpdateProfile, onLogout }: ProfileSummaryProps) {
+export function ProfileSummary({ user, onUpdateProfile }: ProfileSummaryProps) {
   const { t } = useTranslation();
   const [isEditing, setIsEditing] = useState(false);
   const [profileName, setProfileName] = useState(user?.name || '');
@@ -252,15 +251,6 @@ export function ProfileSummary({ user, onUpdateProfile, onLogout }: ProfileSumma
             )}
           </div>
         </div>
-      </div>
-
-      <div className="mt-5 pt-5 border-t border-sand/50">
-        <button
-          onClick={onLogout}
-          className="flex items-center gap-2 text-sm font-bold text-red-600/80 hover:text-red-700 transition-colors w-full p-2 rounded-xl hover:bg-red-50/50"
-        >
-          <LogOut className="w-4 h-4" /> Sign Out
-        </button>
       </div>
     </div>
   );

@@ -407,8 +407,8 @@ function LoginScreenInner() {
                 className="w-full p-3.5 rounded-xl border border-gray-200 hover:border-purple-600 bg-purple-50/40 hover:bg-purple-50 flex items-center justify-between text-left transition-all group cursor-pointer"
               >
                 <div className="flex items-center gap-3">
-                  <div className="w-9 h-9 rounded-lg bg-purple-900 text-white flex items-center justify-center font-bold text-sm">
-                    👑
+                  <div className="w-9 h-9 rounded-lg bg-purple-900 text-white flex items-center justify-center font-bold text-xs tracking-tight">
+                    SA
                   </div>
                   <div>
                     <h4 className="text-xs font-bold text-gray-900 group-hover:text-purple-900">

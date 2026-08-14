@@ -32,36 +32,15 @@ function HeaderContent() {
   const { totalItems } = useCartDetails();
 
   const [searchTerm, setSearchTerm] = useState('');
-  const [selectedCategory, setSelectedCategory] = useState('All Categories');
-  const [isCategoryOpen, setIsCategoryOpen] = useState(false);
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const [isAddressOpen, setIsAddressOpen] = useState(false);
   const [userAddresses, setUserAddresses] = useState<UserAddress[]>([]);
 
-  const dropdownRef = useRef<HTMLDivElement>(null);
   const profileDropdownRef = useRef<HTMLDivElement>(null);
   const addressDropdownRef = useRef<HTMLDivElement>(null);
   const profileTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const addressTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
-  const categories = [
-    'All Categories',
-    'Milk',
-    'Ghee',
-    'Paneer',
-    'Curd',
-    'Lassi',
-    'Cold-Pressed Oils',
-    'Vedic Ayurveda',
-    'Artisanal Handicrafts',
-    'Organic Groceries',
-    'Electronics',
-    'Fashion',
-    'Home & Kitchen',
-    'Beauty & Personal Care',
-    'Sports',
-    'Books',
-  ];
 
   // Fetch addresses when user is logged in
   useEffect(() => {
@@ -89,16 +68,8 @@ function HeaderContent() {
     }
   }, [user?.id, user?.saved_addresses]);
 
-  // Synchronize state with URL parameters
+  // Synchronize search term with URL parameters
   useEffect(() => {
-    const cat = searchParams.get('category');
-    if (cat) {
-      const matched = categories.find(c => c.toLowerCase() === cat.toLowerCase());
-      setSelectedCategory(matched || cat);
-    } else {
-      setSelectedCategory('All Categories');
-    }
-
     const q = searchParams.get('search') || searchParams.get('q');
     if (q !== null && q !== undefined) {
       setSearchTerm(q);
@@ -108,9 +79,6 @@ function HeaderContent() {
   // Close dropdowns on outside click
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
-        setIsCategoryOpen(false);
-      }
       if (profileDropdownRef.current && !profileDropdownRef.current.contains(event.target as Node)) {
         setIsProfileOpen(false);
       }
@@ -161,33 +129,13 @@ function HeaderContent() {
     router.refresh();
   };
 
-  const handleCategorySelect = (cat: string) => {
-    setSelectedCategory(cat);
-    setIsCategoryOpen(false);
-
-    const queryParams = new URLSearchParams();
-    if (cat !== 'All Categories') {
-      queryParams.set('category', cat);
-    }
-    if (searchTerm.trim()) {
-      queryParams.set('search', searchTerm.trim());
-    }
-
-    const queryStr = queryParams.toString();
-    router.push(`/products${queryStr ? `?${queryStr}` : ''}`);
-  };
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
     const queryParams = new URLSearchParams();
-    
-    if (selectedCategory && selectedCategory !== 'All Categories') {
-      queryParams.set('category', selectedCategory);
-    }
     if (searchTerm.trim()) {
       queryParams.set('search', searchTerm.trim());
     }
-
     const queryStr = queryParams.toString();
     router.push(`/products${queryStr ? `?${queryStr}` : ''}`);
   };
@@ -236,46 +184,6 @@ function HeaderContent() {
             placeholder="Search for products, brands and more..."
             className="flex-1 min-w-0 px-4 py-2.5 text-sm bg-transparent text-gray-800 placeholder-gray-400 outline-none rounded-l-lg"
           />
-
-          {/* Category Dropdown Inside Search */}
-          <div ref={dropdownRef} className="relative border-l border-gray-200 shrink-0">
-            <button
-              type="button"
-              onClick={() => setIsCategoryOpen(!isCategoryOpen)}
-              className="px-3 py-2.5 text-xs font-semibold text-gray-700 hover:text-gray-900 flex items-center gap-1.5 whitespace-nowrap bg-gray-100/70 hover:bg-gray-100 transition-colors"
-            >
-              <span className="max-w-[110px] sm:max-w-[140px] truncate">{selectedCategory}</span>
-              <ChevronDown className={`w-3.5 h-3.5 text-gray-500 transition-transform duration-200 ${isCategoryOpen ? 'rotate-180' : ''}`} />
-            </button>
-
-            {isCategoryOpen && (
-              <div className="absolute right-0 top-full mt-1.5 w-56 max-h-72 overflow-y-auto bg-white rounded-xl shadow-2xl border border-gray-200 py-1.5 z-50 animate-in fade-in slide-in-from-top-1 divide-y divide-gray-50">
-                <div className="px-3 py-1.5 text-[10px] font-black text-gray-400 uppercase tracking-wider">
-                  Select Department
-                </div>
-                <div className="py-1">
-                  {categories.map((cat) => {
-                    const isSelected = selectedCategory.toLowerCase() === cat.toLowerCase();
-                    return (
-                      <button
-                        key={cat}
-                        type="button"
-                        onClick={() => handleCategorySelect(cat)}
-                        className={`w-full flex items-center justify-between px-3.5 py-2 text-xs font-medium transition-colors text-left ${
-                          isSelected 
-                            ? 'bg-emerald-50 text-[#0f3e26] font-bold' 
-                            : 'text-gray-700 hover:bg-gray-50 hover:text-[#0f3e26]'
-                        }`}
-                      >
-                        <span>{cat}</span>
-                        {isSelected && <Check className="w-3.5 h-3.5 text-[#0f3e26]" />}
-                      </button>
-                    );
-                  })}
-                </div>
-              </div>
-            )}
-          </div>
 
           {/* Golden Search Button */}
           <button

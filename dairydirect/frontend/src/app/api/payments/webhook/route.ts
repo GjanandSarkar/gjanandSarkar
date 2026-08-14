@@ -2,15 +2,18 @@
  * POST /api/payments/webhook
  * Razorpay Webhook Handler.
  * Verifies webhook signature and processes asynchronous payment events:
- * - payment.captured
- * - payment.failed
- * - refund.processed
+ * - payment.captured  → update order payment_status to 'paid'
+ * - payment.failed    → update order payment_status to 'failed'
+ * - refund.processed  → update order payment_status to 'refunded'
+ * 
+ * Security: Uses HMAC-SHA256 with RAZORPAY_WEBHOOK_SECRET.
+ * RAZORPAY_WEBHOOK_SECRET must be set separately from RAZORPAY_KEY_SECRET.
  */
 
 import { NextRequest, NextResponse } from 'next/server';
 import crypto from 'crypto';
-import { query, withTransaction } from '@/lib/aws/rds';
-import { sendOrderStatusEmail } from '@/lib/aws/ses';
+import { query, withTransaction, isPgConfigured } from '@/lib/aws/rds';
+import { getAdminSupabase } from '@/lib/supabase/admin';
 
 export async function POST(request: NextRequest) {
   try {
@@ -20,11 +23,13 @@ export async function POST(request: NextRequest) {
     }
 
     const rawBody = await request.text();
-    const webhookSecret = process.env.RAZORPAY_WEBHOOK_SECRET || process.env.RAZORPAY_KEY_SECRET;
 
+    // ─── Strict: RAZORPAY_WEBHOOK_SECRET MUST be configured ───
+    // Do NOT fallback to RAZORPAY_KEY_SECRET — they serve different purposes.
+    const webhookSecret = process.env.RAZORPAY_WEBHOOK_SECRET;
     if (!webhookSecret) {
-      console.error('[RazorpayWebhook] Secret not configured');
-      return NextResponse.json({ error: 'Server misconfiguration' }, { status: 500 });
+      console.error('[RazorpayWebhook] RAZORPAY_WEBHOOK_SECRET is not configured!');
+      return NextResponse.json({ error: 'Webhook secret not configured' }, { status: 500 });
     }
 
     // Verify HMAC-SHA256 signature
@@ -33,10 +38,16 @@ export async function POST(request: NextRequest) {
       .update(rawBody)
       .digest('hex');
 
-    const isValid = crypto.timingSafeEqual(
-      Buffer.from(expectedSignature, 'hex'),
-      Buffer.from(signature, 'hex')
-    );
+    // Use timingSafeEqual to prevent timing attacks
+    const expectedBuf = Buffer.from(expectedSignature, 'hex');
+    const receivedBuf = Buffer.from(signature, 'hex');
+
+    if (expectedBuf.length !== receivedBuf.length) {
+      console.error('[RazorpayWebhook] Invalid signature length');
+      return NextResponse.json({ error: 'Invalid signature' }, { status: 400 });
+    }
+
+    const isValid = crypto.timingSafeEqual(expectedBuf, receivedBuf);
 
     if (!isValid) {
       console.error('[RazorpayWebhook] Invalid signature received');
@@ -49,56 +60,119 @@ export async function POST(request: NextRequest) {
 
     console.log(`[RazorpayWebhook] Processing event: ${eventType}`);
 
+    // ─── Helper: Update order in DB (with RDS → Supabase fallback) ───
+    const updateOrderByRazorpayOrderId = async (
+      razorpayOrderId: string,
+      updates: {
+        payment_status?: string;
+        razorpay_payment_id?: string;
+      }
+    ) => {
+      if (isPgConfigured) {
+        try {
+          const setClauses: string[] = ['updated_at = now()'];
+          const params: any[] = [];
+          let pIdx = 1;
+
+          if (updates.payment_status) {
+            setClauses.push(`payment_status = $${pIdx++}`);
+            params.push(updates.payment_status);
+          }
+          if (updates.razorpay_payment_id) {
+            setClauses.push(`razorpay_payment_id = $${pIdx++}`);
+            params.push(updates.razorpay_payment_id);
+          }
+          params.push(razorpayOrderId);
+
+          await query(
+            `UPDATE orders SET ${setClauses.join(', ')} WHERE razorpay_order_id = $${pIdx}`,
+            params
+          );
+          return;
+        } catch (err: any) {
+          console.warn('[RazorpayWebhook] RDS update failed, using Supabase fallback:', err.message);
+        }
+      }
+
+      // Supabase fallback
+      const sb = getAdminSupabase();
+      const updateData: Record<string, any> = { updated_at: new Date().toISOString() };
+      if (updates.payment_status) updateData.payment_status = updates.payment_status;
+      if (updates.razorpay_payment_id) updateData.razorpay_payment_id = updates.razorpay_payment_id;
+
+      await sb
+        .from('orders')
+        .update(updateData)
+        .eq('razorpay_order_id', razorpayOrderId);
+    };
+
+    const updateOrderByPaymentId = async (
+      razorpayPaymentId: string,
+      updates: { payment_status?: string }
+    ) => {
+      if (isPgConfigured) {
+        try {
+          await query(
+            `UPDATE orders SET payment_status = $1, updated_at = now() WHERE razorpay_payment_id = $2`,
+            [updates.payment_status, razorpayPaymentId]
+          );
+          return;
+        } catch (err: any) {
+          console.warn('[RazorpayWebhook] RDS update failed, using Supabase fallback:', err.message);
+        }
+      }
+
+      const sb = getAdminSupabase();
+      await sb
+        .from('orders')
+        .update({ payment_status: updates.payment_status, updated_at: new Date().toISOString() })
+        .eq('razorpay_payment_id', razorpayPaymentId);
+    };
+
+    // ─── Handle Events ───
     if (eventType === 'payment.captured') {
-      const payment = payload.payment.entity;
+      const payment = payload.payment?.entity;
+      if (!payment) {
+        console.warn('[RazorpayWebhook] payment.captured: missing payment entity');
+        return NextResponse.json({ status: 'ok' });
+      }
+
       const razorpayOrderId = payment.order_id;
       const razorpayPaymentId = payment.id;
 
-      await withTransaction(async (client) => {
-        // Find order by razorpay_order_id or notes
-        const orderRes = await client.query<{ id: string; user_id: string; status: string }>(
-          'SELECT id, user_id, status FROM orders WHERE razorpay_order_id = $1',
-          [razorpayOrderId]
-        );
-
-        if (orderRes.rows.length > 0) {
-          const order = orderRes.rows[0];
-
-          await client.query(
-            `UPDATE orders 
-             SET payment_status = 'paid', payment_id = $1, updated_at = now()
-             WHERE id = $2`,
-            [razorpayPaymentId, order.id]
-          );
-
-          await client.query(
-            `UPDATE payment_transactions 
-             SET razorpay_payment_id = $1, status = 'captured', updated_at = now()
-             WHERE razorpay_order_id = $2`,
-            [razorpayPaymentId, razorpayOrderId]
-          );
-        }
+      await updateOrderByRazorpayOrderId(razorpayOrderId, {
+        payment_status: 'paid',
+        razorpay_payment_id: razorpayPaymentId,
       });
+
+      console.log(`[RazorpayWebhook] payment.captured → order updated for razorpay_order_id: ${razorpayOrderId}`);
+
     } else if (eventType === 'payment.failed') {
-      const payment = payload.payment.entity;
+      const payment = payload.payment?.entity;
+      if (!payment) return NextResponse.json({ status: 'ok' });
+
       const razorpayOrderId = payment.order_id;
 
-      await query(
-        `UPDATE payment_transactions 
-         SET status = 'failed', notes = $1, updated_at = now()
-         WHERE razorpay_order_id = $2`,
-        [payment.error_description || 'Payment failed', razorpayOrderId]
-      );
+      await updateOrderByRazorpayOrderId(razorpayOrderId, {
+        payment_status: 'failed',
+      });
+
+      console.log(`[RazorpayWebhook] payment.failed → order marked failed for razorpay_order_id: ${razorpayOrderId}`);
+
     } else if (eventType === 'refund.processed') {
-      const refund = payload.refund.entity;
+      const refund = payload.refund?.entity;
+      if (!refund) return NextResponse.json({ status: 'ok' });
+
       const paymentId = refund.payment_id;
 
-      await query(
-        `UPDATE orders 
-         SET payment_status = 'refunded', updated_at = now()
-         WHERE payment_id = $1`,
-        [paymentId]
-      );
+      await updateOrderByPaymentId(paymentId, {
+        payment_status: 'refunded',
+      });
+
+      console.log(`[RazorpayWebhook] refund.processed → order marked refunded for payment_id: ${paymentId}`);
+
+    } else {
+      console.log(`[RazorpayWebhook] Unhandled event type: ${eventType}`);
     }
 
     return NextResponse.json({ status: 'ok' });

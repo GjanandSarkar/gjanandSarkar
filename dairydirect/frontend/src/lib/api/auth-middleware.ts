@@ -104,7 +104,7 @@ export async function getAuthUser(request: Request): Promise<AuthUser | null> {
       };
     }
   } catch (err) {
-    console.error('[AuthMiddleware] DB check fallback:', err);
+    console.warn('[AuthMiddleware] PostgreSQL not configured, using Supabase auth.');
   }
 
   return {

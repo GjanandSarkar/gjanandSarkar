@@ -9,6 +9,7 @@ import { Button } from '@/components/ui/Button';
 interface RecentOrdersProps {
   orders: OrderWithItems[];
   onReorder: (order: OrderWithItems) => void;
+  hideHeader?: boolean;
 }
 
 const STATUS_STYLES: Record<string, { bg: string; color: string; dot: string; icon: any; label: string }> = {
@@ -19,19 +20,21 @@ const STATUS_STYLES: Record<string, { bg: string; color: string; dot: string; ic
   'cancelled':        { bg: '#fef2f2', color: '#991b1b', dot: '#dc2626', icon: Package, label: 'Cancelled' },
 };
 
-export function RecentOrders({ orders, onReorder }: RecentOrdersProps) {
+export function RecentOrders({ orders, onReorder, hideHeader = false }: RecentOrdersProps) {
   const recentOrders = orders.slice(0, 3);
 
   return (
     <div>
-      <div className="flex justify-between items-center mb-4">
-        <h2 className="text-lg font-black text-dark tracking-wide">Recent Orders</h2>
-        {orders.length > 3 && (
-          <Link href="/orders" className="text-primary text-sm font-bold flex items-center hover:opacity-80 transition-opacity">
-            View All <ChevronRight className="w-4 h-4 ml-0.5" />
-          </Link>
-        )}
-      </div>
+      {!hideHeader && (
+        <div className="flex justify-between items-center mb-4">
+          <h2 className="text-lg font-black text-dark tracking-wide">Recent Orders</h2>
+          {orders.length > 3 && (
+            <Link href="/orders" className="text-primary text-sm font-bold flex items-center hover:opacity-80 transition-opacity">
+              View All <ChevronRight className="w-4 h-4 ml-0.5" />
+            </Link>
+          )}
+        </div>
+      )}
 
       {recentOrders.length === 0 ? (
         <div className="bg-white rounded-[24px] p-6 border border-sand/50 text-center shadow-sm">

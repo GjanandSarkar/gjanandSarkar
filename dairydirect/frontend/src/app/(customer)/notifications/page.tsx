@@ -181,7 +181,7 @@ export default function NotificationsPage() {
             </div>
             
             <div className="p-8 text-center">
-               <p className="text-[11px] font-bold text-muted uppercase tracking-widest italic">That's all for now 🐄</p>
+               <p className="text-[11px] font-bold text-muted uppercase tracking-widest">You're all caught up</p>
             </div>
           </div>
         )}

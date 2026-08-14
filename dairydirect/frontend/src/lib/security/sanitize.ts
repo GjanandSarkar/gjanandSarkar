@@ -7,6 +7,17 @@ import { z } from 'zod';
 
 // ─── Common Schemas ───────────────────────────────────────────
 
+// Permissive UUID validator: accepts any 8-4-4-4-12 hex ID.
+// Zod's z.string().uuid() enforces strict RFC 4122 (version bits [1-8] only),
+// which rejects seeded test IDs like 'aaaa0006-0000-0000-0000-000000000006'.
+const uuidLike = z
+  .string()
+  .regex(
+    /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/,
+    'Invalid ID format'
+  );
+
+
 export const PhoneSchema = z
   .string()
   .trim()
@@ -44,17 +55,21 @@ export const AddressSchema = z.object({
 
 export const PlaceOrderSchema = z.object({
   items: z.array(z.object({
-    productId: z.string().uuid(),
-    variantId: z.string().uuid(),
-    quantity: z.number().int().min(1).max(100),
-    price: z.number().optional(),
+    productId: uuidLike,
+    variantId: uuidLike,
+    quantity: z.coerce.number().int().min(1).max(100),
+    price: z.coerce.number().optional(),
   })).min(1).max(50),
-  addressId: z.string().uuid(),
+  addressId: uuidLike,
   paymentMethod: z.enum(['cod', 'upi', 'razorpay', 'card']),
-  paymentStatus: z.enum(['pending', 'paid', 'failed']).optional(),
+  // paymentStatus is intentionally excluded — always derived server-side
   couponCode: z.string().trim().max(30).optional(),
   upiId: z.string().optional(),
   deliverySlot: z.string().max(50).optional(),
+  // Razorpay payment IDs — required when paymentMethod is 'razorpay'
+  razorpayOrderId: z.string().min(1).optional(),
+  razorpayPaymentId: z.string().min(1).optional(),
+  razorpaySignature: z.string().min(1).optional(),
 });
 
 export const ProductSchema = z.object({

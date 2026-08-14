@@ -7,21 +7,24 @@ import { Button } from '@/components/ui/Button';
 
 interface ActiveSubscriptionsProps {
   subscriptions: SubscriptionWithProduct[];
+  hideHeader?: boolean;
 }
 
-export function ActiveSubscriptions({ subscriptions }: ActiveSubscriptionsProps) {
+export function ActiveSubscriptions({ subscriptions, hideHeader = false }: ActiveSubscriptionsProps) {
   const activeSubs = subscriptions.slice(0, 2);
 
   return (
     <div>
-      <div className="flex justify-between items-center mb-4">
-        <h2 className="text-lg font-black text-dark tracking-wide">My Subscriptions</h2>
-        {subscriptions.length > 0 && (
-          <Link href="/subscribe" className="text-primary text-sm font-bold flex items-center hover:opacity-80 transition-opacity">
-            Manage <ChevronRight className="w-4 h-4 ml-0.5" />
-          </Link>
-        )}
-      </div>
+      {!hideHeader && (
+        <div className="flex justify-between items-center mb-4">
+          <h2 className="text-lg font-black text-dark tracking-wide">My Subscriptions</h2>
+          {subscriptions.length > 0 && (
+            <Link href="/subscribe" className="text-primary text-sm font-bold flex items-center hover:opacity-80 transition-opacity">
+              Manage <ChevronRight className="w-4 h-4 ml-0.5" />
+            </Link>
+          )}
+        </div>
+      )}
 
       {activeSubs.length === 0 ? (
         <div className="bg-white rounded-[24px] p-6 border border-sand/50 text-center shadow-sm">

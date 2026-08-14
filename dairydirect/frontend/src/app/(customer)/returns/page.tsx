@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import {
   RotateCcw, Package, AlertCircle, CheckCircle2,
-  Clock, ArrowLeft, Loader2, IndianRupee, ShieldCheck
+  Clock, ArrowLeft, Loader2, IndianRupee, ShieldCheck, X
 } from 'lucide-react';
 import Link from 'next/link';
 
@@ -182,7 +182,7 @@ export default function CustomerReturnsPage() {
               <h2 className="font-extrabold text-[18px]" style={{ color: 'var(--color-on-surface)' }}>
                 Submit Freshness Claim
               </h2>
-              <button onClick={() => setShowModal(false)} className="text-gray-400 hover:text-gray-600 font-bold">✕</button>
+              <button onClick={() => setShowModal(false)} className="text-gray-400 hover:text-gray-600" aria-label="Close"><X className="w-5 h-5" /></button>
             </div>
 
             <form onSubmit={handleSubmit} className="flex flex-col gap-4">

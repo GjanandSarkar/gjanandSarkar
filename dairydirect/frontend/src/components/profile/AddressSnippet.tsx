@@ -7,22 +7,25 @@ import { Button } from '@/components/ui/Button';
 
 interface AddressSnippetProps {
   addresses: UserAddress[];
+  hideHeader?: boolean;
 }
 
-export function AddressSnippet({ addresses }: AddressSnippetProps) {
+export function AddressSnippet({ addresses, hideHeader = false }: AddressSnippetProps) {
   const defaultAddress = addresses.find(a => a.is_default) || addresses[0];
   const count = addresses.length;
 
   return (
     <div>
-      <div className="flex justify-between items-center mb-4">
-        <h2 className="text-lg font-black text-dark tracking-wide">Saved Addresses</h2>
-        {count > 0 && (
-          <Link href="/profile/saved-addresses" className="text-primary text-sm font-bold flex items-center hover:opacity-80 transition-opacity">
-            Manage <ChevronRight className="w-4 h-4 ml-0.5" />
-          </Link>
-        )}
-      </div>
+      {!hideHeader && (
+        <div className="flex justify-between items-center mb-4">
+          <h2 className="text-lg font-black text-dark tracking-wide">Saved Addresses</h2>
+          {count > 0 && (
+            <Link href="/profile/saved-addresses" className="text-primary text-sm font-bold flex items-center hover:opacity-80 transition-opacity">
+              Manage <ChevronRight className="w-4 h-4 ml-0.5" />
+            </Link>
+          )}
+        </div>
+      )}
 
       {!defaultAddress ? (
         <div className="bg-white rounded-[24px] p-6 border border-sand/50 text-center shadow-sm">

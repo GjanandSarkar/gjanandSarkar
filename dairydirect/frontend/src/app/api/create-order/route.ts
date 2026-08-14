@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getRazorpayClient } from '@/lib/razorpay';
+import { getAuthUser } from '@/lib/api/auth-middleware';
 import { z } from 'zod';
 
 const CreateOrderInputSchema = z.object({
@@ -13,14 +14,24 @@ const CreateOrderInputSchema = z.object({
  * POST /api/create-order
  * Creates a standard Razorpay order.
  * Minimum amount: 100 paise (1 INR).
+ * Requires authentication to prevent abuse.
  */
 export async function POST(request: NextRequest) {
   try {
+    // ─── Auth check: only authenticated users can create orders ───
+    const auth = await getAuthUser(request);
+    if (!auth) {
+      return NextResponse.json(
+        { error: 'Authentication required to initiate payment' },
+        { status: 401 }
+      );
+    }
+
     // Check credentials configuration
     if (!process.env.RAZORPAY_KEY_ID || !process.env.RAZORPAY_KEY_SECRET) {
       return NextResponse.json(
         { error: 'Razorpay credentials not configured' },
-        { status: 401 }
+        { status: 500 }
       );
     }
 
@@ -53,8 +64,11 @@ export async function POST(request: NextRequest) {
     const razorpayOrder = await razorpay.orders.create({
       amount,
       currency: currency.toUpperCase(),
-      receipt: receipt || `rcpt_${Date.now()}`,
-      notes: notes || {},
+      receipt: receipt || `rcpt_${auth.userId.substring(0, 8)}_${Date.now()}`,
+      notes: {
+        ...notes,
+        userId: auth.userId, // Always tag with user ID for audit trail
+      },
     });
 
     return NextResponse.json({

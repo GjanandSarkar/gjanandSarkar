@@ -301,7 +301,7 @@ function ProductsScreenContent() {
               </div>
             ) : filteredProducts.length === 0 ? (
               <div className="bg-white rounded-2xl border border-gray-200/90 p-12 text-center space-y-4">
-                <div className="text-4xl">🌾</div>
+                <div className="w-14 h-14 rounded-2xl bg-gray-100 flex items-center justify-center mx-auto"><svg className="w-7 h-7 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg></div>
                 <h3 className="text-base font-black text-gray-900">
                   No products found matching your filters
                 </h3>
