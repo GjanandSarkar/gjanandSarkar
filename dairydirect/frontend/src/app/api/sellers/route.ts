@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { supabaseAdmin } from '@/lib/db';
+import { getAdminSupabase } from '@/lib/supabase/admin';
 
 export async function POST(request: Request) {
   try {
@@ -10,13 +10,13 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'User ID and Store Name are required' }, { status: 400 });
     }
 
-    // Try inserting into sellers table
-    const { data: store, error } = await supabaseAdmin
+    const sb = getAdminSupabase();
+    const { data: store, error } = await sb
       .from('sellers')
       .upsert({
         user_id: userId,
         store_name: storeName,
-        slug: slug || storeName.toLowerCase().replace(/[^a-z0-9]+/g, '-'),
+        slug: slug || storeName.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, ''),
         state: state || 'Gujarat',
         category: category || 'General',
         description: description || '',
@@ -31,28 +31,15 @@ export async function POST(request: Request) {
       .select()
       .single();
 
+    if (error) {
+      return NextResponse.json({ error: error.message }, { status: 500 });
+    }
+
     // Update profile role to seller
-    await supabaseAdmin
+    await sb
       .from('profiles')
       .update({ role: 'seller' })
       .eq('id', userId);
-
-    if (error) {
-      console.warn('Supabase seller insert fallback:', error.message);
-      return NextResponse.json({
-        success: true,
-        store: {
-          id: 'store-' + Math.random().toString(36).substring(2, 8),
-          user_id: userId,
-          store_name: storeName,
-          slug,
-          state,
-          plan,
-          commission_rate: commissionRate,
-          status: 'active'
-        }
-      });
-    }
 
     return NextResponse.json({ success: true, store });
   } catch (err: any) {
@@ -69,11 +56,16 @@ export async function GET(request: Request) {
   }
 
   try {
-    const { data: store } = await supabaseAdmin
+    const sb = getAdminSupabase();
+    const { data: store, error } = await sb
       .from('sellers')
       .select('*')
       .eq('user_id', userId)
-      .single();
+      .maybeSingle();
+
+    if (error) {
+      return NextResponse.json({ store: null });
+    }
 
     if (store) {
       return NextResponse.json({
@@ -84,55 +76,35 @@ export async function GET(request: Request) {
           plan: store.plan,
           commissionRate: store.commission_rate,
           status: store.status,
-          totalSales: store.total_sales || 284500,
+          totalSales: store.total_sales || 0,
         },
         metrics: {
-          grossRevenue: store.total_sales || 284500,
-          platformCommission: (store.total_sales || 284500) * (store.commission_rate / 100),
-          netPayout: (store.total_sales || 284500) * (1 - store.commission_rate / 100),
-          totalOrders: 342,
-          totalProducts: 14,
-          pendingDeliveries: 8,
+          grossRevenue: store.total_sales || 0,
+          platformCommission: (store.total_sales || 0) * ((store.commission_rate || 5) / 100),
+          netPayout: (store.total_sales || 0) * (1 - (store.commission_rate || 5) / 100),
+          totalOrders: 0,
+          totalProducts: 0,
+          pendingDeliveries: 0,
         },
-        recentOrders: [
-          { id: 'ORD-9821', customerName: 'Aarav Sharma', itemsCount: 3, amount: 1450, status: 'out_for_delivery', date: 'Today, 10:30 AM' },
-          { id: 'ORD-9818', customerName: 'Pooja Iyer', itemsCount: 1, amount: 890, status: 'delivered', date: 'Yesterday' },
-          { id: 'ORD-9812', customerName: 'Vikram Joshi', itemsCount: 4, amount: 2200, status: 'confirmed', date: '01 Aug 2026' },
-        ],
-        payoutHistory: [
-          { id: 'PAY-401', amount: 85000, fee: 4250, net: 80750, status: 'completed', date: '28 Jul 2026' },
-          { id: 'PAY-388', amount: 120000, fee: 6000, net: 114000, status: 'completed', date: '14 Jul 2026' },
-        ]
+        recentOrders: [],
+        payoutHistory: [],
       });
     }
-  } catch (e) {
-    // fallback
-  }
 
-  return NextResponse.json({
-    store: {
-      id: 'store-001',
-      storeName: 'Gir Organic & Vedic Dairy',
-      state: 'Gujarat',
-      plan: 'growth',
-      commissionRate: 5.0,
-      status: 'active',
-      totalSales: 284500,
-    },
-    metrics: {
-      grossRevenue: 284500,
-      platformCommission: 14225,
-      netPayout: 270275,
-      totalOrders: 342,
-      totalProducts: 14,
-      pendingDeliveries: 8,
-    },
-    recentOrders: [
-      { id: 'ORD-9821', customerName: 'Aarav Sharma', itemsCount: 3, amount: 1450, status: 'out_for_delivery', date: 'Today, 10:30 AM' },
-      { id: 'ORD-9818', customerName: 'Pooja Iyer', itemsCount: 1, amount: 890, status: 'delivered', date: 'Yesterday' },
-    ],
-    payoutHistory: [
-      { id: 'PAY-401', amount: 85000, fee: 4250, net: 80750, status: 'completed', date: '28 Jul 2026' },
-    ]
-  });
+    return NextResponse.json({
+      store: null,
+      metrics: {
+        grossRevenue: 0,
+        platformCommission: 0,
+        netPayout: 0,
+        totalOrders: 0,
+        totalProducts: 0,
+        pendingDeliveries: 0,
+      },
+      recentOrders: [],
+      payoutHistory: [],
+    });
+  } catch (err: any) {
+    return NextResponse.json({ error: err.message || 'Failed to fetch seller' }, { status: 500 });
+  }
 }

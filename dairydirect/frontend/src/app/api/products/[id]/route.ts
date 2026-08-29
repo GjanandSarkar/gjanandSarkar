@@ -209,6 +209,23 @@ export async function PUT(request: NextRequest, { params }: Props) {
       }
     }
 
+    // Sync updates to seller_product table in Supabase
+    const spPayload: any = { updated_at: new Date().toISOString() };
+    if (name !== undefined) spPayload.name = name;
+    if (category !== undefined) spPayload.category = category;
+    if (description !== undefined) spPayload.description = description;
+    if (image_url !== undefined) spPayload.image_url = image_url;
+    if (is_active !== undefined) spPayload.status = is_active ? 'active' : 'inactive';
+    if (variants && variants[0]) {
+      if (variants[0].price !== undefined) spPayload.price = variants[0].price;
+      if (variants[0].stock !== undefined) spPayload.stock = variants[0].stock;
+    }
+    try {
+      await sb.from('seller_product').update(spPayload).eq('product_id', id);
+    } catch (spErr: any) {
+      console.warn('[Product PUT] seller_product update warning:', spErr?.message || spErr);
+    }
+
     await invalidateProductsCache();
     const updatedProduct = await fetchProductDetails(id);
     return NextResponse.json({ success: true, product: updatedProduct });
@@ -237,6 +254,7 @@ export async function DELETE(request: NextRequest, { params }: Props) {
       try {
         if (permanent) {
           await withTransaction(async (client) => {
+            await client.query('DELETE FROM seller_product WHERE product_id = $1', [id]).catch(() => {});
             await client.query('DELETE FROM product_variants WHERE product_id = $1', [id]);
             await client.query('DELETE FROM products WHERE id = $1', [id]);
           });
@@ -244,6 +262,7 @@ export async function DELETE(request: NextRequest, { params }: Props) {
           return NextResponse.json({ success: true, permanent: true, message: 'Product deleted permanently' });
         } else {
           await query('UPDATE products SET is_active = false, updated_at = now() WHERE id = $1', [id]);
+          await query("UPDATE seller_product SET status = 'inactive', updated_at = now() WHERE product_id = $1", [id]).catch(() => {});
           await invalidateProductsCache();
           return NextResponse.json({ success: true, softDeleted: true, message: 'Product archived' });
         }
@@ -254,14 +273,23 @@ export async function DELETE(request: NextRequest, { params }: Props) {
 
     const sb = getAdminSupabase();
     if (permanent) {
-      // Delete variants first
+      // Delete from seller_product, variants, and products
+      try {
+        await sb.from('seller_product').delete().eq('product_id', id);
+      } catch (spErr: any) {
+        console.warn('[Product DELETE] seller_product delete warning:', spErr?.message || spErr);
+      }
       await sb.from('product_variants').delete().eq('product_id', id);
-      // Then delete product
       await sb.from('products').delete().eq('id', id);
       await invalidateProductsCache();
       return NextResponse.json({ success: true, permanent: true, message: 'Product deleted permanently' });
     } else {
       await sb.from('products').update({ is_active: false, updated_at: new Date().toISOString() }).eq('id', id);
+      try {
+        await sb.from('seller_product').update({ status: 'inactive', updated_at: new Date().toISOString() }).eq('product_id', id);
+      } catch (spErr: any) {
+        console.warn('[Product DELETE] seller_product update warning:', spErr?.message || spErr);
+      }
       await invalidateProductsCache();
       return NextResponse.json({ success: true, softDeleted: true, message: 'Product archived' });
     }

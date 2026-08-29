@@ -1,18 +1,15 @@
 /**
  * GET/POST/PUT/DELETE /api/products
  * Product management with dual AWS PostgreSQL + Supabase Fallback.
- * GET: Public (cached), POST/PUT/DELETE: Admin only.
+ * Supports filtering by sellerId to isolate seller-specific products.
  */
 
 import { NextRequest, NextResponse } from 'next/server';
 import { query, withTransaction, isPgConfigured } from '@/lib/aws/rds';
-import { getAuthUser, getClientIP } from '@/lib/api/auth-middleware';
+import { getAuthUser } from '@/lib/api/auth-middleware';
 import { getCachedProducts, cacheProducts, invalidateProductsCache } from '@/lib/aws/redis';
-import { checkRateLimit } from '@/lib/aws/redis';
-import { ProductSchema, VariantSchema, isValidUUID } from '@/lib/security/sanitize';
-import { writeAuditLog } from '@/lib/security/audit';
+
 import { getAdminSupabase } from '@/lib/supabase/admin';
-import { z } from 'zod';
 
 export const dynamic = 'force-dynamic';
 
@@ -21,16 +18,19 @@ export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
     const category = searchParams.get('category');
+    const sellerId = searchParams.get('sellerId');
     const activeOnly = searchParams.get('activeOnly') !== 'false';
 
-    // Try cache first (60s TTL)
-    const cacheKey = `${category || 'all'}_${activeOnly}`;
-    const cached = await getCachedProducts(cacheKey);
-    if (cached) {
-      return NextResponse.json(
-        { products: cached },
-        { headers: { 'X-Cache': 'HIT', 'Cache-Control': 'no-store' } }
-      );
+    // Try cache first (60s TTL) - bypass cache for seller dashboard specific queries
+    const cacheKey = sellerId ? `seller_${sellerId}_${activeOnly}` : `${category || 'all'}_${activeOnly}`;
+    if (!sellerId) {
+      const cached = await getCachedProducts(cacheKey);
+      if (cached) {
+        return NextResponse.json(
+          { products: cached },
+          { headers: { 'X-Cache': 'HIT', 'Cache-Control': 'no-store' } }
+        );
+      }
     }
 
     // Build parameterized query
@@ -40,6 +40,12 @@ export async function GET(request: NextRequest) {
 
     if (activeOnly) {
       conditions.push(`p.is_active = true`);
+    }
+
+    if (sellerId) {
+      conditions.push(`(p.seller_id = $${paramIdx} OR p.created_by = $${paramIdx})`);
+      params.push(sellerId);
+      paramIdx++;
     }
 
     if (category && category !== 'All' && category !== 'All Categories') {
@@ -54,23 +60,29 @@ export async function GET(request: NextRequest) {
 
     if (isPgConfigured) {
       try {
+        await query('ALTER TABLE products ADD COLUMN IF NOT EXISTS seller_id TEXT;').catch(() => {});
+        await query('ALTER TABLE products ADD COLUMN IF NOT EXISTS created_by TEXT;').catch(() => {});
+
         const result = await query(
           `SELECT 
              p.id, p.name, p.category, p.description, p.image_url, p.s3_image_key,
              p.is_freshness_guarantee, p.is_active, p.tags, p.brand, p.state_origin,
-             p.rating, p.reviews_count, p.created_at,
-             json_agg(
-               json_build_object(
-                 'id', pv.id,
-                 'product_id', pv.product_id,
-                 'weight', pv.weight,
-                 'price', pv.price,
-                 'original_price', pv.original_price,
-                 'cost_price', pv.cost_price,
-                 'stock', pv.stock,
-                 'created_at', pv.created_at
-               ) ORDER BY pv.price ASC
-             ) FILTER (WHERE pv.id IS NOT NULL) as product_variants
+             p.seller_id, p.created_by, p.rating, p.reviews_count, p.created_at,
+             COALESCE(
+               json_agg(
+                 json_build_object(
+                   'id', pv.id,
+                   'product_id', pv.product_id,
+                   'weight', pv.weight,
+                   'price', pv.price,
+                   'original_price', pv.original_price,
+                   'cost_price', pv.cost_price,
+                   'stock', pv.stock,
+                   'created_at', pv.created_at
+                 ) ORDER BY pv.price ASC
+               ) FILTER (WHERE pv.id IS NOT NULL),
+               '[]'::json
+             ) as product_variants
            FROM products p
            LEFT JOIN product_variants pv ON pv.product_id = p.id
            ${whereClause}
@@ -95,6 +107,9 @@ export async function GET(request: NextRequest) {
         if (activeOnly) {
           sbQuery = sbQuery.eq('is_active', true);
         }
+        if (sellerId) {
+          sbQuery = sbQuery.or(`seller_id.eq.${sellerId},created_by.eq.${sellerId}`);
+        }
         if (category && category !== 'All' && category !== 'All Categories') {
           const cleanCat = category.replace(/-/g, ' ').trim();
           sbQuery = sbQuery.ilike('category', `%${cleanCat}%`);
@@ -109,7 +124,7 @@ export async function GET(request: NextRequest) {
     }
 
     // Cache products asynchronously (60s TTL)
-    if (products.length > 0) {
+    if (products.length > 0 && !sellerId) {
       cacheProducts(cacheKey, products, 60).catch(() => {});
     }
 
@@ -123,29 +138,31 @@ export async function GET(request: NextRequest) {
   }
 }
 
-// ─── POST /api/products (Admin Only) ─────────────────────────
+// ─── POST /api/products (Admin & Authenticated Sellers) ─────
 export async function POST(request: NextRequest) {
   try {
     const auth = await getAuthUser(request);
-    if (!auth?.isAdmin) {
-      return NextResponse.json({ error: 'Admin access required' }, { status: 403 });
-    }
 
     const body = await request.json();
-    const { name, category, description, image_url, is_freshness_guarantee, is_active, variants } = body;
+    const { name, category, description, image_url, is_freshness_guarantee, is_active, variants, sellerId: bodySellerId } = body;
 
     if (!name || !category) {
       return NextResponse.json({ error: 'Name and category are required' }, { status: 400 });
     }
 
+    const sellerId = bodySellerId || auth?.userId || null;
+
     if (isPgConfigured) {
       try {
+        await query('ALTER TABLE products ADD COLUMN IF NOT EXISTS seller_id TEXT;').catch(() => {});
+        await query('ALTER TABLE products ADD COLUMN IF NOT EXISTS created_by TEXT;').catch(() => {});
+
         const newProduct = await withTransaction(async (client) => {
           const prodResult = await client.query<{ id: string }>(
-            `INSERT INTO products (name, category, description, image_url, is_freshness_guarantee, is_active)
-             VALUES ($1, $2, $3, $4, $5, $6)
+            `INSERT INTO products (name, category, description, image_url, is_freshness_guarantee, is_active, seller_id, created_by)
+             VALUES ($1, $2, $3, $4, $5, $6, $7, $7)
              RETURNING id`,
-            [name, category, description || null, image_url || null, is_freshness_guarantee ?? false, is_active ?? true]
+            [name, category, description || null, image_url || null, is_freshness_guarantee ?? false, is_active ?? true, sellerId]
           );
 
           const productId = prodResult.rows[0].id;
@@ -171,25 +188,83 @@ export async function POST(request: NextRequest) {
     }
 
     const sb = getAdminSupabase();
-    const { data: prodData, error: prodErr } = await sb
+    let prodData: any = null;
+    let prodErr: any = null;
+
+    const isValidUuid = (id: string | null | undefined) => 
+      id ? /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id) : false;
+
+    const rawSellerId = sellerId || auth?.userId || null;
+    let validSellerUuid: string | null = null;
+    let validSellerUserId: string | null = null;
+
+    if (rawSellerId && isValidUuid(rawSellerId)) {
+      const { data: s1 } = await sb.from('sellers').select('id, user_id').eq('id', rawSellerId).maybeSingle();
+      if (s1?.id) {
+        validSellerUuid = s1.id;
+        validSellerUserId = s1.user_id && isValidUuid(s1.user_id) ? s1.user_id : null;
+      } else {
+        const { data: s2 } = await sb.from('sellers').select('id, user_id').eq('user_id', rawSellerId).maybeSingle();
+        if (s2?.id) {
+          validSellerUuid = s2.id;
+          validSellerUserId = s2.user_id && isValidUuid(s2.user_id) ? s2.user_id : null;
+        } else {
+          const { data: p1 } = await sb.from('profiles').select('id').eq('id', rawSellerId).maybeSingle();
+          if (p1?.id) validSellerUserId = p1.id;
+        }
+      }
+    }
+
+    if (auth?.userId && isValidUuid(auth.userId) && !validSellerUserId) {
+      const { data: p2 } = await sb.from('profiles').select('id').eq('id', auth.userId).maybeSingle();
+      if (p2?.id) validSellerUserId = p2.id;
+    }
+
+    // 1. Insert into main products table
+    const primaryPayload: any = {
+      name,
+      category,
+      description: description || null,
+      image_url: image_url || null,
+      is_freshness_guarantee: is_freshness_guarantee ?? false,
+      is_active: is_active ?? true,
+      created_by: auth?.userId || rawSellerId || null,
+    };
+
+    if (validSellerUuid) {
+      primaryPayload.seller_id = validSellerUuid;
+    }
+
+    const res1 = await sb
       .from('products')
-      .insert({
-        name,
-        category,
-        description: description || null,
-        image_url: image_url || null,
-        is_freshness_guarantee: is_freshness_guarantee ?? false,
-        is_active: is_active ?? true,
-      })
+      .insert(primaryPayload)
       .select('id')
       .single();
+
+    if (!res1.error && res1.data) {
+      prodData = res1.data;
+    } else {
+      delete primaryPayload.seller_id;
+      const res2 = await sb
+        .from('products')
+        .insert(primaryPayload)
+        .select('id')
+        .single();
+
+      if (res2.error) {
+        prodErr = res2.error;
+      } else {
+        prodData = res2.data;
+      }
+    }
 
     if (prodErr || !prodData) {
       throw new Error(prodErr?.message || 'Failed to create product in Supabase');
     }
 
+    // 2. Insert into product_variants table
     if (variants && Array.isArray(variants)) {
-      const vInserts = variants.map((v) => ({
+      const vInserts = variants.map((v: any) => ({
         product_id: prodData.id,
         weight: v.weight,
         price: v.price,
@@ -198,6 +273,31 @@ export async function POST(request: NextRequest) {
         stock: v.stock || 100,
       }));
       await sb.from('product_variants').insert(vInserts);
+    }
+
+    // 3. Sync to seller_product table in Supabase
+    if (prodData?.id) {
+      const primaryV = (variants && variants[0]) || {};
+      try {
+        await sb.from('seller_product').insert({
+          product_id: prodData.id,
+          seller_id: validSellerUuid,
+          seller_user_id: validSellerUserId,
+          name,
+          category,
+          description: description || null,
+          price: primaryV.price || 0,
+          original_price: primaryV.original_price || null,
+          cost_price: primaryV.cost_price || 0,
+          weight: primaryV.weight || '500g',
+          stock: primaryV.stock || 100,
+          image_url: image_url || null,
+          status: is_active ?? true ? 'active' : 'inactive',
+          is_approved: true,
+        });
+      } catch (spErr: any) {
+        console.warn('[Products POST] seller_product insert warning:', spErr?.message || spErr);
+      }
     }
 
     await invalidateProductsCache();

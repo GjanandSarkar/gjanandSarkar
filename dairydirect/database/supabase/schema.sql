@@ -199,6 +199,33 @@ CREATE INDEX IF NOT EXISTS idx_product_variants_product_id ON product_variants(p
 CREATE INDEX IF NOT EXISTS idx_product_variants_stock      ON product_variants(stock);
 CREATE INDEX IF NOT EXISTS idx_product_variants_active     ON product_variants(product_id, is_active);
 
+-- ─── 8b. Seller Product (Dedicated Seller Catalog Listing) ─────────────────────
+CREATE TABLE IF NOT EXISTS seller_product (
+  id              UUID          PRIMARY KEY DEFAULT gen_random_uuid(),
+  seller_id       UUID          REFERENCES sellers(id) ON DELETE CASCADE,
+  seller_user_id  UUID          REFERENCES profiles(id) ON DELETE SET NULL,
+  product_id      UUID          REFERENCES products(id) ON DELETE CASCADE,
+  name            TEXT          NOT NULL,
+  category        TEXT          NOT NULL,
+  description     TEXT,
+  price           NUMERIC(10,2) NOT NULL DEFAULT 0.00,
+  original_price  NUMERIC(10,2),
+  cost_price      NUMERIC(10,2) DEFAULT 0.00,
+  weight          TEXT          DEFAULT '500g',
+  stock           INTEGER       NOT NULL DEFAULT 50,
+  image_url       TEXT,
+  status          TEXT          NOT NULL DEFAULT 'active' CHECK (status IN ('active', 'inactive', 'pending', 'out_of_stock')),
+  is_approved     BOOLEAN       NOT NULL DEFAULT true,
+  metadata        JSONB         DEFAULT '{}'::jsonb,
+  created_at      TIMESTAMPTZ   NOT NULL DEFAULT now(),
+  updated_at      TIMESTAMPTZ   NOT NULL DEFAULT now()
+);
+
+CREATE INDEX IF NOT EXISTS idx_seller_product_seller_id      ON seller_product(seller_id);
+CREATE INDEX IF NOT EXISTS idx_seller_product_seller_user_id ON seller_product(seller_user_id);
+CREATE INDEX IF NOT EXISTS idx_seller_product_product_id     ON seller_product(product_id);
+CREATE INDEX IF NOT EXISTS idx_seller_product_status         ON seller_product(status);
+
 -- ─── 9. Cart Items ──────────────────────────────────────────────────────────
 CREATE TABLE IF NOT EXISTS cart_items (
   id         UUID        PRIMARY KEY DEFAULT gen_random_uuid(),

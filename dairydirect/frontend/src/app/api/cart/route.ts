@@ -12,11 +12,15 @@ import { getAdminSupabase } from '@/lib/supabase/admin';
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
-    const userId = searchParams.get('userId');
-
     const auth = await getAuthUser(request);
-    if (!auth || auth.userId !== userId) {
+    const userId = searchParams.get('userId') || auth?.userId;
+
+    if (!userId) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    if (auth && !auth.isAdmin && auth.userId !== userId) {
+      return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
     }
 
     if (isPgConfigured) {

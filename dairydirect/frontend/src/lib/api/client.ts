@@ -181,4 +181,43 @@ export const api = {
         body: JSON.stringify(_data),
       }),
   },
+
+  customers: {
+    get: (search?: string) =>
+      fetchApi<{ customers: any[]; total: number }>(`/api/admin/customers${search ? `?search=${encodeURIComponent(search)}` : ''}`),
+  },
+
+  categories: {
+    get: () => fetchApi<{ categories: any[] }>('/api/categories'),
+    create: (_data: any) =>
+      fetchApi<{ success: boolean; category: any }>('/api/categories', {
+        method: 'POST',
+        body: JSON.stringify(_data),
+      }),
+    update: (id: string, _data: any) =>
+      fetchApi<{ success: boolean; category: any }>(`/api/categories/${id}`, {
+        method: 'PUT',
+        body: JSON.stringify(_data),
+      }),
+    delete: (id: string) =>
+      fetchApi<{ success: boolean }>(`/api/categories/${id}`, {
+        method: 'DELETE',
+      }),
+  },
+
+  wishlist: {
+    get: (_userId?: string) =>
+      fetchApi<{ wishlist: string[] }>(`/api/wishlist${_userId ? `?userId=${_userId}` : ''}`),
+
+    toggle: (_userId: string, _productId: string) =>
+      fetchApi<{ success: boolean; added: boolean }>('/api/wishlist', {
+        method: 'POST',
+        body: JSON.stringify({ userId: _userId, productId: _productId }),
+      }),
+
+    remove: (_userId: string, _productId: string) =>
+      fetchApi<{ success: boolean }>(`/api/wishlist?userId=${_userId}&productId=${_productId}`, {
+        method: 'DELETE',
+      }),
+  },
 };

@@ -178,8 +178,18 @@ export async function getSellerDashboard(userId: string): Promise<SellerDashboar
     if (res.ok) {
       const data = await res.json();
       return {
-        ...data,
-        inquiry: userInquiry
+        store: data.store || null,
+        inquiry: userInquiry,
+        metrics: {
+          grossRevenue: data.metrics?.grossRevenue ?? 0,
+          platformCommission: data.metrics?.platformCommission ?? 0,
+          netPayout: data.metrics?.netPayout ?? 0,
+          totalOrders: data.metrics?.totalOrders ?? 0,
+          totalProducts: data.metrics?.totalProducts ?? 0,
+          pendingDeliveries: data.metrics?.pendingDeliveries ?? 0,
+        },
+        recentOrders: Array.isArray(data.recentOrders) ? data.recentOrders : [],
+        payoutHistory: Array.isArray(data.payoutHistory) ? data.payoutHistory : [],
       };
     }
   } catch (e) {
@@ -209,3 +219,76 @@ export async function getSellerDashboard(userId: string): Promise<SellerDashboar
     payoutHistory: [],
   };
 }
+
+export interface SellerProductItem {
+  id: string;
+  seller_id?: string;
+  seller_user_id?: string;
+  product_id?: string;
+  name: string;
+  category: string;
+  description?: string;
+  price: number;
+  original_price?: number;
+  cost_price?: number;
+  weight?: string;
+  stock?: number;
+  image_url?: string;
+  status: string;
+  is_approved?: boolean;
+  created_at?: string;
+  updated_at?: string;
+}
+
+/**
+ * Fetch seller product catalog from Supabase seller_products table
+ */
+export async function getSellerProducts(options: { sellerId?: string; sellerUserId?: string; category?: string; status?: string } = {}): Promise<SellerProductItem[]> {
+  try {
+    const params = new URLSearchParams();
+    if (options.sellerId) params.set('sellerId', options.sellerId);
+    if (options.sellerUserId) params.set('sellerUserId', options.sellerUserId);
+    if (options.category) params.set('category', options.category);
+    if (options.status) params.set('status', options.status);
+
+    const res = await fetch(`/api/sellers/products?${params.toString()}`);
+    if (!res.ok) throw new Error('Failed to fetch seller products');
+    const data = await res.json();
+    return data.sellerProducts || [];
+  } catch (err) {
+    console.error('getSellerProducts error:', err);
+    return [];
+  }
+}
+
+/**
+ * Add a new product to Supabase seller_products table
+ */
+export async function addSellerProduct(payload: {
+  sellerId?: string;
+  sellerUserId?: string;
+  name: string;
+  category: string;
+  description?: string;
+  price: number;
+  originalPrice?: number;
+  costPrice?: number;
+  weight?: string;
+  stock?: number;
+  imageUrl?: string;
+  status?: string;
+}): Promise<{ success: boolean; sellerProduct: SellerProductItem }> {
+  const res = await fetch('/api/sellers/products', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload),
+  });
+
+  if (!res.ok) {
+    const data = await res.json();
+    throw new Error(data.error || 'Failed to add seller product');
+  }
+
+  return await res.json();
+}
+

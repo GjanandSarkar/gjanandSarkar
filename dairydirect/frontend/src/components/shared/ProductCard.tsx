@@ -6,6 +6,7 @@ import { Plus, Minus, Pencil, Star, ShoppingCart, Heart } from 'lucide-react';
 import { useTranslation } from '@/lib/i18n';
 import { useStore } from '@/store/useStore';
 import { addToCart, updateCartItem } from '@/lib/api/cart';
+import { toggleWishlist } from '@/lib/api/wishlist';
 import type { ProductWithVariants } from '@/lib/api/products';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ProductEditModal } from '@/components/admin/ProductEditModal';
@@ -71,10 +72,13 @@ export function ProductCard({
     productCartItems.find((i) => i.variantId === (selectedVariant?.id ?? ''))?.quantity ?? 0;
 
   // ── Wishlist Toggle ───────────────────────────────────────
-  const handleToggleWishlist = (e: React.MouseEvent) => {
+  const handleToggleWishlist = async (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
     toggleWishlistLocal(product.id);
+    if (user) {
+      await toggleWishlist(user.id, product.id);
+    }
   };
 
   // ── Add to cart ───────────────────────────────────────────

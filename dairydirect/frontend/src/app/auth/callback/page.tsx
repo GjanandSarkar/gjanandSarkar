@@ -65,6 +65,8 @@ function AuthCallbackInner() {
 
             if (userProfile.role === 'admin' && (!next || next === '/home' || next === '/')) {
               redirectTarget = '/admin';
+            } else if (userProfile.role === 'seller' && (!next || next === '/home' || next === '/')) {
+              redirectTarget = '/seller/dashboard';
             }
           }
         }

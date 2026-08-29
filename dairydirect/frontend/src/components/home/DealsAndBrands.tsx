@@ -35,6 +35,8 @@ export function DealsAndBrands({ products }: DealsAndBrandsProps) {
     return () => clearInterval(timer);
   }, []);
 
+  if (!products || products.length === 0) return null;
+
   // Deal items
   const dealProducts = products.slice(0, 4);
   const discounts = ['40% OFF', '35% OFF', '25% OFF', '30% OFF'];

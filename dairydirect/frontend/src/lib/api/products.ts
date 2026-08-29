@@ -1,6 +1,7 @@
 import { api } from './client';
 import { supabase } from '@/lib/supabase';
 import { getAdminSupabase } from '@/lib/supabase/admin';
+import { uploadImageToImageKit } from './imagekit';
 
 export type ProductWithVariants = {
   id: string;
@@ -27,6 +28,7 @@ export type NewProductInput = {
   description?: string;
   image_url?: string;
   is_freshness_guarantee?: boolean;
+  sellerId?: string;
 };
 
 export type NewVariantInput = {
@@ -37,9 +39,20 @@ export type NewVariantInput = {
 };
 
 export async function getProducts(
-  options: { category?: string; activeOnly?: boolean } = {}
+  options: { category?: string; activeOnly?: boolean; sellerId?: string } = {}
 ): Promise<ProductWithVariants[]> {
   try {
+    const params = new URLSearchParams();
+    if (options.category) params.set('category', options.category);
+    if (options.activeOnly !== undefined) params.set('activeOnly', String(options.activeOnly));
+    if (options.sellerId) params.set('sellerId', options.sellerId);
+
+    const res = await fetch(`/api/products?${params.toString()}`, { cache: 'no-store' });
+    if (res.ok) {
+      const data = await res.json();
+      return data.products ?? [];
+    }
+
     const result = await api.products.get({
       category: options.category,
       activeOnly: options.activeOnly,
@@ -168,6 +181,13 @@ export async function uploadProductImage(
   file: File
 ): Promise<{ url?: string; error?: string }> {
   try {
+    // 1. Try ImageKit upload first (stores images on ImageKit CDN in /products folder)
+    const ikRes = await uploadImageToImageKit(file, '/products');
+    if (ikRes.success && ikRes.url) {
+      return { url: ikRes.url };
+    }
+
+    // 2. Fallback to Supabase Storage if ImageKit keys are not configured
     const fileExt = file.name.split('.').pop();
     const fileName = `${Math.random()}.${fileExt}`;
     const filePath = `${fileName}`;

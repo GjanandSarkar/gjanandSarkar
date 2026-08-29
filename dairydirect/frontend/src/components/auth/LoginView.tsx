@@ -193,10 +193,11 @@ function LoginScreenInner() {
               <span className="text-white font-black text-xl tracking-tight">GS</span>
             </div>
             <div className="flex flex-col text-left">
-              <span className="text-2xl font-black text-[#0f3e26] tracking-tight leading-none">
-                Gjanand<span className="text-[#c88a23]">.</span>
+              <span className="text-2xl font-black tracking-tight leading-none">
+                <span className="text-[#0f172a]">Gj</span>
+                <span className="text-[#16a34a]">anand</span>
               </span>
-              <span className="text-[10px] tracking-[0.25em] font-extrabold text-[#c88a23] uppercase mt-0.5">
+              <span className="text-[10px] tracking-[0.2em] font-black text-[#2563eb] uppercase text-right leading-none mt-0.5">
                 SARKAR
               </span>
             </div>

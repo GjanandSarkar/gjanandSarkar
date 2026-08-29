@@ -15,7 +15,7 @@ export function TopAppBar() {
       <div className="flex justify-between items-center px-5 py-3.5 w-full">
         
         <Link href="/home" className="flex items-center">
-          <img src="/logo.svg" alt="Logo" className="w-9 h-9 object-contain" />
+          <img src="/application logo/gjanand sarkar logo.png" alt="Logo" className="w-9 h-9 object-contain" />
         </Link>
         
         <div className="flex items-center gap-1.5">

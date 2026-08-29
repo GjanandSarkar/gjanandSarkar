@@ -150,17 +150,21 @@ export default function AdminOrdersPage() {
                           <div className="px-5 py-4">
                             <div className="rounded-[10px] p-3 mb-4"
                               style={{ background: 'var(--color-surface-container-low)' }}>
-                              {order.order_items?.map((item, j) => (
-                                <div key={j} className="flex justify-between text-[13px] py-1"
-                                  style={{ borderTop: j > 0 ? '1px solid rgba(195, 201, 187, 0.25)' : undefined }}>
-                                  <span style={{ color: 'var(--color-on-surface-variant)' }}>
-                                    {item.quantity}× Item #{item.product_id?.slice(0, 8) || 'Unknown'}
-                                  </span>
-                                  <span className="font-semibold" style={{ color: 'var(--color-on-surface)' }}>
-                                    {t('currency')}{item.price * item.quantity}
-                                  </span>
-                                </div>
-                              ))}
+                              {order.order_items?.map((item, j) => {
+                                const pName = item.product_name || item.products?.name || (item.product_id ? `Product #${item.product_id.slice(0, 6)}` : 'Dairy Product');
+                                const pWeight = item.weight || item.product_variants?.weight || '';
+                                return (
+                                  <div key={j} className="flex justify-between text-[13px] py-1"
+                                    style={{ borderTop: j > 0 ? '1px solid rgba(195, 201, 187, 0.25)' : undefined }}>
+                                    <span style={{ color: 'var(--color-on-surface-variant)' }}>
+                                      {item.quantity}× {pName}{pWeight ? ` (${pWeight})` : ''}
+                                    </span>
+                                    <span className="font-semibold" style={{ color: 'var(--color-on-surface)' }}>
+                                      {t('currency')}{item.price * item.quantity}
+                                    </span>
+                                  </div>
+                                );
+                              })}
                             </div>
 
                             <div className="relative">

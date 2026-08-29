@@ -14,7 +14,6 @@ import {
   SlidersHorizontal, 
   ChevronDown, 
   X,
-  Search,
   Check
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -163,23 +162,6 @@ function ProductsScreenContent() {
           {/* Left Sidebar Filters */}
           <aside className="space-y-6">
             
-            {/* Search within page */}
-            <div className="bg-white rounded-2xl border border-gray-200/90 p-4 shadow-2xs">
-              <label className="block text-xs font-black text-gray-900 mb-2 uppercase tracking-wider">
-                Search Catalog
-              </label>
-              <div className="relative">
-                <Search className="w-4 h-4 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2" />
-                <input
-                  type="text"
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  placeholder="Filter by name, spice, ghee..."
-                  className="w-full pl-9 pr-3 py-2 text-xs rounded-xl border border-gray-300 text-gray-900 focus:border-[#0f3e26] outline-none"
-                />
-              </div>
-            </div>
-
             {/* Categories Filter */}
             <div className="bg-white rounded-2xl border border-gray-200/90 p-4 shadow-2xs">
               <h3 className="text-xs font-black text-gray-900 mb-3 uppercase tracking-wider">

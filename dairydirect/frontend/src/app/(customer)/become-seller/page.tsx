@@ -24,6 +24,7 @@ import {
 } from 'lucide-react';
 import { useStore } from '@/store/useStore';
 import { submitSellerInquiry, SellerInquiry } from '@/lib/api/sellers';
+import { validatePhoneNumber, formatPhoneInput } from '@/lib/utils/phone';
 
 export default function BecomeSellerPage() {
   const user = useStore((s) => s.user);
@@ -84,8 +85,9 @@ export default function BecomeSellerPage() {
       setError('Please enter your farm, brand, or business name');
       return;
     }
-    if (!phone.trim() || phone.trim().length < 10) {
-      setError('Please enter a valid 10-digit mobile number for manual verification');
+    const validPhone = validatePhoneNumber(phone);
+    if (!validPhone.isValid) {
+      setError('Enter a valid Indian mobile number');
       return;
     }
     if (!email.trim() || !email.includes('@')) {
@@ -302,9 +304,13 @@ export default function BecomeSellerPage() {
                       <input
                         type="tel"
                         required
-                        value={phone}
-                        onChange={(e) => setPhone(e.target.value)}
-                        placeholder="98250 XXXXX"
+                        value={phone.replace(/^\+91/, '')}
+                        onChange={(e) => {
+                          const digits = e.target.value.replace(/\D/g, '').slice(0, 10);
+                          setPhone(`+91${digits}`);
+                        }}
+                        placeholder="9825012345"
+                        maxLength={10}
                         className="w-full px-4 py-2.5 rounded-r-xl border border-gray-300 text-xs text-gray-900 focus:border-[#0f3e26] focus:ring-1 focus:ring-[#0f3e26] outline-none"
                       />
                     </div>

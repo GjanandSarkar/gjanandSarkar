@@ -32,6 +32,20 @@ export function AuthGuard() {
       return;
     }
 
+    // Logged in seller -> automatically redirect to seller dashboard if accessing general customer pages
+    if (user && user.role === 'seller') {
+      const isSellerAllowedPage = 
+        pathname.startsWith('/seller') || 
+        pathname.startsWith('/api') || 
+        pathname.startsWith('/admin') ||
+        pathname === '/profile';
+
+      if (!isSellerAllowedPage) {
+        router.replace('/seller/dashboard');
+        return;
+      }
+    }
+
     // Already logged in -> leave login page
     if (user && (pathname === '/login' || pathname === '/auth/login')) {
       if (user.role === 'admin') {

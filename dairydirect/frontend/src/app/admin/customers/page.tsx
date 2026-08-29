@@ -5,6 +5,7 @@ import { useTranslation } from '@/lib/i18n';
 import { Users, Loader2, Mail, Phone, Search, X, Package, Repeat, IndianRupee, ArrowLeft } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import Link from 'next/link';
+import { api } from '@/lib/api/client';
 
 export default function AdminCustomersPage() {
   const { t } = useTranslation();
@@ -17,14 +18,23 @@ export default function AdminCustomersPage() {
   const fetchCustomers = async (query = '') => {
     setIsLoading(true);
     try {
-      const res = await fetch(`/api/admin/customers?search=${encodeURIComponent(query)}`);
-      const data = await res.json();
+      const data = await api.customers.get(query);
       if (data.customers) {
         setCustomers(data.customers);
-        setTotal(data.total || data.customers.length);
+        setTotal(data.total ?? data.customers.length);
       }
     } catch (e) {
-      console.error('Failed to fetch customers:', e);
+      console.error('Failed to fetch customers with api client, trying fallback:', e);
+      try {
+        const res = await fetch(`/api/admin/customers?search=${encodeURIComponent(query)}`, { credentials: 'include' });
+        const data = await res.json();
+        if (data.customers) {
+          setCustomers(data.customers);
+          setTotal(data.total ?? data.customers.length);
+        }
+      } catch (err) {
+        console.error('Fallback fetch failed:', err);
+      }
     } finally {
       setIsLoading(false);
     }

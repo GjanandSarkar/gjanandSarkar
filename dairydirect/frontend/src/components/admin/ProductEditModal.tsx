@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { useTranslation } from '@/lib/i18n';
 import type { ProductWithVariants } from '@/lib/api/products';
-import { updateProduct, deleteProduct, uploadProductImage } from '@/lib/api/products';
+import { updateProduct, createProduct, deleteProduct, uploadProductImage } from '@/lib/api/products';
 import {
   X,
   Plus,
@@ -19,7 +19,7 @@ import {
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
-const CATEGORIES = ['Milk', 'Paneer', 'Ghee', 'Buttermilk', 'Curd', 'Lassi'];
+
 
 interface ProductEditModalProps {
   product: ProductWithVariants | null;
@@ -39,7 +39,8 @@ export function ProductEditModal({
   const { t } = useTranslation();
 
   const [name, setName] = useState('');
-  const [category, setCategory] = useState('Milk');
+  const [category, setCategory] = useState('');
+  const [categoriesList, setCategoriesList] = useState<string[]>([]);
   const [description, setDescription] = useState('');
   const [imageUrl, setImageUrl] = useState('');
   const [isFreshnessGuarantee, setIsFreshnessGuarantee] = useState(true);
@@ -64,10 +65,30 @@ export function ProductEditModal({
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [permanentDelete, setPermanentDelete] = useState(false);
 
+  // Fetch live categories from API (show ONLY categories created in database by admin)
+  useEffect(() => {
+    if (!isOpen) return;
+    fetch('/api/categories')
+      .then((res) => res.json())
+      .then((data) => {
+        if (data?.categories && Array.isArray(data.categories)) {
+          const liveNames: string[] = (data.categories || [])
+            .map((c: any) => c.name?.trim())
+            .filter((n: any): n is string => Boolean(n))
+            .sort((a: string, b: string) => a.localeCompare(b, undefined, { sensitivity: 'base' }));
+          setCategoriesList(liveNames);
+          if (!category && liveNames.length > 0) {
+            setCategory(liveNames[0]);
+          }
+        }
+      })
+      .catch((err) => console.warn('[ProductEditModal] Live categories fetch warning:', err));
+  }, [isOpen]);
+
   useEffect(() => {
     if (product) {
       setName(product.name || '');
-      setCategory(product.category || 'Milk');
+      setCategory(product.category || (categoriesList[0] || ''));
       setDescription(product.description || '');
       setImageUrl(product.image_url || '');
       setImagePreview(product.image_url || null);
@@ -84,6 +105,9 @@ export function ProductEditModal({
           stock: v.stock !== undefined ? v.stock.toString() : '0',
         }))
       );
+      if ((product.product_variants || []).length === 0) {
+        setVariants([{ weight: '500g', price: '', cost_price: '', original_price: '', stock: '50' }]);
+      }
       setErrorMessage('');
       setSuccessMessage('');
       setShowDeleteConfirm(false);
@@ -141,37 +165,82 @@ export function ProductEditModal({
         finalImageUrl = uploadRes.url;
       }
 
-      const res = await updateProduct(product.id, {
-        name,
-        category,
-        description,
-        image_url: finalImageUrl,
-        is_freshness_guarantee: isFreshnessGuarantee,
-        is_active: isActive,
-        variants: validVariants.map((v) => ({
-          id: v.id,
-          weight: v.weight.trim(),
-          price: parseFloat(v.price) || 0,
-          cost_price: parseFloat(v.cost_price) || 0,
-          original_price: v.original_price ? parseFloat(v.original_price) : undefined,
-          stock: parseInt(v.stock, 10) || 0,
-        })),
-      });
+      if (!product.id) {
+        const createRes = await createProduct(
+          {
+            name,
+            category,
+            description,
+            image_url: finalImageUrl,
+            is_freshness_guarantee: isFreshnessGuarantee,
+          },
+          validVariants.map((v) => ({
+            weight: v.weight.trim(),
+            price: parseFloat(v.price) || 0,
+            original_price: v.original_price ? parseFloat(v.original_price) : undefined,
+            stock: parseInt(v.stock, 10) || 0,
+          }))
+        );
 
-      if (!res.success) {
-        throw new Error(res.error || 'Failed to update product');
-      }
+        if (!createRes.success) {
+          throw new Error(createRes.error || 'Failed to create product');
+        }
 
-      setSuccessMessage('Product updated successfully!');
-      if (res.product && onProductUpdated) {
-        onProductUpdated(res.product);
+        setSuccessMessage('Product created successfully!');
+        if (onProductUpdated) {
+          const newProd: ProductWithVariants = {
+            id: createRes.id || 'prod-' + Date.now(),
+            name,
+            category,
+            description,
+            image_url: finalImageUrl,
+            is_freshness_guarantee: isFreshnessGuarantee,
+            is_active: isActive,
+            created_at: new Date().toISOString(),
+            product_variants: validVariants.map((v, idx) => ({
+              id: 'var-' + idx,
+              product_id: createRes.id || '',
+              weight: v.weight.trim(),
+              price: parseFloat(v.price) || 0,
+              original_price: v.original_price ? parseFloat(v.original_price) : null,
+              stock: parseInt(v.stock, 10) || 0,
+            })),
+          };
+          onProductUpdated(newProd);
+        }
+      } else {
+        const res = await updateProduct(product.id, {
+          name,
+          category,
+          description,
+          image_url: finalImageUrl,
+          is_freshness_guarantee: isFreshnessGuarantee,
+          is_active: isActive,
+          variants: validVariants.map((v) => ({
+            id: v.id,
+            weight: v.weight.trim(),
+            price: parseFloat(v.price) || 0,
+            cost_price: parseFloat(v.cost_price) || 0,
+            original_price: v.original_price ? parseFloat(v.original_price) : undefined,
+            stock: parseInt(v.stock, 10) || 0,
+          })),
+        });
+
+        if (!res.success) {
+          throw new Error(res.error || 'Failed to update product');
+        }
+
+        setSuccessMessage('Product updated successfully!');
+        if (res.product && onProductUpdated) {
+          onProductUpdated(res.product);
+        }
       }
 
       setTimeout(() => {
         onClose();
       }, 700);
     } catch (err: any) {
-      setErrorMessage(err.message || 'Failed to update product');
+      setErrorMessage(err.message || 'Failed to save product');
     } finally {
       setIsSaving(false);
     }
@@ -243,17 +312,23 @@ export function ProductEditModal({
                     color: 'var(--color-primary, #3f6530)',
                   }}
                 >
-                  Admin Panel
+                  {(product as any)?.seller_id || (product as any)?.isSeller ? 'Seller Hub' : 'Admin Panel'}
                 </span>
-                <span className="text-[12px] font-medium text-gray-500">
-                  ID: {product.id.slice(0, 8)}...
-                </span>
+                {product.id ? (
+                  <span className="text-[12px] font-medium text-gray-500">
+                    ID: {product.id.slice(0, 8)}...
+                  </span>
+                ) : (
+                  <span className="text-[12px] font-medium text-emerald-700 font-bold">
+                    New Product
+                  </span>
+                )}
               </div>
               <h2
                 className="text-[18px] font-bold mt-0.5"
                 style={{ color: 'var(--color-on-surface, #1b1c18)' }}
               >
-                Edit Product: {product.name}
+                {product.id ? `Edit Product: ${product.name}` : 'Add New Product'}
               </h2>
             </div>
 
@@ -331,11 +406,14 @@ export function ProductEditModal({
                     borderColor: 'rgba(195,201,187,0.3)',
                   }}
                 >
-                  {CATEGORIES.map((cat) => (
-                    <option key={cat} value={cat}>
-                      {cat}
-                    </option>
-                  ))}
+                  {Array.from(new Set([...(category ? [category] : []), ...categoriesList]))
+                    .filter((cat): cat is string => Boolean(cat))
+                    .sort((a: string, b: string) => a.localeCompare(b, undefined, { sensitivity: 'base' }))
+                    .map((cat) => (
+                      <option key={cat} value={cat}>
+                        {cat}
+                      </option>
+                    ))}
                 </select>
               </div>
             </div>

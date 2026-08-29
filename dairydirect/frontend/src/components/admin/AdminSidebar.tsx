@@ -47,38 +47,34 @@ export function AdminSidebar() {
       <div className="absolute top-0 left-0 w-full h-48 opacity-10 pointer-events-none"
         style={{ background: 'linear-gradient(180deg, #3f6530 0%, transparent 100%)' }} />
 
-{/* Brand */}
-        <div className="px-6 py-5 relative z-10">
-          <Link href="/home" className="flex items-center gap-2 group transition-transform">
-            <img src="/logo.svg" alt="Logo" className="w-10 h-10 object-contain" />
-            <div className="flex flex-col">
-              <span className="text-[15px] font-black text-[#0f3e26] tracking-tight leading-none">
-                Gjanand<span className="text-[#c88a23]">.</span>
-              </span>
-              <span className="text-[7.5px] tracking-[0.25em] font-extrabold text-[#c88a23] uppercase">
-                SARKAR
-              </span>
-            </div>
-          </Link>
-        </div>
+      {/* Brand */}
+      <div className="px-6 py-5 relative z-10">
+        <Link href="/home" className="flex items-center gap-2 group transition-transform">
+          <img src="/application logo/gjanand sarkar logo.png" alt="Logo" className="w-10 h-10 object-contain" />
+          <div className="flex flex-col">
+            <span className="text-[15px] font-black text-[#0f3e26] tracking-tight leading-none">
+              Gjanand
+            </span>
+            <span className="text-[7.5px] tracking-[0.25em] font-extrabold text-[#c88a23] uppercase">
+              SARKAR
+            </span>
+          </div>
+        </Link>
+      </div>
 
       {/* Admin user chip */}
       <div className="mx-4 mb-3 px-3.5 py-3 rounded-[12px] flex items-center gap-3"
         style={{ background: 'var(--color-surface-container-low)' }}>
         <div className="w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm text-white shrink-0 bg-[#0f3e26] border border-[#0f3e26]/10 relative overflow-hidden">
-          {user?.avatar_url ? (
-            <img 
-              src={user.avatar_url} 
-              alt="Profile" 
-              className="w-full h-full object-cover" 
-              referrerPolicy="no-referrer"
-              onError={(e) => {
-                (e.currentTarget as HTMLImageElement).style.display = 'none';
-              }}
-            />
-          ) : (
-            <span>{user?.name ? user.name.charAt(0).toUpperCase() : 'A'}</span>
-          )}
+          <img
+            src={user?.avatar_url || '/profile/profile.jpg'}
+            alt="Profile"
+            className="w-full h-full object-cover"
+            referrerPolicy="no-referrer"
+            onError={(e) => {
+              (e.currentTarget as HTMLImageElement).src = '/profile/profile.jpg';
+            }}
+          />
         </div>
         <div className="flex-1 min-w-0">
           <p className="text-[10px] font-bold uppercase tracking-wider text-gray-400 mb-0.5">Signed in as</p>

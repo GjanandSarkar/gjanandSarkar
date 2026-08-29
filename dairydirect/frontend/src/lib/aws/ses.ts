@@ -203,7 +203,7 @@ export async function sendAdminNewOrderAlert(params: {
   total: number;
   itemCount: number;
 }): Promise<void> {
-  const adminEmail = process.env.ADMIN_EMAIL || 'patelroshu1218@gmail.com';
+  const adminEmail = process.env.ADMIN_EMAIL || process.env.ADMIN_EMAILS || 'gjanandsarkar09@gmail.com';
 
   const html = `
     <div style="font-family:Arial,sans-serif;padding:20px;max-width:400px;background:#fff;border-radius:12px;">

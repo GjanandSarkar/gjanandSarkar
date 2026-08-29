@@ -20,10 +20,13 @@ import {
   MessageCircle,
   AlertCircle,
   FileCheck2,
-  Building2
+  Building2,
+  ShoppingBag
 } from 'lucide-react';
 import { useStore } from '@/store/useStore';
 import { getSellerDashboard, SellerDashboardData } from '@/lib/api/sellers';
+import { getProducts, ProductWithVariants } from '@/lib/api/products';
+import { ProductEditModal } from '@/components/admin/ProductEditModal';
 import Link from 'next/link';
 
 export default function SellerDashboardPage() {
@@ -34,20 +37,53 @@ export default function SellerDashboardPage() {
   const [data, setData] = useState<SellerDashboardData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
-  // Sample store products
-  const [products, setProducts] = useState([
-    { id: 'p1', name: 'Gir Cow Vedic Bilona Ghee (500ml)', price: 1450, stock: 45, status: 'In Stock', rating: 4.9 },
-    { id: 'p2', name: 'A2 Vedic Cultured Butter (250g)', price: 420, stock: 18, status: 'Low Stock', rating: 4.8 },
-    { id: 'p3', name: 'Raw Forest Wild Honey (500g)', price: 680, stock: 62, status: 'In Stock', rating: 4.7 },
-    { id: 'p4', name: 'Handcrafted Kutch Bell Metal Lamp', price: 2890, stock: 8, status: 'Low Stock', rating: 5.0 },
-  ]);
+  // Products belonging ONLY to this logged-in seller
+  const [products, setProducts] = useState<ProductWithVariants[]>([]);
+  const [isLoadingProducts, setIsLoadingProducts] = useState(true);
+  const [editingProduct, setEditingProduct] = useState<ProductWithVariants | null>(null);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
 
   useEffect(() => {
-    getSellerDashboard(user?.id || 'demo-seller').then((res) => {
+    getSellerDashboard(user?.id || '').then((res) => {
       setData(res);
       setIsLoading(false);
     });
-  }, [user]);
+
+    if (user?.id) {
+      setIsLoadingProducts(true);
+      getProducts({ sellerId: user.id, activeOnly: false }).then((prods) => {
+        setProducts(prods);
+        setIsLoadingProducts(false);
+      });
+    } else {
+      setIsLoadingProducts(false);
+    }
+  }, [user?.id]);
+
+  const handleOpenNewProduct = () => {
+    setEditingProduct({
+      id: '',
+      name: '',
+      category: 'Milk',
+      description: '',
+      image_url: '',
+      is_freshness_guarantee: true,
+      is_active: true,
+      created_at: new Date().toISOString(),
+      seller_id: user?.id || '',
+      product_variants: [
+        {
+          id: '',
+          product_id: '',
+          weight: '500g',
+          price: 0,
+          original_price: null,
+          stock: 50,
+        },
+      ],
+    } as any);
+    setIsEditModalOpen(true);
+  };
 
   if (isLoading || !data) {
     return (
@@ -57,14 +93,80 @@ export default function SellerDashboardPage() {
     );
   }
 
-  // Check if seller account is pending review or not active
-  const isPendingReview = (sellerStore as any)?.status === 'pending_inquiry' || 
-                          (data?.store as any)?.status === 'pending_review' || 
-                          (data?.inquiry && data.inquiry.status !== 'approved');
-
   const inquiry = data?.inquiry;
 
-  // ─── PENDING REVIEW / MANUAL VERIFICATION SCREEN ───
+  // ─── 1. REJECTED SELLER APPLICATION SCREEN ───
+  if (inquiry && inquiry.status === 'rejected') {
+    return (
+      <div className="min-h-screen bg-[#fafaf8] py-12 px-4 sm:px-6 lg:px-8">
+        <div className="max-w-3xl mx-auto space-y-8 animate-in fade-in">
+          <div className="bg-white rounded-3xl border border-red-200 shadow-sm p-8 sm:p-10 text-center space-y-6">
+            <div className="w-16 h-16 rounded-2xl bg-red-100 text-red-600 flex items-center justify-center mx-auto shadow-inner">
+              <AlertCircle className="w-8 h-8" />
+            </div>
+
+            <div className="space-y-2">
+              <span className="px-3 py-1 rounded-full bg-red-50 border border-red-200 text-red-700 text-xs font-black uppercase tracking-wider">
+                Seller Application Rejected
+              </span>
+              <h1 className="text-2xl sm:text-3xl font-black text-gray-900">
+                {inquiry.business_name || 'Seller Application'}
+              </h1>
+              <p className="text-sm text-gray-600 max-w-lg mx-auto">
+                Your seller application was reviewed by our vendor onboarding team and could not be approved at this time. Access to the Seller Dashboard is restricted.
+              </p>
+            </div>
+
+            {inquiry.admin_notes && (
+              <div className="bg-red-50/70 border border-red-200 rounded-2xl p-4 text-left max-w-lg mx-auto text-xs text-red-900">
+                <span className="font-bold block mb-1">Reason / Admin Note:</span>
+                <p>{inquiry.admin_notes}</p>
+              </div>
+            )}
+
+            <div className="bg-gray-50 rounded-2xl p-5 text-left border border-gray-200 space-y-3 max-w-lg mx-auto text-xs">
+              <div className="flex justify-between py-1 border-b border-gray-200">
+                <span className="text-gray-500">Inquiry ID:</span>
+                <span className="font-mono font-bold text-gray-900">{inquiry.id}</span>
+              </div>
+              <div className="flex justify-between py-1 border-b border-gray-200">
+                <span className="text-gray-500">Contact Person:</span>
+                <span className="font-bold text-gray-900">{inquiry.full_name}</span>
+              </div>
+              <div className="flex justify-between py-1">
+                <span className="text-gray-500">Current Status:</span>
+                <span className="font-black uppercase px-2 py-0.5 rounded-full bg-red-100 text-red-800 text-[10px]">
+                  Rejected
+                </span>
+              </div>
+            </div>
+
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-3 pt-2">
+              <Link
+                href="/become-seller"
+                className="w-full sm:w-auto px-6 py-3 bg-[#0f3e26] hover:bg-[#0c331f] text-white text-xs font-bold rounded-xl flex items-center justify-center gap-2 shadow-sm transition-all"
+              >
+                <Building2 className="w-4 h-4" />
+                <span>Submit New Inquiry</span>
+              </Link>
+              <Link
+                href="/home"
+                className="w-full sm:w-auto px-6 py-3 bg-gray-100 hover:bg-gray-200 text-gray-800 text-xs font-bold rounded-xl flex items-center justify-center transition-colors"
+              >
+                Browse Marketplace
+              </Link>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // ─── 2. PENDING REVIEW / CONTACTED SCREEN (LOCKED) ───
+  const isPendingReview = (sellerStore as any)?.status === 'pending_inquiry' || 
+                          (data?.store as any)?.status === 'pending_review' || 
+                          (inquiry && inquiry.status !== 'approved');
+
   if (isPendingReview && inquiry && inquiry.status !== 'approved') {
     return (
       <div className="min-h-screen bg-[#fafaf8] py-12 px-4 sm:px-6 lg:px-8">
@@ -77,15 +179,22 @@ export default function SellerDashboardPage() {
 
             <div className="space-y-2">
               <span className="px-3 py-1 rounded-full bg-amber-50 border border-amber-200 text-amber-800 text-xs font-black uppercase tracking-wider">
-                Application Under Manual Review
+                {inquiry.status === 'contacted' ? 'Contacted & Under Review' : 'Application Under Manual Review'}
               </span>
               <h1 className="text-2xl sm:text-3xl font-black text-gray-900">
                 {inquiry.business_name || 'Your Seller Application'}
               </h1>
               <p className="text-sm text-gray-600 max-w-lg mx-auto">
-                Thank you for applying to sell on Gjanand Sarkar. Our vendor onboarding manager is reviewing your farm/brand details and will contact you manually via Call/WhatsApp.
+                Thank you for applying to sell on Gjanand Sarkar. Our vendor onboarding manager is reviewing your details and will contact you manually via Call/WhatsApp.
               </p>
             </div>
+
+            {inquiry.admin_notes && (
+              <div className="bg-amber-50/80 border border-amber-200 rounded-2xl p-4 text-left max-w-lg mx-auto text-xs text-amber-900">
+                <span className="font-bold block mb-1">Admin Note:</span>
+                <p>{inquiry.admin_notes}</p>
+              </div>
+            )}
 
             {/* Application Summary Box */}
             <div className="bg-gray-50 rounded-2xl p-5 text-left border border-gray-200 space-y-3 max-w-lg mx-auto text-xs">
@@ -113,7 +222,7 @@ export default function SellerDashboardPage() {
               </div>
             </div>
 
-            {/* What to expect next */}
+            {/* Verification Checklist */}
             <div className="bg-emerald-50/70 border border-emerald-200/80 rounded-2xl p-5 text-left space-y-2 max-w-lg mx-auto text-xs text-emerald-900">
               <h4 className="font-black uppercase tracking-wider flex items-center gap-1.5 text-[#0f3e26]">
                 <FileCheck2 className="w-4 h-4 text-[#0f3e26]" />
@@ -150,9 +259,41 @@ export default function SellerDashboardPage() {
     );
   }
 
+  // ─── 3. NO INQUIRY SUBMITTED & NOT AN APPROVED SELLER ───
+  const isApprovedSeller = user?.role === 'admin' || 
+                           user?.role === 'seller' || 
+                           ((sellerStore as any)?.status === 'active' || (data?.store as any)?.status === 'active' || (inquiry && inquiry.status === 'approved'));
+
+  if (!isApprovedSeller && !inquiry) {
+    return (
+      <div className="min-h-screen bg-[#fafaf8] py-12 px-4 sm:px-6 lg:px-8 flex items-center justify-center">
+        <div className="max-w-md w-full bg-white rounded-3xl border border-gray-200 p-8 text-center space-y-5 shadow-sm">
+          <div className="w-16 h-16 rounded-2xl bg-emerald-100 text-[#0f3e26] flex items-center justify-center mx-auto">
+            <Store className="w-8 h-8" />
+          </div>
+          <h2 className="text-xl font-black text-gray-900">Seller Dashboard Access Required</h2>
+          <p className="text-xs text-gray-600">
+            You don't have an active seller account. Please submit a seller inquiry to request vendor onboarding and access seller tools.
+          </p>
+          <div className="pt-2">
+            <Link
+              href="/become-seller"
+              className="w-full px-6 py-3 bg-[#0f3e26] hover:bg-[#0c331f] text-white text-xs font-bold rounded-xl flex items-center justify-center gap-2 shadow-sm transition-all"
+            >
+              <Building2 className="w-4 h-4" />
+              <span>Become a Seller</span>
+            </Link>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   // ─── ACTIVE SELLER DASHBOARD ───
-  const storeName = (sellerStore as any)?.store_name || (data?.store as any)?.storeName || 'Gir Organic & Vedic Dairy';
-  const storeState = sellerStore?.state || (data?.store as any)?.state || 'Gujarat';
+  const storeName = (sellerStore as any)?.store_name 
+    || (data?.store as any)?.storeName 
+    || (user?.name ? `${user.name}'s Store` : 'Seller Store');
+  const storeState = sellerStore?.state || (data?.store as any)?.state || 'India';
   const storePlan = sellerStore?.plan || (data?.store as any)?.plan || 'Growth';
   const storeCommission = (sellerStore as any)?.commission_rate || (data?.store as any)?.commissionRate || 5;
 
@@ -173,7 +314,7 @@ export default function SellerDashboardPage() {
                 </h1>
                 <span className="px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-800 text-[10px] font-black uppercase tracking-wider flex items-center gap-1">
                   <ShieldCheck className="w-3 h-3" />
-                  <span>Verified GI Seller</span>
+                  <span>Verified Seller</span>
                 </span>
               </div>
               <p className="text-xs text-gray-500 mt-1">
@@ -191,7 +332,7 @@ export default function SellerDashboardPage() {
               <ExternalLink className="w-3.5 h-3.5" />
             </Link>
             <button
-              onClick={() => setActiveTab('products')}
+              onClick={handleOpenNewProduct}
               className="px-4 py-2 rounded-xl bg-[#0f3e26] text-white text-xs font-bold hover:bg-[#144f31] flex items-center gap-1.5 shadow-sm transition-colors cursor-pointer"
             >
               <Plus className="w-4 h-4" />
@@ -236,11 +377,11 @@ export default function SellerDashboardPage() {
                   </div>
                 </div>
                 <div className="text-2xl font-black text-gray-900">
-                  ₹{(data.metrics.grossRevenue || 284500).toLocaleString('en-IN')}
+                  ₹{(data?.metrics?.grossRevenue ?? 0).toLocaleString('en-IN')}
                 </div>
                 <div className="text-[11px] text-emerald-600 font-bold mt-1 flex items-center gap-1">
                   <TrendingUp className="w-3.5 h-3.5" />
-                  <span>+18.4% this month</span>
+                  <span>Real-time total</span>
                 </div>
               </div>
 
@@ -252,7 +393,7 @@ export default function SellerDashboardPage() {
                   </div>
                 </div>
                 <div className="text-2xl font-black text-amber-700">
-                  ₹{(data.metrics.platformCommission || 14225).toLocaleString('en-IN')}
+                  ₹{(data?.metrics?.platformCommission ?? 0).toLocaleString('en-IN')}
                 </div>
                 <div className="text-[11px] text-gray-500 mt-1">
                   {storeCommission}% rate on {storePlan} tier
@@ -267,7 +408,7 @@ export default function SellerDashboardPage() {
                   </div>
                 </div>
                 <div className="text-2xl font-black text-[#0f3e26]">
-                  ₹{(data.metrics.netPayout || 270275).toLocaleString('en-IN')}
+                  ₹{(data?.metrics?.netPayout ?? 0).toLocaleString('en-IN')}
                 </div>
                 <div className="text-[11px] text-blue-600 font-bold mt-1">
                   Settled weekly every Tuesday
@@ -282,10 +423,10 @@ export default function SellerDashboardPage() {
                   </div>
                 </div>
                 <div className="text-2xl font-black text-gray-900">
-                  {data.metrics.totalOrders || 342}
+                  {data?.metrics?.totalOrders ?? 0}
                 </div>
                 <div className="text-[11px] text-gray-500 mt-1">
-                  {data.metrics.pendingDeliveries || 8} dispatching today
+                  {data?.metrics?.pendingDeliveries ?? 0} dispatching today
                 </div>
               </div>
             </div>
@@ -305,18 +446,24 @@ export default function SellerDashboardPage() {
               </div>
 
               <div className="divide-y divide-gray-100">
-                {data.recentOrders.map((order) => (
-                  <div key={order.id} className="py-3.5 flex items-center justify-between gap-4">
-                    <div>
-                      <span className="text-xs font-mono font-bold text-gray-800">{order.id}</span>
-                      <p className="text-xs text-gray-500">{order.customerName} • {order.itemsCount} items</p>
+                {(data?.recentOrders || []).length > 0 ? (
+                  (data?.recentOrders || []).map((order) => (
+                    <div key={order.id} className="py-3.5 flex items-center justify-between gap-4">
+                      <div>
+                        <span className="text-xs font-mono font-bold text-gray-800">{order.id}</span>
+                        <p className="text-xs text-gray-500">{order.customerName} • {order.itemsCount} items</p>
+                      </div>
+                      <div className="text-right">
+                        <span className="text-xs font-black text-gray-900">₹{order.amount}</span>
+                        <p className="text-[11px] text-emerald-600 capitalize font-semibold">{order.status.replace('_', ' ')}</p>
+                      </div>
                     </div>
-                    <div className="text-right">
-                      <span className="text-xs font-black text-gray-900">₹{order.amount}</span>
-                      <p className="text-[11px] text-emerald-600 capitalize font-semibold">{order.status.replace('_', ' ')}</p>
-                    </div>
+                  ))
+                ) : (
+                  <div className="py-8 text-center text-gray-400 text-xs font-medium">
+                    No customer orders received yet.
                   </div>
-                ))}
+                )}
               </div>
             </div>
 
@@ -330,27 +477,33 @@ export default function SellerDashboardPage() {
               Store Order Management
             </h3>
             <div className="divide-y divide-gray-100">
-              {data.recentOrders.map((order) => (
-                <div key={order.id} className="py-4 flex items-center justify-between gap-4">
-                  <div className="space-y-1">
-                    <div className="flex items-center gap-2">
-                      <span className="text-xs font-mono font-bold text-[#0f3e26]">{order.id}</span>
-                      <span className="px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 text-[10px] font-black uppercase">
-                        {order.status.replace('_', ' ')}
-                      </span>
+              {(data?.recentOrders || []).length > 0 ? (
+                (data?.recentOrders || []).map((order) => (
+                  <div key={order.id} className="py-4 flex items-center justify-between gap-4">
+                    <div className="space-y-1">
+                      <div className="flex items-center gap-2">
+                        <span className="text-xs font-mono font-bold text-[#0f3e26]">{order.id}</span>
+                        <span className="px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 text-[10px] font-black uppercase">
+                          {order.status.replace('_', ' ')}
+                        </span>
+                      </div>
+                      <p className="text-xs text-gray-600">{order.customerName} • {order.itemsCount} products ordered</p>
+                      <span className="text-[10px] text-gray-400">{order.date}</span>
                     </div>
-                    <p className="text-xs text-gray-600">{order.customerName} • {order.itemsCount} products ordered</p>
-                    <span className="text-[10px] text-gray-400">{order.date}</span>
-                  </div>
 
-                  <div className="text-right space-y-1">
-                    <span className="text-sm font-black text-gray-900">₹{order.amount}</span>
-                    <button className="block text-[11px] font-bold text-[#0f3e26] hover:underline">
-                      Print Shipping Label
-                    </button>
+                    <div className="text-right space-y-1">
+                      <span className="text-sm font-black text-gray-900">₹{order.amount}</span>
+                      <button className="block text-[11px] font-bold text-[#0f3e26] hover:underline">
+                        Print Shipping Label
+                      </button>
+                    </div>
                   </div>
+                ))
+              ) : (
+                <div className="py-10 text-center text-gray-400 text-xs font-medium">
+                  No customer orders received yet.
                 </div>
-              ))}
+              )}
             </div>
           </div>
         )}
@@ -363,10 +516,10 @@ export default function SellerDashboardPage() {
                 <h3 className="text-sm font-black text-gray-900 uppercase tracking-wider">
                   Store Product Catalog
                 </h3>
-                <p className="text-xs text-gray-500">Manage active items, pricing, and batch stock levels</p>
+                <p className="text-xs text-gray-500">Manage active items, pricing, and batch stock levels for your store</p>
               </div>
               <button 
-                onClick={() => alert('New product creation form initialized!')}
+                onClick={handleOpenNewProduct}
                 className="px-4 py-2 bg-[#0f3e26] text-white text-xs font-bold rounded-xl flex items-center gap-1.5 hover:bg-[#144f31] transition-colors cursor-pointer"
               >
                 <Plus className="w-4 h-4" />
@@ -374,30 +527,77 @@ export default function SellerDashboardPage() {
               </button>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-              {products.map((p) => (
-                <div key={p.id} className="p-4 rounded-2xl border border-gray-200 hover:border-[#0f3e26] transition-colors bg-gray-50/50 space-y-3">
-                  <div className="flex justify-between items-start">
-                    <span className={`px-2 py-0.5 rounded-full text-[10px] font-black uppercase ${
-                      p.status === 'In Stock' ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800'
-                    }`}>
-                      {p.status}
-                    </span>
-                    <span className="text-xs font-bold text-amber-600">★ {p.rating}</span>
-                  </div>
-                  <div>
-                    <h4 className="text-xs font-bold text-gray-900 line-clamp-2">{p.name}</h4>
-                    <p className="text-sm font-black text-[#0f3e26] mt-1">₹{p.price}</p>
-                    <p className="text-[11px] text-gray-500">Stock: {p.stock} units</p>
-                  </div>
-                  <div className="flex items-center gap-2 pt-2 border-t border-gray-200">
-                    <button className="flex-1 py-1.5 bg-white border border-gray-300 rounded-lg text-[11px] font-bold text-gray-700 hover:bg-gray-100 transition-colors">
-                      Edit
-                    </button>
-                  </div>
+            {isLoadingProducts ? (
+              <div className="py-12 text-center text-gray-400 text-xs font-medium">
+                Loading your store products...
+              </div>
+            ) : products.length > 0 ? (
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                {products.map((p) => {
+                  const variant = p.product_variants?.[0];
+                  const price = variant?.price || 0;
+                  const totalStock = p.product_variants?.reduce((acc, v) => acc + (v.stock || 0), 0) ?? 0;
+                  return (
+                    <div key={p.id} className="p-4 rounded-2xl border border-gray-200 hover:border-[#0f3e26] transition-colors bg-white space-y-3 shadow-2xs flex flex-col justify-between">
+                      <div className="space-y-3">
+                        <div className="flex justify-between items-start">
+                          <span className={`px-2 py-0.5 rounded-full text-[10px] font-black uppercase ${
+                            p.is_active ? 'bg-emerald-100 text-emerald-800' : 'bg-gray-100 text-gray-600'
+                          }`}>
+                            {p.is_active ? 'Active' : 'Inactive'}
+                          </span>
+                          <span className="text-xs font-bold text-amber-600">★ {(p as any).rating || '5.0'}</span>
+                        </div>
+
+                        <div className="flex gap-3 items-center">
+                          <img
+                            src={p.image_url || '/milk.png'}
+                            alt={p.name}
+                            className="w-12 h-12 rounded-xl object-contain bg-gray-50 border border-gray-100 shrink-0"
+                          />
+                          <div>
+                            <h4 className="text-xs font-bold text-gray-900 line-clamp-2">{p.name}</h4>
+                            <p className="text-sm font-black text-[#0f3e26] mt-0.5">₹{price}</p>
+                            <p className="text-[11px] text-gray-500">Stock: {totalStock} units</p>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="flex items-center gap-2 pt-2 border-t border-gray-100">
+                        <button 
+                          onClick={() => {
+                            setEditingProduct(p);
+                            setIsEditModalOpen(true);
+                          }}
+                          className="flex-1 py-1.5 bg-white border border-gray-300 rounded-lg text-[11px] font-bold text-gray-700 hover:bg-gray-50 transition-colors cursor-pointer"
+                        >
+                          Edit Product
+                        </button>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            ) : (
+              <div className="py-12 text-center text-gray-500 text-xs font-medium space-y-3">
+                <div className="w-12 h-12 rounded-full bg-gray-100 text-gray-400 flex items-center justify-center mx-auto">
+                  <ShoppingBag className="w-6 h-6" />
                 </div>
-              ))}
-            </div>
+                <div className="space-y-1">
+                  <p className="font-bold text-gray-800 text-sm">No Products in Your Catalog</p>
+                  <p className="text-gray-500 max-w-sm mx-auto">
+                    You haven't added any products to your store yet. Click below to add your first product.
+                  </p>
+                </div>
+                <button
+                  onClick={handleOpenNewProduct}
+                  className="px-4 py-2 bg-[#0f3e26] text-white text-xs font-bold rounded-xl hover:bg-[#144f31] transition-colors inline-flex items-center gap-1.5 cursor-pointer"
+                >
+                  <Plus className="w-4 h-4" />
+                  <span>Add Product</span>
+                </button>
+              </div>
+            )}
           </div>
         )}
 
@@ -412,23 +612,54 @@ export default function SellerDashboardPage() {
             </div>
 
             <div className="divide-y divide-gray-100">
-              {data.payoutHistory.map((payout) => (
-                <div key={payout.id} className="py-4 flex items-center justify-between gap-4">
-                  <div className="space-y-0.5">
-                    <span className="text-xs font-mono font-bold text-gray-900">{payout.id}</span>
-                    <p className="text-xs text-gray-500">Direct Deposit (NEFT) • {payout.date}</p>
+              {(data?.payoutHistory || []).length > 0 ? (
+                (data?.payoutHistory || []).map((payout) => (
+                  <div key={payout.id} className="py-4 flex items-center justify-between gap-4">
+                    <div className="space-y-0.5">
+                      <span className="text-xs font-mono font-bold text-gray-900">{payout.id}</span>
+                      <p className="text-xs text-gray-500">Direct Deposit (NEFT) • {payout.date}</p>
+                    </div>
+                    <div className="text-right">
+                      <span className="text-sm font-black text-emerald-700">₹{payout.net.toLocaleString('en-IN')}</span>
+                      <p className="text-[10px] text-gray-400">Platform fee deducted: ₹{payout.fee}</p>
+                    </div>
                   </div>
-                  <div className="text-right">
-                    <span className="text-sm font-black text-emerald-700">₹{payout.net.toLocaleString('en-IN')}</span>
-                    <p className="text-[10px] text-gray-400">Platform fee deducted: ₹{payout.fee}</p>
-                  </div>
+                ))
+              ) : (
+                <div className="py-10 text-center text-gray-400 text-xs font-medium">
+                  No bank payout settlements yet.
                 </div>
-              ))}
+              )}
             </div>
           </div>
         )}
 
       </div>
+
+      {/* Product Edit / Creation Modal */}
+      {isEditModalOpen && editingProduct && (
+        <ProductEditModal
+          product={editingProduct}
+          isOpen={isEditModalOpen}
+          onClose={() => {
+            setIsEditModalOpen(false);
+            setEditingProduct(null);
+          }}
+          onProductUpdated={(updated) => {
+            setProducts((prev) => {
+              const exists = prev.some((p) => p.id === updated.id);
+              if (exists) {
+                return prev.map((p) => (p.id === updated.id ? updated : p));
+              } else {
+                return [updated, ...prev];
+              }
+            });
+          }}
+          onProductDeleted={(deletedId) => {
+            setProducts((prev) => prev.filter((p) => p.id !== deletedId));
+          }}
+        />
+      )}
     </div>
   );
 }

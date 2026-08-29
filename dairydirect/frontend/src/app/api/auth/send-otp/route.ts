@@ -35,7 +35,7 @@ export async function POST(request: NextRequest) {
     const phone = sanitizePhone(rawPhone);
     if (!phone) {
       return NextResponse.json(
-        { error: 'Invalid phone number. Please enter a valid 10-digit Indian number.' },
+        { error: 'Enter a valid Indian mobile number' },
         { status: 400 }
       );
     }

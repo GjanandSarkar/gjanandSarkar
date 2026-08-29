@@ -1,11 +1,12 @@
 /**
  * GET/PUT /api/admin/settings
- * Business settings management — profit margin thresholds, delivery fees, free delivery limits.
+ * Business settings management with dual AWS PostgreSQL + Supabase Fallback.
  */
 
 import { NextRequest, NextResponse } from 'next/server';
-import { query } from '@/lib/aws/rds';
+import { query, isPgConfigured } from '@/lib/aws/rds';
 import { getAuthUser, getClientIP } from '@/lib/api/auth-middleware';
+import { getAdminSupabase } from '@/lib/supabase/admin';
 import { writeAuditLog } from '@/lib/security/audit';
 import { z } from 'zod';
 
@@ -16,8 +17,19 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'Admin access required' }, { status: 403 });
     }
 
-    const result = await query('SELECT * FROM business_settings LIMIT 1');
-    return NextResponse.json({ settings: result.rows[0] || {} });
+    if (isPgConfigured) {
+      try {
+        const result = await query('SELECT * FROM business_settings LIMIT 1');
+        return NextResponse.json({ settings: result.rows[0] || {} });
+      } catch (err: any) {
+        console.warn('[AdminSettings GET] RDS failed, fallback to Supabase:', err.message);
+      }
+    }
+
+    const sb = getAdminSupabase();
+    const { data } = await sb.from('business_settings').select('*').limit(1).maybeSingle();
+
+    return NextResponse.json({ settings: data || {} });
   } catch (error: any) {
     console.error('[AdminSettings GET] Error:', error.message);
     return NextResponse.json({ error: 'Failed to fetch settings' }, { status: 500 });
@@ -48,49 +60,67 @@ export async function PUT(request: NextRequest) {
     }
 
     const data = parseResult.data;
-    const setParts = ['updated_at = now()'];
-    const values: any[] = [];
-    let pIdx = 1;
 
-    if (data.min_profit_margin_percent !== undefined) {
-      setParts.push(`min_profit_margin_percent = $${pIdx++}`);
-      values.push(data.min_profit_margin_percent);
-    }
-    if (data.delivery_fee !== undefined) {
-      setParts.push(`delivery_fee = $${pIdx++}`);
-      values.push(data.delivery_fee);
-    }
-    if (data.free_delivery_threshold !== undefined) {
-      setParts.push(`free_delivery_threshold = $${pIdx++}`);
-      values.push(data.free_delivery_threshold);
-    }
-    if (data.tax_rate_percent !== undefined) {
-      setParts.push(`tax_rate_percent = $${pIdx++}`);
-      values.push(data.tax_rate_percent);
-    }
-    if (data.morning_cutoff_time !== undefined) {
-      setParts.push(`morning_cutoff_time = $${pIdx++}`);
-      values.push(data.morning_cutoff_time);
-    }
-    if (data.evening_cutoff_time !== undefined) {
-      setParts.push(`evening_cutoff_time = $${pIdx++}`);
-      values.push(data.evening_cutoff_time);
-    }
-    if (data.is_ordering_enabled !== undefined) {
-      setParts.push(`is_ordering_enabled = $${pIdx++}`);
-      values.push(data.is_ordering_enabled);
+    if (isPgConfigured) {
+      try {
+        const setParts = ['updated_at = now()'];
+        const values: any[] = [];
+        let pIdx = 1;
+
+        if (data.min_profit_margin_percent !== undefined) {
+          setParts.push(`min_profit_margin_percent = $${pIdx++}`);
+          values.push(data.min_profit_margin_percent);
+        }
+        if (data.delivery_fee !== undefined) {
+          setParts.push(`delivery_fee = $${pIdx++}`);
+          values.push(data.delivery_fee);
+        }
+        if (data.free_delivery_threshold !== undefined) {
+          setParts.push(`free_delivery_threshold = $${pIdx++}`);
+          values.push(data.free_delivery_threshold);
+        }
+        if (data.tax_rate_percent !== undefined) {
+          setParts.push(`tax_rate_percent = $${pIdx++}`);
+          values.push(data.tax_rate_percent);
+        }
+        if (data.morning_cutoff_time !== undefined) {
+          setParts.push(`morning_cutoff_time = $${pIdx++}`);
+          values.push(data.morning_cutoff_time);
+        }
+        if (data.evening_cutoff_time !== undefined) {
+          setParts.push(`evening_cutoff_time = $${pIdx++}`);
+          values.push(data.evening_cutoff_time);
+        }
+        if (data.is_ordering_enabled !== undefined) {
+          setParts.push(`is_ordering_enabled = $${pIdx++}`);
+          values.push(data.is_ordering_enabled);
+        }
+
+        await query(`UPDATE business_settings SET ${setParts.join(', ')}`, values);
+
+        await writeAuditLog({
+          adminId: auth.userId,
+          action: 'settings.update',
+          resourceType: 'business_settings',
+          resourceId: 'global',
+          details: data,
+          ipAddress: getClientIP(request),
+        });
+
+        return NextResponse.json({ success: true });
+      } catch (err: any) {
+        console.warn('[AdminSettings PUT] RDS failed, fallback to Supabase:', err.message);
+      }
     }
 
-    await query(`UPDATE business_settings SET ${setParts.join(', ')}`, values);
+    const sb = getAdminSupabase();
+    const { data: existing } = await sb.from('business_settings').select('id').limit(1).maybeSingle();
 
-    await writeAuditLog({
-      adminId: auth.userId,
-      action: 'settings.update',
-      resourceType: 'business_settings',
-      resourceId: 'global',
-      details: data,
-      ipAddress: getClientIP(request),
-    });
+    if (existing) {
+      await sb.from('business_settings').update({ ...data, updated_at: new Date().toISOString() }).eq('id', existing.id);
+    } else {
+      await sb.from('business_settings').insert(data);
+    }
 
     return NextResponse.json({ success: true });
   } catch (error: any) {

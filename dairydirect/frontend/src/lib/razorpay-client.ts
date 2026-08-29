@@ -181,7 +181,7 @@ export async function initiateRazorpayPayment({
       currency: createData.currency,
       name,
       description,
-      image: '/logo.svg',
+      image: '/application logo/gjanand sarkar logo.png',
       order_id: createData.order_id,
       prefill: {
         name: prefill?.name || '',

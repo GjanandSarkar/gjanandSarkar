@@ -27,10 +27,13 @@ export type CartItem = {
 export type User = {
   id: string;
   name: string;
+  first_name?: string;
+  last_name?: string;
   phone?: string;
   email?: string;
   avatar_url?: string;
   address?: string;
+  country?: string;
   saved_addresses?: { label: string; address: string }[];
   role: 'customer' | 'admin' | 'seller';
 };

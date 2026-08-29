@@ -13,9 +13,11 @@ import {
 } from 'lucide-react';
 import { useStore } from '@/store/useStore';
 import { getProducts } from '@/lib/api/products';
+import { toggleWishlist } from '@/lib/api/wishlist';
 import type { ProductWithVariants } from '@/lib/api/products';
 
 export default function WishlistPage() {
+  const user = useStore((s) => s.user);
   const wishlist = useStore((s) => s.wishlist);
   const toggleWishlistLocal = useStore((s) => s.toggleWishlistLocal);
   const addToCartLocal = useStore((s) => s.addToCartLocal);
@@ -31,6 +33,13 @@ export default function WishlistPage() {
   }, []);
 
   const wishlistProducts = allProducts.filter((p) => wishlist.includes(p.id));
+
+  const handleRemoveFromWishlist = async (productId: string) => {
+    toggleWishlistLocal(productId);
+    if (user) {
+      await toggleWishlist(user.id, productId);
+    }
+  };
 
   const handleMoveAllToCart = () => {
     wishlistProducts.forEach((product) => {
@@ -123,7 +132,7 @@ export default function WishlistPage() {
                     )}
 
                     <button
-                      onClick={() => toggleWishlistLocal(product.id)}
+                      onClick={() => handleRemoveFromWishlist(product.id)}
                       className="absolute top-3 right-3 w-8 h-8 rounded-full bg-white/90 backdrop-blur-sm shadow-sm flex items-center justify-center text-rose-600 hover:scale-110 transition-transform"
                     >
                       <Trash2 className="w-4 h-4" />

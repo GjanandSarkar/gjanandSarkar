@@ -5,7 +5,8 @@ import { useRouter } from 'next/navigation';
 import { useTranslation } from '@/lib/i18n';
 import { Analytics } from '@/lib/analytics';
 import { useStore } from '@/store/useStore';
-import { updateCartItem } from '@/lib/api/cart';
+import { updateCartItem, addToCart, removeFromCart } from '@/lib/api/cart';
+import { toggleWishlist } from '@/lib/api/wishlist';
 import type { ProductWithVariants } from '@/lib/api/products';
 import { 
   ChevronLeft, 
@@ -52,6 +53,13 @@ export function ProductClient({ product: initialProduct }: ProductClientProps) {
   const [reviewSuccess, setReviewSuccess] = useState(false);
 
   const isSaved = wishlist.includes(product.id);
+
+  const handleToggleWishlist = async () => {
+    toggleWishlistLocal(product.id);
+    if (user) {
+      await toggleWishlist(user.id, product.id);
+    }
+  };
 
   useEffect(() => {
     setProduct(initialProduct);
@@ -151,7 +159,7 @@ export function ProductClient({ product: initialProduct }: ProductClientProps) {
             )}
 
             <button
-              onClick={() => toggleWishlistLocal(product.id)}
+              onClick={handleToggleWishlist}
               className={`w-8.5 h-8.5 rounded-full flex items-center justify-center transition-all bg-white border border-gray-200 shadow-2xs cursor-pointer ${
                 isSaved ? 'text-rose-600' : 'text-gray-700 hover:text-rose-500'
               }`}
@@ -188,8 +196,14 @@ export function ProductClient({ product: initialProduct }: ProductClientProps) {
                 
                 <div className="flex items-center gap-1 text-xs font-bold text-amber-500">
                   <Star className="w-3.5 h-3.5 fill-amber-400 text-amber-400" />
-                  <span className="text-gray-900 font-extrabold">4.9</span>
-                  <span className="text-gray-400">({reviews.length * 40 + 120} ratings)</span>
+                  <span className="text-gray-900 font-extrabold">
+                    {reviews.length > 0
+                      ? (reviews.reduce((acc, r) => acc + (r.rating || 5), 0) / reviews.length).toFixed(1)
+                      : ((product as any).rating ? Number((product as any).rating).toFixed(1) : '5.0')}
+                  </span>
+                  <span className="text-gray-400">
+                    ({reviews.length} {reviews.length === 1 ? 'rating' : 'ratings'})
+                  </span>
                 </div>
               </div>
 
@@ -240,7 +254,11 @@ export function ProductClient({ product: initialProduct }: ProductClientProps) {
                 </h3>
                 <div className="flex items-center gap-1 text-xs font-bold text-gray-800">
                   <Star className="w-3.5 h-3.5 fill-amber-400 text-amber-400" />
-                  <span>4.9 / 5.0</span>
+                  <span>
+                    {reviews.length > 0
+                      ? `${(reviews.reduce((acc, r) => acc + (r.rating || 5), 0) / reviews.length).toFixed(1)} / 5.0`
+                      : 'No reviews yet'}
+                  </span>
                 </div>
               </div>
 
@@ -299,38 +317,48 @@ export function ProductClient({ product: initialProduct }: ProductClientProps) {
 
               {/* Reviews List */}
               <div className="space-y-4 divide-y divide-gray-100">
-                {reviews.map((rev) => (
-                  <div key={rev.id} className="pt-4 first:pt-0 space-y-1.5">
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-1.5">
-                        <span className="text-xs font-bold text-gray-900">
-                          {rev.user_name}
-                        </span>
-                        {rev.is_verified_buyer && (
-                          <span className="px-1.5 py-0.2 rounded bg-emerald-50 text-emerald-800 text-[9px] font-bold uppercase tracking-wider flex items-center gap-0.5 border border-emerald-100">
-                            <CheckCircle2 className="w-2.5 h-2.5" />
-                            <span>Verified</span>
+                {reviews.length > 0 ? (
+                  reviews.map((rev) => (
+                    <div key={rev.id} className="pt-4 first:pt-0 space-y-1.5">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-1.5">
+                          <span className="text-xs font-bold text-gray-900">
+                            {rev.user_name}
                           </span>
-                        )}
+                          {rev.is_verified_buyer && (
+                            <span className="px-1.5 py-0.2 rounded bg-emerald-50 text-emerald-800 text-[9px] font-bold uppercase tracking-wider flex items-center gap-0.5 border border-emerald-100">
+                              <CheckCircle2 className="w-2.5 h-2.5" />
+                              <span>Verified</span>
+                            </span>
+                          )}
+                        </div>
+                        <span className="text-[10px] text-gray-400">
+                          {rev.created_at && !rev.created_at.includes('ago') && !rev.created_at.includes('Just now')
+                            ? new Date(rev.created_at).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })
+                            : (rev.created_at || 'Recently')}
+                        </span>
                       </div>
-                      <span className="text-[10px] text-gray-400">{rev.created_at}</span>
+
+                      <div className="flex items-center gap-0.5">
+                        {[...Array(Math.min(5, Math.max(1, rev.rating || 5)))].map((_, i) => (
+                          <Star key={i} className="w-3 h-3 fill-amber-400 text-amber-400" />
+                        ))}
+                      </div>
+
+                      {rev.title && (
+                        <h5 className="text-xs font-bold text-gray-800">{rev.title}</h5>
+                      )}
+
+                      <p className="text-xs text-gray-500 leading-relaxed">
+                        {rev.comment}
+                      </p>
                     </div>
-
-                    <div className="flex items-center gap-0.5">
-                      {[...Array(rev.rating)].map((_, i) => (
-                        <Star key={i} className="w-3 h-3 fill-amber-400 text-amber-400" />
-                      ))}
-                    </div>
-
-                    {rev.title && (
-                      <h5 className="text-xs font-bold text-gray-800">{rev.title}</h5>
-                    )}
-
-                    <p className="text-xs text-gray-500 leading-relaxed">
-                      {rev.comment}
-                    </p>
+                  ))
+                ) : (
+                  <div className="py-6 text-center text-gray-500 text-xs font-medium">
+                    No customer reviews yet. Be the first to share your experience with this product!
                   </div>
-                ))}
+                )}
               </div>
             </div>
 

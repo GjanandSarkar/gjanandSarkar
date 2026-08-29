@@ -64,9 +64,15 @@ export async function getCurrentUser(): Promise<User | null> {
       ? profile.name.trim() 
       : (user.user_metadata?.full_name || user.user_metadata?.name || (profile.email ? profile.email.split('@')[0] : 'Customer'));
 
+    const parts = resolvedName.split(/\s+/);
+    const firstName = profile.first_name || parts[0] || '';
+    const lastName = profile.last_name || parts.slice(1).join(' ') || '';
+
     return {
       id: profile.id,
       name: resolvedName,
+      first_name: firstName,
+      last_name: lastName,
       phone: profile.phone || '',
       email: profile.email || '',
       avatar_url: profile.avatar_url || user.user_metadata?.avatar_url || user.user_metadata?.picture || '',
@@ -80,22 +86,43 @@ export async function getCurrentUser(): Promise<User | null> {
 
 export async function updateProfileName(
   userId: string,
-  name: string
+  firstNameOrName: string,
+  lastNameParam?: string
 ): Promise<{ success: boolean; error?: string }> {
+  let firstName: string;
+  let lastName: string;
+  let combinedName: string;
+
+  if (lastNameParam !== undefined) {
+    firstName = firstNameOrName.trim();
+    lastName = lastNameParam.trim();
+    combinedName = `${firstName} ${lastName}`.trim();
+  } else {
+    combinedName = firstNameOrName.trim();
+    const parts = combinedName.split(/\s+/);
+    firstName = parts[0] || '';
+    lastName = parts.slice(1).join(' ') || '';
+  }
+
   try {
     const res = await fetch('/api/auth/profile', {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ name }),
+      body: JSON.stringify({
+        first_name: firstName,
+        last_name: lastName,
+        name: combinedName,
+      }),
     });
 
     if (res.ok) {
-      const data = await res.json();
       const currentUser = useStore.getState().user;
       if (currentUser) {
         useStore.getState().setUser({
           ...currentUser,
-          name,
+          first_name: firstName,
+          last_name: lastName,
+          name: combinedName,
         });
       }
       return { success: true };
@@ -103,14 +130,25 @@ export async function updateProfileName(
 
     // Fallback to direct supabase
     const { supabase } = await import('@/lib/supabase');
-    const { error } = await supabase.from('profiles').update({ name }).eq('id', userId);
-    if (error) return { success: false, error: error.message };
+    const { error } = await supabase.from('profiles').update({
+      first_name: firstName,
+      last_name: lastName,
+      name: combinedName,
+    }).eq('id', userId);
+
+    if (error) {
+      // Fallback with just name if first_name/last_name columns are not added yet
+      const { error: retryError } = await supabase.from('profiles').update({ name: combinedName }).eq('id', userId);
+      if (retryError) return { success: false, error: retryError.message };
+    }
     
     const currentUser = useStore.getState().user;
     if (currentUser) {
       useStore.getState().setUser({
         ...currentUser,
-        name,
+        first_name: firstName,
+        last_name: lastName,
+        name: combinedName,
       });
     }
     return { success: true };
@@ -119,15 +157,25 @@ export async function updateProfileName(
   }
 }
 
+import { validatePhoneNumber } from '@/lib/utils/phone';
+
 export async function updateProfilePhone(
   userId: string,
   phone: string
 ): Promise<{ success: boolean; error?: string }> {
+  const rawDigits = phone.replace(/\D/g, '');
+  const fullPhone = phone.startsWith('+91') ? phone : `+91${rawDigits}`;
+  const validRes = validatePhoneNumber(fullPhone);
+  if (!validRes.isValid) {
+    return { success: false, error: validRes.error || 'Enter a valid Indian mobile number' };
+  }
+  const onlyTenDigits = validRes.formatted.replace(/^\+91/, '');
+
   try {
     const res = await fetch('/api/auth/profile', {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ phone }),
+      body: JSON.stringify({ phone: onlyTenDigits }),
     });
 
     if (res.ok) {
@@ -135,21 +183,21 @@ export async function updateProfilePhone(
       if (currentUser) {
         useStore.getState().setUser({
           ...currentUser,
-          phone,
+          phone: onlyTenDigits,
         });
       }
       return { success: true };
     }
 
     const { supabase } = await import('@/lib/supabase');
-    const { error } = await supabase.from('profiles').update({ phone }).eq('id', userId);
+    const { error } = await supabase.from('profiles').update({ phone: onlyTenDigits }).eq('id', userId);
     if (error) return { success: false, error: error.message };
 
     const currentUser = useStore.getState().user;
     if (currentUser) {
       useStore.getState().setUser({
         ...currentUser,
-        phone,
+        phone: onlyTenDigits,
       });
     }
     return { success: true };

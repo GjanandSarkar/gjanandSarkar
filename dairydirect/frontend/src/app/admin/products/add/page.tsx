@@ -3,24 +3,65 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useTranslation } from '@/lib/i18n';
-import { getProducts, uploadProductImage, createProduct } from '@/lib/api/products';
-import { ArrowLeft, Plus, Trash2, Loader2, UploadCloud } from 'lucide-react';
-import { motion, AnimatePresence } from 'framer-motion';
-
-const CATEGORIES = ['Milk', 'Paneer', 'Ghee', 'Buttermilk', 'Curd', 'Lassi'];
+import { createProduct, uploadProductImage } from '@/lib/api/products';
+import { api } from '@/lib/api/client';
+import {
+  ArrowLeft,
+  Tag,
+  FileText,
+  LayoutGrid,
+  ChevronDown,
+  UploadCloud,
+  Package,
+  Plus,
+  GripVertical,
+  Trash2,
+  Scale,
+  Loader2,
+  X,
+} from 'lucide-react';
 
 function AddProductPage() {
   const router = useRouter();
   const { t } = useTranslation();
-  
+
   const [name, setName] = useState('');
-  const [category, setCategory] = useState('Milk');
+  const [categories, setCategories] = useState<string[]>([]);
+  const [category, setCategory] = useState('');
+  const [customCategory, setCustomCategory] = useState('');
+  const [isCustomCategory, setIsCustomCategory] = useState(false);
+  const [isLoadingCategories, setIsLoadingCategories] = useState(true);
   const [description, setDescription] = useState('');
   const [variants, setVariants] = useState([{ weight: '', price: '', cost_price: '', stock: '' }]);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState('');
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
+
+  useEffect(() => {
+    async function loadCategories() {
+      try {
+        setIsLoadingCategories(true);
+        const res = await api.categories.get();
+        const catNames = (res.categories || []).map((c: any) => c.name).filter(Boolean);
+        if (catNames.length > 0) {
+          const uniqueCats = Array.from(new Set<string>(catNames));
+          setCategories(uniqueCats);
+          setCategory(uniqueCats[0]);
+        } else {
+          setCategories([]);
+          setIsCustomCategory(true);
+        }
+      } catch (err) {
+        console.error('Failed to load categories from database:', err);
+        setCategories([]);
+        setIsCustomCategory(true);
+      } finally {
+        setIsLoadingCategories(false);
+      }
+    }
+    loadCategories();
+  }, []);
 
   const addVariant = () => {
     setVariants([...variants, { weight: '', price: '', cost_price: '', stock: '' }]);
@@ -39,14 +80,21 @@ function AddProductPage() {
   };
 
   const handleSubmit = async () => {
-    if (!name.trim() || !category) {
-      setError('Product name and category are required');
+    const selectedCategory = isCustomCategory ? customCategory.trim() : category.trim();
+
+    if (!name.trim()) {
+      setError('Product name is required');
       return;
     }
 
-    const validVariants = variants.filter(v => v.weight && v.price && v.cost_price);
+    if (!selectedCategory) {
+      setError('Product category is required');
+      return;
+    }
+
+    const validVariants = variants.filter(v => v.weight && v.price);
     if (validVariants.length === 0) {
-      setError('At least one variant with weight, price, and cost price is required');
+      setError('At least one variant with weight and price is required');
       return;
     }
 
@@ -65,17 +113,17 @@ function AddProductPage() {
 
       const res = await createProduct(
         {
-          name,
-          category,
-          description,
-          image_url,
+          name: name.trim(),
+          category: selectedCategory,
+          description: description.trim() || undefined,
+          image_url: image_url || undefined,
           is_freshness_guarantee: true,
         },
         validVariants.map(v => ({
-          weight: v.weight,
+          weight: v.weight.trim(),
           price: parseFloat(v.price),
-          cost_price: parseFloat(v.cost_price),
-          stock: parseInt(v.stock) || 0,
+          cost_price: v.cost_price ? parseFloat(v.cost_price) : 0,
+          stock: v.stock ? parseInt(v.stock, 10) : 0,
         }))
       );
 
@@ -91,179 +139,407 @@ function AddProductPage() {
   };
 
   return (
-    <div className="flex flex-col min-h-screen">
-      <div className="px-6 md:px-10 pt-6 pb-5 flex items-center gap-4"
-        style={{ background: 'var(--color-surface-container-lowest)' }}>
-        <button onClick={() => router.back()} className="p-2 -ml-2 rounded-full"
-          style={{ color: 'var(--color-on-surface-variant)' }}>
-          <ArrowLeft className="w-5 h-5" />
-        </button>
-        <h1 className="font-extrabold text-[24px] tracking-tight" style={{ color: 'var(--color-on-surface)' }}>
-          Add Product
-        </h1>
-      </div>
-
-      <div className="px-6 md:px-10 py-6 flex flex-col gap-6">
-        <div>
-          <label className="text-[12px] font-bold uppercase tracking-wider mb-2 block"
-            style={{ color: 'var(--color-outline)' }}>Product Name</label>
-          <input
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            placeholder="Enter product name"
-            className="w-full h-12 px-4 rounded-[12px] text-[15px] font-medium outline-none"
-            style={{ background: 'var(--color-surface-container)', color: 'var(--color-on-surface)' }}
-          />
-        </div>
-
-        <div>
-          <label className="text-[12px] font-bold uppercase tracking-wider mb-2 block"
-            style={{ color: 'var(--color-outline)' }}>Category</label>
-          <select
-            value={category}
-            onChange={(e) => setCategory(e.target.value)}
-            className="w-full h-12 px-4 rounded-[12px] text-[15px] font-medium outline-none"
-            style={{ background: 'var(--color-surface-container)', color: 'var(--color-on-surface)' }}
-          >
-            {CATEGORIES.map(cat => (
-              <option key={cat} value={cat}>{cat}</option>
-            ))}
-          </select>
-        </div>
-
-        <div>
-          <label className="text-[12px] font-bold uppercase tracking-wider mb-2 block"
-            style={{ color: 'var(--color-outline)' }}>Description (Optional)</label>
-          <textarea
-            value={description}
-            onChange={(e) => setDescription(e.target.value)}
-            placeholder="Product description"
-            className="w-full min-h-24 px-4 py-3 rounded-[12px] text-[15px] font-medium outline-none resize-none"
-            style={{ background: 'var(--color-surface-container)', color: 'var(--color-on-surface)' }}
-          />
-        </div>
-
-        <div>
-          <label className="text-[12px] font-bold uppercase tracking-wider mb-2 block"
-            style={{ color: 'var(--color-outline)' }}>Product Image (Optional)</label>
-          <div className="flex items-center gap-4">
-            <label className="cursor-pointer flex flex-col items-center justify-center w-24 h-24 rounded-[12px] border-2 border-dashed transition-colors hover:border-primary"
-              style={{ borderColor: 'rgba(195,201,187,0.5)', background: 'var(--color-surface-container)' }}>
-              <input type="file" className="hidden" accept="image/*" onChange={(e) => {
-                const file = e.target.files?.[0];
-                if (file) {
-                  setImageFile(file);
-                  setImagePreview(URL.createObjectURL(file));
-                }
-              }} />
-              {imagePreview ? (
-                <img src={imagePreview} alt="Preview" className="w-full h-full object-cover rounded-[10px]" />
-              ) : (
-                <>
-                  <UploadCloud className="w-6 h-6 mb-1" style={{ color: 'var(--color-outline)' }} />
-                  <span className="text-[10px] font-medium" style={{ color: 'var(--color-outline)' }}>Upload</span>
-                </>
-              )}
-            </label>
-            {imagePreview && (
-              <button onClick={() => { setImageFile(null); setImagePreview(null); }} className="text-[12px] font-bold text-red-600">
-                Remove
-              </button>
-            )}
+    <div className="flex flex-col min-h-screen pb-12" style={{ background: 'var(--color-background, #fbfaf6)' }}>
+      {/* Header */}
+      <div className="px-6 md:px-10 pt-6 pb-5 flex items-center justify-between border-b"
+        style={{ background: 'var(--color-surface, #ffffff)', borderColor: 'var(--color-border, #e4e2db)' }}>
+        <div className="flex items-center gap-3">
+          <button onClick={() => router.back()} className="p-2 -ml-2 rounded-full hover:bg-black/5 transition-colors"
+            style={{ color: 'var(--color-foreground-muted, #58625c)' }}>
+            <ArrowLeft className="w-5 h-5" />
+          </button>
+          <div>
+            <h1 className="font-extrabold text-[22px] tracking-tight" style={{ color: 'var(--color-foreground, #1c201e)' }}>
+              Add Product
+            </h1>
+            <p className="text-[13px]" style={{ color: 'var(--color-foreground-muted, #58625c)' }}>
+              Create a new product listing with custom attributes and pricing variants.
+            </p>
           </div>
         </div>
 
-        <div>
-          <div className="flex items-center justify-between mb-3">
-            <label className="text-[12px] font-bold uppercase tracking-wider"
-              style={{ color: 'var(--color-outline)' }}>Variants</label>
+        <button
+          type="button"
+          onClick={handleSubmit}
+          disabled={isSubmitting}
+          className="inline-flex items-center gap-2 px-6 h-11 rounded-[10px] font-semibold text-[14px] text-white shadow-sm transition-all hover:opacity-95 disabled:opacity-50"
+          style={{ background: 'var(--color-primary, #0c3c26)' }}
+        >
+          {isSubmitting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Plus className="w-4 h-4" />}
+          {isSubmitting ? 'Creating Product...' : 'Save Product'}
+        </button>
+      </div>
+
+      <div className="px-6 md:px-10 py-6 max-w-7xl w-full mx-auto flex flex-col gap-6">
+        {/* Main 2-Column Grid */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          
+          {/* Left Column: Name & Description */}
+          <div className="flex flex-col gap-5">
+            {/* Product Name */}
+            <div>
+              <label className="text-[13px] font-semibold mb-2 flex items-center"
+                style={{ color: 'var(--color-foreground, #1c201e)' }}>
+                Product Name <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 ml-1.5"></span>
+              </label>
+              <div className="relative flex items-center">
+                <Tag className="absolute left-3.5 w-4.5 h-4.5 pointer-events-none" style={{ color: 'var(--color-foreground-muted, #8a948e)' }} />
+                <input
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  placeholder="Enter product name"
+                  className="w-full h-12 pl-11 pr-4 rounded-[10px] text-[14px] font-medium outline-none border transition-all focus:ring-2 focus:ring-primary/20"
+                  style={{
+                    background: 'var(--color-surface, #ffffff)',
+                    borderColor: 'var(--color-border, #e4e2db)',
+                    color: 'var(--color-foreground, #1c201e)',
+                  }}
+                />
+              </div>
+            </div>
+
+            {/* Description (Optional) */}
+            <div>
+              <label className="text-[13px] font-semibold mb-2 block"
+                style={{ color: 'var(--color-foreground, #1c201e)' }}>
+                Description (Optional)
+              </label>
+              <div className="relative">
+                <FileText className="absolute left-3.5 top-3.5 w-4.5 h-4.5 pointer-events-none" style={{ color: 'var(--color-foreground-muted, #8a948e)' }} />
+                <textarea
+                  maxLength={500}
+                  value={description}
+                  onChange={(e) => setDescription(e.target.value)}
+                  placeholder="Enter product description..."
+                  className="w-full h-44 pl-11 pr-4 pt-3 pb-8 rounded-[10px] text-[14px] font-medium outline-none border resize-none transition-all focus:ring-2 focus:ring-primary/20"
+                  style={{
+                    background: 'var(--color-surface, #ffffff)',
+                    borderColor: 'var(--color-border, #e4e2db)',
+                    color: 'var(--color-foreground, #1c201e)',
+                  }}
+                />
+                <div className="absolute bottom-3 right-3 text-[12px] font-semibold tracking-wide pointer-events-none"
+                  style={{ color: 'var(--color-foreground-muted, #8a948e)' }}>
+                  {description.length} / 500
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Right Column: Category & Image */}
+          <div className="flex flex-col gap-5">
+            {/* Category */}
+            <div>
+              <div className="flex items-center justify-between mb-2">
+                <label className="text-[13px] font-semibold flex items-center"
+                  style={{ color: 'var(--color-foreground, #1c201e)' }}>
+                  Category <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 ml-1.5"></span>
+                </label>
+                {categories.length > 0 && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setIsCustomCategory(!isCustomCategory);
+                      if (isCustomCategory && categories.length > 0) {
+                        setCategory(categories[0]);
+                      }
+                    }}
+                    className="text-[13px] font-semibold flex items-center gap-1 hover:underline"
+                    style={{ color: 'var(--color-primary, #0c3c26)' }}
+                  >
+                    <Plus className="w-3.5 h-3.5" />
+                    {isCustomCategory ? "Select Existing Category" : "Add New Category"}
+                  </button>
+                )}
+              </div>
+
+              <div className="relative flex items-center">
+                <LayoutGrid className="absolute left-3.5 w-4.5 h-4.5 pointer-events-none z-10" style={{ color: 'var(--color-foreground-muted, #8a948e)' }} />
+                
+                {isLoadingCategories ? (
+                  <div className="w-full h-12 pl-11 pr-4 rounded-[10px] flex items-center gap-2 border"
+                    style={{ background: 'var(--color-surface, #ffffff)', borderColor: 'var(--color-border, #e4e2db)' }}>
+                    <Loader2 className="w-4 h-4 animate-spin" style={{ color: 'var(--color-foreground-muted, #8a948e)' }} />
+                    <span className="text-[14px] font-medium" style={{ color: 'var(--color-foreground-muted, #8a948e)' }}>Loading categories...</span>
+                  </div>
+                ) : isCustomCategory || categories.length === 0 ? (
+                  <input
+                    value={customCategory}
+                    onChange={(e) => setCustomCategory(e.target.value)}
+                    placeholder="Enter category name"
+                    className="w-full h-12 pl-11 pr-4 rounded-[10px] text-[14px] font-medium outline-none border transition-all focus:ring-2 focus:ring-primary/20"
+                    style={{
+                      background: 'var(--color-surface, #ffffff)',
+                      borderColor: 'var(--color-border, #e4e2db)',
+                      color: 'var(--color-foreground, #1c201e)',
+                    }}
+                  />
+                ) : (
+                  <>
+                    <select
+                      value={category}
+                      onChange={(e) => setCategory(e.target.value)}
+                      className="w-full h-12 pl-11 pr-10 rounded-[10px] text-[14px] font-medium outline-none border appearance-none transition-all focus:ring-2 focus:ring-primary/20 cursor-pointer"
+                      style={{
+                        background: 'var(--color-surface, #ffffff)',
+                        borderColor: 'var(--color-border, #e4e2db)',
+                        color: 'var(--color-foreground, #1c201e)',
+                      }}
+                    >
+                      {categories.map(cat => (
+                        <option key={cat} value={cat}>{cat}</option>
+                      ))}
+                    </select>
+                    <ChevronDown className="absolute right-3.5 w-4.5 h-4.5 pointer-events-none" style={{ color: 'var(--color-foreground-muted, #8a948e)' }} />
+                  </>
+                )}
+              </div>
+            </div>
+
+            {/* Product Image (Optional) */}
+            <div>
+              <label className="text-[13px] font-semibold mb-2 block"
+                style={{ color: 'var(--color-foreground, #1c201e)' }}>
+                Product Image (Optional)
+              </label>
+
+              <div
+                className="w-full h-44 rounded-[12px] border-2 border-dashed flex flex-col items-center justify-center relative p-4 transition-colors hover:border-primary/50"
+                style={{
+                  background: 'var(--color-surface, #ffffff)',
+                  borderColor: 'var(--color-border, #d8d4c9)',
+                }}
+              >
+                {imagePreview ? (
+                  <div className="relative w-full h-full flex items-center justify-center group">
+                    <img src={imagePreview} alt="Preview" className="max-h-full max-w-full object-contain rounded-[8px]" />
+                    <button
+                      type="button"
+                      onClick={() => { setImageFile(null); setImagePreview(null); }}
+                      className="absolute top-1 right-1 p-1.5 rounded-full bg-red-500 text-white shadow-md hover:bg-red-600 transition-all"
+                    >
+                      <X className="w-4 h-4" />
+                    </button>
+                  </div>
+                ) : (
+                  <>
+                    <div className="p-3 rounded-full mb-2" style={{ background: 'var(--color-surface-muted, #f2ede4)' }}>
+                      <UploadCloud className="w-7 h-7" style={{ color: 'var(--color-primary, #0c3c26)' }} />
+                    </div>
+                    <span className="font-bold text-[14px] mb-0.5" style={{ color: 'var(--color-foreground, #1c201e)' }}>
+                      Upload product image
+                    </span>
+                    <span className="text-[12px] font-medium mb-3" style={{ color: 'var(--color-foreground-muted, #8a948e)' }}>
+                      PNG, JPG or WEBP (Max 5MB)
+                    </span>
+                    <label className="cursor-pointer inline-flex items-center gap-1.5 px-4 py-1.5 rounded-[8px] border text-[13px] font-semibold transition-colors hover:bg-primary/5"
+                      style={{ borderColor: 'var(--color-primary, #0c3c26)', color: 'var(--color-primary, #0c3c26)' }}>
+                      <Plus className="w-3.5 h-3.5" />
+                      <span>Choose File</span>
+                      <input
+                        type="file"
+                        className="hidden"
+                        accept="image/*"
+                        onChange={(e) => {
+                          const file = e.target.files?.[0];
+                          if (file) {
+                            setImageFile(file);
+                            setImagePreview(URL.createObjectURL(file));
+                          }
+                        }}
+                      />
+                    </label>
+                  </>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Variants Card Section */}
+        <div className="rounded-[16px] border p-6 mt-2"
+          style={{ background: 'var(--color-surface, #ffffff)', borderColor: 'var(--color-border, #e4e2db)' }}>
+          
+          <div className="flex items-center justify-between mb-5">
+            <div className="flex items-start gap-3">
+              <div className="p-2 rounded-[10px] mt-0.5" style={{ background: 'var(--color-surface-muted, #f2ede4)' }}>
+                <Package className="w-5 h-5" style={{ color: 'var(--color-primary, #0c3c26)' }} />
+              </div>
+              <div>
+                <h2 className="font-extrabold text-[17px] tracking-tight" style={{ color: 'var(--color-foreground, #1c201e)' }}>
+                  Variants
+                </h2>
+                <p className="text-[13px]" style={{ color: 'var(--color-foreground-muted, #58625c)' }}>
+                  Add variants to manage different sizes or packaging.
+                </p>
+              </div>
+            </div>
+
             <button
+              type="button"
               onClick={addVariant}
-              className="flex items-center gap-1 text-[12px] font-bold"
-              style={{ color: 'var(--color-primary)' }}
+              className="inline-flex items-center gap-1.5 px-4 py-2 rounded-[8px] border text-[13px] font-semibold transition-colors hover:bg-primary/5"
+              style={{ borderColor: 'var(--color-primary, #0c3c26)', color: 'var(--color-primary, #0c3c26)' }}
             >
               <Plus className="w-4 h-4" /> Add Variant
             </button>
           </div>
 
-          <div className="flex flex-col gap-3">
+          {/* List of Variant Cards */}
+          <div className="flex flex-col gap-4">
             {variants.map((variant, index) => (
-              <div key={index} className="p-4 rounded-[12px] space-y-3"
-                style={{ background: 'var(--color-surface-container-lowest)', border: '1px solid rgba(195,201,187,0.3)' }}>
-                <div className="flex justify-between items-center">
-                  <span className="text-[13px] font-bold" style={{ color: 'var(--color-on-surface)' }}>
-                    Variant {index + 1}
-                  </span>
+              <div
+                key={index}
+                className="p-5 rounded-[12px] border space-y-4 transition-all"
+                style={{
+                  background: 'var(--color-surface-muted, #fbfaf6)',
+                  borderColor: 'var(--color-border, #e4e2db)',
+                }}
+              >
+                {/* Variant Item Header */}
+                <div className="flex justify-between items-center pb-2 border-b"
+                  style={{ borderColor: 'var(--color-border, #e4e2db)' }}>
+                  <div className="flex items-center gap-2">
+                    <GripVertical className="w-4 h-4 cursor-grab" style={{ color: 'var(--color-foreground-muted, #8a948e)' }} />
+                    <span className="text-[14px] font-bold" style={{ color: 'var(--color-foreground, #1c201e)' }}>
+                      Variant {index + 1}
+                    </span>
+                  </div>
                   {variants.length > 1 && (
                     <button
+                      type="button"
                       onClick={() => removeVariant(index)}
-                      className="p-1 rounded-full"
-                      style={{ color: 'var(--color-error)' }}
+                      className="p-1.5 rounded-md text-red-500 hover:text-red-600 hover:bg-red-50 transition-colors"
                     >
                       <Trash2 className="w-4 h-4" />
                     </button>
                   )}
                 </div>
-                
-                <div className="grid grid-cols-2 gap-3">
-                  <input
-                    value={variant.weight}
-                    onChange={(e) => updateVariant(index, 'weight', e.target.value)}
-                    placeholder="Weight (e.g. 1L)"
-                    className="w-full h-10 px-3 rounded-[8px] text-[14px] font-medium outline-none"
-                    style={{ background: 'var(--color-surface-container)', color: 'var(--color-on-surface)' }}
-                  />
-                  <input
-                    value={variant.price}
-                    onChange={(e) => updateVariant(index, 'price', e.target.value)}
-                    placeholder="Selling Price"
-                    type="number"
-                    className="w-full h-10 px-3 rounded-[8px] text-[14px] font-medium outline-none"
-                    style={{ background: 'var(--color-surface-container)', color: 'var(--color-on-surface)' }}
-                  />
-                  <input
-                    value={variant.cost_price}
-                    onChange={(e) => updateVariant(index, 'cost_price', e.target.value)}
-                    placeholder="Cost Price"
-                    type="number"
-                    className="w-full h-10 px-3 rounded-[8px] text-[14px] font-medium outline-none"
-                    style={{ background: 'var(--color-surface-container)', color: 'var(--color-on-surface)' }}
-                  />
-                  <input
-                    value={variant.stock}
-                    onChange={(e) => updateVariant(index, 'stock', e.target.value)}
-                    placeholder="Stock"
-                    type="number"
-                    className="w-full h-10 px-3 rounded-[8px] text-[14px] font-medium outline-none"
-                    style={{ background: 'var(--color-surface-container)', color: 'var(--color-on-surface)' }}
-                  />
+
+                {/* Variant Input 2x2 Grid */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {/* Weight */}
+                  <div>
+                    <label className="text-[12px] font-semibold mb-1.5 block" style={{ color: 'var(--color-foreground, #1c201e)' }}>
+                      Weight (e.g. 1L, 500g)
+                    </label>
+                    <div className="relative flex items-center">
+                      <Scale className="absolute left-3.5 w-4 h-4 pointer-events-none" style={{ color: 'var(--color-foreground-muted, #8a948e)' }} />
+                      <input
+                        value={variant.weight}
+                        onChange={(e) => updateVariant(index, 'weight', e.target.value)}
+                        placeholder="e.g. 500g"
+                        className="w-full h-11 pl-10 pr-3 rounded-[8px] text-[14px] font-medium outline-none border transition-all focus:ring-2 focus:ring-primary/20"
+                        style={{
+                          background: 'var(--color-surface, #ffffff)',
+                          borderColor: 'var(--color-border, #e4e2db)',
+                          color: 'var(--color-foreground, #1c201e)',
+                        }}
+                      />
+                    </div>
+                  </div>
+
+                  {/* Selling Price */}
+                  <div>
+                    <label className="text-[12px] font-semibold mb-1.5 block" style={{ color: 'var(--color-foreground, #1c201e)' }}>
+                      Selling Price (₹)
+                    </label>
+                    <div className="relative flex items-center">
+                      <span className="absolute left-3.5 text-[14px] font-bold pointer-events-none" style={{ color: 'var(--color-foreground-muted, #8a948e)' }}>
+                        ₹
+                      </span>
+                      <input
+                        value={variant.price}
+                        onChange={(e) => updateVariant(index, 'price', e.target.value)}
+                        placeholder="0.00"
+                        type="number"
+                        step="0.01"
+                        className="w-full h-11 pl-9 pr-3 rounded-[8px] text-[14px] font-medium outline-none border transition-all focus:ring-2 focus:ring-primary/20"
+                        style={{
+                          background: 'var(--color-surface, #ffffff)',
+                          borderColor: 'var(--color-border, #e4e2db)',
+                          color: 'var(--color-foreground, #1c201e)',
+                        }}
+                      />
+                    </div>
+                  </div>
+
+                  {/* Cost Price */}
+                  <div>
+                    <label className="text-[12px] font-semibold mb-1.5 block" style={{ color: 'var(--color-foreground, #1c201e)' }}>
+                      Cost Price (₹)
+                    </label>
+                    <div className="relative flex items-center">
+                      <span className="absolute left-3.5 text-[14px] font-bold pointer-events-none" style={{ color: 'var(--color-foreground-muted, #8a948e)' }}>
+                        ₹
+                      </span>
+                      <input
+                        value={variant.cost_price}
+                        onChange={(e) => updateVariant(index, 'cost_price', e.target.value)}
+                        placeholder="0.00"
+                        type="number"
+                        step="0.01"
+                        className="w-full h-11 pl-9 pr-3 rounded-[8px] text-[14px] font-medium outline-none border transition-all focus:ring-2 focus:ring-primary/20"
+                        style={{
+                          background: 'var(--color-surface, #ffffff)',
+                          borderColor: 'var(--color-border, #e4e2db)',
+                          color: 'var(--color-foreground, #1c201e)',
+                        }}
+                      />
+                    </div>
+                  </div>
+
+                  {/* Stock Quantity */}
+                  <div>
+                    <label className="text-[12px] font-semibold mb-1.5 block" style={{ color: 'var(--color-foreground, #1c201e)' }}>
+                      Stock Quantity
+                    </label>
+                    <div className="relative flex items-center">
+                      <Package className="absolute left-3.5 w-4 h-4 pointer-events-none" style={{ color: 'var(--color-foreground-muted, #8a948e)' }} />
+                      <input
+                        value={variant.stock}
+                        onChange={(e) => updateVariant(index, 'stock', e.target.value)}
+                        placeholder="0"
+                        type="number"
+                        className="w-full h-11 pl-10 pr-3 rounded-[8px] text-[14px] font-medium outline-none border transition-all focus:ring-2 focus:ring-primary/20"
+                        style={{
+                          background: 'var(--color-surface, #ffffff)',
+                          borderColor: 'var(--color-border, #e4e2db)',
+                          color: 'var(--color-foreground, #1c201e)',
+                        }}
+                      />
+                    </div>
+                  </div>
                 </div>
               </div>
             ))}
           </div>
         </div>
 
+        {/* Error message display */}
         {error && (
-          <p className="text-[13px] font-bold" style={{ color: 'var(--color-error)' }}>
-            {error}
-          </p>
+          <div className="p-4 rounded-[10px] border border-red-200 bg-red-50 text-red-700 text-[14px] font-semibold flex items-center gap-2">
+            <span>{error}</span>
+          </div>
         )}
 
-        <button
-          onClick={handleSubmit}
-          disabled={isSubmitting}
-          className="w-full h-12 rounded-[12px] font-bold text-white flex items-center justify-center gap-2"
-          style={{
-            background: isSubmitting ? 'var(--color-surface-container)' : 'linear-gradient(135deg, #3f6530, #577f46)',
-            color: isSubmitting ? 'var(--color-on-surface-variant)' : 'white',
-          }}
-        >
-          {isSubmitting ? <Loader2 className="w-5 h-5 animate-spin" /> : <Plus className="w-5 h-5" />}
-          {isSubmitting ? 'Creating...' : 'Create Product'}
-        </button>
+        {/* Submit button at bottom */}
+        <div className="flex justify-end pt-2">
+          <button
+            type="button"
+            onClick={handleSubmit}
+            disabled={isSubmitting}
+            className="inline-flex items-center justify-center gap-2 px-8 h-12 rounded-[10px] font-bold text-[15px] text-white shadow-md transition-all hover:opacity-95 disabled:opacity-50"
+            style={{ background: 'var(--color-primary, #0c3c26)' }}
+          >
+            {isSubmitting ? <Loader2 className="w-5 h-5 animate-spin" /> : <Plus className="w-5 h-5" />}
+            {isSubmitting ? 'Creating Product...' : 'Create Product'}
+          </button>
+        </div>
       </div>
     </div>
   );
 }
 
 export default AddProductPage;
+

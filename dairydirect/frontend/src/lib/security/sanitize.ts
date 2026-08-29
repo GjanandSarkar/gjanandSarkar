@@ -18,10 +18,12 @@ const uuidLike = z
   );
 
 
+import { PHONE_REGEX, validatePhoneNumber } from '@/lib/utils/phone';
+
 export const PhoneSchema = z
   .string()
   .trim()
-  .regex(/^(\+91)?[6-9]\d{9}$/, 'Invalid Indian phone number');
+  .regex(PHONE_REGEX, 'Enter a valid Indian mobile number');
 
 export const OTPSchema = z
   .string()
@@ -126,10 +128,9 @@ export function sanitizeForSQL(input: string): string {
  * Validate and sanitize phone number
  */
 export function sanitizePhone(phone: string): string | null {
-  const cleaned = phone.replace(/\D/g, '');
-  if (cleaned.length === 10 && /^[6-9]/.test(cleaned)) return `+91${cleaned}`;
-  if (cleaned.length === 12 && cleaned.startsWith('91')) return `+${cleaned}`;
-  return null;
+  if (!phone) return null;
+  const res = validatePhoneNumber(phone);
+  return res.isValid ? res.formatted : null;
 }
 
 /**

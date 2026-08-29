@@ -12,6 +12,7 @@ import { sanitizePhone } from '@/lib/security/sanitize';
 import { checkRateLimit, cacheUserProfile } from '@/lib/aws/redis';
 import { getClientIP } from '@/lib/api/auth-middleware';
 import { sendEmail } from '@/lib/aws/ses';
+import { syncUserToUsersTable, backfillUsersTable } from '@/lib/supabase/sync-users';
 
 export async function POST(request: NextRequest) {
   try {
@@ -35,7 +36,7 @@ export async function POST(request: NextRequest) {
 
     const phone = sanitizePhone(rawPhone);
     if (!phone) {
-      return NextResponse.json({ error: 'Invalid phone number' }, { status: 400 });
+      return NextResponse.json({ error: 'Enter a valid Indian mobile number' }, { status: 400 });
     }
 
     // Verify OTP from Redis
@@ -84,6 +85,15 @@ export async function POST(request: NextRequest) {
     if (!profile) {
       return NextResponse.json({ error: 'Failed to create user account' }, { status: 500 });
     }
+
+    // Sync users table in Supabase and RDS
+    await syncUserToUsersTable({
+      id: profile.id,
+      phone,
+      name: profile.name,
+      email: profile.email,
+    });
+    backfillUsersTable().catch(() => {});
 
     // Issue JWT tokens
     const accessToken = await signAccessToken({

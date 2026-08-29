@@ -4,6 +4,8 @@ import { useEffect, useRef } from 'react';
 import { useStore } from '@/store/useStore';
 import { fetchTranslations } from '@/lib/api/translations';
 import { mergeLocalCart, getCart } from '@/lib/api/cart';
+import { getWishlist } from '@/lib/api/wishlist';
+import { getUserAddresses } from '@/lib/api/addresses';
 import type { Language } from '@/lib/i18n';
 import { supabase } from '@/lib/supabase';
 
@@ -13,6 +15,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const setAuthLoading = useStore((s) => s.setAuthLoading);
   const setTranslationsCache = useStore((s) => s.setTranslationsCache);
   const setCart = useStore((s) => s.setCart);
+  const setWishlist = useStore((s) => s.setWishlist);
   const localCart = useStore((s) => s.cart);
   const translationsCache = useStore((s) => s.translationsCache);
   
@@ -38,18 +41,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   // Supabase Auth listener
   useEffect(() => {
-    // Always start loading = true on mount so guards wait
     setAuthLoading(true);
 
-    // onAuthStateChange fires INITIAL_SESSION immediately on mount with the
-    // persisted session (if any). This is the correct hook for refresh persistence.
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event: any, session: any) => {
       if (event === 'INITIAL_SESSION') {
-        // First load / refresh: if session exists, hydrate user
         if (session) {
           await hydrateUser(session.access_token);
         } else {
-          // No session at all — user is genuinely not logged in
           setAuthLoading(false);
         }
         hasInitialized.current = true;
@@ -62,7 +60,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       }
 
       if (event === 'TOKEN_REFRESHED' && session) {
-        // Token was silently refreshed; re-hydrate in background
         await hydrateUser(session.access_token);
         return;
       }
@@ -118,7 +115,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             saved_addresses: userProfile.saved_addresses || [],
           });
 
-          // Sync cart in background
+          // Sync cart from Database via Backend API
           const cart = localCart;
           if (cart.length > 0) {
             mergeLocalCart(
@@ -142,6 +139,27 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
               );
             }
           }).catch(() => {});
+
+          // Sync wishlist from Database via Backend API
+          getWishlist(userProfile.id).then((items) => {
+            if (items) setWishlist(items);
+          }).catch(() => {});
+
+          // Sync addresses from Database via Backend API
+          getUserAddresses(userProfile.id).then((addresses) => {
+            if (addresses && addresses.length > 0) {
+              setUser({
+                id: userProfile.id,
+                name: resolvedName,
+                phone: userProfile.phone || '',
+                email: userProfile.email || '',
+                avatar_url: userProfile.avatar_url || '',
+                role: userProfile.role ?? 'customer',
+                saved_addresses: addresses.map(a => ({ label: a.label, address: a.address })),
+              });
+            }
+          }).catch(() => {});
+
           return;
         }
       }
@@ -163,6 +181,22 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           role: 'customer',
           saved_addresses: [],
         });
+
+        getWishlist(sbUser.id).then((items) => {
+          if (items) setWishlist(items);
+        }).catch(() => {});
+
+        getCart(sbUser.id).then((dbCart) => {
+          if (dbCart && dbCart.length > 0) {
+            setCart(
+              dbCart.map((item) => ({
+                productId: item.product_id,
+                variantId: item.variant_id,
+                quantity: item.quantity,
+              }))
+            );
+          }
+        }).catch(() => {});
       }
     } catch (err) {
       console.warn('Auth hydration notice:', err);

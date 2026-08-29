@@ -42,12 +42,13 @@ export function Sidebar() {
       {/* Brand */}
       <div className="h-[72px] flex items-center px-6 relative z-10">
         <Link href="/home" className="flex items-center gap-2 group transition-transform">
-          <img src="/logo.svg" alt="Logo" className="w-10 h-10 object-contain" />
+          <img src="/application logo/gjanand sarkar logo.png" alt="Logo" className="w-10 h-10 object-contain" />
           <div className="flex flex-col">
-            <span className="text-[15px] font-black text-[#0f3e26] tracking-tight leading-none">
-              Gjanand<span className="text-[#c88a23]">.</span>
+            <span className="text-[15px] font-black tracking-tight leading-none">
+              <span className="text-[#0f172a]">Gj</span>
+              <span className="text-[#16a34a]">anand</span>
             </span>
-            <span className="text-[7.5px] tracking-[0.25em] font-extrabold text-[#c88a23] uppercase">
+            <span className="text-[7.5px] tracking-[0.2em] font-black text-[#2563eb] uppercase text-right leading-none mt-0.5">
               SARKAR
             </span>
           </div>
@@ -59,19 +60,15 @@ export function Sidebar() {
         <div className="mx-4 mb-2 px-4 py-3 rounded-[14px] flex items-center gap-3"
           style={{ background: 'var(--color-surface-container-low)' }}>
           <div className="w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm text-white shrink-0 bg-[#0f3e26] border border-[#0f3e26]/10 relative overflow-hidden">
-            {user.avatar_url ? (
-              <img 
-                src={user.avatar_url} 
-                alt="Profile" 
-                className="w-full h-full object-cover" 
-                referrerPolicy="no-referrer"
-                onError={(e) => {
-                  (e.currentTarget as HTMLImageElement).style.display = 'none';
-                }}
-              />
-            ) : (
-              <span>{user.name ? user.name.charAt(0).toUpperCase() : 'G'}</span>
-            )}
+            <img 
+              src={user.avatar_url || '/profile/profile.jpg'} 
+              alt="Profile" 
+              className="w-full h-full object-cover" 
+              referrerPolicy="no-referrer"
+              onError={(e) => {
+                (e.currentTarget as HTMLImageElement).src = '/profile/profile.jpg';
+              }}
+            />
           </div>
           <div className="flex-1 min-w-0">
             <p className="text-[11px] font-semibold uppercase tracking-wider"

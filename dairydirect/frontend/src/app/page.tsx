@@ -14,6 +14,8 @@ export default function RootRoute() {
     
     if (user && user.role === 'admin') {
       router.replace('/admin');
+    } else if (user && user.role === 'seller') {
+      router.replace('/seller/dashboard');
     } else {
       router.replace('/home');
     }

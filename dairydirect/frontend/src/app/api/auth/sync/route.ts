@@ -1,7 +1,9 @@
 /**
  * POST /api/auth/sync
  * Syncs auth state with profile — works seamlessly for both Supabase Auth (Google/Phone)
- * and custom sessions. Automatically provisions customer profile if first login.
+ * and custom sessions. Automatically provisions customer profile if first login,
+ * preserves existing profile data (phone, addresses, etc.) on re-login, and merges
+ * accounts if logging in with different auth methods for the same email/phone.
  */
 
 import { NextRequest, NextResponse } from 'next/server';
@@ -10,8 +12,9 @@ import { verifyAccessToken, extractTokenFromRequest, signAccessToken, signRefres
 import { cacheUserProfile, checkRateLimit } from '@/lib/aws/redis';
 import { getClientIP } from '@/lib/api/auth-middleware';
 import { getAdminSupabase } from '@/lib/supabase/admin';
+import { syncUserToUsersTable, backfillUsersTable } from '@/lib/supabase/sync-users';
 
-const ADMIN_EMAILS = (process.env.ADMIN_EMAILS || 'admin@gjanandsarkar.com,patelroshu1218@gmail.com')
+const ADMIN_EMAILS = (process.env.ADMIN_EMAILS || 'gjanandsarkar09@gmail.com')
   .toLowerCase()
   .split(',')
   .map((e) => e.trim());
@@ -61,7 +64,7 @@ export async function POST(request: NextRequest) {
       if (!error && user) {
         userId = user.id;
         userEmail = user.email || userEmail;
-        userPhone = user.phone || userPhone;
+        userPhone = user.phone || user.user_metadata?.phone || userPhone;
         userName = userName 
           || user.user_metadata?.full_name 
           || user.user_metadata?.name 
@@ -79,7 +82,7 @@ export async function POST(request: NextRequest) {
         if (adminUserData?.user) {
           const u = adminUserData.user;
           userEmail = u.email || userEmail;
-          userPhone = u.phone || userPhone;
+          userPhone = u.phone || u.user_metadata?.phone || userPhone;
           userName = userName 
             || u.user_metadata?.full_name 
             || u.user_metadata?.name 
@@ -101,72 +104,155 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Invalid or expired token' }, { status: 401 });
     }
 
+    // Normalize phone number (10 digits) if present
+    const cleanPhone = userPhone ? userPhone.replace(/^\+91/, '').replace(/\D/g, '').slice(-10) : null;
+    const cleanEmail = userEmail ? userEmail.trim().toLowerCase() : null;
+
     // If userName is still null, derive from email or phone
-    if (!userName && userEmail) {
-      const emailPrefix = userEmail.split('@')[0];
-      // Format email prefix e.g. "roshan.patel" or "roshanpatel" -> readable name
+    if (!userName && cleanEmail) {
+      const emailPrefix = cleanEmail.split('@')[0];
       userName = emailPrefix.replace(/[._-]/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase());
     }
 
     // Determine initial role
     const isEnvAdmin =
-      (userEmail && ADMIN_EMAILS.includes(userEmail.toLowerCase())) ||
-      (userPhone && ADMIN_PHONES.includes(userPhone));
+      (cleanEmail && ADMIN_EMAILS.includes(cleanEmail)) ||
+      (cleanPhone && ADMIN_PHONES.some(p => p.replace(/\D/g, '').endsWith(cleanPhone)));
     const initialRole = isEnvAdmin ? 'admin' : 'customer';
 
-    // Upsert profile in PostgreSQL / Supabase
     let profile: any = null;
     let savedAddresses: any[] = [];
 
+    // --- SMART PROFILE SYNC & RETRIEVAL ---
     try {
-      const profileRes = await query<{
-        id: string;
-        phone: string | null;
-        email: string | null;
-        name: string | null;
-        avatar_url: string | null;
-        role: string;
-        loyalty_points: number;
-        referral_code: string;
-        created_at: string;
-      }>(
-        `INSERT INTO profiles (id, email, phone, name, avatar_url, role)
-         VALUES ($1, $2, $3, $4, $5, $6)
-         ON CONFLICT (id) DO UPDATE 
-         SET email = COALESCE(EXCLUDED.email, profiles.email),
-             phone = COALESCE(EXCLUDED.phone, profiles.phone),
-             name = COALESCE(NULLIF(EXCLUDED.name, ''), profiles.name),
-             avatar_url = COALESCE(NULLIF(EXCLUDED.avatar_url, ''), profiles.avatar_url),
-             role = CASE WHEN $7 = 'admin' THEN 'admin'::user_role ELSE profiles.role END,
-             updated_at = now()
-         RETURNING id, phone, email, name, avatar_url, role, loyalty_points, referral_code, created_at`,
-        [userId, userEmail, userPhone, userName, userAvatar, initialRole, initialRole]
+      // 1. Look up existing profile in RDS by ID, Email, or Phone
+      const existingRes = await query<any>(
+        `SELECT id, phone, email, first_name, last_name, name, avatar_url, country, role, loyalty_points, referral_code, created_at
+         FROM profiles
+         WHERE id = $1 
+            OR ($2::text IS NOT NULL AND email IS NOT NULL AND LOWER(email) = LOWER($2))
+            OR ($3::text IS NOT NULL AND phone IS NOT NULL AND phone = $3)
+         ORDER BY (CASE WHEN id = $1 THEN 1 WHEN LOWER(email) = LOWER($2) THEN 2 ELSE 3 END)
+         LIMIT 1`,
+        [userId, cleanEmail, cleanPhone]
       );
-      profile = profileRes.rows[0];
 
+      let existingProfile = existingRes.rows[0] || null;
+
+      if (existingProfile) {
+        const oldId = existingProfile.id;
+
+        // If existing profile has a different ID (e.g. created via Phone OTP or another provider), re-link related tables to current userId
+        if (oldId !== userId) {
+          try {
+            await query('UPDATE user_addresses SET user_id = $2 WHERE user_id = $1', [oldId, userId]);
+            await query('UPDATE orders SET user_id = $2 WHERE user_id = $1', [oldId, userId]);
+            await query('UPDATE subscriptions SET user_id = $2 WHERE user_id = $1', [oldId, userId]);
+            await query('UPDATE cart_items SET user_id = $2 WHERE user_id = $1', [oldId, userId]);
+            await query('UPDATE wishlist SET user_id = $2 WHERE user_id = $1', [oldId, userId]);
+          } catch (relinkErr) {
+            console.warn('[AuthSync] Relink warning:', relinkErr);
+          }
+        }
+
+        // Merge existing profile fields: NEVER overwrite existing phone/name/email with null
+        const finalEmail = existingProfile.email || cleanEmail;
+        const finalPhone = existingProfile.phone || cleanPhone;
+        const finalName = existingProfile.name || userName;
+        const finalAvatar = existingProfile.avatar_url || userAvatar;
+        const finalRole = (isEnvAdmin || existingProfile.role === 'admin') ? 'admin' : (existingProfile.role || 'customer');
+
+        const updateRes = await query<any>(
+          `INSERT INTO profiles (id, email, phone, name, avatar_url, role)
+           VALUES ($1, $2, $3, $4, $5, $6)
+           ON CONFLICT (id) DO UPDATE
+           SET email = COALESCE(profiles.email, EXCLUDED.email),
+               phone = COALESCE(profiles.phone, EXCLUDED.phone),
+               name = COALESCE(NULLIF(profiles.name, ''), EXCLUDED.name),
+               avatar_url = COALESCE(NULLIF(profiles.avatar_url, ''), EXCLUDED.avatar_url),
+               role = CASE WHEN $7 = 'admin' THEN 'admin'::user_role ELSE profiles.role END,
+               updated_at = now()
+           RETURNING id, phone, email, first_name, last_name, name, avatar_url, country, role, loyalty_points, referral_code, created_at`,
+          [userId, finalEmail, finalPhone, finalName, finalAvatar, finalRole, isEnvAdmin ? 'admin' : 'customer']
+        );
+
+        profile = updateRes.rows[0] || {
+          ...existingProfile,
+          id: userId,
+          email: finalEmail,
+          phone: finalPhone,
+          name: finalName,
+          avatar_url: finalAvatar,
+          role: finalRole,
+        };
+
+        // If oldId was different, clean up duplicate old profile row if present
+        if (oldId !== userId) {
+          await query('DELETE FROM profiles WHERE id = $1 AND id != $2', [oldId, userId]).catch(() => {});
+        }
+      } else {
+        // No existing profile found — Create new profile
+        const insertRes = await query<any>(
+          `INSERT INTO profiles (id, email, phone, name, avatar_url, role)
+           VALUES ($1, $2, $3, $4, $5, $6)
+           ON CONFLICT (id) DO UPDATE
+           SET email = COALESCE(profiles.email, EXCLUDED.email),
+               phone = COALESCE(profiles.phone, EXCLUDED.phone),
+               name = COALESCE(NULLIF(profiles.name, ''), EXCLUDED.name),
+               avatar_url = COALESCE(NULLIF(profiles.avatar_url, ''), EXCLUDED.avatar_url),
+               role = CASE WHEN $7 = 'admin' THEN 'admin'::user_role ELSE profiles.role END,
+               updated_at = now()
+           RETURNING id, phone, email, first_name, last_name, name, avatar_url, country, role, loyalty_points, referral_code, created_at`,
+          [userId, cleanEmail, cleanPhone, userName, userAvatar, initialRole, initialRole]
+        );
+        profile = insertRes.rows[0];
+      }
+
+      // Fetch user's saved addresses
       const addressResult = await query<{ id: string; label: string; address: string; pincode: string | null; is_default: boolean }>(
         'SELECT id, label, address, pincode, is_default FROM user_addresses WHERE user_id = $1 ORDER BY is_default DESC, created_at DESC',
         [profile.id]
       );
       savedAddresses = addressResult.rows || [];
-    } catch (dbErr) {
+    } catch (dbErr: any) {
+      console.warn('[AuthSync] RDS query error, trying Supabase fallback:', dbErr.message);
+
       try {
         const sb = getAdminSupabase();
+        // Check Supabase profiles table for existing profile
+        let existingSbProfile = null;
+        if (cleanEmail) {
+          const { data } = await sb.from('profiles').select('*').eq('email', cleanEmail).maybeSingle();
+          existingSbProfile = data;
+        }
+        if (!existingSbProfile) {
+          const { data } = await sb.from('profiles').select('*').eq('id', userId).maybeSingle();
+          existingSbProfile = data;
+        }
+
+        const finalEmail = existingSbProfile?.email || cleanEmail;
+        const finalPhone = existingSbProfile?.phone || cleanPhone;
+        const finalName = existingSbProfile?.name || userName;
+        const finalAvatar = existingSbProfile?.avatar_url || userAvatar;
+        const finalRole = (isEnvAdmin || existingSbProfile?.role === 'admin') ? 'admin' : (existingSbProfile?.role || 'customer');
+
         const { data, error } = await sb
           .from('profiles')
           .upsert({
             id: userId,
-            email: userEmail,
-            phone: userPhone,
-            name: userName,
-            avatar_url: userAvatar,
-            role: initialRole,
+            email: finalEmail,
+            phone: finalPhone,
+            name: finalName,
+            avatar_url: finalAvatar,
+            role: finalRole,
           })
           .select()
           .single();
 
         if (!error && data) {
           profile = data;
+        } else if (existingSbProfile) {
+          profile = existingSbProfile;
         }
 
         const { data: addrs } = await sb
@@ -178,13 +264,15 @@ export async function POST(request: NextRequest) {
         if (addrs) {
           savedAddresses = addrs;
         }
-      } catch {}
+      } catch (sbFallbackErr: any) {
+        console.warn('[AuthSync] Supabase fallback error:', sbFallbackErr.message);
+      }
 
       if (!profile) {
         profile = {
           id: userId,
-          email: userEmail,
-          phone: userPhone,
+          email: cleanEmail,
+          phone: cleanPhone,
           name: userName,
           avatar_url: userAvatar,
           role: initialRole,
@@ -197,10 +285,23 @@ export async function POST(request: NextRequest) {
 
     const profileWithAddresses = {
       ...profile,
-      name: profile?.name || userName || (userEmail ? userEmail.split('@')[0] : 'Customer'),
+      name: profile?.name || userName || (cleanEmail ? cleanEmail.split('@')[0] : 'Customer'),
       avatar_url: profile?.avatar_url || userAvatar || null,
       saved_addresses: savedAddresses,
     };
+
+    // Sync users table in Supabase and RDS
+    await syncUserToUsersTable({
+      id: profile.id,
+      phone: profile.phone || cleanPhone,
+      name: profileWithAddresses.name,
+      first_name: profile.first_name,
+      last_name: profile.last_name,
+      email: profile.email || cleanEmail,
+      country: profile.country,
+      created_at: profile.created_at,
+    });
+    backfillUsersTable().catch(() => {});
 
     // Cache profile in Redis / Memory
     await cacheUserProfile(profile.id, profileWithAddresses);

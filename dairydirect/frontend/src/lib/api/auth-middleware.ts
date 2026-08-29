@@ -17,7 +17,7 @@ export type AuthUser = {
   isAdmin: boolean;
 };
 
-const ADMIN_EMAILS = (process.env.ADMIN_EMAILS || 'admin@gjanandsarkar.com,patelroshu1218@gmail.com')
+const ADMIN_EMAILS = (process.env.ADMIN_EMAILS || 'gjanandsarkar09@gmail.com')
   .toLowerCase()
   .split(',')
   .map((e) => e.trim());

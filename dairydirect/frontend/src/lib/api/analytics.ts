@@ -10,7 +10,7 @@ export type BIOrder = {
     product_id: string;
     quantity: number;
     price: number;
-    products?: { name: string };
+    products?: { name: string; category?: string };
   }[];
 };
 
@@ -35,10 +35,25 @@ export type BusinessIntelligenceData = {
 };
 
 export async function getBusinessIntelligence(): Promise<BusinessIntelligenceData> {
+  try {
+    const res = await fetch('/api/admin/analytics');
+    if (res.ok) {
+      const data = await res.json();
+      return {
+        orders: data.orders || [],
+        profiles: data.profiles || [],
+        subscriptions: data.subscriptions || [],
+      };
+    }
+  } catch (err) {
+    console.warn('[analytics.ts] /api/admin/analytics fetch failed, trying client fallback:', err);
+  }
+
+  // Fallback to client Supabase if API fails
   const [ordersRes, profilesRes, subsRes] = await Promise.all([
     supabase
       .from('orders')
-      .select('id, created_at, total_amount, status, user_id, order_items(product_id, quantity, price, products(name))')
+      .select('id, created_at, total_amount, status, user_id, order_items(product_id, quantity, price, products(name, category))')
       .order('created_at', { ascending: false }),
     supabase
       .from('profiles')
@@ -47,10 +62,6 @@ export async function getBusinessIntelligence(): Promise<BusinessIntelligenceDat
       .from('subscriptions')
       .select('id, status, created_at, plan, product_id, products(name)')
   ]);
-
-  if (ordersRes.error) console.error('Error fetching BI orders:', ordersRes.error);
-  if (profilesRes.error) console.error('Error fetching BI profiles:', profilesRes.error);
-  if (subsRes.error) console.error('Error fetching BI subscriptions:', subsRes.error);
 
   return {
     orders: (ordersRes.data as unknown as BIOrder[]) || [],

@@ -13,6 +13,7 @@ import {
   HelpCircle
 } from 'lucide-react';
 import Link from 'next/link';
+import { validatePhoneNumber, formatPhoneInput } from '@/lib/utils/phone';
 
 export default function ContactPage() {
   const [form, setForm] = useState({
@@ -24,9 +25,18 @@ export default function ContactPage() {
   });
   const [submitted, setSubmitted] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    setError('');
+
+    const validPhone = validatePhoneNumber(form.phone);
+    if (!validPhone.isValid) {
+      setError('Enter a valid Indian mobile number');
+      return;
+    }
+
     setLoading(true);
     setTimeout(() => {
       setLoading(false);
@@ -158,6 +168,11 @@ export default function ContactPage() {
               </div>
             ) : (
               <form onSubmit={handleSubmit} className="space-y-4">
+                {error && (
+                  <div className="p-3 bg-red-50 border border-red-200 rounded-xl text-xs font-bold text-red-700">
+                    {error}
+                  </div>
+                )}
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
                     <label className="block text-xs font-bold text-gray-700 mb-1">
@@ -181,8 +196,9 @@ export default function ContactPage() {
                       type="tel"
                       required
                       value={form.phone}
-                      onChange={e => setForm({ ...form, phone: e.target.value })}
-                      placeholder="+91 98765 43210"
+                      onChange={e => setForm({ ...form, phone: formatPhoneInput(e.target.value) })}
+                      placeholder="+919876543210"
+                      maxLength={13}
                       className="w-full px-3.5 py-2.5 text-xs rounded-xl border border-gray-300 focus:border-[#0f3e26] focus:ring-1 focus:ring-[#0f3e26] outline-none"
                     />
                   </div>
