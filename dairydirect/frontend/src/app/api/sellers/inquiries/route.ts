@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { getAdminSupabase } from '@/lib/supabase/admin';
+import { query, isPgConfigured } from '@/lib/aws/rds';
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
@@ -73,10 +74,47 @@ export async function POST(request: Request) {
       status: 'pending',
     };
 
-    const { data, error } = await sb.from('seller_inquiries').insert(newInquiry).select().single();
+    let insertedInquiry = null;
 
-    if (error) {
-      return NextResponse.json({ error: error.message }, { status: 500 });
+    if (isPgConfigured) {
+      try {
+        const result = await query(
+          `INSERT INTO seller_inquiries (user_id, full_name, business_name, phone, email, city, state, category, product_range, monthly_volume, gstin, fssai_number, notes, status)
+           VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14)
+           RETURNING *`,
+          [
+            newInquiry.user_id, newInquiry.full_name, newInquiry.business_name, newInquiry.phone, newInquiry.email,
+            newInquiry.city, newInquiry.state, newInquiry.category, newInquiry.product_range, newInquiry.monthly_volume,
+            newInquiry.gstin, newInquiry.fssai_number, newInquiry.notes, newInquiry.status
+          ]
+        );
+        insertedInquiry = result.rows[0];
+      } catch (pgErr: any) {
+        console.warn('[SellerInquiry POST] RDS failed, falling back to Supabase:', pgErr.message);
+      }
+    }
+
+    if (!insertedInquiry) {
+      try {
+        const { data, error } = await sb.from('seller_inquiries').insert(newInquiry).select().single();
+        if (error) {
+          if (error.message && error.message.includes('fetch failed')) {
+            console.error('[SellerInquiry POST] Supabase network failure:', error.message);
+            return NextResponse.json(
+              { error: 'Database service is temporarily unreachable. Please try again later.' },
+              { status: 503 }
+            );
+          }
+          return NextResponse.json({ error: error.message }, { status: 500 });
+        }
+        insertedInquiry = data;
+      } catch (sbErr: any) {
+        console.error('[SellerInquiry POST] Supabase network failure:', sbErr.message);
+        return NextResponse.json(
+          { error: 'Database service is temporarily unreachable. Please try again later.' },
+          { status: 503 }
+        );
+      }
     }
 
     if (userId) {
@@ -102,7 +140,7 @@ export async function POST(request: Request) {
     return NextResponse.json({
       success: true,
       message: 'Seller inquiry received successfully. Our onboarding team will contact you within 24-48 hours.',
-      inquiry: data,
+      inquiry: insertedInquiry,
     });
   } catch (err: any) {
     return NextResponse.json({ error: err.message || 'Internal server error' }, { status: 500 });

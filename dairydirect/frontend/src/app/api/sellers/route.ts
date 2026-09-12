@@ -1,10 +1,21 @@
 import { NextResponse } from 'next/server';
 import { getAdminSupabase } from '@/lib/supabase/admin';
+import { getAuthUser } from '@/lib/api/auth-middleware';
 
 export async function POST(request: Request) {
   try {
+    const auth = await getAuthUser(request);
+    if (!auth?.userId) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
     const body = await request.json();
     const { userId, storeName, slug, state, category, description, plan, commissionRate, gstin, pan, bankAccount, ifscCode } = body;
+
+    // A user can only create a store for themselves unless they are an admin
+    if (userId !== auth.userId && !auth.isAdmin) {
+      return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+    }
 
     if (!userId || !storeName) {
       return NextResponse.json({ error: 'User ID and Store Name are required' }, { status: 400 });

@@ -55,6 +55,9 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   try {
     const auth = await getAuthUser(request);
+    if (!auth?.userId) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
     const body = await request.json();
 
     const {
@@ -186,6 +189,11 @@ export async function POST(request: NextRequest) {
 // ─── PUT /api/sellers/products ──────────────────────────────
 export async function PUT(request: NextRequest) {
   try {
+    const auth = await getAuthUser(request);
+    if (!auth?.userId) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
     const body = await request.json();
     const { id, name, category, description, price, originalPrice, costPrice, weight, stock, imageUrl, status } = body;
 
@@ -194,6 +202,12 @@ export async function PUT(request: NextRequest) {
     }
 
     const sb = getAdminSupabase();
+
+    // Verify ownership
+    const { data: existingProduct } = await sb.from('seller_product').select('seller_user_id').eq('id', id).maybeSingle();
+    if (existingProduct?.seller_user_id !== auth.userId && !auth.isAdmin) {
+      return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+    }
 
     const updatePayload: any = { updated_at: new Date().toISOString() };
     if (name !== undefined) updatePayload.name = name;
@@ -228,6 +242,11 @@ export async function PUT(request: NextRequest) {
 // ─── DELETE /api/sellers/products ───────────────────────────
 export async function DELETE(request: NextRequest) {
   try {
+    const auth = await getAuthUser(request);
+    if (!auth?.userId) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
     const { searchParams } = new URL(request.url);
     const id = searchParams.get('id');
 
@@ -236,6 +255,12 @@ export async function DELETE(request: NextRequest) {
     }
 
     const sb = getAdminSupabase();
+
+    // Verify ownership
+    const { data: existingProduct } = await sb.from('seller_product').select('seller_user_id').eq('id', id).maybeSingle();
+    if (existingProduct?.seller_user_id !== auth.userId && !auth.isAdmin) {
+      return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+    }
     const { error } = await sb.from('seller_product').delete().eq('id', id);
 
     if (error) {

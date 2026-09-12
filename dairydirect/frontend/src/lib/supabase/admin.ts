@@ -1,4 +1,5 @@
 import { createClient } from '@supabase/supabase-js';
+import { getSupabaseBrowserClient } from './client';
 
 // Server-side Admin client bypassing RLS with service role key
 let adminClient: ReturnType<typeof createClient> | null = null;
@@ -16,8 +17,6 @@ function sanitizeSupabaseUrl(rawUrl?: string): string {
   return url;
 }
 
-import { getSupabaseBrowserClient } from './client';
-
 export function getAdminSupabase(): any {
   if (typeof window !== 'undefined') {
     return getSupabaseBrowserClient();
@@ -28,6 +27,11 @@ export function getAdminSupabase(): any {
     const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
     const url = sanitizeSupabaseUrl(rawUrl);
 
+    if (url === 'https://placeholder.supabase.co') {
+      console.warn('Supabase env vars missing. Generating temporary client.');
+      return createClient(url, 'placeholder-key', { auth: { persistSession: false } });
+    }
+
     adminClient = createClient(url, serviceRoleKey || 'placeholder-key', {
       auth: {
         autoRefreshToken: false,
@@ -37,6 +41,3 @@ export function getAdminSupabase(): any {
   }
   return adminClient;
 }
-
-export const adminSupabase = typeof window === 'undefined' ? getAdminSupabase() : null;
-

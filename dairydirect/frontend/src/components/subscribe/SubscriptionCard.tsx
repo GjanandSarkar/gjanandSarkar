@@ -25,6 +25,7 @@ export function SubscriptionCard({ subscription, onPauseToggle, onCancel }: Subs
   function formatDeliveryDate(dateStr: string | null): string {
     if (!dateStr) return 'Tomorrow';
     const date = new Date(dateStr);
+    // eslint-disable-next-line react-hooks/purity
     const tomorrow = new Date(Date.now() + 86400000);
     if (date.toDateString() === tomorrow.toDateString()) return 'Tomorrow, 7:00 – 9:00 AM';
     return date.toLocaleDateString('en-IN', { weekday: 'short', month: 'short', day: 'numeric' });
