@@ -37,9 +37,14 @@ export function DealsAndBrands({ products }: DealsAndBrandsProps) {
 
   if (!products || products.length === 0) return null;
 
-  // Deal items
-  const dealProducts = products.slice(0, 4);
-  const discounts = ['40% OFF', '35% OFF', '25% OFF', '30% OFF'];
+  // Deal items (find products where original_price > price)
+  const dealProducts = products.filter(p => {
+    const v = p.product_variants?.[0];
+    return v && v.original_price && v.original_price > v.price;
+  }).slice(0, 4);
+  
+  // If no deals found, just fall back to first 4 products
+  const displayProducts = dealProducts.length > 0 ? dealProducts : products.slice(0, 4);
 
   return (
     <section className="w-full max-w-[1440px] mx-auto px-4 md:px-8 py-6">
@@ -50,7 +55,7 @@ export function DealsAndBrands({ products }: DealsAndBrandsProps) {
           {/* Header & Countdown */}
           <div className="flex flex-wrap items-center justify-between gap-3 pb-4 border-b border-gray-100 mb-5">
             <div className="flex items-center gap-3">
-              <h2 className="text-xl md:text-2xl font-black text-[#0f3e26] tracking-tight">
+               <h2 className="text-xl md:text-2xl font-black text-[#0f3e26] tracking-tight">
                 Deal of the Day
               </h2>
               <div className="flex items-center gap-1.5 bg-emerald-100/80 text-emerald-900 text-xs font-bold px-3 py-1 rounded-full">
@@ -59,18 +64,19 @@ export function DealsAndBrands({ products }: DealsAndBrandsProps) {
               </div>
             </div>
 
-            <Link href="/products" className="text-xs font-bold text-[#c88a23] hover:text-[#0f3e26] flex items-center gap-1">
-              <span>View All</span>
+            <Link href="/offers" className="text-xs font-bold text-[#c88a23] hover:text-[#0f3e26] flex items-center gap-1">
+              <span>View Offers</span>
               <ArrowRight className="w-3.5 h-3.5" />
             </Link>
           </div>
 
           {/* 4 Deal Cards Grid */}
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 md:gap-4">
-            {dealProducts.map((prod, idx) => {
+            {displayProducts.map((prod, idx) => {
               const variant = prod.product_variants?.[0];
               const price = variant?.price ?? 199;
-              const originalPrice = Math.round(price * (1 + (30 + idx * 5) / 100));
+              const originalPrice = variant?.original_price ?? Math.round(price * 1.25);
+              const discountPercent = Math.round(((originalPrice - price) / originalPrice) * 100);
 
               return (
                 <div
@@ -80,7 +86,7 @@ export function DealsAndBrands({ products }: DealsAndBrandsProps) {
                   <div className="relative">
                     {/* Discount Badge */}
                     <span className="absolute top-1 left-1 bg-red-600 text-white text-[9px] font-black px-1.5 py-0.5 rounded shadow-xs z-10">
-                      {discounts[idx % discounts.length]}
+                      {discountPercent}% OFF
                     </span>
 
                     {/* Image */}

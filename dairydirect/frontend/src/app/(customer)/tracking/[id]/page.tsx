@@ -27,10 +27,9 @@ export default function TrackingPage() {
   const addToCartLocal = useStore(state => state.addToCartLocal);
   const user = useStore(state => state.user);
 
-  // Demo Coordinates
+  // Farm Coordinates
   const farmCoords: Coordinates = { lat: 23.0300, lng: 72.5800 }; 
   const customerCoords: Coordinates = { lat: 23.0225, lng: 72.5714 };
-  const [driverCoords, setDriverCoords] = useState<Coordinates>({ lat: 23.0280, lng: 72.5780 });
 
   useEffect(() => {
     getOrderById(id).then(res => {
@@ -38,26 +37,6 @@ export default function TrackingPage() {
       setIsLoading(false);
     });
   }, [id]);
-
-  // Simulate smooth tracking movement only if order is out_for_delivery
-  useEffect(() => {
-    if (order?.status !== 'out_for_delivery') return;
-
-    let lat = driverCoords.lat;
-    let lng = driverCoords.lng;
-    
-    const interval = setInterval(() => {
-      if (Math.abs(lat - customerCoords.lat) > 0.0001 || Math.abs(lng - customerCoords.lng) > 0.0001) {
-        lat += (customerCoords.lat - lat) * 0.1;
-        lng += (customerCoords.lng - lng) * 0.1;
-        setDriverCoords({ lat, lng });
-      } else {
-        clearInterval(interval);
-      }
-    }, 4000);
-
-    return () => clearInterval(interval);
-  }, [order?.status]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleReorder = async () => {
     if (!order || !order.order_items) return;
@@ -122,7 +101,7 @@ export default function TrackingPage() {
         <OrderTrackingMap 
           farmLocation={farmCoords} 
           customerLocation={customerCoords} 
-          driverLocation={order.status === 'out_for_delivery' ? driverCoords : farmCoords} 
+          driverLocation={undefined} 
           height="100%" 
         />
       </div>
@@ -155,28 +134,10 @@ export default function TrackingPage() {
 
         {/* Driver Profile (Only if out for delivery) */}
         {order.status === 'out_for_delivery' && (
-          <div className="flex items-center gap-4 bg-white p-4 rounded-[20px] border border-sand shadow-sm">
-            <div className="relative">
-              <div className="w-12 h-12 rounded-full bg-sand/30 overflow-hidden border-2 border-white shadow-sm">
-                <img src={`https://api.dicebear.com/7.x/notionists/svg?seed=Ramesh`} alt="Driver" className="w-full h-full object-cover" />
-              </div>
-              <div className="absolute -bottom-1 -right-1 w-5 h-5 rounded-full bg-primary flex items-center justify-center border-2 border-white text-white">
-                <Star className="w-2.5 h-2.5 fill-current" />
-              </div>
-            </div>
-            
-            <div className="flex-1">
-              <h3 className="font-bold text-sm text-dark">Ramesh Kumar</h3>
-              <p className="text-muted text-[11px] font-medium">GJ-01-AB-1234 • AC Van</p>
-            </div>
-
-            <div className="flex gap-2">
-              <button className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary transition-transform active:scale-95">
-                <MessageSquare className="w-4 h-4 fill-current opacity-20" />
-              </button>
-              <button className="w-10 h-10 rounded-full bg-primary flex items-center justify-center text-white shadow-lg shadow-primary/30 transition-transform active:scale-95">
-                <Phone className="w-4 h-4 fill-current opacity-20" />
-              </button>
+          <div className="flex items-center justify-center bg-gray-100 p-4 rounded-[20px] border border-gray-200 shadow-inner">
+            <div className="flex items-center gap-2 text-gray-500">
+              <MapPin className="w-5 h-5" />
+              <span className="text-sm font-bold tracking-wide">Live Driver GPS: NOT CONFIGURED</span>
             </div>
           </div>
         )}

@@ -9,6 +9,7 @@ import { getAuthUser } from '@/lib/api/auth-middleware';
 import { invalidateProductsCache } from '@/lib/aws/redis';
 import { isValidUUID } from '@/lib/security/sanitize';
 import { getAdminSupabase } from '@/lib/supabase/admin';
+import { writeAuditLog } from '@/lib/security/audit';
 
 interface Props {
   params: Promise<{ id: string }>;
@@ -154,6 +155,18 @@ export async function PUT(request: NextRequest, { params }: Props) {
 
         await invalidateProductsCache();
         const updatedProduct = await fetchProductDetails(id);
+        
+        if (auth?.userId) {
+          await writeAuditLog({
+            adminId: auth.userId,
+            action: 'product.update' as any,
+            resourceType: 'product',
+            resourceId: id,
+            details: { name, category, is_active },
+            ipAddress: request.headers.get('x-forwarded-for') || ''
+          });
+        }
+        
         return NextResponse.json({ success: true, product: updatedProduct });
       } catch (err: any) {
         console.warn('[Product PUT] RDS failed, fallback to Supabase:', err.message);
@@ -228,6 +241,18 @@ export async function PUT(request: NextRequest, { params }: Props) {
 
     await invalidateProductsCache();
     const updatedProduct = await fetchProductDetails(id);
+    
+    if (auth?.userId) {
+      await writeAuditLog({
+        adminId: auth.userId,
+        action: 'product.update' as any,
+        resourceType: 'product',
+        resourceId: id,
+        details: { name, category, is_active },
+        ipAddress: request.headers.get('x-forwarded-for') || ''
+      });
+    }
+
     return NextResponse.json({ success: true, product: updatedProduct });
   } catch (error: any) {
     console.error('[Product PUT] Error:', error.message);
@@ -259,11 +284,33 @@ export async function DELETE(request: NextRequest, { params }: Props) {
             await client.query('DELETE FROM products WHERE id = $1', [id]);
           });
           await invalidateProductsCache();
+          
+          if (auth?.userId) {
+            await writeAuditLog({
+              adminId: auth.userId,
+              action: 'product.delete' as any,
+              resourceType: 'product',
+              resourceId: id,
+              details: { permanent: true },
+              ipAddress: request.headers.get('x-forwarded-for') || ''
+            });
+          }
+
           return NextResponse.json({ success: true, permanent: true, message: 'Product deleted permanently' });
         } else {
           await query('UPDATE products SET is_active = false, updated_at = now() WHERE id = $1', [id]);
           await query("UPDATE seller_product SET status = 'inactive', updated_at = now() WHERE product_id = $1", [id]).catch(() => {});
           await invalidateProductsCache();
+          if (auth?.userId) {
+            await writeAuditLog({
+              adminId: auth.userId,
+              action: 'product.delete' as any,
+              resourceType: 'product',
+              resourceId: id,
+              details: { permanent: false },
+              ipAddress: request.headers.get('x-forwarded-for') || ''
+            });
+          }
           return NextResponse.json({ success: true, softDeleted: true, message: 'Product archived' });
         }
       } catch (err: any) {
@@ -282,6 +329,18 @@ export async function DELETE(request: NextRequest, { params }: Props) {
       await sb.from('product_variants').delete().eq('product_id', id);
       await sb.from('products').delete().eq('id', id);
       await invalidateProductsCache();
+      
+      if (auth?.userId) {
+        await writeAuditLog({
+          adminId: auth.userId,
+          action: 'product.delete' as any,
+          resourceType: 'product',
+          resourceId: id,
+          details: { permanent: true },
+          ipAddress: request.headers.get('x-forwarded-for') || ''
+        });
+      }
+
       return NextResponse.json({ success: true, permanent: true, message: 'Product deleted permanently' });
     } else {
       await sb.from('products').update({ is_active: false, updated_at: new Date().toISOString() }).eq('id', id);
@@ -291,6 +350,18 @@ export async function DELETE(request: NextRequest, { params }: Props) {
         console.warn('[Product DELETE] seller_product update warning:', spErr?.message || spErr);
       }
       await invalidateProductsCache();
+      
+      if (auth?.userId) {
+        await writeAuditLog({
+          adminId: auth.userId,
+          action: 'product.delete' as any,
+          resourceType: 'product',
+          resourceId: id,
+          details: { permanent: false },
+          ipAddress: request.headers.get('x-forwarded-for') || ''
+        });
+      }
+
       return NextResponse.json({ success: true, softDeleted: true, message: 'Product archived' });
     }
   } catch (error: any) {

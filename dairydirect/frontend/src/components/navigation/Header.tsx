@@ -137,7 +137,7 @@ function HeaderContent() {
       queryParams.set('search', searchTerm.trim());
     }
     const queryStr = queryParams.toString();
-    router.push(`/products${queryStr ? `?${queryStr}` : ''}`);
+    router.push(`/search${queryStr ? `?${queryStr}` : ''}`);
   };
 
   // Find active selected address
@@ -207,6 +207,11 @@ function HeaderContent() {
             <span className="text-[11px] font-semibold mt-0.5 whitespace-nowrap">
               {user?.role === 'seller' ? 'Seller Hub' : user?.role === 'admin' ? 'Admin Panel' : 'Become Seller'}
             </span>
+          </Link>
+
+          <Link href="/offers" className="hidden lg:flex flex-col items-center justify-center text-gray-700 hover:text-[#0f3e26] transition-colors group">
+            <Sparkles className="w-5 h-5 text-gray-600 group-hover:text-[#0f3e26] transition-colors" />
+            <span className="text-[11px] font-semibold mt-0.5 whitespace-nowrap">Offers</span>
           </Link>
 
           {/* ── Delivery Address Selection (ONLY VISIBLE WHEN LOGGED IN) ── */}

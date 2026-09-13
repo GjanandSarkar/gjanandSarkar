@@ -10,6 +10,7 @@ import { query, withTransaction, isPgConfigured } from '@/lib/aws/rds';
 import { getAuthUser, getClientIP } from '@/lib/api/auth-middleware';
 import { isValidUUID } from '@/lib/security/sanitize';
 import { getAdminSupabase } from '@/lib/supabase/admin';
+import { writeAuditLog } from '@/lib/security/audit';
 
 export async function GET(request: NextRequest) {
   try {
@@ -91,7 +92,12 @@ export async function GET(request: NextRequest) {
              LEFT JOIN order_items oi ON oi.order_id = o.id
              LEFT JOIN products prod ON prod.id = oi.product_id
              LEFT JOIN product_variants pv ON pv.id = oi.variant_id
-             WHERE o.id = $1 ${auth.isAdmin ? '' : 'AND o.user_id = $2'}
+             WHERE o.id = $1 
+             ${auth.isAdmin 
+                ? '' 
+                : auth.role === 'seller' 
+                  ? 'AND (o.user_id = $2 OR EXISTS (SELECT 1 FROM order_items oi2 JOIN products p2 ON oi2.product_id = p2.id JOIN sellers s ON p2.seller_id = s.id WHERE oi2.order_id = o.id AND s.user_id = $2))' 
+                  : 'AND o.user_id = $2'}
              GROUP BY o.id, p.name, p.phone, p.email, ua.id, ua.label, ua.address`,
             auth.isAdmin ? [orderId] : [orderId, auth.userId]
           );
@@ -115,14 +121,36 @@ export async function GET(request: NextRequest) {
         `)
         .eq('id', orderId);
 
-      if (!auth.isAdmin) {
+      if (!auth.isAdmin && auth.role !== 'seller') {
         queryBuilder = queryBuilder.eq('user_id', auth.userId);
+      } else if (auth.role === 'seller') {
+        // For seller via Supabase fallback, we do a post-fetch filter
       }
 
       const { data: orderData, error } = await queryBuilder.maybeSingle();
 
       if (error || !orderData) {
         return NextResponse.json({ error: 'Order not found' }, { status: 404 });
+      }
+
+      if (auth.role === 'seller' && orderData.user_id !== auth.userId) {
+        const admin = getAdminSupabase();
+        // Check if seller has items in this order
+        const { data: sData } = await admin.from('sellers').select('id').eq('user_id', auth.userId).single();
+        if (!sData) return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+        
+        let hasMyProduct = false;
+        for (const oi of orderData.order_items || []) {
+           const { data: pData } = await admin.from('products').select('seller_id').eq('id', oi.product_id).single();
+           if (pData && pData.seller_id === sData.id) {
+               hasMyProduct = true;
+               break;
+           }
+        }
+        
+        if (!hasMyProduct) {
+           return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+        }
       }
 
       return NextResponse.json({ order: orderData });
@@ -297,6 +325,14 @@ export async function PUT(request: NextRequest) {
         );
 
         if (updateResult.rows.length > 0) {
+          await writeAuditLog({
+            adminId: auth.userId,
+            action: 'order.update' as any,
+            resourceType: 'order',
+            resourceId: orderId,
+            details: { status, notes },
+            ipAddress: request.headers.get('x-forwarded-for') || ''
+          });
           return NextResponse.json({ success: true, status });
         }
       } catch (err: any) {
@@ -313,6 +349,15 @@ export async function PUT(request: NextRequest) {
     if (error) {
       return NextResponse.json({ error: error.message }, { status: 500 });
     }
+
+    await writeAuditLog({
+      adminId: auth.userId,
+      action: 'order.update' as any,
+      resourceType: 'order',
+      resourceId: orderId,
+      details: { status, notes },
+      ipAddress: request.headers.get('x-forwarded-for') || ''
+    });
 
     return NextResponse.json({ success: true, status });
   } catch (error: any) {

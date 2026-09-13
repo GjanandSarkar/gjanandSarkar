@@ -177,17 +177,32 @@ export async function getSellerDashboard(userId: string): Promise<SellerDashboar
     const res = await fetch(`/api/sellers?userId=${encodeURIComponent(userId)}`);
     if (res.ok) {
       const data = await res.json();
+      
+      // Fetch real analytics
+      let metrics = {
+        grossRevenue: 0,
+        platformCommission: 0,
+        netPayout: 0,
+        totalOrders: 0,
+        totalProducts: 0,
+        pendingDeliveries: 0,
+      };
+      
+      try {
+        // Need to pass auth headers in SSR? It's client-side fetching mostly, so cookie is sent.
+        const analyticsRes = await fetch(`/api/sellers/analytics`);
+        if (analyticsRes.ok) {
+           const analyticsData = await analyticsRes.json();
+           if (analyticsData.metrics) {
+               metrics = analyticsData.metrics;
+           }
+        }
+      } catch (e) {}
+
       return {
         store: data.store || null,
         inquiry: userInquiry,
-        metrics: {
-          grossRevenue: data.metrics?.grossRevenue ?? 0,
-          platformCommission: data.metrics?.platformCommission ?? 0,
-          netPayout: data.metrics?.netPayout ?? 0,
-          totalOrders: data.metrics?.totalOrders ?? 0,
-          totalProducts: data.metrics?.totalProducts ?? 0,
-          pendingDeliveries: data.metrics?.pendingDeliveries ?? 0,
-        },
+        metrics,
         recentOrders: Array.isArray(data.recentOrders) ? data.recentOrders : [],
         payoutHistory: Array.isArray(data.payoutHistory) ? data.payoutHistory : [],
       };

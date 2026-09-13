@@ -39,13 +39,14 @@ export type NewVariantInput = {
 };
 
 export async function getProducts(
-  options: { category?: string; activeOnly?: boolean; sellerId?: string } = {}
+  options: { category?: string; activeOnly?: boolean; sellerId?: string; q?: string } = {}
 ): Promise<ProductWithVariants[]> {
   try {
     const params = new URLSearchParams();
     if (options.category) params.set('category', options.category);
     if (options.activeOnly !== undefined) params.set('activeOnly', String(options.activeOnly));
     if (options.sellerId) params.set('sellerId', options.sellerId);
+    if (options.q) params.set('q', options.q);
 
     const res = await fetch(`/api/products?${params.toString()}`, { cache: 'no-store' });
     if (res.ok) {
@@ -65,7 +66,7 @@ export async function getProducts(
 }
 
 export async function getProductsServer(
-  options: { category?: string; activeOnly?: boolean } = {}
+  options: { category?: string; activeOnly?: boolean; q?: string; sellerId?: string } = {}
 ): Promise<ProductWithVariants[]> {
   try {
     const admin = getAdminSupabase();
@@ -85,6 +86,14 @@ export async function getProductsServer(
 
     if (options.activeOnly !== false) {
       query = query.eq('is_active', true);
+    }
+
+    if (options.q) {
+      query = query.or(`name.ilike.%${options.q}%,description.ilike.%${options.q}%`);
+    }
+
+    if (options.sellerId) {
+      query = query.or(`seller_id.eq.${options.sellerId},created_by.eq.${options.sellerId}`);
     }
 
     const { data, error } = await query;

@@ -7,6 +7,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { query, withTransaction, isPgConfigured } from '@/lib/aws/rds';
 import { getAuthUser } from '@/lib/api/auth-middleware';
+import { writeAuditLog } from '@/lib/security/audit';
 import { getCachedProducts, cacheProducts, invalidateProductsCache } from '@/lib/aws/redis';
 
 import { getAdminSupabase } from '@/lib/supabase/admin';
@@ -19,11 +20,12 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url);
     const category = searchParams.get('category');
     const sellerId = searchParams.get('sellerId');
+    const q = searchParams.get('q');
     const activeOnly = searchParams.get('activeOnly') !== 'false';
 
     // Try cache first (60s TTL) - bypass cache for seller dashboard specific queries
-    const cacheKey = sellerId ? `seller_${sellerId}_${activeOnly}` : `${category || 'all'}_${activeOnly}`;
-    if (!sellerId) {
+    const cacheKey = sellerId || q ? `seller_${sellerId}_q_${q}_${activeOnly}` : `${category || 'all'}_${activeOnly}`;
+    if (!sellerId && !q) {
       const cached = await getCachedProducts(cacheKey);
       if (cached) {
         return NextResponse.json(
@@ -52,6 +54,12 @@ export async function GET(request: NextRequest) {
       const cleanCat = category.replace(/-/g, ' ').trim();
       conditions.push(`p.category ILIKE $${paramIdx++}`);
       params.push(`%${cleanCat}%`);
+    }
+
+    if (q) {
+      conditions.push(`(p.name ILIKE $${paramIdx} OR p.description ILIKE $${paramIdx})`);
+      params.push(`%${q}%`);
+      paramIdx++;
     }
 
     const whereClause = conditions.length > 0 ? `WHERE ${conditions.join(' AND ')}` : '';
@@ -114,6 +122,9 @@ export async function GET(request: NextRequest) {
           const cleanCat = category.replace(/-/g, ' ').trim();
           sbQuery = sbQuery.ilike('category', `%${cleanCat}%`);
         }
+        if (q) {
+          sbQuery = sbQuery.or(`name.ilike.%${q}%,description.ilike.%${q}%`);
+        }
         const { data, error } = await sbQuery;
         if (!error && data) {
           products = data;
@@ -124,7 +135,7 @@ export async function GET(request: NextRequest) {
     }
 
     // Cache products asynchronously (60s TTL)
-    if (products.length > 0 && !sellerId) {
+    if (products.length > 0 && !sellerId && !q) {
       cacheProducts(cacheKey, products, 60).catch(() => {});
     }
 
@@ -181,6 +192,18 @@ export async function POST(request: NextRequest) {
         });
 
         await invalidateProductsCache();
+
+        if (auth?.userId) {
+          await writeAuditLog({
+            adminId: auth.userId,
+            action: 'product.create' as any,
+            resourceType: 'product',
+            resourceId: newProduct,
+            details: { name, category, sellerId },
+            ipAddress: request.headers.get('x-forwarded-for') || ''
+          });
+        }
+
         return NextResponse.json({ success: true, productId: newProduct }, { status: 201 });
       } catch (err: any) {
         console.warn('[Products POST] RDS failed, fallback to Supabase:', err.message);
@@ -300,8 +323,22 @@ export async function POST(request: NextRequest) {
       }
     }
 
+    const pData = prodData;
+
     await invalidateProductsCache();
-    return NextResponse.json({ success: true, productId: prodData.id }, { status: 201 });
+
+    if (auth?.userId) {
+      await writeAuditLog({
+        adminId: auth.userId,
+        action: 'product.create' as any,
+        resourceType: 'product',
+        resourceId: pData.id,
+        details: pData,
+        ipAddress: request.headers.get('x-forwarded-for') || ''
+      });
+    }
+
+    return NextResponse.json({ success: true, productId: pData.id }, { status: 201 });
   } catch (error: any) {
     console.error('[Products POST] Error:', error.message);
     return NextResponse.json({ error: error.message || 'Failed to create product' }, { status: 500 });

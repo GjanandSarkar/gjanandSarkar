@@ -20,6 +20,8 @@ const navItems = [
   { href: '/admin/customers', icon: Users, label: 'Customers' },
   { href: '/admin/delivery', icon: Truck, label: 'Deliveries' },
   { href: '/admin/analytics', icon: BarChart3, label: 'Analytics' },
+  { href: '/admin/coupons', icon: Package, label: 'Coupons' },
+  { href: '/admin/audit-log', icon: ShieldCheck, label: 'Audit Log' },
   { href: '/home', icon: Leaf, label: 'Visit Storefront' },
 ];
 

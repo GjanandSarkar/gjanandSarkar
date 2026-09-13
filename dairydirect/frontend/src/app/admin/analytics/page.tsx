@@ -28,6 +28,43 @@ import {
 } from 'lucide-react';
 import { isToday, isThisWeek, isThisMonth, format, subDays } from 'date-fns';
 
+// Stat Card Component
+const StatCard = ({
+  title,
+  value,
+  growth,
+  subText,
+  icon,
+  iconBg,
+}: {
+  title: string;
+  value: string | number;
+  growth?: string;
+  subText?: string;
+  icon?: React.ReactNode;
+  iconBg?: string;
+}) => (
+  <div className="bg-surface-container-lowest border border-sand/30 rounded-2xl p-5 flex items-center justify-between shadow-2xs">
+    <div className="flex flex-col gap-1">
+      <span className="text-muted text-[11px] font-bold uppercase tracking-wider">{title}</span>
+      <span className="text-on-surface text-2xl font-extrabold">{value}</span>
+      {growth && (
+        <span className="text-emerald-600 text-xs font-bold flex items-center gap-1 mt-0.5">
+          <ArrowUpRight className="w-3.5 h-3.5" />
+          {growth}
+        </span>
+      )}
+      {subText && <span className="text-muted text-[11px] font-medium mt-0.5">{subText}</span>}
+    </div>
+
+    {icon && (
+      <div className={`w-10 h-10 rounded-2xl flex items-center justify-center shrink-0 ${iconBg || 'bg-[#e6f2ec] text-[#0c3c26]'}`}>
+        {icon}
+      </div>
+    )}
+  </div>
+);
+
 export default function AdminAnalyticsPage() {
   const { t } = useTranslation();
 
@@ -173,42 +210,7 @@ export default function AdminAnalyticsPage() {
     );
   }
 
-  // Stat Card Component
-  const StatCard = ({
-    title,
-    value,
-    growth,
-    subText,
-    icon,
-    iconBg,
-  }: {
-    title: string;
-    value: string | number;
-    growth?: string;
-    subText?: string;
-    icon?: React.ReactNode;
-    iconBg?: string;
-  }) => (
-    <div className="bg-surface-container-lowest border border-sand/30 rounded-2xl p-5 flex items-center justify-between shadow-2xs">
-      <div className="flex flex-col gap-1">
-        <span className="text-muted text-[11px] font-bold uppercase tracking-wider">{title}</span>
-        <span className="text-on-surface text-2xl font-extrabold">{value}</span>
-        {growth && (
-          <span className="text-emerald-600 text-xs font-bold flex items-center gap-1 mt-0.5">
-            <ArrowUpRight className="w-3.5 h-3.5" />
-            {growth}
-          </span>
-        )}
-        {subText && <span className="text-muted text-[11px] font-medium mt-0.5">{subText}</span>}
-      </div>
 
-      {icon && (
-        <div className={`w-10 h-10 rounded-2xl flex items-center justify-center shrink-0 ${iconBg || 'bg-[#e6f2ec] text-[#0c3c26]'}`}>
-          {icon}
-        </div>
-      )}
-    </div>
-  );
 
   return (
     <div className="flex flex-col min-h-screen bg-surface-container-low pb-20 font-sans">
