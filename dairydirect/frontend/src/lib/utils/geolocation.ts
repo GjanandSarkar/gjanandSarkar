@@ -11,7 +11,32 @@ export interface LocationResult {
   city?: string;
 }
 
-export async function reverseGeocodeCoords(lat: number, lng: number): Promise<string> {
+export interface DetailedAddressLocation {
+  area: string;
+  street: string;
+  city: string;
+  state: string;
+  pincode: string;
+  country: string;
+  latitude: number;
+  longitude: number;
+  displayName: string;
+}
+
+const geocodeCache = new Map<string, { data: DetailedAddressLocation; timestamp: number }>();
+const CACHE_TTL_MS = 1000 * 60 * 30; // 30 minutes
+
+/**
+ * Reverse geocodes coordinates into structured address fields.
+ * CRITICAL: Flat/house/building numbers are NEVER populated here and must remain manual.
+ */
+export async function reverseGeocodeDetailed(lat: number, lng: number): Promise<DetailedAddressLocation | null> {
+  const cacheKey = `${lat.toFixed(4)},${lng.toFixed(4)}`;
+  const cached = geocodeCache.get(cacheKey);
+  if (cached && Date.now() - cached.timestamp < CACHE_TTL_MS) {
+    return cached.data;
+  }
+
   try {
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), 6000);
@@ -22,6 +47,7 @@ export async function reverseGeocodeCoords(lat: number, lng: number): Promise<st
         signal: controller.signal,
         headers: {
           'Accept-Language': 'en',
+          'User-Agent': 'DairyDirect-Ecommerce-App/1.0',
         },
       }
     );
@@ -29,35 +55,98 @@ export async function reverseGeocodeCoords(lat: number, lng: number): Promise<st
 
     if (res.ok) {
       const data = await res.json();
-      if (data && data.display_name) {
-        return data.display_name;
+      if (data) {
+        const addr = data.address || {};
+
+        // Extract area (suburb, neighbourhood, residential, etc.)
+        const area = (
+          addr.suburb ||
+          addr.neighbourhood ||
+          addr.residential ||
+          addr.subdistrict ||
+          addr.county ||
+          ''
+        ).trim();
+
+        // Extract street/road
+        const street = (
+          addr.road ||
+          addr.street ||
+          addr.pedestrian ||
+          addr.footway ||
+          addr.path ||
+          ''
+        ).trim();
+
+        // Extract town/city
+        const city = (
+          addr.city ||
+          addr.town ||
+          addr.village ||
+          addr.municipality ||
+          addr.city_district ||
+          ''
+        ).trim();
+
+        // Extract state
+        const state = (addr.state || '').trim();
+
+        // Extract pincode (clean non-digits)
+        const rawPostcode = (addr.postcode || '').trim();
+        const pincode = rawPostcode.replace(/\D/g, '').slice(0, 6);
+
+        // Extract country
+        const country = (addr.country || 'India').trim();
+
+        const result: DetailedAddressLocation = {
+          area,
+          street,
+          city,
+          state,
+          pincode,
+          country: country || 'India',
+          latitude: lat,
+          longitude: lng,
+          displayName: data.display_name || '',
+        };
+
+        geocodeCache.set(cacheKey, { data: result, timestamp: Date.now() });
+        return result;
       }
     }
   } catch (err) {
-    console.warn('Nominatim reverse geocode failed, falling back:', err);
+    console.warn('Detailed reverse geocoding failed:', err);
   }
 
+  return null;
+}
+
+export async function reverseGeocodeCoords(lat: number, lng: number): Promise<string> {
+  const detailed = await reverseGeocodeDetailed(lat, lng);
+  if (detailed && detailed.displayName) {
+    return detailed.displayName;
+  }
   return `${lat.toFixed(4)}, ${lng.toFixed(4)}`;
 }
 
 export async function fetchIPLocation(): Promise<LocationResult | null> {
-  // 1. Try ipapi.co
+  // 1. Try ipwho.is (fast, unmetered, high quality)
   try {
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), 4000);
 
-    const res = await fetch('https://ipapi.co/json/', { signal: controller.signal });
+    const res = await fetch('https://ipwho.is/', { signal: controller.signal });
     clearTimeout(timeoutId);
 
     if (res.ok) {
       const data = await res.json();
-      if (typeof data.latitude === 'number' && typeof data.longitude === 'number') {
+      if (data && data.success !== false && typeof data.latitude === 'number' && typeof data.longitude === 'number') {
         const address = await reverseGeocodeCoords(data.latitude, data.longitude);
         return {
           lat: data.latitude,
           lng: data.longitude,
           city: data.city || data.region,
-          address: address || `${data.city || ''}, ${data.region || ''}, ${data.country_name || 'India'}`,
+          address: address || `${data.city || ''}, ${data.region || ''}, ${data.country || 'India'}`,
           source: 'ip',
         };
       }
@@ -88,6 +177,127 @@ export async function fetchIPLocation(): Promise<LocationResult | null> {
       }
     }
   } catch (e) {
+    // ignore
+  }
+
+  // 3. Try ipapi.co
+  try {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 3000);
+
+    const res = await fetch('https://ipapi.co/json/', { signal: controller.signal });
+    clearTimeout(timeoutId);
+
+    if (res.ok) {
+      const data = await res.json();
+      if (typeof data.latitude === 'number' && typeof data.longitude === 'number') {
+        const address = await reverseGeocodeCoords(data.latitude, data.longitude);
+        return {
+          lat: data.latitude,
+          lng: data.longitude,
+          city: data.city || data.region,
+          address: address || `${data.city || ''}, ${data.region || ''}, ${data.country_name || 'India'}`,
+          source: 'ip',
+        };
+      }
+    }
+  } catch (e) {
+    // ignore
+  }
+
+  return null;
+}
+
+/**
+ * Fetches structured address details via IP Geolocation.
+ * Used as automatic fallback whenever device GPS permission is denied or unavailable.
+ */
+export async function fetchDetailedIPLocation(): Promise<{ location: DetailedAddressLocation; source: 'ip' } | null> {
+  // 1. Try ipwho.is
+  try {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 4000);
+    const res = await fetch('https://ipwho.is/', { signal: controller.signal });
+    clearTimeout(timeoutId);
+
+    if (res.ok) {
+      const data = await res.json();
+      if (data && data.success !== false && typeof data.latitude === 'number' && typeof data.longitude === 'number') {
+        const detailed = await reverseGeocodeDetailed(data.latitude, data.longitude);
+        if (detailed) {
+          return {
+            location: {
+              ...detailed,
+              city: detailed.city || data.city || '',
+              state: detailed.state || data.region || '',
+              pincode: detailed.pincode || (data.postal ? String(data.postal).replace(/\D/g, '').slice(0, 6) : ''),
+              country: detailed.country || data.country || 'India',
+            },
+            source: 'ip',
+          };
+        }
+
+        return {
+          location: {
+            area: '',
+            street: '',
+            city: data.city || '',
+            state: data.region || '',
+            pincode: data.postal ? String(data.postal).replace(/\D/g, '').slice(0, 6) : '',
+            country: data.country || 'India',
+            latitude: data.latitude,
+            longitude: data.longitude,
+            displayName: `${data.city || ''}, ${data.region || ''}, ${data.country || 'India'}`,
+          },
+          source: 'ip',
+        };
+      }
+    }
+  } catch (err) {
+    // fallback
+  }
+
+  // 2. Try freeipapi.com
+  try {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 4000);
+    const res = await fetch('https://freeipapi.com/api/json', { signal: controller.signal });
+    clearTimeout(timeoutId);
+
+    if (res.ok) {
+      const data = await res.json();
+      if (data && typeof data.latitude === 'number' && typeof data.longitude === 'number') {
+        const detailed = await reverseGeocodeDetailed(data.latitude, data.longitude);
+        if (detailed) {
+          return {
+            location: {
+              ...detailed,
+              city: detailed.city || data.cityName || '',
+              state: detailed.state || data.regionName || '',
+              pincode: detailed.pincode || (data.zipCode ? String(data.zipCode).replace(/\D/g, '').slice(0, 6) : ''),
+              country: detailed.country || data.countryName || 'India',
+            },
+            source: 'ip',
+          };
+        }
+
+        return {
+          location: {
+            area: '',
+            street: '',
+            city: data.cityName || '',
+            state: data.regionName || '',
+            pincode: data.zipCode ? String(data.zipCode).replace(/\D/g, '').slice(0, 6) : '',
+            country: data.countryName || 'India',
+            latitude: data.latitude,
+            longitude: data.longitude,
+            displayName: `${data.cityName || ''}, ${data.regionName || ''}, ${data.countryName || 'India'}`,
+          },
+          source: 'ip',
+        };
+      }
+    }
+  } catch (err) {
     // ignore
   }
 

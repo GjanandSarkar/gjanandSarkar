@@ -1,11 +1,18 @@
 import type { NextConfig } from "next";
 import { withSentryConfig } from "@sentry/nextjs";
+import path from "path";
 
 const nextConfig: NextConfig = {
   /* Production optimizations */
   reactStrictMode: true,
   poweredByHeader: false,
   compress: true,
+
+  // Silence the multiple lockfiles warning
+  outputFileTracingRoot: path.join(__dirname, '../..'),
+
+  // Keep heavy server-only packages out of the edge bundle for faster cold starts
+  serverExternalPackages: ['pg', 'ioredis'],
 
   allowedDevOrigins: [
     "scary-porcupine-headsman.ngrok-free.dev",
@@ -51,7 +58,7 @@ const nextConfig: NextConfig = {
     imageSizes: [16, 32, 48, 64, 96, 128, 256, 384],
   },
 
-  /* Security headers */
+  /* Security + caching headers */
   async headers() {
     return [
       {
@@ -62,6 +69,20 @@ const nextConfig: NextConfig = {
           { key: 'X-XSS-Protection', value: '1; mode=block' },
           { key: 'Referrer-Policy', value: 'strict-origin-when-cross-origin' },
           { key: 'Permissions-Policy', value: 'camera=(), microphone=(), geolocation=()' },
+        ],
+      },
+      {
+        // Cache public product API responses for 60s at CDN/browser level
+        source: '/api/products',
+        headers: [
+          { key: 'Cache-Control', value: 'public, s-maxage=60, stale-while-revalidate=300' },
+        ],
+      },
+      {
+        // Cache static assets aggressively (images, fonts, js chunks)
+        source: '/_next/static/:path*',
+        headers: [
+          { key: 'Cache-Control', value: 'public, max-age=31536000, immutable' },
         ],
       },
     ];

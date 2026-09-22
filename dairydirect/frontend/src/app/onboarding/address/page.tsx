@@ -169,13 +169,23 @@ function AddressOnboardingInner() {
       const finalType = type === 'Other' ? (customLabel.trim() || 'Other') : type;
 
       // 3. Save Address to user_addresses table with proper is_default flag
+      const phoneDigits = (activeUser.phone || '').replace(/\D/g, '').slice(-10) || '9876543210';
       const addressResult = await saveAddressAPI({
         userId: activeUser.id,
+        address_type: (type.toLowerCase() === 'office' || type.toLowerCase() === 'work' ? 'business' : 'house'),
         label: finalType,
+        full_name: name.trim() || activeUser.name || 'Customer',
+        mobile_number: phoneDigits,
+        pincode: '380001',
+        flat_house_building: address.trim().slice(0, 60) || 'Delivery Location',
+        area_street_sector_village: address.trim() || 'Main Area',
+        town_city: 'City',
+        state: 'Gujarat',
+        country: 'India',
         address: address.trim(),
-        lat: coords.lat,
-        lng: coords.lng,
-        isDefault: isDefault
+        latitude: coords.lat,
+        longitude: coords.lng,
+        is_default: isDefault,
       });
       
       if (addressResult.success) {

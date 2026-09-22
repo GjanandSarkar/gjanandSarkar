@@ -30,7 +30,7 @@ export async function GET(request: NextRequest) {
       if (cached) {
         return NextResponse.json(
           { products: cached },
-          { headers: { 'X-Cache': 'HIT', 'Cache-Control': 'no-store' } }
+          { headers: { 'X-Cache': 'HIT', 'Cache-Control': 'public, s-maxage=60, stale-while-revalidate=300' } }
         );
       }
     }
@@ -68,9 +68,6 @@ export async function GET(request: NextRequest) {
 
     if (isPgConfigured) {
       try {
-        await query('ALTER TABLE products ADD COLUMN IF NOT EXISTS seller_id TEXT;').catch(() => {});
-        await query('ALTER TABLE products ADD COLUMN IF NOT EXISTS created_by TEXT;').catch(() => {});
-
         const result = await query(
           `SELECT 
              p.id, p.name, p.category, p.description, p.image_url, p.s3_image_key,
@@ -141,7 +138,7 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json(
       { products },
-      { headers: { 'X-Cache': 'MISS', 'Cache-Control': 'no-store' } }
+      { headers: { 'X-Cache': 'MISS', 'Cache-Control': 'public, s-maxage=60, stale-while-revalidate=300' } }
     );
   } catch (error: any) {
     console.error('[Products GET] Error:', error.message);

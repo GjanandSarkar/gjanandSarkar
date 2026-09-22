@@ -48,7 +48,7 @@ export async function getProducts(
     if (options.sellerId) params.set('sellerId', options.sellerId);
     if (options.q) params.set('q', options.q);
 
-    const res = await fetch(`/api/products?${params.toString()}`, { cache: 'no-store' });
+    const res = await fetch(`/api/products?${params.toString()}`, { next: { revalidate: 60 } });
     if (res.ok) {
       const data = await res.json();
       return data.products ?? [];

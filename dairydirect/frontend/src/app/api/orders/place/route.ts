@@ -4,7 +4,7 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server';
-import { withTransaction, isPgConfigured } from '@/lib/aws/rds';
+import { query, withTransaction, isPgConfigured } from '@/lib/aws/rds';
 import { calculateOrderPricing } from '@/lib/pricing';
 import { getAuthUser, getClientIP } from '@/lib/api/auth-middleware';
 import { checkRateLimit, invalidateProductsCache, invalidateUserProfileCache } from '@/lib/aws/redis';
@@ -120,6 +120,72 @@ export async function POST(request: NextRequest) {
     let placedOrderId: string | null = null;
     let placedOrderNumber: string | null = null;
 
+    // Fetch delivery address snapshot so past order record is permanently preserved
+    let shippingAddressSnapshot: string | null = null;
+    if (addressId) {
+      if (isPgConfigured) {
+        try {
+          const addrRes = await query('SELECT * FROM user_addresses WHERE id = $1', [addressId]);
+          if (addrRes.rows.length > 0) {
+            const a = addrRes.rows[0];
+            shippingAddressSnapshot = JSON.stringify({
+              id: a.id,
+              full_name: a.full_name,
+              mobile_number: a.mobile_number,
+              address_type: a.address_type,
+              flat_house_building: a.flat_house_building || a.building,
+              area_street_sector_village: a.area_street_sector_village || a.street,
+              landmark: a.landmark,
+              town_city: a.town_city || a.city,
+              state: a.state,
+              pincode: a.pincode,
+              country: a.country || 'India',
+              saturday_delivery: a.saturday_delivery,
+              sunday_delivery: a.sunday_delivery,
+              delivery_instructions: a.delivery_instructions || a.instructions,
+              formatted_address: a.address || [
+                a.flat_house_building || a.building,
+                a.area_street_sector_village || a.street,
+                a.landmark ? `Near ${a.landmark}` : null,
+                `${a.town_city || a.city}, ${a.state} - ${a.pincode}`,
+                a.country || 'India'
+              ].filter(Boolean).join(', ')
+            });
+          }
+        } catch (e) {}
+      }
+
+      if (!shippingAddressSnapshot) {
+        const sb = getAdminSupabase();
+        const { data: a } = await sb.from('user_addresses').select('*').eq('id', addressId).maybeSingle();
+        if (a) {
+          shippingAddressSnapshot = JSON.stringify({
+            id: a.id,
+            full_name: a.full_name,
+            mobile_number: a.mobile_number,
+            address_type: a.address_type,
+            flat_house_building: a.flat_house_building || a.building,
+            area_street_sector_village: a.area_street_sector_village || a.street,
+            landmark: a.landmark,
+            town_city: a.town_city || a.city,
+            state: a.state,
+            pincode: a.pincode,
+            country: a.country || 'India',
+            saturday_delivery: a.saturday_delivery,
+            sunday_delivery: a.sunday_delivery,
+            delivery_instructions: a.delivery_instructions || a.instructions,
+            formatted_address: a.address || [
+              a.flat_house_building || a.building,
+              a.area_street_sector_village || a.street,
+              a.landmark ? `Near ${a.landmark}` : null,
+              `${a.town_city || a.city}, ${a.state} - ${a.pincode}`,
+              a.country || 'India'
+            ].filter(Boolean).join(', ')
+          });
+        }
+      }
+    }
+
     // ─── 1. Attempt via AWS RDS PostgreSQL Transaction ───
     if (isPgConfigured) {
       try {
@@ -132,18 +198,19 @@ export async function POST(request: NextRequest) {
             );
           }
 
-          // Create order record with razorpay IDs
+          // Create order record with razorpay IDs and shipping_address snapshot
           const orderResult = await client.query<{ id: string; order_number?: string }>(
             `INSERT INTO orders (
-               user_id, address_id, status, subtotal, delivery_fee, discount_amount,
+               user_id, address_id, shipping_address, status, subtotal, delivery_fee, discount_amount,
                total_amount, payment_method, payment_status, coupon_code, delivery_slot,
                delivery_date, loyalty_earned,
                razorpay_order_id, razorpay_payment_id, razorpay_signature
-             ) VALUES ($1, $2, 'confirmed', $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15)
+             ) VALUES ($1, $2, $3, 'confirmed', $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16)
              RETURNING id, order_number`,
             [
               auth.userId,
               addressId,
+              shippingAddressSnapshot,
               pricing.subtotal,
               pricing.deliveryFee,
               pricing.discount,
@@ -216,12 +283,13 @@ export async function POST(request: NextRequest) {
     if (!placedOrderId) {
       const sb = getAdminSupabase();
 
-      // Insert Order with razorpay IDs
+      // Insert Order with razorpay IDs and shipping_address snapshot
       const { data: orderDataRes, error: orderErr } = await sb
         .from('orders')
         .insert({
           user_id: auth.userId,
           address_id: addressId,
+          shipping_address: shippingAddressSnapshot,
           status: 'confirmed',
           subtotal: pricing.subtotal,
           delivery_fee: pricing.deliveryFee,

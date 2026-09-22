@@ -229,7 +229,8 @@ export const useStore = create<AppState>()(
         user: state.user,
         sellerStore: state.sellerStore,
         language: state.language,
-        translationsCache: state.translationsCache,
+        // NOTE: translationsCache is intentionally NOT persisted — it's large and
+        // re-fetched idly per session. Persisting it caused slow store hydration.
         cart: state.cart,
         wishlist: state.wishlist,
       }),

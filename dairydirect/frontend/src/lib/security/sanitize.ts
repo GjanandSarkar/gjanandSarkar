@@ -47,11 +47,50 @@ export const NameSchema = z
   .max(100, 'Name too long')
   .regex(/^[a-zA-Z\s\u0900-\u097F]+$/, 'Name can only contain letters');
 
+export const AddressTypeSchema = z.enum(['house', 'apartment', 'business', 'other']);
+
 export const AddressSchema = z.object({
-  label: z.string().trim().min(1).max(50),
-  address: z.string().trim().min(5).max(500),
-  lat: z.number().min(-90).max(90).optional(),
-  lng: z.number().min(-180).max(180).optional(),
+  address_type: AddressTypeSchema.default('house'),
+  country: z.string().trim().min(1, 'Country is required').default('India'),
+  full_name: z.string().trim().min(2, 'Full name must be at least 2 characters').max(100, 'Full name is too long'),
+  mobile_number: z
+    .string()
+    .trim()
+    .regex(/^(\+91[\-\s]?)?[6-9]\d{9}$/, 'Please enter a valid 10-digit Indian mobile number'),
+  pincode: z
+    .string()
+    .trim()
+    .regex(/^\d{6}$/, 'Pincode must be exactly 6 digits'),
+  flat_house_building: z
+    .string()
+    .trim()
+    .min(1, 'Flat, house no., or building is required')
+    .max(200, 'Building info is too long'),
+  area_street_sector_village: z
+    .string()
+    .trim()
+    .min(1, 'Area, street, sector, or village is required')
+    .max(300, 'Area/street info is too long'),
+  landmark: z.string().trim().max(200, 'Landmark is too long').optional().nullable(),
+  town_city: z.string().trim().min(1, 'Town/City is required').max(100, 'Town/City is too long'),
+  state: z.string().trim().min(1, 'State is required').max(100, 'State is too long'),
+  saturday_delivery: z.boolean().default(true),
+  sunday_delivery: z.boolean().default(true),
+  delivery_instructions: z.string().trim().max(500, 'Instructions too long (max 500 characters)').optional().nullable(),
+  is_default: z.boolean().default(false),
+  latitude: z.number().min(-90).max(90).optional().nullable(),
+  longitude: z.number().min(-180).max(180).optional().nullable(),
+
+  // Legacy/alias fields for backward compatibility
+  label: z.string().trim().max(50).optional(),
+  address: z.string().trim().max(500).optional(),
+  building: z.string().trim().max(200).optional().nullable(),
+  street: z.string().trim().max(300).optional().nullable(),
+  city: z.string().trim().max(100).optional().nullable(),
+  instructions: z.string().trim().max(500).optional().nullable(),
+  photo_url: z.string().trim().max(500).optional().nullable(),
+  lat: z.number().min(-90).max(90).optional().nullable(),
+  lng: z.number().min(-180).max(180).optional().nullable(),
   isDefault: z.boolean().optional(),
 });
 

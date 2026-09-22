@@ -72,7 +72,8 @@ export default function CheckoutScreen() {
       ]).then(([addrs, prods]) => {
         setAddresses(addrs);
         if (addrs.length > 0 && !checkoutAddressId) {
-          setCheckoutAddressId(addrs[0].id);
+          const defaultAddr = addrs.find((a) => a.is_default) || addrs[0];
+          setCheckoutAddressId(defaultAddr.id);
         }
         setProducts(prods);
       });
@@ -300,6 +301,24 @@ export default function CheckoutScreen() {
             slots={slots}
             selectedSlot={selectedSlot}
             onSelectSlot={setSelectedSlot}
+            onAddressCreated={(newAddr) => {
+              setAddresses((prev) => [
+                newAddr,
+                ...prev.map((a) => (newAddr.is_default ? { ...a, is_default: false } : a)),
+              ]);
+              setCheckoutAddressId(newAddr.id);
+            }}
+            onAddressUpdated={(updatedAddr) => {
+              setAddresses((prev) =>
+                prev.map((a) =>
+                  a.id === updatedAddr.id
+                    ? updatedAddr
+                    : updatedAddr.is_default
+                    ? { ...a, is_default: false }
+                    : a
+                )
+              );
+            }}
           />
 
           <OrderReview items={cartItemsData} />

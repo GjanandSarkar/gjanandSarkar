@@ -40,25 +40,44 @@ CREATE INDEX IF NOT EXISTS idx_profiles_referral_code ON profiles(referral_code)
 
 -- ─── 2. User Addresses ──────────────────────────────────────────────────────
 CREATE TABLE IF NOT EXISTS user_addresses (
-  id          UUID        PRIMARY KEY DEFAULT gen_random_uuid(),
-  user_id     UUID        NOT NULL REFERENCES profiles(id) ON DELETE CASCADE,
-  label       TEXT        NOT NULL DEFAULT 'Home',
-  address     TEXT        NOT NULL,
-  apartment   TEXT,
-  pincode     TEXT,
-  city        TEXT        DEFAULT 'Palanpur',
-  state       TEXT        DEFAULT 'Gujarat',
-  lat         DOUBLE PRECISION,
-  lng         DOUBLE PRECISION,
-  is_default  BOOLEAN     NOT NULL DEFAULT false,
-  is_deleted  BOOLEAN     NOT NULL DEFAULT false,
-  created_at  TIMESTAMPTZ NOT NULL DEFAULT now(),
-  updated_at  TIMESTAMPTZ NOT NULL DEFAULT now()
+  id                          UUID             PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id                     UUID             NOT NULL REFERENCES profiles(id) ON DELETE CASCADE,
+  address_type                TEXT             NOT NULL DEFAULT 'house' CHECK (address_type IN ('house', 'apartment', 'business', 'other')),
+  country                     TEXT             NOT NULL DEFAULT 'India',
+  full_name                   TEXT             NOT NULL DEFAULT '',
+  mobile_number               TEXT             NOT NULL DEFAULT '',
+  flat_house_building         TEXT             NOT NULL DEFAULT '',
+  area_street_sector_village  TEXT             NOT NULL DEFAULT '',
+  landmark                    TEXT,
+  town_city                   TEXT             NOT NULL DEFAULT '',
+  state                       TEXT             NOT NULL DEFAULT 'Gujarat',
+  pincode                     TEXT             NOT NULL DEFAULT '',
+  saturday_delivery           BOOLEAN          NOT NULL DEFAULT true,
+  sunday_delivery             BOOLEAN          NOT NULL DEFAULT true,
+  delivery_instructions       TEXT,
+  latitude                    DECIMAL,
+  longitude                   DECIMAL,
+  is_default                  BOOLEAN          NOT NULL DEFAULT false,
+  is_deleted                  BOOLEAN          NOT NULL DEFAULT false,
+  created_at                  TIMESTAMPTZ      NOT NULL DEFAULT now(),
+  updated_at                  TIMESTAMPTZ      NOT NULL DEFAULT now(),
+  -- Legacy columns preserved for backward compatibility
+  label                       TEXT             NOT NULL DEFAULT 'Home',
+  address                     TEXT             NOT NULL DEFAULT '',
+  apartment                   TEXT,
+  city                        TEXT             DEFAULT '',
+  lat                         DOUBLE PRECISION,
+  lng                         DOUBLE PRECISION,
+  building                    TEXT,
+  street                      TEXT,
+  instructions                TEXT,
+  photo_url                   TEXT
 );
 
-CREATE INDEX IF NOT EXISTS idx_user_addresses_user_id   ON user_addresses(user_id);
-CREATE INDEX IF NOT EXISTS idx_user_addresses_default   ON user_addresses(user_id, is_default) WHERE is_default = true;
-CREATE INDEX IF NOT EXISTS idx_user_addresses_active    ON user_addresses(user_id) WHERE is_deleted = false;
+CREATE INDEX IF NOT EXISTS idx_user_addresses_user_id      ON user_addresses(user_id);
+CREATE INDEX IF NOT EXISTS idx_user_addresses_default      ON user_addresses(user_id, is_default) WHERE is_default = true;
+CREATE INDEX IF NOT EXISTS idx_user_addresses_active       ON user_addresses(user_id) WHERE is_deleted = false;
+CREATE INDEX IF NOT EXISTS idx_user_addresses_user_default ON user_addresses(user_id, is_default) WHERE is_default = true AND is_deleted = false;
 
 -- ─── 3. Delivery Slots ──────────────────────────────────────────────────────
 CREATE TABLE IF NOT EXISTS delivery_slots (

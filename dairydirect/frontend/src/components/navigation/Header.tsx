@@ -19,7 +19,7 @@ import {
 } from 'lucide-react';
 import { useStore } from '@/store/useStore';
 import { useCartDetails } from '@/hooks/useCartDetails';
-import { getUserAddresses, type UserAddress } from '@/lib/api/addresses';
+import { getUserAddresses, normalizeUserAddress, type UserAddress } from '@/lib/api/addresses';
 
 function HeaderContent() {
   const router = useRouter();
@@ -50,16 +50,16 @@ function HeaderContent() {
           setUserAddresses(addrs);
         } else if (user.saved_addresses && user.saved_addresses.length > 0) {
           setUserAddresses(
-            user.saved_addresses.map((a, i) => ({
-              id: `saved-${i}`,
-              user_id: user.id,
-              label: a.label,
-              address: a.address,
-              lat: null,
-              lng: null,
-              is_default: i === 0,
-              created_at: new Date().toISOString(),
-            }))
+            user.saved_addresses.map((a, i) =>
+              normalizeUserAddress({
+                id: `saved-${i}`,
+                user_id: user.id,
+                label: a.label,
+                address: a.address,
+                is_default: i === 0,
+                created_at: new Date().toISOString(),
+              })
+            )
           );
         }
       });

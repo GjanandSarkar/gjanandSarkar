@@ -22,20 +22,28 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const isHydrating = useRef(false);
   const hasInitialized = useRef(false);
 
-  // Preload translations once in background
+  // Preload translations once in background (deferred so it doesn't block auth)
   useEffect(() => {
     const langs: Language[] = ['en', 'hi', 'gu'];
-    langs.forEach(async (lang) => {
-      if (Object.keys(translationsCache[lang] ?? {}).length > 0) return;
-      try {
-        const map = await fetchTranslations(lang);
-        if (Object.keys(map).length > 0) {
-          setTranslationsCache(lang, map);
+    const load = () => {
+      langs.forEach(async (lang) => {
+        if (Object.keys(translationsCache[lang] ?? {}).length > 0) return;
+        try {
+          const map = await fetchTranslations(lang);
+          if (Object.keys(map).length > 0) {
+            setTranslationsCache(lang, map);
+          }
+        } catch (err) {
+          // Silently skip translation fetch errors
         }
-      } catch (err) {
-        // Silently skip translation fetch errors
-      }
-    });
+      });
+    };
+    // Use idle callback to avoid competing with auth initialization
+    if (typeof window !== 'undefined' && 'requestIdleCallback' in window) {
+      (window as any).requestIdleCallback(load, { timeout: 3000 });
+    } else {
+      setTimeout(load, 1000);
+    }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -115,50 +123,53 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             saved_addresses: userProfile.saved_addresses || [],
           });
 
-          // Sync cart from Database via Backend API
-          const cart = localCart;
-          if (cart.length > 0) {
+          // Parallel fetch cart, wishlist, and addresses — faster than sequential .then() waterfall
+          const [dbCart, wishlistItems, addresses] = await Promise.allSettled([
+            getCart(userProfile.id),
+            getWishlist(userProfile.id),
+            getUserAddresses(userProfile.id),
+          ]);
+
+          // Apply cart
+          if (dbCart.status === 'fulfilled' && dbCart.value && dbCart.value.length > 0) {
+            setCart(
+              dbCart.value.map((item) => ({
+                productId: item.product_id,
+                variantId: item.variant_id,
+                quantity: item.quantity,
+              }))
+            );
+          }
+
+          // Apply wishlist
+          if (wishlistItems.status === 'fulfilled' && wishlistItems.value) {
+            setWishlist(wishlistItems.value);
+          }
+
+          // Apply addresses
+          if (addresses.status === 'fulfilled' && addresses.value && addresses.value.length > 0) {
+            setUser({
+              id: userProfile.id,
+              name: resolvedName,
+              phone: userProfile.phone || '',
+              email: userProfile.email || '',
+              avatar_url: userProfile.avatar_url || '',
+              role: userProfile.role ?? 'customer',
+              saved_addresses: addresses.value.map(a => ({ label: a.label, address: a.address })),
+            });
+          }
+
+          // Merge any local cart items into DB in background (non-blocking)
+          if (localCart.length > 0) {
             mergeLocalCart(
               userProfile.id,
-              cart.map((i) => ({
+              localCart.map((i) => ({
                 productId: i.productId,
                 variantId: i.variantId,
                 quantity: i.quantity,
               }))
             ).catch(() => {});
           }
-
-          getCart(userProfile.id).then((dbCart) => {
-            if (dbCart && dbCart.length > 0) {
-              setCart(
-                dbCart.map((item) => ({
-                  productId: item.product_id,
-                  variantId: item.variant_id,
-                  quantity: item.quantity,
-                }))
-              );
-            }
-          }).catch(() => {});
-
-          // Sync wishlist from Database via Backend API
-          getWishlist(userProfile.id).then((items) => {
-            if (items) setWishlist(items);
-          }).catch(() => {});
-
-          // Sync addresses from Database via Backend API
-          getUserAddresses(userProfile.id).then((addresses) => {
-            if (addresses && addresses.length > 0) {
-              setUser({
-                id: userProfile.id,
-                name: resolvedName,
-                phone: userProfile.phone || '',
-                email: userProfile.email || '',
-                avatar_url: userProfile.avatar_url || '',
-                role: userProfile.role ?? 'customer',
-                saved_addresses: addresses.map(a => ({ label: a.label, address: a.address })),
-              });
-            }
-          }).catch(() => {});
 
           return;
         }

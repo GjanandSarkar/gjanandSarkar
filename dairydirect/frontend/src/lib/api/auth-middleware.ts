@@ -9,6 +9,33 @@ import { getCachedUserProfile } from '@/lib/aws/redis';
 import { query } from '@/lib/aws/rds';
 import { getAdminSupabase } from '@/lib/supabase/admin';
 
+// ─── Short-lived in-process auth cache ────────────────────────────────────────
+// Keyed by a truncated token (last 32 chars) → AuthUser result
+// 30-second TTL prevents hammering Supabase getUser() on every API request.
+const authCache = new Map<string, { user: AuthUser; expiresAt: number }>();
+const AUTH_CACHE_TTL_MS = 30_000; // 30 seconds
+
+function getCachedAuth(token: string): AuthUser | null {
+  const key = token.slice(-32);
+  const entry = authCache.get(key);
+  if (!entry) return null;
+  if (Date.now() > entry.expiresAt) {
+    authCache.delete(key);
+    return null;
+  }
+  return entry.user;
+}
+
+function setCachedAuth(token: string, user: AuthUser): void {
+  const key = token.slice(-32);
+  // Evict oldest entries if cache grows too large
+  if (authCache.size > 500) {
+    const firstKey = authCache.keys().next().value;
+    if (firstKey) authCache.delete(firstKey);
+  }
+  authCache.set(key, { user, expiresAt: Date.now() + AUTH_CACHE_TTL_MS });
+}
+
 export type AuthUser = {
   userId: string;
   role: 'customer' | 'admin' | 'seller';
@@ -32,6 +59,12 @@ const ADMIN_PHONES = (process.env.ADMIN_PHONES || '+919876543210')
 export async function getAuthUser(request: Request): Promise<AuthUser | null> {
   const token = extractTokenFromRequest(request);
 
+  // Fast path: return cached result for recently-seen tokens
+  if (token) {
+    const cached = getCachedAuth(token);
+    if (cached) return cached;
+  }
+
   let userId: string | null = null;
   let userEmail: string | null = null;
   let userPhone: string | null = null;
@@ -49,6 +82,7 @@ export async function getAuthUser(request: Request): Promise<AuthUser | null> {
   }
 
   // 2. Fallback: Check Supabase Auth Bearer Token if not resolved
+  // NOTE: This is a remote network call — only reached if JWT verification failed.
   if (!userId && token) {
     try {
       const supabase = getAdminSupabase();
@@ -107,13 +141,18 @@ export async function getAuthUser(request: Request): Promise<AuthUser | null> {
     console.warn('[AuthMiddleware] PostgreSQL not configured, using Supabase auth.');
   }
 
-  return {
+  const result: AuthUser = {
     userId,
     role: isEnvAdmin || userRole === 'admin' ? 'admin' : 'customer',
     phone: userPhone,
     email: userEmail,
     isAdmin: isEnvAdmin || userRole === 'admin',
   };
+
+  // Cache the resolved auth user to avoid repeated DB/Supabase lookups
+  if (token) setCachedAuth(token, result);
+
+  return result;
 }
 
 /**
