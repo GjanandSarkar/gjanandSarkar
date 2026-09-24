@@ -6,7 +6,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { query, withTransaction, isPgConfigured } from '@/lib/aws/rds';
 import { getAuthUser } from '@/lib/api/auth-middleware';
-import { invalidateProductsCache } from '@/lib/aws/redis';
+import { invalidateProductsCache, getCachedProductDetail, cacheProductDetail } from '@/lib/aws/redis';
 import { isValidUUID } from '@/lib/security/sanitize';
 import { getAdminSupabase } from '@/lib/supabase/admin';
 import { writeAuditLog } from '@/lib/security/audit';
@@ -71,12 +71,27 @@ export async function GET(request: NextRequest, { params }: Props) {
       return NextResponse.json({ error: 'Invalid product ID' }, { status: 400 });
     }
 
+    // Check Redis cache first
+    const cached = await getCachedProductDetail(id);
+    if (cached) {
+      return NextResponse.json(
+        { product: cached },
+        { headers: { 'X-Cache': 'HIT' } }
+      );
+    }
+
     const product = await fetchProductDetails(id);
     if (!product) {
       return NextResponse.json({ error: 'Product not found' }, { status: 404 });
     }
 
-    return NextResponse.json({ product });
+    // Cache asynchronously — do not block response
+    cacheProductDetail(id, product).catch(() => {});
+
+    return NextResponse.json(
+      { product },
+      { headers: { 'X-Cache': 'MISS' } }
+    );
   } catch (error: any) {
     console.error('[Product GET] Error:', error.message);
     return NextResponse.json({ error: 'Failed to fetch product' }, { status: 500 });
@@ -153,7 +168,7 @@ export async function PUT(request: NextRequest, { params }: Props) {
           }
         });
 
-        await invalidateProductsCache();
+        await invalidateProductsCache(id);
         const updatedProduct = await fetchProductDetails(id);
         
         if (auth?.userId) {
@@ -239,7 +254,7 @@ export async function PUT(request: NextRequest, { params }: Props) {
       console.warn('[Product PUT] seller_product update warning:', spErr?.message || spErr);
     }
 
-    await invalidateProductsCache();
+    await invalidateProductsCache(id);
     const updatedProduct = await fetchProductDetails(id);
     
     if (auth?.userId) {
@@ -283,7 +298,7 @@ export async function DELETE(request: NextRequest, { params }: Props) {
             await client.query('DELETE FROM product_variants WHERE product_id = $1', [id]);
             await client.query('DELETE FROM products WHERE id = $1', [id]);
           });
-          await invalidateProductsCache();
+          await invalidateProductsCache(id);
           
           if (auth?.userId) {
             await writeAuditLog({
@@ -300,7 +315,7 @@ export async function DELETE(request: NextRequest, { params }: Props) {
         } else {
           await query('UPDATE products SET is_active = false, updated_at = now() WHERE id = $1', [id]);
           await query("UPDATE seller_product SET status = 'inactive', updated_at = now() WHERE product_id = $1", [id]).catch(() => {});
-          await invalidateProductsCache();
+          await invalidateProductsCache(id);
           if (auth?.userId) {
             await writeAuditLog({
               adminId: auth.userId,
@@ -328,7 +343,7 @@ export async function DELETE(request: NextRequest, { params }: Props) {
       }
       await sb.from('product_variants').delete().eq('product_id', id);
       await sb.from('products').delete().eq('id', id);
-      await invalidateProductsCache();
+      await invalidateProductsCache(id);
       
       if (auth?.userId) {
         await writeAuditLog({
@@ -349,7 +364,7 @@ export async function DELETE(request: NextRequest, { params }: Props) {
       } catch (spErr: any) {
         console.warn('[Product DELETE] seller_product update warning:', spErr?.message || spErr);
       }
-      await invalidateProductsCache();
+      await invalidateProductsCache(id);
       
       if (auth?.userId) {
         await writeAuditLog({

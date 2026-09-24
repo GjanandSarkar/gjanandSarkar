@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { getAdminSupabase } from '@/lib/supabase/admin';
 import { getAuthUser } from '@/lib/api/auth-middleware';
+import { getCachedSellerProfile, cacheSellerProfile, invalidateSellerProfileCache } from '@/lib/aws/redis';
 
 export async function POST(request: Request) {
   try {
@@ -52,6 +53,9 @@ export async function POST(request: Request) {
       .update({ role: 'seller' })
       .eq('id', userId);
 
+    // Invalidate cached seller profile so fresh store data is served immediately
+    await invalidateSellerProfileCache(userId);
+
     return NextResponse.json({ success: true, store });
   } catch (err: any) {
     return NextResponse.json({ error: err.message || 'Internal error' }, { status: 500 });
@@ -67,6 +71,12 @@ export async function GET(request: Request) {
   }
 
   try {
+    // Check cache first (5 min TTL, scoped by userId)
+    const cached = await getCachedSellerProfile(userId);
+    if (cached) {
+      return NextResponse.json(cached, { headers: { 'X-Cache': 'HIT' } });
+    }
+
     const sb = getAdminSupabase();
     const { data: store, error } = await sb
       .from('sellers')
@@ -79,7 +89,7 @@ export async function GET(request: Request) {
     }
 
     if (store) {
-      return NextResponse.json({
+      const responseData = {
         store: {
           id: store.id,
           storeName: store.store_name,
@@ -99,7 +109,10 @@ export async function GET(request: Request) {
         },
         recentOrders: [],
         payoutHistory: [],
-      });
+      };
+      // Cache the non-sensitive seller dashboard data
+      cacheSellerProfile(userId, responseData).catch(() => {});
+      return NextResponse.json(responseData, { headers: { 'X-Cache': 'MISS' } });
     }
 
     return NextResponse.json({

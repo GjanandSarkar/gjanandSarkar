@@ -8,11 +8,21 @@ import { NextRequest, NextResponse } from 'next/server';
 import { query, isPgConfigured } from '@/lib/aws/rds';
 import { getAuthUser } from '@/lib/api/auth-middleware';
 import { getAdminSupabase } from '@/lib/supabase/admin';
+import { getCachedCategories, cacheCategories, invalidateCategoryCache } from '@/lib/aws/redis';
 
 export const dynamic = 'force-dynamic';
 
 export async function GET() {
   try {
+    // Check Redis cache first (30 min TTL)
+    const cachedCategories = await getCachedCategories();
+    if (cachedCategories) {
+      return NextResponse.json(
+        { categories: cachedCategories },
+        { headers: { 'X-Cache': 'HIT' } }
+      );
+    }
+
     // 1. Try RDS PostgreSQL query
     if (isPgConfigured) {
       try {
@@ -31,7 +41,12 @@ export async function GET() {
            ORDER BY c.sort_order ASC, c.name ASC`
         );
         if (result.rows && result.rows.length > 0) {
-          return NextResponse.json({ categories: result.rows });
+          // Cache and return
+          cacheCategories(result.rows).catch(() => {});
+          return NextResponse.json(
+            { categories: result.rows },
+            { headers: { 'X-Cache': 'MISS' } }
+          );
         }
       } catch (err: any) {
         console.warn('[Categories GET] RDS query failed, falling back to Supabase:', err.message);
@@ -101,7 +116,13 @@ export async function GET() {
       };
     });
 
-    return NextResponse.json({ categories });
+    // Cache categories before returning
+    cacheCategories(categories).catch(() => {});
+
+    return NextResponse.json(
+      { categories },
+      { headers: { 'X-Cache': 'MISS' } }
+    );
   } catch (error: any) {
     console.error('[Categories GET] Error:', error.message);
     return NextResponse.json({ error: 'Failed to fetch categories' }, { status: 500 });
@@ -184,6 +205,9 @@ export async function POST(request: NextRequest) {
         product_count: 0,
       };
     }
+
+    // Invalidate category cache so next GET fetches fresh data
+    invalidateCategoryCache().catch(() => {});
 
     return NextResponse.json({ success: true, category: createdCategory });
   } catch (error: any) {

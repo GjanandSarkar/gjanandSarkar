@@ -5,7 +5,7 @@
  */
 
 import { verifyAccessToken, extractTokenFromRequest } from '@/lib/auth/jwt';
-import { getCachedUserProfile } from '@/lib/aws/redis';
+import { getCachedUserProfile, cacheUserProfile } from '@/lib/aws/redis';
 import { query } from '@/lib/aws/rds';
 import { getAdminSupabase } from '@/lib/supabase/admin';
 
@@ -109,12 +109,13 @@ export async function getAuthUser(request: Request): Promise<AuthUser | null> {
   // Try Redis cache to avoid database roundtrip
   const cached = await getCachedUserProfile(userId);
   if (cached) {
-    const isAdmin = isEnvAdmin || (cached.role ?? userRole) === 'admin';
+    const cachedProfile = cached as { role?: string; phone?: string | null; email?: string | null };
+    const isAdmin = isEnvAdmin || (cachedProfile.role ?? userRole) === 'admin';
     return {
       userId,
       role: isAdmin ? 'admin' : 'customer',
-      phone: cached.phone ?? userPhone,
-      email: cached.email ?? userEmail,
+      phone: cachedProfile.phone ?? userPhone,
+      email: cachedProfile.email ?? userEmail,
       isAdmin,
     };
   }
@@ -129,13 +130,16 @@ export async function getAuthUser(request: Request): Promise<AuthUser | null> {
     if (result.rows.length > 0) {
       const row = result.rows[0];
       const isAdmin = isEnvAdmin || row.role === 'admin';
-      return {
+      const authUser: AuthUser = {
         userId,
         role: isAdmin ? 'admin' : (row.role as 'customer' | 'admin'),
         phone: row.phone || userPhone,
         email: row.email || userEmail,
         isAdmin,
       };
+      if (token) setCachedAuth(token, authUser);
+      cacheUserProfile(userId, { role: row.role, phone: row.phone, email: row.email }).catch(() => {});
+      return authUser;
     }
   } catch (err) {
     console.warn('[AuthMiddleware] PostgreSQL not configured, using Supabase auth.');
@@ -151,6 +155,7 @@ export async function getAuthUser(request: Request): Promise<AuthUser | null> {
 
   // Cache the resolved auth user to avoid repeated DB/Supabase lookups
   if (token) setCachedAuth(token, result);
+  cacheUserProfile(userId, { role: result.role, phone: result.phone, email: result.email }).catch(() => {});
 
   return result;
 }

@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getAuthUser } from '@/lib/api/auth-middleware';
 import { getAdminSupabase } from '@/lib/supabase/admin';
 import { query, isPgConfigured } from '@/lib/aws/rds';
+import { getCachedSellerAnalytics, cacheSellerAnalytics } from '@/lib/aws/redis';
 
 export async function GET(request: NextRequest) {
   try {
@@ -21,6 +22,12 @@ export async function GET(request: NextRequest) {
 
     if (error || !store) {
       return NextResponse.json({ error: 'Seller store not found' }, { status: 404 });
+    }
+
+    // Check cache (authorization + store ownership verified above)
+    const cachedAnalytics = await getCachedSellerAnalytics(store.id);
+    if (cachedAnalytics) {
+      return NextResponse.json(cachedAnalytics, { headers: { 'X-Cache': 'HIT' } });
     }
 
     let grossRevenue = 0;
@@ -84,7 +91,7 @@ export async function GET(request: NextRequest) {
     const platformCommission = grossRevenue * ((store.commission_rate || 5) / 100);
     const netPayout = grossRevenue - platformCommission;
 
-    return NextResponse.json({
+    const analyticsPayload = {
       metrics: {
         grossRevenue,
         platformCommission,
@@ -93,7 +100,10 @@ export async function GET(request: NextRequest) {
         totalProducts,
         pendingDeliveries
       }
-    });
+    };
+    // Cache result scoped to sellerId
+    cacheSellerAnalytics(store.id, analyticsPayload).catch(() => {});
+    return NextResponse.json(analyticsPayload, { headers: { 'X-Cache': 'MISS' } });
 
   } catch (err: any) {
     return NextResponse.json({ error: 'Internal Server Error', details: err.message }, { status: 500 });

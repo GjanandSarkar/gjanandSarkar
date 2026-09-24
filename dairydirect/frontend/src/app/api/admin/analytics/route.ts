@@ -7,6 +7,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getAuthUser } from '@/lib/api/auth-middleware';
 import { getAdminSupabase } from '@/lib/supabase/admin';
+import { getCachedAdminAnalytics, cacheAdminAnalytics } from '@/lib/aws/redis';
 
 export const dynamic = 'force-dynamic';
 
@@ -15,6 +16,12 @@ export async function GET(request: NextRequest) {
     const auth = await getAuthUser(request);
     if (!auth?.isAdmin) {
       return NextResponse.json({ error: 'Admin access required' }, { status: 403 });
+    }
+
+    // Check cache (authorization verified above — only admins reach this)
+    const cachedAnalytics = await getCachedAdminAnalytics();
+    if (cachedAnalytics) {
+      return NextResponse.json(cachedAnalytics, { headers: { 'X-Cache': 'HIT' } });
     }
 
     const sb = getAdminSupabase();
@@ -35,11 +42,13 @@ export async function GET(request: NextRequest) {
     if (profilesRes.error) console.error('[Analytics API] Profiles error:', profilesRes.error.message);
     if (subsRes.error) console.error('[Analytics API] Subscriptions error:', subsRes.error.message);
 
-    return NextResponse.json({
+    const analyticsPayload = {
       orders: ordersRes.data || [],
       profiles: profilesRes.data || [],
       subscriptions: subsRes.data || [],
-    });
+    };
+    cacheAdminAnalytics(analyticsPayload).catch(() => {});
+    return NextResponse.json(analyticsPayload, { headers: { 'X-Cache': 'MISS' } });
   } catch (error: any) {
     console.error('[Analytics API] Error:', error.message);
     return NextResponse.json({ error: error.message || 'Failed to fetch analytics' }, { status: 500 });

@@ -7,7 +7,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { query, withTransaction, isPgConfigured } from '@/lib/aws/rds';
 import { calculateOrderPricing } from '@/lib/pricing';
 import { getAuthUser, getClientIP } from '@/lib/api/auth-middleware';
-import { checkRateLimit, invalidateProductsCache, invalidateUserProfileCache } from '@/lib/aws/redis';
+import { checkRateLimit, invalidateProductsCache, invalidateUserProfileCache, invalidateAdminCaches } from '@/lib/aws/redis';
 import { sendOrderConfirmationEmail, sendAdminNewOrderAlert } from '@/lib/aws/ses';
 import { sendSMS } from '@/lib/aws/sns';
 import { PlaceOrderSchema } from '@/lib/security/sanitize';
@@ -355,6 +355,7 @@ export async function POST(request: NextRequest) {
       try {
         await invalidateProductsCache();
         await invalidateUserProfileCache(auth.userId);
+        await invalidateAdminCaches();
       } catch (e) {
         // non-blocking
       }

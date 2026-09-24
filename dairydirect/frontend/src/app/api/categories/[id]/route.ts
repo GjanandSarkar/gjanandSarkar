@@ -7,6 +7,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { query, isPgConfigured } from '@/lib/aws/rds';
 import { getAuthUser } from '@/lib/api/auth-middleware';
 import { getAdminSupabase } from '@/lib/supabase/admin';
+import { invalidateCategoryCache } from '@/lib/aws/redis';
 
 export const dynamic = 'force-dynamic';
 
@@ -73,6 +74,9 @@ export async function PUT(
       updatedCategory = updatedCategory || sbData;
     }
 
+    // Invalidate category cache
+    invalidateCategoryCache().catch(() => {});
+
     return NextResponse.json({ success: true, category: updatedCategory || { id, ...updates } });
   } catch (error: any) {
     console.error('[Category PUT] Error:', error.message);
@@ -102,6 +106,9 @@ export async function DELETE(
 
     const sb = getAdminSupabase();
     await sb.from('categories').delete().or(`id.eq.${id},name.eq.${id}`);
+
+    // Invalidate category cache
+    invalidateCategoryCache().catch(() => {});
 
     return NextResponse.json({ success: true });
   } catch (error: any) {
