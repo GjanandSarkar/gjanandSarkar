@@ -27,8 +27,12 @@ export function HeroBanner({ products }: HeroBannerProps) {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isPaused, setIsPaused] = useState(false);
 
+  // Curate a spotlight selection of up to 6 featured products for the hero carousel
+  const MAX_HERO_ITEMS = 6;
+  const heroProducts = (products || []).slice(0, MAX_HERO_ITEMS);
+
   // Map database products to showcase products
-  const rawItems: ShowcaseProduct[] = (products || []).map((p, idx) => ({
+  const rawItems: ShowcaseProduct[] = heroProducts.map((p, idx) => ({
     id: p.id,
     name: p.name,
     subtitle: p.category || '100% Pure & Vedic',
@@ -295,16 +299,16 @@ export function HeroBanner({ products }: HeroBannerProps) {
             </div>
 
             {/* Interactive Indicator Dots */}
-            <div className="flex items-center gap-2 mt-2 z-30">
+            <div className="flex items-center justify-center gap-2 mt-3 z-30">
               {showcaseProducts.map((p, idx) => (
                 <button
                   key={`${p.id}-${idx}-dot`}
                   onClick={() => setCurrentIndex(idx)}
                   aria-label={`Slide to ${p.name}`}
-                  className={`transition-all duration-500 rounded-full cursor-pointer ${
+                  className={`transition-all duration-300 rounded-full cursor-pointer ${
                     currentIndex === idx 
-                      ? 'w-7 h-2 bg-[#c88a23] shadow-xs' 
-                      : 'w-2 h-2 bg-amber-300/80 hover:bg-amber-400'
+                      ? 'w-7 h-2.5 bg-[#c88a23] shadow-xs' 
+                      : 'w-2.5 h-2.5 bg-amber-300/80 hover:bg-amber-400'
                   }`}
                 />
               ))}
