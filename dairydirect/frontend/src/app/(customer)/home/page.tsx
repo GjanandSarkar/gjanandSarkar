@@ -8,8 +8,8 @@ import { TrendingProducts } from '@/components/home/TrendingProducts';
 
 import { ImpactAndTestimonial } from '@/components/home/ImpactAndTestimonial';
 
-// ISR: cache for 60 seconds, background refresh — avoids DB hit on every request
-export const revalidate = 60;
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
 
 export default async function HomeScreen() {
   // Fetch real active products directly from database on server

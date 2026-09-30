@@ -116,7 +116,7 @@ export async function GET(request: NextRequest) {
         .from('orders')
         .select(`
           *,
-          profiles(name, phone, email),
+          profiles:user_id(name, phone, email),
           user_addresses(id, label, address),
           order_items(*, products(name, image_url), product_variants(weight, price))
         `)
@@ -132,6 +132,18 @@ export async function GET(request: NextRequest) {
 
       if (error || !orderData) {
         return NextResponse.json({ error: 'Order not found' }, { status: 404 });
+      }
+
+      if (orderData && !orderData.user_addresses && orderData.shipping_address) {
+        try {
+          const parsed = typeof orderData.shipping_address === 'string' ? JSON.parse(orderData.shipping_address) : orderData.shipping_address;
+          orderData.user_addresses = {
+            id: parsed.id || orderData.address_id,
+            label: parsed.address_type ? parsed.address_type.toUpperCase() : 'Delivery Address',
+            address: parsed.formatted_address || parsed.address || 'Address details',
+            apartment: parsed.flat_house_building,
+          };
+        } catch (e) {}
       }
 
       if (auth.role === 'seller' && orderData.user_id !== auth.userId) {
@@ -218,7 +230,7 @@ export async function GET(request: NextRequest) {
       .from('orders')
       .select(`
         *,
-        profiles(name, phone, email),
+        profiles:user_id(name, phone, email),
         user_addresses(id, label, address),
         order_items(*, products(name, image_url), product_variants(weight, price))
       `)
@@ -237,7 +249,22 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: error.message }, { status: 500 });
     }
 
-    return NextResponse.json({ orders: ordersData || [] });
+    const mappedOrders = (ordersData || []).map((o: any) => {
+      if (!o.user_addresses && o.shipping_address) {
+        try {
+          const parsed = typeof o.shipping_address === 'string' ? JSON.parse(o.shipping_address) : o.shipping_address;
+          o.user_addresses = {
+            id: parsed.id || o.address_id,
+            label: parsed.address_type ? parsed.address_type.toUpperCase() : 'Delivery Address',
+            address: parsed.formatted_address || parsed.address || 'Address details',
+            apartment: parsed.flat_house_building,
+          };
+        } catch (e) {}
+      }
+      return o;
+    });
+
+    return NextResponse.json({ orders: mappedOrders });
   } catch (error: any) {
     console.error('[Orders GET] Error:', error.message);
     return NextResponse.json({ error: 'Failed to fetch orders' }, { status: 500 });

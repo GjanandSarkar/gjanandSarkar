@@ -38,6 +38,11 @@ export function ProductCard({
   const [product, setProduct] = useState<ProductWithVariants>(initialProduct);
   const [isDeleted, setIsDeleted] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   useEffect(() => {
     setProduct(initialProduct);
@@ -46,14 +51,16 @@ export function ProductCard({
   const variants = product.product_variants ?? [];
   const firstVariant = variants[0];
 
-  const [selectedVariant, setSelectedVariant] = useState(() => {
-    const firstInCart = cart.find(
-      (i) => i.productId === product.id
-    );
-    return firstInCart
-      ? variants.find((v) => v.id === firstInCart.variantId) ?? firstVariant
-      : firstVariant;
-  });
+  const [selectedVariant, setSelectedVariant] = useState(firstVariant);
+
+  useEffect(() => {
+    if (!mounted) return;
+    const firstInCart = cart.find((i) => i.productId === product.id);
+    if (firstInCart) {
+      const match = variants.find((v) => v.id === firstInCart.variantId);
+      if (match) setSelectedVariant(match);
+    }
+  }, [mounted, cart, product.id, variants]);
 
   useEffect(() => {
     if (variants.length > 0 && (!selectedVariant || !variants.some(v => v.id === selectedVariant.id))) {
@@ -64,10 +71,10 @@ export function ProductCard({
   const [showDrawer, setShowDrawer] = useState(false);
   const [busy, setBusy] = useState(false);
 
-  const isSaved = wishlist.includes(product.id);
-  const productCartItems = cart.filter((i) => i.productId === product.id);
+  const isSaved = mounted && wishlist.includes(product.id);
+  const productCartItems = mounted ? cart.filter((i) => i.productId === product.id) : [];
   const totalQuantity = productCartItems.reduce((sum, i) => sum + i.quantity, 0);
-  const isInCart = totalQuantity > 0;
+  const isInCart = mounted && totalQuantity > 0;
   const currentVariantQty =
     productCartItems.find((i) => i.variantId === (selectedVariant?.id ?? ''))?.quantity ?? 0;
 
@@ -197,7 +204,7 @@ export function ProductCard({
           </button>
 
           {/* Admin Quick-Edit Button */}
-          {user?.role === 'admin' && (
+          {mounted && user?.role === 'admin' && (
             <button
               type="button"
               onClick={(e) => {
