@@ -12,15 +12,20 @@ import { getCachedCategories, cacheCategories, invalidateCategoryCache } from '@
 
 export const dynamic = 'force-dynamic';
 
-export async function GET() {
+export async function GET(request: NextRequest) {
   try {
-    // Check Redis cache first (30 min TTL)
-    const cachedCategories = await getCachedCategories();
-    if (cachedCategories) {
-      return NextResponse.json(
-        { categories: cachedCategories },
-        { headers: { 'X-Cache': 'HIT' } }
-      );
+    const { searchParams } = new URL(request.url);
+    const forceRefresh = searchParams.get('refresh') === 'true';
+
+    // Check Redis cache first (30 min TTL) only if non-empty and not force-refreshing
+    if (!forceRefresh) {
+      const cachedCategories = await getCachedCategories();
+      if (Array.isArray(cachedCategories) && cachedCategories.length > 0) {
+        return NextResponse.json(
+          { categories: cachedCategories },
+          { headers: { 'X-Cache': 'HIT' } }
+        );
+      }
     }
 
     // 1. Try RDS PostgreSQL query

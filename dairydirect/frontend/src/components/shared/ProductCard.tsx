@@ -139,6 +139,10 @@ export function ProductCard({
 
   if (isDeleted || !firstVariant) return null;
 
+  const availableStock = selectedVariant?.available_quantity ?? selectedVariant?.stock ?? 0;
+  const isOutOfStock = availableStock <= 0;
+  const isAllOutOfStock = variants.length > 0 && variants.every((v) => (v.available_quantity ?? v.stock ?? 0) <= 0);
+  const isLowStock = !isAllOutOfStock && availableStock > 0 && availableStock <= 10;
   const originalPrice = selectedVariant.original_price || Math.round(selectedVariant.price * 1.25);
 
   return (
@@ -156,7 +160,9 @@ export function ProductCard({
             fill
             sizes="(max-width: 768px) 50vw, 25vw"
             priority={priority}
-            className="w-full h-full object-contain transition-transform duration-300 group-hover:scale-105"
+            className={`w-full h-full object-contain transition-transform duration-300 group-hover:scale-105 ${
+              isAllOutOfStock ? 'grayscale opacity-75' : ''
+            }`}
             onError={(e) => {
               (e.currentTarget as HTMLImageElement).srcset = `/milk.png`;
             }}
@@ -166,6 +172,17 @@ export function ProductCard({
           <span className="absolute top-2 left-2 bg-emerald-50 text-[#0f3e26] border border-emerald-200/80 text-[10px] font-extrabold px-2 py-0.5 rounded-md shadow-2xs">
             {product.category || 'Pure Indian'}
           </span>
+
+          {/* Stock Badges */}
+          {isAllOutOfStock ? (
+            <span className="absolute bottom-2 left-2 bg-rose-600 text-white text-[10px] font-extrabold px-2 py-0.5 rounded-md shadow-xs">
+              Out of Stock
+            </span>
+          ) : isLowStock ? (
+            <span className="absolute bottom-2 left-2 bg-amber-600 text-white text-[10px] font-extrabold px-2 py-0.5 rounded-md shadow-xs">
+              Only {availableStock} left
+            </span>
+          ) : null}
 
           {/* Wishlist Heart Button */}
           <button
@@ -243,14 +260,21 @@ export function ProductCard({
               </div>
             </div>
 
-            {!isInCart ? (
+            {variants.length === 1 && isOutOfStock ? (
+              <button
+                disabled
+                className="px-3 py-1.5 bg-gray-100 text-gray-400 text-xs font-bold rounded-lg cursor-not-allowed border border-gray-200"
+              >
+                Sold Out
+              </button>
+            ) : !isInCart ? (
               <button
                 onClick={handleAdd}
-                disabled={busy}
-                className="px-3.5 py-1.5 bg-[#0f3e26] hover:bg-[#144f31] text-white text-xs font-bold rounded-lg transition-colors flex items-center justify-center gap-1 shadow-xs active:scale-95 disabled:opacity-50"
+                disabled={busy || (variants.length === 1 && isOutOfStock)}
+                className="px-3.5 py-1.5 bg-[#0f3e26] hover:bg-[#144f31] text-white text-xs font-bold rounded-lg transition-colors flex items-center justify-center gap-1 shadow-xs active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 <ShoppingCart className="w-3.5 h-3.5" />
-                <span>Add</span>
+                <span>{variants.length > 1 ? 'Select' : 'Add'}</span>
               </button>
             ) : (
               <div className="flex items-center bg-gray-100 rounded-lg overflow-hidden border border-gray-300">
@@ -266,8 +290,9 @@ export function ProductCard({
                 </span>
                 <button
                   onClick={(e) => handleUpdate(e, 'inc')}
-                  disabled={busy}
-                  className="w-7 h-7 flex items-center justify-center bg-[#0f3e26] text-white hover:bg-[#144f31] transition-colors active:scale-90"
+                  disabled={busy || (variants.length === 1 && currentVariantQty >= availableStock)}
+                  className="w-7 h-7 flex items-center justify-center bg-[#0f3e26] text-white hover:bg-[#144f31] transition-colors active:scale-90 disabled:opacity-40 disabled:cursor-not-allowed"
+                  title={currentVariantQty >= availableStock ? 'Max available stock reached' : undefined}
                 >
                   <Plus className="w-3 h-3 stroke-[3]" />
                 </button>
@@ -313,16 +338,34 @@ export function ProductCard({
                   const qty = cart.find(
                     (i) => i.productId === product.id && i.variantId === v.id
                   )?.quantity ?? 0;
+                  const vStock = v.available_quantity ?? v.stock ?? 0;
+                  const isVOutOfStock = vStock <= 0;
+                  const isVLowStock = !isVOutOfStock && vStock <= 10;
 
                   return (
                     <div 
                       key={v.id}
                       className={`flex items-center justify-between p-3.5 rounded-xl border transition-colors ${
-                        qty > 0 ? 'border-[#0f3e26] bg-emerald-50/40' : 'border-gray-200 bg-white'
+                        isVOutOfStock
+                          ? 'border-gray-200 bg-gray-50/70 opacity-60'
+                          : qty > 0
+                          ? 'border-[#0f3e26] bg-emerald-50/40'
+                          : 'border-gray-200 bg-white'
                       }`}
                     >
                       <div className="flex flex-col">
-                        <span className="font-bold text-xs text-gray-900">{v.weight}</span>
+                        <div className="flex items-center gap-2">
+                          <span className="font-bold text-xs text-gray-900">{v.weight}</span>
+                          {isVOutOfStock ? (
+                            <span className="text-[10px] font-bold text-rose-600 bg-rose-50 px-1.5 py-0.5 rounded">
+                              Out of Stock
+                            </span>
+                          ) : isVLowStock ? (
+                            <span className="text-[10px] font-bold text-amber-600 bg-amber-50 px-1.5 py-0.5 rounded">
+                              Only {vStock} left
+                            </span>
+                          ) : null}
+                        </div>
                         <div className="flex items-baseline gap-1.5 mt-0.5">
                           <span className="text-sm font-black text-[#0f3e26]">
                             ₹{v.price}
@@ -335,7 +378,14 @@ export function ProductCard({
                         </div>
                       </div>
 
-                      {qty === 0 ? (
+                      {isVOutOfStock ? (
+                        <button
+                          disabled
+                          className="px-4 py-1.5 rounded-lg font-bold text-xs bg-gray-100 text-gray-400 border border-gray-200 cursor-not-allowed"
+                        >
+                          Sold Out
+                        </button>
+                      ) : qty === 0 ? (
                         <button
                           onClick={(e) => handleAdd(e, v.id)}
                           disabled={busy}
@@ -355,8 +405,9 @@ export function ProductCard({
                           <span className="w-5 text-center text-xs font-bold text-gray-900">{qty}</span>
                           <button
                             onClick={(e) => handleUpdate(e, 'inc', v.id)}
-                            disabled={busy}
-                            className="w-7 h-7 rounded-md flex items-center justify-center bg-[#0f3e26] text-white hover:bg-[#144f31]"
+                            disabled={busy || qty >= vStock}
+                            className="w-7 h-7 rounded-md flex items-center justify-center bg-[#0f3e26] text-white hover:bg-[#144f31] disabled:opacity-40 disabled:cursor-not-allowed"
+                            title={qty >= vStock ? 'Max available stock reached' : undefined}
                           >
                             <Plus className="w-3.5 h-3.5 stroke-[2.5]" />
                           </button>

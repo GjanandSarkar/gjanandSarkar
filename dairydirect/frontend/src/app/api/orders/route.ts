@@ -11,6 +11,7 @@ import { getAuthUser, getClientIP } from '@/lib/api/auth-middleware';
 import { isValidUUID } from '@/lib/security/sanitize';
 import { getAdminSupabase } from '@/lib/supabase/admin';
 import { writeAuditLog } from '@/lib/security/audit';
+import { revalidateInventory } from '@/lib/inventory/cache-invalidation';
 
 export async function GET(request: NextRequest) {
   try {
@@ -262,53 +263,26 @@ export async function PUT(request: NextRequest) {
       return NextResponse.json({ error: 'Invalid order status' }, { status: 400 });
     }
 
-    // Customer can only cancel their own pending order
-    if (!auth.isAdmin) {
-      if (status !== 'cancelled') {
-        return NextResponse.json({ error: 'Customers can only cancel pending orders' }, { status: 403 });
-      }
-
-      if (isPgConfigured) {
-        try {
-          const checkRes = await query<{ user_id: string; status: string }>(
-            'SELECT user_id, status FROM orders WHERE id = $1',
-            [orderId]
-          );
-          if (checkRes.rows.length === 0 || checkRes.rows[0].user_id !== auth.userId) {
-            return NextResponse.json({ error: 'Order not found' }, { status: 404 });
-          }
-          if (checkRes.rows[0].status !== 'pending' && checkRes.rows[0].status !== 'confirmed') {
-            return NextResponse.json({ error: 'Only pending/confirmed orders can be cancelled' }, { status: 400 });
-          }
-
-          await withTransaction(async (client) => {
-            const items = await client.query<{ variant_id: string; quantity: number }>(
-              'SELECT variant_id, quantity FROM order_items WHERE order_id = $1',
-              [orderId]
-            );
-            for (const item of items.rows) {
-              await client.query('UPDATE product_variants SET stock = stock + $1 WHERE id = $2', [
-                item.quantity,
-                item.variant_id,
-              ]);
-            }
-            await client.query("UPDATE orders SET status = 'cancelled', updated_at = now() WHERE id = $1", [orderId]);
-          });
-
-          return NextResponse.json({ success: true, message: 'Order cancelled' });
-        } catch (err: any) {
-          console.warn('[Orders Cancel] RDS failed, fallback to Supabase:', err.message);
-        }
-      }
-
+    // Order cancellation (Customer or Admin)
+    if (status === 'cancelled') {
       const sb = getAdminSupabase();
-      const { data: orderData } = await sb.from('orders').select('user_id, status').eq('id', orderId).maybeSingle();
-      if (!orderData || orderData.user_id !== auth.userId) {
-        return NextResponse.json({ error: 'Order not found' }, { status: 404 });
+      const { data: cancelRes, error: cancelErr } = await sb.rpc('cancel_order_atomic', {
+        p_order_id: orderId,
+        p_actor_id: auth.userId,
+        p_reason: notes || 'Order cancelled'
+      });
+
+      if (cancelErr || !cancelRes?.success) {
+        const msg = cancelErr?.message || cancelRes?.error || 'Failed to cancel order';
+        return NextResponse.json({ error: msg }, { status: 400 });
       }
 
-      await sb.from('orders').update({ status: 'cancelled', updated_at: new Date().toISOString() }).eq('id', orderId);
-      return NextResponse.json({ success: true, message: 'Order cancelled' });
+      await revalidateInventory();
+      return NextResponse.json({ success: true, message: 'Order cancelled and stock restored' });
+    }
+
+    if (!auth.isAdmin) {
+      return NextResponse.json({ error: 'Customers can only cancel pending orders' }, { status: 403 });
     }
 
     // Admin status update

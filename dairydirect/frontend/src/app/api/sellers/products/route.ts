@@ -6,6 +6,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getAdminSupabase } from '@/lib/supabase/admin';
 import { getAuthUser } from '@/lib/api/auth-middleware';
+import { revalidateInventory } from '@/lib/inventory/cache-invalidation';
 
 export const dynamic = 'force-dynamic';
 
@@ -176,6 +177,10 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: sellerProdErr.message }, { status: 500 });
     }
 
+    if (productId) {
+      await revalidateInventory({ productId });
+    }
+
     return NextResponse.json(
       { success: true, sellerProduct: sellerProd, productId },
       { status: 201 }
@@ -203,10 +208,53 @@ export async function PUT(request: NextRequest) {
 
     const sb = getAdminSupabase();
 
-    // Verify ownership
-    const { data: existingProduct } = await sb.from('seller_product').select('seller_user_id').eq('id', id).maybeSingle();
-    if (existingProduct?.seller_user_id !== auth.userId && !auth.isAdmin) {
-      return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+    // Verify ownership & fetch associated product_id
+    const { data: existingProduct } = await sb
+      .from('seller_product')
+      .select('id, seller_user_id, product_id, stock')
+      .eq('id', id)
+      .maybeSingle();
+
+    if (!existingProduct) {
+      return NextResponse.json({ error: 'Seller product not found' }, { status: 404 });
+    }
+
+    if (existingProduct.seller_user_id !== auth.userId && !auth.isAdmin) {
+      return NextResponse.json({ error: 'Forbidden: You do not own this product' }, { status: 403 });
+    }
+
+    // 1. If stock is updated, update authoritative product_variants row
+    if (stock !== undefined && existingProduct.product_id) {
+      const newStockNum = Math.max(0, parseInt(String(stock), 10) || 0);
+
+      // Fetch primary variant for this product
+      const { data: vList } = await sb
+        .from('product_variants')
+        .select('id, stock, reserved_quantity, available_quantity')
+        .eq('product_id', existingProduct.product_id)
+        .order('created_at', { ascending: true })
+        .limit(1);
+
+      if (vList && vList.length > 0) {
+        const variantId = vList[0].id;
+        // Call atomic stock adjustment with audit logging
+        const { data: adjRes, error: adjErr } = await sb.rpc('adjust_seller_stock_atomic', {
+          p_product_id: existingProduct.product_id,
+          p_variant_id: variantId,
+          p_new_stock: newStockNum,
+          p_actor_id: auth.userId,
+          p_reason: 'Seller panel stock adjustment'
+        });
+
+        if (adjErr) {
+          console.warn('[SellerProducts PUT] adjust_seller_stock_atomic warning:', adjErr.message);
+          // Fallback direct update on product_variants
+          await sb
+            .from('product_variants')
+            .update({ stock: newStockNum, updated_at: new Date().toISOString() })
+            .eq('id', variantId);
+        }
+      }
     }
 
     const updatePayload: any = { updated_at: new Date().toISOString() };
@@ -230,6 +278,11 @@ export async function PUT(request: NextRequest) {
 
     if (error) {
       return NextResponse.json({ error: error.message }, { status: 500 });
+    }
+
+    // Revalidate customer-facing pages so new stock is immediately visible
+    if (existingProduct.product_id) {
+      await revalidateInventory({ productId: existingProduct.product_id });
     }
 
     return NextResponse.json({ success: true, sellerProduct: updated });
@@ -257,14 +310,28 @@ export async function DELETE(request: NextRequest) {
     const sb = getAdminSupabase();
 
     // Verify ownership
-    const { data: existingProduct } = await sb.from('seller_product').select('seller_user_id').eq('id', id).maybeSingle();
+    const { data: existingProduct } = await sb
+      .from('seller_product')
+      .select('seller_user_id, product_id')
+      .eq('id', id)
+      .maybeSingle();
+
+    if (!existingProduct) {
+      return NextResponse.json({ error: 'Product not found' }, { status: 404 });
+    }
+
     if (existingProduct?.seller_user_id !== auth.userId && !auth.isAdmin) {
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
     }
+
     const { error } = await sb.from('seller_product').delete().eq('id', id);
 
     if (error) {
       return NextResponse.json({ error: error.message }, { status: 500 });
+    }
+
+    if (existingProduct.product_id) {
+      await revalidateInventory({ productId: existingProduct.product_id });
     }
 
     return NextResponse.json({ success: true, message: 'Seller product deleted' });

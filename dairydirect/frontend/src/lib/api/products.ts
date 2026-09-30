@@ -12,13 +12,19 @@ export type ProductWithVariants = {
   is_freshness_guarantee: boolean;
   is_active: boolean;
   created_at: string;
+  seller_id?: string | null;
+  created_by?: string | null;
   product_variants: {
     id: string;
     product_id: string;
     weight: string;
     price: number;
     original_price: number | null;
+    cost_price?: number;
     stock: number;
+    reserved_quantity?: number;
+    available_quantity?: number;
+    low_stock_threshold?: number;
   }[];
 };
 
@@ -36,6 +42,7 @@ export type NewVariantInput = {
   price: number;
   original_price?: number;
   stock?: number;
+  cost_price?: number;
 };
 
 export async function getProducts(
@@ -48,7 +55,7 @@ export async function getProducts(
     if (options.sellerId) params.set('sellerId', options.sellerId);
     if (options.q) params.set('q', options.q);
 
-    const res = await fetch(`/api/products?${params.toString()}`, { next: { revalidate: 60 } });
+    const res = await fetch(`/api/products?${params.toString()}`, { next: { revalidate: 60, tags: ['products', 'inventory'] } });
     if (res.ok) {
       const data = await res.json();
       return data.products ?? [];

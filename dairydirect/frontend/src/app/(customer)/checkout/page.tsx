@@ -41,6 +41,7 @@ export default function CheckoutScreen() {
 
   const [isLoading, setIsLoading] = useState(true);
   const [isProcessing, setIsProcessing] = useState(false);
+  const [stockError, setStockError] = useState<string | null>(null);
 
   const [selectedSlot, setSelectedSlot] = useState('morning1');
   const [upiId, setUpiId] = useState('');
@@ -214,7 +215,11 @@ export default function CheckoutScreen() {
             router.replace(`/order-confirmed/${result.orderId}`);
           } else {
             setIsProcessing(false);
-            alert(result.error || 'Payment verified but order creation failed. Please contact support with your payment ID: ' + razorpayResponse.razorpay_payment_id);
+            if (result.error && (result.error.toLowerCase().includes('insufficient') || result.error.toLowerCase().includes('stock') || result.error.toLowerCase().includes('inventory'))) {
+              setStockError(result.error);
+            } else {
+              alert(result.error || 'Payment verified but order creation failed. Please contact support with your payment ID: ' + razorpayResponse.razorpay_payment_id);
+            }
           }
         },
         onError: (error) => {
@@ -254,7 +259,11 @@ export default function CheckoutScreen() {
       router.replace(`/order-confirmed/${result.orderId}`);
     } else {
       setIsProcessing(false);
-      alert(result.error || 'Failed to place order. Please try again.');
+      if (result.error && (result.error.toLowerCase().includes('insufficient') || result.error.toLowerCase().includes('stock') || result.error.toLowerCase().includes('inventory'))) {
+        setStockError(result.error);
+      } else {
+        alert(result.error || 'Failed to place order. Please try again.');
+      }
     }
   };
 
@@ -420,6 +429,44 @@ export default function CheckoutScreen() {
               <div className="w-16 h-16 rounded-full border-4 border-sand border-t-primary animate-spin mb-6" />
               <h3 className="font-bold text-dark text-lg mb-2">Placing Order...</h3>
               <p className="text-sm text-muted text-center">Please do not close the app or press back.</p>
+            </motion.div>
+          </motion.div>
+        )}
+
+        {stockError && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-xs p-4"
+          >
+            <motion.div
+              initial={{ scale: 0.95, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.95, opacity: 0 }}
+              className="bg-white rounded-2xl p-6 w-full max-w-md shadow-2xl border border-rose-200"
+            >
+              <div className="flex items-center gap-3 text-rose-600 mb-3">
+                <AlertCircle className="w-6 h-6 shrink-0" />
+                <h3 className="font-bold text-lg text-gray-900">Important: Inventory Update</h3>
+              </div>
+              <p className="text-sm text-gray-700 leading-relaxed mb-4">
+                {stockError}
+              </p>
+              <p className="text-xs text-gray-500 mb-6">
+                Items in your cart may have been purchased by other customers concurrently. Please return to your cart to review updated quantities.
+              </p>
+              <div className="flex justify-end gap-3">
+                <Button
+                  onClick={() => {
+                    setStockError(null);
+                    router.push('/cart');
+                  }}
+                  className="w-full bg-[#0f3e26] hover:bg-[#144f31] text-white font-bold py-2.5 rounded-xl shadow-md"
+                >
+                  Return to Cart & Adjust Items
+                </Button>
+              </div>
             </motion.div>
           </motion.div>
         )}

@@ -42,6 +42,7 @@ export type PlaceOrderInput = {
   paymentStatus: string;
   couponCode?: string;
   upiId?: string;
+  reservationId?: string;
   // Razorpay-specific fields (required when paymentMethod is 'razorpay')
   razorpayOrderId?: string;
   razorpayPaymentId?: string;

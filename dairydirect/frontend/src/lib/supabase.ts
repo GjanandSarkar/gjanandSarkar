@@ -41,9 +41,12 @@ export type DBProductVariant = {
   original_price: number | null;
   cost_price: number;
   stock: number;
+  reserved_quantity: number;
+  available_quantity: number;
   low_stock_threshold: number;
   batch_number?: string | null;
   expiry_date?: string | null;
+  version?: number;
   created_at: string;
 };
 

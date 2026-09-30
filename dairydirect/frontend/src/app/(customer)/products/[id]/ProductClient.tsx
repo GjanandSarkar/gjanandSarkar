@@ -25,6 +25,7 @@ import { BrandStory } from '@/components/trust/BrandStory';
 import { TrustBadges } from '@/components/trust/TrustBadges';
 import { ProductEditModal } from '@/components/admin/ProductEditModal';
 import { getProductReviews, submitProductReview, ReviewItem } from '@/lib/api/reviews';
+import { useRealtimeInventory } from '@/hooks/useRealtimeInventory';
 
 interface ProductClientProps {
   product: ProductWithVariants;
@@ -77,11 +78,37 @@ export function ProductClient({ product: initialProduct }: ProductClientProps) {
     });
   }, [product.id, product.name, product.category]);
 
+  useRealtimeInventory({
+    productId: product.id,
+    onUpdate: (liveVariant) => {
+      setProduct((prev) => ({
+        ...prev,
+        product_variants: (prev.product_variants || []).map((v) =>
+          v.id === liveVariant.variantId
+            ? {
+                ...v,
+                stock: liveVariant.stock,
+                available_quantity: liveVariant.availableQuantity,
+                reserved_quantity: liveVariant.reservedQuantity,
+                low_stock_threshold: liveVariant.lowStockThreshold,
+              }
+            : v
+        ),
+      }));
+    },
+  });
+
   const [selectedVariantIdx, setSelectedVariantIdx] = useState(0);
 
   const variants = product.product_variants || [];
   const selectedVariant = variants[selectedVariantIdx] || variants[0];
   if (!selectedVariant) return <div className="p-10 text-center">No variants available</div>;
+
+  const availableStock = selectedVariant.available_quantity !== undefined 
+    ? selectedVariant.available_quantity 
+    : selectedVariant.stock;
+  const isOutOfStock = availableStock <= 0;
+  const isLowStock = availableStock > 0 && availableStock <= (selectedVariant.low_stock_threshold || 10);
 
   const cartItem = cart.find(item => item.productId === product.id && item.variantId === selectedVariant.id);
   const quantity = cartItem?.quantity || 0;
@@ -89,7 +116,7 @@ export function ProductClient({ product: initialProduct }: ProductClientProps) {
   const handleUpdate = async (type: 'inc' | 'dec') => {
     let newQuantity = type === 'inc' ? quantity + 1 : Math.max(0, quantity - 1);
 
-    if (type === 'inc' && newQuantity > selectedVariant.stock) return;
+    if (type === 'inc' && newQuantity > availableStock) return;
 
     if (newQuantity === 0) {
       removeFromCartLocal(product.id, selectedVariant.id);
@@ -215,25 +242,49 @@ export function ProductClient({ product: initialProduct }: ProductClientProps) {
               </p>
             </div>
 
-            {/* Variant Selector */}
-            <div className="bg-white rounded-2xl border border-gray-200/90 p-5 shadow-2xs">
-              <h3 className="text-xs font-bold uppercase tracking-wider text-gray-600 mb-3">
-                Pack Size
-              </h3>
+            {/* Variant Selector & Authoritative Realtime Stock Status */}
+            <div className="bg-white rounded-2xl border border-gray-200/90 p-5 shadow-2xs space-y-3">
+              <div className="flex items-center justify-between">
+                <h3 className="text-xs font-bold uppercase tracking-wider text-gray-600">
+                  Pack Size
+                </h3>
+                {isOutOfStock ? (
+                  <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-rose-50 text-rose-700 border border-rose-200">
+                    <span className="w-1.5 h-1.5 rounded-full bg-rose-500" />
+                    Out of Stock
+                  </span>
+                ) : isLowStock ? (
+                  <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-amber-50 text-amber-800 border border-amber-200 animate-pulse">
+                    <span className="w-1.5 h-1.5 rounded-full bg-amber-500" />
+                    Only {availableStock} left in stock — order soon
+                  </span>
+                ) : (
+                  <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-emerald-50 text-emerald-800 border border-emerald-200">
+                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+                    In Stock ({availableStock} units)
+                  </span>
+                )}
+              </div>
               <div className="flex flex-wrap gap-2">
-                {product.product_variants.map((v, idx) => (
-                  <button
-                    key={v.id}
-                    onClick={() => setSelectedVariantIdx(idx)}
-                    className={`px-4 py-2.5 rounded-xl border transition-all font-bold text-xs cursor-pointer ${
-                      selectedVariantIdx === idx
-                        ? 'border-[#0f3e26] bg-[#0f3e26] text-white shadow-sm'
-                        : 'border-gray-200 bg-white text-gray-800 hover:border-gray-300'
-                    }`}
-                  >
-                    <span>{v.weight} — ₹{v.price}</span>
-                  </button>
-                ))}
+                {product.product_variants.map((v, idx) => {
+                  const vAvail = v.available_quantity !== undefined ? v.available_quantity : v.stock;
+                  return (
+                    <button
+                      key={v.id}
+                      onClick={() => setSelectedVariantIdx(idx)}
+                      className={`px-4 py-2.5 rounded-xl border transition-all font-bold text-xs cursor-pointer flex items-center gap-1.5 ${
+                        selectedVariantIdx === idx
+                          ? 'border-[#0f3e26] bg-[#0f3e26] text-white shadow-sm'
+                          : 'border-gray-200 bg-white text-gray-800 hover:border-gray-300'
+                      }`}
+                    >
+                      <span>{v.weight} — ₹{v.price}</span>
+                      {vAvail <= 0 && (
+                        <span className="text-[10px] opacity-75 font-normal text-rose-500">(Sold out)</span>
+                      )}
+                    </button>
+                  );
+                })}
               </div>
             </div>
 
@@ -377,7 +428,14 @@ export function ProductClient({ product: initialProduct }: ProductClientProps) {
             <p className="text-xl sm:text-2xl font-black text-[#0f3e26]">₹{selectedVariant.price}</p>
           </div>
 
-          {quantity === 0 ? (
+          {isOutOfStock ? (
+            <button
+              disabled
+              className="flex-1 h-12 bg-gray-200 text-gray-500 font-bold rounded-xl text-xs sm:text-sm cursor-not-allowed flex items-center justify-center gap-1.5"
+            >
+              <span>Currently Out of Stock</span>
+            </button>
+          ) : quantity === 0 ? (
             <button
               onClick={() => handleUpdate('inc')}
               className="flex-1 h-12 bg-[#0f3e26] hover:bg-[#144f31] text-white font-bold rounded-xl shadow-md active:scale-95 transition-all text-xs sm:text-sm cursor-pointer"
@@ -395,8 +453,9 @@ export function ProductClient({ product: initialProduct }: ProductClientProps) {
               <span className="text-base font-black text-[#0f3e26]">{quantity}</span>
               <button
                 onClick={() => handleUpdate('inc')}
-                disabled={quantity >= selectedVariant.stock}
+                disabled={quantity >= availableStock}
                 className="w-8 h-8 flex items-center justify-center rounded-lg bg-[#0f3e26] text-white shadow-2xs font-black disabled:opacity-50 cursor-pointer"
+                title={quantity >= availableStock ? 'Maximum available stock reached' : undefined}
               >
                 <Plus className="w-4 h-4 stroke-[3]" />
               </button>

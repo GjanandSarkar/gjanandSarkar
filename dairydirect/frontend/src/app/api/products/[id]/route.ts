@@ -10,6 +10,7 @@ import { invalidateProductsCache, getCachedProductDetail, cacheProductDetail } f
 import { isValidUUID } from '@/lib/security/sanitize';
 import { getAdminSupabase } from '@/lib/supabase/admin';
 import { writeAuditLog } from '@/lib/security/audit';
+import { revalidateInventory } from '@/lib/inventory/cache-invalidation';
 
 interface Props {
   params: Promise<{ id: string }>;
@@ -255,6 +256,7 @@ export async function PUT(request: NextRequest, { params }: Props) {
     }
 
     await invalidateProductsCache(id);
+    await revalidateInventory({ productId: id });
     const updatedProduct = await fetchProductDetails(id);
     
     if (auth?.userId) {
@@ -365,6 +367,7 @@ export async function DELETE(request: NextRequest, { params }: Props) {
         console.warn('[Product DELETE] seller_product update warning:', spErr?.message || spErr);
       }
       await invalidateProductsCache(id);
+      await revalidateInventory({ productId: id });
       
       if (auth?.userId) {
         await writeAuditLog({

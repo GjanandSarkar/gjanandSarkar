@@ -12,6 +12,7 @@ import { sendOrderConfirmationEmail, sendAdminNewOrderAlert } from '@/lib/aws/se
 import { sendSMS } from '@/lib/aws/sns';
 import { PlaceOrderSchema } from '@/lib/security/sanitize';
 import { getAdminSupabase } from '@/lib/supabase/admin';
+import { revalidateInventory } from '@/lib/inventory/cache-invalidation';
 
 export async function POST(request: NextRequest) {
   try {
@@ -279,81 +280,57 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // ─── 2. Fallback via Supabase Admin Client ───
+    // ─── 2. Supabase Atomic Order Placement (Single Source of Truth) ───
     if (!placedOrderId) {
       const sb = getAdminSupabase();
+      const reservationId = (orderData as any)?.reservationId || null;
 
-      // Insert Order with razorpay IDs and shipping_address snapshot
-      const { data: orderDataRes, error: orderErr } = await sb
-        .from('orders')
-        .insert({
-          user_id: auth.userId,
-          address_id: addressId,
-          shipping_address: shippingAddressSnapshot,
-          status: 'confirmed',
-          subtotal: pricing.subtotal,
-          delivery_fee: pricing.deliveryFee,
-          discount_amount: pricing.discount,
-          total_amount: pricing.total,
-          payment_method: paymentMethod.toUpperCase(),
-          payment_status: derivedPaymentStatus,
-          coupon_code: couponCode || null,
-          delivery_slot: deliverySlot || null,
-          delivery_date: deliveryDate.toISOString(),
-          loyalty_earned: Math.floor(pricing.total),
-          // Store razorpay IDs for payment tracking & webhook reconciliation
-          razorpay_order_id: razorpayOrderId || null,
-          razorpay_payment_id: razorpayPaymentId || null,
-          razorpay_signature: razorpaySignature || null,
-        })
-        .select('id, order_number')
-        .single();
-
-      if (orderErr || !orderDataRes) {
-        throw new Error(orderErr?.message || 'Failed to create order record in Supabase');
-      }
-
-      placedOrderId = orderDataRes.id;
-      placedOrderNumber = orderDataRes.order_number || `ORD-${orderDataRes.id.substring(0, 8).toUpperCase()}`;
-
-      // Insert Order Items
-      const orderItemInserts = items.map((item) => ({
-        order_id: placedOrderId,
-        product_id: item.productId,
-        variant_id: item.variantId,
-        quantity: item.quantity,
-        price: item.price || 0,
-      }));
-
-      const { error: itemsErr } = await sb.from('order_items').insert(orderItemInserts);
-      if (itemsErr) {
-        console.error('[PlaceOrder] Failed to insert items in Supabase:', itemsErr.message);
-      }
-
-      // Deduct variant stock
-      for (const item of items) {
-        const { data: vData } = await sb.from('product_variants').select('stock').eq('id', item.variantId).single();
-        if (vData) {
-          const newStock = Math.max(0, (vData.stock || 0) - item.quantity);
-          await sb.from('product_variants').update({ stock: newStock }).eq('id', item.variantId);
-        }
-      }
-
-      // Create Notification
-      await sb.from('notifications').insert({
-        user_id: auth.userId,
-        role_target: 'customer',
-        title: 'Order Confirmed! 🎉',
-        message: `Your order ${placedOrderNumber} has been confirmed. Total: ₹${pricing.total}. Expected delivery tomorrow.`,
-        type: 'order',
-        related_id: placedOrderId,
+      const { data: rpcRes, error: rpcErr } = await sb.rpc('place_order_atomic', {
+        p_user_id: auth.userId,
+        p_address_id: addressId,
+        p_shipping_address: shippingAddressSnapshot,
+        p_delivery_slot: deliverySlot || null,
+        p_delivery_date: deliveryDate.toISOString(),
+        p_notes: (orderData as any)?.notes || null,
+        p_payment_method: paymentMethod.toUpperCase(),
+        p_items: items.map((i) => ({ variant_id: i.variantId, quantity: i.quantity })),
+        p_coupon_code: couponCode || null,
+        p_razorpay_order_id: razorpayOrderId || null,
+        p_razorpay_payment_id: razorpayPaymentId || null,
+        p_razorpay_signature: razorpaySignature || null,
+        p_reservation_id: reservationId
       });
+
+      if (rpcErr || !rpcRes || !rpcRes.success) {
+        const errorMsg = rpcErr?.message || rpcRes?.error || 'Failed to place order atomically';
+        console.error('[PlaceOrder Atomic] Error:', errorMsg);
+        return NextResponse.json({ error: errorMsg }, { status: 400 });
+      }
+
+      placedOrderId = rpcRes.order_id;
+      placedOrderNumber = rpcRes.order_number;
+
+      // In-app order notification
+      try {
+        await sb.from('notifications').insert({
+          user_id: auth.userId,
+          role_target: 'customer',
+          title: 'Order Confirmed! 🎉',
+          message: `Your order ${placedOrderNumber} has been confirmed. Total: ₹${rpcRes.total_amount || pricing.total}. Expected delivery tomorrow.`,
+          type: 'order',
+          related_id: placedOrderId,
+        });
+      } catch (notifErr) {
+        console.warn('[PlaceOrder] Failed to insert notification:', notifErr);
+      }
     }
 
-    // ─── Post-Transaction Non-Critical Operations (Async) ───
+    // ─── Post-Transaction Inventory Revalidation ───
+    // Invalidates Next.js cached pages (Home, Category, Search, Product Details) & Redis
+    await revalidateInventory({ productId: items[0]?.productId });
+
     setImmediate(async () => {
       try {
-        await invalidateProductsCache();
         await invalidateUserProfileCache(auth.userId);
         await invalidateAdminCaches();
       } catch (e) {
