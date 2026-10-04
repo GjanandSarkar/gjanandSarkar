@@ -251,6 +251,20 @@ export async function POST(request: NextRequest) {
       created_by: auth?.userId || rawSellerId || null,
     };
 
+    // Auto-link category_id if available
+    if (category) {
+      try {
+        const { data: catRecord } = await sb
+          .from('categories')
+          .select('id')
+          .ilike('name', category.trim())
+          .maybeSingle();
+        if (catRecord?.id) {
+          primaryPayload.category_id = catRecord.id;
+        }
+      } catch {}
+    }
+
     if (validSellerUuid) {
       primaryPayload.seller_id = validSellerUuid;
     }
@@ -283,21 +297,40 @@ export async function POST(request: NextRequest) {
     }
 
     // 2. Insert into product_variants table
-    if (variants && Array.isArray(variants)) {
-      const vInserts = variants.map((v: any) => ({
-        product_id: prodData.id,
-        weight: v.weight,
-        price: v.price,
-        cost_price: v.cost_price || 0,
-        original_price: v.original_price || null,
-        stock: v.stock || 100,
-      }));
-      await sb.from('product_variants').insert(vInserts);
+    if (variants && Array.isArray(variants) && variants.length > 0) {
+      const vInserts = variants.map((v: any) => {
+        const stockNum = typeof v.stock === 'number' ? v.stock : (!isNaN(parseInt(v.stock, 10)) ? parseInt(v.stock, 10) : 100);
+        const priceNum = typeof v.price === 'number' ? v.price : (parseFloat(v.price) || 0);
+        const costPriceNum = typeof v.cost_price === 'number' ? v.cost_price : (!isNaN(parseFloat(v.cost_price)) ? parseFloat(v.cost_price) : 0);
+        const originalPriceNum = v.original_price ? (parseFloat(v.original_price) || null) : null;
+
+        return {
+          product_id: prodData.id,
+          weight: String(v.weight || 'Default').trim(),
+          price: priceNum,
+          cost_price: Math.max(0, costPriceNum),
+          original_price: originalPriceNum,
+          stock: Math.max(0, stockNum),
+          available_quantity: Math.max(0, stockNum),
+          reserved_quantity: 0,
+          low_stock_threshold: v.low_stock_threshold || 10,
+        };
+      });
+
+      const { error: vErr } = await sb.from('product_variants').insert(vInserts);
+      if (vErr) {
+        console.error('[Products POST] product_variants insert error:', vErr);
+        throw new Error(`Failed to save product variants: ${vErr.message}`);
+      }
     }
 
     // 3. Sync to seller_product table in Supabase
     if (prodData?.id) {
       const primaryV = (variants && variants[0]) || {};
+      const primaryPrice = typeof primaryV.price === 'number' ? primaryV.price : (parseFloat(primaryV.price) || 0);
+      const primaryCost = typeof primaryV.cost_price === 'number' ? primaryV.cost_price : (parseFloat(primaryV.cost_price) || 0);
+      const primaryStock = typeof primaryV.stock === 'number' ? primaryV.stock : (!isNaN(parseInt(primaryV.stock, 10)) ? parseInt(primaryV.stock, 10) : 100);
+
       try {
         await sb.from('seller_product').insert({
           product_id: prodData.id,
@@ -306,11 +339,11 @@ export async function POST(request: NextRequest) {
           name,
           category,
           description: description || null,
-          price: primaryV.price || 0,
-          original_price: primaryV.original_price || null,
-          cost_price: primaryV.cost_price || 0,
-          weight: primaryV.weight || '500g',
-          stock: primaryV.stock || 100,
+          price: primaryPrice,
+          original_price: primaryV.original_price ? parseFloat(primaryV.original_price) : null,
+          cost_price: primaryCost,
+          weight: primaryV.weight ? String(primaryV.weight).trim() : '500g',
+          stock: primaryStock,
           image_url: image_url || null,
           status: is_active ?? true ? 'active' : 'inactive',
           is_approved: true,

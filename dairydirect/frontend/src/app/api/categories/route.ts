@@ -194,21 +194,17 @@ export async function POST(request: NextRequest) {
       .select()
       .maybeSingle();
 
-    if (!sbErr && sbData) {
+    if (sbErr) {
+      console.error('[Categories POST] Supabase upsert error:', sbErr);
+    } else if (sbData) {
       createdCategory = createdCategory || sbData;
     }
 
     if (!createdCategory) {
-      createdCategory = {
-        id: `cat-${Date.now()}`,
-        name: cleanName,
-        slug,
-        description: description || null,
-        image_url: image_url || null,
-        icon_name: icon_name || null,
-        sort_order: sort_order || 0,
-        product_count: 0,
-      };
+      return NextResponse.json(
+        { error: sbErr?.message || 'Failed to persist category to database' },
+        { status: 500 }
+      );
     }
 
     // Invalidate category cache so next GET fetches fresh data

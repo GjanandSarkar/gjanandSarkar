@@ -298,7 +298,8 @@ export async function POST(request: NextRequest) {
         p_razorpay_order_id: razorpayOrderId || null,
         p_razorpay_payment_id: razorpayPaymentId || null,
         p_razorpay_signature: razorpaySignature || null,
-        p_reservation_id: reservationId
+        p_reservation_id: reservationId,
+        p_idempotency_key: (orderData as any)?.idempotencyKey || reservationId || razorpayPaymentId || null,
       });
 
       if (rpcErr || !rpcRes || !rpcRes.success) {

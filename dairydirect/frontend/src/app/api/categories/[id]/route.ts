@@ -63,24 +63,35 @@ export async function PUT(
     if (icon_name !== undefined) updates.icon_name = icon_name;
     if (sort_order !== undefined) updates.sort_order = sort_order;
 
-    const { data: sbData } = await sb
-      .from('categories')
-      .update(updates)
-      .or(`id.eq.${id},name.eq.${id}`)
-      .select()
-      .maybeSingle();
+    const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id);
+    let queryBuilder = sb.from('categories').update(updates);
+    if (isUuid) {
+      queryBuilder = queryBuilder.eq('id', id);
+    } else {
+      queryBuilder = queryBuilder.eq('name', id);
+    }
+
+    const { data: sbData, error: sbErr } = await queryBuilder.select().maybeSingle();
+
+    if (sbErr) {
+      console.error('[Category PUT] Supabase error:', sbErr);
+    }
 
     if (sbData) {
       updatedCategory = updatedCategory || sbData;
     }
 
+    if (!updatedCategory) {
+      return NextResponse.json({ error: sbErr?.message || 'Category not found or failed to update' }, { status: 404 });
+    }
+
     // Invalidate category cache
     invalidateCategoryCache().catch(() => {});
 
-    return NextResponse.json({ success: true, category: updatedCategory || { id, ...updates } });
+    return NextResponse.json({ success: true, category: updatedCategory });
   } catch (error: any) {
     console.error('[Category PUT] Error:', error.message);
-    return NextResponse.json({ error: 'Failed to update category' }, { status: 500 });
+    return NextResponse.json({ error: error.message || 'Failed to update category' }, { status: 500 });
   }
 }
 
@@ -105,7 +116,16 @@ export async function DELETE(
     }
 
     const sb = getAdminSupabase();
-    await sb.from('categories').delete().or(`id.eq.${id},name.eq.${id}`);
+    const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id);
+    const deleteQuery = isUuid
+      ? sb.from('categories').delete().eq('id', id)
+      : sb.from('categories').delete().eq('name', id);
+
+    const { error: sbErr } = await deleteQuery;
+    if (sbErr) {
+      console.error('[Category DELETE] Supabase delete error:', sbErr);
+      return NextResponse.json({ error: sbErr.message || 'Failed to delete category' }, { status: 500 });
+    }
 
     // Invalidate category cache
     invalidateCategoryCache().catch(() => {});

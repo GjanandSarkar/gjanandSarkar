@@ -1,10 +1,10 @@
 /**
  * Admin Action Audit Log
- * Records all admin actions to the audit_logs table in PostgreSQL.
+ * Records all admin actions to the audit_logs table via Supabase.
  * Critical for compliance and security investigations.
  */
 
-import { query } from '@/lib/aws/rds';
+import { getAdminSupabase } from '@/lib/supabase/admin';
 
 export type AuditAction =
   | 'product.create'
@@ -13,6 +13,7 @@ export type AuditAction =
   | 'product.activate'
   | 'product.deactivate'
   | 'order.status_update'
+  | 'order.update'
   | 'order.cancel'
   | 'coupon.create'
   | 'coupon.delete'
@@ -25,7 +26,7 @@ export type AuditAction =
 
 export interface AuditLogEntry {
   adminId: string;
-  action: AuditAction;
+  action: AuditAction | string;
   resourceType: string;    // e.g. 'product', 'order'
   resourceId: string;      // ID of affected resource
   details?: object;        // Before/after values
@@ -33,23 +34,24 @@ export interface AuditLogEntry {
 }
 
 /**
- * Write an audit log entry.
+ * Write an audit log entry via Supabase.
  * Non-blocking: failures are logged but don't break the main operation.
  */
 export async function writeAuditLog(entry: AuditLogEntry): Promise<void> {
   try {
-    await query(
-      `INSERT INTO audit_logs (admin_id, action, resource_type, resource_id, details, ip_address)
-       VALUES ($1, $2, $3, $4, $5, $6)`,
-      [
-        entry.adminId,
-        entry.action,
-        entry.resourceType,
-        entry.resourceId,
-        entry.details ? JSON.stringify(entry.details) : null,
-        entry.ipAddress || null,
-      ]
-    );
+    const sb = getAdminSupabase();
+    const { error } = await sb.from('audit_logs').insert({
+      admin_id: entry.adminId,
+      action: entry.action,
+      entity_type: entry.resourceType,
+      entity_id: entry.resourceId,
+      new_data: entry.details || null,
+      ip_address: entry.ipAddress || null,
+    });
+
+    if (error) {
+      console.error('[AuditLog] Supabase insert error:', error.message);
+    }
   } catch (err) {
     // Audit log failure should never break the main operation
     console.error('[AuditLog] Failed to write audit entry:', err);
@@ -65,35 +67,40 @@ export async function getAuditLogs(params: {
   adminId?: string;
   resourceType?: string;
 }): Promise<any[]> {
-  const conditions: string[] = ['1=1'];
-  const values: any[] = [];
-  let paramIdx = 1;
+  try {
+    const sb = getAdminSupabase();
+    let query = sb
+      .from('audit_logs')
+      .select('*, profiles!audit_logs_admin_id_fkey(name, email)')
+      .order('created_at', { ascending: false })
+      .range(params.offset ?? 0, (params.offset ?? 0) + (params.limit ?? 50) - 1);
 
-  if (params.adminId) {
-    conditions.push(`al.admin_id = $${paramIdx++}`);
-    values.push(params.adminId);
+    if (params.adminId) {
+      query = query.eq('admin_id', params.adminId);
+    }
+
+    if (params.resourceType) {
+      query = query.eq('entity_type', params.resourceType);
+    }
+
+    const { data, error } = await query;
+
+    if (error) {
+      console.error('[AuditLog] Failed to fetch audit logs:', error.message);
+      return [];
+    }
+
+    return (data || []).map((row: any) => ({
+      ...row,
+      // Map DB column names to the format callers expect
+      resource_type: row.entity_type,
+      resource_id: row.entity_id,
+      details: row.new_data,
+      admin_name: row.profiles?.name,
+      admin_email: row.profiles?.email,
+    }));
+  } catch (err) {
+    console.error('[AuditLog] Failed to fetch audit logs:', err);
+    return [];
   }
-
-  if (params.resourceType) {
-    conditions.push(`al.resource_type = $${paramIdx++}`);
-    values.push(params.resourceType);
-  }
-
-  values.push(params.limit ?? 50);
-  values.push(params.offset ?? 0);
-
-  const result = await query(
-    `SELECT 
-       al.*,
-       p.name as admin_name,
-       p.email as admin_email
-     FROM audit_logs al
-     LEFT JOIN profiles p ON p.id = al.admin_id
-     WHERE ${conditions.join(' AND ')}
-     ORDER BY al.created_at DESC
-     LIMIT $${paramIdx++} OFFSET $${paramIdx}`,
-    values
-  );
-
-  return result.rows;
 }

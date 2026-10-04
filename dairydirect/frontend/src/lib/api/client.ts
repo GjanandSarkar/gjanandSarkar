@@ -188,7 +188,7 @@ export const api = {
   },
 
   categories: {
-    get: () => fetchApi<{ categories: any[] }>('/api/categories'),
+    get: (refresh?: boolean) => fetchApi<{ categories: any[] }>(`/api/categories${refresh ? '?refresh=true' : ''}`),
     create: (_data: any) =>
       fetchApi<{ success: boolean; category: any }>('/api/categories', {
         method: 'POST',

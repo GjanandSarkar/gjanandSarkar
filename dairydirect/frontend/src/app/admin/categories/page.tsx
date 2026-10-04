@@ -44,7 +44,7 @@ export default function AdminCategoriesPage() {
     setError('');
     try {
       const [categoriesData, productsData] = await Promise.all([
-        api.categories.get().catch(() => ({ categories: [] })),
+        api.categories.get(true).catch(() => ({ categories: [] })),
         api.products.get({ activeOnly: false }).catch(() => ({ products: [] })),
       ]);
 

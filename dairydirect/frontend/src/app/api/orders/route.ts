@@ -328,7 +328,7 @@ export async function PUT(request: NextRequest) {
         if (updateResult.rows.length > 0) {
           await writeAuditLog({
             adminId: auth.userId,
-            action: 'order.update' as any,
+            action: 'order.update',
             resourceType: 'order',
             resourceId: orderId,
             details: { status, notes },
@@ -353,7 +353,7 @@ export async function PUT(request: NextRequest) {
 
     await writeAuditLog({
       adminId: auth.userId,
-      action: 'order.update' as any,
+      action: 'order.update',
       resourceType: 'order',
       resourceId: orderId,
       details: { status, notes },
