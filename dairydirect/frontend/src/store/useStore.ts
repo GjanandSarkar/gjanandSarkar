@@ -39,6 +39,18 @@ export type User = {
 };
 
 // ─── Seller Store shape ──────────────────────────────────────
+export type SellerLifecycleStatus =
+  | 'active'
+  | 'pending'
+  | 'pending_kyc'
+  | 'pending_inquiry'
+  | 'suspended'
+  | 'under_review'
+  | 'deactivated'
+  | 'permanently_deactivated'
+  | 'reactivation_requested'
+  | 'rejected';
+
 export type SellerStore = {
   id: string;
   user_id: string;
@@ -47,10 +59,15 @@ export type SellerStore = {
   state: string;
   plan: 'starter' | 'growth' | 'enterprise';
   commission_rate: number;
-  status: 'active' | 'pending_kyc' | 'suspended';
+  status: SellerLifecycleStatus;
   gstin?: string;
   pan?: string;
   total_revenue?: number;
+  review_started_at?: string | null;
+  review_expires_at?: string | null;
+  review_reason?: string | null;
+  deactivation_reason?: string | null;
+  reactivation_reason?: string | null;
 };
 
 // ─── App State ────────────────────────────────────────────────

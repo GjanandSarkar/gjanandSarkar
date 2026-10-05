@@ -110,6 +110,28 @@ export async function POST(request: NextRequest) {
                                   paymentMethod === 'upi' ? 'paid' : 
                                   'pending'; // COD is always pending
 
+    // ─── Verify that no ordered product belongs to a deactivated seller ───
+    const productIds = Array.from(new Set(items.map((i) => i.productId).filter(Boolean)));
+    if (productIds.length > 0) {
+      const sbCheck = getAdminSupabase();
+      const { data: prodsWithSellers } = await sbCheck
+        .from('products')
+        .select('id, name, seller_id, sellers:seller_id(status, store_name)')
+        .in('id', productIds);
+
+      if (prodsWithSellers) {
+        for (const p of prodsWithSellers) {
+          const seller = (p as any).sellers;
+          if (seller && ['deactivated', 'permanently_deactivated'].includes(seller.status)) {
+            return NextResponse.json(
+              { error: `Cannot place order. Product "${p.name}" is unavailable because the seller "${seller.store_name}" is currently deactivated.` },
+              { status: 400 }
+            );
+          }
+        }
+      }
+    }
+
     // Calculate pricing server-side
     const pricingItems = items.map((i) => ({ variantId: i.variantId, quantity: i.quantity }));
     const pricing = await calculateOrderPricing(pricingItems, couponCode);

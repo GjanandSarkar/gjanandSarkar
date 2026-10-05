@@ -33,23 +33,25 @@ export function Footer() {
           
           {/* Column 1: Brand & Bio (2 cols on lg) */}
           <div className="lg:col-span-2 space-y-4">
-            <Link href="/home" className="inline-flex items-center gap-2">
-              <img 
-                src="/application logo/gjanand sarkar logo.png" 
-                alt="Gjanand Sarkar" 
-                className="h-12 w-auto object-contain brightness-110" 
-                onError={(e) => {
-                  (e.target as HTMLElement).style.display = 'none';
-                }}
-              />
-              <div className="flex flex-col">
-                <span className="text-2xl font-black tracking-tight leading-none">
-                  <span className="text-white">Gj</span>
-                  <span className="text-[#4ade80]">anand</span>
-                </span>
-                <span className="text-[10px] tracking-[0.2em] font-black text-[#60a5fa] uppercase text-right leading-none mt-0.5">
-                  SARKAR
-                </span>
+            {/* ── Brand Logo ── */}
+            <Link href="/home" className="flex items-center gap-2 shrink-0 group active:scale-95 transition-transform">
+              <div className="relative flex items-center">
+                <img
+                  src="/application logo/gjanand sarkar logo.png"
+                  alt="Gjanand Sarkar"
+                  className="h-12 md:h-14 w-auto object-contain drop-shadow-xs brightness-110"
+                  onError={(e) => {
+                    (e.target as HTMLElement).style.display = 'none';
+                  }}
+                />
+                <div className="flex flex-col">
+                  <span className="text-xl md:text-2xl font-black tracking-tight leading-none">
+                    <span className="text-white">Gjanand</span>
+                  </span>
+                  <span className="text-[10px] md:text-[11px] tracking-[0.2em] font-black text-[#c88a23] uppercase text-right leading-none mt-0.5">
+                    SARKAR
+                  </span>
+                </div>
               </div>
             </Link>
 

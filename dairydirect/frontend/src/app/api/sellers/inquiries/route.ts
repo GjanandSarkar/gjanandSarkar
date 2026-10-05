@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { getAdminSupabase } from '@/lib/supabase/admin';
 import { query, isPgConfigured } from '@/lib/aws/rds';
+import { getAuthUser } from '@/lib/api/auth-middleware';
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
@@ -149,6 +150,7 @@ export async function POST(request: Request) {
 
 export async function PATCH(request: Request) {
   try {
+    const auth = await getAuthUser(request);
     const body = await request.json();
     const { id, status, adminNotes } = body;
 
@@ -172,8 +174,11 @@ export async function PATCH(request: Request) {
       return NextResponse.json({ error: error.message }, { status: 500 });
     }
 
-    const targetUserId = updated?.user_id || 
-      (updated?.email ? (await sb.from('profiles').select('id').eq('email', updated.email).maybeSingle())?.data?.id : null);
+    let targetUserId = updated?.user_id;
+    if (!targetUserId && updated?.email) {
+      const { data: userByEmail } = await sb.from('profiles').select('id').eq('email', updated.email).maybeSingle();
+      if (userByEmail?.id) targetUserId = userByEmail.id;
+    }
 
     if (targetUserId) {
       try {
@@ -189,7 +194,7 @@ export async function PATCH(request: Request) {
             .replace(/[^a-z0-9]+/g, '-')
             .replace(/(^-|-$)/g, '');
 
-          await sb
+          const { data: activatedStore } = await sb
             .from('sellers')
             .upsert({
               user_id: targetUserId,
@@ -202,7 +207,23 @@ export async function PATCH(request: Request) {
               commission_rate: 5.0,
               status: 'active',
               gstin: updated.gstin,
+              fssai_number: updated.fssai_number,
+              updated_at: new Date().toISOString(),
+            }, { onConflict: 'user_id' })
+            .select()
+            .single();
+
+          if (activatedStore?.id) {
+            await sb.from('seller_status_history').insert({
+              seller_id: activatedStore.id,
+              previous_status: 'pending_inquiry',
+              new_status: 'active',
+              action: 'inquiry_approved',
+              reason: 'Onboarding application approved by admin',
+              notes: adminNotes || 'Seller store activated',
+              changed_by: auth?.userId || null,
             });
+          }
         } else if (status === 'rejected') {
           // 2. Revoke seller role (unless admin) & set seller rejected
           const { data: userProf } = await sb.from('profiles').select('role').eq('id', targetUserId).maybeSingle();
@@ -213,10 +234,24 @@ export async function PATCH(request: Request) {
               .eq('id', targetUserId);
           }
 
-          await sb
+          const { data: rejectedStore } = await sb
             .from('sellers')
-            .update({ status: 'rejected' })
-            .eq('user_id', targetUserId);
+            .update({ status: 'rejected', updated_at: new Date().toISOString() })
+            .eq('user_id', targetUserId)
+            .select()
+            .maybeSingle();
+
+          if (rejectedStore?.id) {
+            await sb.from('seller_status_history').insert({
+              seller_id: rejectedStore.id,
+              previous_status: rejectedStore.status,
+              new_status: 'rejected',
+              action: 'inquiry_rejected',
+              reason: 'Onboarding application rejected by admin',
+              notes: adminNotes || 'Seller application rejected',
+              changed_by: auth?.userId || null,
+            });
+          }
         } else if (status === 'contacted' || status === 'pending') {
           // 3. Revert seller role (unless admin) & set seller pending_inquiry
           const { data: userProf } = await sb.from('profiles').select('role').eq('id', targetUserId).maybeSingle();
@@ -229,7 +264,7 @@ export async function PATCH(request: Request) {
 
           await sb
             .from('sellers')
-            .update({ status: 'pending_inquiry' })
+            .update({ status: 'pending_inquiry', updated_at: new Date().toISOString() })
             .eq('user_id', targetUserId);
         }
       } catch (err) {

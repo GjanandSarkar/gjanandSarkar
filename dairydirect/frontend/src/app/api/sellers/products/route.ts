@@ -25,11 +25,19 @@ export async function GET(request: NextRequest) {
       .select('*')
       .order('created_at', { ascending: false });
 
-    if (sellerId) {
-      query = query.eq('seller_id', sellerId);
-    }
-    if (sellerUserId) {
-      query = query.eq('seller_user_id', sellerUserId);
+    const targetSellerId = sellerId || sellerUserId;
+    if (targetSellerId) {
+      // Find both store.id and user_id if this is a store or profile reference
+      const { data: store } = await sb
+        .from('sellers')
+        .select('id, user_id')
+        .or(`id.eq.${targetSellerId},user_id.eq.${targetSellerId}`)
+        .maybeSingle();
+
+      const sId = store?.id || targetSellerId;
+      const uId = store?.user_id || targetSellerId;
+
+      query = query.or(`seller_id.eq.${sId},seller_user_id.eq.${uId}`);
     }
     if (category && category !== 'All' && category !== 'All Categories') {
       query = query.ilike('category', `%${category}%`);
@@ -52,6 +60,22 @@ export async function GET(request: NextRequest) {
   }
 }
 
+// ─── Blocked statuses for seller product operations ─────────
+const BLOCKED_SELLER_STATUSES = ['deactivated', 'permanently_deactivated'];
+
+async function checkSellerNotBlocked(sb: any, userId: string, isAdmin: boolean): Promise<{ blocked: boolean; status?: string }> {
+  if (isAdmin) return { blocked: false };
+  const { data: seller } = await sb
+    .from('sellers')
+    .select('status')
+    .eq('user_id', userId)
+    .maybeSingle();
+  if (seller && BLOCKED_SELLER_STATUSES.includes(seller.status)) {
+    return { blocked: true, status: seller.status };
+  }
+  return { blocked: false };
+}
+
 // ─── POST /api/sellers/products ─────────────────────────────
 export async function POST(request: NextRequest) {
   try {
@@ -59,6 +83,18 @@ export async function POST(request: NextRequest) {
     if (!auth?.userId) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
+
+    const sb = getAdminSupabase();
+
+    // Block deactivated sellers from adding products
+    const sellerCheck = await checkSellerNotBlocked(sb, auth.userId, !!auth.isAdmin);
+    if (sellerCheck.blocked) {
+      return NextResponse.json(
+        { error: `Your seller account is ${sellerCheck.status}. You cannot add products.` },
+        { status: 403 }
+      );
+    }
+
     const body = await request.json();
 
     const {
@@ -80,7 +116,6 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Product name and category are required' }, { status: 400 });
     }
 
-    const sb = getAdminSupabase();
 
     const isValidUuid = (id: string | null | undefined) => 
       id ? /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id) : false;
@@ -199,6 +234,16 @@ export async function PUT(request: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
+    // Block deactivated sellers from editing products
+    const sb2 = getAdminSupabase();
+    const sellerCheckPut = await checkSellerNotBlocked(sb2, auth.userId, !!auth.isAdmin);
+    if (sellerCheckPut.blocked) {
+      return NextResponse.json(
+        { error: `Your seller account is ${sellerCheckPut.status}. You cannot edit products.` },
+        { status: 403 }
+      );
+    }
+
     const body = await request.json();
     const { id, name, category, description, price, originalPrice, costPrice, weight, stock, imageUrl, status } = body;
 
@@ -308,6 +353,15 @@ export async function DELETE(request: NextRequest) {
     }
 
     const sb = getAdminSupabase();
+
+    // Block deactivated sellers from deleting products
+    const sellerCheckDel = await checkSellerNotBlocked(sb, auth.userId, !!auth.isAdmin);
+    if (sellerCheckDel.blocked) {
+      return NextResponse.json(
+        { error: `Your seller account is ${sellerCheckDel.status}. You cannot delete products.` },
+        { status: 403 }
+      );
+    }
 
     // Verify ownership
     const { data: existingProduct } = await sb

@@ -186,20 +186,26 @@ function LoginScreenInner() {
 
       <div className="w-full max-w-[440px] relative z-10">
         
-        {/* Brand Header */}
+        {/* ── Brand Logo ── */}
         <div className="flex flex-col items-center mb-6 text-center">
-          <Link href="/home" className="inline-flex items-center gap-2.5 mb-3 group">
-            <div className="w-12 h-12 rounded-2xl bg-[#0f3e26] flex items-center justify-center shadow-lg border border-[#c88a23]/30 group-hover:scale-105 transition-transform">
-              <span className="text-white font-black text-xl tracking-tight">GS</span>
-            </div>
-            <div className="flex flex-col text-left">
-              <span className="text-2xl font-black tracking-tight leading-none">
-                <span className="text-[#0f172a]">Gj</span>
-                <span className="text-[#16a34a]">anand</span>
-              </span>
-              <span className="text-[10px] tracking-[0.2em] font-black text-[#2563eb] uppercase text-right leading-none mt-0.5">
-                SARKAR
-              </span>
+          <Link href="/home" className="flex items-center gap-2 shrink-0 group active:scale-95 transition-transform mb-3">
+            <div className="relative flex items-center">
+              <img
+                src="/application logo/gjanand sarkar logo.png"
+                alt="Gjanand Sarkar"
+                className="h-14 w-auto object-contain drop-shadow-xs"
+                onError={(e) => {
+                  (e.target as HTMLElement).style.display = 'none';
+                }}
+              />
+              <div className="flex flex-col text-left">
+                <span className="text-2xl font-black tracking-tight leading-none">
+                  <span className="text-[#0f3e26]">Gjanand</span>
+                </span>
+                <span className="text-[11px] tracking-[0.2em] font-black text-[#c88a23] uppercase text-right leading-none mt-0.5">
+                  SARKAR
+                </span>
+              </div>
             </div>
           </Link>
           <p className="text-xs text-gray-500 font-medium">

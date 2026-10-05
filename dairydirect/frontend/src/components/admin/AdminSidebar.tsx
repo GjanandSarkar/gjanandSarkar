@@ -6,12 +6,13 @@ import { useRouter } from 'next/navigation';
 import { useStore } from '@/store/useStore';
 import {
   LayoutDashboard, ShoppingBag, Users, Package, BarChart3,
-  Truck, LogOut, Leaf, ShieldCheck, Bell, Settings, Tags, CalendarDays, User, Building2
+  Truck, LogOut, Leaf, ShieldCheck, Bell, Settings, Tags, CalendarDays, User, Building2, Store
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 const navItems = [
   { href: '/admin', icon: LayoutDashboard, label: 'Dashboard', exact: true },
+  { href: '/admin/sellers', icon: Store, label: 'Sellers' },
   { href: '/admin/vendor-inquiries', icon: Building2, label: 'Seller Inquiries' },
   { href: '/admin/orders', icon: ShoppingBag, label: 'Orders' },
   { href: '/admin/subscriptions', icon: CalendarDays, label: 'Subscriptions' },
@@ -49,17 +50,26 @@ export function AdminSidebar() {
       <div className="absolute top-0 left-0 w-full h-48 opacity-10 pointer-events-none"
         style={{ background: 'linear-gradient(180deg, #3f6530 0%, transparent 100%)' }} />
 
-      {/* Brand */}
+      {/* ── Brand Logo ── */}
       <div className="px-6 py-5 relative z-10">
-        <Link href="/home" className="flex items-center gap-2 group transition-transform">
-          <img src="/application logo/gjanand sarkar logo.png" alt="Logo" className="w-10 h-10 object-contain" />
-          <div className="flex flex-col">
-            <span className="text-[15px] font-black text-[#0f3e26] tracking-tight leading-none">
-              Gjanand
-            </span>
-            <span className="text-[7.5px] tracking-[0.25em] font-extrabold text-[#c88a23] uppercase">
-              SARKAR
-            </span>
+        <Link href="/home" className="flex items-center gap-2 shrink-0 group active:scale-95 transition-transform">
+          <div className="relative flex items-center">
+            <img
+              src="/application logo/gjanand sarkar logo.png"
+              alt="Gjanand Sarkar"
+              className="h-12 md:h-14 w-auto object-contain drop-shadow-xs"
+              onError={(e) => {
+                (e.target as HTMLElement).style.display = 'none';
+              }}
+            />
+            <div className="flex flex-col">
+              <span className="text-xl md:text-2xl font-black tracking-tight leading-none">
+                <span className="text-[#0f3e26]">Gjanand</span>
+              </span>
+              <span className="text-[10px] md:text-[11px] tracking-[0.2em] font-black text-[#c88a23] uppercase text-right leading-none mt-0.5">
+                SARKAR
+              </span>
+            </div>
           </div>
         </Link>
       </div>

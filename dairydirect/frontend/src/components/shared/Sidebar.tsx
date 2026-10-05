@@ -39,18 +39,26 @@ export function Sidebar() {
       <div className="absolute top-0 right-0 w-48 h-48 opacity-20 rounded-full blur-[80px] pointer-events-none"
         style={{ background: 'var(--color-primary-fixed)' }} suppressHydrationWarning />
 
-      {/* Brand */}
+      {/* ── Brand Logo ── */}
       <div className="h-[72px] flex items-center px-6 relative z-10">
-        <Link href="/home" className="flex items-center gap-2 group transition-transform">
-          <img src="/application logo/gjanand sarkar logo.png" alt="Logo" className="w-10 h-10 object-contain" />
-          <div className="flex flex-col">
-            <span className="text-[15px] font-black tracking-tight leading-none">
-              <span className="text-[#0f172a]">Gj</span>
-              <span className="text-[#16a34a]">anand</span>
-            </span>
-            <span className="text-[7.5px] tracking-[0.2em] font-black text-[#2563eb] uppercase text-right leading-none mt-0.5">
-              SARKAR
-            </span>
+        <Link href="/home" className="flex items-center gap-2 shrink-0 group active:scale-95 transition-transform">
+          <div className="relative flex items-center">
+            <img
+              src="/application logo/gjanand sarkar logo.png"
+              alt="Gjanand Sarkar"
+              className="h-12 md:h-14 w-auto object-contain drop-shadow-xs"
+              onError={(e) => {
+                (e.target as HTMLElement).style.display = 'none';
+              }}
+            />
+            <div className="flex flex-col">
+              <span className="text-xl md:text-2xl font-black tracking-tight leading-none">
+                <span className="text-[#0f3e26]">Gjanand</span>
+              </span>
+              <span className="text-[10px] md:text-[11px] tracking-[0.2em] font-black text-[#c88a23] uppercase text-right leading-none mt-0.5">
+                SARKAR
+              </span>
+            </div>
           </div>
         </Link>
       </div>

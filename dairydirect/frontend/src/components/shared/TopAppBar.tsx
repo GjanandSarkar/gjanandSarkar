@@ -14,8 +14,26 @@ export function TopAppBar() {
       style={{ background: 'rgba(250, 250, 243, 0.88)', backdropFilter: 'blur(20px)', WebkitBackdropFilter: 'blur(20px)' }}>
       <div className="flex justify-between items-center px-5 py-3.5 w-full">
         
-        <Link href="/home" className="flex items-center">
-          <img src="/application logo/gjanand sarkar logo.png" alt="Logo" className="w-9 h-9 object-contain" />
+        {/* ── Brand Logo ── */}
+        <Link href="/home" className="flex items-center gap-2 shrink-0 group active:scale-95 transition-transform">
+          <div className="relative flex items-center">
+            <img
+              src="/application logo/gjanand sarkar logo.png"
+              alt="Gjanand Sarkar"
+              className="h-10 md:h-14 w-auto object-contain drop-shadow-xs"
+              onError={(e) => {
+                (e.target as HTMLElement).style.display = 'none';
+              }}
+            />
+            <div className="flex flex-col">
+              <span className="text-lg md:text-2xl font-black tracking-tight leading-none">
+                <span className="text-[#0f3e26]">Gjanand</span>
+              </span>
+              <span className="text-[9px] md:text-[11px] tracking-[0.2em] font-black text-[#c88a23] uppercase text-right leading-none mt-0.5">
+                SARKAR
+              </span>
+            </div>
+          </div>
         </Link>
         
         <div className="flex items-center gap-1.5">

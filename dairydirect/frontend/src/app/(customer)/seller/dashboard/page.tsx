@@ -21,10 +21,14 @@ import {
   AlertCircle,
   FileCheck2,
   Building2,
-  ShoppingBag
+  ShoppingBag,
+  Ban,
+  BadgeAlert,
+  Lock,
+  Loader2,
 } from 'lucide-react';
 import { useStore } from '@/store/useStore';
-import { getSellerDashboard, SellerDashboardData } from '@/lib/api/sellers';
+import { getSellerDashboard, SellerDashboardData, requestSellerReactivation } from '@/lib/api/sellers';
 import { getProducts, ProductWithVariants } from '@/lib/api/products';
 import { ProductEditModal } from '@/components/admin/ProductEditModal';
 import Link from 'next/link';
@@ -43,9 +47,19 @@ export default function SellerDashboardPage() {
   const [editingProduct, setEditingProduct] = useState<ProductWithVariants | null>(null);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
 
+  // Reactivation Request Modal State
+  const [reactivationModalOpen, setReactivationModalOpen] = useState(false);
+  const [reactivationReason, setReactivationReason] = useState('');
+  const [reactivationNotes, setReactivationNotes] = useState('');
+  const [isSubmittingReactivation, setIsSubmittingReactivation] = useState(false);
+  const [reactivationMsg, setReactivationMsg] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
+
   useEffect(() => {
     getSellerDashboard(user?.id || '').then((res) => {
       setData(res);
+      if (res?.store) {
+        useStore.getState().setSellerStore(res.store as any);
+      }
       setIsLoading(false);
     });
 
@@ -259,10 +273,58 @@ export default function SellerDashboardPage() {
     );
   }
 
-  // ─── 3. NO INQUIRY SUBMITTED & NOT AN APPROVED SELLER ───
+  // ─── 3. STATUS DERIVATION & ACCESS CHECKS ───
+  const sellerStatus = (data?.store as any)?.status || (sellerStore as any)?.status || (inquiry && inquiry.status === 'approved' ? 'active' : 'pending');
+  const reviewExpiresAt = (data?.store as any)?.review_expires_at || (sellerStore as any)?.review_expires_at;
+  const reviewReason = (data?.store as any)?.review_reason || (sellerStore as any)?.review_reason;
+  const deactivationReason = (data?.store as any)?.deactivation_reason || (sellerStore as any)?.deactivation_reason;
+  const reactivationReasonSubmitted = (data?.store as any)?.reactivation_reason || (sellerStore as any)?.reactivation_reason;
+  const isDeactivatedOrRestricted = ['deactivated', 'permanently_deactivated', 'reactivation_requested'].includes(sellerStatus);
+
+  // ─── 4. PERMANENTLY DEACTIVATED SCREEN ───
+  if (sellerStatus === 'permanently_deactivated') {
+    return (
+      <div className="min-h-screen bg-[#fafaf8] py-12 px-4 sm:px-6 lg:px-8">
+        <div className="max-w-2xl mx-auto space-y-6">
+          <div className="bg-white rounded-3xl border border-red-300 p-8 sm:p-10 text-center space-y-6 shadow-sm">
+            <div className="w-16 h-16 rounded-2xl bg-gray-900 text-red-400 flex items-center justify-center mx-auto shadow-inner">
+              <Lock className="w-8 h-8" />
+            </div>
+            <div className="space-y-2">
+              <span className="px-3 py-1 rounded-full bg-red-100 border border-red-300 text-red-900 text-xs font-black uppercase tracking-wider">
+                Account Permanently Deactivated
+              </span>
+              <h1 className="text-2xl font-black text-gray-900">
+                {(sellerStore as any)?.store_name || (data?.store as any)?.storeName || 'Seller Store'}
+              </h1>
+              <p className="text-xs text-gray-600 max-w-md mx-auto">
+                This seller account has been permanently deactivated due to serious policy violations. Access to seller dashboard operations and product listings has been permanently revoked.
+              </p>
+            </div>
+            {deactivationReason && (
+              <div className="bg-red-50 border border-red-200 rounded-2xl p-4 text-left text-xs text-red-900 max-w-md mx-auto">
+                <span className="font-bold block mb-1">Reason:</span>
+                <p>{deactivationReason}</p>
+              </div>
+            )}
+            <div className="pt-2 flex items-center justify-center gap-3">
+              <Link
+                href="/home"
+                className="px-6 py-2.5 bg-[#0f3e26] hover:bg-[#0c331f] text-white text-xs font-bold rounded-xl transition-all"
+              >
+                Return to Storefront
+              </Link>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // ─── 5. NO INQUIRY SUBMITTED & NOT AN APPROVED SELLER ───
   const isApprovedSeller = user?.role === 'admin' || 
                            user?.role === 'seller' || 
-                           ((sellerStore as any)?.status === 'active' || (data?.store as any)?.status === 'active' || (inquiry && inquiry.status === 'approved'));
+                           (['active', 'under_review', 'deactivated', 'reactivation_requested'].includes(sellerStatus) || (inquiry && inquiry.status === 'approved'));
 
   if (!isApprovedSeller && !inquiry) {
     return (
@@ -299,7 +361,69 @@ export default function SellerDashboardPage() {
 
   return (
     <div className="min-h-screen bg-[#fafaf8] py-8 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-7xl mx-auto space-y-8">
+      <div className="max-w-7xl mx-auto space-y-6">
+
+        {/* ─── LIFECYCLE BANNER 1: Under Review ─── */}
+        {sellerStatus === 'under_review' && (
+          <div className="bg-amber-50 border-2 border-amber-300 rounded-2xl p-5 shadow-2xs space-y-2">
+            <div className="flex items-center justify-between flex-wrap gap-2">
+              <div className="flex items-center gap-2 text-amber-900 font-black text-sm">
+                <Clock className="w-5 h-5 text-amber-700 animate-pulse" />
+                <span>Seller Account Under Review</span>
+              </div>
+              {reviewExpiresAt && (
+                <span className="px-3 py-1 rounded-full bg-amber-200 text-amber-900 text-xs font-bold font-mono border border-amber-300">
+                  Review Expiry: {new Date(reviewExpiresAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}
+                </span>
+              )}
+            </div>
+            <p className="text-xs text-amber-800">
+              Your store is currently under review by our quality and compliance team.
+              {reviewReason ? ` Reason: "${reviewReason}".` : ''} Existing orders continue to be processed and fulfilled normally.
+            </p>
+          </div>
+        )}
+
+        {/* ─── LIFECYCLE BANNER 2: Deactivated ─── */}
+        {sellerStatus === 'deactivated' && (
+          <div className="bg-red-50 border-2 border-red-300 rounded-2xl p-5 shadow-2xs space-y-3">
+            <div className="flex items-center justify-between flex-wrap gap-2">
+              <div className="flex items-center gap-2 text-red-900 font-black text-sm">
+                <Ban className="w-5 h-5 text-red-600" />
+                <span>Seller Account Deactivated</span>
+              </div>
+              <button
+                onClick={() => {
+                  setReactivationReason('');
+                  setReactivationNotes('');
+                  setReactivationMsg(null);
+                  setReactivationModalOpen(true);
+                }}
+                className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white text-xs font-bold rounded-xl shadow-sm transition-all cursor-pointer"
+              >
+                Request Account Reactivation
+              </button>
+            </div>
+            <p className="text-xs text-red-800">
+              Your seller account is currently deactivated. Product additions, price updates, stock changes, and deletion operations are blocked.
+              {deactivationReason ? ` Reason: "${deactivationReason}".` : ''} You may submit an appeal using the Request Reactivation button.
+            </p>
+          </div>
+        )}
+
+        {/* ─── LIFECYCLE BANNER 3: Reactivation Requested ─── */}
+        {sellerStatus === 'reactivation_requested' && (
+          <div className="bg-blue-50 border-2 border-blue-300 rounded-2xl p-5 shadow-2xs space-y-2">
+            <div className="flex items-center gap-2 text-blue-900 font-black text-sm">
+              <BadgeAlert className="w-5 h-5 text-blue-600" />
+              <span>Reactivation Request Submitted (Pending Review)</span>
+            </div>
+            <p className="text-xs text-blue-800">
+              Your request for account reactivation has been submitted to the admin team for evaluation.
+              {reactivationReasonSubmitted ? ` Submitted Reason: "${reactivationReasonSubmitted}".` : ''} Our team will review your account history and notify you once a decision is made.
+            </p>
+          </div>
+        )}
         
         {/* Top Banner & Store Header */}
         <div className="bg-white rounded-2xl border border-gray-200/90 shadow-2xs p-6 sm:p-8 flex flex-col md:flex-row md:items-center justify-between gap-6">
@@ -331,13 +455,24 @@ export default function SellerDashboardPage() {
               <span>View Storefront</span>
               <ExternalLink className="w-3.5 h-3.5" />
             </Link>
-            <button
-              onClick={handleOpenNewProduct}
-              className="px-4 py-2 rounded-xl bg-[#0f3e26] text-white text-xs font-bold hover:bg-[#144f31] flex items-center gap-1.5 shadow-sm transition-colors cursor-pointer"
-            >
-              <Plus className="w-4 h-4" />
-              <span>Add New Product</span>
-            </button>
+            {isDeactivatedOrRestricted ? (
+              <button
+                disabled
+                title="Product creation disabled while account is deactivated"
+                className="px-4 py-2 rounded-xl bg-gray-200 text-gray-400 text-xs font-bold cursor-not-allowed flex items-center gap-1.5"
+              >
+                <Plus className="w-4 h-4" />
+                <span>Add Product (Restricted)</span>
+              </button>
+            ) : (
+              <button
+                onClick={handleOpenNewProduct}
+                className="px-4 py-2 rounded-xl bg-[#0f3e26] text-white text-xs font-bold hover:bg-[#144f31] flex items-center gap-1.5 shadow-sm transition-colors cursor-pointer"
+              >
+                <Plus className="w-4 h-4" />
+                <span>Add New Product</span>
+              </button>
+            )}
           </div>
         </div>
 
@@ -518,13 +653,24 @@ export default function SellerDashboardPage() {
                 </h3>
                 <p className="text-xs text-gray-500">Manage active items, pricing, and batch stock levels for your store</p>
               </div>
-              <button 
-                onClick={handleOpenNewProduct}
-                className="px-4 py-2 bg-[#0f3e26] text-white text-xs font-bold rounded-xl flex items-center gap-1.5 hover:bg-[#144f31] transition-colors cursor-pointer"
-              >
-                <Plus className="w-4 h-4" />
-                <span>Add Product</span>
-              </button>
+              {isDeactivatedOrRestricted ? (
+                <button 
+                  disabled
+                  title="Account is deactivated or under reactivation review"
+                  className="px-4 py-2 bg-gray-200 text-gray-400 text-xs font-bold rounded-xl flex items-center gap-1.5 cursor-not-allowed"
+                >
+                  <Plus className="w-4 h-4" />
+                  <span>Add Product (Restricted)</span>
+                </button>
+              ) : (
+                <button 
+                  onClick={handleOpenNewProduct}
+                  className="px-4 py-2 bg-[#0f3e26] text-white text-xs font-bold rounded-xl flex items-center gap-1.5 hover:bg-[#144f31] transition-colors cursor-pointer"
+                >
+                  <Plus className="w-4 h-4" />
+                  <span>Add Product</span>
+                </button>
+              )}
             </div>
 
             {isLoadingProducts ? (
@@ -564,15 +710,25 @@ export default function SellerDashboardPage() {
                       </div>
 
                       <div className="flex items-center gap-2 pt-2 border-t border-gray-100">
-                        <button 
-                          onClick={() => {
-                            setEditingProduct(p);
-                            setIsEditModalOpen(true);
-                          }}
-                          className="flex-1 py-1.5 bg-white border border-gray-300 rounded-lg text-[11px] font-bold text-gray-700 hover:bg-gray-50 transition-colors cursor-pointer"
-                        >
-                          Edit Product
-                        </button>
+                        {isDeactivatedOrRestricted ? (
+                          <button 
+                            disabled
+                            title="Product editing is disabled while account is deactivated"
+                            className="flex-1 py-1.5 bg-gray-100 border border-gray-200 rounded-lg text-[11px] font-bold text-gray-400 cursor-not-allowed"
+                          >
+                            Edit Restricted
+                          </button>
+                        ) : (
+                          <button 
+                            onClick={() => {
+                              setEditingProduct(p);
+                              setIsEditModalOpen(true);
+                            }}
+                            className="flex-1 py-1.5 bg-white border border-gray-300 rounded-lg text-[11px] font-bold text-gray-700 hover:bg-gray-50 transition-colors cursor-pointer"
+                          >
+                            Edit Product
+                          </button>
+                        )}
                       </div>
                     </div>
                   );
@@ -635,6 +791,117 @@ export default function SellerDashboardPage() {
         )}
 
       </div>
+
+      {/* Reactivation Request Modal */}
+      {reactivationModalOpen && (
+        <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-2xs flex items-center justify-center p-4">
+          <div className="bg-white rounded-3xl max-w-md w-full p-6 sm:p-8 space-y-6 shadow-xl animate-in fade-in">
+            <div className="flex items-center justify-between pb-3 border-b border-gray-100">
+              <div>
+                <h3 className="text-lg font-black text-gray-900">Request Account Reactivation</h3>
+                <p className="text-xs text-gray-500 mt-0.5">Submit an appeal to administrator</p>
+              </div>
+              <button
+                onClick={() => setReactivationModalOpen(false)}
+                className="w-8 h-8 rounded-full bg-gray-100 text-gray-500 hover:bg-gray-200 flex items-center justify-center text-xs font-bold cursor-pointer"
+              >
+                ✕
+              </button>
+            </div>
+
+            {reactivationMsg && (
+              <div className={`p-3 rounded-xl text-xs font-bold flex items-center gap-2 ${
+                reactivationMsg.type === 'success'
+                  ? 'bg-emerald-50 text-emerald-800 border border-emerald-200'
+                  : 'bg-red-50 text-red-800 border border-red-200'
+              }`}>
+                {reactivationMsg.type === 'success' ? (
+                  <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+                ) : (
+                  <AlertCircle className="w-4 h-4 text-red-600 shrink-0" />
+                )}
+                <span>{reactivationMsg.text}</span>
+              </div>
+            )}
+
+            <div className="space-y-4 text-xs">
+              <div>
+                <label className="block font-bold text-gray-700 mb-1.5">
+                  Reason for Reactivation <span className="text-red-500">*</span>
+                </label>
+                <textarea
+                  rows={3}
+                  value={reactivationReason}
+                  onChange={(e) => setReactivationReason(e.target.value)}
+                  placeholder="Explain why your account should be reactivated, corrective actions taken, compliance updates..."
+                  className="w-full p-3 bg-white border border-gray-200 rounded-xl text-xs text-gray-900 outline-none focus:border-[#0f3e26]"
+                />
+              </div>
+
+              <div>
+                <label className="block font-bold text-gray-700 mb-1.5">Additional Notes / Evidence (Optional)</label>
+                <textarea
+                  rows={2}
+                  value={reactivationNotes}
+                  onChange={(e) => setReactivationNotes(e.target.value)}
+                  placeholder="Supporting details or references..."
+                  className="w-full p-3 bg-white border border-gray-200 rounded-xl text-xs text-gray-900 outline-none focus:border-[#0f3e26]"
+                />
+              </div>
+            </div>
+
+            <div className="flex items-center justify-end gap-3 pt-3 border-t border-gray-100">
+              <button
+                type="button"
+                onClick={() => setReactivationModalOpen(false)}
+                disabled={isSubmittingReactivation}
+                className="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 text-xs font-bold rounded-xl transition-colors cursor-pointer"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={async () => {
+                  if (!reactivationReason.trim()) return;
+                  setIsSubmittingReactivation(true);
+                  setReactivationMsg(null);
+                  try {
+                    await requestSellerReactivation({
+                      reason: reactivationReason.trim(),
+                      notes: reactivationNotes.trim(),
+                    });
+                    setReactivationMsg({ type: 'success', text: 'Reactivation request submitted successfully!' });
+
+                    if (user?.id) {
+                      const res = await getSellerDashboard(user.id);
+                      setData(res);
+                      if (res?.store) {
+                        useStore.getState().setSellerStore(res.store as any);
+                      }
+                    }
+
+                    setTimeout(() => {
+                      setReactivationModalOpen(false);
+                      setReactivationMsg(null);
+                    }, 1200);
+                  } catch (err: any) {
+                    setReactivationMsg({ type: 'error', text: err.message || 'Failed to submit reactivation request' });
+                  } finally {
+                    setIsSubmittingReactivation(false);
+                  }
+                }}
+                disabled={isSubmittingReactivation || !reactivationReason.trim()}
+                className={`px-5 py-2 text-xs font-bold rounded-xl text-white bg-[#0f3e26] hover:bg-[#144f31] shadow-sm flex items-center gap-2 cursor-pointer ${
+                  isSubmittingReactivation || !reactivationReason.trim() ? 'opacity-50 cursor-not-allowed' : ''
+                }`}
+              >
+                {isSubmittingReactivation && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
+                <span>Submit Request</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Product Edit / Creation Modal */}
       {isEditModalOpen && editingProduct && (
