@@ -29,11 +29,17 @@ export function TrendingProducts({ products }: TrendingProductsProps) {
           <div className="flex items-center gap-1.5 mb-1">
             <Sparkles className="w-4 h-4 text-[#c88a23]" />
             <span className="text-xs font-bold text-[#c88a23] uppercase tracking-wider">
-              Top Picks
+              Just Added
             </span>
           </div>
+          {/* Was "Trending Products" / "Top Picks". The feed behind it is
+              simply the newest products by created_at — there is no
+              popularity, view or sales signal involved. Labelling a
+              reverse-chronological list as trending or top-picked is a claim
+              the data does not support, so it says what it actually is.
+              Rename this back once a real ranking signal exists. */}
           <h2 className="text-2xl md:text-3xl font-black text-[#0f3e26] tracking-tight">
-            Trending Products
+            New Arrivals
           </h2>
         </div>
 

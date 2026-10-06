@@ -49,6 +49,24 @@ export function ProductClient({ product: initialProduct }: ProductClientProps) {
 
   // Reviews state
   const [reviews, setReviews] = useState<ReviewItem[]>([]);
+
+  /**
+   * Average rating, derived only from ratings that actually exist.
+   *
+   * The display previously did three unsound things: it treated a missing or
+   * zero rating as 5 stars (`r.rating || 5`), inflating the average; it fell
+   * back to `product.rating`, which the schema defaults to 4.80; and if that
+   * was absent it printed a flat "5.0". A product with no reviews at all
+   * therefore advertised a perfect score.
+   */
+  const ratedReviews = reviews.filter(
+    (r) => typeof r.rating === 'number' && r.rating > 0,
+  );
+  const averageRating =
+    ratedReviews.length > 0
+      ? ratedReviews.reduce((acc, r) => acc + (r.rating as number), 0) /
+        ratedReviews.length
+      : null;
   const [newRating, setNewRating] = useState(5);
   const [newComment, setNewComment] = useState('');
   const [isSubmittingReview, setIsSubmittingReview] = useState(false);
@@ -146,10 +164,15 @@ export function ProductClient({ product: initialProduct }: ProductClientProps) {
     const res = await submitProductReview({
       productId: product.id,
       userId: user?.id || 'guest-' + Date.now(),
-      userName: user?.name || 'Verified Buyer',
+      // Was `user?.name || 'Verified Buyer'`, which stamped every anonymous
+      // review with a purchase-verification claim the platform had not
+      // checked. Fabricated trust badges are precisely the pattern the
+      // CCPA 2023 dark-patterns guidelines prohibit.
+      userName: user?.name || 'Anonymous',
       rating: newRating,
       comment: newComment.trim(),
-      stateOrigin: 'Gujarat',
+      // Was hardcoded to 'Gujarat' for every reviewer in the country.
+      stateOrigin: undefined,
     });
 
     if (res.review) {
@@ -222,17 +245,22 @@ export function ProductClient({ product: initialProduct }: ProductClientProps) {
                   {product.category}
                 </span>
                 
-                <div className="flex items-center gap-1 text-xs font-bold text-amber-500">
-                  <Star className="w-3.5 h-3.5 fill-amber-400 text-amber-400" />
-                  <span className="text-gray-900 font-extrabold">
-                    {reviews.length > 0
-                      ? (reviews.reduce((acc, r) => acc + (r.rating || 5), 0) / reviews.length).toFixed(1)
-                      : ((product as any).rating ? Number((product as any).rating).toFixed(1) : '5.0')}
+                {averageRating !== null ? (
+                  <div className="flex items-center gap-1 text-xs font-bold">
+                    <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded bg-emerald-600 text-white">
+                      <Star className="w-3 h-3 fill-white text-white" />
+                      {averageRating.toFixed(1)}
+                    </span>
+                    <span className="text-gray-400 tabular-nums">
+                      ({ratedReviews.length}{' '}
+                      {ratedReviews.length === 1 ? 'rating' : 'ratings'})
+                    </span>
+                  </div>
+                ) : (
+                  <span className="text-xs font-semibold text-gray-400">
+                    No ratings yet
                   </span>
-                  <span className="text-gray-400">
-                    ({reviews.length} {reviews.length === 1 ? 'rating' : 'ratings'})
-                  </span>
-                </div>
+                )}
               </div>
 
               <h1 className="text-2xl sm:text-3xl font-black text-gray-900 tracking-tight leading-tight">
@@ -307,8 +335,8 @@ export function ProductClient({ product: initialProduct }: ProductClientProps) {
                 <div className="flex items-center gap-1 text-xs font-bold text-gray-800">
                   <Star className="w-3.5 h-3.5 fill-amber-400 text-amber-400" />
                   <span>
-                    {reviews.length > 0
-                      ? `${(reviews.reduce((acc, r) => acc + (r.rating || 5), 0) / reviews.length).toFixed(1)} / 5.0`
+                    {averageRating !== null
+                      ? `${averageRating.toFixed(1)} / 5.0`
                       : 'No reviews yet'}
                   </span>
                 </div>
@@ -392,7 +420,10 @@ export function ProductClient({ product: initialProduct }: ProductClientProps) {
                       </div>
 
                       <div className="flex items-center gap-0.5">
-                        {[...Array(Math.min(5, Math.max(1, rev.rating || 5)))].map((_, i) => (
+                        {/* `rev.rating || 5` rendered a 5-star row for any
+                            review with a missing rating. Clamp to the real
+                            value and show nothing when there isn't one. */}
+                        {[...Array(Math.min(5, Math.max(0, rev.rating ?? 0)))].map((_, i) => (
                           <Star key={i} className="w-3 h-3 fill-amber-400 text-amber-400" />
                         ))}
                       </div>

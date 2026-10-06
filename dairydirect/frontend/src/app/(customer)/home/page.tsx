@@ -6,7 +6,7 @@ import { DealsAndBrands } from '@/components/home/DealsAndBrands';
 import { HeritageBanner } from '@/components/home/HeritageBanner';
 import { TrendingProducts } from '@/components/home/TrendingProducts';
 
-import { ImpactAndTestimonial } from '@/components/home/ImpactAndTestimonial';
+import { WhyGjanandSarkar } from '@/components/home/WhyGjanandSarkar';
 
 // Previously `force-dynamic` + `revalidate = 0`: every visitor triggered a
 // full-catalogue database query and a fresh server render, so the homepage
@@ -37,8 +37,8 @@ export default async function HomeScreen() {
       {/* 6. Trending Products (Live Store Catalog) */}
       <TrendingProducts products={prods} />
 
-      {/* 8. Impact Stats, Why Choose & Verified Testimonial */}
-      <ImpactAndTestimonial />
+      {/* 8. How the marketplace works (replaced invented stats + testimonials) */}
+      <WhyGjanandSarkar />
     </div>
   );
 }
