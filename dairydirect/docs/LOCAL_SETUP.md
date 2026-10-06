@@ -194,6 +194,7 @@ depend on tables created by earlier ones.
 11. 20261004_seller_lifecycle.sql
 12. 20261006_product_ownership_columns.sql      <- new on this branch
 13. 20261006_catalog_performance_indexes.sql    <- new on this branch
+14. 20261007_drop_misleading_product_defaults.sql <- new on this branch
 ```
 
 The last two are new in this branch and have **not** been applied to any live
@@ -204,6 +205,11 @@ project yet:
   The hardening is incomplete without it.
 - `20261006_catalog_performance_indexes.sql` adds the catalogue read-path
   indexes behind the measured speed-ups.
+- `20261007_drop_misleading_product_defaults.sql` removes the
+  `brand DEFAULT 'Gjanand Farm'` and `rating DEFAULT 4.80` left over from the
+  single-brand dairy, and adds a trigger that recomputes `products.rating`
+  and `products.reviews_count` from the `reviews` table so a rating can only
+  come from a real review.
 
 ### Load sample data
 
