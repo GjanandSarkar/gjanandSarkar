@@ -916,10 +916,25 @@ export default function SellerDashboardPage() {
             setProducts((prev) => {
               const exists = prev.some((p) => p.id === updated.id);
               if (exists) {
-                return prev.map((p) => (p.id === updated.id ? updated : p));
-              } else {
-                return [updated, ...prev];
+                // Merge the narrow CatalogProduct update over the existing
+                // full record instead of replacing (and losing) it.
+                return prev.map((p) =>
+                  p.id === updated.id
+                    ? { ...p, ...updated, category: updated.category ?? p.category }
+                    : p
+                );
               }
+              return [
+                {
+                  description: null,
+                  is_freshness_guarantee: false,
+                  is_active: true,
+                  created_at: new Date().toISOString(),
+                  ...updated,
+                  category: updated.category ?? '',
+                },
+                ...prev,
+              ];
             });
           }}
           onProductDeleted={(deletedId) => {

@@ -1,6 +1,6 @@
 import { Metadata } from 'next';
 import { notFound } from 'next/navigation';
-import { getProductByIdServer } from '@/lib/api/products';
+import { getProductByIdServer } from '@/lib/api/products.server';
 import { ProductClient } from './ProductClient';
 import { JsonLd } from '@/components/seo/JsonLd';
 

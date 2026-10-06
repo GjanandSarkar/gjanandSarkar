@@ -7,15 +7,27 @@ import { useTranslation } from '@/lib/i18n';
 import { useStore } from '@/store/useStore';
 import { addToCart, updateCartItem } from '@/lib/api/cart';
 import { toggleWishlist } from '@/lib/api/wishlist';
-import type { ProductWithVariants } from '@/lib/api/products';
+import type { CatalogProduct } from '@/lib/types/catalog';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ProductEditModal } from '@/components/admin/ProductEditModal';
+import dynamic from 'next/dynamic';
+
+/**
+ * The admin edit modal (large form + image upload + category fetching) was a
+ * static import, so it was bundled into every product card — and therefore
+ * into the homepage, category pages and search results for every customer,
+ * 99.9% of whom are not admins and can never open it. It is now code-split
+ * and only downloaded when an admin actually opens the editor.
+ */
+const ProductEditModal = dynamic(
+  () => import('@/components/admin/ProductEditModal').then((m) => m.ProductEditModal),
+  { ssr: false }
+);
 import Image from 'next/image';
 
 interface ProductCardProps {
-  product: ProductWithVariants;
+  product: CatalogProduct;
   priority?: boolean;
-  onProductUpdated?: (updated: ProductWithVariants) => void;
+  onProductUpdated?: (updated: CatalogProduct) => void;
   onProductDeleted?: (id: string) => void;
 }
 
@@ -35,7 +47,7 @@ export function ProductCard({
   const addToCartLocal = useStore((s) => s.addToCartLocal);
   const updateCartQuantityLocal = useStore((s) => s.updateCartQuantityLocal);
 
-  const [product, setProduct] = useState<ProductWithVariants>(initialProduct);
+  const [product, setProduct] = useState<CatalogProduct>(initialProduct);
   const [isDeleted, setIsDeleted] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [mounted, setMounted] = useState(false);
@@ -437,7 +449,7 @@ export function ProductCard({
       </AnimatePresence>
 
       {/* Admin Edit / Delete Modal */}
-      {user?.role === 'admin' && (
+      {user?.role === 'admin' && isEditModalOpen && (
         <ProductEditModal
           product={product}
           isOpen={isEditModalOpen}

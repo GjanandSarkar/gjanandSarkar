@@ -1,4 +1,4 @@
-import { getProductsServer } from '@/lib/api/products';
+import { getHomeFeed } from '@/lib/api/home';
 import { HeroBanner } from '@/components/home/HeroBanner';
 import { TrustBar } from '@/components/home/TrustBar';
 
@@ -8,12 +8,16 @@ import { TrendingProducts } from '@/components/home/TrendingProducts';
 
 import { ImpactAndTestimonial } from '@/components/home/ImpactAndTestimonial';
 
-export const dynamic = 'force-dynamic';
-export const revalidate = 0;
+// Previously `force-dynamic` + `revalidate = 0`: every visitor triggered a
+// full-catalogue database query and a fresh server render, so the homepage
+// could never be cached or served from a CDN edge. The catalogue is not
+// per-user, so it is now statically rendered and revalidated every 5 minutes
+// (and immediately on product changes via `revalidateTag('products')`).
+export const revalidate = 300;
 
 export default async function HomeScreen() {
-  // Fetch real active products directly from database on server
-  const prods = await getProductsServer({ activeOnly: true });
+  // Cached, column-limited feed (see src/lib/api/home.ts).
+  const prods = await getHomeFeed();
 
   return (
     <div className="flex flex-col w-full overflow-x-hidden bg-[#fafaf8]">

@@ -4,10 +4,10 @@ import React, { useRef } from 'react';
 import Link from 'next/link';
 import { ArrowRight, ChevronLeft, ChevronRight, Sparkles } from 'lucide-react';
 import { ProductCard } from '@/components/shared/ProductCard';
-import type { ProductWithVariants } from '@/lib/api/products';
+import type { CatalogProduct } from '@/lib/types/catalog';
 
 interface TrendingProductsProps {
-  products: ProductWithVariants[];
+  products: CatalogProduct[];
 }
 
 export function TrendingProducts({ products }: TrendingProductsProps) {

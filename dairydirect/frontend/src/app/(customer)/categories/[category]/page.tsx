@@ -1,5 +1,5 @@
 import { Metadata } from 'next';
-import { getProductsServer } from '@/lib/api/products';
+import { getProductsServer } from '@/lib/api/products.server';
 import { ProductCard } from '@/components/shared/ProductCard';
 import { JsonLd } from '@/components/seo/JsonLd';
 import { ChevronLeft, Sparkles, ArrowRight, PackageOpen } from 'lucide-react';

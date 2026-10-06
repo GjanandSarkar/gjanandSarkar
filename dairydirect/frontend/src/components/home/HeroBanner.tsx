@@ -3,7 +3,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
 import { ArrowRight, ChevronLeft, ChevronRight, Sparkles, PackageOpen } from 'lucide-react';
-import type { ProductWithVariants } from '@/lib/api/products';
+import type { CatalogProduct } from '@/lib/types/catalog';
 
 interface ShowcaseProduct {
   id: string;
@@ -17,7 +17,7 @@ interface ShowcaseProduct {
 }
 
 interface HeroBannerProps {
-  products?: ProductWithVariants[];
+  products?: CatalogProduct[];
 }
 
 const badgeColors = ['#d97706', '#0f3e26', '#15803d', '#c88a23', '#047857', '#b45309'];

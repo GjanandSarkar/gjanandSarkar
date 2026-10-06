@@ -3,13 +3,13 @@
 import Link from 'next/link';
 import { ArrowRight } from 'lucide-react';
 import { ProductCard } from '@/components/shared/ProductCard';
-import type { ProductWithVariants } from '@/lib/api/products';
+import type { CatalogProduct } from '@/lib/types/catalog';
 
 interface ProductCarouselProps {
   title: string;
   subtitle?: string;
   icon?: React.ReactNode;
-  products: ProductWithVariants[];
+  products: CatalogProduct[];
   isLoading: boolean;
   viewAllLink?: string;
   priority?: boolean;

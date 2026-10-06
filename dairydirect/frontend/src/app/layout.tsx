@@ -1,12 +1,17 @@
 import type { Metadata, Viewport } from "next";
-import { Inter } from "next/font/google";
+import localFont from "next/font/local";
 import "./globals.css";
 
-const inter = Inter({
-  subsets: ["latin"],
+// Self-hosted Inter variable font (single 48KB woff2 covering weights 100-900).
+// Replaces the previous 7 separate static weights fetched from Google Fonts at
+// build time: fewer requests, no third-party dependency, no build-time network call.
+const inter = localFont({
+  src: "../fonts/inter-latin-wght-normal.woff2",
   variable: "--font-inter",
-  weight: ["300", "400", "500", "600", "700", "800", "900"],
+  weight: "100 900",
   display: "swap",
+  preload: true,
+  fallback: ["system-ui", "-apple-system", "Segoe UI", "Roboto", "sans-serif"],
 });
 
 export const metadata: Metadata = {
@@ -36,8 +41,6 @@ export const metadata: Metadata = {
 export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
-  maximumScale: 1,
-  userScalable: false,
   themeColor: "#fafaf3",
 }
 
@@ -79,12 +82,13 @@ export default function RootLayout({
       <head>
         <JsonLd data={orgStructuredData} />
         <JsonLd data={webSiteStructuredData} />
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         <link rel="icon" href="/application logo/gjanand sarkar logo.png" type="image/png" />
       </head>
-      <body className="min-h-screen antialiased" 
-        style={{ fontFamily: "'Inter', system-ui, sans-serif", background: '#fafaf3', color: '#1a1c18' }} suppressHydrationWarning>
+      <body
+        className={`${inter.className} min-h-screen antialiased`}
+        style={{ background: '#fafaf3', color: '#1a1c18' }}
+        suppressHydrationWarning
+      >
         <AuthProvider>
           <LanguageManager />
           {children}

@@ -8,12 +8,12 @@ import {
   ArrowRight,
   ShoppingCart
 } from 'lucide-react';
-import type { ProductWithVariants } from '@/lib/api/products';
+import type { CatalogProduct } from '@/lib/types/catalog';
 import { useStore } from '@/store/useStore';
 import { addToCart } from '@/lib/api/cart';
 
 interface DealsAndBrandsProps {
-  products: ProductWithVariants[];
+  products: CatalogProduct[];
 }
 
 export function DealsAndBrands({ products }: DealsAndBrandsProps) {

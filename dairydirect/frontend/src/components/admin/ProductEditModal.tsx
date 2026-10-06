@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { useTranslation } from '@/lib/i18n';
 import type { ProductWithVariants } from '@/lib/api/products';
+import type { CatalogProduct } from '@/lib/types/catalog';
 import { updateProduct, createProduct, deleteProduct, uploadProductImage } from '@/lib/api/products';
 import {
   X,
@@ -22,10 +23,10 @@ import { motion, AnimatePresence } from 'framer-motion';
 
 
 interface ProductEditModalProps {
-  product: ProductWithVariants | null;
+  product: CatalogProduct | null;
   isOpen: boolean;
   onClose: () => void;
-  onProductUpdated?: (updatedProduct: ProductWithVariants) => void;
+  onProductUpdated?: (updatedProduct: CatalogProduct) => void;
   onProductDeleted?: (deletedProductId: string) => void;
 }
 

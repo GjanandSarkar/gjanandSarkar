@@ -1,6 +1,5 @@
 import { api } from './client';
-import { supabase } from '@/lib/supabase';
-import { getAdminSupabase } from '@/lib/supabase/admin';
+import { getSupabaseLazy } from '@/lib/supabase/lazy';
 import { uploadImageToImageKit } from './imagekit';
 
 export type ProductWithVariants = {
@@ -16,7 +15,7 @@ export type ProductWithVariants = {
   created_by?: string | null;
   product_variants: {
     id: string;
-    product_id: string;
+    product_id?: string;
     weight: string;
     price: number;
     original_price: number | null;
@@ -72,45 +71,6 @@ export async function getProducts(
   }
 }
 
-export async function getProductsServer(
-  options: { category?: string; activeOnly?: boolean; q?: string; sellerId?: string } = {}
-): Promise<ProductWithVariants[]> {
-  try {
-    const admin = getAdminSupabase();
-    let query = admin
-      .from('products')
-      .select('*, product_variants(*)')
-      .order('created_at', { ascending: false });
-
-    if (options.category && options.category !== 'All' && options.category !== 'All Categories') {
-      const cleanCat = options.category.replace(/-/g, ' ').trim();
-      if (cleanCat.toLowerCase() === 'dairy & essentials' || cleanCat.toLowerCase() === 'dairy') {
-        query = query.or('category.ilike.%Milk%,category.ilike.%Ghee%,category.ilike.%Paneer%,category.ilike.%Curd%,category.ilike.%Lassi%,category.ilike.%Dairy%');
-      } else {
-        query = query.ilike('category', `%${cleanCat}%`);
-      }
-    }
-
-    if (options.activeOnly !== false) {
-      query = query.eq('is_active', true);
-    }
-
-    if (options.q) {
-      query = query.or(`name.ilike.%${options.q}%,description.ilike.%${options.q}%`);
-    }
-
-    if (options.sellerId) {
-      query = query.or(`seller_id.eq.${options.sellerId},created_by.eq.${options.sellerId}`);
-    }
-
-    const { data, error } = await query;
-    if (error) throw error;
-    return data as ProductWithVariants[];
-  } catch (error) {
-    console.error('getProductsServer error:', error);
-    return [];
-  }
-}
 
 export async function getProductById(id: string): Promise<ProductWithVariants | null> {
   try {
@@ -129,25 +89,6 @@ export async function getProductById(id: string): Promise<ProductWithVariants | 
   }
 }
 
-export async function getProductByIdServer(id: string): Promise<ProductWithVariants | null> {
-  try {
-    const admin = getAdminSupabase();
-    const { data, error } = await admin
-      .from('products')
-      .select(`
-        *,
-        product_variants (*)
-      `)
-      .eq('id', id)
-      .single();
-
-    if (error) throw error;
-    return data as ProductWithVariants;
-  } catch (error) {
-    console.error('getProductByIdServer error:', error);
-    return null;
-  }
-}
 
 export async function createProduct(
   product: NewProductInput,
@@ -208,6 +149,7 @@ export async function uploadProductImage(
     const fileName = `${Math.random()}.${fileExt}`;
     const filePath = `${fileName}`;
 
+    const supabase = await getSupabaseLazy();
     const { error: uploadError } = await supabase.storage
       .from('products')
       .upload(filePath, file);

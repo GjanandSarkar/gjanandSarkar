@@ -1,5 +1,5 @@
 import React from 'react';
-import { getProductsServer } from '@/lib/api/products';
+import { getProductsServer } from '@/lib/api/products.server';
 import { ProductCard } from '@/components/shared/ProductCard';
 
 export const dynamic = 'force-dynamic';

@@ -7,7 +7,29 @@ import { mergeLocalCart, getCart } from '@/lib/api/cart';
 import { getWishlist } from '@/lib/api/wishlist';
 import { getUserAddresses } from '@/lib/api/addresses';
 import type { Language } from '@/lib/i18n';
-import { supabase } from '@/lib/supabase';
+
+/**
+ * `@supabase/supabase-js` is ~180KB of JavaScript. It used to be imported
+ * statically here, and because AuthProvider wraps the entire app in the root
+ * layout, that 180KB sat in the critical bundle of EVERY route — including
+ * fully public pages (home, product, category, about) where no signed-in
+ * session is involved at all.
+ *
+ * It is now loaded on demand. Two helpers below give us a single shared
+ * promise so repeated calls never create a second client.
+ */
+let supabaseClientPromise: Promise<
+  Awaited<ReturnType<typeof import('@/lib/supabase/client')['getSupabaseBrowserClient']>>
+> | null = null;
+
+function loadSupabase() {
+  if (!supabaseClientPromise) {
+    supabaseClientPromise = import('@/lib/supabase/client').then((m) =>
+      m.getSupabaseBrowserClient()
+    );
+  }
+  return supabaseClientPromise;
+}
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const setUser = useStore((s) => s.setUser);
@@ -47,11 +69,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // Supabase Auth listener
+  // Supabase Auth listener (client loaded lazily — see loadSupabase above)
   useEffect(() => {
     setAuthLoading(true);
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event: any, session: any) => {
+    let unsubscribe: (() => void) | undefined;
+    let cancelled = false;
+
+    const handleAuthEvent = async (event: any, session: any) => {
       if (event === 'INITIAL_SESSION') {
         if (session) {
           await hydrateUser(session.access_token);
@@ -80,10 +105,24 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       }
 
       setAuthLoading(false);
-    });
+    };
+
+    loadSupabase()
+      .then((supabase) => {
+        if (cancelled) return;
+        const {
+          data: { subscription },
+        } = supabase.auth.onAuthStateChange(handleAuthEvent);
+        unsubscribe = () => subscription.unsubscribe();
+      })
+      .catch((err) => {
+        console.warn('Auth init notice:', err);
+        setAuthLoading(false);
+      });
 
     return () => {
-      subscription.unsubscribe();
+      cancelled = true;
+      unsubscribe?.();
     };
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -176,6 +215,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       }
 
       // Fallback if sync API failed to return profile
+      const supabase = await loadSupabase();
       const { data: { user: sbUser } } = await supabase.auth.getUser();
       if (sbUser) {
         const fallbackName = sbUser.user_metadata?.full_name 

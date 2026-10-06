@@ -471,7 +471,13 @@ export function ProductClient({ product: initialProduct }: ProductClientProps) {
           isOpen={isEditModalOpen}
           onClose={() => setIsEditModalOpen(false)}
           onProductUpdated={(updated) => {
-            setProduct(updated);
+            // `updated` is the narrow CatalogProduct shape; merge it over the
+            // full detail record so detail-only fields are preserved.
+            setProduct((prev) => ({
+              ...prev,
+              ...updated,
+              category: updated.category ?? prev.category,
+            }));
           }}
           onProductDeleted={() => {
             router.push('/home');

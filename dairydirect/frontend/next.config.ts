@@ -58,6 +58,26 @@ const nextConfig: NextConfig = {
     imageSizes: [16, 32, 48, 64, 96, 128, 256, 384],
   },
 
+  /* Rewrites */
+  async rewrites() {
+    return {
+      beforeFiles: [
+        // The landing URL used to be a client component that rendered an empty
+        // div, waited for React to hydrate, waited for the Supabase auth
+        // session to resolve, and only then client-side navigated to /home.
+        // Every first-time visitor therefore stared at a blank page for the
+        // length of: JS download + hydration + auth round-trip + a second
+        // route transition — before any content existed.
+        //
+        // A rewrite serves the real (statically rendered) storefront HTML at
+        // `/` immediately, with no redirect hop and no JS required to paint.
+        { source: '/', destination: '/home' },
+      ],
+      afterFiles: [],
+      fallback: [],
+    };
+  },
+
   /* Security + caching headers */
   async headers() {
     return [
