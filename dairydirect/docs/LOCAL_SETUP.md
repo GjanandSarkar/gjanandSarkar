@@ -195,9 +195,10 @@ depend on tables created by earlier ones.
 12. 20261006_product_ownership_columns.sql      <- new on this branch
 13. 20261006_catalog_performance_indexes.sql    <- new on this branch
 14. 20261007_drop_misleading_product_defaults.sql <- new on this branch
+15. 20261008_order_idempotency.sql               <- new on this branch
 ```
 
-The last three are new in this branch and have **not** been applied to any live
+The last four are new in this branch and have **not** been applied to any live
 project yet:
 
 - `20261006_product_ownership_columns.sql` backs the security fix that stops
@@ -210,6 +211,10 @@ project yet:
   single-brand dairy, and adds a trigger that recomputes `products.rating`
   and `products.reviews_count` from the `reviews` table so a rating can only
   come from a real review.
+- `20261008_order_idempotency.sql` adds the `p_idempotency_key` argument that
+  `api/orders/place` already passes (without it every checkout failed), makes
+  a repeated key return the original order instead of placing a second one,
+  and drops two superseded `place_order_atomic` overloads.
 
 ### Load sample data
 
@@ -356,6 +361,11 @@ Usually correct behaviour on a fresh install, not a bug:
   the only profile, the list is empty by design. Log in with a second phone
   number to see a row.
 - *Categories* is populated by `seed.sql` (twelve canonical categories).
+
+**Checkout fails: `Could not find the function public.place_order_atomic(...)`**
+Fixed on this branch. The API passes `p_idempotency_key`; the function was
+declared without it, and PostgREST matches RPC by exact argument-name set.
+Run `20261008_order_idempotency.sql`.
 
 **Google login: `Unsupported provider: provider is not enabled`**
 Supabase config, not a code problem. See "Enabling Google login" below.
