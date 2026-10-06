@@ -26,6 +26,7 @@ import { TrustBadges } from '@/components/trust/TrustBadges';
 import { ProductEditModal } from '@/components/admin/ProductEditModal';
 import { getProductReviews, submitProductReview, ReviewItem } from '@/lib/api/reviews';
 import { useRealtimeInventory } from '@/hooks/useRealtimeInventory';
+import { PLACEHOLDER_PRODUCT_IMAGE } from '@/lib/constants/brand';
 
 interface ProductClientProps {
   product: ProductWithVariants;
@@ -205,7 +206,7 @@ export function ProductClient({ product: initialProduct }: ProductClientProps) {
           <div className="col-span-1 md:col-span-6 space-y-4 md:sticky md:top-24">
             <div className="bg-white rounded-3xl border border-sand/50 p-6 shadow-2xs flex items-center justify-center bg-gradient-to-b from-white to-[#fafaf8] aspect-square max-h-[460px] mx-auto w-full">
               <img
-                src={product.image_url || '/milk.png'}
+                src={product.image_url || PLACEHOLDER_PRODUCT_IMAGE}
                 alt={product.name}
                 className="w-auto h-full max-h-[360px] object-contain transition-transform hover:scale-105 duration-500"
               />

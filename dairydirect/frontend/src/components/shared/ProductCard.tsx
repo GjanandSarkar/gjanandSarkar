@@ -23,6 +23,7 @@ const ProductEditModal = dynamic(
   { ssr: false }
 );
 import Image from 'next/image';
+import { PLACEHOLDER_PRODUCT_IMAGE } from '@/lib/constants/brand';
 
 interface ProductCardProps {
   product: CatalogProduct;
@@ -174,7 +175,7 @@ export function ProductCard({
         <div className="relative w-full aspect-square bg-gray-50/80 rounded-xl overflow-hidden mb-3 p-2 flex items-center justify-center">
           
           <Image
-            src={product.image_url || '/milk.png'}
+            src={product.image_url || PLACEHOLDER_PRODUCT_IMAGE}
             alt={product.name}
             fill
             sizes="(max-width: 768px) 50vw, 25vw"
@@ -183,7 +184,7 @@ export function ProductCard({
               isAllOutOfStock ? 'grayscale opacity-75' : ''
             }`}
             onError={(e) => {
-              (e.currentTarget as HTMLImageElement).srcset = `/milk.png`;
+              (e.currentTarget as HTMLImageElement).srcset = PLACEHOLDER_PRODUCT_IMAGE;
             }}
           />
 
@@ -338,7 +339,7 @@ export function ProductCard({
               <div className="w-12 h-1.5 rounded-full mx-auto mb-6 bg-gray-300" />
               <div className="flex items-start gap-4 mb-6">
                 <img
-                  src={product.image_url ?? '/milk.png'}
+                  src={product.image_url ?? PLACEHOLDER_PRODUCT_IMAGE}
                   alt={product.name}
                   className="w-16 h-16 rounded-xl object-contain bg-gray-50 border p-1"
                 />

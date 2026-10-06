@@ -2,20 +2,13 @@
 
 import Link from 'next/link';
 import { motion } from 'framer-motion';
+import { categoryColors } from '@/lib/constants/categories';
+import { CategoryNameIcon } from '@/components/shared/CategoryIcon';
 
 interface CategorySectionProps {
   categories: string[];
   isLoading: boolean;
 }
-
-const categoryGradients: Record<string, { bg: string; icon: string; blob: string }> = {
-  'Milk':      { bg: '#e8f4fd', icon: '#4a90d9', blob: '#bde3ff' },
-  'Paneer':    { bg: '#fff8e6', icon: '#c78c2e', blob: '#ffe8a0' },
-  'Ghee':      { bg: '#fef5ec', icon: '#d4712a', blob: '#ffd9b0' },
-  'Buttermilk':{ bg: '#eaf6ef', icon: '#3b8a55', blob: '#b8e8c9' },
-  'Curd':      { bg: '#fff8e6', icon: '#c78c2e', blob: '#ffe8a0' },
-  'Lassi':     { bg: '#e8f4fd', icon: '#4a90d9', blob: '#bde3ff' },
-};
 
 export function CategorySection({ categories, isLoading }: CategorySectionProps) {
   if (isLoading) {
@@ -39,7 +32,7 @@ export function CategorySection({ categories, isLoading }: CategorySectionProps)
     <section className="mb-10 px-5 md:px-10">
       <div className="flex overflow-x-auto no-scrollbar gap-4 md:grid md:grid-cols-6 lg:grid-cols-8 md:gap-5 pb-4 md:pb-0">
         {categories.map((category, idx) => {
-          const style = categoryGradients[category] || categoryGradients['Milk'];
+          const style = categoryColors(category);
           
           return (
             <Link 
@@ -56,14 +49,14 @@ export function CategorySection({ categories, isLoading }: CategorySectionProps)
               >
                 <div 
                   className="absolute -right-4 -bottom-4 w-16 h-16 rounded-full opacity-60 blur-lg transition-transform group-hover:scale-150"
-                  style={{ background: style.blob }}
+                  style={{ background: style.color, opacity: 0.18 }}
                 />
-                <div 
-                  className="relative z-10 w-12 h-12 rounded-full flex items-center justify-center font-black text-2xl"
-                  style={{ color: style.icon }}
+                <div
+                  className="relative z-10 w-12 h-12 rounded-full flex items-center justify-center"
+                  style={{ color: style.color }}
                 >
-                  {/* Using first letter as a lightweight icon fallback if no actual images are available */}
-                  {category.charAt(0)}
+                  {/* Real category icon, replacing the first-letter placeholder. */}
+                  <CategoryNameIcon category={category} className="w-6 h-6" />
                 </div>
               </motion.div>
               <span className="text-[12px] font-bold text-center leading-tight text-on-surface group-hover:text-primary transition-colors">

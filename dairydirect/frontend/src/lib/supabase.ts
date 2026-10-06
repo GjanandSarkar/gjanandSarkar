@@ -24,7 +24,10 @@ export type DBProfile = {
 export type DBProduct = {
   id: string;
   name: string;
-  category: 'Milk' | 'Paneer' | 'Ghee' | 'Buttermilk' | 'Curd' | 'Lassi';
+  // Was a closed union of six dairy values, which the UI had already
+  // outgrown (it offers Electronics, Fashion, Books...). Categories are data,
+  // defined in src/lib/constants/categories.ts, not a compile-time constant.
+  category: string;
   description: string | null;
   image_url: string | null;
   is_freshness_guarantee: boolean;

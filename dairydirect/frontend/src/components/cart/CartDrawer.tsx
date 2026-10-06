@@ -11,6 +11,8 @@ import { EmptyCart } from './EmptyCart';
 import { updateCartItem, removeFromCart, clearCart as apiClearCart } from '@/lib/api/cart';
 import { useRouter, usePathname } from 'next/navigation';
 import { CartCrossSells } from '@/components/discovery/CartCrossSells';
+import { PLACEHOLDER_PRODUCT_IMAGE } from '@/lib/constants/brand';
+import { categoryBg } from '@/lib/constants/categories';
 
 interface CartDrawerProps {
   isOpen: boolean;
@@ -123,17 +125,7 @@ export function CartDrawer({ isOpen, onClose }: CartDrawerProps) {
     if (user) await apiClearCart(user.id);
   };
 
-  const getCategoryBg = (category: string) => {
-    const bgs: Record<string, string> = {
-      'Milk': '#e8f4fd',
-      'Paneer': '#fff8e6',
-      'Ghee': '#fef5ec',
-      'Buttermilk': '#eaf6ef',
-      'Curd': '#fff8e6',
-      'Lassi': '#e8f4fd',
-    };
-    return bgs[category] || '#eaf6ef';
-  };
+  const getCategoryBg = (category: string) => categoryBg(category);
 
   return (
     <AnimatePresence>
@@ -223,7 +215,7 @@ export function CartDrawer({ isOpen, onClose }: CartDrawerProps) {
                         className="w-16 h-16 rounded-[12px] flex items-center justify-center shrink-0 overflow-hidden"
                         style={{ background: getCategoryBg(item.product.category) }}
                       >
-                        <img src={item.product.image_url ?? '/milk.png'} alt={item.product.name} className="w-full h-full object-cover" />
+                        <img src={item.product.image_url ?? PLACEHOLDER_PRODUCT_IMAGE} alt={item.product.name} className="w-full h-full object-cover" />
                       </div>
 
                       <div className="flex-1 flex flex-col justify-center">

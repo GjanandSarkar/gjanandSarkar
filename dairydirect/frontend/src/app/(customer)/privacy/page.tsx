@@ -35,11 +35,12 @@ export default function PrivacyPolicyPage() {
               1. Information We Collect
             </h2>
             <p>
-              When you use Gjanand Sarkar (our website, mobile applications, or subscription services), we collect information essential to delivering pure farm-fresh products to your doorstep:
+              When you use Gjanand Sarkar (our website, mobile applications, or subscription
+              services), we collect information essential to fulfilling your orders:
             </p>
             <ul className="list-disc pl-5 space-y-1.5 mt-2">
               <li><strong>Personal Identifiers:</strong> Name, phone number, email address, and delivery location/apartment details.</li>
-              <li><strong>Order & Subscription History:</strong> Products purchased, recurring milk schedules, and delivery slot preferences.</li>
+              <li><strong>Order &amp; Subscription History:</strong> Products purchased, recurring delivery schedules, and delivery slot preferences.</li>
               <li><strong>Payment Information:</strong> Processed securely through RBI-licensed payment gateways (Razorpay). We do not store credit/debit card numbers or CVV on our servers.</li>
             </ul>
           </section>
@@ -54,7 +55,7 @@ export default function PrivacyPolicyPage() {
               <li>Fulfilling daily morning doorstep delivery routes between 5:30 AM and 7:30 AM.</li>
               <li>Sending automated WhatsApp/SMS order confirmations, dispatch alerts, and subscription renewal notices.</li>
               <li>Preventing fraudulent transactions and ensuring marketplace security.</li>
-              <li>Continuously improving product freshness, milk test reports, and app performance.</li>
+              <li>Continuously improving product quality, partner performance and app performance.</li>
             </ul>
           </section>
 
@@ -69,7 +70,7 @@ export default function PrivacyPolicyPage() {
             <ul className="list-disc pl-5 space-y-1.5 mt-2">
               <li><strong>Authorized Delivery Executives:</strong> Exclusively for navigating to your registered doorstep address.</li>
               <li><strong>Payment Aggregators (Razorpay):</strong> For secure end-to-end tokenized transaction settlements.</li>
-              <li><strong>Legal & Regulatory Authorities:</strong> When strictly mandated by Indian law or FSSAI safety compliance.</li>
+              <li><strong>Legal &amp; Regulatory Authorities:</strong> When strictly mandated by Indian law or applicable sector regulators.</li>
             </ul>
           </section>
 

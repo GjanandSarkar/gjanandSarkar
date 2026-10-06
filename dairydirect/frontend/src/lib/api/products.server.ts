@@ -2,6 +2,7 @@ import 'server-only';
 
 import { getAdminSupabase } from '@/lib/supabase/admin';
 import type { ProductWithVariants } from './products';
+import { legacyCategoryFilter } from '@/lib/constants/categories';
 
 /**
  * Server-only catalogue reads.
@@ -27,8 +28,9 @@ export async function getProductsServer(
 
     if (options.category && options.category !== 'All' && options.category !== 'All Categories') {
       const cleanCat = options.category.replace(/-/g, ' ').trim();
-      if (cleanCat.toLowerCase() === 'dairy & essentials' || cleanCat.toLowerCase() === 'dairy') {
-        query = query.or('category.ilike.%Milk%,category.ilike.%Ghee%,category.ilike.%Paneer%,category.ilike.%Curd%,category.ilike.%Lassi%,category.ilike.%Dairy%');
+      const legacy = legacyCategoryFilter(cleanCat);
+      if (legacy) {
+        query = query.or(legacy);
       } else {
         query = query.ilike('category', `%${cleanCat}%`);
       }

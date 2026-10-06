@@ -35,7 +35,10 @@ export default function TermsPage() {
               1. Platform Services & Eligibility
             </h2>
             <p>
-              Gjanand Sarkar operates a direct farm-to-table artisanal marketplace connecting consumers with verified rural Gaushalas, certified organic farms, and producers. By accessing or ordering from our platform, you confirm that you are at least 18 years of age and legally competent to enter into binding agreements under Indian law.
+              Gjanand Sarkar operates a curated marketplace for products made in India,
+              partnering with one verified company per product category. By accessing or
+              ordering from our platform, you confirm that you are at least 18 years of age
+              and legally competent to enter into binding agreements under Indian law.
             </p>
           </section>
 
@@ -45,7 +48,8 @@ export default function TermsPage() {
               2. Deliveries, Slots & Cold Chain
             </h2>
             <p>
-              Morning deliveries are scheduled between 5:30 AM and 7:30 AM daily. Due to the perishable nature of raw/pasteurized dairy and fresh farm produce:
+              Delivery windows vary by category and destination pincode and are shown at
+              checkout. For perishable categories such as dairy and fresh produce:
             </p>
             <ul className="list-disc pl-5 space-y-1.5 mt-2">
               <li>Customers must ensure accessible doorstep delivery or gate access for the delivery executive.</li>
@@ -74,7 +78,10 @@ export default function TermsPage() {
               4. Quality & Purity Assurance
             </h2>
             <p>
-              Gjanand Sarkar adheres to strict FSSAI food safety regulations. While we test every batch for zero adulteration, customers with specific lactose or dairy sensitivities should consult their healthcare provider before consumption.
+              Food and beverage categories are sold under valid FSSAI licensing and are
+              batch-tested by the partner brand. Customers with allergies or specific dietary
+              sensitivities should read the product label and consult their healthcare
+              provider before consumption.
             </p>
           </section>
 

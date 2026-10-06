@@ -370,7 +370,7 @@ export function AddressFormModal({
               {isEditMode ? 'Edit Delivery Address' : 'Add New Delivery Address'}
             </h2>
             <p className="text-xs text-slate-500 mt-0.5">
-              Enter your complete address details for seamless farm-fresh delivery.
+              Enter your complete address details so we can deliver accurately.
             </p>
           </div>
           <button

@@ -149,7 +149,7 @@ function LoginScreenInner() {
       setSellerStore({
         id: 'store-demo-001',
         user_id: 'seller-demo-user-id',
-        store_name: 'Gir Organic & Vedic Dairy',
+        store_name: 'Demo Partner Store',
         slug: 'gir-organic-dairy',
         state: 'Gujarat',
         plan: 'growth',

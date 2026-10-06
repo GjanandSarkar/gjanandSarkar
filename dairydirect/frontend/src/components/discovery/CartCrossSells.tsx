@@ -6,6 +6,8 @@ import { getProducts } from '@/lib/api/products';
 import type { ProductWithVariants } from '@/lib/api/products';
 import { useStore } from '@/store/useStore';
 import { addToCart } from '@/lib/api/cart';
+import { PLACEHOLDER_PRODUCT_IMAGE } from '@/lib/constants/brand';
+import { FEATURED_CATEGORIES, relatedCategories } from '@/lib/constants/categories';
 
 export function CartCrossSells() {
   const cart = useStore(state => state.cart);
@@ -38,24 +40,23 @@ export function CartCrossSells() {
           allProducts.filter(p => cartProductIds.has(p.id)).map(p => p.category)
         );
 
-        // Simple Rule Engine
+        // Recommend complementary categories. The previous rule engine only
+        // knew dairy sub-products, so a cart of electronics or fashion produced
+        // no suggestions at all and silently fell back to milk and paneer.
         const targetCategories = new Set<string>();
-        if (cartCategories.has('Milk')) {
-          targetCategories.add('Paneer');
-          targetCategories.add('Curd');
+        for (const cat of cartCategories) {
+          for (const related of relatedCategories(cat)) {
+            targetCategories.add(related);
+          }
         }
-        if (cartCategories.has('Curd')) {
-          targetCategories.add('Buttermilk');
-          targetCategories.add('Ghee');
-        }
-        if (cartCategories.has('Paneer')) {
-          targetCategories.add('Ghee');
+        // Do not suggest what is already in the cart.
+        for (const cat of cartCategories) {
+          if (cat) targetCategories.delete(cat);
         }
 
         // Fallback to Best Sellers if no rules match or no target categories found
         if (targetCategories.size === 0) {
-          targetCategories.add('Milk');
-          targetCategories.add('Paneer');
+          for (const c of FEATURED_CATEGORIES) targetCategories.add(c.name);
         }
 
         // Filter products that match target categories and aren't already in cart, must be in stock
@@ -107,7 +108,7 @@ export function CartCrossSells() {
             {suggestions.map(product => (
               <div key={product.id} className="w-[120px] shrink-0 bg-white border border-sand/50 rounded-[16px] p-2.5 flex flex-col items-center text-center shadow-sm relative">
                 <div className="w-16 h-16 bg-sky-50 rounded-full mb-2 flex items-center justify-center p-1.5 overflow-hidden border border-sand/30">
-                  <img src={product.image_url || '/milk.png'} alt={product.name} className="w-full h-full object-contain" />
+                  <img src={product.image_url || PLACEHOLDER_PRODUCT_IMAGE} alt={product.name} className="w-full h-full object-contain" />
                 </div>
                 <p className="text-[11px] font-bold text-dark leading-tight mb-1 line-clamp-2">{product.name}</p>
                 <p className="text-[12px] font-black text-primary mb-2 mt-auto">₹{product.product_variants[0]?.price}</p>

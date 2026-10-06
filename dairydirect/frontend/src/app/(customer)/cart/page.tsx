@@ -10,6 +10,8 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { OrderSummary } from '@/components/cart/OrderSummary';
 import { EmptyCart } from '@/components/cart/EmptyCart';
 import Link from 'next/link';
+import { PLACEHOLDER_PRODUCT_IMAGE } from '@/lib/constants/brand';
+import { categoryBg } from '@/lib/constants/categories';
 
 export default function CartScreen() {
   const { t } = useTranslation();
@@ -54,17 +56,7 @@ export default function CartScreen() {
     if (user) await apiClearCart(user.id);
   };
 
-  const getCategoryBg = (category: string) => {
-    const bgs: Record<string, string> = {
-      'Milk': '#e8f4fd',
-      'Paneer': '#fff8e6',
-      'Ghee': '#fef5ec',
-      'Buttermilk': '#eaf6ef',
-      'Curd': '#fff8e6',
-      'Lassi': '#e8f4fd',
-    };
-    return bgs[category] || '#eaf6ef';
-  };
+  const getCategoryBg = (category: string) => categoryBg(category);
 
   if (isLoading) {
     return (
@@ -161,7 +153,7 @@ export default function CartScreen() {
                   item.isOutOfStock ? 'grayscale opacity-75' : ''
                 }`}
                   style={{ background: getCategoryBg(item.product.category) }}>
-                  <img src={item.product.image_url ?? '/milk.png'} alt={item.product.name} className="w-full h-full object-cover" />
+                  <img src={item.product.image_url ?? PLACEHOLDER_PRODUCT_IMAGE} alt={item.product.name} className="w-full h-full object-cover" />
                 </div>
 
                 {/* Details */}

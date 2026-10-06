@@ -4,6 +4,7 @@ import { ProductCard } from '@/components/shared/ProductCard';
 import { JsonLd } from '@/components/seo/JsonLd';
 import { ChevronLeft, Sparkles, ArrowRight, PackageOpen } from 'lucide-react';
 import Link from 'next/link';
+import { CATEGORIES } from '@/lib/constants/categories';
 
 interface Props {
   params: Promise<{ category: string }>;
@@ -61,14 +62,14 @@ export default async function CategoryPage({ params }: Props) {
     ]
   };
 
-  const popularCategories = [
-    { name: 'A2 Gir Milk', category: 'Milk' },
-    { name: 'Bilona Ghee', category: 'Ghee' },
-    { name: 'Fresh Paneer', category: 'Paneer' },
-    { name: 'Curd & Lassi', category: 'Curd' },
-    { name: 'Handicrafts', category: 'Handicrafts' },
-    { name: 'Ayurveda', category: 'Ayurveda' },
-  ];
+  // Cross-links to other categories. Previously four of the six were dairy
+  // sub-products that are not categories at all, so they linked to pages with
+  // no results. Now drawn from the taxonomy, excluding the current category.
+  const popularCategories = CATEGORIES.filter(
+    (c) => c.name.toLowerCase() !== rawCategory.toLowerCase(),
+  )
+    .slice(0, 6)
+    .map((c) => ({ name: c.name, category: c.name }));
 
   return (
     <div className="min-h-screen bg-[#fafaf8] pb-24">

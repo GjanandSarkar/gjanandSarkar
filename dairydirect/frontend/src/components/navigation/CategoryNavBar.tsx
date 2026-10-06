@@ -2,18 +2,16 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
-import { 
-  Menu, 
-  ChevronDown, 
+import { CategoryIcon } from '@/components/shared/CategoryIcon';
+import {
+  Menu,
+  ChevronDown,
   Truck,
   ShieldCheck,
   Milk,
   Flame,
-  ChefHat,
   Droplets,
-  Leaf,
   Hammer,
-  Spline,
   Wheat,
   Shirt,
   FlaskConical,
@@ -21,73 +19,55 @@ import {
   Sparkles,
   Sun,
   Heart,
+  Plug,
+  BookOpen,
   LayoutGrid,
+  type LucideIcon,
 } from 'lucide-react';
+import {
+  CATEGORIES,
+  FEATURED_CATEGORIES,
+  SECONDARY_CATEGORIES,
+  categoryHref,
+} from '@/lib/constants/categories';
 
-// Shared icon map used in both dropdowns
-const CATEGORY_ICONS: Record<string, React.ReactNode> = {
-  'All Products (Full Catalog)': <LayoutGrid className="w-4 h-4 text-gray-600" />,
-  'A2 Gir Cow Milk':            <Milk className="w-4 h-4 text-emerald-700" />,
-  'Vedic Bilona Ghee':          <Flame className="w-4 h-4 text-amber-600" />,
-  'Fresh Malai Paneer':         <ChefHat className="w-4 h-4 text-orange-600" />,
-  'Organic Curd & Lassi':       <Droplets className="w-4 h-4 text-teal-600" />,
-  'Cold-Pressed Organic Oils':  <Leaf className="w-4 h-4 text-lime-700" />,
-  'Ayurveda & Vedic Herbs':     <FlaskConical className="w-4 h-4 text-emerald-700" />,
-  'Artisanal Handicrafts':      <Hammer className="w-4 h-4 text-purple-600" />,
-  'Spices & Traditional Masalas':<Spline className="w-4 h-4 text-red-600" />,
-  'Organic Farm Groceries':     <Wheat className="w-4 h-4 text-amber-700" />,
-  'Handloom & Textiles':        <Shirt className="w-4 h-4 text-indigo-600" />,
-  'Pooja & Spiritual Essentials':<Sun className="w-4 h-4 text-yellow-600" />,
-  'Home & Kitchen Essentials':  <CookingPot className="w-4 h-4 text-stone-600" />,
-  'Natural Beauty & Personal Care': <Heart className="w-4 h-4 text-pink-600" />,
-  // More dropdown
-  'Ayurveda & Herbs':           <FlaskConical className="w-4 h-4 text-emerald-700" />,
-  'Spices & Masalas':           <Spline className="w-4 h-4 text-red-600" />,
-  'Organic Groceries':          <Wheat className="w-4 h-4 text-amber-700" />,
-  'Pooja Essentials':           <Sun className="w-4 h-4 text-yellow-600" />,
-  'Home & Kitchen':             <CookingPot className="w-4 h-4 text-stone-600" />,
-  'View Complete Catalog':       <LayoutGrid className="w-4 h-4 text-[#0f3e26]" />,
-};
-
+// Icons are resolved from the canonical taxonomy's `icon` field so the nav
+// can never drift out of sync with the category list again.
 export function CategoryNavBar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isMoreOpen, setIsMoreOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
   const moreRef = useRef<HTMLDivElement>(null);
 
-  const reducedCategories = [
-    { name: 'Milk', href: '/products?category=Milk', badge: 'Fresh Daily' },
-    { name: 'Ghee', href: '/products?category=Ghee', badge: 'Bilona' },
-    { name: 'Paneer', href: '/products?category=Paneer', badge: 'Malai' },
-    { name: 'Curd & Lassi', href: '/products?category=Curd', badge: 'Probiotic' },
-    { name: 'Cold-Pressed Oils', href: '/products?category=Cold-Pressed%20Oils', badge: 'Pure' },
-  ];
+  // All three menus are now projections of the single source of truth in
+  // src/lib/constants/categories.ts. They used to be three hand-maintained
+  // arrays with different names for the same things ("Ghee" vs "Vedic Bilona
+  // Ghee" vs "Organic Curd & Lassi"), all of them dairy-first.
+  const reducedCategories = FEATURED_CATEGORIES.map((c) => ({
+    name: c.name,
+    href: categoryHref(c),
+    badge: c.badge,
+    icon: c.icon,
+  }));
 
   const allCategories = [
-    { name: 'All Products (Full Catalog)', href: '/products' },
-    { name: 'A2 Gir Cow Milk', href: '/products?category=Milk' },
-    { name: 'Vedic Bilona Ghee', href: '/products?category=Ghee' },
-    { name: 'Fresh Malai Paneer', href: '/products?category=Paneer' },
-    { name: 'Organic Curd & Lassi', href: '/products?category=Curd' },
-    { name: 'Cold-Pressed Organic Oils', href: '/products?category=Cold-Pressed%20Oils' },
-    { name: 'Ayurveda & Vedic Herbs', href: '/products?category=Ayurveda' },
-    { name: 'Artisanal Handicrafts', href: '/products?category=Handicrafts' },
-    { name: 'Spices & Traditional Masalas', href: '/products?category=Spices' },
-    { name: 'Organic Farm Groceries', href: '/products?category=Organic%20Groceries' },
-    { name: 'Handloom & Textiles', href: '/products?category=Fashion' },
-    { name: 'Pooja & Spiritual Essentials', href: '/products?category=Pooja' },
-    { name: 'Home & Kitchen Essentials', href: '/products?category=Home%20%26%20Kitchen' },
-    { name: 'Natural Beauty & Personal Care', href: '/products?category=Beauty%20%26%20Personal%20Care' },
+    { name: 'All Products', href: '/products', icon: 'LayoutGrid', description: 'Browse the full catalogue' },
+    ...CATEGORIES.map((c) => ({
+      name: c.name,
+      href: categoryHref(c),
+      icon: c.icon,
+      description: c.description,
+    })),
   ];
 
   const moreCategories = [
-    { name: 'Ayurveda & Herbs', href: '/products?category=Ayurveda', desc: 'Ancient wellness' },
-    { name: 'Artisanal Handicrafts', href: '/products?category=Handicrafts', desc: 'Handmade decor' },
-    { name: 'Spices & Masalas', href: '/products?category=Spices', desc: 'Aromatic & pure' },
-    { name: 'Organic Groceries', href: '/products?category=Organic%20Groceries', desc: 'Direct farm harvest' },
-    { name: 'Pooja Essentials', href: '/products?category=Pooja', desc: 'Sacred items' },
-    { name: 'Home & Kitchen', href: '/products?category=Home%20%26%20Kitchen', desc: 'Cookware & brass' },
-    { name: 'View Complete Catalog', href: '/products', desc: 'All departments' },
+    ...SECONDARY_CATEGORIES.map((c) => ({
+      name: c.name,
+      href: categoryHref(c),
+      desc: c.description,
+      icon: c.icon,
+    })),
+    { name: 'View Complete Catalog', href: '/products', desc: 'All departments', icon: 'LayoutGrid' },
   ];
 
   useEffect(() => {
@@ -126,7 +106,7 @@ export function CategoryNavBar() {
                   <Sparkles className="w-3.5 h-3.5" />
                   Explore Departments
                 </span>
-                <span className="text-gray-400 font-medium">14 categories</span>
+                <span className="text-gray-400 font-medium">{CATEGORIES.length} categories</span>
               </div>
               <div className="py-1">
                 {allCategories.map((cat) => (
@@ -137,7 +117,7 @@ export function CategoryNavBar() {
                     className="flex items-center gap-3 px-4 py-2 text-xs font-semibold text-gray-700 hover:bg-emerald-50 hover:text-[#0f3e26] transition-colors"
                   >
                     <span className="w-5 h-5 flex items-center justify-center shrink-0">
-                      {CATEGORY_ICONS[cat.name]}
+                      <CategoryIcon name={cat.icon} />
                     </span>
                     <span>{cat.name}</span>
                   </Link>
@@ -187,7 +167,7 @@ export function CategoryNavBar() {
                       className="flex items-center gap-3 px-3.5 py-2 text-xs text-gray-800 hover:bg-emerald-50 hover:text-[#0f3e26] transition-colors group"
                     >
                       <span className="w-5 h-5 flex items-center justify-center shrink-0">
-                        {CATEGORY_ICONS[cat.name]}
+                        <CategoryIcon name={cat.icon} />
                       </span>
                       <div className="min-w-0">
                         <p className="font-bold text-gray-900 group-hover:text-[#0f3e26] truncate">{cat.name}</p>

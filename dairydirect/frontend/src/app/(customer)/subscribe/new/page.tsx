@@ -9,6 +9,7 @@ import { useStore } from '@/store/useStore';
 import { getUserSubscriptions, createSubscription, submitModificationReport } from '@/lib/api/subscriptions';
 import { getProducts } from '@/lib/api/products';
 import { format, addDays } from 'date-fns';
+import { PLACEHOLDER_PRODUCT_IMAGE } from '@/lib/constants/brand';
 
 function NewSubscriptionContent() {
   const router = useRouter();
@@ -21,20 +22,20 @@ function NewSubscriptionContent() {
   const [isProcessing, setIsProcessing] = useState(false);
   const [plan, setPlan] = useState<'weekly' | 'monthly'>('monthly');
   const [isSuccess, setIsSuccess] = useState(false);
-  const [milkProductId, setMilkProductId] = useState<string>('');
-  const [milkProductName, setMilkProductName] = useState('Farm Fresh Cow Milk');
-  const [milkProductImage, setMilkProductImage] = useState('/milk.png');
+  const [subscriptionProductId, setSubscriptionProductId] = useState<string>('');
+  const [subscriptionProductName, setSubscriptionProductName] = useState('');
+  const [subscriptionProductImage, setSubscriptionProductImage] = useState(PLACEHOLDER_PRODUCT_IMAGE);
   const [startDate, setStartDate] = useState(format(addDays(new Date(), 1), 'yyyy-MM-dd'));
   const [deliveryTime, setDeliveryTime] = useState('07:00');
 
   useEffect(() => {
     async function loadData() {
       const products = await getProducts({ activeOnly: true });
-      const milkObj = products.find(p => p.category === 'Milk') || products[0];
-      if (milkObj) {
-        setMilkProductId(milkObj.id);
-        setMilkProductName(milkObj.name);
-        if (milkObj.image_url) setMilkProductImage(milkObj.image_url);
+      const defaultProduct = products[0];
+      if (defaultProduct) {
+        setSubscriptionProductId(defaultProduct.id);
+        setSubscriptionProductName(defaultProduct.name);
+        if (defaultProduct.image_url) setSubscriptionProductImage(defaultProduct.image_url);
       }
 
       if (user && editId) {
@@ -70,7 +71,7 @@ function NewSubscriptionContent() {
         const combinedDateTime = new Date(`${startDate}T${deliveryTime}:00`).toISOString();
         result = await createSubscription({
           userId: user.id,
-          productId: milkProductId,
+          productId: subscriptionProductId,
           volume,
           plan,
           startDate: combinedDateTime,
@@ -138,9 +139,9 @@ function NewSubscriptionContent() {
           <div className="absolute bottom-0 left-0 w-32 h-32 bg-primary/5 rounded-full -ml-16 -mb-16 blur-2xl" />
           
           <div className="w-24 h-24 relative mb-4 overflow-hidden rounded-[20px] bg-sky-50 flex items-center justify-center p-2 shadow-inner border border-sand/30">
-            <img src={milkProductImage} alt={milkProductName} className="w-full h-full object-contain" />
+            <img src={subscriptionProductImage} alt={subscriptionProductName} className="w-full h-full object-contain" />
           </div>
-          <h2 className="font-black text-dark text-xl mb-1 text-center">{milkProductName}</h2>
+          <h2 className="font-black text-dark text-xl mb-1 text-center">{subscriptionProductName}</h2>
           <p className="text-[11px] text-primary font-bold uppercase tracking-widest mb-6 bg-primary/10 px-3 py-1 rounded-full">A2 Quality • Pure Harvest</p>
           
           <div className="w-full space-y-6">

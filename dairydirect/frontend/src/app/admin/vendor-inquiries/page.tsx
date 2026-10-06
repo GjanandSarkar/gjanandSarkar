@@ -364,7 +364,7 @@ export default function AdminVendorInquiriesPage() {
               )}
               {selectedInquiry.notes && (
                 <div className="py-1">
-                  <span className="text-gray-500 block mb-0.5">Purity / Cattle Practice Notes:</span>
+                  <span className="text-gray-500 block mb-0.5">Product &amp; Certification Notes:</span>
                   <p className="text-gray-800 italic bg-white p-2.5 rounded-xl border border-gray-200">
                     &ldquo;{selectedInquiry.notes}&rdquo;
                   </p>

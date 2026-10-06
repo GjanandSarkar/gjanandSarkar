@@ -56,7 +56,8 @@ export default function ContactPage() {
             Contact Customer Support
           </h1>
           <p className="text-xs sm:text-sm text-gray-600 leading-relaxed">
-            Have questions about morning delivery timings, subscriptions, lab reports, or bulk farm orders? Our team is available 7 days a week.
+            Questions about an order, a partner brand, a subscription or bulk
+            purchasing? Our team is available 7 days a week.
           </p>
         </div>
 
@@ -118,23 +119,23 @@ export default function ContactPage() {
                 </div>
               </div>
               <p className="text-[11px] text-gray-500">
-                For corporate gifting, bulk orders, or farm tie-ups.
+                For corporate gifting, bulk orders, or brand partnerships.
               </p>
             </div>
 
-            {/* Corporate Gaushala Hub */}
+            {/* Headquarters */}
             <div className="bg-white border border-gray-200 rounded-2xl p-5 shadow-xs space-y-2">
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 rounded-xl bg-purple-50 text-purple-700 flex items-center justify-center">
                   <MapPin className="w-5 h-5" />
                 </div>
                 <div>
-                  <h3 className="text-xs font-bold text-gray-900">Headquarters & Dairy Hub</h3>
-                  <p className="text-[11px] text-gray-600">Gjanand Sarkar Dairy Direct LLP</p>
+                  <h3 className="text-xs font-bold text-gray-900">Headquarters</h3>
+                  <p className="text-[11px] text-gray-600">Gjanand Sarkar</p>
                 </div>
               </div>
               <p className="text-[11px] text-gray-500 leading-relaxed">
-                Kudasan Farm Road, Near Infocity Circle, Gandhinagar, Gujarat - 382421
+                Kudasan, Near Infocity Circle, Gandhinagar, Gujarat - 382421
               </p>
             </div>
 
@@ -229,10 +230,10 @@ export default function ContactPage() {
                       className="w-full px-3.5 py-2.5 text-xs rounded-xl border border-gray-300 focus:border-[#0f3e26] focus:ring-1 focus:ring-[#0f3e26] outline-none bg-white"
                     >
                       <option value="Order Query">Order Status & Delivery</option>
-                      <option value="Subscription">Daily Milk Subscription</option>
+                      <option value="Subscription">Subscriptions</option>
                       <option value="Quality">Lab Report & Purity Question</option>
                       <option value="Refund">Return & Refund Request</option>
-                      <option value="Partnership">Farmer / Seller Onboarding</option>
+                      <option value="Partnership">Partner Brand Onboarding</option>
                       <option value="Other">General Feedback</option>
                     </select>
                   </div>

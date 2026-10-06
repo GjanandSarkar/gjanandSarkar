@@ -123,7 +123,8 @@ export default function CustomerReturnsPage() {
           <div>
             <p className="font-bold text-[14px] text-[#2d5a27]">Gjanand Sarkar Freshness Promise</p>
             <p className="text-[12px] text-[#43493e]">
-              If any milk or dairy product delivered to you is sour, damaged, or not fresh, report it within 24 hours for an instant replacement or refund.
+              If a perishable item arrives spoiled, damaged or not fresh, report it within
+              24 hours for an instant replacement or refund.
             </p>
           </div>
         </div>
@@ -235,7 +236,7 @@ export default function CustomerReturnsPage() {
                   onChange={e => setReason(e.target.value)}
                   className="w-full px-3 py-2 rounded-[10px] border text-[13px] bg-gray-50"
                 >
-                  <option value="spoiled_sour">Milk / Dairy is sour or spoiled</option>
+                  <option value="spoiled_sour">Perishable item is spoiled</option>
                   <option value="damaged_seal">Seal broken or packet leaking</option>
                   <option value="wrong_item">Wrong item delivered</option>
                   <option value="expired">Near or past expiry date</option>

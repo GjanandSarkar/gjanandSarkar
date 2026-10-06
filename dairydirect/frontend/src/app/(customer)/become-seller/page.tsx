@@ -25,6 +25,7 @@ import {
 import { useStore } from '@/store/useStore';
 import { submitSellerInquiry, SellerInquiry } from '@/lib/api/sellers';
 import { validatePhoneNumber, formatPhoneInput } from '@/lib/utils/phone';
+import { CATEGORY_NAMES } from '@/lib/constants/categories';
 
 export default function BecomeSellerPage() {
   const user = useStore((s) => s.user);
@@ -36,7 +37,7 @@ export default function BecomeSellerPage() {
   const [email, setEmail] = useState(user?.email || '');
   const [city, setCity] = useState('');
   const [stateOrigin, setStateOrigin] = useState('Gujarat');
-  const [category, setCategory] = useState('A2 Dairy & Vedic Ghee');
+  const [category, setCategory] = useState(CATEGORY_NAMES[0]);
   const [productRange, setProductRange] = useState('');
   const [monthlyVolume, setMonthlyVolume] = useState('500 - 1,000 Liters / Units');
   const [fssaiNumber, setFssaiNumber] = useState('');
@@ -54,23 +55,17 @@ export default function BecomeSellerPage() {
     'Tamil Nadu', 'Kashmir', 'Himachal Pradesh', 'West Bengal', 'Karnataka', 'Madhya Pradesh', 'Uttar Pradesh'
   ];
 
-  const categoriesList = [
-    'A2 Dairy & Vedic Ghee',
-    'Vedic Ayurveda & Herbs',
-    'Artisanal Handicrafts & Handloom',
-    'Cold-Pressed Wood Churned Oils',
-    'Heritage Spices & Seasonings',
-    'Organic Staples, Pulses & Grains',
-    'Pooja & Spiritual Essentials',
-    'Traditional Indian Sweets & Snacks'
-  ];
+  // Was a bespoke 8-item list led by dairy. Partner applications must map to
+  // the same taxonomy the storefront uses, otherwise an approved partner's
+  // category would not match any category customers can actually browse.
+  const categoriesList = CATEGORY_NAMES;
 
   const volumeOptions = [
-    'Under 200 Liters / Units per month',
-    '200 - 500 Liters / Units per month',
-    '500 - 1,000 Liters / Units per month',
-    '1,000 - 5,000 Liters / Units per month',
-    '5,000+ Liters / Units per month (Commercial Scale)'
+    'Under 200 units per month',
+    '200 - 500 units per month',
+    '500 - 1,000 units per month',
+    '1,000 - 5,000 units per month',
+    '5,000+ units per month (commercial scale)'
   ];
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -146,8 +141,10 @@ export default function BecomeSellerPage() {
             Become a Verified Seller on Gjanand Sarkar
           </h1>
           <p className="text-sm sm:text-base text-gray-600 leading-relaxed">
-            We partner with certified Indian dairy farmers, traditional Bilona ghee makers, and heritage artisans. 
-            Submit your seller inquiry below — our vendor onboarding team will contact you manually within 24-48 hours to verify quality and onboard your store.
+            Gjanand Sarkar works with exactly one partner company per category.
+            If your category is open, we want to hear from you. Submit your
+            application below and our onboarding team will contact you within
+            24–48 hours to verify your business and discuss terms.
           </p>
         </div>
 
@@ -159,7 +156,7 @@ export default function BecomeSellerPage() {
             </div>
             <h3 className="text-sm font-black text-gray-900 mb-1">Submit Seller Inquiry</h3>
             <p className="text-xs text-gray-500 leading-normal">
-              Fill out your farm, dairy brand, or artisanal workshop details along with your production capacity.
+              Tell us about your company, the category you want to own, and your monthly production capacity.
             </p>
           </div>
 
@@ -169,7 +166,7 @@ export default function BecomeSellerPage() {
             </div>
             <h3 className="text-sm font-black text-gray-900 mb-1">Manual Quality Verification</h3>
             <p className="text-xs text-gray-500 leading-normal">
-              Our team will call / WhatsApp you within 24-48h to review FSSAI, purity lab tests, and sample quality.
+              We call or WhatsApp you within 24–48h to verify registration, GST, category licences and product samples.
             </p>
           </div>
 
@@ -232,7 +229,7 @@ export default function BecomeSellerPage() {
                 </li>
                 <li className="flex items-start gap-2">
                   <span className="font-bold text-[#c88a23]">•</span>
-                  <span>We will verify your FSSAI credentials, batch quality certificates, and discuss packaging standards.</span>
+                  <span>We will verify your business registration, GST, category licences and quality certificates, and discuss packaging standards.</span>
                 </li>
                 <li className="flex items-start gap-2">
                   <span className="font-bold text-[#c88a23]">•</span>
@@ -326,7 +323,7 @@ export default function BecomeSellerPage() {
                       required
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
-                      placeholder="e.g. contact@girfarm.in"
+                      placeholder="e.g. contact@yourcompany.in"
                       className="w-full px-4 py-2.5 rounded-xl border border-gray-300 text-xs text-gray-900 focus:border-[#0f3e26] focus:ring-1 focus:ring-[#0f3e26] outline-none"
                     />
                   </div>
@@ -350,7 +347,7 @@ export default function BecomeSellerPage() {
                       required
                       value={businessName}
                       onChange={(e) => setBusinessName(e.target.value)}
-                      placeholder="e.g. Gir Amrutam Vedic Farm & Dairy"
+                      placeholder="e.g. Shree Industries Pvt Ltd"
                       className="w-full px-4 py-2.5 rounded-xl border border-gray-300 text-xs text-gray-900 focus:border-[#0f3e26] focus:ring-1 focus:ring-[#0f3e26] outline-none"
                     />
                   </div>
@@ -421,7 +418,7 @@ export default function BecomeSellerPage() {
                       type="text"
                       value={productRange}
                       onChange={(e) => setProductRange(e.target.value)}
-                      placeholder="e.g. Vedic A2 Gir Cow Bilona Ghee, Cultured White Butter, Cold-pressed Sesame Oil"
+                      placeholder="e.g. Stainless steel cookware, cold-pressed sesame oil, handloom cotton sarees"
                       className="w-full px-4 py-2.5 rounded-xl border border-gray-300 text-xs text-gray-900 focus:border-[#0f3e26] outline-none"
                     />
                   </div>
@@ -438,7 +435,7 @@ export default function BecomeSellerPage() {
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
                     <label className="block text-xs font-bold text-gray-700 mb-1.5">
-                      FSSAI License Number (Optional/Recommended)
+                      FSSAI License Number (food &amp; beverage categories only)
                     </label>
                     <input
                       type="text"
@@ -464,13 +461,13 @@ export default function BecomeSellerPage() {
 
                   <div className="sm:col-span-2">
                     <label className="block text-xs font-bold text-gray-700 mb-1.5">
-                      Describe Your Purity, Cattle Breed, or Crafting Process
+                      Describe Your Products, Certifications and Manufacturing Process
                     </label>
                     <textarea
                       rows={3}
                       value={notes}
                       onChange={(e) => setNotes(e.target.value)}
-                      placeholder="Tell us about your cattle breed (Gir/Kankrej), fodder practices, traditional clay pot churning, or artisanal handloom methods..."
+                      placeholder="Tell us how your products are made, what certifications you hold, your manufacturing or sourcing setup, and why you should own this category..."
                       className="w-full px-4 py-2.5 rounded-xl border border-gray-300 text-xs text-gray-900 focus:border-[#0f3e26] outline-none resize-none"
                     />
                   </div>

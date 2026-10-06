@@ -11,6 +11,7 @@ import {
 import type { CatalogProduct } from '@/lib/types/catalog';
 import { useStore } from '@/store/useStore';
 import { addToCart } from '@/lib/api/cart';
+import { PLACEHOLDER_PRODUCT_IMAGE } from '@/lib/constants/brand';
 
 interface DealsAndBrandsProps {
   products: CatalogProduct[];
@@ -92,7 +93,7 @@ export function DealsAndBrands({ products }: DealsAndBrandsProps) {
                     {/* Image */}
                     <div className="w-full aspect-square bg-white rounded-lg p-2 flex items-center justify-center overflow-hidden mb-2">
                       <img
-                        src={prod.image_url || '/milk.png'}
+                        src={prod.image_url || PLACEHOLDER_PRODUCT_IMAGE}
                         alt={prod.name}
                         className="w-full h-full object-contain group-hover:scale-105 transition-transform"
                       />

@@ -1,6 +1,7 @@
 import { unstable_cache } from 'next/cache';
 import { getAdminSupabase } from '@/lib/supabase/admin';
 import type { CatalogProduct } from '@/lib/types/catalog';
+import { legacyCategoryFilter } from '@/lib/constants/categories';
 
 /**
  * Slim product shape for the homepage.
@@ -123,13 +124,9 @@ export function getCategoryProducts(category?: string): Promise<HomeProduct[]> {
 
         if (category) {
           const cleanCat = category.replace(/-/g, ' ').trim();
-          if (
-            cleanCat.toLowerCase() === 'dairy & essentials' ||
-            cleanCat.toLowerCase() === 'dairy'
-          ) {
-            query = query.or(
-              'category.ilike.%Milk%,category.ilike.%Ghee%,category.ilike.%Paneer%,category.ilike.%Curd%,category.ilike.%Lassi%,category.ilike.%Dairy%'
-            );
+          const legacy = legacyCategoryFilter(cleanCat);
+          if (legacy) {
+            query = query.or(legacy);
           } else {
             query = query.ilike('category', `%${cleanCat}%`);
           }

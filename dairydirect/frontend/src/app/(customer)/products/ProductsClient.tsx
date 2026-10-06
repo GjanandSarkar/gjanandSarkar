@@ -5,6 +5,7 @@ import { useSearchParams } from 'next/navigation';
 import { useTranslation } from '@/lib/i18n';
 import { getProducts } from '@/lib/api/products';
 import type { CatalogProduct } from '@/lib/types/catalog';
+import { CATEGORY_NAMES } from '@/lib/constants/categories';
 import { ProductCard } from '@/components/shared/ProductCard';
 import { useStore } from '@/store/useStore';
 import { 
@@ -69,25 +70,9 @@ function ProductsScreenContent({ initialProducts }: { initialProducts: CatalogPr
     'Punjab', 'Tamil Nadu', 'Himachal Pradesh', 'West Bengal'
   ];
 
-  const defaultCategories = [
-    'All',
-    'Milk',
-    'Ghee',
-    'Paneer',
-    'Curd',
-    'Lassi',
-    'Cold-Pressed Oils',
-    'Ayurveda',
-    'Handicrafts',
-    'Spices',
-    'Organic Groceries',
-    'Fashion',
-    'Electronics',
-    'Home & Kitchen',
-    'Beauty & Personal Care',
-    'Sports',
-    'Books',
-  ];
+  // Was a hand-maintained 16-item array that disagreed with the navigation
+  // and with the admin product form. Now derived from the single taxonomy.
+  const defaultCategories = ['All', ...CATEGORY_NAMES];
 
   const categories = useMemo(() => {
     const list = Array.from(
@@ -111,10 +96,11 @@ function ProductsScreenContent({ initialProducts }: { initialProducts: CatalogPr
         if (!matchCat) {
           if (prodCat === activeCat) {
             matchCat = true;
-          } else if (activeCat === 'curd & lassi' || activeCat === 'curd' || activeCat === 'lassi') {
-            matchCat = prodCat.includes('curd') || prodCat.includes('lassi');
           } else if (activeCat.includes('dairy') || activeCat.includes('essentials')) {
-            matchCat = ['milk', 'ghee', 'paneer', 'curd', 'lassi', 'butter', 'dairy'].some(c => prodCat.includes(c));
+            // Legacy data shim: existing rows store dairy sub-products
+            // ('Milk', 'Ghee', ...) in products.category rather than 'Dairy'.
+            // Mirrors legacyCategoryFilter() used by the server queries.
+            matchCat = ['milk', 'ghee', 'paneer', 'curd', 'lassi', 'buttermilk', 'butter', 'dairy'].some(c => prodCat.includes(c));
           } else if (activeCat.includes('oil') || activeCat.includes('spice')) {
             matchCat = prodCat.includes('oil') || prodCat.includes('spice');
           } else {

@@ -4,6 +4,8 @@ import React, { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
 import { ArrowRight, ChevronLeft, ChevronRight, Sparkles, PackageOpen } from 'lucide-react';
 import type { CatalogProduct } from '@/lib/types/catalog';
+import { BRAND, PLACEHOLDER_PRODUCT_IMAGE } from '@/lib/constants/brand';
+import { findCategory } from '@/lib/constants/categories';
 
 interface ShowcaseProduct {
   id: string;
@@ -21,7 +23,25 @@ interface HeroBannerProps {
 }
 
 const badgeColors = ['#d97706', '#0f3e26', '#15803d', '#c88a23', '#047857', '#b45309'];
-const badges = ['VEDIC BILONA GHEE', 'ARTISANAL HERITAGE', 'HANDCRAFTED FRESH', 'PROBIOTIC PURITY', 'AUTHENTIC DESI', '100% ORGANIC'];
+
+/**
+ * The hero used to stamp a rotating list of dairy slogans onto whatever
+ * products happened to be in the carousel — so an electronics item could be
+ * labelled "VEDIC BILONA GHEE" or "100% ORGANIC". Those are product claims,
+ * and making false ones on a marketplace whose entire pitch is verified
+ * authenticity is a brand risk, not a cosmetic one.
+ *
+ * The badge now states the product's actual category, with a neutral,
+ * always-true fallback.
+ */
+const DEFAULT_BADGE = 'VERIFIED INDIAN BRAND';
+
+function badgeForProduct(category?: string | null): string {
+  const match = findCategory(category);
+  if (match) return match.name.toUpperCase();
+  if (category && category.trim()) return category.trim().toUpperCase();
+  return DEFAULT_BADGE;
+}
 
 export function HeroBanner({ products }: HeroBannerProps) {
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -40,10 +60,10 @@ export function HeroBanner({ products }: HeroBannerProps) {
   const rawItems: ShowcaseProduct[] = heroProducts.map((p, idx) => ({
     id: p.id,
     name: p.name,
-    subtitle: p.category || '100% Pure & Vedic',
-    badge: badges[idx % badges.length],
+    subtitle: findCategory(p.category)?.description || p.category || 'Verified Indian product',
+    badge: badgeForProduct(p.category),
     badgeBg: badgeColors[idx % badgeColors.length],
-    image: p.image_url || '/milk.png',
+    image: p.image_url || PLACEHOLDER_PRODUCT_IMAGE,
     href: `/products/${p.id}`,
     tagColor: 'text-[#0f3e26]'
   }));
@@ -163,7 +183,8 @@ export function HeroBanner({ products }: HeroBannerProps) {
           </h1>
 
           <p className="text-sm sm:text-base text-gray-700 font-normal leading-relaxed mb-8 max-w-lg">
-            Your one-stop platform for Made in India products from trusted businesses, local dairy farms, and heritage craftsmen.
+            {BRAND.promise} We partner with a single verified company in every
+            category — so you never have to guess which listing is the real one.
           </p>
 
           <div className="flex flex-wrap items-center gap-4">

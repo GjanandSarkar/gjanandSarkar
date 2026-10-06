@@ -22,7 +22,7 @@ const stats = [
   },
   {
     value: '15K+',
-    label: 'Farmers Sourced',
+    label: 'Partner Brands',
     icon: Store,
     bg: 'bg-amber-50 text-amber-800',
   },
@@ -40,27 +40,32 @@ const stats = [
   },
 ];
 
+// TODO(pre-launch): these testimonials and the counters above are
+// placeholders. Replace them with real reviews from the `reviews` table and
+// real counts before going live — inventing social proof on a platform whose
+// entire pitch is verified authenticity is a brand-level risk. See
+// docs/LAUNCH_READINESS_AUDIT.md section 5.1.
 const reviews = [
   {
     id: 0,
     name: 'Amit Sharma',
     location: 'Ahmedabad',
     initials: 'AS',
-    text: '“Unmatched freshness & authentic aroma. The A2 Gir cow ghee reminds me of my village home!”',
+    text: '“Finally one place where I know the brand is the real one. No fake listings, no guessing between ten identical sellers.”',
   },
   {
     id: 1,
     name: 'Pooja Verma',
     location: 'Jaipur',
     initials: 'PV',
-    text: '“Prompt 7 AM doorstep delivery in sterile glass bottles. Extremely fresh and delicious.”',
+    text: '“Ordered across three different categories in one basket. Packaging was solid and delivery was on time.”',
   },
   {
     id: 2,
     name: 'Dr. Rajesh Iyer',
     location: 'Bengaluru',
     initials: 'RI',
-    text: '“Direct connection with genuine regional farmers. High quality products and great service.”',
+    text: '“Good to see Indian brands getting a proper storefront. Quality has been consistent on every order.”',
   },
 ];
 
@@ -156,7 +161,7 @@ export function ImpactAndTestimonial() {
           <div className="flex flex-wrap items-center gap-5">
             <span className="inline-flex items-center gap-1.5">
               <ShieldCheck className="w-4 h-4 text-emerald-700" />
-              <span>Lab Tested &amp; FSSAI Certified</span>
+              <span>Verified Partner Brands</span>
             </span>
             <span className="inline-flex items-center gap-1.5">
               <CheckCircle2 className="w-4 h-4 text-emerald-700" />

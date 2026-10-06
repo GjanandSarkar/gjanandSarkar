@@ -25,7 +25,11 @@ import {
 } from 'lucide-react';
 import { motion } from 'framer-motion';
 
-const CATEGORIES = ['Milk', 'Paneer', 'Ghee', 'Buttermilk', 'Curd', 'Lassi'];
+// Was a dairy-only list, so an admin editing an Electronics product would
+// have had its category silently reset to a dairy value.
+import { CATEGORY_NAMES } from '@/lib/constants/categories';
+
+const CATEGORIES = CATEGORY_NAMES;
 
 export default function EditProductPage() {
   const router = useRouter();

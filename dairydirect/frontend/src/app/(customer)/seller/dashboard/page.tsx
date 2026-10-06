@@ -32,6 +32,7 @@ import { getSellerDashboard, SellerDashboardData, requestSellerReactivation } fr
 import { getProducts, ProductWithVariants } from '@/lib/api/products';
 import { ProductEditModal } from '@/components/admin/ProductEditModal';
 import Link from 'next/link';
+import { PLACEHOLDER_PRODUCT_IMAGE } from '@/lib/constants/brand';
 
 export default function SellerDashboardPage() {
   const user = useStore((s) => s.user);
@@ -242,8 +243,8 @@ export default function SellerDashboardPage() {
                 <FileCheck2 className="w-4 h-4 text-[#0f3e26]" />
                 <span>Verification Checklist</span>
               </h4>
-              <p>1. Our quality audit team will verify your FSSAI / cattle breed pedigree.</p>
-              <p>2. We arrange a sample quality check or lab purity certificate review.</p>
+              <p>1. We verify your business registration, GST and the licences your category requires.</p>
+              <p>2. We review product samples and your quality certificates.</p>
               <p>3. Once approved, your seller dashboard & storefront go live instantly.</p>
             </div>
 
@@ -697,7 +698,7 @@ export default function SellerDashboardPage() {
 
                         <div className="flex gap-3 items-center">
                           <img
-                            src={p.image_url || '/milk.png'}
+                            src={p.image_url || PLACEHOLDER_PRODUCT_IMAGE}
                             alt={p.name}
                             className="w-12 h-12 rounded-xl object-contain bg-gray-50 border border-gray-100 shrink-0"
                           />
