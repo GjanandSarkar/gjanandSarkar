@@ -35,7 +35,7 @@ export function FloatingCartBar({ onOpen }: FloatingCartBarProps) {
             onClick={onOpen}
             className="w-full flex items-center justify-between rounded-[16px] px-5 py-4 transition-all active:scale-[0.98] hover:brightness-105"
             style={{
-              background: 'linear-gradient(135deg, #3f6530, #577f46)',
+              background: 'var(--cta-gradient)',
               boxShadow: '0 8px 24px rgba(63, 101, 48, 0.35)',
             }}
           >

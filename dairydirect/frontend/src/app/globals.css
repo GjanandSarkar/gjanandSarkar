@@ -89,6 +89,15 @@
     --primary-fixed: #e6f2ec;
     --primary-fixed-dim: #cce6d9;
     
+    /* The primary call-to-action gradient.
+       "Proceed to checkout", "Place order" and the floating cart bar were
+       all hardcoded to linear-gradient(135deg, #3f6530, #577f46) — a muted
+       olive that is not the brand green (#0c3c26) and appears nowhere in the
+       palette. The most important button on the site was off-brand in 14
+       places. */
+    --cta-gradient: linear-gradient(135deg, #0c3c26, #1b6342);
+    --cta-shadow: 0 6px 20px rgba(12, 60, 38, 0.28);
+
     --secondary: #b87d20;
     --secondary-hover: #9e6b18;
     

@@ -68,9 +68,9 @@ export default function AdminOrdersPage() {
               <button key={tab} onClick={() => setActiveTab(tab)}
                 className="whitespace-nowrap px-4 py-2 rounded-full text-[12px] font-semibold transition-all duration-200 shrink-0 capitalize"
                 style={activeTab === tab ? {
-                  background: 'linear-gradient(135deg, #3f6530, #577f46)',
+                  background: 'var(--cta-gradient)',
                   color: 'white',
-                  boxShadow: '0 3px 10px rgba(63, 101, 48, 0.25)',
+                  boxShadow: '0 3px 10px rgba(12, 60, 38, 0.25)',
                 } : {
                   background: 'var(--color-surface-container-low)',
                   color: 'var(--color-on-surface-variant)',
@@ -183,7 +183,7 @@ export default function AdminOrdersPage() {
                                   return (
                                     <div key={status} className="flex items-center flex-1 last:flex-none">
                                       <div className={`w-8 h-8 rounded-full flex items-center justify-center transition-colors ${isActive ? 'bg-primary text-white' : 'bg-surface text-outline border border-outline/30'}`}
-                                           style={{ boxShadow: isCurrent ? '0 0 0 3px rgba(63, 101, 48, 0.2)' : 'none' }}>
+                                           style={{ boxShadow: isCurrent ? '0 0 0 3px rgba(12, 60, 38, 0.20)' : 'none' }}>
                                         {idx + 1}
                                       </div>
                                       {idx < arr.length - 1 && (

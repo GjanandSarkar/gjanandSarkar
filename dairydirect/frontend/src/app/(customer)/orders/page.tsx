@@ -93,9 +93,9 @@ export default function OrdersScreen() {
               <button key={tab} onClick={() => setActiveTab(tab)}
                 className="whitespace-nowrap px-4 py-2 rounded-full text-[12px] font-semibold transition-all duration-200 shrink-0"
                 style={activeTab === tab ? {
-                  background: 'linear-gradient(135deg, #3f6530, #577f46)',
+                  background: 'var(--cta-gradient)',
                   color: 'white',
-                  boxShadow: '0 3px 10px rgba(63, 101, 48, 0.25)',
+                  boxShadow: '0 3px 10px rgba(12, 60, 38, 0.25)',
                 } : {
                   background: 'var(--color-surface-container-low)',
                   color: 'var(--color-on-surface-variant)',
@@ -202,7 +202,7 @@ export default function OrdersScreen() {
                             {(order.status === 'out_for_delivery' || order.status === 'confirmed') && (
                               <Link href={`/tracking/${order.id}`}
                                 className="flex items-center justify-center gap-2 w-full py-3 rounded-[12px] font-bold text-sm text-white"
-                                style={{ background: 'linear-gradient(135deg, #3f6530, #577f46)' }}>
+                                style={{ background: 'var(--cta-gradient)' }}>
                                 <Truck className="w-4 h-4" />
                                 {t('trackLive')}
                               </Link>

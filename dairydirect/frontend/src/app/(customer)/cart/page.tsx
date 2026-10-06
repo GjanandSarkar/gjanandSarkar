@@ -12,6 +12,7 @@ import { EmptyCart } from '@/components/cart/EmptyCart';
 import Link from 'next/link';
 import { PLACEHOLDER_PRODUCT_IMAGE } from '@/lib/constants/brand';
 import { categoryBg } from '@/lib/constants/categories';
+import { ListSkeleton } from '@/components/shared/Skeletons';
 
 export default function CartScreen() {
   const { t } = useTranslation();
@@ -62,9 +63,9 @@ export default function CartScreen() {
     return (
       <div className="flex flex-col min-h-screen pt-20 px-6" style={{ background: 'var(--color-surface)' }}>
         <div className="flex flex-col gap-4 max-w-4xl mx-auto w-full">
-          {[1, 2, 3].map(i => (
-            <div key={i} className="h-24 rounded-[16px] animate-pulse" style={{ background: 'var(--color-surface-container-low)' }} />
-          ))}
+          {/* Was three flat grey bars that matched neither the row height nor
+              the row layout, so the cart still jumped when items arrived. */}
+          <ListSkeleton rows={3} />
         </div>
       </div>
     );
@@ -246,9 +247,9 @@ export default function CartScreen() {
               <Link href="/checkout"
                 className="flex items-center justify-between w-full px-6 py-4 rounded-[14px] font-bold text-[16px] transition-all active:scale-[0.98] hover:brightness-105"
                 style={{
-                  background: 'linear-gradient(135deg, #3f6530, #577f46)',
+                  background: 'var(--cta-gradient)',
                   color: 'white',
-                  boxShadow: '0 6px 20px rgba(63, 101, 48, 0.30)',
+                  boxShadow: 'var(--cta-shadow)',
                 }}>
                 <span>{t('proceedToCheckout')}</span>
                 <div className="flex items-center gap-2">
@@ -275,9 +276,9 @@ export default function CartScreen() {
           <Link href="/checkout"
             className="flex items-center justify-between w-full px-5 py-4 rounded-[14px] font-bold text-[15px] transition-all active:scale-[0.97]"
             style={{
-              background: 'linear-gradient(135deg, #3f6530, #577f46)',
+              background: 'var(--cta-gradient)',
               color: 'white',
-              boxShadow: '0 6px 20px rgba(63, 101, 48, 0.30)',
+              boxShadow: 'var(--cta-shadow)',
             }}>
             <span>{t('checkout')}</span>
             <div className="flex items-center gap-1.5">

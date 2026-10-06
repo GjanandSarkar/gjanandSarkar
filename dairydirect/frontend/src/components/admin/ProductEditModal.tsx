@@ -570,7 +570,7 @@ export function ProductEditModal({
                   onClick={handleAddVariant}
                   className="flex items-center gap-1 px-3 py-1.5 rounded-[10px] text-[12px] font-bold text-white transition-all active:scale-95 shadow-sm"
                   style={{
-                    background: 'linear-gradient(135deg, #3f6530, #577f46)',
+                    background: 'var(--cta-gradient)',
                   }}
                 >
                   <Plus className="w-3.5 h-3.5" />
@@ -818,7 +818,7 @@ export function ProductEditModal({
               disabled={isSaving || isDeleting}
               className="px-6 py-2.5 rounded-[12px] text-[13px] font-bold text-white transition-all active:scale-95 flex items-center gap-2 shadow-md hover:opacity-95 disabled:opacity-50"
               style={{
-                background: 'linear-gradient(135deg, #3f6530, #577f46)',
+                background: 'var(--cta-gradient)',
               }}
             >
               {isSaving ? (

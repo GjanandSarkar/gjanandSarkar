@@ -103,7 +103,7 @@ export default function AdminCustomersPage() {
                 style={{ background: 'var(--color-surface-container-lowest)', border: '1px solid rgba(195,201,187,0.3)' }}
               >
                 <div className="w-11 h-11 rounded-full flex items-center justify-center font-bold text-white text-[15px]"
-                  style={{ background: 'linear-gradient(135deg, #3f6530, #577f46)' }}>
+                  style={{ background: 'var(--cta-gradient)' }}>
                   {(c.name || c.email || 'C')[0].toUpperCase()}
                 </div>
                 <div className="flex-1 min-w-0">

@@ -158,6 +158,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             email: userProfile.email || '',
             avatar_url: userProfile.avatar_url || '',
             role: userProfile.role ?? 'customer',
+            // Was never mapped, so the profile screen had no real balance to
+            // read and fell back to a hardcoded 150.
+            loyalty_points: userProfile.loyalty_points ?? 0,
             saved_addresses: userProfile.saved_addresses || [],
           });
 
@@ -193,6 +196,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
               email: userProfile.email || '',
               avatar_url: userProfile.avatar_url || '',
               role: userProfile.role ?? 'customer',
+              loyalty_points: userProfile.loyalty_points ?? 0,
               saved_addresses: addresses.value.map(a => ({ label: a.label, address: a.address })),
             });
           }

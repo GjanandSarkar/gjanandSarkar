@@ -108,6 +108,15 @@ export default function ProfileScreen() {
   const router = useRouter();
   const { t, language } = useTranslation();
   const user = useStore((s) => s.user);
+
+  // Loyalty progress, derived from the real balance rather than hardcoded.
+  const REWARD_THRESHOLD = 200;
+  const loyaltyPoints = user?.loyalty_points ?? 0;
+  const pointsToReward = Math.max(0, REWARD_THRESHOLD - loyaltyPoints);
+  const rewardProgressPct = Math.min(
+    100,
+    Math.round((loyaltyPoints / REWARD_THRESHOLD) * 100),
+  );
   const isAuthLoading = useStore((s) => s.isAuthLoading);
   const logoutLocal = useStore((s) => s.logout);
   const setLanguage = useStore((s) => s.setLanguage);
@@ -220,23 +229,37 @@ export default function ProfileScreen() {
         <CollapsibleSection
           title="GjanandSarkar Rewards"
           subtitle="Earn points and unlock free deliveries"
-          badge="150 Points"
+          badge={`${loyaltyPoints} Points`}
           icon={<Trophy className="w-5 h-5" />}
           isOpen={openSections.rewards}
           onToggle={() => toggleSection('rewards')}
         >
+          {/* Was a hardcoded 150 points with a 75%-full bar and "50 pts to
+              Free Delivery", shown identically to every account — including
+              brand new ones with no orders. `profiles.loyalty_points` is a
+              real column that orders accrue into, so this now reads it. */}
           <div className="py-2.5">
             <div className="flex items-end justify-between mb-2">
               <div className="flex items-baseline gap-1">
-                <span className="text-2xl font-black text-dark tracking-tight">150</span>
+                <span className="text-2xl font-black text-dark tracking-tight tabular-nums">
+                  {loyaltyPoints}
+                </span>
                 <span className="text-[11px] font-bold text-muted uppercase tracking-wider">Points</span>
               </div>
-              <span className="text-[11px] font-semibold text-primary">50 pts to Free Delivery</span>
+              {pointsToReward > 0 ? (
+                <span className="text-[11px] font-semibold text-primary tabular-nums">
+                  {pointsToReward} pts to your next reward
+                </span>
+              ) : (
+                <span className="text-[11px] font-semibold text-primary">
+                  Reward unlocked
+                </span>
+              )}
             </div>
             <div className="h-2 w-full bg-sand rounded-full overflow-hidden">
-              <div 
-                className="h-full bg-primary rounded-full"
-                style={{ width: '75%' }}
+              <div
+                className="h-full bg-primary rounded-full transition-[width] duration-500"
+                style={{ width: `${rewardProgressPct}%` }}
               />
             </div>
           </div>

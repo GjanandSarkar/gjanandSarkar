@@ -22,6 +22,7 @@ import { OrderSummary } from '@/components/cart/OrderSummary';
 import { PaymentSelection } from '@/components/checkout/PaymentSelection';
 import { CheckoutConfidence } from '@/components/trust/CheckoutConfidence';
 import { initiateRazorpayPayment } from '@/lib/razorpay-client';
+import { SkeletonBlock } from '@/components/shared/Skeletons';
 
 export default function CheckoutScreen() {
   const router = useRouter();
@@ -269,16 +270,31 @@ export default function CheckoutScreen() {
 
   if (isLoading || !pricing) {
     return (
-      <div className="flex flex-col min-h-screen items-center justify-center bg-cream">
-        <Loader2 className="w-8 h-8 animate-spin text-primary" />
-        <p className="mt-4 text-xs text-muted font-medium">Securing Checkout...</p>
+      /* Was a centred spinner on a blank screen reading "Securing
+         Checkout...". Checkout is the most abandonment-sensitive screen in
+         the app: a blank page with a spinner is exactly where people leave.
+         A skeleton of the real layout keeps the page feeling present. */
+      <div className="flex flex-col min-h-screen bg-cream">
+        <div className="sticky top-0 z-30 bg-white border-b border-sand">
+          <div className="flex justify-between items-center p-4">
+            <SkeletonBlock className="h-6 w-40" />
+            <SkeletonBlock className="h-6 w-20 rounded-md" />
+          </div>
+        </div>
+        <div className="flex-1 px-4 py-5 space-y-4 max-w-3xl mx-auto w-full">
+          <SkeletonBlock className="h-28 w-full rounded-2xl" />
+          <SkeletonBlock className="h-40 w-full rounded-2xl" />
+          <SkeletonBlock className="h-48 w-full rounded-2xl" />
+        </div>
+        <div className="sticky bottom-0 bg-white border-t border-sand p-4">
+          <SkeletonBlock className="h-14 w-full rounded-2xl" />
+        </div>
       </div>
     );
   }
 
-  // Calculate free delivery progress for OrderSummary
-  // (We use a mock threshold of 300 for UI purposes, matching earlier logic if needed, 
-  // but it relies on pricing.nextTier)
+  // Free-delivery progress. Derived from the server-calculated pricing tier,
+  // not a hardcoded threshold.
   const deliveryProgress = pricing.nextTier > 0
     ? Math.min(100, (pricing.subtotal / (pricing.subtotal + pricing.nextTier)) * 100)
     : 100;

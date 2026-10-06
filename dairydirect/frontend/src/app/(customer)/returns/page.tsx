@@ -100,7 +100,7 @@ export default function CustomerReturnsPage() {
         <button
           onClick={() => setShowModal(true)}
           className="flex items-center gap-1.5 px-4 py-2 rounded-full font-bold text-[12px] text-white shadow-sm"
-          style={{ background: 'linear-gradient(135deg, #3f6530, #577f46)' }}
+          style={{ background: 'var(--cta-gradient)' }}
         >
           <RotateCcw className="w-3.5 h-3.5" /> Request Return
         </button>

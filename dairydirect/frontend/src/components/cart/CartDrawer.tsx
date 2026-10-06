@@ -303,9 +303,9 @@ export function CartDrawer({ isOpen, onClose }: CartDrawerProps) {
               aria-label="Proceed to checkout"
               className="flex items-center justify-between w-full px-6 py-4 rounded-[16px] font-bold text-[16px] transition-transform active:scale-[0.98] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
               style={{
-                background: 'linear-gradient(135deg, #3f6530, #577f46)',
+                background: 'var(--cta-gradient)',
                 color: 'white',
-                boxShadow: '0 6px 20px rgba(63, 101, 48, 0.25)',
+                boxShadow: '0 6px 20px rgba(12, 60, 38, 0.25)',
               }}
             >
               <span>{t('proceedToCheckout')}</span>
