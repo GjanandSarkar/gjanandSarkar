@@ -142,11 +142,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         const raw = await res.json();
         const userProfile = raw.user || raw.data?.user;
         const accessToken = raw.data?.accessToken || raw.accessToken;
-        if (accessToken) {
-          try {
-            document.cookie = `gs_access_token=${accessToken}; path=/; max-age=604800; SameSite=Lax`;
-          } catch {}
-        }
+        // NOTE: we deliberately do NOT write gs_access_token here any more.
+        // /api/auth/sync already sets it as an httpOnly cookie on this very
+        // response; re-writing it from JavaScript silently replaced that with
+        // a script-readable one, defeating the protection entirely.
         if (userProfile) {
           const resolvedName = (userProfile.name && userProfile.name.trim())
             ? userProfile.name.trim()

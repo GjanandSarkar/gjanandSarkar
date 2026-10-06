@@ -137,7 +137,7 @@ Numbers are from this sandbox with a stub database. On real infrastructure the *
 
 ## 2. Security
 
-### 2.1 🔴 LAUNCH BLOCKER — anyone can create products
+### 2.1 ~~🔴 LAUNCH BLOCKER~~ ✅ FIXED — anyone could create products
 
 `src/app/api/products/route.ts`, `POST` handler:
 
@@ -151,11 +151,39 @@ if (!name || !category) return 400;        // ...then it inserts
 
 This is especially damaging for your business model: the entire value proposition is *curated, one verified brand per category*. An open write endpoint destroys exactly the trust you are selling.
 
-**Fix required before launch:** gate `POST` behind `auth?.isAdmin || auth?.isApprovedSeller`, and make sellers only able to create products inside the category they are contracted for.
+**Fixed.** `POST` now enforces:
 
-I did not patch this myself because the correct rule depends on your seller onboarding policy — tell me which roles may create products and I will implement and test it.
+- unauthenticated → `401`
+- authenticated customer with no seller record → `403`
+- seller whose status is not `active` → `403`, naming the current status
+- seller listing outside their contracted category → `403`
+- admin → allowed in any category
 
-### 2.2 Runtime schema migration inside a request handler
+Seller identity is now resolved **server-side** from the authenticated user.
+The old code read `sellerId` out of the request body and then tried to match
+it against `sellers.id`, then `sellers.user_id`, then `profiles.id` — three
+speculative lookups that would happily attribute a product to someone else's
+store. That whole block is gone.
+
+Verified against the running build:
+
+```
+POST /api/products  (no auth)            --> 401 {"error":"Authentication required"}
+POST /api/products  (forged bearer)      --> 401 {"error":"Authentication required"}
+GET  /api/products                       --> 200  (public reads unaffected)
+```
+
+**Related bug found while fixing this:** `getAuthUser()` was destroying the
+`seller` role. In the Redis-cached branch it returned
+`role: isAdmin ? 'admin' : 'customer'`, and the final fallback branch never
+consulted the `profiles` table at all — it only trusted a custom JWT. Since
+you run Supabase (not RDS), that fallback is the path almost every request
+takes, so **every seller was being seen as a plain customer** and every
+database-assigned admin was downgraded too. Any authorisation built on top of
+that would have failed open or locked sellers out. Fixed: the role now
+survives caching, and Supabase `profiles` is consulted when RDS is absent.
+
+### 2.2 ✅ FIXED — runtime schema migration inside a request handler
 
 The same `POST` handler executes:
 
@@ -166,9 +194,40 @@ ALTER TABLE products ADD COLUMN IF NOT EXISTS created_by TEXT;
 
 DDL on every product creation. This takes an `ACCESS EXCLUSIVE` lock on your products table — on a live site, under concurrency, that will stall every read. Schema changes belong in migrations, which you already have a proper directory for.
 
-### 2.3 Auth token stored in a JavaScript-readable cookie
+**Fixed.** Removed from the handler. The columns are created by
+`20261006_product_ownership_columns.sql`, now with proper `UUID` types and
+foreign keys to `sellers(id)` and `profiles(id)` instead of bare `TEXT`.
 
-`AuthProvider` sets the access token via `document.cookie`, so it is `httpOnly: false` by construction and readable by any injected script. Should be set server-side as an `httpOnly`, `Secure`, `SameSite=Lax` cookie.
+That migration also adds a partial unique index,
+`uniq_active_seller_per_category`, enforcing **at most one active seller per
+category** in the database. Your defining business rule was previously a
+convention held only in people's heads — nothing stopped two active
+Electronics partners being created. (Scoped to `status = 'active'` so
+suspended or replaced partners stay in the table for history without blocking
+a successor.)
+
+### 2.3 ✅ FIXED — auth token readable by JavaScript
+
+Worse than first described. The server was *already* setting the session
+cookie correctly in some places (`getAccessTokenCookieOptions()` →
+`httpOnly: true`), but:
+
+- `/api/auth/sync` and `/api/auth/profile` explicitly overrode it with
+  `httpOnly: false` and a 7-day lifetime
+- `AuthProvider` and the OAuth callback page then **re-wrote the same cookie
+  from JavaScript** via `document.cookie`, which strips `httpOnly` even when
+  the server set it — silently undoing the protection on the very same
+  response
+
+So a 7-day session token was readable by any injected script.
+
+**Fixed.** Both routes now set `httpOnly: true`, and all three
+`document.cookie` writes are gone. This is safe because the browser never
+needed to read that cookie: `lib/api/client.ts` takes its bearer token from
+the Supabase session, and the cookie exists purely so the server and
+middleware can authenticate a request. Logout now calls
+`DELETE /api/auth/session` to expire the cookies server-side, since
+JavaScript can no longer clear them.
 
 ### 2.4 Dual-database fallback is a correctness risk
 
@@ -207,8 +266,13 @@ Five AWS SDK packages, `pg`, `ioredis`, `puppeteer-core`, `maplibre-gl` + `react
 ### 3.5 Operational gaps for a real launch
 
 - No test suite of any kind — no unit, integration or E2E tests. For a checkout flow handling real money, at minimum: place-order, payment-verify and inventory-reservation need integration tests.
-- No rate limiting on auth endpoints (`send-otp` is an SMS-cost DoS target).
-- `/api/test-sentry` and `/test-payment` routes are live in production builds.
+- ~~No rate limiting on auth endpoints.~~ **Correction: this was wrong.** On
+  closer reading `send-otp` does rate-limit, per IP (10/10min) *and* per phone
+  number (5/10min), and `verify-otp` limits per IP. This is correctly done.
+- ~~`/api/test-sentry` and `/test-payment` routes are live in production.~~
+  ✅ **FIXED** — `/api/test-sentry` (a route whose entire body is
+  `throw new Error(...)`), `/test-sentry` and `/test-payment` have been
+  deleted. Nothing referenced them.
 - Health check exists (`/api/health`) but no uptime monitoring or alerting is configured.
 
 ---
@@ -274,19 +338,18 @@ Steps 1–2 are where "college project" turns into "startup". I would do those n
 ## 6. Recommended order of work
 
 **Before launch (blocking):**
-1. Fix the open `POST /api/products` endpoint (§2.1)
-2. Remove runtime `ALTER TABLE` (§2.2)
-3. Apply the index migration to Supabase (§1.9)
-4. Confirm Supabase + hosting are both in Mumbai (§4)
-5. Rebrand away from dairy (§3.1)
-6. Remove `/api/test-sentry` and `/test-payment` (§3.5)
-7. Integration tests for checkout and payment (§3.5)
+1. ✅ ~~Fix the open `POST /api/products` endpoint~~ (§2.1)
+2. ✅ ~~Remove runtime `ALTER TABLE`~~ (§2.2)
+3. ✅ ~~`httpOnly` auth cookie~~ (§2.3)
+4. ✅ ~~Remove `/api/test-sentry` and `/test-payment`~~ (§3.5)
+5. 🔲 **Apply both new migrations to Supabase** (§1.9, §2.2) — *requires you*
+6. 🔲 Confirm Supabase + hosting are both in Mumbai (§4) — *requires you*
+7. 🔲 Rebrand away from dairy (§3.1) — *next*
+8. 🔲 Integration tests for checkout and payment (§3.5)
 
 **Launch week:**
-8. Optimistic cart UI (§5.2.1)
-9. Skeletons + design tokens (§5.2.2)
-10. `httpOnly` auth cookie (§2.3)
-11. Rate-limit OTP endpoints (§3.5)
+9. Optimistic cart UI (§5.2.1)
+10. Skeletons + design tokens (§5.2.2)
 
 **Shortly after:**
 12. `LazyMotion` for framer-motion (§1.11)
@@ -303,6 +366,7 @@ Steps 1–2 are where "college project" turns into "startup". I would do those n
 |---|---|
 | `7cce040` | Landing-page rewrite, homepage ISR + tag invalidation, Supabase/Sentry code-splitting, self-hosted variable font, lazy admin modal |
 | `d389261` | Server-rendered `/products` and `/categories/[slug]`, catalogue performance index migration |
-| *(this commit)* | Turbopack for dev + build, removed conflicting static-asset cache header |
+| `962b368` | Turbopack for dev + build, removed conflicting static-asset cache header |
+| *(this commit)* | **Security:** closed the open product-creation endpoint, fixed seller/admin role resolution, httpOnly session cookie, removed runtime DDL, deleted test routes, added ownership + one-seller-per-category migration |
 
 No behaviour was changed other than what is described above. TypeScript passes clean and the production build succeeds.

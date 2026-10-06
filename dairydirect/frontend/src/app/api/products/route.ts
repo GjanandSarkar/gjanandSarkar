@@ -6,7 +6,12 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { query, withTransaction, isPgConfigured } from '@/lib/aws/rds';
-import { getAuthUser } from '@/lib/api/auth-middleware';
+import {
+  getAuthUser,
+  getSellerForUser,
+  sellerCanWrite,
+  type SellerContext,
+} from '@/lib/api/auth-middleware';
 import { writeAuditLog } from '@/lib/security/audit';
 import { getCachedProducts, cacheProducts, invalidateProductsCache } from '@/lib/aws/redis';
 
@@ -146,25 +151,87 @@ export async function GET(request: NextRequest) {
   }
 }
 
-// ─── POST /api/products (Admin & Authenticated Sellers) ─────
+// ─── POST /api/products (Admin & active contracted sellers only) ─────
 export async function POST(request: NextRequest) {
   try {
+    // ─────────────────────────────────────────────────────────────────────
+    // AUTHORISATION
+    //
+    // This handler previously called getAuthUser() and then ignored the
+    // result entirely: there was no admin check, no seller check, and no
+    // login check at all. An unauthenticated request could publish a live
+    // product — with arbitrary name, price, images and description — onto
+    // the storefront. (PUT and DELETE on /api/products/[id] were already
+    // gated on auth.isAdmin; only POST was open.)
+    //
+    // The rule enforced here mirrors the business model:
+    //   - admins may create products in any category
+    //   - a seller may create products ONLY if their seller record is
+    //     'active', and ONLY inside the single category they are contracted
+    //     for (one company per category)
+    //   - everybody else is rejected
+    // ─────────────────────────────────────────────────────────────────────
     const auth = await getAuthUser(request);
 
+    if (!auth) {
+      return NextResponse.json(
+        { error: 'Authentication required' },
+        { status: 401 }
+      );
+    }
+
     const body = await request.json();
-    const { name, category, description, image_url, is_freshness_guarantee, is_active, variants, sellerId: bodySellerId } = body;
+    const { name, category, description, image_url, is_freshness_guarantee, is_active, variants } = body;
 
     if (!name || !category) {
       return NextResponse.json({ error: 'Name and category are required' }, { status: 400 });
     }
 
-    const sellerId = bodySellerId || auth?.userId || null;
+    // Seller identity is resolved from the authenticated user server-side.
+    // The previous code read `sellerId` straight out of the request body,
+    // so a caller could attribute a product to any seller they liked.
+    let seller: SellerContext | null = null;
+
+    if (!auth.isAdmin) {
+      seller = await getSellerForUser(auth.userId);
+
+      if (!seller) {
+        return NextResponse.json(
+          { error: 'Only approved sellers can add products' },
+          { status: 403 }
+        );
+      }
+
+      if (!sellerCanWrite(seller)) {
+        return NextResponse.json(
+          {
+            error: `Your seller account is '${seller.status}'. Products can only be added while your account is active.`,
+          },
+          { status: 403 }
+        );
+      }
+
+      // One company per category: a seller cannot list outside their contract.
+      const requested = String(category).trim().toLowerCase();
+      const contracted = seller.category.trim().toLowerCase();
+      if (!contracted || requested !== contracted) {
+        return NextResponse.json(
+          {
+            error: `You are contracted for the '${seller.category}' category and cannot list products under '${category}'.`,
+          },
+          { status: 403 }
+        );
+      }
+    }
+
+    const sellerId = seller?.sellerId ?? null;
 
     if (isPgConfigured) {
       try {
-        await query('ALTER TABLE products ADD COLUMN IF NOT EXISTS seller_id TEXT;').catch(() => {});
-        await query('ALTER TABLE products ADD COLUMN IF NOT EXISTS created_by TEXT;').catch(() => {});
-
+        // Runtime `ALTER TABLE ... ADD COLUMN` used to run here on every
+        // product creation. DDL takes an ACCESS EXCLUSIVE lock, which stalls
+        // every concurrent read of the products table. These columns are now
+        // created by migration 20261006_product_ownership_columns.sql.
         const newProduct = await withTransaction(async (client) => {
           const prodResult = await client.query<{ id: string }>(
             `INSERT INTO products (name, category, description, image_url, is_freshness_guarantee, is_active, seller_id, created_by)
@@ -211,34 +278,14 @@ export async function POST(request: NextRequest) {
     let prodData: any = null;
     let prodErr: any = null;
 
-    const isValidUuid = (id: string | null | undefined) => 
-      id ? /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id) : false;
-
-    const rawSellerId = sellerId || auth?.userId || null;
-    let validSellerUuid: string | null = null;
-    let validSellerUserId: string | null = null;
-
-    if (rawSellerId && isValidUuid(rawSellerId)) {
-      const { data: s1 } = await sb.from('sellers').select('id, user_id').eq('id', rawSellerId).maybeSingle();
-      if (s1?.id) {
-        validSellerUuid = s1.id;
-        validSellerUserId = s1.user_id && isValidUuid(s1.user_id) ? s1.user_id : null;
-      } else {
-        const { data: s2 } = await sb.from('sellers').select('id, user_id').eq('user_id', rawSellerId).maybeSingle();
-        if (s2?.id) {
-          validSellerUuid = s2.id;
-          validSellerUserId = s2.user_id && isValidUuid(s2.user_id) ? s2.user_id : null;
-        } else {
-          const { data: p1 } = await sb.from('profiles').select('id').eq('id', rawSellerId).maybeSingle();
-          if (p1?.id) validSellerUserId = p1.id;
-        }
-      }
-    }
-
-    if (auth?.userId && isValidUuid(auth.userId) && !validSellerUserId) {
-      const { data: p2 } = await sb.from('profiles').select('id').eq('id', auth.userId).maybeSingle();
-      if (p2?.id) validSellerUserId = p2.id;
-    }
+    // Seller attribution is already verified above (getSellerForUser +
+    // sellerCanWrite + category check). The previous implementation instead
+    // took an unverified id from the request body and tried, in turn, to
+    // match it against sellers.id, then sellers.user_id, then profiles.id —
+    // three speculative lookups that would happily attribute a product to
+    // somebody else's store.
+    const validSellerUuid: string | null = seller?.sellerId ?? null;
+    const validSellerUserId: string | null = seller?.userId ?? auth.userId;
 
     // 1. Insert into main products table
     const primaryPayload: any = {
@@ -248,7 +295,7 @@ export async function POST(request: NextRequest) {
       image_url: image_url || null,
       is_freshness_guarantee: is_freshness_guarantee ?? false,
       is_active: is_active ?? true,
-      created_by: auth?.userId || rawSellerId || null,
+      created_by: auth.userId,
     };
 
     // Auto-link category_id if available

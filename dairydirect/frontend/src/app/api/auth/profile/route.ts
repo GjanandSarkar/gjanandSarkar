@@ -254,8 +254,13 @@ export async function PATCH(request: Request) {
       },
     });
 
+    // The session cookie is httpOnly: it exists so the server and middleware
+    // can authenticate a request, and must never be readable by page scripts
+    // (an XSS payload could otherwise exfiltrate a 7-day session token).
+    // The browser gets its bearer token from the Supabase session instead,
+    // so nothing client-side needs to read this.
     response.cookies.set('gs_access_token', newAccessToken, {
-      httpOnly: false,
+      httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'lax',
       path: '/',
