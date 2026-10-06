@@ -197,7 +197,7 @@ depend on tables created by earlier ones.
 14. 20261007_drop_misleading_product_defaults.sql <- new on this branch
 ```
 
-The last two are new in this branch and have **not** been applied to any live
+The last three are new in this branch and have **not** been applied to any live
 project yet:
 
 - `20261006_product_ownership_columns.sql` backs the security fix that stops
