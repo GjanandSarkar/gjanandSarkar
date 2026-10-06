@@ -314,3 +314,29 @@ INSERT INTO translations (language, key, value) VALUES
   ('hi', 'btn_subscribe', 'दैनिक सदस्यता लें'),
   ('hi', 'btn_order_now', 'अभी आर्डर करें')
 ON CONFLICT (language, key) DO UPDATE SET value = EXCLUDED.value;
+
+-- ─── 8. Category Taxonomy ─────────────────────────────────────────────
+-- The `categories` table is created by 20261004_create_categories_table.sql
+-- but nothing ever populated it, so Admin -> Categories rendered an empty
+-- list on every fresh install. These twelve rows are the canonical taxonomy
+-- in src/lib/constants/categories.ts; names, slugs and icon_name values must
+-- stay in step with that file (icon_name resolves via CategoryIcon.tsx).
+INSERT INTO categories (name, slug, description, icon_name, sort_order, is_active) VALUES
+  ('Dairy',                  'dairy',        'Milk, ghee, paneer and curd from verified Indian dairies', 'Milk',         1,  true),
+  ('Groceries',              'groceries',    'Everyday staples, grains, pulses and flours',              'Wheat',        2,  true),
+  ('Spices & Masalas',       'spices',       'Single-origin spices and traditional masala blends',       'Flame',        3,  true),
+  ('Cold-Pressed Oils',      'oils',         'Wood-pressed and cold-pressed cooking oils',               'Droplets',     4,  true),
+  ('Ayurveda & Wellness',    'ayurveda',     'Ayurvedic preparations and wellness essentials',           'FlaskConical', 5,  true),
+  ('Beauty & Personal Care', 'beauty',       'Natural skincare, haircare and personal care',             'Heart',        6,  true),
+  ('Home & Kitchen',         'home-kitchen', 'Cookware, storage and everyday home essentials',           'CookingPot',   7,  true),
+  ('Handicrafts & Decor',    'handicrafts',  'Handmade decor and artisan craft from across India',       'Hammer',       8,  true),
+  ('Handloom & Fashion',     'fashion',      'Handloom textiles, apparel and accessories',               'Shirt',        9,  true),
+  ('Pooja & Spiritual',      'pooja',        'Pooja essentials and spiritual goods',                     'Sun',          10, true),
+  ('Electronics',            'electronics',  'Consumer electronics from Indian brands',                  'Plug',         11, true),
+  ('Books & Stationery',     'books',        'Books, journals and stationery',                           'BookOpen',     12, true)
+ON CONFLICT (name) DO UPDATE
+  SET slug        = EXCLUDED.slug,
+      description = EXCLUDED.description,
+      icon_name   = EXCLUDED.icon_name,
+      sort_order  = EXCLUDED.sort_order,
+      updated_at  = now();

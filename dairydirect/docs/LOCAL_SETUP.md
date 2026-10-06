@@ -309,6 +309,39 @@ Fixed on this branch. `seller_product` is written to by the product API but
 was never created by any migration. `20260930_inventory_synchronization_system.sql`
 now creates and backfills it before first use. `git pull` and re-run that file.
 
+**`column product_variants_1.available_quantity does not exist`**
+A migration that errors part-way is rolled back **in full** — the Supabase SQL
+Editor runs each script in one transaction. When
+`20260930_inventory_synchronization_system.sql` failed on the missing
+`seller_product` table, the `available_quantity`, `reserved_quantity` and
+`version` columns it had added moments earlier were undone with it. The file
+reported an error but left no trace, which is why the app then complained
+about a column from a migration you thought had run.
+
+`git pull` and re-run that whole file. Re-running is safe: every statement in
+it is guarded with `IF NOT EXISTS` / `CREATE OR REPLACE`. Confirm with:
+
+```sql
+select column_name from information_schema.columns
+where table_name = 'product_variants' and column_name = 'available_quantity';
+```
+
+This also clears the `500`s on `/api/inventory/status`.
+
+**`PGRST204: Could not find the 'landmark' column of 'user_addresses'`**
+Fixed on this branch. `20260917_upgrade_user_addresses.sql` now adds it.
+Re-run that file.
+
+**Admin pages are empty (Orders, Customers, Subscriptions, Deliveries)**
+Usually correct behaviour on a fresh install, not a bug:
+- *Orders* and *Deliveries* read the `orders` table. Place a test order first.
+- *Subscriptions* reads `subscriptions`. Nothing seeds it.
+- *Customers* deliberately excludes `role = 'admin'`. If your admin account is
+  the only profile, the list is empty by design. Log in with a second phone
+  number to see a row.
+- *Categories* was genuinely empty: nothing populated the `categories` table.
+  `seed.sql` now inserts the twelve canonical categories. Re-run it.
+
 **Google login: `Unsupported provider: provider is not enabled`**
 Supabase config, not a code problem. See "Enabling Google login" below.
 

@@ -13,6 +13,12 @@ ALTER TABLE user_addresses
   ADD COLUMN IF NOT EXISTS mobile_number TEXT NOT NULL DEFAULT '',
   ADD COLUMN IF NOT EXISTS flat_house_building TEXT NOT NULL DEFAULT '',
   ADD COLUMN IF NOT EXISTS area_street_sector_village TEXT NOT NULL DEFAULT '',
+  -- FIX: the address API, AddressFormModal, AddressCard and orders/place all
+  -- read and write `landmark`, but no migration ever created it. Saving an
+  -- address failed with:
+  --   PGRST204: Could not find the 'landmark' column of 'user_addresses'
+  -- Nullable on purpose: a landmark is optional.
+  ADD COLUMN IF NOT EXISTS landmark TEXT,
   ADD COLUMN IF NOT EXISTS town_city TEXT NOT NULL DEFAULT '',
   ADD COLUMN IF NOT EXISTS saturday_delivery BOOLEAN NOT NULL DEFAULT true,
   ADD COLUMN IF NOT EXISTS sunday_delivery BOOLEAN NOT NULL DEFAULT true,
