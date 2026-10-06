@@ -98,13 +98,6 @@ const nextConfig: NextConfig = {
           { key: 'Cache-Control', value: 'public, s-maxage=60, stale-while-revalidate=300' },
         ],
       },
-      {
-        // Cache static assets aggressively (images, fonts, js chunks)
-        source: '/_next/static/:path*',
-        headers: [
-          { key: 'Cache-Control', value: 'public, max-age=31536000, immutable' },
-        ],
-      },
     ];
   },
 
