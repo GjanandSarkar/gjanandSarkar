@@ -126,7 +126,7 @@ INSERT INTO products (
   'Milk',
   'Pure, unadulterated farm-fresh A2 milk from grass-fed indigenous Gir cows. Tested for zero antibiotics, preservatives, and adulteration.',
   'https://images.unsplash.com/photo-1550583724-b2692b85b150?auto=format&fit=crop&q=80&w=800',
-  true, true, '11111111-1111-1111-1111-111111111111', 'Gujarat', 'Gjanand Farm', 4.90, 145, true, 12,
+  true, true, '11111111-1111-1111-1111-111111111111', 'Gujarat', 'Gjanand Farm', NULL, 0, true, 12,
   ARRAY['Made in India', 'A2 Milk', 'Grass Fed', 'Freshness Guaranteed']
 ) ON CONFLICT (id) DO UPDATE SET name = EXCLUDED.name, description = EXCLUDED.description, is_active = EXCLUDED.is_active;
 
@@ -146,7 +146,7 @@ INSERT INTO products (
   'Milk',
   'Rich, thick and creamy whole buffalo milk with naturally high fat content (7.5%+), ideal for rich tea, kheer, and traditional sweets.',
   'https://images.unsplash.com/photo-1563636619-e9143da7973b?auto=format&fit=crop&q=80&w=800',
-  true, true, '11111111-1111-1111-1111-111111111111', 'Gujarat', 'Gjanand Farm', 4.80, 98, false, 10,
+  true, true, '11111111-1111-1111-1111-111111111111', 'Gujarat', 'Gjanand Farm', NULL, 0, false, 10,
   ARRAY['Pure Buffalo', 'High Fat', 'Creamy', 'Fresh']
 ) ON CONFLICT (id) DO UPDATE SET name = EXCLUDED.name, description = EXCLUDED.description, is_active = EXCLUDED.is_active;
 
@@ -166,7 +166,7 @@ INSERT INTO products (
   'Ghee',
   'Golden, aromatic Vedic Bilona Ghee made by churning whole curd using wooden churners in earthen pots. Rich in fat-soluble vitamins and gut-friendly nutrients.',
   'https://images.unsplash.com/photo-1589927986089-35812388d1f4?auto=format&fit=crop&q=80&w=800',
-  true, true, '22222222-2222-2222-2222-222222222222', 'Gujarat', 'Gir Amrit', 5.00, 312, true, 15,
+  true, true, '22222222-2222-2222-2222-222222222222', 'Gujarat', 'Gir Amrit', NULL, 0, true, 15,
   ARRAY['Vedic Bilona', 'Gir Cow', 'Hand Churned', 'Pure Ghee']
 ) ON CONFLICT (id) DO UPDATE SET name = EXCLUDED.name, description = EXCLUDED.description, is_active = EXCLUDED.is_active;
 
@@ -186,7 +186,7 @@ INSERT INTO products (
   'Paneer',
   'Super soft, melt-in-mouth cottage cheese crafted from 100% pure fresh cow and buffalo milk curdled naturally with lemon juice.',
   'https://images.unsplash.com/photo-1631452180519-c014fe946bc7?auto=format&fit=crop&q=80&w=800',
-  true, true, '33333333-3333-3333-3333-333333333333', 'Gujarat', 'Gjanand Farm', 4.90, 215, false, 14,
+  true, true, '33333333-3333-3333-3333-333333333333', 'Gujarat', 'Gjanand Farm', NULL, 0, false, 14,
   ARRAY['Malai Paneer', 'High Protein', 'Freshly Made']
 ) ON CONFLICT (id) DO UPDATE SET name = EXCLUDED.name, description = EXCLUDED.description, is_active = EXCLUDED.is_active;
 
@@ -206,7 +206,7 @@ INSERT INTO products (
   'Curd',
   'Set curd prepared from pure boiled cow milk using traditional live cultures. Naturally thick, creamy, and gentle on digestion.',
   'https://images.unsplash.com/photo-1571212515416-fef01fc43637?auto=format&fit=crop&q=80&w=800',
-  true, true, '11111111-1111-1111-1111-111111111111', 'Gujarat', 'Gjanand Farm', 4.80, 84, false, 11,
+  true, true, '11111111-1111-1111-1111-111111111111', 'Gujarat', 'Gjanand Farm', NULL, 0, false, 11,
   ARRAY['Probiotic', 'Set Curd', 'Live Cultures', 'Digestive Health']
 ) ON CONFLICT (id) DO UPDATE SET name = EXCLUDED.name, description = EXCLUDED.description, is_active = EXCLUDED.is_active;
 
@@ -226,7 +226,7 @@ INSERT INTO products (
   'Buttermilk',
   'Refreshing traditional Gujarati spiced buttermilk seasoned with roasted jeera (cumin), black salt, fresh mint, and ginger.',
   'https://images.unsplash.com/photo-1556881286-fc6915169721?auto=format&fit=crop&q=80&w=800',
-  true, true, '11111111-1111-1111-1111-111111111111', 'Gujarat', 'Gjanand Farm', 4.90, 167, false, 20,
+  true, true, '11111111-1111-1111-1111-111111111111', 'Gujarat', 'Gjanand Farm', NULL, 0, false, 20,
   ARRAY['Masala Chhas', 'Refreshing', 'Gujarati Special', 'Cooling']
 ) ON CONFLICT (id) DO UPDATE SET name = EXCLUDED.name, description = EXCLUDED.description, is_active = EXCLUDED.is_active;
 
@@ -246,7 +246,7 @@ INSERT INTO products (
   'Butter',
   'Unsalted, pure white butter churned freshly from cultured cream. Reminiscent of Lord Krishna''s favourite village makhan.',
   'https://images.unsplash.com/photo-1589985270826-4b7bb135bc9d?auto=format&fit=crop&q=80&w=800',
-  true, true, '22222222-2222-2222-2222-222222222222', 'Gujarat', 'Gir Amrit', 4.90, 78, false, 14,
+  true, true, '22222222-2222-2222-2222-222222222222', 'Gujarat', 'Gir Amrit', NULL, 0, false, 14,
   ARRAY['White Makhan', 'Unsalted Butter', 'Village Churned']
 ) ON CONFLICT (id) DO UPDATE SET name = EXCLUDED.name, description = EXCLUDED.description, is_active = EXCLUDED.is_active;
 
@@ -266,7 +266,7 @@ INSERT INTO products (
   'Sweets',
   'Traditional Gujarati sweet made from slow-reduced pure Gir cow mawa, infused with Kashmiri saffron strands and fragrant green cardamom.',
   'https://images.unsplash.com/photo-1599488615731-7e5c2823ff28?auto=format&fit=crop&q=80&w=800',
-  true, true, '11111111-1111-1111-1111-111111111111', 'Gujarat', 'Gjanand Farm', 4.95, 112, false, 14,
+  true, true, '11111111-1111-1111-1111-111111111111', 'Gujarat', 'Gjanand Farm', NULL, 0, false, 14,
   ARRAY['Kesar Peda', 'Mawa Mithai', 'Saffron Infused', 'Festive Special']
 ) ON CONFLICT (id) DO UPDATE SET name = EXCLUDED.name, description = EXCLUDED.description, is_active = EXCLUDED.is_active;
 
