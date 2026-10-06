@@ -60,3 +60,90 @@ export const getHomeFeed = unstable_cache(fetchHomeFeed, ['home-feed-v1'], {
   revalidate: 300,
   tags: ['products', 'home-feed'],
 });
+
+/**
+ * Full active catalogue, cached.
+ *
+ * Used by the `/products` and `/categories/[slug]` pages, which previously
+ * either queried the database on every single request (`force-dynamic`) or —
+ * worse, on `/products` — rendered a spinner and fetched the whole catalogue
+ * from the browser after hydration, so the user saw an empty page until a
+ * client-side round-trip completed.
+ *
+ * Same cache tag as the homepage feed, so one `revalidateTag('products')`
+ * refreshes every catalogue surface at once.
+ */
+async function fetchCatalog(): Promise<HomeProduct[]> {
+  try {
+    const admin = getAdminSupabase();
+    const { data, error } = await admin
+      .from('products')
+      .select(
+        'id, name, category, image_url, description, product_variants(id, weight, price, original_price, stock, available_quantity)'
+      )
+      .eq('is_active', true)
+      .order('created_at', { ascending: false })
+      .limit(500);
+
+    if (error) throw error;
+    return (data ?? []) as HomeProduct[];
+  } catch (error) {
+    console.error('[catalog] getCatalog failed:', error);
+    return [];
+  }
+}
+
+export const getCatalog = unstable_cache(fetchCatalog, ['catalog-v1'], {
+  revalidate: 300,
+  tags: ['products', 'catalog'],
+});
+
+/**
+ * Products for one category slug, cached per category.
+ *
+ * Mirrors the category matching the old `getProductsServer` performed, but
+ * with an explicit column list, a sane limit, and per-category cache keys so
+ * a popular category is served from cache instead of re-querying Postgres.
+ */
+export function getCategoryProducts(category?: string): Promise<HomeProduct[]> {
+  const key = (category ?? 'all').toLowerCase().trim();
+
+  return unstable_cache(
+    async () => {
+      try {
+        const admin = getAdminSupabase();
+        let query = admin
+          .from('products')
+          .select(
+            'id, name, category, image_url, description, product_variants(id, weight, price, original_price, stock, available_quantity)'
+          )
+          .eq('is_active', true)
+          .order('created_at', { ascending: false })
+          .limit(200);
+
+        if (category) {
+          const cleanCat = category.replace(/-/g, ' ').trim();
+          if (
+            cleanCat.toLowerCase() === 'dairy & essentials' ||
+            cleanCat.toLowerCase() === 'dairy'
+          ) {
+            query = query.or(
+              'category.ilike.%Milk%,category.ilike.%Ghee%,category.ilike.%Paneer%,category.ilike.%Curd%,category.ilike.%Lassi%,category.ilike.%Dairy%'
+            );
+          } else {
+            query = query.ilike('category', `%${cleanCat}%`);
+          }
+        }
+
+        const { data, error } = await query;
+        if (error) throw error;
+        return (data ?? []) as HomeProduct[];
+      } catch (error) {
+        console.error('[catalog] getCategoryProducts failed:', error);
+        return [];
+      }
+    },
+    ['category-products-v1', key],
+    { revalidate: 300, tags: ['products', `category:${key}`] }
+  )();
+}

@@ -1,5 +1,5 @@
 import { Metadata } from 'next';
-import { getProductsServer } from '@/lib/api/products.server';
+import { getCategoryProducts } from '@/lib/api/home';
 import { ProductCard } from '@/components/shared/ProductCard';
 import { JsonLd } from '@/components/seo/JsonLd';
 import { ChevronLeft, Sparkles, ArrowRight, PackageOpen } from 'lucide-react';
@@ -28,18 +28,19 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   };
 }
 
-export const dynamic = 'force-dynamic';
-export const revalidate = 0;
+// Was force-dynamic + revalidate 0: a full, unbounded category query on every
+// single page view. Category listings change when the catalogue changes, not
+// per visitor, so they are cached and tag-invalidated like the homepage.
+export const revalidate = 300;
 
 export default async function CategoryPage({ params }: Props) {
   const { category: rawCategory } = await params;
   const categoryTitle = formatCategoryTitle(rawCategory);
   
   // Fetch products matching category
-  const products = await getProductsServer({ 
-    category: rawCategory.toLowerCase() === 'all' ? undefined : categoryTitle, 
-    activeOnly: true 
-  });
+  const products = await getCategoryProducts(
+    rawCategory.toLowerCase() === 'all' ? undefined : categoryTitle
+  );
 
   const breadcrumbData = {
     "@context": "https://schema.org",
