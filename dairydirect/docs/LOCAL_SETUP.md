@@ -299,5 +299,82 @@ from the dashboard exactly, including `https://` and no trailing slash.
 **Changing `.env.local` seems to have no effect**
 Next.js only reads it at startup. Stop the server and restart it.
 
+**Migration fails: `42703: column "building" does not exist`**
+Fixed on this branch. `20260917_upgrade_user_addresses.sql` backfilled from
+`building`, `street` and `instructions`, which have never existed on
+`user_addresses`. `git pull` and re-run that file.
+
+**Migration fails: `42P01: relation "seller_product" does not exist`**
+Fixed on this branch. `seller_product` is written to by the product API but
+was never created by any migration. `20260930_inventory_synchronization_system.sql`
+now creates and backfills it before first use. `git pull` and re-run that file.
+
+**Google login: `Unsupported provider: provider is not enabled`**
+Supabase config, not a code problem. See "Enabling Google login" below.
+
 **Node version errors / cryptic build failures**
 `node -v` must be 20.9+. Next.js 16 does not support Node 18.
+
+
+---
+
+## Enabling Google login
+
+A fresh Supabase project has every OAuth provider switched off, so
+`supabase.auth.signInWithOAuth({ provider: 'google' })` returns:
+
+```json
+{ "code": 400, "error_code": "validation_failed",
+  "msg": "Unsupported provider: provider is not enabled" }
+```
+
+Nothing is wrong with the app. Phone OTP login works without any of this, so
+only do it if you specifically need Google sign-in.
+
+### 1. Create a Google OAuth client
+
+1. [Google Cloud Console](https://console.cloud.google.com/) -> create or pick
+   a project.
+2. **APIs & Services -> OAuth consent screen**. Choose **External**, fill in
+   app name and support email, save. While the app is in **Testing**, add your
+   own Google account under **Test users** or sign-in will be refused.
+3. **APIs & Services -> Credentials -> Create Credentials -> OAuth client ID**.
+   Application type: **Web application**.
+4. Under **Authorised redirect URIs** add exactly one entry:
+
+   ```
+   https://<your-project-ref>.supabase.co/auth/v1/callback
+   ```
+
+   `<your-project-ref>` is the subdomain from `NEXT_PUBLIC_SUPABASE_URL`.
+
+   This is the single most common mistake: the redirect URI points at
+   **Supabase**, not at `localhost`. Google hands the code to Supabase, and
+   Supabase then redirects to your app. Putting
+   `http://localhost:3000/auth/callback` here produces `redirect_uri_mismatch`.
+5. Copy the **Client ID** and **Client secret**.
+
+### 2. Enable the provider in Supabase
+
+**Authentication -> Providers -> Google**: toggle **Enable**, paste the Client
+ID and Client secret, Save.
+
+### 3. Allow your local URL to be redirected to
+
+**Authentication -> URL Configuration**:
+
+- **Site URL**: `http://localhost:3000`
+- **Redirect URLs**: add `http://localhost:3000/**`
+
+The app sends users to `/auth/callback`, and Supabase refuses to redirect
+anywhere not on this allowlist. Without the wildcard entry you land back on
+the home page silently logged out.
+
+### 4. Restart and test
+
+Changes apply immediately; no redeploy needed. Hard-refresh the browser,
+since the old failing response may be cached.
+
+> Add the deployed origin to both **Site URL** / **Redirect URLs** and the
+> Google client when you ship. `NEXT_PUBLIC_GOOGLE_CLIENT_ID` in `.env.local`
+> is **not** required for this flow; Supabase holds the credentials.
