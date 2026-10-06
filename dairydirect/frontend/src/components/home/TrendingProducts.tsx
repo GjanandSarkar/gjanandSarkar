@@ -69,7 +69,7 @@ export function TrendingProducts({ products }: TrendingProductsProps) {
       {/* Product List */}
       <div 
         ref={scrollRef}
-        className="flex gap-4 md:gap-6 overflow-x-auto no-scrollbar pb-4 pt-1"
+        className="flex gap-4 md:gap-6 overflow-x-auto no-scrollbar snap-rail reveal pb-4 pt-1"
       >
         {products.map((product, idx) => (
           <div 

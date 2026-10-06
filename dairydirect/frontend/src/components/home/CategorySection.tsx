@@ -30,7 +30,7 @@ export function CategorySection({ categories, isLoading }: CategorySectionProps)
 
   return (
     <section className="mb-10 px-5 md:px-10">
-      <div className="flex overflow-x-auto no-scrollbar gap-4 md:grid md:grid-cols-6 lg:grid-cols-8 md:gap-5 pb-4 md:pb-0">
+      <div className="flex overflow-x-auto no-scrollbar snap-rail reveal gap-4 md:grid md:grid-cols-6 lg:grid-cols-8 md:gap-5 pb-4 md:pb-0">
         {categories.map((category, idx) => {
           const style = categoryColors(category);
           

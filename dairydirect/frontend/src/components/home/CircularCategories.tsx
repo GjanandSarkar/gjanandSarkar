@@ -23,7 +23,7 @@ const categories = CATEGORIES.map((c) => ({
 export function CircularCategories() {
   return (
     <section className="w-full max-w-[1440px] mx-auto px-4 md:px-8 py-8">
-      <div className="flex items-center justify-between gap-3 overflow-x-auto no-scrollbar pb-2 pt-1">
+      <div className="flex items-center justify-between gap-3 overflow-x-auto no-scrollbar snap-rail reveal pb-2 pt-1">
         {categories.map((cat) => (
           <Link
             key={cat.name}

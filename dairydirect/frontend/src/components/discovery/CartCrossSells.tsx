@@ -96,7 +96,7 @@ export function CartCrossSells() {
         <h3 className="text-sm font-black text-dark">Perfect with your order</h3>
       </div>
       
-      <div className="flex gap-3 overflow-x-auto no-scrollbar px-4 pb-4">
+      <div className="flex gap-3 overflow-x-auto no-scrollbar snap-rail px-4 pb-4">
         {isLoading ? (
           <>
             {[1, 2, 3].map(i => (

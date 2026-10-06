@@ -30,7 +30,7 @@ async function fetchHomeFeed(): Promise<HomeProduct[]> {
       .from('products')
       // Explicit column list instead of `*` — no description/cost_price/etc.
       .select(
-        'id, name, category, image_url, product_variants(id, weight, price, original_price, stock, available_quantity)'
+        'id, name, category, image_url, brand, rating, reviews_count, product_variants(id, weight, price, original_price, stock, available_quantity)'
       )
       .eq('is_active', true)
       .order('created_at', { ascending: false })
@@ -80,7 +80,7 @@ async function fetchCatalog(): Promise<HomeProduct[]> {
     const { data, error } = await admin
       .from('products')
       .select(
-        'id, name, category, image_url, description, product_variants(id, weight, price, original_price, stock, available_quantity)'
+        'id, name, category, image_url, description, brand, rating, reviews_count, product_variants(id, weight, price, original_price, stock, available_quantity)'
       )
       .eq('is_active', true)
       .order('created_at', { ascending: false })
@@ -116,7 +116,7 @@ export function getCategoryProducts(category?: string): Promise<HomeProduct[]> {
         let query = admin
           .from('products')
           .select(
-            'id, name, category, image_url, description, product_variants(id, weight, price, original_price, stock, available_quantity)'
+            'id, name, category, image_url, description, brand, rating, reviews_count, product_variants(id, weight, price, original_price, stock, available_quantity)'
           )
           .eq('is_active', true)
           .order('created_at', { ascending: false })

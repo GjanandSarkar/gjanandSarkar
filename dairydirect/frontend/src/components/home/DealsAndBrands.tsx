@@ -21,31 +21,68 @@ export function DealsAndBrands({ products }: DealsAndBrandsProps) {
   const user = useStore((s) => s.user);
   const addToCartLocal = useStore((s) => s.addToCartLocal);
 
-  // Live Countdown State for Deal of the Day
-  const [timeLeft, setTimeLeft] = useState({ hours: 8, minutes: 45, seconds: 32 });
+  /**
+   * Countdown to the actual end of the deal window.
+   *
+   * This used to start at a hardcoded 8h 45m 32s for every visitor, tick
+   * down, and then loop back to 12:00:00 — so two people looking at the same
+   * "Deal of the Day" saw different times remaining, and the deal never
+   * actually ended. It now counts down to midnight India time, which is a
+   * real, shared, verifiable deadline.
+   *
+   * Starts null and fills in after mount: the remaining time depends on the
+   * viewer's clock, so rendering it on the server would cause a hydration
+   * mismatch.
+   */
+  const [timeLeft, setTimeLeft] = useState<{
+    hours: number;
+    minutes: number;
+    seconds: number;
+  } | null>(null);
 
   useEffect(() => {
-    const timer = setInterval(() => {
-      setTimeLeft((prev) => {
-        if (prev.seconds > 0) return { ...prev, seconds: prev.seconds - 1 };
-        if (prev.minutes > 0) return { ...prev, minutes: prev.minutes - 1, seconds: 59 };
-        if (prev.hours > 0) return { ...prev, hours: prev.hours - 1, minutes: 59, seconds: 59 };
-        return { hours: 12, minutes: 0, seconds: 0 };
+    const msUntilEndOfDayIST = () => {
+      // IST is UTC+5:30 with no daylight saving.
+      const IST_OFFSET_MS = 5.5 * 60 * 60 * 1000;
+      const nowIst = new Date(Date.now() + IST_OFFSET_MS);
+      const endOfDayIst = Date.UTC(
+        nowIst.getUTCFullYear(),
+        nowIst.getUTCMonth(),
+        nowIst.getUTCDate() + 1,
+        0, 0, 0, 0,
+      );
+      return endOfDayIst - nowIst.getTime();
+    };
+
+    const tick = () => {
+      const remaining = Math.max(0, msUntilEndOfDayIST());
+      const totalSeconds = Math.floor(remaining / 1000);
+      setTimeLeft({
+        hours: Math.floor(totalSeconds / 3600),
+        minutes: Math.floor((totalSeconds % 3600) / 60),
+        seconds: totalSeconds % 60,
       });
-    }, 1000);
+    };
+
+    tick();
+    const timer = setInterval(tick, 1000);
     return () => clearInterval(timer);
   }, []);
 
   if (!products || products.length === 0) return null;
 
-  // Deal items (find products where original_price > price)
+  // Products that are genuinely discounted.
   const dealProducts = products.filter(p => {
     const v = p.product_variants?.[0];
     return v && v.original_price && v.original_price > v.price;
   }).slice(0, 4);
-  
-  // If no deals found, just fall back to first 4 products
-  const displayProducts = dealProducts.length > 0 ? dealProducts : products.slice(0, 4);
+
+  // There used to be a fallback to `products.slice(0, 4)` here, which
+  // presented four full-price products under a "Deal of the Day" heading with
+  // a countdown timer. If nothing is actually discounted, show nothing —
+  // an empty deals rail is honest, a fake one is misleading advertising.
+  const displayProducts = dealProducts;
+  if (displayProducts.length === 0) return null;
 
   return (
     <section className="w-full max-w-[1440px] mx-auto px-4 md:px-8 py-6">
@@ -59,9 +96,21 @@ export function DealsAndBrands({ products }: DealsAndBrandsProps) {
                <h2 className="text-xl md:text-2xl font-black text-[#0f3e26] tracking-tight">
                 Deal of the Day
               </h2>
-              <div className="flex items-center gap-1.5 bg-emerald-100/80 text-emerald-900 text-xs font-bold px-3 py-1 rounded-full">
-                <Clock className="w-3.5 h-3.5 text-emerald-700 animate-spin" style={{ animationDuration: '6s' }} />
-                <span>Ends in {String(timeLeft.hours).padStart(2, '0')} : {String(timeLeft.minutes).padStart(2, '0')} : {String(timeLeft.seconds).padStart(2, '0')}</span>
+              {/* Reserve the pill's space before the client clock resolves so
+                  the header does not shift on hydration. */}
+              <div className="flex items-center gap-1.5 bg-emerald-100/80 text-emerald-900 text-xs font-bold px-3 py-1 rounded-full min-h-[26px]">
+                <Clock className="w-3.5 h-3.5 text-emerald-700" />
+                {timeLeft ? (
+                  <span className="tabular-nums">
+                    Ends in {String(timeLeft.hours).padStart(2, '0')} :{' '}
+                    {String(timeLeft.minutes).padStart(2, '0')} :{' '}
+                    {String(timeLeft.seconds).padStart(2, '0')}
+                  </span>
+                ) : (
+                  <span className="tabular-nums opacity-0" aria-hidden="true">
+                    Ends in 00 : 00 : 00
+                  </span>
+                )}
               </div>
             </div>
 

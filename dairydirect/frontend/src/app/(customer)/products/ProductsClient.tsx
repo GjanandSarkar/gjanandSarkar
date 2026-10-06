@@ -18,6 +18,7 @@ import {
   Check
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { ProductGridSkeleton } from '@/components/shared/Skeletons';
 
 function ProductsScreenContent({ initialProducts }: { initialProducts: CatalogProduct[] }) {
   const searchParams = useSearchParams();
@@ -281,11 +282,10 @@ function ProductsScreenContent({ initialProducts }: { initialProducts: CatalogPr
 
             {/* Products Grid */}
             {isLoading ? (
-              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-                {[1, 2, 3, 4, 5, 6, 7, 8].map((i) => (
-                  <div key={i} className="h-72 rounded-2xl bg-white animate-pulse border border-gray-200" />
-                ))}
-              </div>
+              /* Was eight blank pulsing rectangles of a fixed 18rem height,
+                 which did not match the real card and so still shifted the
+                 layout on load. ProductGridSkeleton mirrors the card exactly. */
+              <ProductGridSkeleton count={8} />
             ) : filteredProducts.length === 0 ? (
               <div className="bg-white rounded-2xl border border-gray-200/90 p-12 text-center space-y-4">
                 <div className="w-14 h-14 rounded-2xl bg-gray-100 flex items-center justify-center mx-auto"><svg className="w-7 h-7 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg></div>
@@ -303,7 +303,7 @@ function ProductsScreenContent({ initialProducts }: { initialProducts: CatalogPr
                 </button>
               </div>
             ) : (
-              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-3 xl:grid-cols-4 gap-4 reveal">
                 {filteredProducts.map((prod) => (
                   <div key={prod.id} className="h-full">
                     <ProductCard product={prod} />

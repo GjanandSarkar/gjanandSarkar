@@ -1,4 +1,14 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
+/*
+ * The Inter font is self-hosted via next/font/local in src/app/layout.tsx
+ * (one 48KB variable woff2, preloaded, with a font-display swap fallback).
+ *
+ * There used to be an `@import url('https://fonts.googleapis.com/...')` on
+ * this line. A remote CSS @import is render-blocking and sits at the very top
+ * of the critical path, so every first paint waited on a round trip to
+ * fonts.googleapis.com and then a second one to fonts.gstatic.com — for a
+ * font the app had already downloaded locally. It also leaked every visitor's
+ * IP to a third party, which matters for an India-only consumer brand.
+ */
 @import "tailwindcss";
 
 @theme {
@@ -42,7 +52,7 @@
   --color-info: var(--info);
   --color-info-bg: var(--info-bg);
 
-  --font-sans: 'Inter', system-ui, sans-serif;
+  --font-sans: var(--font-inter), system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
 
   /* === Radius Scale === */
   --radius-xs: 4px;
@@ -318,4 +328,161 @@
 }
 .shadow-\[\#0f3e26\]\/20 {
   --tw-shadow-color: rgba(12, 60, 38, 0.2) !important;
+}
+
+/* ============================================================================
+ * Interaction & motion system
+ *
+ * The UI previously had almost no feedback: taps did nothing visible, lists
+ * appeared instantly with no entrance, loading was a centred spinner, and
+ * focus rings were suppressed. That is what made it feel static.
+ *
+ * Everything here is pure CSS so it costs no JavaScript. framer-motion is
+ * already 220KB of the bundle; none of these need it.
+ * ==========================================================================*/
+
+@layer utilities {
+  /* --- Easing tokens ------------------------------------------------------ */
+  :root {
+    --ease-out-quint: cubic-bezier(0.22, 1, 0.36, 1);
+    --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+    --dur-fast: 120ms;
+    --dur-base: 220ms;
+    --dur-slow: 380ms;
+  }
+
+  /* --- Pressable: the core tap affordance --------------------------------- */
+  /* Applied to cards, tiles and buttons. Gives a real, immediate response to
+     touch, which is most of the difference between feeling "app-like" and
+     feeling like a web page. */
+  .pressable {
+    transition:
+      transform var(--dur-fast) var(--ease-out-quint),
+      box-shadow var(--dur-base) var(--ease-out-quint),
+      border-color var(--dur-base) ease;
+    -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
+  }
+  .pressable:active {
+    transform: scale(0.97);
+  }
+
+  /* --- Lift: hover elevation for cards ------------------------------------ */
+  .lift {
+    transition:
+      transform var(--dur-base) var(--ease-out-quint),
+      box-shadow var(--dur-base) var(--ease-out-quint);
+  }
+  @media (hover: hover) {
+    .lift:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 12px 28px rgba(12, 60, 38, 0.10), 0 3px 8px rgba(0, 0, 0, 0.04);
+    }
+  }
+  .lift:active {
+    transform: translateY(-1px) scale(0.99);
+  }
+
+  /* --- Skeleton shimmer ---------------------------------------------------- */
+  /* Replaces centred spinners. A skeleton that matches the final layout makes
+     load feel faster and stops the page jumping when content arrives. */
+  .skeleton {
+    position: relative;
+    overflow: hidden;
+    background-color: color-mix(in srgb, var(--border) 45%, transparent);
+  }
+  .skeleton::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    transform: translateX(-100%);
+    background: linear-gradient(
+      90deg,
+      transparent,
+      rgba(255, 255, 255, 0.65),
+      transparent
+    );
+    animation: shimmer 1.4s infinite;
+  }
+  @keyframes shimmer {
+    100% { transform: translateX(100%); }
+  }
+
+  /* --- Entrance reveal ----------------------------------------------------- */
+  /* `.reveal` on a container staggers its children in. Index-based delay is
+     capped so long lists do not have a visibly late tail. */
+  .reveal > * {
+    animation: revealUp var(--dur-slow) var(--ease-out-quint) both;
+  }
+  .reveal > *:nth-child(1)  { animation-delay: 0ms; }
+  .reveal > *:nth-child(2)  { animation-delay: 40ms; }
+  .reveal > *:nth-child(3)  { animation-delay: 80ms; }
+  .reveal > *:nth-child(4)  { animation-delay: 120ms; }
+  .reveal > *:nth-child(5)  { animation-delay: 160ms; }
+  .reveal > *:nth-child(6)  { animation-delay: 200ms; }
+  .reveal > *:nth-child(n+7) { animation-delay: 240ms; }
+
+  @keyframes revealUp {
+    from { opacity: 0; transform: translateY(12px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  /* --- Count / value change pop ------------------------------------------- */
+  .pop { animation: pop var(--dur-base) var(--ease-spring); }
+  @keyframes pop {
+    0%   { transform: scale(1); }
+    45%  { transform: scale(1.22); }
+    100% { transform: scale(1); }
+  }
+
+  /* --- Success flash for add-to-cart --------------------------------------- */
+  .flash-success { animation: flashSuccess 600ms ease-out; }
+  @keyframes flashSuccess {
+    0%   { box-shadow: 0 0 0 0 rgba(16, 150, 85, 0.55); }
+    100% { box-shadow: 0 0 0 14px rgba(16, 150, 85, 0); }
+  }
+
+  /* --- Horizontal rails ---------------------------------------------------- */
+  /* Scroll snapping makes carousels feel deliberate rather than loose. */
+  .snap-rail {
+    scroll-snap-type: x mandatory;
+    scroll-padding-left: 1.25rem;
+    overscroll-behavior-x: contain;
+  }
+  .snap-rail > * { scroll-snap-align: start; }
+}
+
+/* --- Focus visibility ------------------------------------------------------
+ * Interactive elements had no visible keyboard focus state, which makes the
+ * site unusable without a mouse and fails WCAG 2.4.7. `:focus-visible` shows
+ * the ring for keyboard users without putting an outline on mouse clicks.
+ * ------------------------------------------------------------------------- */
+@layer base {
+  :where(a, button, input, select, textarea, [tabindex]):focus-visible {
+    outline: 2px solid var(--primary);
+    outline-offset: 2px;
+    border-radius: var(--radius-sm);
+  }
+
+  /* Never leave a user without a focus indicator, even if a component
+     sets `outline: none` locally. */
+  :where(a, button):focus-visible {
+    box-shadow: 0 0 0 4px color-mix(in srgb, var(--primary) 22%, transparent);
+  }
+}
+
+/* --- Reduced motion --------------------------------------------------------
+ * Honour the OS-level preference. Vestibular-disorder users get a static UI;
+ * everyone else keeps the animation.
+ * ------------------------------------------------------------------------- */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+  .skeleton::after { animation: none; }
 }

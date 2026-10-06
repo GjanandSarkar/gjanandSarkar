@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useCallback, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 import { Plus, Minus, Pencil, Star, ShoppingCart, Heart } from 'lucide-react';
 import { useTranslation } from '@/lib/i18n';
 import { useStore } from '@/store/useStore';
@@ -39,7 +39,6 @@ export function ProductCard({
   onProductDeleted,
 }: ProductCardProps) {
   const { t } = useTranslation();
-  const router = useRouter();
 
   const user = useStore((s) => s.user);
   const cart = useStore((s) => s.cart);
@@ -163,14 +162,53 @@ export function ProductCard({
   const isOutOfStock = availableStock <= 0;
   const isAllOutOfStock = variants.length > 0 && variants.every((v) => (v.available_quantity ?? v.stock ?? 0) <= 0);
   const isLowStock = !isAllOutOfStock && availableStock > 0 && availableStock <= 10;
-  const originalPrice = selectedVariant.original_price || Math.round(selectedVariant.price * 1.25);
+  // Previously: `selectedVariant.original_price || Math.round(price * 1.25)`.
+  // That invented a 25% "discount" for every product that had no original
+  // price set, so the card showed a struck-through price that had never been
+  // charged. Besides being untrue, presenting a fictitious reference price is
+  // a misleading-pricing offence under the Consumer Protection Act 2019 and
+  // the Legal Metrology (Packaged Commodities) Rules. Only ever show a
+  // strikethrough when a real, higher original price exists.
+  const originalPrice = selectedVariant.original_price ?? null;
+  const hasRealDiscount = originalPrice !== null && originalPrice > selectedVariant.price;
+  const discountPct = hasRealDiscount
+    ? Math.round(((originalPrice - selectedVariant.price) / originalPrice) * 100)
+    : 0;
+
+  // Real review aggregates. Rating is only meaningful with reviews behind it:
+  // products.rating defaults to 4.80 in the schema, so showing it on a product
+  // with zero reviews would present a default as customer sentiment.
+  const reviewCount = product.reviews_count ?? 0;
+  const rating = product.rating ?? null;
+  const showRating = reviewCount > 0 && rating !== null;
 
   return (
     <>
-      <div
-        className="flex flex-col h-full bg-white rounded-2xl border border-gray-200/90 p-3.5 shadow-2xs hover:shadow-lg hover:border-[#c88a23] transition-all duration-200 cursor-pointer group relative"
-        onClick={() => router.push(`/products/${product.id}`)}
-      >
+      {/*
+        The card was a plain <div> with an onClick handler: unreachable by
+        keyboard, not announced as a link, no focus ring, and impossible to
+        middle-click or open in a new tab.
+
+        It is not wrapped in an <a> either, because the card contains buttons
+        (wishlist, add to cart, quantity stepper) and interactive content
+        nested inside an anchor is invalid HTML — it breaks keyboard order and
+        confuses screen readers.
+
+        Instead this uses the "stretched link" pattern: a real anchor that is
+        visually hidden but absolutely covers the card, sitting *below* the
+        controls in z-order. The whole card is clickable, the link is properly
+        announced and focusable, and the buttons stay genuinely separate.
+      */}
+      <div className="flex flex-col h-full bg-white rounded-2xl border border-gray-200/90 p-3.5 shadow-2xs hover:border-[#c88a23] group relative lift pressable focus-within:ring-2 focus-within:ring-[#0f3e26]/40">
+        <Link
+          href={`/products/${product.id}`}
+          className="absolute inset-0 z-10 rounded-2xl"
+        >
+          <span className="sr-only">
+            {product.name}
+            {product.brand ? ` by ${product.brand}` : ''}, ₹{selectedVariant.price}
+          </span>
+        </Link>
         {/* Product Image Container */}
         <div className="relative w-full aspect-square bg-gray-50/80 rounded-xl overflow-hidden mb-3 p-2 flex items-center justify-center">
           
@@ -188,10 +226,14 @@ export function ProductCard({
             }}
           />
 
-          {/* Category / Origin Badge */}
-          <span className="absolute top-2 left-2 bg-emerald-50 text-[#0f3e26] border border-emerald-200/80 text-[10px] font-extrabold px-2 py-0.5 rounded-md shadow-2xs">
-            {product.category || 'Pure Indian'}
-          </span>
+          {/* A real discount badge, shown only when there is a genuine saving.
+              This is the single strongest scanning cue on a listing grid and
+              the card had none. */}
+          {hasRealDiscount && discountPct >= 1 && (
+            <span className="absolute top-2 left-2 bg-[#c88a23] text-white text-[10px] font-black px-1.5 py-0.5 rounded-md shadow-sm tabular-nums">
+              {discountPct}% OFF
+            </span>
+          )}
 
           {/* Stock Badges */}
           {isAllOutOfStock ? (
@@ -245,19 +287,31 @@ export function ProductCard({
         {/* Content Section */}
         <div className="flex flex-col flex-1 justify-between">
           <div>
-            <span className="text-[10px] text-gray-400 font-semibold block mb-0.5">
-              By Gjanand Farm
-            </span>
+            {/* The partner brand. This was hardcoded to "By Gjanand Farm" on
+                every card, which is wrong on a marketplace whose entire pitch
+                is one verified brand per category — and absurd on electronics
+                or books. */}
+            {product.brand && (
+              <span className="text-[10px] text-gray-500 font-semibold block mb-0.5 truncate">
+                {product.brand}
+              </span>
+            )}
 
             <h3 className="text-xs sm:text-sm font-bold text-gray-900 line-clamp-1 group-hover:text-[#0f3e26] transition-colors leading-snug">
               {product.name}
             </h3>
 
-            <div className="flex items-center gap-1 text-[10px] text-amber-500 font-bold mt-1 mb-2">
-              <Star className="w-3 h-3 fill-amber-400 text-amber-400" />
-              <span className="text-gray-700">4.8</span>
-              <span className="text-gray-400 font-normal">({120 + product.name.length * 5})</span>
-              <span className="text-gray-300">•</span>
+            <div className="flex items-center gap-1 text-[10px] font-bold mt-1 mb-2">
+              {showRating && (
+                <>
+                  <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded bg-emerald-600 text-white">
+                    <Star className="w-2.5 h-2.5 fill-white text-white" />
+                    {rating!.toFixed(1)}
+                  </span>
+                  <span className="text-gray-400 font-normal">({reviewCount})</span>
+                  <span className="text-gray-300">•</span>
+                </>
+              )}
               <span className="text-gray-500 font-medium">
                 {selectedVariant.weight}
                 {variants.length > 1 && ` (+${variants.length - 1})`}
@@ -265,14 +319,17 @@ export function ProductCard({
             </div>
           </div>
 
-          {/* Price & Action Button */}
-          <div className="flex items-center justify-between gap-2 pt-2 border-t border-gray-100 mt-1">
+          {/* Price & Action Button.
+              `relative z-20` lifts this row above the stretched link (z-10)
+              so the add button and quantity stepper stay directly clickable
+              instead of being covered by the card-wide anchor. */}
+          <div className="relative z-20 flex items-center justify-between gap-2 pt-2 border-t border-gray-100 mt-1">
             <div className="flex flex-col">
               <div className="flex items-baseline gap-1">
                 <span className="text-base font-black text-[#0f3e26]">
                   ₹{selectedVariant.price}
                 </span>
-                {originalPrice > selectedVariant.price && (
+                {hasRealDiscount && (
                   <span className="text-[11px] text-gray-400 line-through">
                     ₹{originalPrice}
                   </span>
