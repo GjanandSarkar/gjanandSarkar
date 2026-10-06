@@ -332,6 +332,16 @@ This also clears the `500`s on `/api/inventory/status`.
 Fixed on this branch. `20260917_upgrade_user_addresses.sql` now adds it.
 Re-run that file.
 
+**Admin -> Categories shows 21 rows, including Milk, Ghee and Paneer**
+Fixed. `20261004_create_categories_table.sql` seeds the ten dairy-era
+categories from before the rebrand. `seed.sql` now retires them after
+inserting the twelve canonical ones, leaving exactly twelve. Re-run `seed.sql`.
+
+**Seller panel shows no products**
+Fixed. `seller_product` is backfilled by `20260930`, which runs *before*
+`seed.sql` creates any products, so the backfill always matched zero rows.
+`seed.sql` now populates it. Re-run `seed.sql`.
+
 **Admin pages are empty (Orders, Customers, Subscriptions, Deliveries)**
 Usually correct behaviour on a fresh install, not a bug:
 - *Orders* and *Deliveries* read the `orders` table. Place a test order first.
@@ -339,8 +349,7 @@ Usually correct behaviour on a fresh install, not a bug:
 - *Customers* deliberately excludes `role = 'admin'`. If your admin account is
   the only profile, the list is empty by design. Log in with a second phone
   number to see a row.
-- *Categories* was genuinely empty: nothing populated the `categories` table.
-  `seed.sql` now inserts the twelve canonical categories. Re-run it.
+- *Categories* is populated by `seed.sql` (twelve canonical categories).
 
 **Google login: `Unsupported provider: provider is not enabled`**
 Supabase config, not a code problem. See "Enabling Google login" below.

@@ -340,3 +340,51 @@ ON CONFLICT (name) DO UPDATE
       icon_name   = EXCLUDED.icon_name,
       sort_order  = EXCLUDED.sort_order,
       updated_at  = now();
+
+-- Retire the dairy-era taxonomy seeded by 20261004_create_categories_table.sql
+-- (Milk, Ghee, Paneer, Curd & Dahi, ...). Those were top-level categories when
+-- this was a dairy shop. After the rebrand Dairy is ONE of twelve categories,
+-- so leaving them in place gave Admin -> Categories 21 rows, with Milk and Ghee
+-- sitting as siblings of Dairy and sort_order values colliding in pairs.
+--
+-- Safe to delete: products.category_id is a nullable FK with ON DELETE SET NULL
+-- and no seeded product populates it. The products.category TEXT column, which
+-- does still hold 'Milk'/'Ghee'/etc., is a separate legacy shim handled in
+-- application code by legacyCategoryFilter() and is deliberately untouched.
+--
+-- 'Ayurveda & Wellness' is NOT in this list: it exists in both taxonomies, so
+-- the upsert above has already re-pointed it at the canonical slug.
+DELETE FROM categories
+WHERE slug IN (
+  'milk', 'ghee', 'paneer', 'curd-dahi', 'butter-makhan',
+  'buttermilk-lassi', 'traditional-sweets', 'cream-khoya', 'organic-oils-spices'
+);
+
+-- ─── 9. Seller catalog projection ─────────────────────────────────────
+-- seller_product is created and backfilled by
+-- 20260930_inventory_synchronization_system.sql, but that migration runs
+-- BEFORE this seed inserts any products, so on a fresh install its backfill
+-- matches zero rows and the seller panel stays empty forever. Populate it
+-- here, after the products exist.
+INSERT INTO seller_product (product_id, seller_id, name, category, description, image_url, price, stock, status)
+SELECT
+  p.id,
+  p.seller_id,
+  p.name,
+  p.category,
+  p.description,
+  p.image_url,
+  (SELECT MIN(pv.price) FROM product_variants pv WHERE pv.product_id = p.id),
+  COALESCE((SELECT SUM(pv.available_quantity) FROM product_variants pv WHERE pv.product_id = p.id), 0),
+  CASE WHEN p.is_active THEN 'active' ELSE 'inactive' END
+FROM products p
+ON CONFLICT (product_id) DO UPDATE
+  SET seller_id   = EXCLUDED.seller_id,
+      name        = EXCLUDED.name,
+      category    = EXCLUDED.category,
+      description = EXCLUDED.description,
+      image_url   = EXCLUDED.image_url,
+      price       = EXCLUDED.price,
+      stock       = EXCLUDED.stock,
+      status      = EXCLUDED.status,
+      updated_at  = now();
