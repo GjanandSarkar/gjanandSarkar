@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useTranslation } from '@/lib/i18n';
 import { format } from 'date-fns';
-import { ShoppingBag, ChevronDown, Loader2 } from 'lucide-react';
+import { ShoppingBag, ChevronDown, Loader2, AlertCircle } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { getAllOrders, updateOrderStatus } from '@/lib/api/orders';
 import type { OrderWithItems } from '@/lib/api/orders';
@@ -18,6 +18,44 @@ const STATUS_STYLES: Record<string, { bg: string; color: string; dot: string }> 
 
 const ORDER_STATUSES: OrderWithItems['status'][] = ['pending', 'confirmed', 'out_for_delivery', 'delivered', 'cancelled'];
 
+type OrderStatus = OrderWithItems['status'];
+
+/**
+ * The order lifecycle, mirroring what the database actually permits.
+ *
+ * This screen used to render all five statuses as plain clickable buttons,
+ * so an admin could ask for a transition the backend is guaranteed to
+ * reject -- cancelling a delivered order being the obvious one, which
+ * cancel_order_atomic() refuses because the goods are already with the
+ * customer. That is a return/refund, not a cancellation.
+ *
+ * Keep this in sync with cancel_order_atomic() in
+ * 20260930_inventory_synchronization_system.sql.
+ */
+const ALLOWED_TRANSITIONS: Record<OrderStatus, OrderStatus[]> = {
+  pending:          ['confirmed', 'cancelled'],
+  confirmed:        ['out_for_delivery', 'cancelled'],
+  out_for_delivery: ['delivered', 'cancelled'],
+  delivered:        [],
+  cancelled:        [],
+};
+
+/** Why a given target status is unavailable from the order's current state. */
+function transitionBlockedReason(from: OrderStatus, to: OrderStatus): string | null {
+  if (from === to) return null;
+  if (ALLOWED_TRANSITIONS[from]?.includes(to)) return null;
+
+  if (from === 'delivered') {
+    return to === 'cancelled'
+      ? 'This order has already been delivered, so it cannot be cancelled. Raise a return or refund instead.'
+      : 'Delivered is the final step of the order lifecycle.';
+  }
+  if (from === 'cancelled') {
+    return 'This order was cancelled and its stock has been restored. Cancelled orders cannot be reopened.';
+  }
+  return `An order that is ${from.replace(/_/g, ' ')} cannot move straight to ${to.replace(/_/g, ' ')}.`;
+}
+
 export default function AdminOrdersPage() {
   const { t } = useTranslation();
   const [orders, setOrders] = useState<OrderWithItems[]>([]);
@@ -25,6 +63,7 @@ export default function AdminOrdersPage() {
   const [activeTab, setActiveTab] = useState('all');
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [isUpdating, setIsUpdating] = useState<string | null>(null);
+  const [updateError, setUpdateError] = useState<{ orderId: string; message: string } | null>(null);
 
   useEffect(() => {
     getAllOrders().then(data => {
@@ -33,13 +72,35 @@ export default function AdminOrdersPage() {
     });
   }, []);
 
-  const handleUpdateStatus = async (orderId: string, status: OrderWithItems['status'], userId: string | null) => {
-    setIsUpdating(orderId);
-    const result = await updateOrderStatus(orderId, status, userId || undefined);
-    if (result.success) {
-      setOrders(prev => prev.map(o => o.id === orderId ? { ...o, status } : o));
+  const handleUpdateStatus = async (orderId: string, status: OrderStatus, userId: string | null) => {
+    const order = orders.find(o => o.id === orderId);
+    if (!order) return;
+
+    // Guard client-side too, so a stale render can never fire a request the
+    // backend will refuse.
+    const blocked = transitionBlockedReason(order.status, status);
+    if (blocked) {
+      setUpdateError({ orderId, message: blocked });
+      return;
     }
-    setIsUpdating(null);
+
+    setUpdateError(null);
+    setIsUpdating(orderId);
+    try {
+      const result = await updateOrderStatus(orderId, status, userId || undefined);
+      if (result.success) {
+        setOrders(prev => prev.map(o => (o.id === orderId ? { ...o, status } : o)));
+      } else {
+        // Previously this branch did not exist: a failed update logged to the
+        // console and the admin just saw nothing happen.
+        setUpdateError({
+          orderId,
+          message: result.error || 'Could not update this order. Please try again.',
+        });
+      }
+    } finally {
+      setIsUpdating(null);
+    }
   };
 
   const filtered = activeTab === 'all' ? orders : orders.filter(o => o.status === activeTab);
@@ -198,11 +259,22 @@ export default function AdminOrdersPage() {
                                 {ORDER_STATUSES.map(status => {
                                   const sStyle = STATUS_STYLES[status];
                                   const isCurrentStatus = order.status === status;
+                                  const blockedReason = transitionBlockedReason(order.status, status);
+                                  const isBlocked = blockedReason !== null;
+                                  const isBusy = isUpdating === order.id;
                                   return (
                                     <button key={status}
                                       onClick={() => handleUpdateStatus(order.id, status, order.user_id)}
-                                      disabled={isUpdating === order.id}
-                                      className="px-3 py-1.5 rounded-full text-[11px] font-bold transition-all active:scale-95 disabled:opacity-50"
+                                      disabled={isBusy || isBlocked || isCurrentStatus}
+                                      title={blockedReason ?? (isCurrentStatus ? 'Current status' : `Mark as ${status.replace(/_/g, ' ')}`)}
+                                      aria-current={isCurrentStatus ? 'true' : undefined}
+                                      className={`px-3 py-1.5 rounded-full text-[11px] font-bold transition-all ${
+                                        isBlocked
+                                          ? 'opacity-40 cursor-not-allowed line-through'
+                                          : isCurrentStatus
+                                            ? 'cursor-default'
+                                            : 'active:scale-95 pressable'
+                                      } disabled:opacity-50`}
                                       style={isCurrentStatus ? {
                                         background: sStyle.bg,
                                         color: sStyle.color,
@@ -216,6 +288,23 @@ export default function AdminOrdersPage() {
                                   );
                                 })}
                               </div>
+
+                              {ALLOWED_TRANSITIONS[order.status].length === 0 && (
+                                <p className="mt-2 text-[11px]" style={{ color: 'var(--color-on-surface-variant)' }}>
+                                  {order.status === 'delivered'
+                                    ? 'This order is complete. To reverse it, raise a return or refund rather than a cancellation.'
+                                    : 'This order is cancelled and its stock has been restored.'}
+                                </p>
+                              )}
+
+                              {updateError?.orderId === order.id && (
+                                <div role="alert"
+                                  className="mt-3 flex items-start gap-2 rounded-xl px-3 py-2 text-[12px]"
+                                  style={{ background: '#ffdad6', color: '#410002' }}>
+                                  <AlertCircle className="w-4 h-4 shrink-0 mt-[1px]" />
+                                  <span>{updateError.message}</span>
+                                </div>
+                              )}
                             </div>
                           </div>
                         </motion.div>
