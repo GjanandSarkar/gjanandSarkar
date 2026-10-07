@@ -1,15 +1,95 @@
 const API_BASE = '';
 
+/**
+ * supabase-js serialises all auth work through a Web Lock
+ * (`lock:sb-<ref>-auth-token`). If anything is already holding that lock --
+ * a token refresh kicked off by the OAuth callback, or a concurrent
+ * getSession() from another component -- `getSession()` does not reject, it
+ * simply never settles.
+ *
+ * Every API call goes through `getAuthToken()`, so one stuck lock silently
+ * freezes the whole app. On checkout that meant "Placing Order..." spun
+ * forever and no request was ever sent: there was nothing in the server log
+ * because the fetch had not happened yet.
+ */
+const AUTH_TOKEN_TIMEOUT_MS = 3000;
+
+/** Sentinel so a genuine `null` token is distinguishable from a timeout. */
+const TIMED_OUT = Symbol('auth-token-timeout');
+
+/**
+ * Read the persisted session straight out of storage.
+ *
+ * supabase-js writes the session to `sb-<project-ref>-auth-token`, so the
+ * access token is readable without going anywhere near the auth lock. Used
+ * only when `getSession()` fails to answer in time.
+ */
+function readPersistedAccessToken(): string | null {
+  try {
+    const keys: string[] = [];
+    const ref = (process.env.NEXT_PUBLIC_SUPABASE_URL || '').match(
+      /^https?:\/\/([^.]+)\./
+    )?.[1];
+    if (ref) keys.push(`sb-${ref}-auth-token`);
+    for (let i = 0; i < window.localStorage.length; i++) {
+      const k = window.localStorage.key(i);
+      if (k && k.startsWith('sb-') && k.endsWith('-auth-token') && !keys.includes(k)) {
+        keys.push(k);
+      }
+    }
+
+    for (const key of keys) {
+      let raw = window.localStorage.getItem(key);
+      if (!raw) continue;
+      // Newer clients base64-encode the payload behind a `base64-` prefix.
+      if (raw.startsWith('base64-')) {
+        try {
+          raw = atob(raw.slice(7));
+        } catch {
+          continue;
+        }
+      }
+      const parsed = JSON.parse(raw);
+      const token: unknown =
+        parsed?.access_token ?? parsed?.currentSession?.access_token;
+      if (typeof token === 'string' && token.length > 0) return token;
+    }
+  } catch {
+    /* storage unavailable or malformed - fall through */
+  }
+  return null;
+}
+
 async function getAuthToken(): Promise<string | null> {
   if (typeof window === 'undefined') return null;
   try {
     const { supabase } = await import('@/lib/supabase');
-    const { data: { session } } = await supabase.auth.getSession();
-    return session?.access_token ?? null;
+
+    // Never await getSession() unbounded.
+    const token = await Promise.race([
+      supabase.auth
+        .getSession()
+        .then(
+          (result: { data: { session: { access_token?: string } | null } }) =>
+            result.data.session?.access_token ?? null
+        ),
+      new Promise<typeof TIMED_OUT>((resolve) =>
+        setTimeout(() => resolve(TIMED_OUT), AUTH_TOKEN_TIMEOUT_MS)
+      ),
+    ]);
+
+    if (token !== TIMED_OUT) return token;
+
+    console.warn(
+      `[auth] getSession() did not resolve within ${AUTH_TOKEN_TIMEOUT_MS}ms; ` +
+        'falling back to the persisted session.'
+    );
+    return readPersistedAccessToken();
   } catch {
-    return null;
+    return readPersistedAccessToken();
   }
 }
+
 
 async function fetchApi<T = any>(
   endpoint: string,

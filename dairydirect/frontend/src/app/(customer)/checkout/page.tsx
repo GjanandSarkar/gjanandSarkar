@@ -236,35 +236,58 @@ export default function CheckoutScreen() {
 
     setIsProcessing(true);
 
-    const result = await placeOrder({
-      userId: user.id,
-      customerName: user.name || 'Customer',
-      customerPhone: user.phone || '',
-      items: orderItems,
-      total: pricing?.total || 0,
-      addressId: checkoutAddressId,
-      paymentMethod: selectedMethod,
-      paymentStatus: selectedMethod === 'cod' ? 'pending' : 'paid',
-      couponCode: couponCode || undefined,
-      upiId: selectedMethod === 'upi' ? upiId : undefined
-    });
+    // `navigated` keeps the button disabled while the router transition to the
+    // confirmation page is in flight. Every other exit path -- success, error,
+    // or an unexpected throw -- must release the spinner in `finally`.
+    // Previously there was no try/catch here at all, so anything that threw or
+    // hung left "Placing Order..." on screen permanently with no way out.
+    let navigated = false;
 
-    if (result.success && result.orderId) {
-      Analytics.trackEvent('Checkout Completed', {
-        orderId: result.orderId,
+    try {
+      const result = await placeOrder({
+        userId: user.id,
+        customerName: user.name || 'Customer',
+        customerPhone: user.phone || '',
+        items: orderItems,
         total: pricing?.total || 0,
-        cartSize: cartItemsData.length
+        addressId: checkoutAddressId,
+        paymentMethod: selectedMethod,
+        paymentStatus: selectedMethod === 'cod' ? 'pending' : 'paid',
+        couponCode: couponCode || undefined,
+        upiId: selectedMethod === 'upi' ? upiId : undefined
       });
-      clearCartLocal();
-      await clearCartApi(user.id);
-      router.replace(`/order-confirmed/${result.orderId}`);
-    } else {
-      setIsProcessing(false);
-      if (result.error && (result.error.toLowerCase().includes('insufficient') || result.error.toLowerCase().includes('stock') || result.error.toLowerCase().includes('inventory'))) {
+
+      if (result.success && result.orderId) {
+        Analytics.trackEvent('Checkout Completed', {
+          orderId: result.orderId,
+          total: pricing?.total || 0,
+          cartSize: cartItemsData.length
+        });
+        clearCartLocal();
+        // Fire-and-forget: the order is already placed, so a slow or failing
+        // cart-cleanup call must never stand between the customer and their
+        // confirmation page.
+        void clearCartApi(user.id).catch(() => {});
+        navigated = true;
+        router.replace(`/order-confirmed/${result.orderId}`);
+      } else if (
+        result.error &&
+        (result.error.toLowerCase().includes('insufficient') ||
+          result.error.toLowerCase().includes('stock') ||
+          result.error.toLowerCase().includes('inventory'))
+      ) {
         setStockError(result.error);
       } else {
         alert(result.error || 'Failed to place order. Please try again.');
       }
+    } catch (err) {
+      console.error('[checkout] Unexpected error while placing order:', err);
+      alert(
+        'Something went wrong while placing your order. ' +
+          'You have not been charged. Please check My Orders before retrying.'
+      );
+    } finally {
+      if (!navigated) setIsProcessing(false);
     }
   };
 
