@@ -60,7 +60,7 @@ function readPersistedAccessToken(): string | null {
   return null;
 }
 
-async function getAuthToken(): Promise<string | null> {
+export async function getAuthToken(): Promise<string | null> {
   if (typeof window === 'undefined') return null;
   try {
     const { supabase } = await import('@/lib/supabase');

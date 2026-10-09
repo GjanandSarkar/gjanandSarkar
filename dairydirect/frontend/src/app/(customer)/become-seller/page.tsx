@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { 
   Building2, 
@@ -17,18 +17,29 @@ import {
   Store,
   Clock,
   CheckCircle2,
+  XCircle,
+  AlertCircle,
   FileText,
   HelpCircle,
   Copy,
-  MessageCircle
+  MessageCircle,
+  RefreshCw,
+  Edit3
 } from 'lucide-react';
 import { useStore } from '@/store/useStore';
-import { submitSellerInquiry, SellerInquiry } from '@/lib/api/sellers';
+import { submitSellerInquiry, getMySellerInquiry, SellerInquiry } from '@/lib/api/sellers';
 import { validatePhoneNumber, formatPhoneInput } from '@/lib/utils/phone';
 import { CATEGORY_NAMES } from '@/lib/constants/categories';
 
 export default function BecomeSellerPage() {
   const user = useStore((s) => s.user);
+  const isAuthLoading = useStore((s) => s.isAuthLoading);
+
+  // Status check & existing application
+  const [isCheckingStatus, setIsCheckingStatus] = useState(true);
+  const [existingInquiry, setExistingInquiry] = useState<SellerInquiry | null>(null);
+  const [isEditing, setIsEditing] = useState(false);
+  const [isRefreshing, setIsRefreshing] = useState(false);
 
   // Form State
   const [fullName, setFullName] = useState(user?.name || '');
@@ -47,7 +58,6 @@ export default function BecomeSellerPage() {
   // Status & Submission
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
-  const [submittedInquiry, setSubmittedInquiry] = useState<SellerInquiry | null>(null);
   const [copiedId, setCopiedId] = useState(false);
 
   const statesList = [
@@ -55,9 +65,6 @@ export default function BecomeSellerPage() {
     'Tamil Nadu', 'Kashmir', 'Himachal Pradesh', 'West Bengal', 'Karnataka', 'Madhya Pradesh', 'Uttar Pradesh'
   ];
 
-  // Was a bespoke 8-item list led by dairy. Partner applications must map to
-  // the same taxonomy the storefront uses, otherwise an approved partner's
-  // category would not match any category customers can actually browse.
   const categoriesList = CATEGORY_NAMES;
 
   const volumeOptions = [
@@ -67,6 +74,54 @@ export default function BecomeSellerPage() {
     '1,000 - 5,000 units per month',
     '5,000+ units per month (commercial scale)'
   ];
+
+  const populateFormWithInquiry = (inq: SellerInquiry) => {
+    if (inq.full_name) setFullName(inq.full_name);
+    if (inq.business_name) setBusinessName(inq.business_name);
+    if (inq.phone) setPhone(inq.phone);
+    if (inq.email) setEmail(inq.email);
+    if (inq.city) setCity(inq.city);
+    if (inq.state) setStateOrigin(inq.state);
+    if (inq.category) setCategory(inq.category);
+    if (inq.product_range) setProductRange(inq.product_range);
+    if (inq.monthly_volume) setMonthlyVolume(inq.monthly_volume);
+    if (inq.fssai_number) setFssaiNumber(inq.fssai_number);
+    if (inq.gstin) setGstin(inq.gstin);
+    if (inq.notes) setNotes(inq.notes);
+  };
+
+  const checkApplicationStatus = async () => {
+    try {
+      const inq = await getMySellerInquiry();
+      if (inq) {
+        setExistingInquiry(inq);
+        populateFormWithInquiry(inq);
+      } else {
+        setExistingInquiry(null);
+        if (user) {
+          if (!fullName && user.name) setFullName(user.name);
+          if (!email && user.email) setEmail(user.email);
+          if (!phone && user.phone) setPhone(user.phone);
+        }
+      }
+    } catch (err) {
+      console.error('Failed to fetch seller application status:', err);
+    } finally {
+      setIsCheckingStatus(false);
+      setIsRefreshing(false);
+    }
+  };
+
+  useEffect(() => {
+    if (!isAuthLoading) {
+      checkApplicationStatus();
+    }
+  }, [isAuthLoading, user?.id]);
+
+  const handleRefresh = async () => {
+    setIsRefreshing(true);
+    await checkApplicationStatus();
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -110,7 +165,8 @@ export default function BecomeSellerPage() {
       });
 
       if (res.success && res.inquiry) {
-        setSubmittedInquiry(res.inquiry);
+        setExistingInquiry(res.inquiry);
+        setIsEditing(false);
       }
     } catch (err: any) {
       setError(err.message || 'Failed to submit inquiry. Please try again.');
@@ -120,8 +176,8 @@ export default function BecomeSellerPage() {
   };
 
   const handleCopyId = () => {
-    if (submittedInquiry?.id) {
-      navigator.clipboard.writeText(submittedInquiry.id);
+    if (existingInquiry?.id) {
+      navigator.clipboard.writeText(existingInquiry.id);
       setCopiedId(true);
       setTimeout(() => setCopiedId(false), 2500);
     }
@@ -181,85 +237,255 @@ export default function BecomeSellerPage() {
           </div>
         </div>
 
-        {/* Success Confirmation Modal / Screen */}
-        {submittedInquiry ? (
-          <div className="bg-white rounded-3xl border-2 border-emerald-500/30 p-8 sm:p-12 shadow-xl text-center max-w-2xl mx-auto space-y-6 animate-in fade-in zoom-in-95">
-            <div className="w-20 h-20 rounded-full bg-emerald-100 text-[#0f3e26] flex items-center justify-center mx-auto shadow-inner">
-              <CheckCircle2 className="w-12 h-12 text-emerald-600" />
+        {/* ─── Dynamic View Based on Application Status ─────────────────────── */}
+        {isCheckingStatus ? (
+          /* Loading Indicator: Prevents blank form flashing on refresh */
+          <div className="bg-white rounded-3xl border border-gray-200 shadow-sm p-12 text-center max-w-xl mx-auto space-y-4">
+            <div className="w-16 h-16 rounded-2xl bg-[#0f3e26]/10 text-[#0f3e26] flex items-center justify-center mx-auto">
+              <Loader2 className="w-8 h-8 animate-spin text-[#0f3e26]" />
             </div>
-
-            <div className="space-y-2">
-              <span className="px-3 py-1 rounded-full bg-emerald-50 text-emerald-800 text-xs font-black uppercase tracking-wider">
-                Inquiry Submitted Successfully
-              </span>
-              <h2 className="text-2xl sm:text-3xl font-black text-gray-900">
-                Thank You, {submittedInquiry.full_name}!
-              </h2>
-              <p className="text-sm text-gray-600 max-w-lg mx-auto">
-                We have received the seller application for <strong className="text-gray-900">{submittedInquiry.business_name}</strong>.
+            <div className="space-y-1">
+              <h3 className="text-lg font-black text-gray-900">Checking Seller Application Status</h3>
+              <p className="text-xs text-gray-500">
+                Verifying your account and fetching your latest registration records from the database...
               </p>
             </div>
-
-            {/* Reference Badge */}
-            <div className="p-4 bg-gray-50 rounded-2xl border border-gray-200 flex items-center justify-between gap-4 max-w-md mx-auto">
-              <div className="text-left">
-                <p className="text-[10px] uppercase font-black text-gray-400">Inquiry Reference ID</p>
-                <p className="text-base font-black text-[#0f3e26] font-mono">{submittedInquiry.id}</p>
-              </div>
-              <button
-                type="button"
-                onClick={handleCopyId}
-                className="px-3 py-1.5 bg-white border border-gray-200 rounded-xl text-xs font-bold text-gray-700 hover:bg-gray-100 flex items-center gap-1.5 transition-colors"
-              >
-                {copiedId ? <Check className="w-3.5 h-3.5 text-emerald-600" /> : <Copy className="w-3.5 h-3.5" />}
-                <span>{copiedId ? 'Copied!' : 'Copy ID'}</span>
-              </button>
-            </div>
-
-            {/* Next Steps Card */}
-            <div className="bg-amber-50/70 border border-amber-200/80 rounded-2xl p-5 text-left space-y-3">
-              <h4 className="text-xs font-black text-amber-950 uppercase tracking-wider flex items-center gap-2">
-                <Clock className="w-4 h-4 text-[#c88a23]" />
-                <span>What Happens Next?</span>
-              </h4>
-              <ul className="text-xs text-amber-900 space-y-2">
-                <li className="flex items-start gap-2">
-                  <span className="font-bold text-[#c88a23]">•</span>
-                  <span>Our Onboarding Manager will call / WhatsApp you at <strong>+91 {submittedInquiry.phone}</strong> within <strong>24 to 48 business hours</strong>.</span>
-                </li>
-                <li className="flex items-start gap-2">
-                  <span className="font-bold text-[#c88a23]">•</span>
-                  <span>We will verify your business registration, GST, category licences and quality certificates, and discuss packaging standards.</span>
-                </li>
-                <li className="flex items-start gap-2">
-                  <span className="font-bold text-[#c88a23]">•</span>
-                  <span>Upon approval, your seller dashboard will be unlocked with automated inventory & payout tools.</span>
-                </li>
-              </ul>
-            </div>
-
-            {/* Action Buttons */}
-            <div className="flex flex-col sm:flex-row items-center justify-center gap-3 pt-2">
-              <a
-                href={`https://wa.me/919825123456?text=${encodeURIComponent(`Hello Gjanand Sarkar team, I have submitted a seller inquiry (ID: ${submittedInquiry.id}) for ${submittedInquiry.business_name}.`)}`}
-                target="_blank"
-                rel="noreferrer"
-                className="w-full sm:w-auto px-6 py-3 bg-[#25D366] hover:bg-[#20bd5a] text-white text-xs font-bold rounded-xl flex items-center justify-center gap-2 shadow-sm transition-all"
-              >
-                <MessageCircle className="w-4 h-4" />
-                <span>Quick WhatsApp Verification</span>
-              </a>
-              <Link
-                href="/home"
-                className="w-full sm:w-auto px-6 py-3 bg-gray-100 hover:bg-gray-200 text-gray-800 text-xs font-bold rounded-xl flex items-center justify-center transition-colors"
-              >
-                Return to Marketplace
-              </Link>
-            </div>
           </div>
+        ) : existingInquiry && !isEditing ? (
+          <>
+            {/* ─── 1. PENDING / CONTACTED SCREEN ───────────────────────────── */}
+            {(existingInquiry.status === 'pending' || existingInquiry.status === 'contacted') && (
+              <div className="bg-white rounded-3xl border-2 border-amber-500/30 p-8 sm:p-12 shadow-xl text-center max-w-2xl mx-auto space-y-6 animate-in fade-in zoom-in-95">
+                <div className="w-20 h-20 rounded-full bg-amber-100 text-amber-800 flex items-center justify-center mx-auto shadow-inner">
+                  <Clock className="w-12 h-12 text-amber-600 animate-pulse" />
+                </div>
+
+                <div className="space-y-3">
+                  <span className="px-3.5 py-1 rounded-full bg-amber-50 border border-amber-200 text-amber-800 text-xs font-black uppercase tracking-wider">
+                    Application Pending Review
+                  </span>
+                  <h2 className="text-2xl sm:text-3xl font-black text-gray-900">
+                    Application Under Review
+                  </h2>
+                  <p className="text-sm font-medium text-gray-700 leading-relaxed max-w-lg mx-auto bg-amber-50/60 p-4 rounded-2xl border border-amber-200/60">
+                    Your seller registration application has been submitted successfully and is currently under review by our admin team. You do not need to fill out the form again. We will update your status once the review is complete.
+                  </p>
+                </div>
+
+                {/* Inquiry Details Summary Card */}
+                <div className="p-4 bg-gray-50 rounded-2xl border border-gray-200 flex flex-col sm:flex-row items-center justify-between gap-4 max-w-md mx-auto text-left">
+                  <div>
+                    <p className="text-[10px] uppercase font-black text-gray-400">Business / Farm Name</p>
+                    <p className="text-sm font-black text-gray-900">{existingInquiry.business_name}</p>
+                    <p className="text-[11px] text-gray-500 font-medium">Category: {existingInquiry.category}</p>
+                  </div>
+                  <div className="sm:text-right border-t sm:border-t-0 pt-2 sm:pt-0 w-full sm:w-auto flex sm:flex-col justify-between items-center sm:items-end">
+                    <p className="text-[10px] uppercase font-black text-gray-400">Inquiry ID</p>
+                    <button
+                      type="button"
+                      onClick={handleCopyId}
+                      className="px-2.5 py-1 bg-white border border-gray-200 rounded-lg text-xs font-bold text-gray-700 hover:bg-gray-100 flex items-center gap-1.5 transition-colors shadow-2xs font-mono"
+                      title="Click to copy ID"
+                    >
+                      {copiedId ? <Check className="w-3.5 h-3.5 text-emerald-600" /> : <Copy className="w-3.5 h-3.5" />}
+                      <span>{existingInquiry.id.slice(0, 8)}...</span>
+                    </button>
+                  </div>
+                </div>
+
+                {/* What Happens Next Card */}
+                <div className="bg-amber-50/70 border border-amber-200/80 rounded-2xl p-5 text-left space-y-3">
+                  <h4 className="text-xs font-black text-amber-950 uppercase tracking-wider flex items-center gap-2">
+                    <Clock className="w-4 h-4 text-[#c88a23]" />
+                    <span>What Happens Next?</span>
+                  </h4>
+                  <ul className="text-xs text-amber-900 space-y-2">
+                    <li className="flex items-start gap-2">
+                      <span className="font-bold text-[#c88a23]">•</span>
+                      <span>Our Onboarding Manager will call / WhatsApp you at <strong>+91 {existingInquiry.phone}</strong> within <strong>24 to 48 business hours</strong>.</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <span className="font-bold text-[#c88a23]">•</span>
+                      <span>We will verify your business registration, GST, category licences, and product samples.</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <span className="font-bold text-[#c88a23]">•</span>
+                      <span>Once approved by the admin team, your seller dashboard will be unlocked automatically.</span>
+                    </li>
+                  </ul>
+                </div>
+
+                {/* Action Buttons */}
+                <div className="flex flex-col sm:flex-row items-center justify-center gap-3 pt-2">
+                  <button
+                    type="button"
+                    onClick={handleRefresh}
+                    disabled={isRefreshing}
+                    className="w-full sm:w-auto px-5 py-3 bg-white border border-gray-300 hover:bg-gray-50 text-gray-800 text-xs font-bold rounded-xl flex items-center justify-center gap-2 shadow-2xs transition-all disabled:opacity-50"
+                  >
+                    <RefreshCw className={`w-3.5 h-3.5 ${isRefreshing ? 'animate-spin text-emerald-600' : 'text-gray-500'}`} />
+                    <span>{isRefreshing ? 'Checking Status...' : 'Refresh Status'}</span>
+                  </button>
+
+                  <a
+                    href={`https://wa.me/919825123456?text=${encodeURIComponent(`Hello Gjanand Sarkar team, I have submitted a seller application (ID: ${existingInquiry.id}) for ${existingInquiry.business_name}. Could you please check the review status?`)}`}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="w-full sm:w-auto px-6 py-3 bg-[#25D366] hover:bg-[#20bd5a] text-white text-xs font-bold rounded-xl flex items-center justify-center gap-2 shadow-sm transition-all"
+                  >
+                    <MessageCircle className="w-4 h-4" />
+                    <span>Quick WhatsApp Verification</span>
+                  </a>
+
+                  <Link
+                    href="/home"
+                    className="w-full sm:w-auto px-6 py-3 bg-gray-100 hover:bg-gray-200 text-gray-800 text-xs font-bold rounded-xl flex items-center justify-center transition-colors"
+                  >
+                    Return to Marketplace
+                  </Link>
+                </div>
+              </div>
+            )}
+
+            {/* ─── 2. APPROVED SCREEN ───────────────────────────────────────── */}
+            {existingInquiry.status === 'approved' && (
+              <div className="bg-white rounded-3xl border-2 border-emerald-500/40 p-8 sm:p-12 shadow-xl text-center max-w-2xl mx-auto space-y-6 animate-in fade-in zoom-in-95">
+                <div className="w-20 h-20 rounded-full bg-emerald-100 text-[#0f3e26] flex items-center justify-center mx-auto shadow-inner">
+                  <CheckCircle2 className="w-12 h-12 text-emerald-600" />
+                </div>
+
+                <div className="space-y-3">
+                  <span className="px-3.5 py-1 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-black uppercase tracking-wider">
+                    Application Approved
+                  </span>
+                  <h2 className="text-2xl sm:text-3xl font-black text-gray-900">
+                    Welcome to Gjanand Sarkar!
+                  </h2>
+                  <p className="text-sm font-semibold text-emerald-950 leading-relaxed max-w-lg mx-auto bg-emerald-50/70 p-4 rounded-2xl border border-emerald-200">
+                    Congratulations! Your seller registration application has been approved. You can now access your seller dashboard.
+                  </p>
+                </div>
+
+                {/* Approved Store Badge */}
+                <div className="p-4 bg-gray-50 rounded-2xl border border-gray-200 flex items-center justify-between gap-4 max-w-md mx-auto text-left">
+                  <div>
+                    <p className="text-[10px] uppercase font-black text-gray-400">Verified Brand / Farm</p>
+                    <p className="text-base font-black text-[#0f3e26]">{existingInquiry.business_name}</p>
+                    <p className="text-xs text-gray-500 font-medium">Category: {existingInquiry.category}</p>
+                  </div>
+                  <div className="inline-flex items-center gap-1.5 px-3 py-1 bg-emerald-100 text-emerald-800 rounded-lg text-xs font-black">
+                    <ShieldCheck className="w-4 h-4 text-emerald-600" />
+                    <span>Active Partner</span>
+                  </div>
+                </div>
+
+                {/* Action Buttons */}
+                <div className="flex flex-col sm:flex-row items-center justify-center gap-3 pt-2">
+                  <Link
+                    href="/seller/dashboard"
+                    className="w-full sm:w-auto px-8 py-3.5 bg-[#0f3e26] hover:bg-[#144f31] text-white text-xs font-black rounded-xl shadow-md flex items-center justify-center gap-2 transition-all active:scale-95"
+                  >
+                    <span>Access Seller Dashboard</span>
+                    <ArrowRight className="w-4 h-4 text-[#c88a23]" />
+                  </Link>
+
+                  <Link
+                    href="/home"
+                    className="w-full sm:w-auto px-6 py-3.5 bg-gray-100 hover:bg-gray-200 text-gray-800 text-xs font-bold rounded-xl flex items-center justify-center transition-colors"
+                  >
+                    Browse Marketplace
+                  </Link>
+                </div>
+              </div>
+            )}
+
+            {/* ─── 3. REJECTED SCREEN ───────────────────────────────────────── */}
+            {existingInquiry.status === 'rejected' && (
+              <div className="bg-white rounded-3xl border-2 border-rose-500/30 p-8 sm:p-12 shadow-xl text-center max-w-2xl mx-auto space-y-6 animate-in fade-in zoom-in-95">
+                <div className="w-20 h-20 rounded-full bg-rose-100 text-rose-800 flex items-center justify-center mx-auto shadow-inner">
+                  <XCircle className="w-12 h-12 text-rose-600" />
+                </div>
+
+                <div className="space-y-3">
+                  <span className="px-3.5 py-1 rounded-full bg-rose-50 border border-rose-200 text-rose-800 text-xs font-black uppercase tracking-wider">
+                    Application Not Approved
+                  </span>
+                  <h2 className="text-2xl sm:text-3xl font-black text-gray-900">
+                    Application Status Update
+                  </h2>
+                  <p className="text-sm font-medium text-gray-700 leading-relaxed max-w-lg mx-auto bg-rose-50/60 p-4 rounded-2xl border border-rose-200/60">
+                    Your seller registration application was not approved. Please review the admin's feedback and follow the available next steps.
+                  </p>
+                </div>
+
+                {/* Admin Feedback Box */}
+                <div className="bg-amber-50/70 border border-amber-200/80 rounded-2xl p-5 text-left space-y-2 max-w-lg mx-auto">
+                  <h4 className="text-xs font-black text-amber-950 uppercase tracking-wider flex items-center gap-2">
+                    <AlertCircle className="w-4 h-4 text-amber-600" />
+                    <span>Admin Feedback</span>
+                  </h4>
+                  <p className="text-xs text-amber-900 leading-relaxed">
+                    {existingInquiry.admin_notes?.trim() 
+                      ? existingInquiry.admin_notes 
+                      : 'No specific comments provided. Please review your business licenses, FSSAI registration, and contact information before resubmitting.'}
+                  </p>
+                </div>
+
+                {/* Permitted Next Actions */}
+                <div className="flex flex-col sm:flex-row items-center justify-center gap-3 pt-2">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      populateFormWithInquiry(existingInquiry);
+                      setIsEditing(true);
+                    }}
+                    className="w-full sm:w-auto px-6 py-3.5 bg-[#0f3e26] hover:bg-[#144f31] text-white text-xs font-black rounded-xl shadow-md flex items-center justify-center gap-2 transition-all active:scale-95 cursor-pointer"
+                  >
+                    <Edit3 className="w-4 h-4 text-[#c88a23]" />
+                    <span>Edit & Resubmit Application</span>
+                  </button>
+
+                  <a
+                    href={`https://wa.me/919825123456?text=${encodeURIComponent(`Hello Gjanand Sarkar team, I have questions regarding my seller application (ID: ${existingInquiry.id}) for ${existingInquiry.business_name}.`)}`}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="w-full sm:w-auto px-6 py-3.5 bg-gray-100 hover:bg-gray-200 text-gray-800 text-xs font-bold rounded-xl flex items-center justify-center gap-2 transition-colors"
+                  >
+                    <MessageCircle className="w-4 h-4 text-gray-600" />
+                    <span>Contact Support</span>
+                  </a>
+
+                  <Link
+                    href="/home"
+                    className="w-full sm:w-auto px-6 py-3.5 bg-gray-100 hover:bg-gray-200 text-gray-800 text-xs font-bold rounded-xl flex items-center justify-center transition-colors"
+                  >
+                    Return to Marketplace
+                  </Link>
+                </div>
+              </div>
+            )}
+          </>
         ) : (
-          /* Main Inquiry Submission Form */
+          /* ─── 4. SELLER REGISTRATION / EDIT FORM ────────────────────────── */
           <div className="bg-white rounded-3xl border border-gray-200/90 shadow-sm p-6 sm:p-10">
+            {isEditing && (
+              <div className="mb-6 p-4 bg-amber-50 border border-amber-200 rounded-2xl flex items-center justify-between gap-4">
+                <div className="text-left">
+                  <p className="text-xs font-black text-amber-900">Editing Your Previous Application</p>
+                  <p className="text-[11px] text-amber-700">
+                    Update any requested details or licenses below. Submitting will send your updated application for admin review.
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setIsEditing(false)}
+                  className="px-3 py-1.5 bg-white border border-amber-300 rounded-xl text-xs font-bold text-gray-700 hover:bg-amber-100 transition-colors"
+                >
+                  Cancel Edit
+                </button>
+              </div>
+            )}
+
             <form onSubmit={handleSubmit} className="space-y-8">
               
               {error && (
@@ -488,11 +714,11 @@ export default function BecomeSellerPage() {
                   {isLoading ? (
                     <>
                       <Loader2 className="w-4 h-4 animate-spin" />
-                      <span>Submitting Inquiry...</span>
+                      <span>{isEditing ? 'Updating Application...' : 'Submitting Inquiry...'}</span>
                     </>
                   ) : (
                     <>
-                      <span>Submit Seller Inquiry</span>
+                      <span>{isEditing ? 'Resubmit Seller Application' : 'Submit Seller Inquiry'}</span>
                       <ArrowRight className="w-4 h-4 text-[#c88a23]" />
                     </>
                   )}

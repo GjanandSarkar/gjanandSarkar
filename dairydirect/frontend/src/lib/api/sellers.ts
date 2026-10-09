@@ -1,4 +1,5 @@
 import { supabase } from '@/lib/supabase';
+import { getAuthToken } from '@/lib/api/client';
 
 export interface SellerInquiryPayload {
   userId?: string;
@@ -91,9 +92,14 @@ export interface SellerDashboardData {
  * Submit seller onboarding inquiry for manual verification
  */
 export async function submitSellerInquiry(payload: SellerInquiryPayload): Promise<{ success: boolean; inquiry: SellerInquiry; message: string }> {
+  const token = await getAuthToken();
+  const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+  if (token) headers['Authorization'] = `Bearer ${token}`;
+
   const res = await fetch('/api/sellers/inquiries', {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers,
+    credentials: 'include',
     body: JSON.stringify(payload),
   });
 
@@ -103,6 +109,32 @@ export async function submitSellerInquiry(payload: SellerInquiryPayload): Promis
   }
 
   return await res.json();
+}
+
+/**
+ * Fetch the authenticated user's own seller inquiry/application from the database.
+ */
+export async function getMySellerInquiry(): Promise<SellerInquiry | null> {
+  try {
+    const token = await getAuthToken();
+    const headers: Record<string, string> = {};
+    if (token) headers['Authorization'] = `Bearer ${token}`;
+
+    const res = await fetch('/api/sellers/inquiries?mine=true', {
+      cache: 'no-store',
+      headers,
+      credentials: 'include',
+    });
+    if (!res.ok) return null;
+    const data = await res.json();
+    if (data.inquiries && data.inquiries.length > 0) {
+      return data.inquiries[0];
+    }
+    return null;
+  } catch (err) {
+    console.error('getMySellerInquiry error:', err);
+    return null;
+  }
 }
 
 /**

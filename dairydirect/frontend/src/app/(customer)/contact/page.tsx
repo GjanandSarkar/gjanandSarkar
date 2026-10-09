@@ -14,8 +14,11 @@ import {
 } from 'lucide-react';
 import Link from 'next/link';
 import { validatePhoneNumber, formatPhoneInput } from '@/lib/utils/phone';
+import { useStore } from '@/store/useStore';
+import { getAuthToken } from '@/lib/api/client';
 
 export default function ContactPage() {
+  const user = useStore((s) => s.user);
   const [form, setForm] = useState({
     name: '',
     email: '',
@@ -27,7 +30,7 @@ export default function ContactPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
 
@@ -38,11 +41,39 @@ export default function ContactPage() {
     }
 
     setLoading(true);
-    setTimeout(() => {
-      setLoading(false);
+    try {
+      const token = await getAuthToken();
+      const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+      if (token) headers['Authorization'] = `Bearer ${token}`;
+
+      const res = await fetch('/api/support/tickets', {
+        method: 'POST',
+        headers,
+        credentials: 'include',
+        body: JSON.stringify({
+          subject: form.subject || 'Customer Support Inquiry',
+          message: form.message,
+          name: form.name,
+          email: form.email,
+          phone: form.phone,
+          userId: user?.id,
+          priority: 'normal'
+        })
+      });
+
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        throw new Error(data.error || 'Failed to send message');
+      }
+
       setSubmitted(true);
       setForm({ name: '', email: '', phone: '', subject: 'Order Query', message: '' });
-    }, 600);
+    } catch (err: any) {
+      console.error('Contact form submission error:', err);
+      setError(err.message || 'Failed to send message. Please try again.');
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (

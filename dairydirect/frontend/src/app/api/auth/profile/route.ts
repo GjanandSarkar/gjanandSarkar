@@ -219,7 +219,6 @@ export async function PATCH(request: Request) {
       ...updatedProfile,
       saved_addresses: savedAddresses,
     };
-
     // Sync users table in Supabase and RDS
     await syncUserToUsersTable({
       id: userId,
@@ -228,7 +227,6 @@ export async function PATCH(request: Request) {
       first_name: finalProfile.first_name,
       last_name: finalProfile.last_name,
       email: finalProfile.email,
-      country: finalProfile.country,
     });
 
     // Invalidate and refresh cache
