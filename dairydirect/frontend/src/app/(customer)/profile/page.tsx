@@ -10,6 +10,7 @@ import { getUserSubscriptions } from '@/lib/api/subscriptions';
 import { getUserAddresses } from '@/lib/api/addresses';
 import type { OrderWithItems } from '@/lib/api/orders';
 import type { SubscriptionWithProduct } from '@/lib/api/subscriptions';
+import { getMySellerInquiry, SellerInquiry } from '@/lib/api/sellers';
 import type { UserAddress } from '@/lib/api/addresses';
 
 // Components
@@ -33,8 +34,15 @@ import {
   CalendarDays, 
   MapPin, 
   Settings2,
-  LogOut 
+  LogOut,
+  Store,
+  ShieldCheck,
+  Clock,
+  XCircle,
+  ArrowRight,
+  AlertTriangle
 } from 'lucide-react';
+import Link from 'next/link';
 import { motion, AnimatePresence } from 'framer-motion';
 import type { Language } from '@/store/useStore';
 
@@ -126,6 +134,7 @@ export default function ProfileScreen() {
   const [orders, setOrders] = useState<OrderWithItems[]>([]);
   const [subscriptions, setSubscriptions] = useState<SubscriptionWithProduct[]>([]);
   const [addresses, setAddresses] = useState<UserAddress[]>([]);
+  const [sellerInquiry, setSellerInquiry] = useState<SellerInquiry | null>(null);
   
   const [isLoading, setIsLoading] = useState(true);
   const [showLanguageSettings, setShowLanguageSettings] = useState(false);
@@ -158,11 +167,13 @@ export default function ProfileScreen() {
     Promise.all([
       getUserOrders(user.id),
       getUserSubscriptions(user.id),
-      getUserAddresses(user.id)
-    ]).then(([ordersData, subsData, addrsData]) => {
+      getUserAddresses(user.id),
+      getMySellerInquiry().catch(() => null)
+    ]).then(([ordersData, subsData, addrsData, inqData]) => {
       setOrders(ordersData);
       setSubscriptions(subsData);
       setAddresses(addrsData);
+      setSellerInquiry(inqData);
       setIsLoading(false);
     });
   }, [user, router, isAuthLoading]);
@@ -224,6 +235,104 @@ export default function ProfileScreen() {
           user={user} 
           onUpdateProfile={updateProfileLocal} 
         />
+
+        {/* Seller Account / Application Status Card */}
+        {sellerInquiry ? (
+          <div className="bg-white rounded-[24px] border border-sand/50 shadow-xs p-5 space-y-3">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-full bg-[#0f3e26]/10 flex items-center justify-center text-[#0f3e26]">
+                  <Store className="w-5 h-5" />
+                </div>
+                <div>
+                  <h3 className="font-extrabold text-dark text-[15px] leading-tight">
+                    Seller Account Status
+                  </h3>
+                  <p className="text-[12px] font-semibold text-muted">
+                    {sellerInquiry.business_name} ({sellerInquiry.category})
+                  </p>
+                </div>
+              </div>
+
+              {sellerInquiry.status === 'approved' && (
+                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-100 text-emerald-800 text-[11px] font-black uppercase tracking-wider">
+                  <ShieldCheck className="w-3.5 h-3.5" />
+                  <span>Approved</span>
+                </span>
+              )}
+              {sellerInquiry.status === 'pending' && (
+                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-100 text-amber-800 text-[11px] font-black uppercase tracking-wider">
+                  <Clock className="w-3.5 h-3.5" />
+                  <span>Pending Approval</span>
+                </span>
+              )}
+              {sellerInquiry.status === 'rejected' && (
+                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-rose-100 text-rose-800 text-[11px] font-black uppercase tracking-wider">
+                  <XCircle className="w-3.5 h-3.5" />
+                  <span>Rejected</span>
+                </span>
+              )}
+              {sellerInquiry.status === 'suspended' && (
+                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-red-100 text-red-800 text-[11px] font-black uppercase tracking-wider">
+                  <AlertTriangle className="w-3.5 h-3.5" />
+                  <span>Suspended</span>
+                </span>
+              )}
+            </div>
+
+            {sellerInquiry.status === 'pending' && (
+              <p className="text-xs text-gray-600 bg-amber-50/60 p-3 rounded-xl border border-amber-200/60 leading-relaxed">
+                Your seller application has been submitted successfully and is awaiting admin approval. Duplicate submissions are prevented while under review.
+              </p>
+            )}
+
+            {sellerInquiry.status === 'rejected' && (
+              <div className="bg-rose-50/60 p-3 rounded-xl border border-rose-200/60 text-xs text-rose-900 space-y-1">
+                <p className="font-bold">Rejection Reason:</p>
+                <p>{sellerInquiry.admin_notes || 'Application did not satisfy verification criteria. You may edit and resubmit.'}</p>
+              </div>
+            )}
+
+            <div className="flex items-center justify-end pt-1">
+              {sellerInquiry.status === 'approved' ? (
+                <Link
+                  href="/seller/dashboard"
+                  className="inline-flex items-center gap-1.5 px-4 py-2 bg-[#0f3e26] hover:bg-[#144f31] text-white text-xs font-bold rounded-xl transition-all shadow-2xs"
+                >
+                  <span>Open Seller Dashboard</span>
+                  <ArrowRight className="w-3.5 h-3.5" />
+                </Link>
+              ) : (
+                <Link
+                  href="/become-seller"
+                  className="inline-flex items-center gap-1.5 px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-800 text-xs font-bold rounded-xl transition-colors"
+                >
+                  <span>{sellerInquiry.status === 'rejected' ? 'Edit & Resubmit Application' : 'View Application Details'}</span>
+                  <ArrowRight className="w-3.5 h-3.5" />
+                </Link>
+              )}
+            </div>
+          </div>
+        ) : (
+          <div className="bg-gradient-to-r from-emerald-50/80 to-amber-50/60 rounded-[24px] border border-emerald-200/50 shadow-xs p-5 flex items-center justify-between gap-4">
+            <div className="flex items-center gap-3.5">
+              <div className="w-10 h-10 rounded-full bg-[#0f3e26] text-white flex items-center justify-center shrink-0">
+                <Store className="w-5 h-5" />
+              </div>
+              <div>
+                <h4 className="font-black text-gray-900 text-sm">Sell on Gjanand Sarkar</h4>
+                <p className="text-xs text-gray-600 mt-0.5">Reach pan-India customers with direct-from-source verified seller privileges.</p>
+              </div>
+            </div>
+            <Link
+              href="/become-seller"
+              className="px-4 py-2.5 bg-[#0f3e26] hover:bg-[#144f31] text-white text-xs font-black rounded-xl shrink-0 transition-all shadow-2xs flex items-center gap-1"
+            >
+              <span>Apply Now</span>
+              <ArrowRight className="w-3.5 h-3.5 text-[#c88a23]" />
+            </Link>
+          </div>
+        )}
 
         {/* Section 1: GjanandSarkar Rewards */}
         <CollapsibleSection

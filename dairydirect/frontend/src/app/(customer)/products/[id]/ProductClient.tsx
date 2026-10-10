@@ -119,6 +119,20 @@ export function ProductClient({ product: initialProduct }: ProductClientProps) {
 
   const [selectedVariantIdx, setSelectedVariantIdx] = useState(0);
 
+  const allImages = (function() {
+    const list: string[] = [];
+    if (product.image_url) list.push(product.image_url);
+    if (Array.isArray(product.gallery_images)) {
+      product.gallery_images.forEach((img) => {
+        if (img && !list.includes(img)) list.push(img);
+      });
+    }
+    return list.length > 0 ? list : [PLACEHOLDER_PRODUCT_IMAGE];
+  })();
+
+  const [activeImageIdx, setActiveImageIdx] = useState(0);
+  const currentImage = allImages[activeImageIdx] || allImages[0] || product.image_url || PLACEHOLDER_PRODUCT_IMAGE;
+
   const variants = product.product_variants || [];
   const selectedVariant = variants[selectedVariantIdx] || variants[0];
   if (!selectedVariant) return <div className="p-10 text-center">No variants available</div>;
@@ -227,13 +241,38 @@ export function ProductClient({ product: initialProduct }: ProductClientProps) {
           
           {/* Left Column: Product Image Gallery (Sticky on desktop) */}
           <div className="col-span-1 md:col-span-6 space-y-4 md:sticky md:top-24">
-            <div className="bg-white rounded-3xl border border-sand/50 p-6 shadow-2xs flex items-center justify-center bg-gradient-to-b from-white to-[#fafaf8] aspect-square max-h-[460px] mx-auto w-full">
+            <div className="bg-white rounded-3xl border border-sand/50 p-6 shadow-2xs flex items-center justify-center bg-gradient-to-b from-white to-[#fafaf8] aspect-square max-h-[460px] mx-auto w-full relative overflow-hidden">
               <img
-                src={product.image_url || PLACEHOLDER_PRODUCT_IMAGE}
+                src={currentImage}
                 alt={product.name}
                 className="w-auto h-full max-h-[360px] object-contain transition-transform hover:scale-105 duration-500"
               />
             </div>
+
+            {/* Multiple Gallery Images Selector */}
+            {allImages.length > 1 && (
+              <div className="flex items-center gap-2.5 overflow-x-auto pb-1 px-1">
+                {allImages.map((img, idx) => (
+                  <button
+                    key={idx}
+                    type="button"
+                    onClick={() => setActiveImageIdx(idx)}
+                    className={`relative w-16 h-16 rounded-xl border-2 overflow-hidden flex-shrink-0 transition-all cursor-pointer bg-white ${
+                      activeImageIdx === idx
+                        ? 'border-emerald-600 ring-2 ring-emerald-600/20 shadow-xs scale-105'
+                        : 'border-gray-200 hover:border-gray-400 opacity-70 hover:opacity-100'
+                    }`}
+                  >
+                    <img
+                      src={img}
+                      alt={`${product.name} thumbnail ${idx + 1}`}
+                      className="w-full h-full object-cover"
+                    />
+                  </button>
+                ))}
+              </div>
+            )}
+
             <TrustBadges className="hidden md:grid" />
           </div>
 

@@ -166,6 +166,25 @@ export default function CheckoutScreen() {
       price: parseFloat(String(item.variant.price)) || 0, // Supabase numeric comes as string
     }));
 
+    // ─── Reserve Inventory Hold During Checkout ───
+    let activeReservationId: string | undefined = undefined;
+    try {
+      const resRes = await fetch('/api/inventory/reserve', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          items: orderItems.map(i => ({ variantId: i.variantId, quantity: i.quantity, productId: i.productId })),
+          holdSeconds: 600,
+        }),
+      });
+      if (resRes.ok) {
+        const resJson = await resRes.json();
+        activeReservationId = resJson?.reservations?.[0]?.reservation_id || resJson?.reservations?.[0]?.id;
+      }
+    } catch (e) {
+      console.warn('Inventory reservation warning:', e);
+    }
+
     // ─── Razorpay Online Payment Flow ───
     if (selectedMethod === 'razorpay') {
       const amountInPaise = Math.round((pricing?.total || 0) * 100);
@@ -197,6 +216,7 @@ export default function CheckoutScreen() {
             paymentMethod: 'razorpay',
             paymentStatus: 'paid',
             couponCode: couponCode || undefined,
+            reservationId: activeReservationId,
             // Pass Razorpay IDs so they get stored in the order record
             razorpayOrderId: razorpayResponse.razorpay_order_id,
             razorpayPaymentId: razorpayResponse.razorpay_payment_id,
@@ -216,6 +236,9 @@ export default function CheckoutScreen() {
             router.replace(`/order-confirmed/${result.orderId}`);
           } else {
             setIsProcessing(false);
+            if (activeReservationId) {
+              fetch(`/api/inventory/reserve?reservationId=${activeReservationId}`, { method: 'DELETE' }).catch(() => {});
+            }
             if (result.error && (result.error.toLowerCase().includes('insufficient') || result.error.toLowerCase().includes('stock') || result.error.toLowerCase().includes('inventory'))) {
               setStockError(result.error);
             } else {
@@ -225,10 +248,16 @@ export default function CheckoutScreen() {
         },
         onError: (error) => {
           setIsProcessing(false);
+          if (activeReservationId) {
+            fetch(`/api/inventory/reserve?reservationId=${activeReservationId}`, { method: 'DELETE' }).catch(() => {});
+          }
           alert(error.message || 'Payment failed or was cancelled.');
         },
         onDismiss: () => {
           setIsProcessing(false);
+          if (activeReservationId) {
+            fetch(`/api/inventory/reserve?reservationId=${activeReservationId}`, { method: 'DELETE' }).catch(() => {});
+          }
         },
       });
       return;
@@ -254,7 +283,8 @@ export default function CheckoutScreen() {
         paymentMethod: selectedMethod,
         paymentStatus: selectedMethod === 'cod' ? 'pending' : 'paid',
         couponCode: couponCode || undefined,
-        upiId: selectedMethod === 'upi' ? upiId : undefined
+        upiId: selectedMethod === 'upi' ? upiId : undefined,
+        reservationId: activeReservationId,
       });
 
       if (result.success && result.orderId) {

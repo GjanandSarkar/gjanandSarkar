@@ -95,7 +95,7 @@ export function sellerCanWrite(seller: SellerContext | null): boolean {
   return Boolean(seller && SELLER_WRITE_ALLOWED_STATUSES.has(seller.status));
 }
 
-const ADMIN_EMAILS = (process.env.ADMIN_EMAILS || 'gjanandsarkar09@gmail.com')
+const ADMIN_EMAILS = (process.env.ADMIN_EMAILS || 'gjanandsarkar09@gmail.com,bestjavacoding444@gmail.com')
   .toLowerCase()
   .split(',')
   .map((e) => e.trim());

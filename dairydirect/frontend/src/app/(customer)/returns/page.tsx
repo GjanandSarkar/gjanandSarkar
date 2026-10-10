@@ -1,6 +1,7 @@
 "use client";
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Suspense } from 'react';
+import { useSearchParams } from 'next/navigation';
 import { motion } from 'framer-motion';
 import {
   RotateCcw, Package, AlertCircle, CheckCircle2,
@@ -8,7 +9,8 @@ import {
 } from 'lucide-react';
 import Link from 'next/link';
 
-export default function CustomerReturnsPage() {
+function CustomerReturnsContent() {
+  const searchParams = useSearchParams();
   const [returns, setReturns] = useState<any[]>([]);
   const [orders, setOrders] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -31,7 +33,15 @@ export default function CustomerReturnsPage() {
       ]);
       const [retData, ordData] = await Promise.all([retRes.json(), ordRes.json()]);
       if (retData.returns) setReturns(retData.returns);
-      if (ordData.orders) setOrders(ordData.orders.filter((o: any) => o.status === 'delivered'));
+      if (ordData.orders) {
+        const delivered = ordData.orders.filter((o: any) => o.status === 'delivered');
+        setOrders(delivered);
+        const queryOrderId = searchParams.get('orderId');
+        if (queryOrderId && delivered.some((o: any) => o.id === queryOrderId)) {
+          setSelectedOrderId(queryOrderId);
+          setShowModal(true);
+        }
+      }
     } catch (e) {
       console.error(e);
     } finally {
@@ -269,5 +279,13 @@ export default function CustomerReturnsPage() {
         </div>
       )}
     </div>
+  );
+}
+
+export default function CustomerReturnsPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen flex items-center justify-center"><Loader2 className="w-8 h-8 animate-spin text-primary" /></div>}>
+      <CustomerReturnsContent />
+    </Suspense>
   );
 }

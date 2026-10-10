@@ -20,9 +20,10 @@ function NewSubscriptionContent() {
 
   const [volume, setVolume] = useState(1);
   const [isProcessing, setIsProcessing] = useState(false);
-  const [plan, setPlan] = useState<'weekly' | 'monthly'>('monthly');
+  const [plan, setPlan] = useState<'daily' | 'alternate' | 'weekly'>('daily');
   const [isSuccess, setIsSuccess] = useState(false);
   const [subscriptionProductId, setSubscriptionProductId] = useState<string>('');
+  const [subscriptionVariantId, setSubscriptionVariantId] = useState<string>('');
   const [subscriptionProductName, setSubscriptionProductName] = useState('');
   const [subscriptionProductImage, setSubscriptionProductImage] = useState(PLACEHOLDER_PRODUCT_IMAGE);
   const [startDate, setStartDate] = useState(format(addDays(new Date(), 1), 'yyyy-MM-dd'));
@@ -36,6 +37,9 @@ function NewSubscriptionContent() {
         setSubscriptionProductId(defaultProduct.id);
         setSubscriptionProductName(defaultProduct.name);
         if (defaultProduct.image_url) setSubscriptionProductImage(defaultProduct.image_url);
+        if (defaultProduct.product_variants && defaultProduct.product_variants.length > 0) {
+          setSubscriptionVariantId(defaultProduct.product_variants[0].id);
+        }
       }
 
       if (user && editId) {
@@ -43,7 +47,7 @@ function NewSubscriptionContent() {
         const existingSub = subs.find(s => s.id === editId);
         if (existingSub) {
           setVolume(existingSub.volume);
-          setPlan(existingSub.plan as 'weekly' | 'monthly');
+          setPlan((existingSub.plan as any) || 'daily');
         }
       }
     }
@@ -52,7 +56,7 @@ function NewSubscriptionContent() {
 
   const PRICE_PER_LITER = 68;
   const dailyCost = volume * PRICE_PER_LITER;
-  const total = plan === 'weekly' ? dailyCost * 7 : dailyCost * 30 * 0.95;
+  const total = plan === 'weekly' ? dailyCost * 7 : plan === 'alternate' ? dailyCost * 15 : dailyCost * 30 * 0.95;
 
   const handleAction = async () => {
     if (!user) return;
@@ -65,13 +69,14 @@ function NewSubscriptionContent() {
           subscriptionId: editId,
           userId: user.id,
           newVolume: volume,
-          newPlan: plan,
+          newPlan: plan as any,
         });
       } else {
         const combinedDateTime = new Date(`${startDate}T${deliveryTime}:00`).toISOString();
         result = await createSubscription({
           userId: user.id,
           productId: subscriptionProductId,
+          variantId: subscriptionVariantId,
           volume,
           plan,
           startDate: combinedDateTime,
@@ -186,43 +191,42 @@ function NewSubscriptionContent() {
 
         {/* Plan Selection */}
         <h3 className="font-bold text-dark mb-3 text-lg px-1">Delivery Plan</h3>
-        <div className="flex gap-3 mb-6">
+        <div className="grid grid-cols-3 gap-3 mb-6">
           <div 
-            onClick={() => setPlan('weekly')}
+            onClick={() => setPlan('daily')}
             className={cn(
-              "flex-1 p-5 rounded-[20px] border-2 cursor-pointer transition-all bg-white",
-              plan === 'weekly' ? "border-primary shadow-[0_0_0_4px_rgba(63,101,48,0.1)]" : "border-sand/50 text-dark hover:border-sand"
+              "p-4 rounded-[20px] border-2 cursor-pointer transition-all relative overflow-hidden bg-white text-center",
+              plan === 'daily' ? "border-primary shadow-[0_0_0_4px_rgba(63,101,48,0.1)]" : "border-sand/50 text-dark hover:border-sand"
             )}
           >
-            <div className="flex justify-between items-start mb-2">
-              <div className="font-black text-sm">Weekly</div>
-              <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${plan === 'weekly' ? 'border-primary bg-primary' : 'border-sand'}`}>
-                {plan === 'weekly' && <div className="w-2 h-2 bg-white rounded-full" />}
-              </div>
-            </div>
-            <div className="text-xs text-muted font-medium mb-4">7 Days Delivery</div>
-            <div className="font-black text-xl text-dark">₹{Math.round(dailyCost * 7)}</div>
+            <div className="absolute top-0 right-0 bg-mint text-primary text-[9px] font-black px-2 py-0.5 rounded-bl-[10px]">SAVE 5%</div>
+            <div className="font-black text-sm mb-1 mt-1">Daily</div>
+            <div className="text-[11px] text-muted font-medium mb-3">Everyday</div>
+            <div className="font-black text-base text-dark">₹{Math.round(dailyCost * 30 * 0.95)}<span className="text-[10px] text-muted font-normal">/mo</span></div>
           </div>
 
           <div 
-            onClick={() => setPlan('monthly')}
+            onClick={() => setPlan('alternate')}
             className={cn(
-              "flex-1 p-5 rounded-[20px] border-2 cursor-pointer transition-all relative overflow-hidden bg-white",
-              plan === 'monthly' ? "border-primary shadow-[0_0_0_4px_rgba(63,101,48,0.1)]" : "border-sand/50 text-dark hover:border-sand"
+              "p-4 rounded-[20px] border-2 cursor-pointer transition-all bg-white text-center",
+              plan === 'alternate' ? "border-primary shadow-[0_0_0_4px_rgba(63,101,48,0.1)]" : "border-sand/50 text-dark hover:border-sand"
             )}
           >
-            <div className="absolute top-0 right-0 bg-mint text-primary text-[10px] font-black px-3 py-1 rounded-bl-[12px]">SAVE 5%</div>
-            <div className="flex justify-between items-start mb-2 mt-1">
-              <div className="font-black text-sm">Monthly</div>
-              <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${plan === 'monthly' ? 'border-primary bg-primary' : 'border-sand'}`}>
-                {plan === 'monthly' && <div className="w-2 h-2 bg-white rounded-full" />}
-              </div>
-            </div>
-            <div className="text-xs text-muted font-medium mb-4">30 Days Delivery</div>
-            <div className="font-black text-xl text-dark flex items-baseline gap-2">
-              ₹{Math.round(dailyCost * 30 * 0.95)}
-              <span className="text-[10px] text-muted line-through">₹{Math.round(dailyCost * 30)}</span>
-            </div>
+            <div className="font-black text-sm mb-1">Alternate</div>
+            <div className="text-[11px] text-muted font-medium mb-3">Every 2 Days</div>
+            <div className="font-black text-base text-dark">₹{Math.round(dailyCost * 15)}<span className="text-[10px] text-muted font-normal">/mo</span></div>
+          </div>
+
+          <div 
+            onClick={() => setPlan('weekly')}
+            className={cn(
+              "p-4 rounded-[20px] border-2 cursor-pointer transition-all bg-white text-center",
+              plan === 'weekly' ? "border-primary shadow-[0_0_0_4px_rgba(63,101,48,0.1)]" : "border-sand/50 text-dark hover:border-sand"
+            )}
+          >
+            <div className="font-black text-sm mb-1">Weekly</div>
+            <div className="text-[11px] text-muted font-medium mb-3">7 Days</div>
+            <div className="font-black text-base text-dark">₹{Math.round(dailyCost * 7)}<span className="text-[10px] text-muted font-normal">/wk</span></div>
           </div>
         </div>
 

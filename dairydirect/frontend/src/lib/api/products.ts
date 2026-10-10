@@ -6,13 +6,33 @@ export type ProductWithVariants = {
   id: string;
   name: string;
   category: string;
+  subcategory?: string | null;
   description: string | null;
+  brand?: string | null;
   image_url: string | null;
+  gallery_images?: string[];
   is_freshness_guarantee: boolean;
   is_active: boolean;
+  approval_status?: 'pending' | 'approved' | 'rejected' | 'suspended';
+  rejection_reason?: string | null;
+  reviewed_by?: string | null;
+  reviewed_at?: string | null;
+  sku?: string | null;
+  tax_rate?: number;
+  shipping_details?: string | null;
+  return_policy?: string | null;
+  attributes?: Record<string, any>;
+  compliance_documents?: any[];
   created_at: string;
+  updated_at?: string;
   seller_id?: string | null;
   created_by?: string | null;
+  sellers?: {
+    id: string;
+    store_name: string;
+    status: string;
+    category?: string;
+  } | null;
   product_variants: {
     id: string;
     product_id?: string;
@@ -30,9 +50,18 @@ export type ProductWithVariants = {
 export type NewProductInput = {
   name: string;
   category: string;
+  subcategory?: string;
   description?: string;
+  brand?: string;
   image_url?: string;
+  gallery_images?: string[];
   is_freshness_guarantee?: boolean;
+  sku?: string;
+  tax_rate?: number;
+  shipping_details?: string;
+  return_policy?: string;
+  attributes?: Record<string, any>;
+  compliance_documents?: any[];
   sellerId?: string;
 };
 
@@ -165,3 +194,121 @@ export async function uploadProductImage(
     return { error: error.message };
   }
 }
+
+export async function uploadMultipleProductImages(
+  files: File[]
+): Promise<{ urls: string[]; errors: string[] }> {
+  const urls: string[] = [];
+  const errors: string[] = [];
+  for (const file of files) {
+    const res = await uploadProductImage(file);
+    if (res.url) {
+      urls.push(res.url);
+    } else if (res.error) {
+      errors.push(`${file.name}: ${res.error}`);
+    }
+  }
+  return { urls, errors };
+}
+
+/**
+ * Fetch product approvals queue for Admin
+ */
+export async function getAdminProductApprovals(options: { status?: string; search?: string } = {}) {
+  try {
+    const { getAuthToken } = await import('@/lib/api/client');
+    const token = await getAuthToken();
+    const headers: Record<string, string> = {};
+    if (token) headers['Authorization'] = `Bearer ${token}`;
+
+    const params = new URLSearchParams();
+    if (options.status) params.set('status', options.status);
+    if (options.search) params.set('search', options.search);
+
+    const res = await fetch(`/api/admin/product-approvals?${params.toString()}`, {
+      cache: 'no-store',
+      headers,
+      credentials: 'include',
+    });
+    if (!res.ok) {
+      const errJson = await res.json().catch(() => ({}));
+      throw new Error(errJson.error || `Failed to fetch product approvals (${res.status})`);
+    }
+    return await res.json();
+  } catch (err: any) {
+    console.error('getAdminProductApprovals error:', err);
+    return { success: false, error: err.message, products: [], counts: { pending: 0, approved: 0, rejected: 0, suspended: 0, all: 0 } };
+  }
+}
+
+/**
+ * Update product approval status (Approve, Reject, Suspend) for Admin
+ */
+export async function updateAdminProductApproval(id: string, status: string, rejectionReason?: string, notes?: string) {
+  const { getAuthToken } = await import('@/lib/api/client');
+  const token = await getAuthToken();
+  const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+  if (token) headers['Authorization'] = `Bearer ${token}`;
+
+  const res = await fetch('/api/admin/product-approvals', {
+    method: 'PATCH',
+    headers,
+    credentials: 'include',
+    body: JSON.stringify({ id, status, rejectionReason, notes }),
+  });
+
+  if (!res.ok) {
+    const data = await res.json();
+    throw new Error(data.error || 'Failed to update product approval status');
+  }
+
+  return await res.json();
+}
+
+/**
+ * Submit new product for approval from Seller Dashboard
+ */
+export async function submitSellerProduct(payload: any) {
+  const { getAuthToken } = await import('@/lib/api/client');
+  const token = await getAuthToken();
+  const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+  if (token) headers['Authorization'] = `Bearer ${token}`;
+
+  const res = await fetch('/api/sellers/products', {
+    method: 'POST',
+    headers,
+    credentials: 'include',
+    body: JSON.stringify(payload),
+  });
+
+  if (!res.ok) {
+    const data = await res.json().catch(() => ({}));
+    throw new Error(data.error || 'Failed to submit product');
+  }
+
+  return await res.json();
+}
+
+/**
+ * Update existing seller product
+ */
+export async function updateSellerProduct(id: string, payload: any) {
+  const { getAuthToken } = await import('@/lib/api/client');
+  const token = await getAuthToken();
+  const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+  if (token) headers['Authorization'] = `Bearer ${token}`;
+
+  const res = await fetch('/api/sellers/products', {
+    method: 'PUT',
+    headers,
+    credentials: 'include',
+    body: JSON.stringify({ id, ...payload }),
+  });
+
+  if (!res.ok) {
+    const data = await res.json().catch(() => ({}));
+    throw new Error(data.error || 'Failed to update product');
+  }
+
+  return await res.json();
+}

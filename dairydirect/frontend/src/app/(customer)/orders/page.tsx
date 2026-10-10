@@ -7,7 +7,7 @@ import { getUserOrders } from '@/lib/api/orders';
 import { supabase } from '@/lib/supabase';
 import type { OrderWithItems } from '@/lib/api/orders';
 import { format } from 'date-fns';
-import { ShoppingBag, ChevronDown, ArrowRight, Package, Truck, CheckCircle2, Clock, AlertCircle } from 'lucide-react';
+import { ShoppingBag, ChevronDown, ArrowRight, Package, Truck, CheckCircle2, Clock, AlertCircle, RotateCcw } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import Link from 'next/link';
 import { BuyAgainCarousel } from '@/components/discovery/BuyAgainCarousel';
@@ -205,6 +205,15 @@ export default function OrdersScreen() {
                                 style={{ background: 'var(--cta-gradient)' }}>
                                 <Truck className="w-4 h-4" />
                                 {t('trackLive')}
+                              </Link>
+                            )}
+
+                            {/* Return / Freshness Guarantee claim button */}
+                            {order.status === 'delivered' && (
+                              <Link href={`/returns?orderId=${order.id}`}
+                                className="flex items-center justify-center gap-2 w-full py-2.5 rounded-[12px] font-bold text-xs text-primary bg-primary/10 hover:bg-primary/20 transition-colors">
+                                <RotateCcw className="w-3.5 h-3.5" />
+                                Freshness Guarantee / Report Issue
                               </Link>
                             )}
                           </div>

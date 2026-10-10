@@ -7,13 +7,18 @@ export interface SellerInquiryPayload {
   businessName: string;
   phone: string;
   email: string;
+  businessAddress?: string;
   city?: string;
   state: string;
+  pincode?: string;
+  businessType?: string;
   category: string;
   productRange?: string;
   monthlyVolume?: string;
   gstin?: string;
+  pan?: string;
   fssaiNumber?: string;
+  businessDocuments?: any[];
   notes?: string;
 }
 
@@ -24,16 +29,23 @@ export interface SellerInquiry {
   business_name: string;
   phone: string;
   email: string;
+  business_address?: string;
   city?: string;
   state: string;
+  pincode?: string;
+  business_type?: string;
   category: string;
   product_range?: string;
   monthly_volume?: string;
   gstin?: string;
+  pan?: string;
   fssai_number?: string;
+  business_documents?: any[];
   notes?: string;
-  status: 'pending' | 'contacted' | 'approved' | 'rejected';
+  status: 'pending' | 'contacted' | 'approved' | 'rejected' | 'suspended';
   admin_notes?: string;
+  reviewed_by?: string;
+  reviewed_at?: string;
   created_at: string;
   updated_at: string;
 }
@@ -142,11 +154,18 @@ export async function getMySellerInquiry(): Promise<SellerInquiry | null> {
  */
 export async function getSellerInquiries(status?: string): Promise<SellerInquiry[]> {
   try {
+    const token = await getAuthToken();
+    const headers: Record<string, string> = {};
+    if (token) headers['Authorization'] = `Bearer ${token}`;
+
     const url = status && status !== 'all' 
       ? `/api/sellers/inquiries?status=${encodeURIComponent(status)}`
       : '/api/sellers/inquiries';
     
-    const res = await fetch(url);
+    const res = await fetch(url, {
+      headers,
+      credentials: 'include',
+    });
     if (!res.ok) throw new Error('Failed to fetch inquiries');
     const data = await res.json();
     return data.inquiries || [];
@@ -160,14 +179,19 @@ export async function getSellerInquiries(status?: string): Promise<SellerInquiry
  * Update seller inquiry status & internal notes (for Admin)
  */
 export async function updateSellerInquiryStatus(id: string, status: string, adminNotes?: string) {
+  const token = await getAuthToken();
+  const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+  if (token) headers['Authorization'] = `Bearer ${token}`;
+
   const res = await fetch('/api/sellers/inquiries', {
     method: 'PATCH',
-    headers: { 'Content-Type': 'application/json' },
+    headers,
+    credentials: 'include',
     body: JSON.stringify({ id, status, adminNotes }),
   });
 
   if (!res.ok) {
-    const data = await res.json();
+    const data = await res.json().catch(() => ({}));
     throw new Error(data.error || 'Failed to update inquiry status');
   }
 
@@ -196,8 +220,16 @@ export async function registerSeller(payload: SellerRegistrationPayload) {
  */
 export async function getSellerDashboard(userId: string): Promise<SellerDashboardData> {
   try {
+    const token = await getAuthToken();
+    const headers: Record<string, string> = {};
+    if (token) headers['Authorization'] = `Bearer ${token}`;
+
     // Check inquiry status first
-    const inqRes = await fetch(`/api/sellers/inquiries?userId=${encodeURIComponent(userId)}`);
+    const inqRes = await fetch(`/api/sellers/inquiries?userId=${encodeURIComponent(userId)}`, {
+      headers,
+      credentials: 'include',
+      cache: 'no-store',
+    });
     let userInquiry: SellerInquiry | null = null;
     if (inqRes.ok) {
       const inqData = await inqRes.json();
@@ -206,7 +238,11 @@ export async function getSellerDashboard(userId: string): Promise<SellerDashboar
       }
     }
 
-    const res = await fetch(`/api/sellers?userId=${encodeURIComponent(userId)}`);
+    const res = await fetch(`/api/sellers?userId=${encodeURIComponent(userId)}&fresh=true`, {
+      headers,
+      credentials: 'include',
+      cache: 'no-store',
+    });
     if (res.ok) {
       const data = await res.json();
       
@@ -283,16 +319,24 @@ export interface SellerProductItem {
  */
 export async function getSellerProducts(options: { sellerId?: string; sellerUserId?: string; category?: string; status?: string } = {}): Promise<SellerProductItem[]> {
   try {
+    const token = await getAuthToken();
+    const headers: Record<string, string> = {};
+    if (token) headers['Authorization'] = `Bearer ${token}`;
+
     const params = new URLSearchParams();
     if (options.sellerId) params.set('sellerId', options.sellerId);
     if (options.sellerUserId) params.set('sellerUserId', options.sellerUserId);
     if (options.category) params.set('category', options.category);
     if (options.status) params.set('status', options.status);
 
-    const res = await fetch(`/api/sellers/products?${params.toString()}`);
+    const res = await fetch(`/api/sellers/products?${params.toString()}`, {
+      headers,
+      credentials: 'include',
+      cache: 'no-store',
+    });
     if (!res.ok) throw new Error('Failed to fetch seller products');
     const data = await res.json();
-    return data.sellerProducts || [];
+    return data.sellerProducts || data.products || [];
   } catch (err) {
     console.error('getSellerProducts error:', err);
     return [];
@@ -403,12 +447,23 @@ export interface SellerLifecycleActionPayload {
  */
 export async function getAdminSellersList(status?: string): Promise<SellerLifecycleRecord[]> {
   try {
+    const token = await getAuthToken();
+    const headers: Record<string, string> = {};
+    if (token) headers['Authorization'] = `Bearer ${token}`;
+
     const url = status && status !== 'all'
       ? `/api/sellers/lifecycle?action=list&status=${encodeURIComponent(status)}`
       : '/api/sellers/lifecycle?action=list';
 
-    const res = await fetch(url);
-    if (!res.ok) throw new Error('Failed to fetch sellers list');
+    const res = await fetch(url, {
+      headers,
+      credentials: 'include',
+    });
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      console.error('[getAdminSellersList] API error:', res.status, err);
+      throw new Error(err.error || 'Failed to fetch sellers list');
+    }
     const data = await res.json();
     return data.sellers || [];
   } catch (err) {
@@ -425,9 +480,16 @@ export async function getSellerLifecycleDetails(sellerId: string): Promise<{
   activeReview: SellerStatusHistoryItem | null;
   history: SellerStatusHistoryItem[];
 }> {
-  const res = await fetch(`/api/sellers/lifecycle?sellerId=${encodeURIComponent(sellerId)}`);
+  const token = await getAuthToken();
+  const headers: Record<string, string> = {};
+  if (token) headers['Authorization'] = `Bearer ${token}`;
+
+  const res = await fetch(`/api/sellers/lifecycle?sellerId=${encodeURIComponent(sellerId)}`, {
+    headers,
+    credentials: 'include',
+  });
   if (!res.ok) {
-    const err = await res.json();
+    const err = await res.json().catch(() => ({}));
     throw new Error(err.error || 'Failed to fetch seller details');
   }
   return await res.json();
@@ -437,9 +499,14 @@ export async function getSellerLifecycleDetails(sellerId: string): Promise<{
  * Execute admin seller lifecycle transition
  */
 export async function executeSellerLifecycleAction(payload: SellerLifecycleActionPayload) {
+  const token = await getAuthToken();
+  const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+  if (token) headers['Authorization'] = `Bearer ${token}`;
+
   const res = await fetch('/api/sellers/lifecycle', {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers,
+    credentials: 'include',
     body: JSON.stringify(payload),
   });
 
@@ -454,9 +521,14 @@ export async function executeSellerLifecycleAction(payload: SellerLifecycleActio
  * Request reactivation (seller-facing)
  */
 export async function requestSellerReactivation(payload: { reason: string; notes?: string }) {
+  const token = await getAuthToken();
+  const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+  if (token) headers['Authorization'] = `Bearer ${token}`;
+
   const res = await fetch('/api/sellers/reactivation', {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers,
+    credentials: 'include',
     body: JSON.stringify(payload),
   });
 

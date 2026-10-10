@@ -99,14 +99,22 @@ function AdminProductsContent() {
             {filtered.length} products shown {category !== 'All' ? `in "${category}"` : 'in catalogue'}
           </p>
         </div>
-        <button onClick={() => router.push('/admin/products/add')} className="flex items-center gap-2 px-4 py-2.5 rounded-[12px] font-bold text-[13px] text-white transition-all active:scale-95 cursor-pointer"
-          style={{
-            background: 'linear-gradient(135deg, #0c3c26, #114e32)',
-            boxShadow: '0 4px 12px rgba(12, 60, 38, 0.25)',
-          }}>
-          <Plus className="w-4 h-4" strokeWidth={2.5} />
-          Add Product
-        </button>
+        <div className="flex items-center gap-2.5">
+          <button 
+            onClick={() => router.push('/admin/products/approvals')}
+            className="flex items-center gap-2 px-4 py-2.5 rounded-[12px] font-bold text-[13px] transition-all border border-emerald-700/30 text-emerald-800 bg-emerald-50 hover:bg-emerald-100 cursor-pointer"
+          >
+            Review Approvals
+          </button>
+          <button onClick={() => router.push('/admin/products/add')} className="flex items-center gap-2 px-4 py-2.5 rounded-[12px] font-bold text-[13px] text-white transition-all active:scale-95 cursor-pointer"
+            style={{
+              background: 'linear-gradient(135deg, #0c3c26, #114e32)',
+              boxShadow: '0 4px 12px rgba(12, 60, 38, 0.25)',
+            }}>
+            <Plus className="w-4 h-4" strokeWidth={2.5} />
+            Add Product
+          </button>
+        </div>
       </div>
 
       <div className="px-6 md:px-10 py-5 flex flex-col gap-5">

@@ -84,23 +84,49 @@ export async function POST(request: NextRequest) {
 
     const qty = Math.max(1, Math.min(100, parseInt(quantity) || 1));
 
-    if (isPgConfigured) {
-      try {
-        await query(
-          `INSERT INTO cart_items (user_id, product_id, variant_id, quantity)
-           VALUES ($1, $2, $3, $4)
-           ON CONFLICT (user_id, product_id, variant_id) 
-           DO UPDATE SET quantity = cart_items.quantity + $4, updated_at = now()`,
-          [userId, productId, variantId, qty]
-        );
+    const sb = getAdminSupabase();
 
-        return NextResponse.json({ success: true });
-      } catch (err: any) {
-        console.warn('[Cart POST] RDS failed, fallback to Supabase:', err.message);
-      }
+    // Verify product is approved, active, in stock, and its seller is active
+    const { data: prodCheck, error: prodErr } = await sb
+      .from('products')
+      .select('id, name, is_active, approval_status, seller_id, sellers:seller_id(id, status, store_name)')
+      .eq('id', productId)
+      .maybeSingle();
+
+    if (prodErr || !prodCheck) {
+      return NextResponse.json({ error: 'Product not found' }, { status: 404 });
     }
 
-    const sb = getAdminSupabase();
+    if (prodCheck.approval_status !== 'approved' || !prodCheck.is_active) {
+      return NextResponse.json(
+        { error: `"${prodCheck.name}" is not currently available for purchase.` },
+        { status: 400 }
+      );
+    }
+
+    const seller = (prodCheck as any).sellers;
+    if (prodCheck.seller_id && seller && seller.status !== 'active') {
+      return NextResponse.json(
+        { error: `"${prodCheck.name}" is unavailable because the seller account is ${seller.status}.` },
+        { status: 400 }
+      );
+    }
+
+    // Verify variant stock
+    const { data: variantCheck } = await sb
+      .from('product_variants')
+      .select('id, stock')
+      .eq('id', variantId)
+      .eq('product_id', productId)
+      .maybeSingle();
+
+    if (!variantCheck || variantCheck.stock <= 0) {
+      return NextResponse.json(
+        { error: `"${prodCheck.name}" is currently out of stock.` },
+        { status: 400 }
+      );
+    }
+
     const { data: existing } = await sb
       .from('cart_items')
       .select('id, quantity')

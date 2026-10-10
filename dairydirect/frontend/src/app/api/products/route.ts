@@ -45,7 +45,11 @@ export async function GET(request: NextRequest) {
     const params: any[] = [];
     let paramIdx = 1;
 
-    if (activeOnly) {
+    if (activeOnly && !sellerId) {
+      conditions.push(`p.is_active = true`);
+      conditions.push(`p.approval_status = 'approved'`);
+      conditions.push(`(p.seller_id IS NULL OR EXISTS (SELECT 1 FROM sellers s WHERE s.id = p.seller_id AND s.status = 'active'))`);
+    } else if (activeOnly) {
       conditions.push(`p.is_active = true`);
     }
 
@@ -76,7 +80,8 @@ export async function GET(request: NextRequest) {
         const result = await query(
           `SELECT 
              p.id, p.name, p.category, p.description, p.image_url, p.s3_image_key,
-             p.is_freshness_guarantee, p.is_active, p.tags, p.brand, p.state_origin,
+             p.is_freshness_guarantee, p.is_active, p.approval_status, p.rejection_reason, p.sku,
+             p.tags, p.brand, p.state_origin,
              p.seller_id, p.created_by, p.rating, p.reviews_count, p.created_at,
              COALESCE(
                json_agg(
@@ -111,12 +116,15 @@ export async function GET(request: NextRequest) {
         const admin = getAdminSupabase();
         let sbQuery = admin
           .from('products')
-          .select('*, product_variants(*)')
+          .select('*, product_variants(*), sellers:seller_id(id, status, store_name)')
           .order('created_at', { ascending: false });
 
-        if (activeOnly) {
+        if (activeOnly && !sellerId) {
+          sbQuery = sbQuery.eq('is_active', true).eq('approval_status', 'approved');
+        } else if (activeOnly) {
           sbQuery = sbQuery.eq('is_active', true);
         }
+
         if (sellerId) {
           sbQuery = sbQuery.or(`seller_id.eq.${sellerId},created_by.eq.${sellerId}`);
         }
@@ -129,7 +137,12 @@ export async function GET(request: NextRequest) {
         }
         const { data, error } = await sbQuery;
         if (!error && data) {
-          products = data;
+          // If customer facing catalog, filter out any product whose seller is not active
+          if (activeOnly && !sellerId) {
+            products = data.filter((p: any) => !p.seller_id || (p.sellers && p.sellers.status === 'active'));
+          } else {
+            products = data;
+          }
         }
       } catch (sbErr: any) {
         console.warn('[Products GET] Supabase fallback error:', sbErr.message);
@@ -181,7 +194,12 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json();
-    const { name, category, description, image_url, is_freshness_guarantee, is_active, variants } = body;
+    const { name, category, description, image_url, gallery_images, is_freshness_guarantee, is_active, variants } = body;
+
+    const finalGalleryImages = Array.isArray(gallery_images)
+      ? gallery_images
+      : (image_url ? [image_url] : []);
+    const finalImageUrl = image_url || (finalGalleryImages.length > 0 ? finalGalleryImages[0] : null);
 
     if (!name || !category) {
       return NextResponse.json({ error: 'Name and category are required' }, { status: 400 });
@@ -226,18 +244,17 @@ export async function POST(request: NextRequest) {
 
     const sellerId = seller?.sellerId ?? null;
 
+    const initialApprovalStatus = auth.isAdmin ? 'approved' : 'pending';
+    const initialIsActive = auth.isAdmin ? (is_active ?? true) : false;
+
     if (isPgConfigured) {
       try {
-        // Runtime `ALTER TABLE ... ADD COLUMN` used to run here on every
-        // product creation. DDL takes an ACCESS EXCLUSIVE lock, which stalls
-        // every concurrent read of the products table. These columns are now
-        // created by migration 20261006_product_ownership_columns.sql.
         const newProduct = await withTransaction(async (client) => {
           const prodResult = await client.query<{ id: string }>(
-            `INSERT INTO products (name, category, description, image_url, is_freshness_guarantee, is_active, seller_id, created_by)
-             VALUES ($1, $2, $3, $4, $5, $6, $7, $7)
+            `INSERT INTO products (name, category, description, image_url, gallery_images, is_freshness_guarantee, is_active, approval_status, seller_id, created_by)
+             VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
              RETURNING id`,
-            [name, category, description || null, image_url || null, is_freshness_guarantee ?? false, is_active ?? true, sellerId]
+            [name, category, description || null, finalImageUrl, finalGalleryImages, is_freshness_guarantee ?? false, initialIsActive, initialApprovalStatus, sellerId, auth.userId]
           );
 
           const productId = prodResult.rows[0].id;
@@ -263,7 +280,7 @@ export async function POST(request: NextRequest) {
             action: 'product.create' as any,
             resourceType: 'product',
             resourceId: newProduct,
-            details: { name, category, sellerId },
+            details: { name, category, sellerId, approval_status: initialApprovalStatus },
             ipAddress: request.headers.get('x-forwarded-for') || ''
           });
         }
@@ -278,12 +295,6 @@ export async function POST(request: NextRequest) {
     let prodData: any = null;
     let prodErr: any = null;
 
-    // Seller attribution is already verified above (getSellerForUser +
-    // sellerCanWrite + category check). The previous implementation instead
-    // took an unverified id from the request body and tried, in turn, to
-    // match it against sellers.id, then sellers.user_id, then profiles.id —
-    // three speculative lookups that would happily attribute a product to
-    // somebody else's store.
     const validSellerUuid: string | null = seller?.sellerId ?? null;
     const validSellerUserId: string | null = seller?.userId ?? auth.userId;
 
@@ -292,9 +303,11 @@ export async function POST(request: NextRequest) {
       name,
       category,
       description: description || null,
-      image_url: image_url || null,
+      image_url: finalImageUrl,
+      gallery_images: finalGalleryImages,
       is_freshness_guarantee: is_freshness_guarantee ?? false,
-      is_active: is_active ?? true,
+      is_active: initialIsActive,
+      approval_status: initialApprovalStatus,
       created_by: auth.userId,
     };
 

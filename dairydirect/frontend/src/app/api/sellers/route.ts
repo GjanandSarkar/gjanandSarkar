@@ -126,10 +126,13 @@ export async function GET(request: Request) {
   // ─── Case 1: Fetch single seller dashboard & live data for a specific user ───
   if (userId) {
     try {
-      // Check cache first (5 min TTL, scoped by userId)
-      const cached = await getCachedSellerProfile(userId);
-      if (cached) {
-        return NextResponse.json(cached, { headers: { 'X-Cache': 'HIT' } });
+      const isFresh = searchParams.get('fresh') === 'true' || request.headers.get('cache-control')?.includes('no-cache');
+      // Check cache first (scoped by userId) only if fresh is not requested
+      if (!isFresh) {
+        const cached = await getCachedSellerProfile(userId);
+        if (cached) {
+          return NextResponse.json(cached, { headers: { 'X-Cache': 'HIT' } });
+        }
       }
 
       const { data: store, error } = await sb

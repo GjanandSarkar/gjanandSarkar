@@ -5,6 +5,7 @@ import { useTranslation } from '@/lib/i18n';
 import type { ProductWithVariants } from '@/lib/api/products';
 import type { CatalogProduct } from '@/lib/types/catalog';
 import { updateProduct, createProduct, deleteProduct, uploadProductImage } from '@/lib/api/products';
+import { MultiImageUpload, ImageItem } from '@/components/admin/MultiImageUpload';
 import {
   X,
   Plus,
@@ -57,8 +58,7 @@ export function ProductEditModal({
     }>
   >([]);
 
-  const [imageFile, setImageFile] = useState<File | null>(null);
-  const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [images, setImages] = useState<ImageItem[]>([]);
   const [isSaving, setIsSaving] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
@@ -92,8 +92,29 @@ export function ProductEditModal({
       setCategory(product.category || (categoriesList[0] || ''));
       setDescription(product.description || '');
       setImageUrl(product.image_url || '');
-      setImagePreview(product.image_url || null);
-      setImageFile(null);
+
+      // Populate existing images into MultiImageUpload items
+      const existingImages: ImageItem[] = [];
+      if (product.image_url) {
+        existingImages.push({
+          id: 'main-cover',
+          url: product.image_url,
+          isPrimary: true,
+        });
+      }
+      if (Array.isArray((product as any).gallery_images)) {
+        (product as any).gallery_images.forEach((imgUrl: string, idx: number) => {
+          if (imgUrl && imgUrl !== product.image_url) {
+            existingImages.push({
+              id: `gallery-img-${idx}`,
+              url: imgUrl,
+              isPrimary: false,
+            });
+          }
+        });
+      }
+      setImages(existingImages);
+
       setIsFreshnessGuarantee(product.is_freshness_guarantee ?? true);
       setIsActive(product.is_active ?? true);
       setVariants(
@@ -157,14 +178,29 @@ export function ProductEditModal({
     setSuccessMessage('');
 
     try {
-      let finalImageUrl = imageUrl;
-      if (imageFile) {
-        const uploadRes = await uploadProductImage(imageFile);
-        if (uploadRes.error || !uploadRes.url) {
-          throw new Error(uploadRes.error || 'Failed to upload new image');
+      // 1. Upload any new files from images array
+      const uploadedUrls: string[] = [];
+      let primaryUrl = '';
+
+      for (const item of images) {
+        let currentUrl = item.url;
+        if (item.file) {
+          const uploadRes = await uploadProductImage(item.file);
+          if (uploadRes.error || !uploadRes.url) {
+            throw new Error(uploadRes.error || 'Failed to upload product image');
+          }
+          currentUrl = uploadRes.url;
         }
-        finalImageUrl = uploadRes.url;
+
+        if (currentUrl) {
+          uploadedUrls.push(currentUrl);
+          if (item.isPrimary || !primaryUrl) {
+            primaryUrl = currentUrl;
+          }
+        }
       }
+
+      const finalImageUrl = primaryUrl || imageUrl;
 
       if (!product.id) {
         const createRes = await createProduct(
@@ -173,6 +209,7 @@ export function ProductEditModal({
             category,
             description,
             image_url: finalImageUrl,
+            gallery_images: uploadedUrls,
             is_freshness_guarantee: isFreshnessGuarantee,
           },
           validVariants.map((v) => ({
@@ -195,8 +232,10 @@ export function ProductEditModal({
             category,
             description,
             image_url: finalImageUrl,
+            gallery_images: uploadedUrls,
             is_freshness_guarantee: isFreshnessGuarantee,
             is_active: isActive,
+            approval_status: 'approved',
             created_at: new Date().toISOString(),
             product_variants: validVariants.map((v, idx) => ({
               id: 'var-' + idx,
@@ -215,6 +254,7 @@ export function ProductEditModal({
           category,
           description,
           image_url: finalImageUrl,
+          gallery_images: uploadedUrls,
           is_freshness_guarantee: isFreshnessGuarantee,
           is_active: isActive,
           variants: validVariants.map((v) => ({
@@ -484,70 +524,19 @@ export function ProductEditModal({
               </label>
             </div>
 
-            {/* Product Image */}
+            {/* Product Images (Multi-Image Upload) */}
             <div>
               <label
                 className="text-[11px] font-bold uppercase tracking-wider mb-2 block"
                 style={{ color: 'var(--color-outline, #73796e)' }}
               >
-                Product Image
+                Product Images
               </label>
-              <div className="flex items-center gap-4">
-                <label
-                  className="cursor-pointer relative flex flex-col items-center justify-center w-24 h-24 rounded-[14px] border-2 border-dashed transition-all hover:border-primary overflow-hidden group"
-                  style={{
-                    borderColor: 'rgba(195,201,187,0.6)',
-                    background: 'var(--color-surface-container, #f3f4ef)',
-                  }}
-                >
-                  <input
-                    type="file"
-                    className="hidden"
-                    accept="image/*"
-                    onChange={(e) => {
-                      const file = e.target.files?.[0];
-                      if (file) {
-                        setImageFile(file);
-                        setImagePreview(URL.createObjectURL(file));
-                      }
-                    }}
-                  />
-                  {imagePreview ? (
-                    <>
-                      <img
-                        src={imagePreview}
-                        alt="Product Preview"
-                        className="w-full h-full object-cover"
-                      />
-                      <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center text-white text-[10px] font-bold">
-                        Change
-                      </div>
-                    </>
-                  ) : (
-                    <>
-                      <UploadCloud className="w-6 h-6 mb-1 text-gray-400" />
-                      <span className="text-[10px] font-bold text-gray-500">Upload</span>
-                    </>
-                  )}
-                </label>
-
-                {imagePreview && (
-                  <div className="flex flex-col gap-1 text-[12px]">
-                    <span className="font-semibold text-gray-700">Image selected</span>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setImageFile(null);
-                        setImagePreview(null);
-                        setImageUrl('');
-                      }}
-                      className="text-red-600 font-bold hover:underline self-start text-[11px]"
-                    >
-                      Remove image
-                    </button>
-                  </div>
-                )}
-              </div>
+              <MultiImageUpload
+                images={images}
+                onChange={setImages}
+                disabled={isSaving}
+              />
             </div>
 
             {/* Variants Management */}
