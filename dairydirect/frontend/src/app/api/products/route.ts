@@ -6,7 +6,12 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { query, withTransaction, isPgConfigured } from '@/lib/aws/rds';
-import { getAuthUser } from '@/lib/api/auth-middleware';
+import {
+  getAuthUser,
+  getSellerForUser,
+  sellerCanWrite,
+  type SellerContext,
+} from '@/lib/api/auth-middleware';
 import { writeAuditLog } from '@/lib/security/audit';
 import { getCachedProducts, cacheProducts, invalidateProductsCache } from '@/lib/aws/redis';
 
@@ -40,7 +45,11 @@ export async function GET(request: NextRequest) {
     const params: any[] = [];
     let paramIdx = 1;
 
-    if (activeOnly) {
+    if (activeOnly && !sellerId) {
+      conditions.push(`p.is_active = true`);
+      conditions.push(`p.approval_status = 'approved'`);
+      conditions.push(`(p.seller_id IS NULL OR EXISTS (SELECT 1 FROM sellers s WHERE s.id = p.seller_id AND s.status = 'active'))`);
+    } else if (activeOnly) {
       conditions.push(`p.is_active = true`);
     }
 
@@ -71,7 +80,8 @@ export async function GET(request: NextRequest) {
         const result = await query(
           `SELECT 
              p.id, p.name, p.category, p.description, p.image_url, p.s3_image_key,
-             p.is_freshness_guarantee, p.is_active, p.tags, p.brand, p.state_origin,
+             p.is_freshness_guarantee, p.is_active, p.approval_status, p.rejection_reason, p.sku,
+             p.tags, p.brand, p.state_origin,
              p.seller_id, p.created_by, p.rating, p.reviews_count, p.created_at,
              COALESCE(
                json_agg(
@@ -106,12 +116,15 @@ export async function GET(request: NextRequest) {
         const admin = getAdminSupabase();
         let sbQuery = admin
           .from('products')
-          .select('*, product_variants(*)')
+          .select('*, product_variants(*), sellers:seller_id(id, status, store_name)')
           .order('created_at', { ascending: false });
 
-        if (activeOnly) {
+        if (activeOnly && !sellerId) {
+          sbQuery = sbQuery.eq('is_active', true).eq('approval_status', 'approved');
+        } else if (activeOnly) {
           sbQuery = sbQuery.eq('is_active', true);
         }
+
         if (sellerId) {
           sbQuery = sbQuery.or(`seller_id.eq.${sellerId},created_by.eq.${sellerId}`);
         }
@@ -124,7 +137,12 @@ export async function GET(request: NextRequest) {
         }
         const { data, error } = await sbQuery;
         if (!error && data) {
-          products = data;
+          // If customer facing catalog, filter out any product whose seller is not active
+          if (activeOnly && !sellerId) {
+            products = data.filter((p: any) => !p.seller_id || (p.sellers && p.sellers.status === 'active'));
+          } else {
+            products = data;
+          }
         }
       } catch (sbErr: any) {
         console.warn('[Products GET] Supabase fallback error:', sbErr.message);
@@ -146,31 +164,97 @@ export async function GET(request: NextRequest) {
   }
 }
 
-// ─── POST /api/products (Admin & Authenticated Sellers) ─────
+// ─── POST /api/products (Admin & active contracted sellers only) ─────
 export async function POST(request: NextRequest) {
   try {
+    // ─────────────────────────────────────────────────────────────────────
+    // AUTHORISATION
+    //
+    // This handler previously called getAuthUser() and then ignored the
+    // result entirely: there was no admin check, no seller check, and no
+    // login check at all. An unauthenticated request could publish a live
+    // product — with arbitrary name, price, images and description — onto
+    // the storefront. (PUT and DELETE on /api/products/[id] were already
+    // gated on auth.isAdmin; only POST was open.)
+    //
+    // The rule enforced here mirrors the business model:
+    //   - admins may create products in any category
+    //   - a seller may create products ONLY if their seller record is
+    //     'active', and ONLY inside the single category they are contracted
+    //     for (one company per category)
+    //   - everybody else is rejected
+    // ─────────────────────────────────────────────────────────────────────
     const auth = await getAuthUser(request);
 
+    if (!auth) {
+      return NextResponse.json(
+        { error: 'Authentication required' },
+        { status: 401 }
+      );
+    }
+
     const body = await request.json();
-    const { name, category, description, image_url, is_freshness_guarantee, is_active, variants, sellerId: bodySellerId } = body;
+    const { name, category, description, image_url, gallery_images, is_freshness_guarantee, is_active, variants } = body;
+
+    const finalGalleryImages = Array.isArray(gallery_images)
+      ? gallery_images
+      : (image_url ? [image_url] : []);
+    const finalImageUrl = image_url || (finalGalleryImages.length > 0 ? finalGalleryImages[0] : null);
 
     if (!name || !category) {
       return NextResponse.json({ error: 'Name and category are required' }, { status: 400 });
     }
 
-    const sellerId = bodySellerId || auth?.userId || null;
+    // Seller identity is resolved from the authenticated user server-side.
+    // The previous code read `sellerId` straight out of the request body,
+    // so a caller could attribute a product to any seller they liked.
+    let seller: SellerContext | null = null;
+
+    if (!auth.isAdmin) {
+      seller = await getSellerForUser(auth.userId);
+
+      if (!seller) {
+        return NextResponse.json(
+          { error: 'Only approved sellers can add products' },
+          { status: 403 }
+        );
+      }
+
+      if (!sellerCanWrite(seller)) {
+        return NextResponse.json(
+          {
+            error: `Your seller account is '${seller.status}'. Products can only be added while your account is active.`,
+          },
+          { status: 403 }
+        );
+      }
+
+      // One company per category: a seller cannot list outside their contract.
+      const requested = String(category).trim().toLowerCase();
+      const contracted = seller.category.trim().toLowerCase();
+      if (!contracted || requested !== contracted) {
+        return NextResponse.json(
+          {
+            error: `You are contracted for the '${seller.category}' category and cannot list products under '${category}'.`,
+          },
+          { status: 403 }
+        );
+      }
+    }
+
+    const sellerId = seller?.sellerId ?? null;
+
+    const initialApprovalStatus = auth.isAdmin ? 'approved' : 'pending';
+    const initialIsActive = auth.isAdmin ? (is_active ?? true) : false;
 
     if (isPgConfigured) {
       try {
-        await query('ALTER TABLE products ADD COLUMN IF NOT EXISTS seller_id TEXT;').catch(() => {});
-        await query('ALTER TABLE products ADD COLUMN IF NOT EXISTS created_by TEXT;').catch(() => {});
-
         const newProduct = await withTransaction(async (client) => {
           const prodResult = await client.query<{ id: string }>(
-            `INSERT INTO products (name, category, description, image_url, is_freshness_guarantee, is_active, seller_id, created_by)
-             VALUES ($1, $2, $3, $4, $5, $6, $7, $7)
+            `INSERT INTO products (name, category, description, image_url, gallery_images, is_freshness_guarantee, is_active, approval_status, seller_id, created_by)
+             VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
              RETURNING id`,
-            [name, category, description || null, image_url || null, is_freshness_guarantee ?? false, is_active ?? true, sellerId]
+            [name, category, description || null, finalImageUrl, finalGalleryImages, is_freshness_guarantee ?? false, initialIsActive, initialApprovalStatus, sellerId, auth.userId]
           );
 
           const productId = prodResult.rows[0].id;
@@ -196,7 +280,7 @@ export async function POST(request: NextRequest) {
             action: 'product.create' as any,
             resourceType: 'product',
             resourceId: newProduct,
-            details: { name, category, sellerId },
+            details: { name, category, sellerId, approval_status: initialApprovalStatus },
             ipAddress: request.headers.get('x-forwarded-for') || ''
           });
         }
@@ -211,44 +295,20 @@ export async function POST(request: NextRequest) {
     let prodData: any = null;
     let prodErr: any = null;
 
-    const isValidUuid = (id: string | null | undefined) => 
-      id ? /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id) : false;
-
-    const rawSellerId = sellerId || auth?.userId || null;
-    let validSellerUuid: string | null = null;
-    let validSellerUserId: string | null = null;
-
-    if (rawSellerId && isValidUuid(rawSellerId)) {
-      const { data: s1 } = await sb.from('sellers').select('id, user_id').eq('id', rawSellerId).maybeSingle();
-      if (s1?.id) {
-        validSellerUuid = s1.id;
-        validSellerUserId = s1.user_id && isValidUuid(s1.user_id) ? s1.user_id : null;
-      } else {
-        const { data: s2 } = await sb.from('sellers').select('id, user_id').eq('user_id', rawSellerId).maybeSingle();
-        if (s2?.id) {
-          validSellerUuid = s2.id;
-          validSellerUserId = s2.user_id && isValidUuid(s2.user_id) ? s2.user_id : null;
-        } else {
-          const { data: p1 } = await sb.from('profiles').select('id').eq('id', rawSellerId).maybeSingle();
-          if (p1?.id) validSellerUserId = p1.id;
-        }
-      }
-    }
-
-    if (auth?.userId && isValidUuid(auth.userId) && !validSellerUserId) {
-      const { data: p2 } = await sb.from('profiles').select('id').eq('id', auth.userId).maybeSingle();
-      if (p2?.id) validSellerUserId = p2.id;
-    }
+    const validSellerUuid: string | null = seller?.sellerId ?? null;
+    const validSellerUserId: string | null = seller?.userId ?? auth.userId;
 
     // 1. Insert into main products table
     const primaryPayload: any = {
       name,
       category,
       description: description || null,
-      image_url: image_url || null,
+      image_url: finalImageUrl,
+      gallery_images: finalGalleryImages,
       is_freshness_guarantee: is_freshness_guarantee ?? false,
-      is_active: is_active ?? true,
-      created_by: auth?.userId || rawSellerId || null,
+      is_active: initialIsActive,
+      approval_status: initialApprovalStatus,
+      created_by: auth.userId,
     };
 
     // Auto-link category_id if available

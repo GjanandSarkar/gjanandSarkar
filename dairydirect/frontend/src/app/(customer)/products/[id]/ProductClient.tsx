@@ -26,6 +26,7 @@ import { TrustBadges } from '@/components/trust/TrustBadges';
 import { ProductEditModal } from '@/components/admin/ProductEditModal';
 import { getProductReviews, submitProductReview, ReviewItem } from '@/lib/api/reviews';
 import { useRealtimeInventory } from '@/hooks/useRealtimeInventory';
+import { PLACEHOLDER_PRODUCT_IMAGE } from '@/lib/constants/brand';
 
 interface ProductClientProps {
   product: ProductWithVariants;
@@ -48,6 +49,24 @@ export function ProductClient({ product: initialProduct }: ProductClientProps) {
 
   // Reviews state
   const [reviews, setReviews] = useState<ReviewItem[]>([]);
+
+  /**
+   * Average rating, derived only from ratings that actually exist.
+   *
+   * The display previously did three unsound things: it treated a missing or
+   * zero rating as 5 stars (`r.rating || 5`), inflating the average; it fell
+   * back to `product.rating`, which the schema defaults to 4.80; and if that
+   * was absent it printed a flat "5.0". A product with no reviews at all
+   * therefore advertised a perfect score.
+   */
+  const ratedReviews = reviews.filter(
+    (r) => typeof r.rating === 'number' && r.rating > 0,
+  );
+  const averageRating =
+    ratedReviews.length > 0
+      ? ratedReviews.reduce((acc, r) => acc + (r.rating as number), 0) /
+        ratedReviews.length
+      : null;
   const [newRating, setNewRating] = useState(5);
   const [newComment, setNewComment] = useState('');
   const [isSubmittingReview, setIsSubmittingReview] = useState(false);
@@ -100,6 +119,20 @@ export function ProductClient({ product: initialProduct }: ProductClientProps) {
 
   const [selectedVariantIdx, setSelectedVariantIdx] = useState(0);
 
+  const allImages = (function() {
+    const list: string[] = [];
+    if (product.image_url) list.push(product.image_url);
+    if (Array.isArray(product.gallery_images)) {
+      product.gallery_images.forEach((img) => {
+        if (img && !list.includes(img)) list.push(img);
+      });
+    }
+    return list.length > 0 ? list : [PLACEHOLDER_PRODUCT_IMAGE];
+  })();
+
+  const [activeImageIdx, setActiveImageIdx] = useState(0);
+  const currentImage = allImages[activeImageIdx] || allImages[0] || product.image_url || PLACEHOLDER_PRODUCT_IMAGE;
+
   const variants = product.product_variants || [];
   const selectedVariant = variants[selectedVariantIdx] || variants[0];
   if (!selectedVariant) return <div className="p-10 text-center">No variants available</div>;
@@ -145,10 +178,15 @@ export function ProductClient({ product: initialProduct }: ProductClientProps) {
     const res = await submitProductReview({
       productId: product.id,
       userId: user?.id || 'guest-' + Date.now(),
-      userName: user?.name || 'Verified Buyer',
+      // Was `user?.name || 'Verified Buyer'`, which stamped every anonymous
+      // review with a purchase-verification claim the platform had not
+      // checked. Fabricated trust badges are precisely the pattern the
+      // CCPA 2023 dark-patterns guidelines prohibit.
+      userName: user?.name || 'Anonymous',
       rating: newRating,
       comment: newComment.trim(),
-      stateOrigin: 'Gujarat',
+      // Was hardcoded to 'Gujarat' for every reviewer in the country.
+      stateOrigin: undefined,
     });
 
     if (res.review) {
@@ -203,13 +241,38 @@ export function ProductClient({ product: initialProduct }: ProductClientProps) {
           
           {/* Left Column: Product Image Gallery (Sticky on desktop) */}
           <div className="col-span-1 md:col-span-6 space-y-4 md:sticky md:top-24">
-            <div className="bg-white rounded-3xl border border-sand/50 p-6 shadow-2xs flex items-center justify-center bg-gradient-to-b from-white to-[#fafaf8] aspect-square max-h-[460px] mx-auto w-full">
+            <div className="bg-white rounded-3xl border border-sand/50 p-6 shadow-2xs flex items-center justify-center bg-gradient-to-b from-white to-[#fafaf8] aspect-square max-h-[460px] mx-auto w-full relative overflow-hidden">
               <img
-                src={product.image_url || '/milk.png'}
+                src={currentImage}
                 alt={product.name}
                 className="w-auto h-full max-h-[360px] object-contain transition-transform hover:scale-105 duration-500"
               />
             </div>
+
+            {/* Multiple Gallery Images Selector */}
+            {allImages.length > 1 && (
+              <div className="flex items-center gap-2.5 overflow-x-auto pb-1 px-1">
+                {allImages.map((img, idx) => (
+                  <button
+                    key={idx}
+                    type="button"
+                    onClick={() => setActiveImageIdx(idx)}
+                    className={`relative w-16 h-16 rounded-xl border-2 overflow-hidden flex-shrink-0 transition-all cursor-pointer bg-white ${
+                      activeImageIdx === idx
+                        ? 'border-emerald-600 ring-2 ring-emerald-600/20 shadow-xs scale-105'
+                        : 'border-gray-200 hover:border-gray-400 opacity-70 hover:opacity-100'
+                    }`}
+                  >
+                    <img
+                      src={img}
+                      alt={`${product.name} thumbnail ${idx + 1}`}
+                      className="w-full h-full object-cover"
+                    />
+                  </button>
+                ))}
+              </div>
+            )}
+
             <TrustBadges className="hidden md:grid" />
           </div>
 
@@ -221,17 +284,22 @@ export function ProductClient({ product: initialProduct }: ProductClientProps) {
                   {product.category}
                 </span>
                 
-                <div className="flex items-center gap-1 text-xs font-bold text-amber-500">
-                  <Star className="w-3.5 h-3.5 fill-amber-400 text-amber-400" />
-                  <span className="text-gray-900 font-extrabold">
-                    {reviews.length > 0
-                      ? (reviews.reduce((acc, r) => acc + (r.rating || 5), 0) / reviews.length).toFixed(1)
-                      : ((product as any).rating ? Number((product as any).rating).toFixed(1) : '5.0')}
+                {averageRating !== null ? (
+                  <div className="flex items-center gap-1 text-xs font-bold">
+                    <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded bg-emerald-600 text-white">
+                      <Star className="w-3 h-3 fill-white text-white" />
+                      {averageRating.toFixed(1)}
+                    </span>
+                    <span className="text-gray-400 tabular-nums">
+                      ({ratedReviews.length}{' '}
+                      {ratedReviews.length === 1 ? 'rating' : 'ratings'})
+                    </span>
+                  </div>
+                ) : (
+                  <span className="text-xs font-semibold text-gray-400">
+                    No ratings yet
                   </span>
-                  <span className="text-gray-400">
-                    ({reviews.length} {reviews.length === 1 ? 'rating' : 'ratings'})
-                  </span>
-                </div>
+                )}
               </div>
 
               <h1 className="text-2xl sm:text-3xl font-black text-gray-900 tracking-tight leading-tight">
@@ -306,8 +374,8 @@ export function ProductClient({ product: initialProduct }: ProductClientProps) {
                 <div className="flex items-center gap-1 text-xs font-bold text-gray-800">
                   <Star className="w-3.5 h-3.5 fill-amber-400 text-amber-400" />
                   <span>
-                    {reviews.length > 0
-                      ? `${(reviews.reduce((acc, r) => acc + (r.rating || 5), 0) / reviews.length).toFixed(1)} / 5.0`
+                    {averageRating !== null
+                      ? `${averageRating.toFixed(1)} / 5.0`
                       : 'No reviews yet'}
                   </span>
                 </div>
@@ -391,7 +459,10 @@ export function ProductClient({ product: initialProduct }: ProductClientProps) {
                       </div>
 
                       <div className="flex items-center gap-0.5">
-                        {[...Array(Math.min(5, Math.max(1, rev.rating || 5)))].map((_, i) => (
+                        {/* `rev.rating || 5` rendered a 5-star row for any
+                            review with a missing rating. Clamp to the real
+                            value and show nothing when there isn't one. */}
+                        {[...Array(Math.min(5, Math.max(0, rev.rating ?? 0)))].map((_, i) => (
                           <Star key={i} className="w-3 h-3 fill-amber-400 text-amber-400" />
                         ))}
                       </div>
@@ -471,7 +542,13 @@ export function ProductClient({ product: initialProduct }: ProductClientProps) {
           isOpen={isEditModalOpen}
           onClose={() => setIsEditModalOpen(false)}
           onProductUpdated={(updated) => {
-            setProduct(updated);
+            // `updated` is the narrow CatalogProduct shape; merge it over the
+            // full detail record so detail-only fields are preserved.
+            setProduct((prev) => ({
+              ...prev,
+              ...updated,
+              category: updated.category ?? prev.category,
+            }));
           }}
           onProductDeleted={() => {
             router.push('/home');

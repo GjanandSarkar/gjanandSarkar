@@ -3,10 +3,11 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev --webpack",
-    "build": "next build --webpack",
+    "dev": "next dev",
+    "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "build:webpack": "next build --webpack"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.1103.0",
@@ -55,6 +56,7 @@
     "react-dom": "^19.2.5",
     "react-map-gl": "^8.1.1",
     "recharts": "^3.10.1",
+    "server-only": "^0.0.1",
     "tailwind-merge": "^3.5.0",
     "zod": "^4.4.3",
     "zustand": "^5.0.12"
@@ -68,5 +70,13 @@
     "eslint-config-next": "^16.2.3",
     "tailwindcss": "^4",
     "typescript": "^5"
-  }
+  },
+  "browserslist": [
+    "chrome >= 111",
+    "edge >= 111",
+    "firefox >= 111",
+    "safari >= 16.4",
+    "ios_saf >= 16.4",
+    "not dead"
+  ]
 }

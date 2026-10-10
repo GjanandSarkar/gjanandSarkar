@@ -42,7 +42,7 @@ export function BrandStory() {
               <Leaf className="w-4 h-4" />
             </div>
             <h4 className="text-[12px] font-bold text-dark">Ethically Sourced</h4>
-            <p className="text-[11px] text-muted leading-tight">From well-cared for, happy cattle.</p>
+            <p className="text-[11px] text-muted leading-tight">Verified brands, made in India.</p>
           </div>
         </div>
       </div>

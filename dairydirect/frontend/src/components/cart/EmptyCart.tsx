@@ -19,7 +19,7 @@ export function EmptyCart({ onActionClick }: EmptyCartProps) {
         </div>
         <div>
           <h4 className="font-bold text-[12px] text-green-900 mb-0.5">The GjanandSarkar Promise</h4>
-          <p className="text-[11px] text-green-800/80 leading-snug">Pure, natural dairy products delivered straight to your door.</p>
+          <p className="text-[11px] text-green-800/80 leading-snug">Verified Indian brands across every category, delivered to your door.</p>
         </div>
       </div>
     </div>

@@ -1,4 +1,4 @@
-import { supabase } from '@/lib/supabase';
+import { getSupabaseLazy } from '@/lib/supabase/lazy';
 import type { DBNotification } from '@/lib/supabase';
 
 // ─── Types ────────────────────────────────────────────────────
@@ -17,6 +17,7 @@ export async function getNotifications(
   userId: string,
   userRole: 'customer' | 'admin' | 'seller'
 ): Promise<DBNotification[]> {
+  const supabase = await getSupabaseLazy();
   // Fetch personal + broadcast notifications for this role
   const { data, error } = await supabase
     .from('notifications')
@@ -42,6 +43,7 @@ export async function getUnreadCount(
   userId: string,
   userRole: 'customer' | 'admin' | 'seller'
 ): Promise<number> {
+  const supabase = await getSupabaseLazy();
   const { count, error } = await supabase
     .from('notifications')
     .select('*', { count: 'exact', head: true })
@@ -58,6 +60,7 @@ export async function getUnreadCount(
 
 // ─── Mark Notification as Read ───────────────────────────────
 export async function markAsRead(notificationId: string): Promise<void> {
+  const supabase = await getSupabaseLazy();
   await supabase
     .from('notifications')
     .update({ is_read: true })
@@ -66,6 +69,7 @@ export async function markAsRead(notificationId: string): Promise<void> {
 
 // ─── Mark All Read for User ───────────────────────────────────
 export async function markAllRead(userId: string): Promise<void> {
+  const supabase = await getSupabaseLazy();
   await supabase
     .from('notifications')
     .update({ is_read: true })
@@ -77,6 +81,7 @@ export async function markAllRead(userId: string): Promise<void> {
 export async function createNotification(
   input: CreateNotificationInput
 ): Promise<{ success: boolean; error?: string }> {
+  const supabase = await getSupabaseLazy();
   const { error } = await supabase.from('notifications').insert({
     user_id: input.userId,
     role_target: input.roleTarget,
@@ -111,24 +116,41 @@ export function subscribeToNotifications(
   // This prevents conflicts if multiple NotificationBells (e.g. Sidebar + TopAppBar) 
   // are mounted simultaneously for the same user.
   const instanceId = Math.random().toString(36).substring(2, 8);
-  const channel = supabase.channel(`notifs-${userId}-${instanceId}`);
-  
-  channel
-    .on(
-      'postgres_changes',
-      {
-        event: 'INSERT',
-        schema: 'public',
-        table: 'notifications',
-        filter: `user_id=eq.${userId}`,
-      },
-      (payload: any) => {
-        onNew(payload.new as DBNotification);
-      }
-    )
-    .subscribe();
+
+  // The Supabase client is now loaded lazily, so channel setup is async while
+  // this function stays synchronous for callers (React effects expect a
+  // cleanup function back immediately). `cancelled` handles the case where the
+  // component unmounts before the client finishes loading.
+  let cancelled = false;
+  let teardown: (() => void) | undefined;
+
+  void getSupabaseLazy().then((supabase) => {
+    if (cancelled) return;
+
+    const channel = supabase.channel(`notifs-${userId}-${instanceId}`);
+
+    channel
+      .on(
+        'postgres_changes',
+        {
+          event: 'INSERT',
+          schema: 'public',
+          table: 'notifications',
+          filter: `user_id=eq.${userId}`,
+        },
+        (payload: any) => {
+          onNew(payload.new as DBNotification);
+        }
+      )
+      .subscribe();
+
+    teardown = () => {
+      supabase.removeChannel(channel);
+    };
+  });
 
   return () => {
-    supabase.removeChannel(channel);
+    cancelled = true;
+    teardown?.();
   };
 }

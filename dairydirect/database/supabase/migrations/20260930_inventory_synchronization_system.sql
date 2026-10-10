@@ -154,6 +154,59 @@ CREATE INDEX IF NOT EXISTS idx_inventory_tx_order       ON inventory_transaction
 CREATE INDEX IF NOT EXISTS idx_inventory_tx_type        ON inventory_transactions(change_type);
 CREATE INDEX IF NOT EXISTS idx_inventory_tx_created_at  ON inventory_transactions(created_at DESC);
 
+-- ─── 3b. seller_product catalog table ─────────────────────────────────────
+--
+-- FIX: this migration (and src/app/api/products/[id]/route.ts) both read and
+-- write `seller_product`, but no migration ever created it. Applying this
+-- file failed with:
+--   ERROR: 42P01: relation "seller_product" does not exist
+-- The table is the seller-facing projection of a product: the seller panel
+-- reads it, and the trigger below keeps its stock in step with the
+-- authoritative value in product_variants. Created here, before first use.
+CREATE TABLE IF NOT EXISTS seller_product (
+  id          UUID          PRIMARY KEY DEFAULT gen_random_uuid(),
+  product_id  UUID          NOT NULL UNIQUE REFERENCES products(id) ON DELETE CASCADE,
+  seller_id   UUID          REFERENCES sellers(id) ON DELETE SET NULL,
+  name        TEXT,
+  category    TEXT,
+  description TEXT,
+  image_url   TEXT,
+  price       NUMERIC(10,2) CHECK (price IS NULL OR price >= 0),
+  stock       INTEGER       NOT NULL DEFAULT 0 CHECK (stock >= 0),
+  status      TEXT          NOT NULL DEFAULT 'active'
+                            CHECK (status IN ('active', 'inactive', 'out_of_stock')),
+  created_at  TIMESTAMPTZ   NOT NULL DEFAULT now(),
+  updated_at  TIMESTAMPTZ   NOT NULL DEFAULT now()
+);
+
+CREATE INDEX IF NOT EXISTS idx_seller_product_seller  ON seller_product(seller_id);
+CREATE INDEX IF NOT EXISTS idx_seller_product_status  ON seller_product(status);
+
+-- Backfill one row per existing product so the trigger has something to update.
+INSERT INTO seller_product (product_id, seller_id, name, category, description, image_url, status)
+SELECT p.id, p.seller_id, p.name, p.category, p.description, p.image_url,
+       CASE WHEN p.is_active THEN 'active' ELSE 'inactive' END
+FROM products p
+ON CONFLICT (product_id) DO NOTHING;
+
+ALTER TABLE seller_product ENABLE ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS "Seller product: public read" ON seller_product;
+CREATE POLICY "Seller product: public read"
+  ON seller_product FOR SELECT USING (true);
+
+DROP POLICY IF EXISTS "Seller product: owner or admin write" ON seller_product;
+CREATE POLICY "Seller product: owner or admin write"
+  ON seller_product FOR ALL
+  USING (
+    is_admin(auth.uid()) OR
+    EXISTS (SELECT 1 FROM sellers s WHERE s.id = seller_product.seller_id AND s.user_id = auth.uid())
+  )
+  WITH CHECK (
+    is_admin(auth.uid()) OR
+    EXISTS (SELECT 1 FROM sellers s WHERE s.id = seller_product.seller_id AND s.user_id = auth.uid())
+  );
+
 -- ─── 4. Bi-directional Sync between product_variants and seller_product ───
 CREATE OR REPLACE FUNCTION trg_sync_variant_to_seller_product()
 RETURNS TRIGGER AS $$

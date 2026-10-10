@@ -22,6 +22,7 @@ import { OrderSummary } from '@/components/cart/OrderSummary';
 import { PaymentSelection } from '@/components/checkout/PaymentSelection';
 import { CheckoutConfidence } from '@/components/trust/CheckoutConfidence';
 import { initiateRazorpayPayment } from '@/lib/razorpay-client';
+import { SkeletonBlock } from '@/components/shared/Skeletons';
 
 export default function CheckoutScreen() {
   const router = useRouter();
@@ -165,6 +166,25 @@ export default function CheckoutScreen() {
       price: parseFloat(String(item.variant.price)) || 0, // Supabase numeric comes as string
     }));
 
+    // ─── Reserve Inventory Hold During Checkout ───
+    let activeReservationId: string | undefined = undefined;
+    try {
+      const resRes = await fetch('/api/inventory/reserve', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          items: orderItems.map(i => ({ variantId: i.variantId, quantity: i.quantity, productId: i.productId })),
+          holdSeconds: 600,
+        }),
+      });
+      if (resRes.ok) {
+        const resJson = await resRes.json();
+        activeReservationId = resJson?.reservations?.[0]?.reservation_id || resJson?.reservations?.[0]?.id;
+      }
+    } catch (e) {
+      console.warn('Inventory reservation warning:', e);
+    }
+
     // ─── Razorpay Online Payment Flow ───
     if (selectedMethod === 'razorpay') {
       const amountInPaise = Math.round((pricing?.total || 0) * 100);
@@ -196,6 +216,7 @@ export default function CheckoutScreen() {
             paymentMethod: 'razorpay',
             paymentStatus: 'paid',
             couponCode: couponCode || undefined,
+            reservationId: activeReservationId,
             // Pass Razorpay IDs so they get stored in the order record
             razorpayOrderId: razorpayResponse.razorpay_order_id,
             razorpayPaymentId: razorpayResponse.razorpay_payment_id,
@@ -215,6 +236,9 @@ export default function CheckoutScreen() {
             router.replace(`/order-confirmed/${result.orderId}`);
           } else {
             setIsProcessing(false);
+            if (activeReservationId) {
+              fetch(`/api/inventory/reserve?reservationId=${activeReservationId}`, { method: 'DELETE' }).catch(() => {});
+            }
             if (result.error && (result.error.toLowerCase().includes('insufficient') || result.error.toLowerCase().includes('stock') || result.error.toLowerCase().includes('inventory'))) {
               setStockError(result.error);
             } else {
@@ -224,10 +248,16 @@ export default function CheckoutScreen() {
         },
         onError: (error) => {
           setIsProcessing(false);
+          if (activeReservationId) {
+            fetch(`/api/inventory/reserve?reservationId=${activeReservationId}`, { method: 'DELETE' }).catch(() => {});
+          }
           alert(error.message || 'Payment failed or was cancelled.');
         },
         onDismiss: () => {
           setIsProcessing(false);
+          if (activeReservationId) {
+            fetch(`/api/inventory/reserve?reservationId=${activeReservationId}`, { method: 'DELETE' }).catch(() => {});
+          }
         },
       });
       return;
@@ -235,50 +265,89 @@ export default function CheckoutScreen() {
 
     setIsProcessing(true);
 
-    const result = await placeOrder({
-      userId: user.id,
-      customerName: user.name || 'Customer',
-      customerPhone: user.phone || '',
-      items: orderItems,
-      total: pricing?.total || 0,
-      addressId: checkoutAddressId,
-      paymentMethod: selectedMethod,
-      paymentStatus: selectedMethod === 'cod' ? 'pending' : 'paid',
-      couponCode: couponCode || undefined,
-      upiId: selectedMethod === 'upi' ? upiId : undefined
-    });
+    // `navigated` keeps the button disabled while the router transition to the
+    // confirmation page is in flight. Every other exit path -- success, error,
+    // or an unexpected throw -- must release the spinner in `finally`.
+    // Previously there was no try/catch here at all, so anything that threw or
+    // hung left "Placing Order..." on screen permanently with no way out.
+    let navigated = false;
 
-    if (result.success && result.orderId) {
-      Analytics.trackEvent('Checkout Completed', {
-        orderId: result.orderId,
+    try {
+      const result = await placeOrder({
+        userId: user.id,
+        customerName: user.name || 'Customer',
+        customerPhone: user.phone || '',
+        items: orderItems,
         total: pricing?.total || 0,
-        cartSize: cartItemsData.length
+        addressId: checkoutAddressId,
+        paymentMethod: selectedMethod,
+        paymentStatus: selectedMethod === 'cod' ? 'pending' : 'paid',
+        couponCode: couponCode || undefined,
+        upiId: selectedMethod === 'upi' ? upiId : undefined,
+        reservationId: activeReservationId,
       });
-      clearCartLocal();
-      await clearCartApi(user.id);
-      router.replace(`/order-confirmed/${result.orderId}`);
-    } else {
-      setIsProcessing(false);
-      if (result.error && (result.error.toLowerCase().includes('insufficient') || result.error.toLowerCase().includes('stock') || result.error.toLowerCase().includes('inventory'))) {
+
+      if (result.success && result.orderId) {
+        Analytics.trackEvent('Checkout Completed', {
+          orderId: result.orderId,
+          total: pricing?.total || 0,
+          cartSize: cartItemsData.length
+        });
+        clearCartLocal();
+        // Fire-and-forget: the order is already placed, so a slow or failing
+        // cart-cleanup call must never stand between the customer and their
+        // confirmation page.
+        void clearCartApi(user.id).catch(() => {});
+        navigated = true;
+        router.replace(`/order-confirmed/${result.orderId}`);
+      } else if (
+        result.error &&
+        (result.error.toLowerCase().includes('insufficient') ||
+          result.error.toLowerCase().includes('stock') ||
+          result.error.toLowerCase().includes('inventory'))
+      ) {
         setStockError(result.error);
       } else {
         alert(result.error || 'Failed to place order. Please try again.');
       }
+    } catch (err) {
+      console.error('[checkout] Unexpected error while placing order:', err);
+      alert(
+        'Something went wrong while placing your order. ' +
+          'You have not been charged. Please check My Orders before retrying.'
+      );
+    } finally {
+      if (!navigated) setIsProcessing(false);
     }
   };
 
   if (isLoading || !pricing) {
     return (
-      <div className="flex flex-col min-h-screen items-center justify-center bg-cream">
-        <Loader2 className="w-8 h-8 animate-spin text-primary" />
-        <p className="mt-4 text-xs text-muted font-medium">Securing Checkout...</p>
+      /* Was a centred spinner on a blank screen reading "Securing
+         Checkout...". Checkout is the most abandonment-sensitive screen in
+         the app: a blank page with a spinner is exactly where people leave.
+         A skeleton of the real layout keeps the page feeling present. */
+      <div className="flex flex-col min-h-screen bg-cream">
+        <div className="sticky top-0 z-30 bg-white border-b border-sand">
+          <div className="flex justify-between items-center p-4">
+            <SkeletonBlock className="h-6 w-40" />
+            <SkeletonBlock className="h-6 w-20 rounded-md" />
+          </div>
+        </div>
+        <div className="flex-1 px-4 py-5 space-y-4 max-w-3xl mx-auto w-full">
+          <SkeletonBlock className="h-28 w-full rounded-2xl" />
+          <SkeletonBlock className="h-40 w-full rounded-2xl" />
+          <SkeletonBlock className="h-48 w-full rounded-2xl" />
+        </div>
+        <div className="sticky bottom-0 bg-white border-t border-sand p-4">
+          <SkeletonBlock className="h-14 w-full rounded-2xl" />
+        </div>
       </div>
     );
   }
 
-  // Calculate free delivery progress for OrderSummary
-  // (We use a mock threshold of 300 for UI purposes, matching earlier logic if needed, 
-  // but it relies on pricing.nextTier)
+  // Free-delivery progress. Derived from the server-calculated pricing tier,
+  // not a hardcoded threshold.
   const deliveryProgress = pricing.nextTier > 0
     ? Math.min(100, (pricing.subtotal / (pricing.subtotal + pricing.nextTier)) * 100)
     : 100;

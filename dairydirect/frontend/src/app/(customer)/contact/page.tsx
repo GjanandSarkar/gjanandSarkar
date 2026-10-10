@@ -14,8 +14,11 @@ import {
 } from 'lucide-react';
 import Link from 'next/link';
 import { validatePhoneNumber, formatPhoneInput } from '@/lib/utils/phone';
+import { useStore } from '@/store/useStore';
+import { getAuthToken } from '@/lib/api/client';
 
 export default function ContactPage() {
+  const user = useStore((s) => s.user);
   const [form, setForm] = useState({
     name: '',
     email: '',
@@ -27,7 +30,7 @@ export default function ContactPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
 
@@ -38,11 +41,39 @@ export default function ContactPage() {
     }
 
     setLoading(true);
-    setTimeout(() => {
-      setLoading(false);
+    try {
+      const token = await getAuthToken();
+      const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+      if (token) headers['Authorization'] = `Bearer ${token}`;
+
+      const res = await fetch('/api/support/tickets', {
+        method: 'POST',
+        headers,
+        credentials: 'include',
+        body: JSON.stringify({
+          subject: form.subject || 'Customer Support Inquiry',
+          message: form.message,
+          name: form.name,
+          email: form.email,
+          phone: form.phone,
+          userId: user?.id,
+          priority: 'normal'
+        })
+      });
+
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        throw new Error(data.error || 'Failed to send message');
+      }
+
       setSubmitted(true);
       setForm({ name: '', email: '', phone: '', subject: 'Order Query', message: '' });
-    }, 600);
+    } catch (err: any) {
+      console.error('Contact form submission error:', err);
+      setError(err.message || 'Failed to send message. Please try again.');
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -56,7 +87,8 @@ export default function ContactPage() {
             Contact Customer Support
           </h1>
           <p className="text-xs sm:text-sm text-gray-600 leading-relaxed">
-            Have questions about morning delivery timings, subscriptions, lab reports, or bulk farm orders? Our team is available 7 days a week.
+            Questions about an order, a partner brand, a subscription or bulk
+            purchasing? Our team is available 7 days a week.
           </p>
         </div>
 
@@ -118,23 +150,23 @@ export default function ContactPage() {
                 </div>
               </div>
               <p className="text-[11px] text-gray-500">
-                For corporate gifting, bulk orders, or farm tie-ups.
+                For corporate gifting, bulk orders, or brand partnerships.
               </p>
             </div>
 
-            {/* Corporate Gaushala Hub */}
+            {/* Headquarters */}
             <div className="bg-white border border-gray-200 rounded-2xl p-5 shadow-xs space-y-2">
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 rounded-xl bg-purple-50 text-purple-700 flex items-center justify-center">
                   <MapPin className="w-5 h-5" />
                 </div>
                 <div>
-                  <h3 className="text-xs font-bold text-gray-900">Headquarters & Dairy Hub</h3>
-                  <p className="text-[11px] text-gray-600">Gjanand Sarkar Dairy Direct LLP</p>
+                  <h3 className="text-xs font-bold text-gray-900">Headquarters</h3>
+                  <p className="text-[11px] text-gray-600">Gjanand Sarkar</p>
                 </div>
               </div>
               <p className="text-[11px] text-gray-500 leading-relaxed">
-                Kudasan Farm Road, Near Infocity Circle, Gandhinagar, Gujarat - 382421
+                Kudasan, Near Infocity Circle, Gandhinagar, Gujarat - 382421
               </p>
             </div>
 
@@ -229,10 +261,10 @@ export default function ContactPage() {
                       className="w-full px-3.5 py-2.5 text-xs rounded-xl border border-gray-300 focus:border-[#0f3e26] focus:ring-1 focus:ring-[#0f3e26] outline-none bg-white"
                     >
                       <option value="Order Query">Order Status & Delivery</option>
-                      <option value="Subscription">Daily Milk Subscription</option>
+                      <option value="Subscription">Subscriptions</option>
                       <option value="Quality">Lab Report & Purity Question</option>
                       <option value="Refund">Return & Refund Request</option>
-                      <option value="Partnership">Farmer / Seller Onboarding</option>
+                      <option value="Partnership">Partner Brand Onboarding</option>
                       <option value="Other">General Feedback</option>
                     </select>
                   </div>

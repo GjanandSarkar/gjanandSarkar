@@ -44,7 +44,8 @@ function AuthCallbackInner() {
 
           if (accessToken) {
             try {
-              document.cookie = `gs_access_token=${accessToken}; path=/; max-age=604800; SameSite=Lax`;
+              // Intentionally not set from JavaScript — /api/auth/sync
+              // returns it as an httpOnly cookie on this response.
             } catch {}
           }
 

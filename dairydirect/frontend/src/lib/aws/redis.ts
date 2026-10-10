@@ -515,6 +515,19 @@ export async function invalidateProductsCache(productId?: string): Promise<void>
     tasks.push(cacheDel(`product:${productId}`));
   }
   await Promise.all(tasks);
+
+  // Catalogue pages (homepage, category, search) are now cached by Next's
+  // data/route cache under the 'products' tag instead of being re-queried on
+  // every request. Busting the Redis cache alone would leave those pages
+  // serving stale data for up to their TTL, so the two caches are invalidated
+  // together, here, in one place. Every existing caller of
+  // invalidateProductsCache() gets correct revalidation for free.
+  try {
+    const { revalidateTag } = await import('next/cache');
+    revalidateTag('products', 'max');
+  } catch {
+    // Called outside a Next request scope (e.g. a script) — nothing to do.
+  }
 }
 
 // ─── Category Cache Invalidation ────────────────────────────

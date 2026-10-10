@@ -3,13 +3,13 @@
 import Link from 'next/link';
 import { ArrowRight } from 'lucide-react';
 import { ProductCard } from '@/components/shared/ProductCard';
-import type { ProductWithVariants } from '@/lib/api/products';
+import type { CatalogProduct } from '@/lib/types/catalog';
 
 interface ProductCarouselProps {
   title: string;
   subtitle?: string;
   icon?: React.ReactNode;
-  products: ProductWithVariants[];
+  products: CatalogProduct[];
   isLoading: boolean;
   viewAllLink?: string;
   priority?: boolean;
@@ -55,7 +55,7 @@ export function ProductCarousel({
         </div>
       </div>
 
-      <div className="flex gap-4 overflow-x-auto no-scrollbar pl-5 md:pl-10 pr-5 pb-6">
+      <div className="flex gap-4 overflow-x-auto no-scrollbar snap-rail reveal pl-5 md:pl-10 pr-5 pb-6">
         {isLoading ? (
           <>
             {[1, 2, 3, 4].map(i => (

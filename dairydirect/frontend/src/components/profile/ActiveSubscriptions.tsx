@@ -5,6 +5,12 @@ import { CalendarDays, ChevronRight, PauseCircle, CheckCircle2 } from 'lucide-re
 import type { SubscriptionWithProduct } from '@/lib/api/subscriptions';
 import { Button } from '@/components/ui/Button';
 
+// Units for subscription volume. Previously an inline check for exactly
+// 'Milk' or 'Buttermilk', so every other liquid subscription displayed in kg.
+const LIQUID_CATEGORIES = new Set([
+  'milk', 'buttermilk', 'lassi', 'dairy', 'cold-pressed oils', 'beverages',
+]);
+
 interface ActiveSubscriptionsProps {
   subscriptions: SubscriptionWithProduct[];
   hideHeader?: boolean;
@@ -47,7 +53,7 @@ export function ActiveSubscriptions({ subscriptions, hideHeader = false }: Activ
                 <div className="flex-1 min-w-0">
                   <h3 className="font-bold text-dark text-sm truncate">{sub.products?.name || 'Product'}</h3>
                   <p className="text-xs font-medium text-muted mt-0.5">
-                    {sub.volume} {sub.products?.category === 'Milk' || sub.products?.category === 'Buttermilk' ? 'L' : 'kg'} / {sub.plan}
+                    {sub.volume} {LIQUID_CATEGORIES.has((sub.products?.category ?? '').toLowerCase()) ? 'L' : 'kg'} / {sub.plan}
                   </p>
                   <p className={`text-[10px] font-bold uppercase tracking-wider mt-1.5 ${isPaused ? 'text-red-500' : 'text-primary'}`}>
                     {isPaused ? 'Paused' : 'Active'}

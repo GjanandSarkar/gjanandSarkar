@@ -12,9 +12,12 @@ export type SubscriptionWithProduct = DBSubscription & {
 export type NewSubscriptionInput = {
   userId: string;
   productId: string;
+  variantId?: string;
   volume: number;
-  plan: 'weekly' | 'monthly';
+  plan: 'daily' | 'alternate' | 'weekly' | 'custom' | string;
   startDate: string;
+  addressId?: string;
+  deliverySlot?: string;
 };
 
 // ─── Generate IDs ─────────────────────────────────────────────
@@ -68,9 +71,12 @@ export async function createSubscription(
     const result = await api.subscriptions.create({
       userId: input.userId,
       productId: input.productId,
+      variantId: input.variantId,
       volume: input.volume,
       plan: input.plan,
       startDate: input.startDate,
+      addressId: input.addressId,
+      deliverySlot: input.deliverySlot,
     });
     return { success: result.success, id: result.id };
   } catch (err: any) {

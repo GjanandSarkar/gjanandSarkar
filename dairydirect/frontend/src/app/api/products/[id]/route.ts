@@ -86,6 +86,26 @@ export async function GET(request: NextRequest, { params }: Props) {
       return NextResponse.json({ error: 'Product not found' }, { status: 404 });
     }
 
+    // Visibility rule: Customers cannot view pending/rejected/suspended or inactive products
+    const auth = await getAuthUser(request);
+    const isOwnerOrAdmin = auth?.isAdmin || (auth?.userId && auth.userId === product.created_by);
+    if (!isOwnerOrAdmin) {
+      if (product.approval_status !== 'approved' || !product.is_active) {
+        return NextResponse.json({ error: 'Product not found or unavailable' }, { status: 404 });
+      }
+      if (product.seller_id) {
+        const sb = getAdminSupabase();
+        const { data: seller } = await sb
+          .from('sellers')
+          .select('status')
+          .eq('id', product.seller_id)
+          .maybeSingle();
+        if (seller && seller.status !== 'active') {
+          return NextResponse.json({ error: 'Product not found or unavailable' }, { status: 404 });
+        }
+      }
+    }
+
     // Cache asynchronously — do not block response
     cacheProductDetail(id, product).catch(() => {});
 
@@ -112,7 +132,14 @@ export async function PUT(request: NextRequest, { params }: Props) {
     }
 
     const body = await request.json();
-    const { name, category, description, image_url, is_freshness_guarantee, is_active, variants } = body;
+    const { name, category, description, image_url, gallery_images, is_freshness_guarantee, is_active, variants } = body;
+
+    const finalGalleryImages = Array.isArray(gallery_images)
+      ? gallery_images
+      : (image_url ? [image_url] : undefined);
+    const finalImageUrl = image_url !== undefined
+      ? image_url
+      : (finalGalleryImages && finalGalleryImages.length > 0 ? finalGalleryImages[0] : undefined);
 
     if (isPgConfigured) {
       try {
@@ -123,15 +150,17 @@ export async function PUT(request: NextRequest, { params }: Props) {
                  category = COALESCE($2, category),
                  description = COALESCE($3, description),
                  image_url = COALESCE($4, image_url),
-                 is_freshness_guarantee = COALESCE($5, is_freshness_guarantee),
-                 is_active = COALESCE($6, is_active),
+                 gallery_images = COALESCE($5, gallery_images),
+                 is_freshness_guarantee = COALESCE($6, is_freshness_guarantee),
+                 is_active = COALESCE($7, is_active),
                  updated_at = now()
-             WHERE id = $7`,
+             WHERE id = $8`,
             [
               name !== undefined ? name : null,
               category !== undefined ? category : null,
               description !== undefined ? description : null,
-              image_url !== undefined ? image_url : null,
+              finalImageUrl !== undefined ? finalImageUrl : null,
+              finalGalleryImages !== undefined ? finalGalleryImages : null,
               is_freshness_guarantee !== undefined ? is_freshness_guarantee : null,
               is_active !== undefined ? is_active : null,
               id
@@ -190,18 +219,18 @@ export async function PUT(request: NextRequest, { params }: Props) {
     }
 
     const sb = getAdminSupabase();
-    await sb
-      .from('products')
-      .update({
-        name,
-        category,
-        description,
-        image_url,
-        is_freshness_guarantee,
-        is_active,
-        updated_at: new Date().toISOString(),
-      })
-      .eq('id', id);
+    const updatePayload: any = {
+      updated_at: new Date().toISOString(),
+    };
+    if (name !== undefined) updatePayload.name = name;
+    if (category !== undefined) updatePayload.category = category;
+    if (description !== undefined) updatePayload.description = description;
+    if (finalImageUrl !== undefined) updatePayload.image_url = finalImageUrl;
+    if (finalGalleryImages !== undefined) updatePayload.gallery_images = finalGalleryImages;
+    if (is_freshness_guarantee !== undefined) updatePayload.is_freshness_guarantee = is_freshness_guarantee;
+    if (is_active !== undefined) updatePayload.is_active = is_active;
+
+    await sb.from('products').update(updatePayload).eq('id', id);
 
     if (variants && Array.isArray(variants)) {
       // Delete variants that were removed in the edit modal

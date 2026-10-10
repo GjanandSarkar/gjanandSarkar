@@ -1,6 +1,7 @@
 "use client";
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Suspense } from 'react';
+import { useSearchParams } from 'next/navigation';
 import { motion } from 'framer-motion';
 import {
   RotateCcw, Package, AlertCircle, CheckCircle2,
@@ -8,7 +9,8 @@ import {
 } from 'lucide-react';
 import Link from 'next/link';
 
-export default function CustomerReturnsPage() {
+function CustomerReturnsContent() {
+  const searchParams = useSearchParams();
   const [returns, setReturns] = useState<any[]>([]);
   const [orders, setOrders] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -31,7 +33,15 @@ export default function CustomerReturnsPage() {
       ]);
       const [retData, ordData] = await Promise.all([retRes.json(), ordRes.json()]);
       if (retData.returns) setReturns(retData.returns);
-      if (ordData.orders) setOrders(ordData.orders.filter((o: any) => o.status === 'delivered'));
+      if (ordData.orders) {
+        const delivered = ordData.orders.filter((o: any) => o.status === 'delivered');
+        setOrders(delivered);
+        const queryOrderId = searchParams.get('orderId');
+        if (queryOrderId && delivered.some((o: any) => o.id === queryOrderId)) {
+          setSelectedOrderId(queryOrderId);
+          setShowModal(true);
+        }
+      }
     } catch (e) {
       console.error(e);
     } finally {
@@ -100,7 +110,7 @@ export default function CustomerReturnsPage() {
         <button
           onClick={() => setShowModal(true)}
           className="flex items-center gap-1.5 px-4 py-2 rounded-full font-bold text-[12px] text-white shadow-sm"
-          style={{ background: 'linear-gradient(135deg, #3f6530, #577f46)' }}
+          style={{ background: 'var(--cta-gradient)' }}
         >
           <RotateCcw className="w-3.5 h-3.5" /> Request Return
         </button>
@@ -123,7 +133,8 @@ export default function CustomerReturnsPage() {
           <div>
             <p className="font-bold text-[14px] text-[#2d5a27]">Gjanand Sarkar Freshness Promise</p>
             <p className="text-[12px] text-[#43493e]">
-              If any milk or dairy product delivered to you is sour, damaged, or not fresh, report it within 24 hours for an instant replacement or refund.
+              If a perishable item arrives spoiled, damaged or not fresh, report it within
+              24 hours for an instant replacement or refund.
             </p>
           </div>
         </div>
@@ -235,7 +246,7 @@ export default function CustomerReturnsPage() {
                   onChange={e => setReason(e.target.value)}
                   className="w-full px-3 py-2 rounded-[10px] border text-[13px] bg-gray-50"
                 >
-                  <option value="spoiled_sour">Milk / Dairy is sour or spoiled</option>
+                  <option value="spoiled_sour">Perishable item is spoiled</option>
                   <option value="damaged_seal">Seal broken or packet leaking</option>
                   <option value="wrong_item">Wrong item delivered</option>
                   <option value="expired">Near or past expiry date</option>
@@ -268,5 +279,13 @@ export default function CustomerReturnsPage() {
         </div>
       )}
     </div>
+  );
+}
+
+export default function CustomerReturnsPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen flex items-center justify-center"><Loader2 className="w-8 h-8 animate-spin text-primary" /></div>}>
+      <CustomerReturnsContent />
+    </Suspense>
   );
 }

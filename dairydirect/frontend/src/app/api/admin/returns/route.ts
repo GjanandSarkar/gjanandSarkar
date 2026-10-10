@@ -17,8 +17,8 @@ import { z } from 'zod';
 export async function GET(request: NextRequest) {
   try {
     const auth = await getAuthUser(request);
-    if (!auth?.isAdmin) {
-      return NextResponse.json({ error: 'Admin access required' }, { status: 403 });
+    if (!auth) {
+      return NextResponse.json({ error: 'Authentication required' }, { status: 401 });
     }
 
     const { searchParams } = new URL(request.url);
@@ -29,6 +29,11 @@ export async function GET(request: NextRequest) {
         const conditions = ['1=1'];
         const params: any[] = [];
         let paramIdx = 1;
+
+        if (!auth.isAdmin) {
+          conditions.push(`rr.user_id = $${paramIdx++}`);
+          params.push(auth.userId);
+        }
 
         if (status && ['pending', 'approved', 'rejected', 'refunded'].includes(status)) {
           conditions.push(`rr.status = $${paramIdx++}`);
@@ -63,6 +68,11 @@ export async function GET(request: NextRequest) {
 
     const sb = getAdminSupabase();
     let sbQuery = sb.from('return_requests').select('*, orders(*), profiles(*)').order('created_at', { ascending: false });
+    
+    if (!auth.isAdmin) {
+      sbQuery = sbQuery.eq('user_id', auth.userId);
+    }
+
     if (status && ['pending', 'approved', 'rejected', 'refunded'].includes(status)) {
       sbQuery = sbQuery.eq('status', status);
     }
@@ -81,7 +91,9 @@ export async function GET(request: NextRequest) {
 
 const SubmitReturnSchema = z.object({
   orderId: z.string().uuid(),
-  reason: z.enum(['damaged', 'wrong_item', 'quality_issue', 'not_delivered', 'changed_mind', 'other']),
+  productId: z.string().optional(),
+  quantity: z.number().optional(),
+  reason: z.string().min(1),
   description: z.string().max(1000).optional(),
 });
 

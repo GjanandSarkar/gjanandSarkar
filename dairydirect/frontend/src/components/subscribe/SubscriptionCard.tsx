@@ -6,6 +6,7 @@ import { CalendarCheck, Droplets, Pause, Play, Settings2, MoreHorizontal, AlertT
 import type { SubscriptionWithProduct } from '@/lib/api/subscriptions';
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { PLACEHOLDER_PRODUCT_IMAGE } from '@/lib/constants/brand';
 
 interface SubscriptionCardProps {
   subscription: SubscriptionWithProduct;
@@ -97,7 +98,7 @@ export function SubscriptionCard({ subscription, onPauseToggle, onCancel }: Subs
         <div className="flex gap-4 mb-5">
           <div className="w-20 h-20 rounded-[18px] bg-sky-50 border border-sand/50 shrink-0 flex items-center justify-center overflow-hidden p-2">
             <img 
-              src={product?.image_url || '/milk.png'} 
+              src={product?.image_url || PLACEHOLDER_PRODUCT_IMAGE} 
               alt={product?.name} 
               className="w-full h-full object-contain"
             />

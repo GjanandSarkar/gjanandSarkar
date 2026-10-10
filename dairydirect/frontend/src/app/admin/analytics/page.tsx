@@ -134,7 +134,7 @@ export default function AdminAnalyticsPage() {
     // Products Ranking
     const productSales = validOrders.reduce((acc, o) => {
       o.order_items?.forEach((item) => {
-        const name = item.products?.name || 'Paneer';
+        const name = item.products?.name?.trim() || 'Unnamed product';
         if (!acc[name]) acc[name] = { revenue: 0, units: 0 };
         const price = typeof item.price === 'string' ? parseFloat(item.price) : Number(item.price) || 0;
         const qty = Number(item.quantity) || 1;
@@ -148,20 +148,17 @@ export default function AdminAnalyticsPage() {
       .map(([name, stats]) => ({ label: name, ...stats }))
       .sort((a, b) => b.units - a.units);
 
-    // Fallback mock items matching screenshot if empty
-    const topProductsUnits = productRanking.length > 0
-      ? productRanking.slice(0, 5).map((p) => ({ label: p.label, value: p.units, displayValue: String(p.units) }))
-      : [
-          { label: 'Paneer', value: 3, displayValue: '3' },
-          { label: 'Masala Chaas (Spiced Buttermilk)', value: 3, displayValue: '3' },
-        ];
+    // No mock fallback: these previously showed two invented dairy rows
+    // ("Paneer", "Masala Chaas") whenever there were no sales, which made an
+    // empty dashboard look like it had real orders.
+    const topProductsUnits = productRanking
+      .slice(0, 5)
+      .map((p) => ({ label: p.label, value: p.units, displayValue: String(p.units) }));
 
-    const topProductsRevenue = productRanking.length > 0
-      ? [...productRanking].sort((a, b) => b.revenue - a.revenue).slice(0, 5).map((p) => ({ label: p.label, value: p.revenue, displayValue: `${t('currency')}${p.revenue}` }))
-      : [
-          { label: 'Paneer', value: 50, displayValue: '₹50' },
-          { label: 'Masala Chaas (Spiced Buttermilk)', value: 50, displayValue: '₹50' },
-        ];
+    const topProductsRevenue = [...productRanking]
+      .sort((a, b) => b.revenue - a.revenue)
+      .slice(0, 5)
+      .map((p) => ({ label: p.label, value: p.revenue, displayValue: `${t('currency')}${p.revenue}` }));
 
     // Charts - Daily Revenue (Last 7 Days)
     const last7Days = Array.from({ length: 7 }).map((_, i) => {

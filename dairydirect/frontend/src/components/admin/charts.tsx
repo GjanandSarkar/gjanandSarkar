@@ -964,7 +964,7 @@ export function CategoryTreemapChart({
       orders.forEach((o) => {
         if (o.status === 'cancelled') return;
         o.order_items?.forEach((item) => {
-          const catName = item.products?.category || 'Milk & Dairy';
+          const catName = item.products?.category?.trim() || 'Uncategorised';
           const qty = Number(item.quantity) || 1;
           const price = typeof item.price === 'string' ? parseFloat(item.price) : Number(item.price) || 0;
 
@@ -978,15 +978,10 @@ export function CategoryTreemapChart({
       });
     }
 
-    // Default fallback mock categories if no order items exist yet
+    // No mock fallback. Showing invented dairy revenue on an admin dashboard
+    // is worse than showing an honest empty state.
     if (Object.keys(catStats).length === 0) {
-      return [
-        { label: 'Milk & Dairy', value: 320, percentage: 32, revenue: 16000 },
-        { label: 'Curd & Yogurt', value: 280, percentage: 28, revenue: 11200 },
-        { label: 'Paneer & Butter', value: 200, percentage: 20, revenue: 14000 },
-        { label: 'Ghee & Sweets', value: 120, percentage: 12, revenue: 18000 },
-        { label: 'Beverages', value: 80, percentage: 8, revenue: 4800 },
-      ];
+      return [];
     }
 
     const sorted = Object.entries(catStats)
@@ -1021,8 +1016,16 @@ export function CategoryTreemapChart({
         </span>
       </div>
 
+      {categoriesList.length === 0 && (
+        <div className="min-h-[220px] flex items-center justify-center text-center">
+          <p className="text-xs text-muted font-medium max-w-[240px]">
+            No category sales data yet. Tiles appear here once orders are placed.
+          </p>
+        </div>
+      )}
+
       {/* Treemap Tile Grid Container */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-2.5 min-h-[220px]">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-2.5 min-h-[220px]" hidden={categoriesList.length === 0}>
         {categoriesList.slice(0, 5).map((item, idx) => {
           const colorClass = CATEGORY_COLORS[idx % CATEGORY_COLORS.length];
           const pct = item.percentage ?? (totalValue > 0 ? Math.round((item.value / totalValue) * 100) : 0);
@@ -1242,6 +1245,40 @@ export interface TopCategoriesCardProps {
 }
 
 export function TopCategoriesCard({ orders, className = '' }: TopCategoriesCardProps) {
+  // Previously rendered two hardcoded cards ("Milk & Dairy 3 / 60%" and
+  // "Buttermilk 3 / 60%") and a hardcoded "Total Categories 6", completely
+  // ignoring the `orders` prop it was given. It now aggregates real order
+  // items, like every other card on the dashboard.
+  const ranked = React.useMemo(() => {
+    const units: Record<string, number> = {};
+    let total = 0;
+
+    for (const order of orders ?? []) {
+      if (order.status === 'cancelled') continue;
+      for (const item of order.order_items ?? []) {
+        const name = item.products?.category?.trim();
+        if (!name) continue;
+        const qty = Number(item.quantity) || 1;
+        units[name] = (units[name] ?? 0) + qty;
+        total += qty;
+      }
+    }
+
+    const sorted = Object.entries(units)
+      .map(([label, value]) => ({
+        label,
+        value,
+        percentage: total > 0 ? Math.round((value / total) * 100) : 0,
+      }))
+      .sort((a, b) => b.value - a.value);
+
+    return { sorted, categoryCount: sorted.length };
+  }, [orders]);
+
+  const cards = ranked.sorted.slice(0, 2);
+  const cardStyles = ['bg-[#0c3c26]', 'bg-[#b87d20]'];
+  const dotStyles = ['bg-[#0c3c26]', 'bg-[#b87d20]'];
+
   return (
     <div className={`w-full bg-surface-container-lowest border border-sand/30 rounded-2xl p-4 sm:p-5 shadow-xs flex flex-col justify-between ${className}`}>
       {/* Header Bar */}
@@ -1251,51 +1288,53 @@ export function TopCategoriesCard({ orders, className = '' }: TopCategoriesCardP
         </h3>
       </div>
 
-      {/* Cards Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-4">
-        {/* Card 1: Milk & Dairy */}
-        <div className="bg-[#0c3c26] rounded-2xl p-4 text-white flex flex-col justify-between min-h-[135px] relative overflow-hidden shadow-sm">
-          <div>
-            <span className="text-xs font-bold tracking-wide opacity-95 block">Milk & Dairy</span>
-            <span className="text-2xl font-extrabold mt-1 block">3</span>
+      {cards.length === 0 ? (
+        <div className="flex-1 flex items-center justify-center py-10 text-center">
+          <p className="text-xs text-muted font-medium max-w-[220px]">
+            No category sales yet. This card fills in once orders start coming through.
+          </p>
+        </div>
+      ) : (
+        <>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-4">
+            {cards.map((cat, i) => (
+              <div
+                key={cat.label}
+                className={`${cardStyles[i]} rounded-2xl p-4 text-white flex flex-col justify-between min-h-[135px] relative overflow-hidden shadow-sm`}
+              >
+                <div>
+                  <span className="text-xs font-bold tracking-wide opacity-95 block truncate">{cat.label}</span>
+                  <span className="text-2xl font-extrabold mt-1 block">{cat.value}</span>
+                </div>
+
+                <div className="flex items-end justify-between mt-4">
+                  <span className="text-xs font-semibold opacity-90">{cat.percentage}%</span>
+                  <div className="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center shrink-0">
+                    <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+                    </svg>
+                  </div>
+                </div>
+              </div>
+            ))}
           </div>
 
-          <div className="flex items-end justify-between mt-4">
-            <span className="text-xs font-semibold opacity-90">60%</span>
-            <div className="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center shrink-0">
-              <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
-              </svg>
+          {/* Footer Text */}
+          <div className="pt-3 border-t border-sand/20 flex items-center justify-between text-[11px] text-muted font-medium">
+            <span>
+              Total Categories{' '}
+              <strong className="text-on-surface font-extrabold">{ranked.categoryCount}</strong>
+            </span>
+            <div className="flex items-center gap-2">
+              {cards.map((cat, i) => (
+                <span key={cat.label} className="flex items-center gap-1">
+                  <span className={`w-2 h-2 rounded-full ${dotStyles[i]}`} /> {cat.label}
+                </span>
+              ))}
             </div>
           </div>
-        </div>
-
-        {/* Card 2: Buttermilk */}
-        <div className="bg-[#b87d20] rounded-2xl p-4 text-white flex flex-col justify-between min-h-[135px] relative overflow-hidden shadow-sm">
-          <div>
-            <span className="text-xs font-bold tracking-wide opacity-95 block">Buttermilk</span>
-            <span className="text-2xl font-extrabold mt-1 block">3</span>
-          </div>
-
-          <div className="flex items-end justify-between mt-4">
-            <span className="text-xs font-semibold opacity-90">60%</span>
-            <div className="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center shrink-0">
-              <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
-              </svg>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Footer Text */}
-      <div className="pt-3 border-t border-sand/20 flex items-center justify-between text-[11px] text-muted font-medium">
-        <span>Total Categories <strong className="text-on-surface font-extrabold">6</strong></span>
-        <div className="flex items-center gap-2">
-          <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-[#0c3c26]" /> Milk & Dairy</span>
-          <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-[#b87d20]" /> Buttermilk</span>
-        </div>
-      </div>
+        </>
+      )}
     </div>
   );
 }

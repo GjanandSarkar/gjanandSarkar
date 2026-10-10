@@ -56,7 +56,8 @@ export function Footer() {
             </Link>
 
             <p className="text-xs text-emerald-100/80 leading-relaxed max-w-sm">
-              Proudly Indian. Purely Authentic. Connecting conscious families directly with certified Vedic Gaushalas, traditional organic farmers, and regional artisans.
+              Proudly Indian. Purely Authentic. One verified partner brand per
+              category — across dairy, groceries, wellness, home, fashion and more.
             </p>
 
             <div className="flex items-center gap-3 pt-2">
@@ -136,8 +137,8 @@ export function Footer() {
               <li><Link href="/about" className="hover:text-white transition-colors">About Us</Link></li>
               <li><Link href="/contact" className="hover:text-white transition-colors">Contact Us</Link></li>
               <li><Link href="/faq" className="hover:text-white transition-colors">FAQs & Help</Link></li>
-              <li><Link href="/become-seller" className="hover:text-white transition-colors">Gaushala Partners</Link></li>
-              <li><Link href="/about#fssai" className="hover:text-white transition-colors">FSSAI Verification</Link></li>
+              <li><Link href="/become-seller" className="hover:text-white transition-colors">Partner With Us</Link></li>
+              <li><Link href="/about#verification" className="hover:text-white transition-colors">Brand Verification</Link></li>
             </ul>
           </div>
 
@@ -163,7 +164,7 @@ export function Footer() {
             <ul className="space-y-2 text-xs text-emerald-100/80">
               <li><Link href="/become-seller" className="hover:text-white transition-colors">Become a Seller</Link></li>
               <li><Link href="/seller/dashboard" className="hover:text-white transition-colors">Seller Portal Login</Link></li>
-              <li><Link href="/become-seller" className="hover:text-white transition-colors">Farmer Guidelines</Link></li>
+              <li><Link href="/become-seller" className="hover:text-white transition-colors">Partner Guidelines</Link></li>
               <li><Link href="/about" className="hover:text-white transition-colors">Quality Standards</Link></li>
               <li><Link href="/contact" className="hover:text-white transition-colors">Bulk & Corporate Supply</Link></li>
             </ul>
@@ -175,7 +176,7 @@ export function Footer() {
               Stay Connected
             </h4>
             <p className="text-xs text-emerald-100/80 leading-relaxed">
-              Get updates on fresh seasonal harvest, Vedic ghee batches, and festive offers.
+              Get updates on new partner brands, category launches and festive offers.
             </p>
 
             <form onSubmit={handleSubscribe} className="space-y-2">
@@ -212,7 +213,7 @@ export function Footer() {
             <span>•</span>
             <Link href="/terms" className="hover:text-white transition-colors">Terms of Service</Link>
             <span>•</span>
-            <Link href="/about#fssai" className="hover:text-white transition-colors">FSSAI Certified</Link>
+            <Link href="/about#verification" className="hover:text-white transition-colors">Verified Partners</Link>
           </div>
 
           <div className="flex items-center gap-1 text-emerald-200">

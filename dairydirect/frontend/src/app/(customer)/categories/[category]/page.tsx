@@ -1,9 +1,10 @@
 import { Metadata } from 'next';
-import { getProductsServer } from '@/lib/api/products';
+import { getCategoryProducts } from '@/lib/api/home';
 import { ProductCard } from '@/components/shared/ProductCard';
 import { JsonLd } from '@/components/seo/JsonLd';
 import { ChevronLeft, Sparkles, ArrowRight, PackageOpen } from 'lucide-react';
 import Link from 'next/link';
+import { CATEGORIES } from '@/lib/constants/categories';
 
 interface Props {
   params: Promise<{ category: string }>;
@@ -28,18 +29,19 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   };
 }
 
-export const dynamic = 'force-dynamic';
-export const revalidate = 0;
+// Was force-dynamic + revalidate 0: a full, unbounded category query on every
+// single page view. Category listings change when the catalogue changes, not
+// per visitor, so they are cached and tag-invalidated like the homepage.
+export const revalidate = 300;
 
 export default async function CategoryPage({ params }: Props) {
   const { category: rawCategory } = await params;
   const categoryTitle = formatCategoryTitle(rawCategory);
   
   // Fetch products matching category
-  const products = await getProductsServer({ 
-    category: rawCategory.toLowerCase() === 'all' ? undefined : categoryTitle, 
-    activeOnly: true 
-  });
+  const products = await getCategoryProducts(
+    rawCategory.toLowerCase() === 'all' ? undefined : categoryTitle
+  );
 
   const breadcrumbData = {
     "@context": "https://schema.org",
@@ -60,14 +62,14 @@ export default async function CategoryPage({ params }: Props) {
     ]
   };
 
-  const popularCategories = [
-    { name: 'A2 Gir Milk', category: 'Milk' },
-    { name: 'Bilona Ghee', category: 'Ghee' },
-    { name: 'Fresh Paneer', category: 'Paneer' },
-    { name: 'Curd & Lassi', category: 'Curd' },
-    { name: 'Handicrafts', category: 'Handicrafts' },
-    { name: 'Ayurveda', category: 'Ayurveda' },
-  ];
+  // Cross-links to other categories. Previously four of the six were dairy
+  // sub-products that are not categories at all, so they linked to pages with
+  // no results. Now drawn from the taxonomy, excluding the current category.
+  const popularCategories = CATEGORIES.filter(
+    (c) => c.name.toLowerCase() !== rawCategory.toLowerCase(),
+  )
+    .slice(0, 6)
+    .map((c) => ({ name: c.name, category: c.name }));
 
   return (
     <div className="min-h-screen bg-[#fafaf8] pb-24">

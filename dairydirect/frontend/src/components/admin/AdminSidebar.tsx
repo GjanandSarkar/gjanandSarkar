@@ -13,11 +13,12 @@ import { cn } from '@/lib/utils';
 const navItems = [
   { href: '/admin', icon: LayoutDashboard, label: 'Dashboard', exact: true },
   { href: '/admin/sellers', icon: Store, label: 'Sellers' },
-  { href: '/admin/vendor-inquiries', icon: Building2, label: 'Seller Inquiries' },
+  { href: '/admin/vendor-inquiries', icon: Building2, label: 'Seller Applications' },
+  { href: '/admin/products/approvals', icon: ShieldCheck, label: 'Product Approvals' },
+  { href: '/admin/products', icon: Package, label: 'Products', exact: true },
+  { href: '/admin/categories', icon: Tags, label: 'Categories' },
   { href: '/admin/orders', icon: ShoppingBag, label: 'Orders' },
   { href: '/admin/subscriptions', icon: CalendarDays, label: 'Subscriptions' },
-  { href: '/admin/products', icon: Package, label: 'Products' },
-  { href: '/admin/categories', icon: Tags, label: 'Categories' },
   { href: '/admin/customers', icon: Users, label: 'Customers' },
   { href: '/admin/delivery', icon: Truck, label: 'Deliveries' },
   { href: '/admin/analytics', icon: BarChart3, label: 'Analytics' },
@@ -39,6 +40,9 @@ export function AdminSidebar() {
 
   const isActive = (item: typeof navItems[0]) => {
     if (item.exact) return pathname === item.href;
+    if (item.href === '/admin/products' && pathname.startsWith('/admin/products/approvals')) {
+      return false;
+    }
     return pathname.startsWith(item.href);
   };
 
