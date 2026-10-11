@@ -3,10 +3,23 @@
 import { useState, useEffect } from 'react';
 import { useTranslation } from '@/lib/i18n';
 import { format } from 'date-fns';
-import { ShoppingBag, ChevronDown, Loader2, AlertCircle } from 'lucide-react';
+import { 
+  ShoppingBag, 
+  ChevronDown, 
+  Loader2, 
+  AlertCircle, 
+  Store, 
+  MapPin, 
+  Phone, 
+  CreditCard, 
+  CheckCircle2, 
+  Ban, 
+  RefreshCw 
+} from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { getAllOrders, updateOrderStatus } from '@/lib/api/orders';
 import type { OrderWithItems } from '@/lib/api/orders';
+import { PLACEHOLDER_PRODUCT_IMAGE } from '@/lib/constants/brand';
 
 const STATUS_STYLES: Record<string, { bg: string; color: string; dot: string }> = {
   'pending':          { bg: '#ffdcc7', color: '#774117', dot: '#d4712a' },
@@ -16,22 +29,10 @@ const STATUS_STYLES: Record<string, { bg: string; color: string; dot: string }> 
   'cancelled':        { bg: '#e3e3dc', color: '#43493e', dot: '#73796d' },
 };
 
-const ORDER_STATUSES: OrderWithItems['status'][] = ['pending', 'confirmed', 'out_for_delivery', 'delivered', 'cancelled'];
+const ORDER_STATUSES: OrderWithItems['status'][] = ['confirmed', 'out_for_delivery', 'delivered', 'cancelled'];
 
 type OrderStatus = OrderWithItems['status'];
 
-/**
- * The order lifecycle, mirroring what the database actually permits.
- *
- * This screen used to render all five statuses as plain clickable buttons,
- * so an admin could ask for a transition the backend is guaranteed to
- * reject -- cancelling a delivered order being the obvious one, which
- * cancel_order_atomic() refuses because the goods are already with the
- * customer. That is a return/refund, not a cancellation.
- *
- * Keep this in sync with cancel_order_atomic() in
- * 20260930_inventory_synchronization_system.sql.
- */
 const ALLOWED_TRANSITIONS: Record<OrderStatus, OrderStatus[]> = {
   pending:          ['confirmed', 'cancelled'],
   confirmed:        ['out_for_delivery', 'cancelled'],
@@ -40,7 +41,6 @@ const ALLOWED_TRANSITIONS: Record<OrderStatus, OrderStatus[]> = {
   cancelled:        [],
 };
 
-/** Why a given target status is unavailable from the order's current state. */
 function transitionBlockedReason(from: OrderStatus, to: OrderStatus): string | null {
   if (from === to) return null;
   if (ALLOWED_TRANSITIONS[from]?.includes(to)) return null;
@@ -65,19 +65,65 @@ export default function AdminOrdersPage() {
   const [isUpdating, setIsUpdating] = useState<string | null>(null);
   const [updateError, setUpdateError] = useState<{ orderId: string; message: string } | null>(null);
 
-  useEffect(() => {
-    getAllOrders().then(data => {
-      setOrders(data);
+  const fetchOrders = () => {
+    getAllOrders({ type: 'admin' }).then(data => {
+      // Filter orders where products do not belong to external sellers (Admin product orders only)
+      const adminOnly = data.filter(order =>
+        (order.order_items || []).every(item => !item.products?.seller_id && !item.products?.sellers)
+      );
+      setOrders(adminOnly);
       setIsLoading(false);
     });
+  };
+
+  useEffect(() => {
+    fetchOrders();
+
+    // Realtime Supabase listener on orders table so status changes sync immediately
+    let isCancelled = false;
+    let activeChannel: any = null;
+    import('@/lib/supabase/lazy').then(({ getSupabaseLazy }) => {
+      getSupabaseLazy().then(supabase => {
+        if (isCancelled) return;
+        const channelName = `admin-orders-live-sync-${Math.random().toString(36).slice(2, 9)}`;
+        activeChannel = supabase
+          .channel(channelName)
+          .on(
+            'postgres_changes',
+            { event: '*', schema: 'public', table: 'orders' },
+            () => {
+              getAllOrders({ type: 'admin' }).then(data => {
+                const adminOnly = data.filter(order =>
+                  (order.order_items || []).every(item => !item.products?.seller_id && !item.products?.sellers)
+                );
+                setOrders(adminOnly);
+              });
+            }
+          )
+          .subscribe();
+
+        if (isCancelled) {
+          supabase.removeChannel(activeChannel);
+        }
+      });
+    });
+
+    return () => {
+      isCancelled = true;
+      if (activeChannel) {
+        import('@/lib/supabase/lazy').then(({ getSupabaseLazy }) => {
+          getSupabaseLazy().then(supabase => {
+            supabase.removeChannel(activeChannel);
+          });
+        });
+      }
+    };
   }, []);
 
   const handleUpdateStatus = async (orderId: string, status: OrderStatus, userId: string | null) => {
     const order = orders.find(o => o.id === orderId);
     if (!order) return;
 
-    // Guard client-side too, so a stale render can never fire a request the
-    // backend will refuse.
     const blocked = transitionBlockedReason(order.status, status);
     if (blocked) {
       setUpdateError({ orderId, message: blocked });
@@ -91,8 +137,6 @@ export default function AdminOrdersPage() {
       if (result.success) {
         setOrders(prev => prev.map(o => (o.id === orderId ? { ...o, status } : o)));
       } else {
-        // Previously this branch did not exist: a failed update logged to the
-        // console and the admin just saw nothing happen.
         setUpdateError({
           orderId,
           message: result.error || 'Could not update this order. Please try again.',
@@ -117,15 +161,42 @@ export default function AdminOrdersPage() {
     <div className="flex flex-col min-h-screen">
       <div className="sticky top-0 z-30 glass-surface">
         <div className="px-6 md:px-10 pt-6 pb-0">
-          <h1 className="font-extrabold text-[24px] tracking-tight mb-4"
-            style={{ color: 'var(--color-on-surface)' }}>
-            Orders
-            <span className="ml-2 text-[15px] font-normal" style={{ color: 'var(--color-outline)' }}>
-              ({filtered.length})
-            </span>
-          </h1>
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-4">
+            <div>
+              <div className="flex items-center gap-2">
+                <span className="px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-800 text-[10px] font-black uppercase tracking-wider">
+                  Admin Platform Inventory
+                </span>
+              </div>
+              <h1 className="font-extrabold text-[24px] tracking-tight mt-1"
+                style={{ color: 'var(--color-on-surface)' }}>
+                Admin Product Orders
+                <span className="ml-2 text-[15px] font-normal" style={{ color: 'var(--color-outline)' }}>
+                  ({filtered.length})
+                </span>
+              </h1>
+              <p className="text-[12px] text-gray-500 mt-0.5">
+                Orders containing direct platform & admin products. For external vendor products, manage under All Seller Orders List.
+              </p>
+            </div>
+
+            <div className="flex items-center gap-2">
+
+              <button
+                onClick={() => {
+                  setIsLoading(true);
+                  fetchOrders();
+                }}
+                title="Refresh Orders"
+                className="p-2 rounded-xl border border-gray-200 hover:bg-gray-50 text-gray-600 transition-colors cursor-pointer shrink-0"
+              >
+                <RefreshCw className="w-4 h-4" />
+              </button>
+            </div>
+          </div>
+
           <div className="flex gap-2 overflow-x-auto no-scrollbar -mx-6 px-6 pb-1">
-            {['all', 'confirmed', 'out_for_delivery', 'delivered', 'cancelled'].map(tab => (
+            {['all', 'pending', 'confirmed', 'out_for_delivery', 'delivered', 'cancelled'].map(tab => (
               <button key={tab} onClick={() => setActiveTab(tab)}
                 className="whitespace-nowrap px-4 py-2 rounded-full text-[12px] font-semibold transition-all duration-200 shrink-0 capitalize"
                 style={activeTab === tab ? {
@@ -164,6 +235,16 @@ export default function AdminOrdersPage() {
               {filtered.map((order, i) => {
                 const statusStyle = STATUS_STYLES[order.status] || STATUS_STYLES['cancelled'];
                 const isExpanded = expandedId === order.id;
+
+                // Extract all distinct sellers from order items
+                const sellerStores = Array.from(
+                  new Set(
+                    (order.order_items || [])
+                      .map(item => item.products?.sellers?.store_name)
+                      .filter(Boolean)
+                  )
+                );
+
                 return (
                   <motion.div key={order.id}
                     initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }}
@@ -175,12 +256,42 @@ export default function AdminOrdersPage() {
                       onClick={() => setExpandedId(isExpanded ? null : order.id)}>
                       <div className="flex items-center gap-3">
                         <div>
-                          <p className="font-bold text-[14px]" style={{ color: 'var(--color-primary)' }}>{order.id}</p>
-                          <p className="text-[11px]" style={{ color: 'var(--color-outline)' }}>
-                            {order.profiles?.name || 'Customer'} · {format(new Date(order.created_at), 'MMM d, hh:mm a')}
+                          <div className="flex items-center gap-2 flex-wrap">
+                            <p className="font-bold text-[14px]" style={{ color: 'var(--color-primary)' }}>
+                              {order.order_number || order.id}
+                            </p>
+
+                            {/* Seller Store Tag */}
+                            {sellerStores.length > 0 ? (
+                              sellerStores.map(storeName => (
+                                <span
+                                  key={storeName}
+                                  className="px-2 py-0.5 rounded-md text-[10px] font-black uppercase tracking-wider bg-purple-100 text-purple-800 flex items-center gap-1"
+                                >
+                                  <Store className="w-3 h-3 text-purple-600" />
+                                  <span>{storeName}</span>
+                                </span>
+                              ))
+                            ) : (
+                              <span className="px-2 py-0.5 rounded-md text-[10px] font-semibold bg-gray-100 text-gray-600">
+                                Direct Platform
+                              </span>
+                            )}
+
+                            {/* Payment Status */}
+                            <span className={`px-2 py-0.5 rounded-md text-[10px] font-bold uppercase tracking-wider ${
+                              order.payment_status === 'paid' ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800'
+                            }`}>
+                              {order.payment_status === 'paid' ? 'Paid' : `Payment: ${order.payment_status || 'Pending'}`} ({order.payment_method || 'COD'})
+                            </span>
+                          </div>
+
+                          <p className="text-[11px] mt-0.5" style={{ color: 'var(--color-outline)' }}>
+                            {order.profiles?.name || 'Customer'} {order.profiles?.phone ? `(${order.profiles.phone})` : ''} · {format(new Date(order.created_at), 'MMM d, hh:mm a')}
                           </p>
                         </div>
                       </div>
+
                       <div className="flex items-center gap-3">
                         <span className="font-extrabold text-[15px]" style={{ color: 'var(--color-primary)' }}>
                           {t('currency')}{order.total_amount}
@@ -208,19 +319,71 @@ export default function AdminOrdersPage() {
                           exit={{ height: 0, opacity: 0 }}
                           transition={{ duration: 0.25 }}
                           style={{ overflow: 'hidden', borderTop: '1px solid rgba(195, 201, 187, 0.3)' }}>
-                          <div className="px-5 py-4">
-                            <div className="rounded-[10px] p-3 mb-4"
+                          <div className="px-5 py-4 space-y-4">
+
+                            {/* Customer Delivery Details Box */}
+                            <div className="p-3.5 rounded-xl border border-gray-200/80 bg-gray-50/70 text-xs grid grid-cols-1 md:grid-cols-2 gap-3">
+                              <div>
+                                <span className="text-[10px] font-bold uppercase tracking-wider text-gray-400 block">Customer Information</span>
+                                <p className="font-bold text-gray-900 mt-0.5">{order.profiles?.name || 'Customer'}</p>
+                                <p className="text-gray-600">{order.profiles?.email || 'N/A'}</p>
+                                {order.profiles?.phone && (
+                                  <p className="text-gray-700 flex items-center gap-1 mt-0.5 font-medium">
+                                    <Phone className="w-3 h-3 text-gray-400" />
+                                    <span>+91 {order.profiles.phone}</span>
+                                  </p>
+                                )}
+                              </div>
+
+                              <div>
+                                <span className="text-[10px] font-bold uppercase tracking-wider text-gray-400 block">Shipping Address</span>
+                                <p className="text-gray-800 mt-0.5 leading-relaxed font-medium">
+                                  {order.user_addresses?.address || order.shipping_address || 'Address on file'}
+                                </p>
+                                {order.user_addresses?.apartment && (
+                                  <p className="text-gray-500 text-[11px]">Apt/Flat: {order.user_addresses.apartment}</p>
+                                )}
+                                {order.delivery_slot && (
+                                  <p className="text-emerald-700 font-semibold mt-1 text-[11px]">Slot: {order.delivery_slot}</p>
+                                )}
+                              </div>
+                            </div>
+
+                            {/* Ordered Items with Seller Attribution */}
+                            <div className="rounded-[10px] p-3 mb-2"
                               style={{ background: 'var(--color-surface-container-low)' }}>
+                              <span className="text-[10px] font-bold uppercase tracking-wider text-gray-400 block mb-2">Order Products & Sellers</span>
                               {order.order_items?.map((item, j) => {
                                 const pName = item.product_name || item.products?.name || (item.product_id ? `Product #${item.product_id.slice(0, 6)}` : 'Dairy Product');
                                 const pWeight = item.weight || item.product_variants?.weight || '';
+                                const storeName = item.products?.sellers?.store_name;
+                                const img = item.products?.image_url || item.product_image || PLACEHOLDER_PRODUCT_IMAGE;
+
                                 return (
-                                  <div key={j} className="flex justify-between text-[13px] py-1"
+                                  <div key={j} className="flex items-center justify-between text-[13px] py-2"
                                     style={{ borderTop: j > 0 ? '1px solid rgba(195, 201, 187, 0.25)' : undefined }}>
-                                    <span style={{ color: 'var(--color-on-surface-variant)' }}>
-                                      {item.quantity}× {pName}{pWeight ? ` (${pWeight})` : ''}
-                                    </span>
-                                    <span className="font-semibold" style={{ color: 'var(--color-on-surface)' }}>
+                                    <div className="flex items-center gap-2.5">
+                                      <img
+                                        src={img}
+                                        alt={pName}
+                                        className="w-9 h-9 rounded-lg object-cover bg-white border border-gray-200 shrink-0"
+                                        onError={e => {
+                                          (e.target as HTMLImageElement).src = PLACEHOLDER_PRODUCT_IMAGE;
+                                        }}
+                                      />
+                                      <div>
+                                        <span className="font-semibold" style={{ color: 'var(--color-on-surface-variant)' }}>
+                                          {item.quantity}× {pName}{pWeight ? ` (${pWeight})` : ''}
+                                        </span>
+                                        {storeName && (
+                                          <div className="flex items-center gap-1 mt-0.5">
+                                            <Store className="w-3 h-3 text-purple-600" />
+                                            <span className="text-[11px] font-bold text-purple-700">Store: {storeName}</span>
+                                          </div>
+                                        )}
+                                      </div>
+                                    </div>
+                                    <span className="font-bold" style={{ color: 'var(--color-on-surface)' }}>
                                       {t('currency')}{item.price * item.quantity}
                                     </span>
                                   </div>
@@ -228,18 +391,31 @@ export default function AdminOrdersPage() {
                               })}
                             </div>
 
-                            <div className="relative">
+                            {/* Cancellation Reason / History Display */}
+                            {order.status === 'cancelled' && (
+                              <div className="p-3 rounded-xl bg-gray-100 border border-gray-200 text-xs text-gray-700 space-y-1">
+                                <span className="font-bold text-gray-900 block flex items-center gap-1">
+                                  <Ban className="w-3.5 h-3.5 text-gray-500" />
+                                  <span>Cancellation History & Audit Note:</span>
+                                </span>
+                                <p className="text-gray-600 font-mono text-[11px]">
+                                  {order.notes || 'Order cancelled and stock inventory restored.'}
+                                </p>
+                              </div>
+                            )}
+
+                            <div className="relative pt-2">
                               {isUpdating === order.id && (
                                 <div className="absolute inset-0 bg-white/50 flex items-center justify-center z-10">
                                   <Loader2 className="w-5 h-5 animate-spin text-primary" />
                                 </div>
                               )}
                               <p className="text-[11px] font-bold uppercase tracking-wider mb-4"
-                                style={{ color: 'var(--color-outline)' }}>Order Timeline & Status</p>
+                                style={{ color: 'var(--color-outline)' }}>Order Timeline & Fulfillment</p>
                               
                               <div className="flex items-center gap-2 mb-6 w-full max-w-xl">
                                 {['pending', 'confirmed', 'out_for_delivery', 'delivered'].map((status, idx, arr) => {
-                                  const isActive = order.status === status || arr.indexOf(order.status as any) > idx && order.status !== 'cancelled';
+                                  const isActive = order.status === status || (arr.indexOf(order.status as any) > idx && order.status !== 'cancelled');
                                   const isCurrent = order.status === status;
                                   return (
                                     <div key={status} className="flex items-center flex-1 last:flex-none">
@@ -256,6 +432,7 @@ export default function AdminOrdersPage() {
                               </div>
 
                               <div className="flex flex-wrap gap-2">
+                                <span className="text-xs font-bold text-gray-500 self-center mr-1">Actions:</span>
                                 {ORDER_STATUSES.map(status => {
                                   const sStyle = STATUS_STYLES[status];
                                   const isCurrentStatus = order.status === status;
@@ -268,7 +445,7 @@ export default function AdminOrdersPage() {
                                       disabled={isBusy || isBlocked || isCurrentStatus}
                                       title={blockedReason ?? (isCurrentStatus ? 'Current status' : `Mark as ${status.replace(/_/g, ' ')}`)}
                                       aria-current={isCurrentStatus ? 'true' : undefined}
-                                      className={`px-3 py-1.5 rounded-full text-[11px] font-bold transition-all ${
+                                      className={`px-3.5 py-1.5 rounded-full text-[11px] font-bold transition-all cursor-pointer ${
                                         isBlocked
                                           ? 'opacity-40 cursor-not-allowed line-through'
                                           : isCurrentStatus
@@ -283,16 +460,16 @@ export default function AdminOrdersPage() {
                                         background: 'var(--color-surface-container)',
                                         color: 'var(--color-on-surface-variant)',
                                       }}>
-                                      <span className="capitalize">{status.replace(/_/g, ' ')}</span>
+                                      <span className="capitalize">{status === 'cancelled' ? 'Cancel Order' : status.replace(/_/g, ' ')}</span>
                                     </button>
                                   );
                                 })}
                               </div>
 
-                              {ALLOWED_TRANSITIONS[order.status].length === 0 && (
+                              {ALLOWED_TRANSITIONS[order.status]?.length === 0 && (
                                 <p className="mt-2 text-[11px]" style={{ color: 'var(--color-on-surface-variant)' }}>
                                   {order.status === 'delivered'
-                                    ? 'This order is complete. To reverse it, raise a return or refund rather than a cancellation.'
+                                    ? 'This order is fulfilled. To reverse it, raise a return or refund rather than a cancellation.'
                                     : 'This order is cancelled and its stock has been restored.'}
                                 </p>
                               )}

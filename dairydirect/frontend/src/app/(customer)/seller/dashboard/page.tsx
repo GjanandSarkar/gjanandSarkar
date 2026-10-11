@@ -44,6 +44,8 @@ import {
 import { useStore } from '@/store/useStore';
 import { getSellerDashboard, SellerDashboardData, getSellerProducts, requestSellerReactivation } from '@/lib/api/sellers';
 import { SellerProductModal } from '@/components/seller/SellerProductModal';
+import { SellerOrdersManager } from '@/components/seller/SellerOrdersManager';
+import { SellerReturnsManager } from '@/components/seller/SellerReturnsManager';
 import Link from 'next/link';
 import { PLACEHOLDER_PRODUCT_IMAGE } from '@/lib/constants/brand';
 
@@ -54,6 +56,7 @@ type DashboardTab =
   | 'rejections' 
   | 'inventory' 
   | 'orders' 
+  | 'returns'
   | 'analytics' 
   | 'notifications';
 
@@ -156,11 +159,14 @@ export default function SellerDashboardPage() {
       }, 12000);
 
       // 2. Real-time Supabase listener on product approvals, products, and orders
-      let channel: any = null;
+      let isCancelled = false;
+      let activeChannel: any = null;
       import('@/lib/supabase/lazy').then(({ getSupabaseLazy }) => {
         getSupabaseLazy().then((supabase) => {
-          channel = supabase
-            .channel(`seller-live-${user.id}`)
+          if (isCancelled) return;
+          const channelName = `seller-live-${user.id}-${Math.random().toString(36).slice(2, 9)}`;
+          activeChannel = supabase
+            .channel(channelName)
             .on('postgres_changes', { event: '*', schema: 'public', table: 'seller_product_approval' }, () => {
               loadProducts();
               loadSellerData();
@@ -177,15 +183,20 @@ export default function SellerDashboardPage() {
               loadSellerData();
             })
             .subscribe();
+
+          if (isCancelled) {
+            supabase.removeChannel(activeChannel);
+          }
         });
       });
 
       return () => {
+        isCancelled = true;
         clearInterval(interval);
-        if (channel) {
+        if (activeChannel) {
           import('@/lib/supabase/lazy').then(({ getSupabaseLazy }) => {
             getSupabaseLazy().then((supabase) => {
-              supabase.removeChannel(channel);
+              supabase.removeChannel(activeChannel);
             });
           });
         }
@@ -642,6 +653,7 @@ export default function SellerDashboardPage() {
             { id: 'inventory', label: 'Inventory Management', icon: Layers },
             { id: 'profile', label: 'Seller Profile', icon: Building2 },
             { id: 'orders', label: `Orders (${data?.recentOrders?.length || 0})`, icon: ShoppingBag },
+            { id: 'returns', label: 'Returns & Cancellations', icon: RotateCcw },
             { id: 'analytics', label: 'Sales & Settlements', icon: IndianRupee },
             { id: 'notifications', label: 'Notifications', icon: Bell, badge: notifications.length },
           ].map((tab) => {
@@ -1249,37 +1261,28 @@ export default function SellerDashboardPage() {
 
         {/* ─── TAB 6: ORDERS ─── */}
         {activeTab === 'orders' && (
-          <div className="bg-white rounded-3xl border border-gray-200 shadow-2xs p-6 sm:p-8 space-y-4 animate-in fade-in">
-            <h3 className="text-sm font-black text-gray-900 uppercase tracking-wider">
-              Store Order Management
-            </h3>
-            <div className="divide-y divide-gray-100">
-              {(data?.recentOrders || []).length > 0 ? (
-                (data?.recentOrders || []).map((order) => (
-                  <div key={order.id} className="py-4 flex items-center justify-between gap-4">
-                    <div className="space-y-1">
-                      <div className="flex items-center gap-2">
-                        <span className="text-xs font-mono font-bold text-[#0f3e26]">{order.id}</span>
-                        <span className="px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 text-[10px] font-black uppercase">
-                          {order.status.replace('_', ' ')}
-                        </span>
-                      </div>
-                      <p className="text-xs text-gray-600">{order.customerName} • {order.itemsCount} products ordered</p>
-                      <span className="text-[10px] text-gray-400">{order.date}</span>
-                    </div>
-
-                    <div className="text-right space-y-1">
-                      <span className="text-sm font-black text-gray-900">₹{order.amount}</span>
-                    </div>
-                  </div>
-                ))
-              ) : (
-                <div className="py-10 text-center text-gray-400 text-xs font-medium">
-                  No customer orders received yet.
+          <div className="space-y-6 animate-in fade-in">
+            <div className="bg-white rounded-3xl border border-gray-200/90 shadow-2xs p-6 sm:p-8">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                <div>
+                  <h3 className="text-lg font-black text-gray-900 tracking-tight flex items-center gap-2">
+                    <ShoppingBag className="w-5 h-5 text-[#0f3e26]" />
+                    <span>Store Order Fulfillment</span>
+                  </h3>
+                  <p className="text-xs text-gray-500 mt-0.5">
+                    Process store orders through fulfillment workflow: Confirmed → Out for Delivery → Delivered, or cancel eligible orders.
+                  </p>
                 </div>
-              )}
+              </div>
             </div>
+
+            <SellerOrdersManager />
           </div>
+        )}
+
+        {/* ─── TAB 6b: RETURNS & CANCELLATIONS ─── */}
+        {activeTab === 'returns' && (
+          <SellerReturnsManager />
         )}
 
         {/* ─── TAB 7: ANALYTICS & PAYOUTS ─── */}

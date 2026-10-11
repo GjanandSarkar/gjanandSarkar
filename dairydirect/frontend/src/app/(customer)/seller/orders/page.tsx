@@ -1,0 +1,67 @@
+"use client";
+
+import React, { useEffect } from 'react';
+import Link from 'next/link';
+import { useRouter } from 'next/navigation';
+import { ArrowLeft, ShoppingBag, Store } from 'lucide-react';
+import { useStore } from '@/store/useStore';
+import { SellerOrdersManager } from '@/components/seller/SellerOrdersManager';
+
+export default function SellerOrdersDedicatedPage() {
+  const router = useRouter();
+  const user = useStore(s => s.user);
+  const isAuthLoading = useStore(s => s.isAuthLoading);
+
+  useEffect(() => {
+    if (!isAuthLoading && !user) {
+      router.replace('/login?redirect=/seller/orders');
+    }
+  }, [isAuthLoading, user, router]);
+
+  return (
+    <div className="min-h-screen bg-[#fafaf8] py-8 px-4 sm:px-6 lg:px-8">
+      <div className="max-w-7xl mx-auto space-y-6">
+        {/* Navigation Breadcrumb / Header */}
+        <div className="bg-white rounded-3xl border border-gray-200/90 shadow-2xs p-6 sm:p-8 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div className="flex items-center gap-4">
+            <Link
+              href="/seller/dashboard"
+              className="p-2.5 rounded-xl border border-gray-200 text-gray-700 hover:bg-gray-50 flex items-center justify-center transition-colors shrink-0"
+              title="Return to Seller Dashboard"
+            >
+              <ArrowLeft className="w-5 h-5 text-gray-700" />
+            </Link>
+
+            <div className="space-y-0.5">
+              <div className="flex items-center gap-2">
+                <span className="px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 text-[10px] font-black uppercase tracking-wider">
+                  Seller Orders Portal
+                </span>
+              </div>
+              <h1 className="text-xl sm:text-2xl font-black text-[#0f3e26] tracking-tight flex items-center gap-2">
+                <ShoppingBag className="w-6 h-6 text-[#c88a23]" />
+                <span>Seller Order Management</span>
+              </h1>
+              <p className="text-xs text-gray-500">
+                Track incoming customer purchases, advance fulfillment milestones (Confirmed → Out for Delivery → Delivered), and manage cancellations.
+              </p>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-3">
+            <Link
+              href="/seller/dashboard"
+              className="px-4 py-2.5 bg-gray-100 hover:bg-gray-200 text-gray-800 text-xs font-bold rounded-xl flex items-center gap-1.5 transition-colors"
+            >
+              <Store className="w-4 h-4 text-gray-600" />
+              <span>Seller Dashboard</span>
+            </Link>
+          </div>
+        </div>
+
+        {/* Orders Manager Component */}
+        <SellerOrdersManager />
+      </div>
+    </div>
+  );
+}

@@ -6,7 +6,7 @@ import { useRouter } from 'next/navigation';
 import { useStore } from '@/store/useStore';
 import {
   LayoutDashboard, ShoppingBag, Users, Package, BarChart3,
-  Truck, LogOut, Leaf, ShieldCheck, Bell, Settings, Tags, CalendarDays, User, Building2, Store
+  Truck, LogOut, Leaf, ShieldCheck, Bell, Settings, Tags, CalendarDays, User, Building2, Store, RotateCcw
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -17,7 +17,9 @@ const navItems = [
   { href: '/admin/products/approvals', icon: ShieldCheck, label: 'Product Approvals' },
   { href: '/admin/products', icon: Package, label: 'Products', exact: true },
   { href: '/admin/categories', icon: Tags, label: 'Categories' },
-  { href: '/admin/orders', icon: ShoppingBag, label: 'Orders' },
+  { href: '/admin/orders', icon: ShoppingBag, label: 'Admin Orders', exact: true },
+  { href: '/admin/seller-orders', icon: Store, label: 'All Seller Orders List' },
+  { href: '/admin/returns', icon: RotateCcw, label: 'Returns & Cancellations' },
   { href: '/admin/subscriptions', icon: CalendarDays, label: 'Subscriptions' },
   { href: '/admin/customers', icon: Users, label: 'Customers' },
   { href: '/admin/delivery', icon: Truck, label: 'Deliveries' },
@@ -41,6 +43,9 @@ export function AdminSidebar() {
   const isActive = (item: typeof navItems[0]) => {
     if (item.exact) return pathname === item.href;
     if (item.href === '/admin/products' && pathname.startsWith('/admin/products/approvals')) {
+      return false;
+    }
+    if (item.href === '/admin/orders' && pathname.startsWith('/admin/seller-orders')) {
       return false;
     }
     return pathname.startsWith(item.href);

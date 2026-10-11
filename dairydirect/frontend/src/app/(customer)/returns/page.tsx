@@ -18,7 +18,7 @@ function CustomerReturnsContent() {
   const [showModal, setShowModal] = useState(false);
 
   const [selectedOrderId, setSelectedOrderId] = useState('');
-  const [selectedProductId, setSelectedProductId] = useState('');
+  const [selectedItemId, setSelectedItemId] = useState('');
   const [quantity, setQuantity] = useState(1);
   const [reason, setReason] = useState('spoiled_sour');
   const [customReason, setCustomReason] = useState('');
@@ -53,7 +53,7 @@ function CustomerReturnsContent() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!selectedOrderId || !selectedProductId) {
+    if (!selectedOrderId || !selectedItemId) {
       setToast({ type: 'error', message: 'Please select an order and item.' });
       return;
     }
@@ -61,15 +61,31 @@ function CustomerReturnsContent() {
     setIsSubmitting(true);
     setToast(null);
 
+    const chosenItem = (selectedOrder?.order_items || []).find(
+      (item: any) => item.id === selectedItemId || item.product_id === selectedItemId
+    );
+
+    const reasonMap: Record<string, string> = {
+      'spoiled_sour': 'Perishable item is spoiled',
+      'damaged_seal': 'Seal broken or packet leaking',
+      'wrong_item': 'Wrong item delivered',
+      'expired': 'Near or past expiry date',
+      'other': 'Other issue',
+    };
+    const readableReason = reasonMap[reason] || reason;
+
     try {
       const res = await fetch('/api/admin/returns', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           orderId: selectedOrderId,
-          productId: selectedProductId,
+          orderItemId: chosenItem?.id || selectedItemId,
+          productId: chosenItem?.product_id,
+          requestType: 'return',
           quantity: Number(quantity),
-          reason: customReason ? `${reason}: ${customReason}` : reason,
+          reason: customReason ? `${readableReason}: ${customReason}` : readableReason,
+          description: customReason || undefined,
         }),
       });
 
@@ -78,6 +94,9 @@ function CustomerReturnsContent() {
 
       setToast({ type: 'success', message: 'Return request submitted! Our team will inspect and process it.' });
       setShowModal(false);
+      setSelectedOrderId('');
+      setSelectedItemId('');
+      setCustomReason('');
       loadData();
     } catch (err: any) {
       setToast({ type: 'error', message: err.message });
@@ -204,7 +223,7 @@ function CustomerReturnsContent() {
                   value={selectedOrderId}
                   onChange={e => {
                     setSelectedOrderId(e.target.value);
-                    setSelectedProductId('');
+                    setSelectedItemId('');
                   }}
                   className="w-full px-3 py-2 rounded-[10px] border text-[13px] bg-gray-50"
                   required
@@ -223,17 +242,21 @@ function CustomerReturnsContent() {
                 <div>
                   <label className="block text-[12px] font-bold text-gray-700 mb-1">Select Item</label>
                   <select
-                    value={selectedProductId}
-                    onChange={e => setSelectedProductId(e.target.value)}
+                    value={selectedItemId}
+                    onChange={e => setSelectedItemId(e.target.value)}
                     className="w-full px-3 py-2 rounded-[10px] border text-[13px] bg-gray-50"
                     required
                   >
                     <option value="">-- Select product --</option>
-                    {(selectedOrder.order_items || []).map((item: any) => (
-                      <option key={item.product_id} value={item.product_id}>
-                        {item.product_name || item.product_id} ({item.quantity} qty)
-                      </option>
-                    ))}
+                    {(selectedOrder.order_items || []).map((item: any) => {
+                      const itemVal = item.id || item.product_id;
+                      const itemName = item.product_name || item.products?.name || item.product_id;
+                      return (
+                        <option key={itemVal} value={itemVal}>
+                          {itemName} ({item.quantity} qty)
+                        </option>
+                      );
+                    })}
                   </select>
                 </div>
               )}
@@ -268,9 +291,9 @@ function CustomerReturnsContent() {
 
               <button
                 type="submit"
-                disabled={isSubmitting || !selectedOrderId || !selectedProductId}
-                className="w-full py-3 rounded-[12px] font-bold text-white text-[14px] shadow-md transition-opacity"
-                style={{ background: 'var(--color-primary)', opacity: isSubmitting ? 0.7 : 1 }}
+                disabled={isSubmitting || !selectedOrderId || !selectedItemId}
+                className="w-full py-3 rounded-[12px] font-bold text-white text-[14px] shadow-md transition-opacity cursor-pointer disabled:opacity-50"
+                style={{ background: 'var(--color-primary)' }}
               >
                 {isSubmitting ? 'Submitting...' : 'Submit Claim'}
               </button>

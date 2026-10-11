@@ -85,6 +85,44 @@ export type DBOrderItem = {
   cost_price?: number;
   product_name?: string;
   variant_weight?: string;
+  status?: 'pending' | 'confirmed' | 'out_for_delivery' | 'delivered' | 'cancelled' | 'returned';
+  cancelled_at?: string | null;
+  delivered_at?: string | null;
+  seller_id?: string | null;
+  return_requests?: DBReturnRequest[];
+};
+
+export type DBReturnRequest = {
+  id: string;
+  order_id: string;
+  order_item_id?: string | null;
+  product_id?: string | null;
+  seller_id?: string | null;
+  user_id: string;
+  request_type: 'cancellation' | 'return';
+  reason: string;
+  description?: string | null;
+  images?: string[];
+  status: 'submitted' | 'under_review' | 'approved' | 'rejected' | 'return_in_progress' | 'item_received' | 'inspection_completed' | 'refund_pending' | 'refunded';
+  refund_amount?: number | null;
+  seller_notes?: string | null;
+  seller_status?: 'pending' | 'approved' | 'rejected';
+  admin_notes?: string | null;
+  rejection_reason?: string | null;
+  history?: Array<{
+    action: string;
+    actor_id: string;
+    actor_type: 'customer' | 'seller' | 'admin';
+    timestamp: string;
+    notes?: string;
+  }>;
+  orders?: DBOrder;
+  profiles?: DBProfile;
+  order_items?: DBOrderItem;
+  products?: DBProduct;
+  created_at: string;
+  updated_at?: string;
+  resolved_at?: string | null;
 };
 
 export type DBSubscription = {
@@ -101,22 +139,6 @@ export type DBSubscription = {
   created_at: string;
   products?: DBProduct;
   product_variants?: DBProductVariant;
-};
-
-export type DBReturnRequest = {
-  id: string;
-  order_id: string;
-  user_id: string;
-  reason: string;
-  description?: string | null;
-  images?: string[];
-  status: 'pending' | 'approved' | 'rejected' | 'refunded';
-  refund_amount: number;
-  admin_notes?: string | null;
-  created_at: string;
-  resolved_at?: string | null;
-  orders?: DBOrder;
-  profiles?: DBProfile;
 };
 
 export type DBDeliverySlot = {
