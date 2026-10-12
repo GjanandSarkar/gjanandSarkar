@@ -196,6 +196,13 @@ depend on tables created by earlier ones.
 13. 20261006_catalog_performance_indexes.sql    <- new on this branch
 14. 20261007_drop_misleading_product_defaults.sql <- new on this branch
 15. 20261008_order_idempotency.sql               <- new on this branch
+16. 20261010_seller_and_product_approval_workflow.sql
+17. 20261010_seller_product_approval_tables_and_functions.sql
+18. 20261010_sync_profiles_to_users_trigger.sql
+19. 20261011_order_cancellation_and_returns.sql
+20. 20261011_seller_order_fulfillment.sql
+21. 20261011_update_return_requests_status_check.sql
+22. 20261012_fix_place_order_atomic_overloads.sql <- new on this branch
 ```
 
 The last four are new in this branch and have **not** been applied to any live
@@ -215,6 +222,9 @@ project yet:
   `api/orders/place` already passes (without it every checkout failed), makes
   a repeated key return the original order instead of placing a second one,
   and drops two superseded `place_order_atomic` overloads.
+- `20261012_fix_place_order_atomic_overloads.sql` guarantees the database
+  holds exactly **one** `place_order_atomic`. Run this on any project where
+  checkout reports an ambiguous-function error.
 
 ### Load sample data
 
@@ -361,6 +371,23 @@ Usually correct behaviour on a fresh install, not a bug:
   the only profile, the list is empty by design. Log in with a second phone
   number to see a row.
 - *Categories* is populated by `seed.sql` (twelve canonical categories).
+
+**Checkout fails: `Could not choose the best candidate function between: ...`**
+Two copies of `place_order_atomic` exist with the same fourteen argument
+*names* but a different argument *order*. PostgreSQL identifies a function by
+its ordered argument types, so those are two distinct functions; PostgREST
+calls RPCs by name, the call matches both equally, and Postgres raises
+`42725` rather than guessing.
+
+This happens when the function is edited directly in the Supabase SQL editor
+with its parameters reordered: `CREATE OR REPLACE` only replaces a function
+whose ordered argument types match exactly, so a reordered copy is silently
+*added* as a second overload instead of replacing the first.
+
+Run `20261012_fix_place_order_atomic_overloads.sql`. It drops every overload
+and recreates one canonical definition, and refuses to finish if more than
+one survives. Always change database functions by adding a migration here,
+never by editing them in the dashboard.
 
 **Checkout fails: `Could not find the function public.place_order_atomic(...)`**
 Fixed on this branch. The API passes `p_idempotency_key`; the function was
