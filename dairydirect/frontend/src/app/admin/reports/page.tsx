@@ -49,7 +49,7 @@ export default function AdminReportsPage() {
             </Link>
             <div>
               <h1 className="font-extrabold text-[24px]" style={{ color: 'var(--color-on-surface)' }}>Business Reports & Analytics</h1>
-              <p className="text-[12px]" style={{ color: 'var(--color-outline)' }}>Financial analytics, revenue trends, and product performance</p>
+              <p className="text-[12px]" style={{ color: 'var(--color-on-surface-variant)' }}>Financial analytics, revenue trends, and product performance</p>
             </div>
           </div>
 
@@ -136,7 +136,7 @@ export default function AdminReportsPage() {
                       <div className="flex items-center gap-2">
                         <div className="w-3 h-3 rounded-full" style={{ background: COLORS[i % COLORS.length] }} />
                         <span className="text-[13px] font-semibold capitalize" style={{ color: 'var(--color-on-surface)' }}>{cat.category}</span>
-                        <span className="text-[11px]" style={{ color: 'var(--color-outline)' }}>({cat.units_sold} units)</span>
+                        <span className="text-[11px]" style={{ color: 'var(--color-on-surface-variant)' }}>({cat.units_sold} units)</span>
                       </div>
                       <span className="font-bold text-[13px]" style={{ color: 'var(--color-primary)' }}>
                         ₹{parseFloat(cat.revenue).toLocaleString('en-IN', { maximumFractionDigits: 0 })}
@@ -155,7 +155,7 @@ export default function AdminReportsPage() {
                       <div className="flex items-center gap-2">
                         <div className="w-3 h-3 rounded-full" style={{ background: COLORS[(i + 2) % COLORS.length] }} />
                         <span className="text-[13px] font-semibold uppercase" style={{ color: 'var(--color-on-surface)' }}>{pm.payment_method}</span>
-                        <span className="text-[11px]" style={{ color: 'var(--color-outline)' }}>({pm.count} orders)</span>
+                        <span className="text-[11px]" style={{ color: 'var(--color-on-surface-variant)' }}>({pm.count} orders)</span>
                       </div>
                       <span className="font-bold text-[13px]" style={{ color: 'var(--color-on-surface)' }}>
                         ₹{parseFloat(pm.total || '0').toLocaleString('en-IN', { maximumFractionDigits: 0 })}
@@ -176,7 +176,7 @@ export default function AdminReportsPage() {
                   <thead>
                     <tr style={{ background: 'var(--color-surface-container-low)' }}>
                       {['Product', 'Units Sold', 'Revenue', 'Cost', 'Est. Profit'].map(h => (
-                        <th key={h} className="text-left px-5 py-3 text-[11px] font-bold uppercase tracking-wider" style={{ color: 'var(--color-outline)' }}>{h}</th>
+                        <th key={h} className="text-left px-5 py-3 text-[11px] font-bold uppercase tracking-wider" style={{ color: 'var(--color-on-surface-variant)' }}>{h}</th>
                       ))}
                     </tr>
                   </thead>
@@ -190,7 +190,7 @@ export default function AdminReportsPage() {
                         <td className="px-5 py-3 font-bold text-[13px]" style={{ color: 'var(--color-primary)' }}>
                           ₹{parseFloat(p.revenue).toLocaleString('en-IN', { maximumFractionDigits: 0 })}
                         </td>
-                        <td className="px-5 py-3 text-[12px]" style={{ color: 'var(--color-outline)' }}>
+                        <td className="px-5 py-3 text-[12px]" style={{ color: 'var(--color-on-surface-variant)' }}>
                           ₹{parseFloat(p.cost || '0').toLocaleString('en-IN', { maximumFractionDigits: 0 })}
                         </td>
                         <td className="px-5 py-3 font-bold text-[13px]" style={{ color: '#2d5a27' }}>

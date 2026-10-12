@@ -226,7 +226,7 @@ export function CartDrawer({ isOpen, onClose }: CartDrawerProps) {
                           <button
                             onClick={() => handleRemove(item.productId, item.variantId)}
                             aria-label={`Remove ${item.product.name} from cart`}
-                            className="p-1 text-outline hover:text-error transition-colors focus-visible:outline-2 focus-visible:outline-primary rounded-md"
+                            className="p-1 text-on-surface-variant hover:text-error transition-colors focus-visible:outline-2 focus-visible:outline-primary rounded-md"
                           >
                             <Trash2 className="w-4 h-4" />
                           </button>

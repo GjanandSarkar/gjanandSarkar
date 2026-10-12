@@ -14,31 +14,31 @@ export function EmptyState({ type, onClear }: EmptyStateProps) {
   
   const content = {
     search: {
-      icon: <Search className="w-8 h-8 text-outline" />,
+      icon: <Search className="w-8 h-8 text-on-surface-variant" />,
       title: 'No search results found',
       desc: 'We couldn\'t find any products matching your search. Try adjusting your keywords.',
       action: 'Clear Search'
     },
     category: {
-      icon: <FolderX className="w-8 h-8 text-outline" />,
+      icon: <FolderX className="w-8 h-8 text-on-surface-variant" />,
       title: 'Category is empty',
       desc: 'There are no active products in this category at the moment.',
       action: 'View All Categories'
     },
     products: {
-      icon: <PackageX className="w-8 h-8 text-outline" />,
+      icon: <PackageX className="w-8 h-8 text-on-surface-variant" />,
       title: 'No products available',
       desc: 'We are currently restocking our inventory. Please check back later.',
       action: 'Refresh'
     },
     orders: {
-      icon: <ShoppingBag className="w-8 h-8 text-outline" />,
+      icon: <ShoppingBag className="w-8 h-8 text-on-surface-variant" />,
       title: 'No Orders Yet',
       desc: 'Looks like you haven\'t placed any orders with us yet.',
       action: 'Browse Products'
     },
     cart: {
-      icon: <ShoppingCart className="w-8 h-8 text-outline" />,
+      icon: <ShoppingCart className="w-8 h-8 text-on-surface-variant" />,
       title: 'Your cart is empty',
       desc: 'Looks like you haven\'t added any products to your cart yet.',
       action: 'Browse Products'
@@ -53,7 +53,7 @@ export function EmptyState({ type, onClear }: EmptyStateProps) {
       <h2 className="font-bold text-[20px] mb-2 text-on-surface">
         {content.title}
       </h2>
-      <p className="text-[14px] max-w-[260px] leading-relaxed text-outline mb-8">
+      <p className="text-[14px] max-w-[260px] leading-relaxed text-on-surface-variant mb-8">
         {content.desc}
       </p>
       

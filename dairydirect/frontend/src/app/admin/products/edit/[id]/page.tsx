@@ -318,7 +318,7 @@ export default function EditProductPage() {
           <div>
             <label
               className="text-[12px] font-bold uppercase tracking-wider mb-2 block"
-              style={{ color: 'var(--color-outline)' }}
+              style={{ color: 'var(--color-on-surface-variant)' }}
             >
               Product Name *
             </label>
@@ -338,7 +338,7 @@ export default function EditProductPage() {
           <div>
             <label
               className="text-[12px] font-bold uppercase tracking-wider mb-2 block"
-              style={{ color: 'var(--color-outline)' }}
+              style={{ color: 'var(--color-on-surface-variant)' }}
             >
               Category *
             </label>
@@ -365,7 +365,7 @@ export default function EditProductPage() {
         <div>
           <label
             className="text-[12px] font-bold uppercase tracking-wider mb-2 block"
-            style={{ color: 'var(--color-outline)' }}
+            style={{ color: 'var(--color-on-surface-variant)' }}
           >
             Description
           </label>
@@ -430,7 +430,7 @@ export default function EditProductPage() {
         <div>
           <label
             className="text-[12px] font-bold uppercase tracking-wider mb-2 block"
-            style={{ color: 'var(--color-outline)' }}
+            style={{ color: 'var(--color-on-surface-variant)' }}
           >
             Product Photos (Upload multiple at once)
           </label>
@@ -448,7 +448,7 @@ export default function EditProductPage() {
             <div>
               <label
                 className="text-[13px] font-bold uppercase tracking-wider flex items-center gap-1.5"
-                style={{ color: 'var(--color-outline)' }}
+                style={{ color: 'var(--color-on-surface-variant)' }}
               >
                 <Layers className="w-4 h-4 text-primary" />
                 Product Variants & Margin Rules ({variants.length})

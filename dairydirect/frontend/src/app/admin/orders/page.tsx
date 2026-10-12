@@ -171,7 +171,7 @@ export default function AdminOrdersPage() {
               <h1 className="font-extrabold text-[24px] tracking-tight mt-1"
                 style={{ color: 'var(--color-on-surface)' }}>
                 Admin Product Orders
-                <span className="ml-2 text-[15px] font-normal" style={{ color: 'var(--color-outline)' }}>
+                <span className="ml-2 text-[15px] font-normal" style={{ color: 'var(--color-on-surface-variant)' }}>
                   ({filtered.length})
                 </span>
               </h1>
@@ -222,10 +222,10 @@ export default function AdminOrdersPage() {
               className="flex flex-col items-center justify-center py-24 text-center">
               <div className="w-16 h-16 rounded-full flex items-center justify-center mb-4"
                 style={{ background: 'var(--color-surface-container-low)' }}>
-                <ShoppingBag className="w-7 h-7" style={{ color: 'var(--color-outline)' }} strokeWidth={1.5} />
+                <ShoppingBag className="w-7 h-7" style={{ color: 'var(--color-on-surface-variant)' }} strokeWidth={1.5} />
               </div>
               <p className="font-bold text-[18px]" style={{ color: 'var(--color-on-surface)' }}>No orders</p>
-              <p className="text-[13px] mt-1" style={{ color: 'var(--color-outline)' }}>
+              <p className="text-[13px] mt-1" style={{ color: 'var(--color-on-surface-variant)' }}>
                 Orders will appear when customers place them.
               </p>
             </motion.div>
@@ -286,7 +286,7 @@ export default function AdminOrdersPage() {
                             </span>
                           </div>
 
-                          <p className="text-[11px] mt-0.5" style={{ color: 'var(--color-outline)' }}>
+                          <p className="text-[11px] mt-0.5" style={{ color: 'var(--color-on-surface-variant)' }}>
                             {order.profiles?.name || 'Customer'} {order.profiles?.phone ? `(${order.profiles.phone})` : ''} · {format(new Date(order.created_at), 'MMM d, hh:mm a')}
                           </p>
                         </div>
@@ -305,7 +305,7 @@ export default function AdminOrdersPage() {
                         </div>
                         <ChevronDown className="w-4 h-4 shrink-0 transition-transform duration-200"
                           style={{
-                            color: 'var(--color-outline)',
+                            color: 'var(--color-on-surface-variant)',
                             transform: isExpanded ? 'rotate(180deg)' : 'rotate(0deg)',
                           }} />
                       </div>
@@ -411,7 +411,7 @@ export default function AdminOrdersPage() {
                                 </div>
                               )}
                               <p className="text-[11px] font-bold uppercase tracking-wider mb-4"
-                                style={{ color: 'var(--color-outline)' }}>Order Timeline & Fulfillment</p>
+                                style={{ color: 'var(--color-on-surface-variant)' }}>Order Timeline & Fulfillment</p>
                               
                               <div className="flex items-center gap-2 mb-6 w-full max-w-xl">
                                 {['pending', 'confirmed', 'out_for_delivery', 'delivered'].map((status, idx, arr) => {
@@ -419,7 +419,7 @@ export default function AdminOrdersPage() {
                                   const isCurrent = order.status === status;
                                   return (
                                     <div key={status} className="flex items-center flex-1 last:flex-none">
-                                      <div className={`w-8 h-8 rounded-full flex items-center justify-center transition-colors ${isActive ? 'bg-primary text-white' : 'bg-surface text-outline border border-outline/30'}`}
+                                      <div className={`w-8 h-8 rounded-full flex items-center justify-center transition-colors ${isActive ? 'bg-primary text-white' : 'bg-surface text-on-surface-variant border border-outline/30'}`}
                                            style={{ boxShadow: isCurrent ? '0 0 0 3px rgba(12, 60, 38, 0.20)' : 'none' }}>
                                         {idx + 1}
                                       </div>

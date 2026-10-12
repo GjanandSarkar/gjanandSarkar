@@ -106,7 +106,7 @@ export default function CartScreen() {
             </div>
             <h1 className="font-extrabold text-[22px] md:text-[28px] tracking-tight text-on-surface">
               {t('myCart')}
-              <span className="ml-2 text-[14px] font-normal text-outline">
+              <span className="ml-2 text-[14px] font-normal text-on-surface-variant">
                 ({cartItemsData.length})
               </span>
             </h1>

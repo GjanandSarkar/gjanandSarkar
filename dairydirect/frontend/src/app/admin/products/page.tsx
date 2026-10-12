@@ -95,7 +95,7 @@ function AdminProductsContent() {
           <h1 className="font-extrabold text-[24px] tracking-tight" style={{ color: 'var(--color-on-surface)' }}>
             Products
           </h1>
-          <p className="text-[13px] mt-0.5" style={{ color: 'var(--color-outline)' }}>
+          <p className="text-[13px] mt-0.5" style={{ color: 'var(--color-on-surface-variant)' }}>
             {filtered.length} products shown {category !== 'All' ? `in "${category}"` : 'in catalogue'}
           </p>
         </div>
@@ -122,7 +122,7 @@ function AdminProductsContent() {
         <div className="flex flex-col sm:flex-row gap-3 items-center">
           <div className="relative flex-1 w-full">
             <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 pointer-events-none"
-              style={{ color: 'var(--color-outline)' }} strokeWidth={2} />
+              style={{ color: 'var(--color-on-surface-variant)' }} strokeWidth={2} />
             <input
               value={search}
               onChange={e => setSearch(e.target.value)}
@@ -250,7 +250,7 @@ function AdminProductsContent() {
                     </h3>
 
                     <p className="text-[12px] line-clamp-1 mt-0.5"
-                      style={{ color: 'var(--color-outline)' }}>
+                      style={{ color: 'var(--color-on-surface-variant)' }}>
                       {product.description || 'Fresh daily dairy product'}
                     </p>
 
@@ -261,7 +261,7 @@ function AdminProductsContent() {
                           {t('currency')}{product.product_variants?.[0]?.price || 0}
                         </span>
                         {product.product_variants?.[0]?.weight && (
-                          <span className="text-[11px] ml-1 font-medium" style={{ color: 'var(--color-outline)' }}>
+                          <span className="text-[11px] ml-1 font-medium" style={{ color: 'var(--color-on-surface-variant)' }}>
                             / {product.product_variants[0].weight}
                           </span>
                         )}

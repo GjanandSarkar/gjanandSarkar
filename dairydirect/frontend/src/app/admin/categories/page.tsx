@@ -168,7 +168,7 @@ export default function AdminCategoriesPage() {
           <h1 className="font-extrabold text-[24px] tracking-tight" style={{ color: 'var(--color-on-surface)' }}>
             Categories
           </h1>
-          <p className="text-[13px] mt-0.5" style={{ color: 'var(--color-outline)' }}>
+          <p className="text-[13px] mt-0.5" style={{ color: 'var(--color-on-surface-variant)' }}>
             Manage product taxonomy ({categories.length} total)
           </p>
         </div>
@@ -197,16 +197,17 @@ export default function AdminCategoriesPage() {
             className="rounded-[16px] overflow-hidden shadow-xs"
             style={{ border: '1px solid rgba(195,201,187,0.3)', background: 'var(--color-surface-container-lowest)' }}
           >
-            <table className="w-full text-left border-collapse">
+            <div className="overflow-x-auto">
+            <table className="w-full min-w-[640px] text-left border-collapse">
               <thead>
                 <tr style={{ background: 'var(--color-surface-container-low)' }}>
-                  <th className="px-5 py-4 text-[12px] font-bold uppercase tracking-wider" style={{ color: 'var(--color-outline)' }}>
+                  <th className="px-5 py-4 text-[12px] font-bold uppercase tracking-wider" style={{ color: 'var(--color-on-surface-variant)' }}>
                     Category Name
                   </th>
-                  <th className="px-5 py-4 text-[12px] font-bold uppercase tracking-wider" style={{ color: 'var(--color-outline)' }}>
+                  <th className="px-5 py-4 text-[12px] font-bold uppercase tracking-wider" style={{ color: 'var(--color-on-surface-variant)' }}>
                     Products
                   </th>
-                  <th className="px-5 py-4 text-[12px] font-bold uppercase tracking-wider text-right" style={{ color: 'var(--color-outline)' }}>
+                  <th className="px-5 py-4 text-[12px] font-bold uppercase tracking-wider text-right" style={{ color: 'var(--color-on-surface-variant)' }}>
                     Actions
                   </th>
                 </tr>
@@ -277,6 +278,7 @@ export default function AdminCategoriesPage() {
                 ))}
               </tbody>
             </table>
+            </div>
           </div>
         )}
       </div>

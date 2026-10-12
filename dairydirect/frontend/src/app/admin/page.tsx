@@ -166,7 +166,7 @@ export default function AdminDashboard() {
     return (
       <div className="flex flex-col min-h-screen items-center justify-center gap-3">
         <Loader2 className="w-8 h-8 animate-spin" style={{ color: 'var(--color-primary)' }} />
-        <p className="text-sm font-medium" style={{ color: 'var(--color-outline)' }}>Loading dashboard...</p>
+        <p className="text-sm font-medium" style={{ color: 'var(--color-on-surface-variant)' }}>Loading dashboard...</p>
       </div>
     );
   }
@@ -189,7 +189,7 @@ export default function AdminDashboard() {
             <h1 className="font-extrabold text-[28px] tracking-tight" style={{ color: 'var(--color-on-surface)' }}>
               {greeting()}, {user?.name?.split(' ')[0] || 'Admin'}
             </h1>
-            <p className="text-[13px] mt-1" style={{ color: 'var(--color-outline)' }}>
+            <p className="text-[13px] mt-1" style={{ color: 'var(--color-on-surface-variant)' }}>
               {format(new Date(), 'EEEE, MMMM d, yyyy')} · Last updated {format(lastRefreshed, 'h:mm a')}
             </p>
           </div>
@@ -265,7 +265,7 @@ export default function AdminDashboard() {
                   <p className="text-[11px] font-semibold mt-0.5" style={{ color: 'var(--color-on-surface)' }}>
                     {stat.label}
                   </p>
-                  <p className="text-[10px] mt-0.5" style={{ color: 'var(--color-outline)' }}>
+                  <p className="text-[10px] mt-0.5" style={{ color: 'var(--color-on-surface-variant)' }}>
                     {stat.sub}
                   </p>
                 </div>
@@ -363,7 +363,7 @@ export default function AdminDashboard() {
 
           {!data?.recentOrders?.length ? (
             <div className="flex flex-col items-center justify-center py-16">
-              <ShoppingBag className="w-8 h-8 mb-3" style={{ color: 'var(--color-outline)' }} strokeWidth={1.5} />
+              <ShoppingBag className="w-8 h-8 mb-3" style={{ color: 'var(--color-on-surface-variant)' }} strokeWidth={1.5} />
               <p className="font-semibold" style={{ color: 'var(--color-on-surface)' }}>No orders yet</p>
             </div>
           ) : (
@@ -372,7 +372,7 @@ export default function AdminDashboard() {
                 <thead>
                   <tr style={{ background: 'var(--color-surface-container-low)' }}>
                     {['Order #', 'Customer', 'Total', 'Status', 'Date'].map((h) => (
-                      <th key={h} className="text-left px-5 py-3 text-[11px] font-bold uppercase tracking-wider" style={{ color: 'var(--color-outline)' }}>{h}</th>
+                      <th key={h} className="text-left px-5 py-3 text-[11px] font-bold uppercase tracking-wider" style={{ color: 'var(--color-on-surface-variant)' }}>{h}</th>
                     ))}
                   </tr>
                 </thead>
@@ -406,7 +406,7 @@ export default function AdminDashboard() {
                             </span>
                           </div>
                         </td>
-                        <td className="px-5 py-3.5 text-[11px]" style={{ color: 'var(--color-outline)' }}>
+                        <td className="px-5 py-3.5 text-[11px]" style={{ color: 'var(--color-on-surface-variant)' }}>
                           {format(new Date(order.created_at), 'MMM d, h:mm a')}
                         </td>
                       </tr>
@@ -446,7 +446,7 @@ export default function AdminDashboard() {
                       <p className="text-[13px] font-semibold" style={{ color: 'var(--color-on-surface)' }}>
                         {product.name} ({product.weight})
                       </p>
-                      <p className="text-[11px]" style={{ color: 'var(--color-outline)' }}>
+                      <p className="text-[11px]" style={{ color: 'var(--color-on-surface-variant)' }}>
                         {product.total_sold} units sold
                       </p>
                     </div>
