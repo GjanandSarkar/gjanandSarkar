@@ -146,9 +146,37 @@ function HeaderContent() {
     || userAddresses[0]
     || (user?.address ? { id: 'default-profile', label: 'Default', address: user.address, user_id: user.id, lat: null, lng: null, is_default: true, created_at: '' } : null);
 
+  /* One shared search form, rendered inline on desktop and as its own
+     full-width row on phones. The header used to put the logo, the search box
+     and the account/cart actions on a single row at EVERY breakpoint, so on a
+     360px screen the search was squeezed into roughly 100px: the placeholder
+     was unreadable and the gold submit button was clipped. */
+  const searchForm = (
+    <form
+      onSubmit={handleSearch}
+      className="w-full relative flex items-center bg-gray-50/80 border border-gray-300 rounded-lg overflow-visible focus-within:border-[#c88a23] focus-within:ring-1 focus-within:ring-[#c88a23] transition-all"
+    >
+      <input
+        type="text"
+        value={searchTerm}
+        onChange={(e) => setSearchTerm(e.target.value)}
+        placeholder="Search products, brands and more"
+        aria-label="Search products"
+        className="flex-1 min-w-0 px-3 md:px-4 py-2.5 text-sm bg-transparent text-gray-800 placeholder-gray-400 outline-none rounded-l-lg"
+      />
+      <button
+        type="submit"
+        className="bg-[#c88a23] hover:bg-[#b0781c] text-white px-4 h-11 min-w-[48px] flex items-center justify-center transition-colors shrink-0 rounded-r-lg"
+        aria-label="Search"
+      >
+        <Search className="w-4 h-4 stroke-[2.5]" />
+      </button>
+    </form>
+  );
+
   return (
     <header className="sticky top-0 w-full z-40 bg-white border-b border-gray-200/80 shadow-xs">
-      <div className="max-w-[1440px] mx-auto px-4 md:px-8 h-18 md:h-20 flex items-center justify-between gap-4 md:gap-8">
+      <div className="max-w-[1440px] mx-auto px-4 md:px-8 h-18 md:h-20 flex items-center justify-between gap-3 md:gap-8">
 
         {/* ── Brand Logo ── */}
         <Link href="/home" className="flex items-center gap-2 shrink-0 group active:scale-95 transition-transform">
@@ -172,28 +200,8 @@ function HeaderContent() {
           </div>
         </Link>
 
-        {/* ── Search Bar ── */}
-        <form
-          onSubmit={handleSearch}
-          className="flex-1 max-w-2xl mx-auto relative flex items-center bg-gray-50/80 border border-gray-300 rounded-lg overflow-visible focus-within:border-[#c88a23] focus-within:ring-1 focus-within:ring-[#c88a23] transition-all"
-        >
-          <input
-            type="text"
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            placeholder="Search for products, brands and more..."
-            className="flex-1 min-w-0 px-4 py-2.5 text-sm bg-transparent text-gray-800 placeholder-gray-400 outline-none rounded-l-lg"
-          />
-
-          {/* Golden Search Button */}
-          <button
-            type="submit"
-            className="bg-[#c88a23] hover:bg-[#b0781c] text-white px-4 py-2.5 flex items-center justify-center transition-colors shrink-0 rounded-r-lg"
-            aria-label="Search"
-          >
-            <Search className="w-4 h-4 stroke-[2.5]" />
-          </button>
-        </form>
+        {/* ── Search Bar (desktop/tablet: inline) ── */}
+        <div className="hidden md:flex flex-1 max-w-2xl mx-auto">{searchForm}</div>
 
         {/* ── Right Quick Actions ── */}
         <div className="flex items-center gap-4 md:gap-6 shrink-0">
@@ -502,6 +510,12 @@ function HeaderContent() {
           </div>
 
         </div>
+      </div>
+
+      {/* Search gets its own full-width row on phones, where there is no space
+          for it beside the logo and the account actions. */}
+      <div className="md:hidden px-4 pb-3 -mt-1">
+        {searchForm}
       </div>
     </header>
   );

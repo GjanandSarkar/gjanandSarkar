@@ -3,7 +3,10 @@ import { getAdminSupabase } from './supabase/admin';
 
 export { getSupabaseBrowserClient, getAdminSupabase };
 export const supabase = getSupabaseBrowserClient();
-export const adminSupabase = typeof window === 'undefined' ? getAdminSupabase() : null;
+// `adminSupabase` used to be constructed here at module scope. Nothing
+// imported it, and building a Supabase client during module evaluation is the
+// pattern that broke the production build from src/lib/db.ts. Use
+// getAdminSupabase() at the point of use instead.
 
 // ─── Shared Database Types ─────────────────────────────────────
 

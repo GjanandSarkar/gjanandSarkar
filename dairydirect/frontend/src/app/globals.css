@@ -189,6 +189,9 @@
     max-width: 100vw;
   }
 
+  /* Shared page width constraints live in the components layer at the end of
+     this file: .page-narrow / .page-medium / .page-wide. */
+
   /* Media and embeds should never exceed their container. */
   img, svg, video, canvas, iframe {
     max-width: 100%;
@@ -511,4 +514,14 @@
     scroll-behavior: auto !important;
   }
   .skeleton::after { animation: none; }
+}
+
+
+/* === Page width constraints ===========================================
+   Applied to the content wrapper of a page, not the page background, so
+   full-bleed headers and hero images still span the viewport. */
+@layer components {
+  .page-narrow { width: 100%; max-width: 48rem; margin-inline: auto; }  /* 768px  - single-column detail/reading pages */
+  .page-medium { width: 100%; max-width: 64rem; margin-inline: auto; }  /* 1024px - forms, lists */
+  .page-wide   { width: 100%; max-width: 90rem; margin-inline: auto; }  /* 1440px - dashboards, product grids */
 }

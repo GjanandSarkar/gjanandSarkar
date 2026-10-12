@@ -34,7 +34,7 @@ export default function QualityReportsScreen() {
         </div>
       </div>
 
-      <div className="px-5 pt-6 space-y-6">
+      <div className="page-narrow px-5 pt-6 space-y-6">
         {/* Banner */}
         <div className="bg-gradient-to-br from-primary/10 to-primary/5 rounded-[28px] p-6 border border-primary/10 relative overflow-hidden">
           <ShieldCheck className="absolute -right-4 -bottom-4 w-32 h-32 text-primary/10 rotate-12" />
