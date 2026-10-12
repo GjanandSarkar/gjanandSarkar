@@ -80,7 +80,7 @@ export default function OrdersScreen() {
     <div className="flex flex-col min-h-screen">
       {/* Sticky Header + Tabs */}
       <div className="sticky top-0 z-30 glass-surface">
-        <div className="px-5 md:px-10 pt-6 pb-0">
+        <div className="page-medium px-5 md:px-10 pt-6 pb-0">
           <h1 className="font-extrabold text-[24px] tracking-tight mb-4"
             style={{ color: 'var(--color-on-surface)' }}>
             {t('myOrders')}
@@ -108,7 +108,7 @@ export default function OrdersScreen() {
         <div className="h-px mt-2 opacity-25" style={{ background: 'var(--color-outline-variant)' }} />
       </div>
 
-      <div className="px-5 md:px-10 py-5 flex flex-col gap-3">
+      <div className="page-medium px-5 md:px-10 py-5 flex flex-col gap-3">
         {filteredOrders.length > 0 && activeTab === 'All' && (
           <div className="mb-6 -mx-5 px-5 md:mx-0 md:px-0">
             <BuyAgainCarousel />

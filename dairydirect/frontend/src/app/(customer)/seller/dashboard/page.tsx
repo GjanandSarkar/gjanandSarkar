@@ -627,6 +627,13 @@ export default function SellerDashboardPage() {
             </button>
 
             <Link
+              href="/seller/activity"
+              className="px-4 py-2.5 rounded-xl border border-gray-200 text-xs font-bold text-gray-700 hover:bg-gray-50 flex items-center gap-1.5 transition-colors"
+            >
+              <span>Activity Log</span>
+            </Link>
+
+            <Link
               href="/home"
               className="px-4 py-2.5 rounded-xl border border-gray-200 text-xs font-bold text-gray-700 hover:bg-gray-50 flex items-center gap-1.5 transition-colors"
             >

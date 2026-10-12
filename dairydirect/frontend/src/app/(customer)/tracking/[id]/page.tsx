@@ -111,7 +111,7 @@ export default function TrackingPage() {
         initial={{ y: "100%" }}
         animate={{ y: 0 }}
         transition={{ type: "spring", stiffness: 300, damping: 30 }}
-        className="bg-cream rounded-t-[32px] shadow-[0_-10px_40px_rgba(0,0,0,0.08)] z-20 -mt-8 relative flex-1 flex flex-col gap-6 p-4 pt-6"
+        className="bg-cream rounded-t-[32px] shadow-[0_-10px_40px_rgba(0,0,0,0.08)] z-20 -mt-8 relative flex-1 flex flex-col gap-6 p-4 pt-6 w-full max-w-3xl mx-auto"
       >
         <div className="w-12 h-1.5 bg-sand rounded-full mx-auto mb-2" />
 

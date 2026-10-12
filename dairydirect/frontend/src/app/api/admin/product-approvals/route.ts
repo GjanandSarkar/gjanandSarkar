@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getAdminSupabase } from '@/lib/supabase/admin';
 import { getAuthUser } from '@/lib/api/auth-middleware';
+import { writeAuditLog } from '@/lib/security/audit';
 import { revalidateInventory } from '@/lib/inventory/cache-invalidation';
 
 export const dynamic = 'force-dynamic';
@@ -194,6 +195,22 @@ export async function PATCH(request: NextRequest) {
         } catch {}
       }
 
+      // Publishing a seller's product to the live marketplace is a trust
+      // decision; record who made it.
+      await writeAuditLog({
+        adminId: auth.userId,
+        action: 'product.approve',
+        resourceType: 'seller_product_approval',
+        resourceId: id,
+        details: {
+          productName: approvalReq.name,
+          sellerId: approvalReq.seller_id,
+          resultingProductId,
+          notes: notes || null,
+        },
+        ipAddress: request.headers.get('x-forwarded-for') || undefined,
+      });
+
       return NextResponse.json({
         success: true,
         message: 'Product successfully approved and published to marketplace.',
@@ -211,6 +228,19 @@ export async function PATCH(request: NextRequest) {
         console.error('[AdminProductApprovals PATCH] reject_seller_product RPC error:', rpcErr.message);
         return NextResponse.json({ error: rpcErr.message }, { status: 500 });
       }
+
+      await writeAuditLog({
+        adminId: auth.userId,
+        action: 'product.reject',
+        resourceType: 'seller_product_approval',
+        resourceId: id,
+        details: {
+          productName: approvalReq.name,
+          sellerId: approvalReq.seller_id,
+          rejectionReason: rejectionReason.trim(),
+        },
+        ipAddress: request.headers.get('x-forwarded-for') || undefined,
+      });
 
       // Notify seller
       const sellerUserId = (approvalReq.sellers as any)?.user_id || approvalReq.seller_user_id;
