@@ -3,7 +3,9 @@
 import React, { useState, useEffect } from 'react';
 import { useTranslation } from '@/lib/i18n';
 import type { ProductWithVariants } from '@/lib/api/products';
-import { updateProduct, deleteProduct, uploadProductImage } from '@/lib/api/products';
+import type { CatalogProduct } from '@/lib/types/catalog';
+import { updateProduct, createProduct, deleteProduct, uploadProductImage } from '@/lib/api/products';
+import { MultiImageUpload, ImageItem } from '@/components/admin/MultiImageUpload';
 import {
   X,
   Plus,
@@ -19,13 +21,13 @@ import {
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
-const CATEGORIES = ['Milk', 'Paneer', 'Ghee', 'Buttermilk', 'Curd', 'Lassi'];
+
 
 interface ProductEditModalProps {
-  product: ProductWithVariants | null;
+  product: CatalogProduct | null;
   isOpen: boolean;
   onClose: () => void;
-  onProductUpdated?: (updatedProduct: ProductWithVariants) => void;
+  onProductUpdated?: (updatedProduct: CatalogProduct) => void;
   onProductDeleted?: (deletedProductId: string) => void;
 }
 
@@ -39,7 +41,8 @@ export function ProductEditModal({
   const { t } = useTranslation();
 
   const [name, setName] = useState('');
-  const [category, setCategory] = useState('Milk');
+  const [category, setCategory] = useState('');
+  const [categoriesList, setCategoriesList] = useState<string[]>([]);
   const [description, setDescription] = useState('');
   const [imageUrl, setImageUrl] = useState('');
   const [isFreshnessGuarantee, setIsFreshnessGuarantee] = useState(true);
@@ -55,8 +58,7 @@ export function ProductEditModal({
     }>
   >([]);
 
-  const [imageFile, setImageFile] = useState<File | null>(null);
-  const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [images, setImages] = useState<ImageItem[]>([]);
   const [isSaving, setIsSaving] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
@@ -64,14 +66,55 @@ export function ProductEditModal({
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [permanentDelete, setPermanentDelete] = useState(false);
 
+  // Fetch live categories from API (show ONLY categories created in database by admin)
+  useEffect(() => {
+    if (!isOpen) return;
+    fetch('/api/categories')
+      .then((res) => res.json())
+      .then((data) => {
+        if (data?.categories && Array.isArray(data.categories)) {
+          const liveNames: string[] = (data.categories || [])
+            .map((c: any) => c.name?.trim())
+            .filter((n: any): n is string => Boolean(n))
+            .sort((a: string, b: string) => a.localeCompare(b, undefined, { sensitivity: 'base' }));
+          setCategoriesList(liveNames);
+          if (!category && liveNames.length > 0) {
+            setCategory(liveNames[0]);
+          }
+        }
+      })
+      .catch((err) => console.warn('[ProductEditModal] Live categories fetch warning:', err));
+  }, [isOpen]);
+
   useEffect(() => {
     if (product) {
       setName(product.name || '');
-      setCategory(product.category || 'Milk');
+      setCategory(product.category || (categoriesList[0] || ''));
       setDescription(product.description || '');
       setImageUrl(product.image_url || '');
-      setImagePreview(product.image_url || null);
-      setImageFile(null);
+
+      // Populate existing images into MultiImageUpload items
+      const existingImages: ImageItem[] = [];
+      if (product.image_url) {
+        existingImages.push({
+          id: 'main-cover',
+          url: product.image_url,
+          isPrimary: true,
+        });
+      }
+      if (Array.isArray((product as any).gallery_images)) {
+        (product as any).gallery_images.forEach((imgUrl: string, idx: number) => {
+          if (imgUrl && imgUrl !== product.image_url) {
+            existingImages.push({
+              id: `gallery-img-${idx}`,
+              url: imgUrl,
+              isPrimary: false,
+            });
+          }
+        });
+      }
+      setImages(existingImages);
+
       setIsFreshnessGuarantee(product.is_freshness_guarantee ?? true);
       setIsActive(product.is_active ?? true);
       setVariants(
@@ -84,6 +127,9 @@ export function ProductEditModal({
           stock: v.stock !== undefined ? v.stock.toString() : '0',
         }))
       );
+      if ((product.product_variants || []).length === 0) {
+        setVariants([{ weight: '500g', price: '', cost_price: '', original_price: '', stock: '50' }]);
+      }
       setErrorMessage('');
       setSuccessMessage('');
       setShowDeleteConfirm(false);
@@ -132,46 +178,110 @@ export function ProductEditModal({
     setSuccessMessage('');
 
     try {
-      let finalImageUrl = imageUrl;
-      if (imageFile) {
-        const uploadRes = await uploadProductImage(imageFile);
-        if (uploadRes.error || !uploadRes.url) {
-          throw new Error(uploadRes.error || 'Failed to upload new image');
+      // 1. Upload any new files from images array
+      const uploadedUrls: string[] = [];
+      let primaryUrl = '';
+
+      for (const item of images) {
+        let currentUrl = item.url;
+        if (item.file) {
+          const uploadRes = await uploadProductImage(item.file);
+          if (uploadRes.error || !uploadRes.url) {
+            throw new Error(uploadRes.error || 'Failed to upload product image');
+          }
+          currentUrl = uploadRes.url;
         }
-        finalImageUrl = uploadRes.url;
+
+        if (currentUrl) {
+          uploadedUrls.push(currentUrl);
+          if (item.isPrimary || !primaryUrl) {
+            primaryUrl = currentUrl;
+          }
+        }
       }
 
-      const res = await updateProduct(product.id, {
-        name,
-        category,
-        description,
-        image_url: finalImageUrl,
-        is_freshness_guarantee: isFreshnessGuarantee,
-        is_active: isActive,
-        variants: validVariants.map((v) => ({
-          id: v.id,
-          weight: v.weight.trim(),
-          price: parseFloat(v.price) || 0,
-          cost_price: parseFloat(v.cost_price) || 0,
-          original_price: v.original_price ? parseFloat(v.original_price) : undefined,
-          stock: parseInt(v.stock, 10) || 0,
-        })),
-      });
+      const finalImageUrl = primaryUrl || imageUrl;
 
-      if (!res.success) {
-        throw new Error(res.error || 'Failed to update product');
-      }
+      if (!product.id) {
+        const createRes = await createProduct(
+          {
+            name,
+            category,
+            description,
+            image_url: finalImageUrl,
+            gallery_images: uploadedUrls,
+            is_freshness_guarantee: isFreshnessGuarantee,
+          },
+          validVariants.map((v) => ({
+            weight: v.weight.trim(),
+            price: parseFloat(v.price) || 0,
+            original_price: v.original_price ? parseFloat(v.original_price) : undefined,
+            stock: parseInt(v.stock, 10) || 0,
+          }))
+        );
 
-      setSuccessMessage('Product updated successfully!');
-      if (res.product && onProductUpdated) {
-        onProductUpdated(res.product);
+        if (!createRes.success) {
+          throw new Error(createRes.error || 'Failed to create product');
+        }
+
+        setSuccessMessage('Product created successfully!');
+        if (onProductUpdated) {
+          const newProd: ProductWithVariants = {
+            id: createRes.id || 'prod-' + Date.now(),
+            name,
+            category,
+            description,
+            image_url: finalImageUrl,
+            gallery_images: uploadedUrls,
+            is_freshness_guarantee: isFreshnessGuarantee,
+            is_active: isActive,
+            approval_status: 'approved',
+            created_at: new Date().toISOString(),
+            product_variants: validVariants.map((v, idx) => ({
+              id: 'var-' + idx,
+              product_id: createRes.id || '',
+              weight: v.weight.trim(),
+              price: parseFloat(v.price) || 0,
+              original_price: v.original_price ? parseFloat(v.original_price) : null,
+              stock: parseInt(v.stock, 10) || 0,
+            })),
+          };
+          onProductUpdated(newProd);
+        }
+      } else {
+        const res = await updateProduct(product.id, {
+          name,
+          category,
+          description,
+          image_url: finalImageUrl,
+          gallery_images: uploadedUrls,
+          is_freshness_guarantee: isFreshnessGuarantee,
+          is_active: isActive,
+          variants: validVariants.map((v) => ({
+            id: v.id,
+            weight: v.weight.trim(),
+            price: parseFloat(v.price) || 0,
+            cost_price: parseFloat(v.cost_price) || 0,
+            original_price: v.original_price ? parseFloat(v.original_price) : undefined,
+            stock: parseInt(v.stock, 10) || 0,
+          })),
+        });
+
+        if (!res.success) {
+          throw new Error(res.error || 'Failed to update product');
+        }
+
+        setSuccessMessage('Product updated successfully!');
+        if (res.product && onProductUpdated) {
+          onProductUpdated(res.product);
+        }
       }
 
       setTimeout(() => {
         onClose();
       }, 700);
     } catch (err: any) {
-      setErrorMessage(err.message || 'Failed to update product');
+      setErrorMessage(err.message || 'Failed to save product');
     } finally {
       setIsSaving(false);
     }
@@ -243,17 +353,23 @@ export function ProductEditModal({
                     color: 'var(--color-primary, #3f6530)',
                   }}
                 >
-                  Admin Panel
+                  {(product as any)?.seller_id || (product as any)?.isSeller ? 'Seller Hub' : 'Admin Panel'}
                 </span>
-                <span className="text-[12px] font-medium text-gray-500">
-                  ID: {product.id.slice(0, 8)}...
-                </span>
+                {product.id ? (
+                  <span className="text-[12px] font-medium text-gray-500">
+                    ID: {product.id.slice(0, 8)}...
+                  </span>
+                ) : (
+                  <span className="text-[12px] font-medium text-emerald-700 font-bold">
+                    New Product
+                  </span>
+                )}
               </div>
               <h2
                 className="text-[18px] font-bold mt-0.5"
                 style={{ color: 'var(--color-on-surface, #1b1c18)' }}
               >
-                Edit Product: {product.name}
+                {product.id ? `Edit Product: ${product.name}` : 'Add New Product'}
               </h2>
             </div>
 
@@ -331,11 +447,14 @@ export function ProductEditModal({
                     borderColor: 'rgba(195,201,187,0.3)',
                   }}
                 >
-                  {CATEGORIES.map((cat) => (
-                    <option key={cat} value={cat}>
-                      {cat}
-                    </option>
-                  ))}
+                  {Array.from(new Set([...(category ? [category] : []), ...categoriesList]))
+                    .filter((cat): cat is string => Boolean(cat))
+                    .sort((a: string, b: string) => a.localeCompare(b, undefined, { sensitivity: 'base' }))
+                    .map((cat) => (
+                      <option key={cat} value={cat}>
+                        {cat}
+                      </option>
+                    ))}
                 </select>
               </div>
             </div>
@@ -405,70 +524,19 @@ export function ProductEditModal({
               </label>
             </div>
 
-            {/* Product Image */}
+            {/* Product Images (Multi-Image Upload) */}
             <div>
               <label
                 className="text-[11px] font-bold uppercase tracking-wider mb-2 block"
                 style={{ color: 'var(--color-outline, #73796e)' }}
               >
-                Product Image
+                Product Images
               </label>
-              <div className="flex items-center gap-4">
-                <label
-                  className="cursor-pointer relative flex flex-col items-center justify-center w-24 h-24 rounded-[14px] border-2 border-dashed transition-all hover:border-primary overflow-hidden group"
-                  style={{
-                    borderColor: 'rgba(195,201,187,0.6)',
-                    background: 'var(--color-surface-container, #f3f4ef)',
-                  }}
-                >
-                  <input
-                    type="file"
-                    className="hidden"
-                    accept="image/*"
-                    onChange={(e) => {
-                      const file = e.target.files?.[0];
-                      if (file) {
-                        setImageFile(file);
-                        setImagePreview(URL.createObjectURL(file));
-                      }
-                    }}
-                  />
-                  {imagePreview ? (
-                    <>
-                      <img
-                        src={imagePreview}
-                        alt="Product Preview"
-                        className="w-full h-full object-cover"
-                      />
-                      <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center text-white text-[10px] font-bold">
-                        Change
-                      </div>
-                    </>
-                  ) : (
-                    <>
-                      <UploadCloud className="w-6 h-6 mb-1 text-gray-400" />
-                      <span className="text-[10px] font-bold text-gray-500">Upload</span>
-                    </>
-                  )}
-                </label>
-
-                {imagePreview && (
-                  <div className="flex flex-col gap-1 text-[12px]">
-                    <span className="font-semibold text-gray-700">Image selected</span>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setImageFile(null);
-                        setImagePreview(null);
-                        setImageUrl('');
-                      }}
-                      className="text-red-600 font-bold hover:underline self-start text-[11px]"
-                    >
-                      Remove image
-                    </button>
-                  </div>
-                )}
-              </div>
+              <MultiImageUpload
+                images={images}
+                onChange={setImages}
+                disabled={isSaving}
+              />
             </div>
 
             {/* Variants Management */}
@@ -491,7 +559,7 @@ export function ProductEditModal({
                   onClick={handleAddVariant}
                   className="flex items-center gap-1 px-3 py-1.5 rounded-[10px] text-[12px] font-bold text-white transition-all active:scale-95 shadow-sm"
                   style={{
-                    background: 'linear-gradient(135deg, #3f6530, #577f46)',
+                    background: 'var(--cta-gradient)',
                   }}
                 >
                   <Plus className="w-3.5 h-3.5" />
@@ -739,7 +807,7 @@ export function ProductEditModal({
               disabled={isSaving || isDeleting}
               className="px-6 py-2.5 rounded-[12px] text-[13px] font-bold text-white transition-all active:scale-95 flex items-center gap-2 shadow-md hover:opacity-95 disabled:opacity-50"
               style={{
-                background: 'linear-gradient(135deg, #3f6530, #577f46)',
+                background: 'var(--cta-gradient)',
               }}
             >
               {isSaving ? (

@@ -13,9 +13,12 @@ import {
 } from 'lucide-react';
 import { useStore } from '@/store/useStore';
 import { getProducts } from '@/lib/api/products';
+import { toggleWishlist } from '@/lib/api/wishlist';
 import type { ProductWithVariants } from '@/lib/api/products';
+import { ProductGridSkeleton } from '@/components/shared/Skeletons';
 
 export default function WishlistPage() {
+  const user = useStore((s) => s.user);
   const wishlist = useStore((s) => s.wishlist);
   const toggleWishlistLocal = useStore((s) => s.toggleWishlistLocal);
   const addToCartLocal = useStore((s) => s.addToCartLocal);
@@ -32,6 +35,13 @@ export default function WishlistPage() {
 
   const wishlistProducts = allProducts.filter((p) => wishlist.includes(p.id));
 
+  const handleRemoveFromWishlist = async (productId: string) => {
+    toggleWishlistLocal(productId);
+    if (user) {
+      await toggleWishlist(user.id, productId);
+    }
+  };
+
   const handleMoveAllToCart = () => {
     wishlistProducts.forEach((product) => {
       const defaultVariant = product.product_variants?.[0];
@@ -43,8 +53,8 @@ export default function WishlistPage() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-[#fafaf8]">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#0f3e26]" />
+      <div className="min-h-screen bg-[#fafaf8] px-4 md:px-8 py-6 max-w-[1440px] mx-auto">
+        <ProductGridSkeleton count={6} />
       </div>
     );
   }
@@ -117,13 +127,13 @@ export default function WishlistPage() {
                         className="object-cover"
                       />
                     ) : (
-                      <div className="w-full h-full flex items-center justify-center text-4xl bg-amber-50/50">
-                        🏺
+                      <div className="w-full h-full flex items-center justify-center bg-amber-50/50">
+                        <svg className="w-10 h-10 text-amber-300" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" /></svg>
                       </div>
                     )}
 
                     <button
-                      onClick={() => toggleWishlistLocal(product.id)}
+                      onClick={() => handleRemoveFromWishlist(product.id)}
                       className="absolute top-3 right-3 w-8 h-8 rounded-full bg-white/90 backdrop-blur-sm shadow-sm flex items-center justify-center text-rose-600 hover:scale-110 transition-transform"
                     >
                       <Trash2 className="w-4 h-4" />

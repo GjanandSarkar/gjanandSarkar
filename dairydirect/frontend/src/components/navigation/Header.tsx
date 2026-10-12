@@ -3,13 +3,13 @@
 import React, { useState, useEffect, useRef, Suspense } from 'react';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { 
-  Search, 
-  Store, 
-  Package, 
-  Heart, 
-  ShoppingCart, 
-  User, 
+import {
+  Search,
+  Store,
+  Package,
+  Heart,
+  ShoppingCart,
+  User,
   ChevronDown,
   Check,
   Sparkles,
@@ -19,7 +19,7 @@ import {
 } from 'lucide-react';
 import { useStore } from '@/store/useStore';
 import { useCartDetails } from '@/hooks/useCartDetails';
-import { getUserAddresses, type UserAddress } from '@/lib/api/addresses';
+import { getUserAddresses, normalizeUserAddress, type UserAddress } from '@/lib/api/addresses';
 
 function HeaderContent() {
   const router = useRouter();
@@ -32,36 +32,15 @@ function HeaderContent() {
   const { totalItems } = useCartDetails();
 
   const [searchTerm, setSearchTerm] = useState('');
-  const [selectedCategory, setSelectedCategory] = useState('All Categories');
-  const [isCategoryOpen, setIsCategoryOpen] = useState(false);
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const [isAddressOpen, setIsAddressOpen] = useState(false);
   const [userAddresses, setUserAddresses] = useState<UserAddress[]>([]);
 
-  const dropdownRef = useRef<HTMLDivElement>(null);
   const profileDropdownRef = useRef<HTMLDivElement>(null);
   const addressDropdownRef = useRef<HTMLDivElement>(null);
   const profileTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const addressTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
-  const categories = [
-    'All Categories',
-    'Milk',
-    'Ghee',
-    'Paneer',
-    'Curd',
-    'Lassi',
-    'Cold-Pressed Oils',
-    'Vedic Ayurveda',
-    'Artisanal Handicrafts',
-    'Organic Groceries',
-    'Electronics',
-    'Fashion',
-    'Home & Kitchen',
-    'Beauty & Personal Care',
-    'Sports',
-    'Books',
-  ];
 
   // Fetch addresses when user is logged in
   useEffect(() => {
@@ -71,16 +50,16 @@ function HeaderContent() {
           setUserAddresses(addrs);
         } else if (user.saved_addresses && user.saved_addresses.length > 0) {
           setUserAddresses(
-            user.saved_addresses.map((a, i) => ({
-              id: `saved-${i}`,
-              user_id: user.id,
-              label: a.label,
-              address: a.address,
-              lat: null,
-              lng: null,
-              is_default: i === 0,
-              created_at: new Date().toISOString(),
-            }))
+            user.saved_addresses.map((a, i) =>
+              normalizeUserAddress({
+                id: `saved-${i}`,
+                user_id: user.id,
+                label: a.label,
+                address: a.address,
+                is_default: i === 0,
+                created_at: new Date().toISOString(),
+              })
+            )
           );
         }
       });
@@ -89,16 +68,8 @@ function HeaderContent() {
     }
   }, [user?.id, user?.saved_addresses]);
 
-  // Synchronize state with URL parameters
+  // Synchronize search term with URL parameters
   useEffect(() => {
-    const cat = searchParams.get('category');
-    if (cat) {
-      const matched = categories.find(c => c.toLowerCase() === cat.toLowerCase());
-      setSelectedCategory(matched || cat);
-    } else {
-      setSelectedCategory('All Categories');
-    }
-
     const q = searchParams.get('search') || searchParams.get('q');
     if (q !== null && q !== undefined) {
       setSearchTerm(q);
@@ -108,9 +79,6 @@ function HeaderContent() {
   // Close dropdowns on outside click
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
-        setIsCategoryOpen(false);
-      }
       if (profileDropdownRef.current && !profileDropdownRef.current.contains(event.target as Node)) {
         setIsProfileOpen(false);
       }
@@ -161,63 +129,43 @@ function HeaderContent() {
     router.refresh();
   };
 
-  const handleCategorySelect = (cat: string) => {
-    setSelectedCategory(cat);
-    setIsCategoryOpen(false);
-
-    const queryParams = new URLSearchParams();
-    if (cat !== 'All Categories') {
-      queryParams.set('category', cat);
-    }
-    if (searchTerm.trim()) {
-      queryParams.set('search', searchTerm.trim());
-    }
-
-    const queryStr = queryParams.toString();
-    router.push(`/products${queryStr ? `?${queryStr}` : ''}`);
-  };
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
     const queryParams = new URLSearchParams();
-    
-    if (selectedCategory && selectedCategory !== 'All Categories') {
-      queryParams.set('category', selectedCategory);
-    }
     if (searchTerm.trim()) {
       queryParams.set('search', searchTerm.trim());
     }
-
     const queryStr = queryParams.toString();
-    router.push(`/products${queryStr ? `?${queryStr}` : ''}`);
+    router.push(`/search${queryStr ? `?${queryStr}` : ''}`);
   };
 
   // Find active selected address
-  const activeAddress = userAddresses.find(a => a.id === checkoutAddressId || a.label === checkoutAddressId) 
-    || userAddresses.find(a => a.is_default) 
-    || userAddresses[0] 
+  const activeAddress = userAddresses.find(a => a.id === checkoutAddressId || a.label === checkoutAddressId)
+    || userAddresses.find(a => a.is_default)
+    || userAddresses[0]
     || (user?.address ? { id: 'default-profile', label: 'Default', address: user.address, user_id: user.id, lat: null, lng: null, is_default: true, created_at: '' } : null);
 
   return (
     <header className="sticky top-0 w-full z-40 bg-white border-b border-gray-200/80 shadow-xs">
       <div className="max-w-[1440px] mx-auto px-4 md:px-8 h-18 md:h-20 flex items-center justify-between gap-4 md:gap-8">
-        
+
         {/* ── Brand Logo ── */}
         <Link href="/home" className="flex items-center gap-2 shrink-0 group active:scale-95 transition-transform">
           <div className="relative flex items-center">
-            <img 
-              src="/logo.svg" 
-              alt="Gjanand Sarkar" 
-              className="h-12 md:h-14 w-auto object-contain drop-shadow-xs" 
+            <img
+              src="/application logo/gjanand sarkar logo.png"
+              alt="Gjanand Sarkar"
+              className="h-12 md:h-14 w-auto object-contain drop-shadow-xs"
               onError={(e) => {
                 (e.target as HTMLElement).style.display = 'none';
               }}
             />
             <div className="flex flex-col">
-              <span className="text-xl md:text-2xl font-black text-[#0f3e26] tracking-tight leading-none">
-                Gjanand<span className="text-[#c88a23]">.</span>
+              <span className="text-xl md:text-2xl font-black tracking-tight leading-none">
+                <span className="text-[#0f3e26]">Gjanand</span>
               </span>
-              <span className="text-[10px] tracking-[0.25em] font-extrabold text-[#c88a23] uppercase">
+              <span className="text-[10px] md:text-[11px] tracking-[0.2em] font-black text-[#c88a23] uppercase text-right leading-none mt-0.5">
                 SARKAR
               </span>
             </div>
@@ -225,7 +173,7 @@ function HeaderContent() {
         </Link>
 
         {/* ── Search Bar ── */}
-        <form 
+        <form
           onSubmit={handleSearch}
           className="flex-1 max-w-2xl mx-auto relative flex items-center bg-gray-50/80 border border-gray-300 rounded-lg overflow-visible focus-within:border-[#c88a23] focus-within:ring-1 focus-within:ring-[#c88a23] transition-all"
         >
@@ -236,46 +184,6 @@ function HeaderContent() {
             placeholder="Search for products, brands and more..."
             className="flex-1 min-w-0 px-4 py-2.5 text-sm bg-transparent text-gray-800 placeholder-gray-400 outline-none rounded-l-lg"
           />
-
-          {/* Category Dropdown Inside Search */}
-          <div ref={dropdownRef} className="relative border-l border-gray-200 shrink-0">
-            <button
-              type="button"
-              onClick={() => setIsCategoryOpen(!isCategoryOpen)}
-              className="px-3 py-2.5 text-xs font-semibold text-gray-700 hover:text-gray-900 flex items-center gap-1.5 whitespace-nowrap bg-gray-100/70 hover:bg-gray-100 transition-colors"
-            >
-              <span className="max-w-[110px] sm:max-w-[140px] truncate">{selectedCategory}</span>
-              <ChevronDown className={`w-3.5 h-3.5 text-gray-500 transition-transform duration-200 ${isCategoryOpen ? 'rotate-180' : ''}`} />
-            </button>
-
-            {isCategoryOpen && (
-              <div className="absolute right-0 top-full mt-1.5 w-56 max-h-72 overflow-y-auto bg-white rounded-xl shadow-2xl border border-gray-200 py-1.5 z-50 animate-in fade-in slide-in-from-top-1 divide-y divide-gray-50">
-                <div className="px-3 py-1.5 text-[10px] font-black text-gray-400 uppercase tracking-wider">
-                  Select Department
-                </div>
-                <div className="py-1">
-                  {categories.map((cat) => {
-                    const isSelected = selectedCategory.toLowerCase() === cat.toLowerCase();
-                    return (
-                      <button
-                        key={cat}
-                        type="button"
-                        onClick={() => handleCategorySelect(cat)}
-                        className={`w-full flex items-center justify-between px-3.5 py-2 text-xs font-medium transition-colors text-left ${
-                          isSelected 
-                            ? 'bg-emerald-50 text-[#0f3e26] font-bold' 
-                            : 'text-gray-700 hover:bg-gray-50 hover:text-[#0f3e26]'
-                        }`}
-                      >
-                        <span>{cat}</span>
-                        {isSelected && <Check className="w-3.5 h-3.5 text-[#0f3e26]" />}
-                      </button>
-                    );
-                  })}
-                </div>
-              </div>
-            )}
-          </div>
 
           {/* Golden Search Button */}
           <button
@@ -289,7 +197,7 @@ function HeaderContent() {
 
         {/* ── Right Quick Actions ── */}
         <div className="flex items-center gap-4 md:gap-6 shrink-0">
-          
+
           {/* Become Seller / Seller Portal */}
           <Link
             href={user?.role === 'seller' ? "/seller/dashboard" : user?.role === 'admin' ? "/admin/products" : "/become-seller"}
@@ -301,9 +209,14 @@ function HeaderContent() {
             </span>
           </Link>
 
+          <Link href="/offers" className="hidden lg:flex flex-col items-center justify-center text-gray-700 hover:text-[#0f3e26] transition-colors group">
+            <Sparkles className="w-5 h-5 text-gray-600 group-hover:text-[#0f3e26] transition-colors" />
+            <span className="text-[11px] font-semibold mt-0.5 whitespace-nowrap">Offers</span>
+          </Link>
+
           {/* ── Delivery Address Selection (ONLY VISIBLE WHEN LOGGED IN) ── */}
           {user && (
-            <div 
+            <div
               ref={addressDropdownRef}
               onMouseEnter={handleAddressMouseEnter}
               onMouseLeave={handleAddressMouseLeave}
@@ -345,24 +258,23 @@ function HeaderContent() {
                       Manage
                     </Link>
                   </div>
-                  
+
                   <div className="max-h-60 overflow-y-auto p-1.5 space-y-1">
                     {userAddresses.length > 0 ? (
-                      userAddresses.map((addr) => {
+                      userAddresses.map((addr, idx) => {
                         const isSelected = activeAddress?.id === addr.id || (activeAddress?.label === addr.label && activeAddress?.address === addr.address);
                         return (
                           <button
-                            key={addr.id || addr.label}
+                            key={addr.id || `addr-${idx}-${addr.label}`}
                             type="button"
                             onClick={() => {
                               setCheckoutAddressId(addr.id || addr.label);
                               setIsAddressOpen(false);
                             }}
-                            className={`w-full flex items-start justify-between p-2.5 rounded-xl transition-all text-left cursor-pointer ${
-                              isSelected 
-                                ? 'bg-emerald-50/90 border border-emerald-200 text-[#0f3e26]' 
+                            className={`w-full flex items-start justify-between p-2.5 rounded-xl transition-all text-left cursor-pointer ${isSelected
+                                ? 'bg-emerald-50/90 border border-emerald-200 text-[#0f3e26]'
                                 : 'hover:bg-gray-50 text-gray-700'
-                            }`}
+                              }`}
                           >
                             <div className="min-w-0 pr-2">
                               <div className="flex items-center gap-2">
@@ -429,7 +341,7 @@ function HeaderContent() {
           </Link>
 
           {/* ── User Profile with Hover Dropdown ── */}
-          <div 
+          <div
             ref={profileDropdownRef}
             onMouseEnter={handleProfileMouseEnter}
             onMouseLeave={handleProfileMouseLeave}
@@ -440,11 +352,15 @@ function HeaderContent() {
               className="flex flex-col items-center justify-center text-gray-700 hover:text-[#0f3e26] transition-colors group cursor-pointer"
             >
               <div className="w-7 h-7 rounded-full bg-gray-100 flex items-center justify-center overflow-hidden border border-gray-200 group-hover:border-[#0f3e26] transition-colors shadow-2xs">
-                {user?.avatar_url ? (
-                  <img src={user.avatar_url} alt="Profile" className="w-full h-full object-cover" />
-                ) : (
-                  <User className="w-4 h-4 text-gray-600 group-hover:text-[#0f3e26] transition-colors" />
-                )}
+                <img
+                  src={user?.avatar_url || '/profile/profile.jpg'}
+                  alt={user?.name || "Profile"}
+                  className="w-full h-full object-cover"
+                  referrerPolicy="no-referrer"
+                  onError={(e) => {
+                    (e.currentTarget as HTMLImageElement).src = '/profile/profile.jpg';
+                  }}
+                />
               </div>
               <div className="flex items-center gap-0.5 mt-0.5">
                 <span className="text-[11px] font-semibold text-gray-800 group-hover:text-[#0f3e26] whitespace-nowrap">

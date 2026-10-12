@@ -1,283 +1,624 @@
 import { NextResponse } from 'next/server';
-import { supabaseAdmin } from '@/lib/db';
+import { getAdminSupabase } from '@/lib/supabase/admin';
+import { getAuthUser } from '@/lib/api/auth-middleware';
 
-// Fallback in-memory cache for resilient inquiry management
-let memoryInquiries: any[] = [
-  {
-    id: 'INQ-2026-8801',
-    user_id: 'user-demo-1',
-    full_name: 'Bhavesh Bhai Patel',
-    business_name: 'Gir Amrutam Organic Farm',
-    phone: '9825123456',
-    email: 'bhavesh@giramrutam.com',
-    city: 'Junagadh',
-    state: 'Gujarat',
-    category: 'A2 Dairy & Ghee',
-    product_range: 'Gir Cow Vedic Bilona Ghee, A2 Cultured Butter',
-    monthly_volume: '500-1000 Liters/Kg',
-    gstin: '24AAAAA0000A1Z5',
-    fssai_number: '10722001000123',
-    notes: 'We own 80+ pure Gir cows in Junagadh, Gujarat. Producing traditional bilona ghee.',
-    status: 'pending',
-    admin_notes: '',
-    created_at: new Date(Date.now() - 3600000 * 4).toISOString(),
-    updated_at: new Date(Date.now() - 3600000 * 4).toISOString(),
-  },
-  {
-    id: 'INQ-2026-8802',
-    user_id: 'user-demo-2',
-    full_name: 'Sunita Devi Sharma',
-    business_name: 'Kashmir Saffron & Honey Collective',
-    phone: '9419123456',
-    email: 'sunita@kashmirherbs.in',
-    city: 'Pampore',
-    state: 'Kashmir',
-    category: 'Heritage Spices & Tea',
-    product_range: 'GI Tagged Mongra Saffron, Wild Forest Honey',
-    monthly_volume: '200-500 Units',
-    gstin: '01BBBBB1111B1Z2',
-    fssai_number: '11021002000456',
-    notes: 'Direct farm produce from growers in Pampore valley.',
-    status: 'contacted',
-    admin_notes: 'Spoke with Sunita on WhatsApp. Lab test certificate for Saffron requested.',
-    created_at: new Date(Date.now() - 3600000 * 24).toISOString(),
-    updated_at: new Date(Date.now() - 3600000 * 12).toISOString(),
-  }
-];
+export const dynamic = 'force-dynamic';
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
   const status = searchParams.get('status');
-  const userId = searchParams.get('userId');
+  const search = searchParams.get('search');
+  const mine = searchParams.get('mine') === 'true';
 
   try {
-    // Try querying Supabase seller_inquiries table
-    let query = supabaseAdmin.from('seller_inquiries').select('*').order('created_at', { ascending: false });
-    
-    if (status && status !== 'all') {
-      query = query.eq('status', status);
-    }
-    if (userId) {
-      query = query.eq('user_id', userId);
+    const auth = await getAuthUser(request);
+    const sb = getAdminSupabase();
+
+    // ─── 1. Admin Access: Can query all inquiries or filter by status/search ───
+    if (auth?.isAdmin && !mine) {
+      const userId = searchParams.get('userId');
+      let adminQuery = sb.from('seller_inquiries').select('*').order('created_at', { ascending: false });
+
+      if (status && status !== 'all') {
+        adminQuery = adminQuery.eq('status', status);
+      }
+      if (userId) {
+        adminQuery = adminQuery.eq('user_id', userId);
+      }
+      if (search && search.trim()) {
+        const q = search.trim();
+        adminQuery = adminQuery.or(
+          `business_name.ilike.%${q}%,full_name.ilike.%${q}%,email.ilike.%${q}%,phone.ilike.%${q}%,id.ilike.%${q}%`
+        );
+      }
+
+      const { data, error } = await adminQuery;
+      if (error) {
+        return NextResponse.json({ success: false, inquiries: [] });
+      }
+      return NextResponse.json({ success: true, inquiries: data || [] });
     }
 
-    const { data, error } = await query;
-
-    if (!error && data && data.length > 0) {
-      return NextResponse.json({ success: true, inquiries: data });
+    // ─── 2. Unauthenticated User: Return 401 if 'mine' requested ───────────────
+    if (!auth?.userId) {
+      if (mine) {
+        return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+      }
+      return NextResponse.json({ success: true, inquiries: [] });
     }
 
-    // Also check sellers table for pending inquiries
-    const { data: pendingSellers } = await supabaseAdmin
-      .from('sellers')
+    // ─── 3. Authenticated Customer/Seller: Return ONLY their own application ──
+    const { data: userInquiries, error: userInqErr } = await sb
+      .from('seller_inquiries')
       .select('*')
-      .eq('status', 'pending_inquiry');
+      .eq('user_id', auth.userId)
+      .order('created_at', { ascending: false });
 
-    let combined = [...memoryInquiries];
-    if (pendingSellers && pendingSellers.length > 0) {
-      const mapped = pendingSellers.map(s => ({
-        id: s.id,
-        user_id: s.user_id,
-        full_name: s.store_name,
-        business_name: s.store_name,
-        phone: s.pan || 'N/A',
-        email: 'seller@' + (s.slug || 'gjanandsarkar.com'),
-        city: s.state,
-        state: s.state,
-        category: s.category,
-        product_range: s.description,
-        monthly_volume: 'Pending Verification',
-        gstin: s.gstin,
-        fssai_number: 'Under Review',
-        notes: s.description,
-        status: s.status === 'pending_inquiry' ? 'pending' : s.status,
-        admin_notes: '',
-        created_at: s.created_at,
-        updated_at: s.updated_at
-      }));
-      combined = [...mapped, ...combined];
+    if (!userInqErr && userInquiries && userInquiries.length > 0) {
+      return NextResponse.json({ success: true, inquiries: userInquiries });
     }
 
-    let filtered = combined;
-    if (status && status !== 'all') {
-      filtered = filtered.filter(i => i.status === status);
+    // Fallback: If not yet linked by user_id, check by verified email or phone
+    const fallbackFilters: string[] = [];
+    if (auth.email) {
+      fallbackFilters.push(`email.eq.${auth.email.trim().toLowerCase()}`);
     }
-    if (userId) {
-      filtered = filtered.filter(i => i.user_id === userId);
+    if (auth.phone) {
+      const cleanPhone = auth.phone.replace(/\D/g, '').slice(-10);
+      if (cleanPhone) fallbackFilters.push(`phone.ilike.%${cleanPhone}`);
     }
 
-    return NextResponse.json({ success: true, inquiries: filtered });
+    if (fallbackFilters.length > 0) {
+      const { data: matchedInquiries } = await sb
+        .from('seller_inquiries')
+        .select('*')
+        .or(fallbackFilters.join(','))
+        .order('created_at', { ascending: false })
+        .limit(1);
+
+      if (matchedInquiries && matchedInquiries.length > 0) {
+        await sb
+          .from('seller_inquiries')
+          .update({ user_id: auth.userId })
+          .eq('id', matchedInquiries[0].id);
+
+        return NextResponse.json({ success: true, inquiries: matchedInquiries });
+      }
+    }
+
+    return NextResponse.json({ success: true, inquiries: [] });
   } catch (err: any) {
-    let filtered = memoryInquiries;
-    if (status && status !== 'all') {
-      filtered = filtered.filter(i => i.status === status);
-    }
-    if (userId) {
-      filtered = filtered.filter(i => i.user_id === userId);
-    }
-    return NextResponse.json({ success: true, inquiries: filtered });
+    return NextResponse.json({ error: err.message || 'Failed to fetch inquiries' }, { status: 500 });
   }
 }
 
 export async function POST(request: Request) {
   try {
+    const auth = await getAuthUser(request);
+    if (!auth?.userId) {
+      return NextResponse.json(
+        { error: 'Please sign in to submit a seller registration application.' },
+        { status: 401 }
+      );
+    }
+
     const body = await request.json();
     const {
-      userId,
       fullName,
       businessName,
       phone,
       email,
+      businessAddress,
       city,
       state,
+      pincode,
+      businessType,
       category,
       productRange,
       monthlyVolume,
       gstin,
+      pan,
       fssaiNumber,
-      notes
+      businessDocuments,
+      notes,
     } = body;
 
-    if (!fullName || !businessName || !phone || !email) {
+    // Field validations
+    if (!fullName?.trim() || !businessName?.trim() || !phone?.trim() || !email?.trim()) {
       return NextResponse.json(
-        { error: 'Please provide full name, business name, phone number, and email' },
+        { error: 'Full name, business name, phone number, and email address are required.' },
         { status: 400 }
       );
     }
 
-    const inquiryId = `INQ-${new Date().getFullYear()}-${Math.floor(1000 + Math.random() * 9000)}`;
+    const cleanEmail = email.trim().toLowerCase();
+    const cleanPhone = phone.replace(/\D/g, '').slice(-10);
 
-    const newInquiry = {
-      id: inquiryId,
-      user_id: userId || null,
-      full_name: fullName.trim(),
-      business_name: businessName.trim(),
-      phone: phone.trim(),
-      email: email.trim().toLowerCase(),
-      city: city ? city.trim() : '',
-      state: state || 'Gujarat',
-      category: category || 'A2 Dairy & Ghee',
-      product_range: productRange || '',
-      monthly_volume: monthlyVolume || '',
-      gstin: gstin ? gstin.trim().toUpperCase() : null,
-      fssai_number: fssaiNumber ? fssaiNumber.trim() : null,
-      notes: notes || '',
-      status: 'pending',
-      admin_notes: '',
-      created_at: new Date().toISOString(),
-      updated_at: new Date().toISOString()
-    };
-
-    // Save to memory storage
-    memoryInquiries.unshift(newInquiry);
-
-    // Attempt insert into Supabase seller_inquiries table
-    try {
-      await supabaseAdmin.from('seller_inquiries').insert([newInquiry]);
-    } catch (dbErr) {
-      console.warn('seller_inquiries Supabase insert skipped (using resilient store):', dbErr);
+    if (!cleanPhone || cleanPhone.length !== 10 || !/^[6-9]\d{9}$/.test(cleanPhone)) {
+      return NextResponse.json(
+        { error: 'Please enter a valid 10-digit Indian mobile number (e.g. 9825123456).' },
+        { status: 400 }
+      );
     }
 
-    // Also insert into sellers table as pending_inquiry so store structure is reserved
-    if (userId) {
-      try {
-        const slug = businessName.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
-        await supabaseAdmin.from('sellers').upsert({
-          user_id: userId,
-          store_name: businessName,
-          slug,
+    if (!cleanEmail.includes('@') || !cleanEmail.includes('.')) {
+      return NextResponse.json(
+        { error: 'Please enter a valid email address.' },
+        { status: 400 }
+      );
+    }
+
+    if (pan && pan.trim() && !/^[A-Z]{5}[0-9]{4}[A-Z]{1}$/i.test(pan.trim())) {
+      return NextResponse.json(
+        { error: 'Invalid PAN format. Standard PAN is 10 characters (e.g. ABCDE1234F).' },
+        { status: 400 }
+      );
+    }
+
+    if (gstin && gstin.trim() && !/^[0-9]{2}[A-Z]{5}[0-9]{4}[A-Z]{1}[1-9A-Z]{1}Z[0-9A-Z]{1}$/i.test(gstin.trim())) {
+      return NextResponse.json(
+        { error: 'Invalid GSTIN format. Standard GSTIN is 15 characters (e.g. 24AAAAA0000A1Z5).' },
+        { status: 400 }
+      );
+    }
+
+    const sb = getAdminSupabase();
+
+    // ── Check for existing applications to prevent duplicates ───────────────
+    const { data: existingByUser } = await sb
+      .from('seller_inquiries')
+      .select('*')
+      .eq('user_id', auth.userId)
+      .order('created_at', { ascending: false })
+      .limit(1);
+
+    const existingInquiry = existingByUser && existingByUser.length > 0 ? existingByUser[0] : null;
+
+    if (existingInquiry) {
+      // 1. If already approved
+      if (existingInquiry.status === 'approved') {
+        return NextResponse.json(
+          {
+            error: 'Your seller application has already been approved. You can access the seller dashboard.',
+            inquiry: existingInquiry,
+          },
+          { status: 400 }
+        );
+      }
+
+      // 2. Prevent duplicate application while pending or under review
+      if (existingInquiry.status === 'pending' || existingInquiry.status === 'contacted') {
+        return NextResponse.json(
+          {
+            error: 'Your seller application is already submitted and currently under review. Duplicate applications are not allowed.',
+            inquiry: existingInquiry,
+          },
+          { status: 400 }
+        );
+      }
+
+      // 3. If rejected or suspended, allow resubmission / correction
+      if (existingInquiry.status === 'rejected' || existingInquiry.status === 'suspended') {
+        const updatePayload: any = {
+          full_name: fullName.trim(),
+          business_name: businessName.trim(),
+          phone: cleanPhone,
+          email: cleanEmail,
+          business_address: businessAddress?.trim() || null,
+          city: city?.trim() || null,
           state: state || 'Gujarat',
-          category: category || 'General',
-          description: notes || productRange || 'Seller inquiry submitted - Pending manual review',
-          plan: 'growth',
-          commission_rate: 5.0,
-          status: 'pending_inquiry',
-          gstin: gstin || null,
+          pincode: pincode?.trim() || null,
+          business_type: businessType || 'individual',
+          category: category || 'A2 Organic Dairy',
+          product_range: productRange?.trim() || null,
+          monthly_volume: monthlyVolume || null,
+          gstin: gstin ? gstin.trim().toUpperCase() : null,
+          pan: pan ? pan.trim().toUpperCase() : null,
+          fssai_number: fssaiNumber?.trim() || null,
+          business_documents: Array.isArray(businessDocuments) ? businessDocuments : [],
+          notes: notes?.trim() || null,
+          status: 'pending',
+          admin_notes: null, // Clear rejection reason on resubmission
+          reviewed_by: null,
+          reviewed_at: null,
+          updated_at: new Date().toISOString(),
+        };
+
+        const { data: updated, error: updateErr } = await sb
+          .from('seller_inquiries')
+          .update(updatePayload)
+          .eq('id', existingInquiry.id)
+          .select()
+          .single();
+
+        if (updateErr) {
+          return NextResponse.json({ error: updateErr.message }, { status: 500 });
+        }
+
+        // Update seller store status to pending
+        const { data: sellerStore } = await sb
+          .from('sellers')
+          .select('id')
+          .eq('user_id', auth.userId)
+          .maybeSingle();
+
+        if (sellerStore?.id) {
+          await sb
+            .from('sellers')
+            .update({
+              store_name: businessName.trim(),
+              phone: cleanPhone,
+              status: 'pending',
+              category: category || 'General',
+              gstin: gstin ? gstin.trim().toUpperCase() : null,
+              pan: pan ? pan.trim().toUpperCase() : null,
+              updated_at: new Date().toISOString(),
+            })
+            .eq('id', sellerStore.id);
+
+          await sb.from('seller_status_history').insert({
+            seller_id: sellerStore.id,
+            previous_status: existingInquiry.status,
+            new_status: 'pending',
+            action: 'application_resubmitted',
+            reason: 'Seller corrected and resubmitted application',
+            notes: notes || 'Updated business details provided',
+            changed_by: auth.userId,
+          });
+        }
+
+        // Sync seller phone to user profile
+        try {
+          await sb
+            .from('profiles')
+            .update({
+              phone: cleanPhone,
+              updated_at: new Date().toISOString(),
+            })
+            .eq('id', auth.userId);
+        } catch {}
+
+        // Send in-app notification to admins
+        try {
+          await sb.from('notifications').insert({
+            role_target: 'admin',
+            title: 'Seller Application Resubmitted',
+            message: `${fullName} has resubmitted their seller application for "${businessName}".`,
+            type: 'system',
+            related_id: updated.id,
+          });
+        } catch {}
+
+        return NextResponse.json({
+          success: true,
+          message: 'Your seller application has been updated and resubmitted successfully and is awaiting admin approval.',
+          inquiry: updated,
         });
-      } catch (sellerDbErr) {
-        console.warn('sellers table insert notice:', sellerDbErr);
       }
     }
 
+    // ── Create brand-new seller inquiry ──────────────────────────────────
+    const newInquiry: any = {
+      user_id: auth.userId,
+      full_name: fullName.trim(),
+      business_name: businessName.trim(),
+      phone: cleanPhone,
+      email: cleanEmail,
+      business_address: businessAddress?.trim() || null,
+      city: city?.trim() || null,
+      state: state || 'Gujarat',
+      pincode: pincode?.trim() || null,
+      business_type: businessType || 'individual',
+      category: category || 'A2 Organic Dairy',
+      product_range: productRange?.trim() || null,
+      monthly_volume: monthlyVolume || null,
+      gstin: gstin ? gstin.trim().toUpperCase() : null,
+      pan: pan ? pan.trim().toUpperCase() : null,
+      fssai_number: fssaiNumber?.trim() || null,
+      business_documents: Array.isArray(businessDocuments) ? businessDocuments : [],
+      notes: notes?.trim() || null,
+      status: 'pending',
+    };
+
+    const { data: insertedInquiry, error: insertErr } = await sb
+      .from('seller_inquiries')
+      .insert(newInquiry)
+      .select()
+      .single();
+
+    if (insertErr) {
+      return NextResponse.json({ error: insertErr.message }, { status: 500 });
+    }
+
+    // Create seller record in sellers table with status 'pending'
+    const slug = businessName
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/(^-|-$)/g, '');
+
+    const { data: store, error: storeErr } = await sb
+      .from('sellers')
+      .upsert(
+        {
+          user_id: auth.userId,
+          store_name: businessName.trim(),
+          phone: cleanPhone,
+          slug: `${slug}-${Date.now().toString(36).slice(-4)}`,
+          state: state || 'Gujarat',
+          category: category || 'General',
+          description: notes || productRange || 'Seller registration submitted',
+          plan: 'growth',
+          commission_rate: 5.0,
+          status: 'pending',
+          gstin: gstin ? gstin.trim().toUpperCase() : null,
+          pan: pan ? pan.trim().toUpperCase() : null,
+          fssai_number: fssaiNumber?.trim() || null,
+          updated_at: new Date().toISOString(),
+        },
+        { onConflict: 'user_id' }
+      )
+      .select()
+      .single();
+
+    // Sync phone number to profiles table
+    try {
+      await sb
+        .from('profiles')
+        .update({
+          phone: cleanPhone,
+          updated_at: new Date().toISOString(),
+        })
+        .eq('id', auth.userId);
+    } catch {}
+
+    if (store?.id) {
+      try {
+        await sb.from('seller_status_history').insert({
+          seller_id: store.id,
+          previous_status: null,
+          new_status: 'pending',
+          action: 'application_submitted',
+          reason: 'Initial seller registration application submitted',
+          notes: `Store '${businessName}' application registered`,
+          changed_by: auth.userId,
+        });
+      } catch (histErr) {
+        console.warn('Status history notice:', histErr);
+      }
+    }
+
+    // Create notification for admins
+    try {
+      await sb.from('notifications').insert({
+        role_target: 'admin',
+        title: 'New Seller Registration Request',
+        message: `${fullName} has submitted a new seller application for "${businessName}".`,
+        type: 'system',
+        related_id: insertedInquiry.id,
+      });
+    } catch {}
+
     return NextResponse.json({
       success: true,
-      message: 'Seller inquiry received successfully. Our onboarding team will contact you within 24-48 hours.',
-      inquiry: newInquiry
+      message: 'Your seller application has been submitted successfully and is awaiting admin approval.',
+      inquiry: insertedInquiry,
     });
   } catch (err: any) {
+    console.error('[SellerInquiry POST] Exception:', err);
     return NextResponse.json({ error: err.message || 'Internal server error' }, { status: 500 });
   }
 }
 
 export async function PATCH(request: Request) {
   try {
+    const auth = await getAuthUser(request);
+    // Enforce admin authorization — only admins can approve/reject/suspend
+    if (!auth?.isAdmin) {
+      return NextResponse.json({ error: 'Unauthorized: Admin access required' }, { status: 403 });
+    }
+
     const body = await request.json();
     const { id, status, adminNotes } = body;
 
     if (!id || !status) {
-      return NextResponse.json({ error: 'Inquiry ID and new status are required' }, { status: 400 });
+      return NextResponse.json({ error: 'Application ID and new status are required' }, { status: 400 });
     }
 
-    // Update memory
-    const existingIndex = memoryInquiries.findIndex(i => i.id === id);
-    if (existingIndex !== -1) {
-      memoryInquiries[existingIndex] = {
-        ...memoryInquiries[existingIndex],
+    if (status === 'rejected' && (!adminNotes || !adminNotes.trim())) {
+      return NextResponse.json({ error: 'Please provide a rejection reason for the applicant.' }, { status: 400 });
+    }
+
+    const sb = getAdminSupabase();
+
+    // Fetch existing inquiry
+    const { data: existingInquiry, error: fetchErr } = await sb
+      .from('seller_inquiries')
+      .select('*')
+      .eq('id', id)
+      .single();
+
+    if (fetchErr || !existingInquiry) {
+      return NextResponse.json({ error: 'Seller application not found' }, { status: 404 });
+    }
+
+    // Update seller_inquiries
+    const { data: updated, error: updateErr } = await sb
+      .from('seller_inquiries')
+      .update({
         status,
-        admin_notes: adminNotes !== undefined ? adminNotes : memoryInquiries[existingIndex].admin_notes,
-        updated_at: new Date().toISOString()
-      };
+        admin_notes: adminNotes ?? existingInquiry.admin_notes,
+        reviewed_by: auth.userId,
+        reviewed_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+      })
+      .eq('id', id)
+      .select()
+      .single();
+
+    if (updateErr) {
+      return NextResponse.json({ error: updateErr.message }, { status: 500 });
     }
 
-    // Update Supabase seller_inquiries
-    try {
-      await supabaseAdmin
-        .from('seller_inquiries')
-        .update({
-          status,
-          admin_notes: adminNotes,
-          updated_at: new Date().toISOString()
-        })
-        .eq('id', id);
-    } catch (e) {
-      // Ignored
+    let targetUserId = updated.user_id;
+    if (!targetUserId && updated.email) {
+      const { data: uByEmail } = await sb.from('profiles').select('id').eq('email', updated.email).maybeSingle();
+      if (uByEmail?.id) targetUserId = uByEmail.id;
     }
 
-    // If status is 'approved', activate seller and elevate user role
-    const inquiry = existingIndex !== -1 ? memoryInquiries[existingIndex] : null;
-    if (status === 'approved' && inquiry?.user_id) {
-      try {
-        await supabaseAdmin
+    if (targetUserId) {
+      if (status === 'approved') {
+        // 1. Grant seller role to profile and sync contact phone
+        await sb
           .from('profiles')
-          .update({ role: 'seller' })
-          .eq('id', inquiry.user_id);
+          .update({
+            role: 'seller',
+            phone: updated.phone || undefined,
+            updated_at: new Date().toISOString(),
+          })
+          .eq('id', targetUserId);
 
-        const slug = inquiry.business_name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
-        await supabaseAdmin
+        // 2. Set seller store to active
+        const slug = (updated.business_name || 'seller')
+          .toLowerCase()
+          .replace(/[^a-z0-9]+/g, '-')
+          .replace(/(^-|-$)/g, '');
+
+        const { data: store } = await sb
           .from('sellers')
-          .upsert({
-            user_id: inquiry.user_id,
-            store_name: inquiry.business_name,
-            slug,
-            state: inquiry.state || 'Gujarat',
-            category: inquiry.category || 'A2 Dairy & Ghee',
-            description: inquiry.notes || inquiry.product_range,
-            plan: 'growth',
-            commission_rate: 5.0,
-            status: 'active',
-            gstin: inquiry.gstin,
+          .upsert(
+            {
+              user_id: targetUserId,
+              store_name: updated.business_name,
+              phone: updated.phone || undefined,
+              slug: `${slug}-${targetUserId.slice(0, 4)}`,
+              state: updated.state || 'Gujarat',
+              category: updated.category || 'General',
+              description: updated.notes || updated.product_range,
+              plan: 'growth',
+              commission_rate: 5.0,
+              status: 'active',
+              gstin: updated.gstin,
+              pan: updated.pan,
+              fssai_number: updated.fssai_number,
+              updated_at: new Date().toISOString(),
+            },
+            { onConflict: 'user_id' }
+          )
+          .select()
+          .single();
+
+        if (store?.id) {
+          await sb.from('seller_status_history').insert({
+            seller_id: store.id,
+            previous_status: existingInquiry.status,
+            new_status: 'active',
+            action: 'application_approved',
+            reason: 'Seller onboarding application approved by admin',
+            notes: adminNotes || 'Seller store activated with dashboard access',
+            changed_by: auth.userId,
           });
-      } catch (err) {
-        console.warn('Auto provision seller on approve error:', err);
+        }
+
+        // Notify the seller
+        try {
+          await sb.from('notifications').insert({
+            user_id: targetUserId,
+            role_target: 'seller',
+            title: 'Seller Application Approved!',
+            message: `Congratulations! Your seller application for "${updated.business_name}" has been approved. You now have full access to your seller dashboard to add products and manage sales.`,
+            type: 'system',
+            related_id: id,
+          });
+        } catch {}
+
+      } else if (status === 'rejected') {
+        // Revoke seller role (unless admin)
+        const { data: userProf } = await sb.from('profiles').select('role').eq('id', targetUserId).maybeSingle();
+        if (userProf?.role !== 'admin') {
+          await sb.from('profiles').update({ role: 'customer' }).eq('id', targetUserId);
+        }
+
+        const { data: store } = await sb
+          .from('sellers')
+          .update({
+            status: 'rejected',
+            deactivation_reason: adminNotes,
+            updated_at: new Date().toISOString(),
+          })
+          .eq('user_id', targetUserId)
+          .select()
+          .maybeSingle();
+
+        if (store?.id) {
+          await sb.from('seller_status_history').insert({
+            seller_id: store.id,
+            previous_status: existingInquiry.status,
+            new_status: 'rejected',
+            action: 'application_rejected',
+            reason: adminNotes,
+            notes: 'Application rejected during review',
+            changed_by: auth.userId,
+          });
+        }
+
+        // Notify the applicant
+        try {
+          await sb.from('notifications').insert({
+            user_id: targetUserId,
+            role_target: 'customer',
+            title: 'Seller Application Status Update',
+            message: `Your seller application for "${updated.business_name}" was not approved. Reason: ${adminNotes}. You may update and resubmit your details.`,
+            type: 'alert',
+            related_id: id,
+          });
+        } catch {}
+
+      } else if (status === 'suspended') {
+        // Suspend seller account
+        const { data: store } = await sb
+          .from('sellers')
+          .update({
+            status: 'suspended',
+            deactivation_reason: adminNotes || 'Suspended by admin',
+            updated_at: new Date().toISOString(),
+          })
+          .eq('user_id', targetUserId)
+          .select()
+          .maybeSingle();
+
+        if (store?.id) {
+          await sb.from('seller_status_history').insert({
+            seller_id: store.id,
+            previous_status: existingInquiry.status,
+            new_status: 'suspended',
+            action: 'seller_suspended',
+            reason: adminNotes,
+            notes: 'Seller suspended by admin',
+            changed_by: auth.userId,
+          });
+        }
+
+        // Notify the seller
+        try {
+          await sb.from('notifications').insert({
+            user_id: targetUserId,
+            role_target: 'seller',
+            title: 'Seller Account Suspended',
+            message: `Your seller store "${updated.business_name}" has been suspended. Reason: ${adminNotes || 'Contact support for more details.'}`,
+            type: 'alert',
+            related_id: id,
+          });
+        } catch {}
       }
     }
 
     return NextResponse.json({
       success: true,
-      message: `Inquiry status updated to ${status}`,
-      inquiry: inquiry || { id, status, adminNotes }
+      message: `Seller application status updated to ${status}`,
+      inquiry: updated,
     });
   } catch (err: any) {
+    console.error('[SellerInquiry PATCH] Exception:', err);
     return NextResponse.json({ error: err.message || 'Failed to update inquiry' }, { status: 500 });
   }
 }

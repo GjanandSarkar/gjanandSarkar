@@ -27,15 +27,32 @@ export type CartItem = {
 export type User = {
   id: string;
   name: string;
+  first_name?: string;
+  last_name?: string;
   phone?: string;
   email?: string;
   avatar_url?: string;
   address?: string;
+  country?: string;
   saved_addresses?: { label: string; address: string }[];
   role: 'customer' | 'admin' | 'seller';
+  /** Real balance from `profiles.loyalty_points`; orders accrue into it. */
+  loyalty_points?: number;
 };
 
 // ─── Seller Store shape ──────────────────────────────────────
+export type SellerLifecycleStatus =
+  | 'active'
+  | 'pending'
+  | 'pending_kyc'
+  | 'pending_inquiry'
+  | 'suspended'
+  | 'under_review'
+  | 'deactivated'
+  | 'permanently_deactivated'
+  | 'reactivation_requested'
+  | 'rejected';
+
 export type SellerStore = {
   id: string;
   user_id: string;
@@ -44,10 +61,15 @@ export type SellerStore = {
   state: string;
   plan: 'starter' | 'growth' | 'enterprise';
   commission_rate: number;
-  status: 'active' | 'pending_kyc' | 'suspended';
+  status: SellerLifecycleStatus;
   gstin?: string;
   pan?: string;
   total_revenue?: number;
+  review_started_at?: string | null;
+  review_expires_at?: string | null;
+  review_reason?: string | null;
+  deactivation_reason?: string | null;
+  reactivation_reason?: string | null;
 };
 
 // ─── App State ────────────────────────────────────────────────
@@ -226,7 +248,8 @@ export const useStore = create<AppState>()(
         user: state.user,
         sellerStore: state.sellerStore,
         language: state.language,
-        translationsCache: state.translationsCache,
+        // NOTE: translationsCache is intentionally NOT persisted — it's large and
+        // re-fetched idly per session. Persisting it caused slow store hydration.
         cart: state.cart,
         wishlist: state.wishlist,
       }),

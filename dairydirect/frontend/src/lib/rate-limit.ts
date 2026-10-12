@@ -1,56 +1,36 @@
 // src/lib/rate-limit.ts
 
 /**
- * Lightweight, zero-dependency in-memory rate limiter.
- * Ideal for Startup MVP scale (0-10k customers).
- * 
- * IMPORTANT:
- * - State is kept in-memory, which means limits are INSTANCE-LOCAL on Vercel/Serverless.
- * - This will reset on cold starts.
- * - For a single or few serverless instances, this is sufficient to prevent blatant abuse and bot spam.
- * 
- * MIGRATION TO DISTRIBUTED RATE LIMITING (Redis/Upstash):
- * When scaling past the MVP phase or deploying horizontally across many regions:
- * 1. Install `@upstash/ratelimit` and `@upstash/redis`.
- * 2. Replace this implementation with `new Ratelimit({ redis: Redis.fromEnv(), limiter: Ratelimit.slidingWindow(...) })`.
- * 3. The exported `rateLimit` function signature can remain exactly the same.
+ * Distributed rate limiter — Redis-backed when Redis is available, in-memory fallback otherwise.
+ *
+ * Redis path: Uses INCR + EXPIRE sliding window (see checkRateLimit in @/lib/aws/redis).
+ * Memory path: In-process map — state is instance-local and resets on cold starts.
+ *
+ * USAGE:
+ *   const limiter = rateLimit({ interval: 60_000, uniqueTokenPerInterval: 100 });
+ *   await limiter.check(10, 'identifier');
+ *
+ * SCALING:
+ * Redis is already integrated — this module will automatically use distributed limits
+ * when REDIS_URL is configured and Redis is reachable.
  */
 
+import { checkRateLimit } from '@/lib/aws/redis';
+
 type RateLimitOptions = {
-  interval: number; // in milliseconds
-  uniqueTokenPerInterval: number; // Max requests per interval
+  interval: number;            // window in milliseconds
+  uniqueTokenPerInterval: number; // kept for API compatibility
 };
 
-const rateLimitMap = new Map<string, { count: number; expiresAt: number }>();
-
 export function rateLimit(options: RateLimitOptions) {
+  const windowSeconds = Math.ceil(options.interval / 1000);
+
   return {
-    check: (limit: number, token: string): Promise<void> => {
-      return new Promise((resolve, reject) => {
-        const now = Date.now();
-        const record = rateLimitMap.get(token);
-
-        // Clean up expired records to prevent memory leaks
-        if (rateLimitMap.size > 1000) {
-          rateLimitMap.forEach((val, key) => {
-            if (val.expiresAt < now) {
-              rateLimitMap.delete(key);
-            }
-          });
-        }
-
-        if (record && record.expiresAt > now) {
-          if (record.count >= limit) {
-            return reject(new Error('Rate limit exceeded'));
-          }
-          record.count += 1;
-          rateLimitMap.set(token, record);
-          resolve();
-        } else {
-          rateLimitMap.set(token, { count: 1, expiresAt: now + options.interval });
-          resolve();
-        }
-      });
+    check: async (limit: number, token: string): Promise<void> => {
+      const result = await checkRateLimit(token, 'generic', limit, windowSeconds);
+      if (!result.allowed) {
+        throw new Error('Rate limit exceeded');
+      }
     },
   };
 }

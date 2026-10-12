@@ -1,4 +1,4 @@
-import { supabase } from '@/lib/supabase';
+import { api } from './client';
 import type { DBCartItem } from '@/lib/supabase';
 
 // ─── Types ────────────────────────────────────────────────────
@@ -9,18 +9,13 @@ export type CartItemWithDetails = DBCartItem & {
 };
 
 export async function getCart(userId: string): Promise<CartItemWithDetails[]> {
-  const { data, error } = await supabase
-    .from('cart_items')
-    .select('*, products(*), product_variants(*)')
-    .eq('user_id', userId)
-    .order('created_at', { ascending: true });
-
-  if (error) {
-    console.error('getCart error:', error.message, '| Detail:', error.details, '| Hint:', error.hint);
+  try {
+    const res = await api.cart.get(userId);
+    return (res.cart as CartItemWithDetails[]) || [];
+  } catch (error: any) {
+    console.error('getCart error:', error.message);
     return [];
   }
-
-  return (data as CartItemWithDetails[]) ?? [];
 }
 
 export async function addToCart(
@@ -29,33 +24,12 @@ export async function addToCart(
   variantId: string,
   quantity: number = 1
 ): Promise<{ success: boolean; error?: string }> {
-  const { data: existing } = await supabase
-    .from('cart_items')
-    .select('id, quantity')
-    .eq('user_id', userId)
-    .eq('product_id', productId)
-    .eq('variant_id', variantId)
-    .single();
-
-  if (existing) {
-    const { error } = await supabase
-      .from('cart_items')
-      .update({ quantity: existing.quantity + quantity })
-      .eq('id', existing.id);
-
-    if (error) return { success: false, error: error.message };
-    return { success: true };
+  try {
+    const res = await api.cart.add(userId, productId, variantId, quantity);
+    return { success: res.success ?? true };
+  } catch (error: any) {
+    return { success: false, error: error.message };
   }
-
-  const { error } = await supabase.from('cart_items').insert({
-    user_id: userId,
-    product_id: productId,
-    variant_id: variantId,
-    quantity,
-  });
-
-  if (error) return { success: false, error: error.message };
-  return { success: true };
 }
 
 export async function updateCartItem(
@@ -64,19 +38,15 @@ export async function updateCartItem(
   variantId: string,
   quantity: number
 ): Promise<{ success: boolean; error?: string }> {
-  if (quantity <= 0) {
-    return removeFromCart(userId, productId, variantId);
+  try {
+    if (quantity <= 0) {
+      return removeFromCart(userId, productId, variantId);
+    }
+    const res = await api.cart.update(userId, productId, variantId, quantity);
+    return { success: res.success ?? true };
+  } catch (error: any) {
+    return { success: false, error: error.message };
   }
-
-  const { error } = await supabase
-    .from('cart_items')
-    .update({ quantity })
-    .eq('user_id', userId)
-    .eq('product_id', productId)
-    .eq('variant_id', variantId);
-
-  if (error) return { success: false, error: error.message };
-  return { success: true };
 }
 
 export async function removeFromCart(
@@ -84,35 +54,18 @@ export async function removeFromCart(
   productId: string,
   variantId: string
 ): Promise<{ success: boolean; error?: string }> {
-  const { error } = await supabase
-    .from('cart_items')
-    .delete()
-    .eq('user_id', userId)
-    .eq('product_id', productId)
-    .eq('variant_id', variantId);
-
-  if (error) return { success: false, error: error.message };
-  return { success: true };
+  try {
+    const res = await api.cart.remove(userId, productId, variantId);
+    return { success: res.success ?? true };
+  } catch (error: any) {
+    return { success: false, error: error.message };
+  }
 }
 
 export async function clearCart(userId: string): Promise<{ success: boolean; error?: string }> {
   try {
-    const { data: { session } } = await supabase.auth.getSession();
-    if (!session) throw new Error('Not authenticated');
-
-    const res = await fetch('/api/cart/clear', {
-      method: 'POST',
-      headers: { 
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${session.access_token}`,
-      },
-      body: JSON.stringify({ userId })
-    });
-
-    const data = await res.json();
-    if (!res.ok) throw new Error(data.error || 'Failed to clear cart');
-
-    return { success: true };
+    const res = await api.cart.clear(userId);
+    return { success: res.success ?? true };
   } catch (error: any) {
     console.error('clearCart error:', error);
     return { success: false, error: error.message };
@@ -125,25 +78,18 @@ export async function mergeLocalCart(
 ): Promise<void> {
   if (localItems.length === 0) return;
 
-  const { data: dbCart } = await supabase
-    .from('cart_items')
-    .select('product_id, variant_id, quantity')
-    .eq('user_id', userId);
+  try {
+    const dbCart = await getCart(userId);
+    const dbSet = new Set(
+      (dbCart ?? []).map((i: any) => `${i.product_id}-${i.variant_id}`)
+    );
 
-  const dbSet = new Set(
-    (dbCart ?? []).map((i: any) => `${i.product_id}-${i.variant_id}`)
-  );
-
-  const toInsert = localItems
-    .filter((i) => !dbSet.has(`${i.productId}-${i.variantId}`))
-    .map((i) => ({
-      user_id: userId,
-      product_id: i.productId,
-      variant_id: i.variantId,
-      quantity: i.quantity,
-    }));
-
-  if (toInsert.length > 0) {
-    await supabase.from('cart_items').insert(toInsert).select();
+    for (const item of localItems) {
+      if (!dbSet.has(`${item.productId}-${item.variantId}`)) {
+        await addToCart(userId, item.productId, item.variantId, item.quantity);
+      }
+    }
+  } catch (err) {
+    console.warn('mergeLocalCart error:', err);
   }
 }

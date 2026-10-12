@@ -1,19 +1,35 @@
-import { supabase } from '@/lib/supabase';
 import type { DBOrder, DBOrderItem } from '@/lib/supabase';
-import { createNotification } from './notifications';
+import { api } from './client';
 
 // ─── Types ────────────────────────────────────────────────────
 
 export type OrderWithItems = Omit<DBOrder, 'order_items'> & {
   order_items: (DBOrderItem & {
-    products?: { name: string; image_url: string | null };
-    product_variants?: { weight: string };
+    products?: { 
+      name: string; 
+      image_url: string | null;
+      seller_id?: string | null;
+      sellers?: {
+        id: string;
+        store_name: string;
+        slug: string;
+      } | null;
+    };
+    product_variants?: { weight: string; price?: number };
+    product_name?: string;
+    product_image?: string | null;
+    weight?: string;
   })[];
   user_addresses?: { 
     id: string;
     label: string;
     address: string;
     apartment?: string;
+  };
+  profiles?: {
+    name?: string;
+    phone?: string;
+    email?: string;
   };
 };
 
@@ -35,38 +51,29 @@ export type PlaceOrderInput = {
   paymentStatus: string;
   couponCode?: string;
   upiId?: string;
+  reservationId?: string;
+  // Razorpay-specific fields (required when paymentMethod is 'razorpay')
+  razorpayOrderId?: string;
+  razorpayPaymentId?: string;
+  razorpaySignature?: string;
 };
 
 export type OrderStatus = DBOrder['status'];
 
-// ─── Generate Order ID ────────────────────────────────────────
-function generateOrderId(): string {
-  return `ORD-${Math.floor(1000 + Math.random() * 9000)}`;
-}
-
-export async function getUserOrders(userId: string): Promise<OrderWithItems[]> {
-  const { data, error } = await supabase
-    .from('orders')
-    .select('*, order_items(*, products(name, image_url), product_variants(weight)), user_addresses(*)')
-    .eq('user_id', userId)
-    .order('created_at', { ascending: false });
-
-  if (error) {
+export async function getUserOrders(userId?: string): Promise<OrderWithItems[]> {
+  try {
+    const res = await fetch('/api/orders');
+    const data = await res.json();
+    return data.orders || [];
+  } catch (error) {
     console.error('getUserOrders error:', error);
     return [];
   }
-
-  return (data as OrderWithItems[]) ?? [];
 }
 
 export async function getUserBuyAgainHistory(): Promise<string[]> {
   try {
-    const { data: { session } } = await supabase.auth.getSession();
-    if (!session) return [];
-    
-    const res = await fetch('/api/orders?history=true', {
-      headers: { 'Authorization': `Bearer ${session.access_token}` },
-    });
+    const res = await fetch('/api/orders?history=true');
     const data = await res.json();
     return data.productIds || [];
   } catch (error) {
@@ -76,34 +83,45 @@ export async function getUserBuyAgainHistory(): Promise<string[]> {
 }
 
 // ─── Get All Orders (Admin) ───────────────────────────────────
-export async function getAllOrders(): Promise<OrderWithItems[]> {
-  const { data, error } = await supabase
-    .from('orders')
-    .select('*, order_items(*, products(name, image_url), product_variants(weight)), user_addresses(*), profiles:user_id(name, phone)')
-    .order('created_at', { ascending: false });
+export async function getAllOrders(
+  options?: string | { status?: string; type?: 'admin' | 'seller'; sellerId?: string }
+): Promise<OrderWithItems[]> {
+  try {
+    let url = '/api/orders';
+    const params = new URLSearchParams();
 
-  if (error) {
+    if (typeof options === 'string') {
+      if (options && options !== 'all') params.set('status', options);
+    } else if (options && typeof options === 'object') {
+      if (options.status && options.status !== 'all') params.set('status', options.status);
+      if (options.type) params.set('type', options.type);
+      if (options.sellerId && options.sellerId !== 'all') params.set('sellerId', options.sellerId);
+    }
+
+    const queryStr = params.toString();
+    if (queryStr) {
+      url += `?${queryStr}`;
+    }
+
+    const res = await fetch(url, { credentials: 'include', cache: 'no-store' });
+    const data = await res.json();
+    return data.orders || [];
+  } catch (error) {
     console.error('getAllOrders error:', error);
     return [];
   }
-
-  return (data as OrderWithItems[]) ?? [];
 }
 
 // ─── Get Single Order ─────────────────────────────────────────
 export async function getOrderById(orderId: string): Promise<OrderWithItems | null> {
-  const { data, error } = await supabase
-    .from('orders')
-    .select('*, order_items(*, products(name, image_url), product_variants(weight)), user_addresses(*)')
-    .eq('id', orderId)
-    .single();
-
-  if (error) {
+  try {
+    const res = await fetch(`/api/orders?id=${orderId}`);
+    const data = await res.json();
+    return data.order || null;
+  } catch (error) {
     console.error('getOrderById error:', error);
     return null;
   }
-
-  return data as OrderWithItems;
 }
 
 // ─── Place Order ──────────────────────────────────────────────
@@ -111,27 +129,25 @@ export async function placeOrder(
   input: PlaceOrderInput
 ): Promise<{ success: boolean; orderId?: string; error?: string }> {
   try {
-    const { data: { session } } = await supabase.auth.getSession();
-    if (!session) throw new Error('User not authenticated');
+    // Coerce Supabase numeric fields (PostgreSQL `numeric` columns come as strings)
+    const sanitizedInput = {
+      ...input,
+      items: input.items.map(item => ({
+        ...item,
+        price: typeof item.price === 'string' ? parseFloat(item.price as any) : Number(item.price ?? 0),
+        quantity: Number(item.quantity),
+      })),
+    };
 
-    const res = await fetch('/api/orders/place', {
-      method: 'POST',
-      headers: { 
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${session.access_token}`,
-      },
-      body: JSON.stringify({ orderData: input })
-    });
-
-    const data = await res.json();
-    if (!res.ok) throw new Error(data.error || 'Failed to place order');
-
+    // Use authenticated fetchApi wrapper (sends Supabase Bearer token automatically)
+    const data = await api.orders.place(sanitizedInput);
     return { success: true, orderId: data.orderId };
   } catch (error: any) {
     console.error('placeOrder error:', error);
     return { success: false, error: error.message };
   }
 }
+
 
 // ─── Validate Coupon ──────────────────────────────────────────
 export async function validateCoupon(
@@ -141,7 +157,7 @@ export async function validateCoupon(
   valid: boolean; 
   discount: number; 
   total: number; 
-  subtotal: number;
+  subtotal: number; 
   deliveryFee: number;
   nextTierAmount?: number;
   message?: string;
@@ -159,30 +175,91 @@ export async function validateCoupon(
   }
 }
 
-// ─── Admin: Update Order Status ───────────────────────────────
+// ─── Get Seller Orders ────────────────────────────────────────
+export async function getSellerOrders(status?: string): Promise<OrderWithItems[]> {
+  try {
+    const url = status && status !== 'all' ? `/api/orders?status=${status}` : '/api/orders';
+    const res = await fetch(url, { credentials: 'include', cache: 'no-store' });
+    const data = await res.json();
+    return data.orders || [];
+  } catch (error) {
+    console.error('getSellerOrders error:', error);
+    return [];
+  }
+}
+
+export type { DBReturnRequest } from '@/lib/supabase';
+
+// ─── Admin / User / Seller: Update / Cancel Order ─────────────
 export async function updateOrderStatus(
   orderId: string,
   status: OrderStatus,
-  userId?: string
+  userId?: string,
+  notes?: string,
+  orderItemId?: string
 ): Promise<{ success: boolean; error?: string }> {
-  const { error } = await supabase
-    .from('orders')
-    .update({ status })
-    .eq('id', orderId);
-
-  if (error) return { success: false, error: error.message };
-
-  // Notify the customer whose order was updated
-  if (userId) {
-    await createNotification({
-      userId,
-      roleTarget: 'customer',
-      title: `Order ${orderId} Update`,
-      body: `Your order is now: ${status}.`,
-      type: 'order',
-      relatedId: orderId,
+  try {
+    const res = await fetch('/api/orders', {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      credentials: 'include',
+      body: JSON.stringify({ orderId, status, notes, orderItemId })
     });
-  }
 
-  return { success: true };
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'Failed to update status');
+    return { success: true };
+  } catch (error: any) {
+    console.error('updateOrderStatus error:', error);
+    return { success: false, error: error.message };
+  }
+}
+
+// ─── Customer: Submit Order Item Request (Cancellation or Return) ─
+export async function submitOrderRequest(input: {
+  orderId: string;
+  orderItemId: string;
+  requestType: 'cancellation' | 'return';
+  reason: string;
+  description?: string;
+  images?: string[];
+}): Promise<{ success: boolean; requestId?: string; error?: string; message?: string }> {
+  try {
+    const res = await fetch('/api/admin/returns', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      credentials: 'include',
+      body: JSON.stringify(input)
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'Failed to submit request');
+    return { success: true, requestId: data.requestId || data.returnId, message: data.message };
+  } catch (error: any) {
+    console.error('submitOrderRequest error:', error);
+    return { success: false, error: error.message };
+  }
+}
+
+// ─── Seller / Admin: Process Request (Approve / Reject / Operational) ─
+export async function processOrderRequest(input: {
+  requestId: string;
+  action: 'approve' | 'reject' | 'override' | 'return_in_progress' | 'item_received' | 'inspection_completed' | 'refund_pending' | 'refunded';
+  reason?: string;
+  notes?: string;
+  refundAmount?: number;
+}): Promise<{ success: boolean; error?: string; message?: string }> {
+  try {
+    const res = await fetch('/api/admin/returns', {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      credentials: 'include',
+      body: JSON.stringify(input)
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'Failed to process request');
+    return { success: true, message: data.message };
+  } catch (error: any) {
+    console.error('processOrderRequest error:', error);
+    return { success: false, error: error.message };
+  }
 }

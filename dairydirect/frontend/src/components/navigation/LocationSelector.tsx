@@ -63,9 +63,9 @@ export function LocationSelector({ className }: LocationSelectorProps) {
             className="absolute top-full left-0 mt-2 w-64 bg-surface border border-sand rounded-xl shadow-xl overflow-hidden"
           >
             <div className="p-2 space-y-1">
-              {addresses.map((addr) => (
+              {addresses.map((addr, idx) => (
                 <button
-                  key={addr.label}
+                  key={addr.label ? `${addr.label}-${idx}` : `loc-addr-${idx}`}
                   onClick={() => {
                     setCheckoutAddressId(addr.label);
                     setIsOpen(false);

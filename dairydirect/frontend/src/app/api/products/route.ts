@@ -1,340 +1,436 @@
+/**
+ * GET/POST/PUT/DELETE /api/products
+ * Product management with dual AWS PostgreSQL + Supabase Fallback.
+ * Supports filtering by sellerId to isolate seller-specific products.
+ */
+
 import { NextRequest, NextResponse } from 'next/server';
-import { supabaseAdmin } from '@/lib/db';
-import { getAuthUser } from '@/lib/api/auth-middleware';
+import { query, withTransaction, isPgConfigured } from '@/lib/aws/rds';
+import {
+  getAuthUser,
+  getSellerForUser,
+  sellerCanWrite,
+  type SellerContext,
+} from '@/lib/api/auth-middleware';
+import { writeAuditLog } from '@/lib/security/audit';
+import { getCachedProducts, cacheProducts, invalidateProductsCache } from '@/lib/aws/redis';
+
+import { getAdminSupabase } from '@/lib/supabase/admin';
 
 export const dynamic = 'force-dynamic';
 
+// ─── GET /api/products ────────────────────────────────────────
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
     const category = searchParams.get('category');
+    const sellerId = searchParams.get('sellerId');
+    const q = searchParams.get('q');
     const activeOnly = searchParams.get('activeOnly') !== 'false';
 
-    let query = supabaseAdmin
-      .from('products')
-      .select('*, product_variants(*)')
-      .order('created_at', { ascending: false });
-
-    if (category && category !== 'All' && category !== 'All Categories') {
-      // Clean category slug if any (e.g. home-kitchen -> home kitchen)
-      const cleanCat = category.replace(/-/g, ' ').trim();
-      if (cleanCat.toLowerCase() === 'dairy & essentials' || cleanCat.toLowerCase() === 'dairy') {
-        query = query.or('category.ilike.%Milk%,category.ilike.%Ghee%,category.ilike.%Paneer%,category.ilike.%Curd%,category.ilike.%Lassi%,category.ilike.%Dairy%');
-      } else {
-        query = query.ilike('category', `%${cleanCat}%`);
+    // Try cache first (60s TTL) - bypass cache for seller dashboard specific queries
+    const cacheKey = sellerId || q ? `seller_${sellerId}_q_${q}_${activeOnly}` : `${category || 'all'}_${activeOnly}`;
+    if (!sellerId && !q) {
+      const cached = await getCachedProducts(cacheKey);
+      if (cached) {
+        return NextResponse.json(
+          { products: cached },
+          { headers: { 'X-Cache': 'HIT', 'Cache-Control': 'public, s-maxage=60, stale-while-revalidate=300' } }
+        );
       }
     }
 
-    if (activeOnly) {
-      query = query.eq('is_active', true);
+    // Build parameterized query
+    const conditions: string[] = [];
+    const params: any[] = [];
+    let paramIdx = 1;
+
+    if (activeOnly && !sellerId) {
+      conditions.push(`p.is_active = true`);
+      conditions.push(`p.approval_status = 'approved'`);
+      conditions.push(`(p.seller_id IS NULL OR EXISTS (SELECT 1 FROM sellers s WHERE s.id = p.seller_id AND s.status = 'active'))`);
+    } else if (activeOnly) {
+      conditions.push(`p.is_active = true`);
     }
 
-    const { data, error } = await query;
+    if (sellerId) {
+      conditions.push(`(p.seller_id = $${paramIdx} OR p.created_by = $${paramIdx})`);
+      params.push(sellerId);
+      paramIdx++;
+    }
 
-    if (error) {
-      console.error('getProducts error:', error);
-      return NextResponse.json({ error: error.message }, { status: 500 });
+    if (category && category !== 'All' && category !== 'All Categories') {
+      const cleanCat = category.replace(/-/g, ' ').trim();
+      conditions.push(`p.category ILIKE $${paramIdx++}`);
+      params.push(`%${cleanCat}%`);
+    }
+
+    if (q) {
+      conditions.push(`(p.name ILIKE $${paramIdx} OR p.description ILIKE $${paramIdx})`);
+      params.push(`%${q}%`);
+      paramIdx++;
+    }
+
+    const whereClause = conditions.length > 0 ? `WHERE ${conditions.join(' AND ')}` : '';
+
+    let products: any[] = [];
+
+    if (isPgConfigured) {
+      try {
+        const result = await query(
+          `SELECT 
+             p.id, p.name, p.category, p.description, p.image_url, p.s3_image_key,
+             p.is_freshness_guarantee, p.is_active, p.approval_status, p.rejection_reason, p.sku,
+             p.tags, p.brand, p.state_origin,
+             p.seller_id, p.created_by, p.rating, p.reviews_count, p.created_at,
+             COALESCE(
+               json_agg(
+                 json_build_object(
+                   'id', pv.id,
+                   'product_id', pv.product_id,
+                   'weight', pv.weight,
+                   'price', pv.price,
+                   'original_price', pv.original_price,
+                   'cost_price', pv.cost_price,
+                   'stock', pv.stock,
+                   'created_at', pv.created_at
+                 ) ORDER BY pv.price ASC
+               ) FILTER (WHERE pv.id IS NOT NULL),
+               '[]'::json
+             ) as product_variants
+           FROM products p
+           LEFT JOIN product_variants pv ON pv.product_id = p.id
+           ${whereClause}
+           GROUP BY p.id
+           ORDER BY p.created_at DESC`,
+          params
+        );
+        products = result.rows || [];
+      } catch (dbErr: any) {
+        console.warn('[Products GET] RDS failed, falling back to Supabase:', dbErr.message);
+      }
+    }
+
+    if (products.length === 0) {
+      try {
+        const admin = getAdminSupabase();
+        let sbQuery = admin
+          .from('products')
+          .select('*, product_variants(*), sellers:seller_id(id, status, store_name)')
+          .order('created_at', { ascending: false });
+
+        if (activeOnly && !sellerId) {
+          sbQuery = sbQuery.eq('is_active', true).eq('approval_status', 'approved');
+        } else if (activeOnly) {
+          sbQuery = sbQuery.eq('is_active', true);
+        }
+
+        if (sellerId) {
+          sbQuery = sbQuery.or(`seller_id.eq.${sellerId},created_by.eq.${sellerId}`);
+        }
+        if (category && category !== 'All' && category !== 'All Categories') {
+          const cleanCat = category.replace(/-/g, ' ').trim();
+          sbQuery = sbQuery.ilike('category', `%${cleanCat}%`);
+        }
+        if (q) {
+          sbQuery = sbQuery.or(`name.ilike.%${q}%,description.ilike.%${q}%`);
+        }
+        const { data, error } = await sbQuery;
+        if (!error && data) {
+          // If customer facing catalog, filter out any product whose seller is not active
+          if (activeOnly && !sellerId) {
+            products = data.filter((p: any) => !p.seller_id || (p.sellers && p.sellers.status === 'active'));
+          } else {
+            products = data;
+          }
+        }
+      } catch (sbErr: any) {
+        console.warn('[Products GET] Supabase fallback error:', sbErr.message);
+      }
+    }
+
+    // Cache products asynchronously (60s TTL)
+    if (products.length > 0 && !sellerId && !q) {
+      cacheProducts(cacheKey, products, 60).catch(() => {});
     }
 
     return NextResponse.json(
-      { products: data },
-      { headers: { 'Cache-Control': 'no-store, max-age=0' } }
+      { products },
+      { headers: { 'X-Cache': 'MISS', 'Cache-Control': 'public, s-maxage=60, stale-while-revalidate=300' } }
     );
-  } catch (error) {
-    console.error('Products GET error:', error);
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+  } catch (error: any) {
+    console.error('[Products GET] Error:', error.message);
+    return NextResponse.json({ error: 'Failed to fetch products', products: [] }, { status: 500 });
   }
 }
 
+// ─── POST /api/products (Admin & active contracted sellers only) ─────
 export async function POST(request: NextRequest) {
   try {
+    // ─────────────────────────────────────────────────────────────────────
+    // AUTHORISATION
+    //
+    // This handler previously called getAuthUser() and then ignored the
+    // result entirely: there was no admin check, no seller check, and no
+    // login check at all. An unauthenticated request could publish a live
+    // product — with arbitrary name, price, images and description — onto
+    // the storefront. (PUT and DELETE on /api/products/[id] were already
+    // gated on auth.isAdmin; only POST was open.)
+    //
+    // The rule enforced here mirrors the business model:
+    //   - admins may create products in any category
+    //   - a seller may create products ONLY if their seller record is
+    //     'active', and ONLY inside the single category they are contracted
+    //     for (one company per category)
+    //   - everybody else is rejected
+    // ─────────────────────────────────────────────────────────────────────
     const auth = await getAuthUser(request);
-    if (!auth) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
 
-    if (!auth.isAdmin) {
-      return NextResponse.json({ error: 'Admin only' }, { status: 403 });
+    if (!auth) {
+      return NextResponse.json(
+        { error: 'Authentication required' },
+        { status: 401 }
+      );
     }
 
     const body = await request.json();
-    const { name, category, description, image_url, is_freshness_guarantee, variants } = body;
+    const { name, category, description, image_url, gallery_images, is_freshness_guarantee, is_active, variants } = body;
 
-    const { data: settings } = await supabaseAdmin
-      .from('business_settings')
-      .select('min_profit_margin_percent')
-      .single();
-    
-    const minMargin = settings?.min_profit_margin_percent || 20;
+    const finalGalleryImages = Array.isArray(gallery_images)
+      ? gallery_images
+      : (image_url ? [image_url] : []);
+    const finalImageUrl = image_url || (finalGalleryImages.length > 0 ? finalGalleryImages[0] : null);
 
-    if (variants && variants.length > 0) {
-      for (const v of variants) {
-        const cost = Number(v.cost_price) || 0;
-        const selling = Number(v.price) || 0;
-        if (cost <= 0) {
-          return NextResponse.json({ error: `Cost price must be greater than 0 for variant ${v.weight}` }, { status: 400 });
-        }
-        const minSelling = cost * (1 + minMargin / 100);
-        if (selling < minSelling) {
-          return NextResponse.json({ 
-            error: `Selling price for ${v.weight} must be at least ₹${minSelling.toFixed(2)} (Min ${minMargin}% margin)` 
-          }, { status: 400 });
-        }
-      }
+    if (!name || !category) {
+      return NextResponse.json({ error: 'Name and category are required' }, { status: 400 });
     }
 
-    const { data: productData, error: productError } = await supabaseAdmin
-      .from('products')
-      .insert({
-        name,
-        category,
-        description,
-        image_url,
-        is_freshness_guarantee: is_freshness_guarantee ?? false,
-        is_active: true,
-      })
-      .select('id')
-      .single();
+    // Seller identity is resolved from the authenticated user server-side.
+    // The previous code read `sellerId` straight out of the request body,
+    // so a caller could attribute a product to any seller they liked.
+    let seller: SellerContext | null = null;
 
-    if (productError) {
-      return NextResponse.json({ error: productError.message }, { status: 500 });
-    }
+    if (!auth.isAdmin) {
+      seller = await getSellerForUser(auth.userId);
 
-    const productId = productData.id;
-
-    if (variants && variants.length > 0) {
-      const { error: variantError } = await supabaseAdmin
-        .from('product_variants')
-        .insert(
-          variants.map((v: any) => ({
-            product_id: productId,
-            weight: v.weight,
-            price: Number(v.price),
-            cost_price: Number(v.cost_price) || 0,
-            original_price: v.original_price ? Number(v.original_price) : null,
-            stock: Number(v.stock) || 0,
-          }))
+      if (!seller) {
+        return NextResponse.json(
+          { error: 'Only approved sellers can add products' },
+          { status: 403 }
         );
+      }
 
-      if (variantError) {
-        console.error('Variant insert error:', variantError);
+      if (!sellerCanWrite(seller)) {
+        return NextResponse.json(
+          {
+            error: `Your seller account is '${seller.status}'. Products can only be added while your account is active.`,
+          },
+          { status: 403 }
+        );
+      }
+
+      // One company per category: a seller cannot list outside their contract.
+      const requested = String(category).trim().toLowerCase();
+      const contracted = seller.category.trim().toLowerCase();
+      if (!contracted || requested !== contracted) {
+        return NextResponse.json(
+          {
+            error: `You are contracted for the '${seller.category}' category and cannot list products under '${category}'.`,
+          },
+          { status: 403 }
+        );
       }
     }
 
-    return NextResponse.json({ success: true, id: productId });
-  } catch (error) {
-    console.error('Products POST error:', error);
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
-  }
-}
+    const sellerId = seller?.sellerId ?? null;
 
-export async function PUT(request: NextRequest) {
-  try {
-    const auth = await getAuthUser(request);
-    if (!auth) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
+    const initialApprovalStatus = auth.isAdmin ? 'approved' : 'pending';
+    const initialIsActive = auth.isAdmin ? (is_active ?? true) : false;
 
-    if (!auth.isAdmin) {
-      return NextResponse.json({ error: 'Admin access required' }, { status: 403 });
-    }
-
-    const body = await request.json();
-    const { id, name, category, description, image_url, is_freshness_guarantee, is_active, variants } = body;
-
-    if (!id) {
-      return NextResponse.json({ error: 'Product ID is required' }, { status: 400 });
-    }
-
-    const { data: settings } = await supabaseAdmin
-      .from('business_settings')
-      .select('min_profit_margin_percent')
-      .single();
-
-    const minMargin = settings?.min_profit_margin_percent || 20;
-
-    if (variants && Array.isArray(variants) && variants.length > 0) {
-      for (const v of variants) {
-        const cost = Number(v.cost_price) || 0;
-        const selling = Number(v.price) || 0;
-        if (cost <= 0) {
-          return NextResponse.json(
-            { error: `Cost price must be greater than 0 for variant "${v.weight || 'unknown'}"` },
-            { status: 400 }
+    if (isPgConfigured) {
+      try {
+        const newProduct = await withTransaction(async (client) => {
+          const prodResult = await client.query<{ id: string }>(
+            `INSERT INTO products (name, category, description, image_url, gallery_images, is_freshness_guarantee, is_active, approval_status, seller_id, created_by)
+             VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
+             RETURNING id`,
+            [name, category, description || null, finalImageUrl, finalGalleryImages, is_freshness_guarantee ?? false, initialIsActive, initialApprovalStatus, sellerId, auth.userId]
           );
-        }
-        const minSelling = cost * (1 + minMargin / 100);
-        if (selling < minSelling) {
-          return NextResponse.json(
-            {
-              error: `Selling price for "${v.weight}" must be at least ₹${minSelling.toFixed(2)} (Minimum ${minMargin}% margin)`,
-            },
-            { status: 400 }
-          );
-        }
-      }
-    }
 
-    const productUpdatePayload: Record<string, any> = {
-      updated_at: new Date().toISOString(),
-    };
-    if (name !== undefined) productUpdatePayload.name = name;
-    if (category !== undefined) productUpdatePayload.category = category;
-    if (description !== undefined) productUpdatePayload.description = description;
-    if (image_url !== undefined) productUpdatePayload.image_url = image_url;
-    if (is_freshness_guarantee !== undefined) productUpdatePayload.is_freshness_guarantee = is_freshness_guarantee;
-    if (is_active !== undefined) productUpdatePayload.is_active = is_active;
+          const productId = prodResult.rows[0].id;
 
-    const { error: productError } = await supabaseAdmin
-      .from('products')
-      .update(productUpdatePayload)
-      .eq('id', id);
+          if (variants && Array.isArray(variants)) {
+            for (const v of variants) {
+              await client.query(
+                `INSERT INTO product_variants (product_id, weight, price, cost_price, original_price, stock)
+                 VALUES ($1, $2, $3, $4, $5, $6)`,
+                [productId, v.weight, v.price, v.cost_price || 0, v.original_price || null, v.stock || 100]
+              );
+            }
+          }
 
-    if (productError) {
-      return NextResponse.json({ error: productError.message }, { status: 500 });
-    }
+          return productId;
+        });
 
-    if (variants && Array.isArray(variants)) {
-      const { data: existingVariants } = await supabaseAdmin
-        .from('product_variants')
-        .select('id')
-        .eq('product_id', id);
+        await invalidateProductsCache();
 
-      const existingIds = (existingVariants || []).map((ev) => ev.id);
-      const incomingIds = variants.filter((v: any) => v.id).map((v: any) => v.id);
-      const toDeleteIds = existingIds.filter((evId) => !incomingIds.includes(evId));
-
-      for (const delId of toDeleteIds) {
-        const { data: orderRefs } = await supabaseAdmin
-          .from('order_items')
-          .select('id')
-          .eq('variant_id', delId)
-          .limit(1);
-
-        const { data: subRefs } = await supabaseAdmin
-          .from('subscriptions')
-          .select('id')
-          .eq('variant_id', delId)
-          .limit(1);
-
-        if ((orderRefs && orderRefs.length > 0) || (subRefs && subRefs.length > 0)) {
-          await supabaseAdmin
-            .from('product_variants')
-            .update({ stock: 0 })
-            .eq('id', delId);
-        } else {
-          await supabaseAdmin.from('cart_items').delete().eq('variant_id', delId);
-          await supabaseAdmin.from('product_variants').delete().eq('id', delId);
-        }
-      }
-
-      for (const v of variants) {
-        if (v.id && existingIds.includes(v.id)) {
-          await supabaseAdmin
-            .from('product_variants')
-            .update({
-              weight: v.weight,
-              price: Number(v.price),
-              cost_price: Number(v.cost_price),
-              original_price: v.original_price ? Number(v.original_price) : null,
-              stock: v.stock !== undefined ? parseInt(v.stock, 10) || 0 : 0,
-            })
-            .eq('id', v.id);
-        } else {
-          await supabaseAdmin.from('product_variants').insert({
-            product_id: id,
-            weight: v.weight,
-            price: Number(v.price),
-            cost_price: Number(v.cost_price),
-            original_price: v.original_price ? Number(v.original_price) : null,
-            stock: v.stock !== undefined ? parseInt(v.stock, 10) || 0 : 0,
+        if (auth?.userId) {
+          await writeAuditLog({
+            adminId: auth.userId,
+            action: 'product.create' as any,
+            resourceType: 'product',
+            resourceId: newProduct,
+            details: { name, category, sellerId, approval_status: initialApprovalStatus },
+            ipAddress: request.headers.get('x-forwarded-for') || ''
           });
         }
+
+        return NextResponse.json({ success: true, productId: newProduct }, { status: 201 });
+      } catch (err: any) {
+        console.warn('[Products POST] RDS failed, fallback to Supabase:', err.message);
       }
     }
 
-    const { data: updatedProduct } = await supabaseAdmin
+    const sb = getAdminSupabase();
+    let prodData: any = null;
+    let prodErr: any = null;
+
+    const validSellerUuid: string | null = seller?.sellerId ?? null;
+    const validSellerUserId: string | null = seller?.userId ?? auth.userId;
+
+    // 1. Insert into main products table
+    const primaryPayload: any = {
+      name,
+      category,
+      description: description || null,
+      image_url: finalImageUrl,
+      gallery_images: finalGalleryImages,
+      is_freshness_guarantee: is_freshness_guarantee ?? false,
+      is_active: initialIsActive,
+      approval_status: initialApprovalStatus,
+      created_by: auth.userId,
+    };
+
+    // Auto-link category_id if available
+    if (category) {
+      try {
+        const { data: catRecord } = await sb
+          .from('categories')
+          .select('id')
+          .ilike('name', category.trim())
+          .maybeSingle();
+        if (catRecord?.id) {
+          primaryPayload.category_id = catRecord.id;
+        }
+      } catch {}
+    }
+
+    if (validSellerUuid) {
+      primaryPayload.seller_id = validSellerUuid;
+    }
+
+    const res1 = await sb
       .from('products')
-      .select('*, product_variants(*)')
-      .eq('id', id)
+      .insert(primaryPayload)
+      .select('id')
       .single();
 
-    return NextResponse.json({ success: true, product: updatedProduct });
-  } catch (error: any) {
-    console.error('Products PUT error:', error);
-    return NextResponse.json({ error: error.message || 'Internal server error' }, { status: 500 });
-  }
-}
+    if (!res1.error && res1.data) {
+      prodData = res1.data;
+    } else {
+      delete primaryPayload.seller_id;
+      const res2 = await sb
+        .from('products')
+        .insert(primaryPayload)
+        .select('id')
+        .single();
 
-export async function DELETE(request: NextRequest) {
-  try {
-    const auth = await getAuthUser(request);
-    if (!auth) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
-
-    if (!auth.isAdmin) {
-      return NextResponse.json({ error: 'Admin access required' }, { status: 403 });
-    }
-
-    const { searchParams } = new URL(request.url);
-    const id = searchParams.get('id');
-    const permanent = searchParams.get('permanent') === 'true';
-
-    if (!id) {
-      return NextResponse.json({ error: 'Product ID is required' }, { status: 400 });
-    }
-
-    const { data: orderRefs } = await supabaseAdmin
-      .from('order_items')
-      .select('id')
-      .eq('product_id', id)
-      .limit(1);
-
-    const { data: subRefs } = await supabaseAdmin
-      .from('subscriptions')
-      .select('id')
-      .eq('product_id', id)
-      .limit(1);
-
-    const isReferenced = (orderRefs && orderRefs.length > 0) || (subRefs && subRefs.length > 0);
-
-    if (permanent && !isReferenced) {
-      await supabaseAdmin.from('cart_items').delete().eq('product_id', id);
-      await supabaseAdmin.from('product_variants').delete().eq('product_id', id);
-      const { error: deleteError } = await supabaseAdmin.from('products').delete().eq('id', id);
-
-      if (deleteError) {
-        return NextResponse.json({ error: deleteError.message }, { status: 500 });
+      if (res2.error) {
+        prodErr = res2.error;
+      } else {
+        prodData = res2.data;
       }
+    }
 
-      return NextResponse.json({
-        success: true,
-        permanent: true,
-        message: 'Product permanently removed from catalogue.',
+    if (prodErr || !prodData) {
+      throw new Error(prodErr?.message || 'Failed to create product in Supabase');
+    }
+
+    // 2. Insert into product_variants table
+    if (variants && Array.isArray(variants) && variants.length > 0) {
+      const vInserts = variants.map((v: any) => {
+        const stockNum = typeof v.stock === 'number' ? v.stock : (!isNaN(parseInt(v.stock, 10)) ? parseInt(v.stock, 10) : 100);
+        const priceNum = typeof v.price === 'number' ? v.price : (parseFloat(v.price) || 0);
+        const costPriceNum = typeof v.cost_price === 'number' ? v.cost_price : (!isNaN(parseFloat(v.cost_price)) ? parseFloat(v.cost_price) : 0);
+        const originalPriceNum = v.original_price ? (parseFloat(v.original_price) || null) : null;
+
+        return {
+          product_id: prodData.id,
+          weight: String(v.weight || 'Default').trim(),
+          price: priceNum,
+          cost_price: Math.max(0, costPriceNum),
+          original_price: originalPriceNum,
+          stock: Math.max(0, stockNum),
+          available_quantity: Math.max(0, stockNum),
+          reserved_quantity: 0,
+          low_stock_threshold: v.low_stock_threshold || 10,
+        };
+      });
+
+      const { error: vErr } = await sb.from('product_variants').insert(vInserts);
+      if (vErr) {
+        console.error('[Products POST] product_variants insert error:', vErr);
+        throw new Error(`Failed to save product variants: ${vErr.message}`);
+      }
+    }
+
+    // 3. Sync to seller_product table in Supabase
+    if (prodData?.id) {
+      const primaryV = (variants && variants[0]) || {};
+      const primaryPrice = typeof primaryV.price === 'number' ? primaryV.price : (parseFloat(primaryV.price) || 0);
+      const primaryCost = typeof primaryV.cost_price === 'number' ? primaryV.cost_price : (parseFloat(primaryV.cost_price) || 0);
+      const primaryStock = typeof primaryV.stock === 'number' ? primaryV.stock : (!isNaN(parseInt(primaryV.stock, 10)) ? parseInt(primaryV.stock, 10) : 100);
+
+      try {
+        await sb.from('seller_product').insert({
+          product_id: prodData.id,
+          seller_id: validSellerUuid,
+          seller_user_id: validSellerUserId,
+          name,
+          category,
+          description: description || null,
+          price: primaryPrice,
+          original_price: primaryV.original_price ? parseFloat(primaryV.original_price) : null,
+          cost_price: primaryCost,
+          weight: primaryV.weight ? String(primaryV.weight).trim() : '500g',
+          stock: primaryStock,
+          image_url: image_url || null,
+          status: is_active ?? true ? 'active' : 'inactive',
+          is_approved: true,
+        });
+      } catch (spErr: any) {
+        console.warn('[Products POST] seller_product insert warning:', spErr?.message || spErr);
+      }
+    }
+
+    const pData = prodData;
+
+    await invalidateProductsCache();
+
+    if (auth?.userId) {
+      await writeAuditLog({
+        adminId: auth.userId,
+        action: 'product.create' as any,
+        resourceType: 'product',
+        resourceId: pData.id,
+        details: pData,
+        ipAddress: request.headers.get('x-forwarded-for') || ''
       });
     }
 
-    const { error: updateError } = await supabaseAdmin
-      .from('products')
-      .update({ is_active: false, updated_at: new Date().toISOString() })
-      .eq('id', id);
-
-    await supabaseAdmin.from('cart_items').delete().eq('product_id', id);
-
-    if (updateError) {
-      return NextResponse.json({ error: updateError.message }, { status: 500 });
-    }
-
-    return NextResponse.json({
-      success: true,
-      softDeleted: true,
-      message: isReferenced
-        ? 'Product was archived and deactivated because it has existing order/subscription history.'
-        : 'Product deactivated and removed from storefront.',
-    });
+    return NextResponse.json({ success: true, productId: pData.id }, { status: 201 });
   } catch (error: any) {
-    console.error('Products DELETE error:', error);
-    return NextResponse.json({ error: error.message || 'Internal server error' }, { status: 500 });
+    console.error('[Products POST] Error:', error.message);
+    return NextResponse.json({ error: error.message || 'Failed to create product' }, { status: 500 });
   }
 }

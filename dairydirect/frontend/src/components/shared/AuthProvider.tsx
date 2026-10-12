@@ -4,8 +4,32 @@ import { useEffect, useRef } from 'react';
 import { useStore } from '@/store/useStore';
 import { fetchTranslations } from '@/lib/api/translations';
 import { mergeLocalCart, getCart } from '@/lib/api/cart';
+import { getWishlist } from '@/lib/api/wishlist';
+import { getUserAddresses } from '@/lib/api/addresses';
 import type { Language } from '@/lib/i18n';
-import { supabase } from '@/lib/supabase';
+
+/**
+ * `@supabase/supabase-js` is ~180KB of JavaScript. It used to be imported
+ * statically here, and because AuthProvider wraps the entire app in the root
+ * layout, that 180KB sat in the critical bundle of EVERY route — including
+ * fully public pages (home, product, category, about) where no signed-in
+ * session is involved at all.
+ *
+ * It is now loaded on demand. Two helpers below give us a single shared
+ * promise so repeated calls never create a second client.
+ */
+let supabaseClientPromise: Promise<
+  Awaited<ReturnType<typeof import('@/lib/supabase/client')['getSupabaseBrowserClient']>>
+> | null = null;
+
+function loadSupabase() {
+  if (!supabaseClientPromise) {
+    supabaseClientPromise = import('@/lib/supabase/client').then((m) =>
+      m.getSupabaseBrowserClient()
+    );
+  }
+  return supabaseClientPromise;
+}
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const setUser = useStore((s) => s.setUser);
@@ -13,43 +37,50 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const setAuthLoading = useStore((s) => s.setAuthLoading);
   const setTranslationsCache = useStore((s) => s.setTranslationsCache);
   const setCart = useStore((s) => s.setCart);
+  const setWishlist = useStore((s) => s.setWishlist);
   const localCart = useStore((s) => s.cart);
   const translationsCache = useStore((s) => s.translationsCache);
   
   const isHydrating = useRef(false);
   const hasInitialized = useRef(false);
 
-  // Preload translations once in background
+  // Preload translations once in background (deferred so it doesn't block auth)
   useEffect(() => {
     const langs: Language[] = ['en', 'hi', 'gu'];
-    langs.forEach(async (lang) => {
-      if (Object.keys(translationsCache[lang] ?? {}).length > 0) return;
-      try {
-        const map = await fetchTranslations(lang);
-        if (Object.keys(map).length > 0) {
-          setTranslationsCache(lang, map);
+    const load = () => {
+      langs.forEach(async (lang) => {
+        if (Object.keys(translationsCache[lang] ?? {}).length > 0) return;
+        try {
+          const map = await fetchTranslations(lang);
+          if (Object.keys(map).length > 0) {
+            setTranslationsCache(lang, map);
+          }
+        } catch (err) {
+          // Silently skip translation fetch errors
         }
-      } catch (err) {
-        // Silently skip translation fetch errors
-      }
-    });
+      });
+    };
+    // Use idle callback to avoid competing with auth initialization
+    if (typeof window !== 'undefined' && 'requestIdleCallback' in window) {
+      (window as any).requestIdleCallback(load, { timeout: 3000 });
+    } else {
+      setTimeout(load, 1000);
+    }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // Supabase Auth listener
+  // Supabase Auth listener (client loaded lazily — see loadSupabase above)
   useEffect(() => {
-    // Always start loading = true on mount so guards wait
     setAuthLoading(true);
 
-    // onAuthStateChange fires INITIAL_SESSION immediately on mount with the
-    // persisted session (if any). This is the correct hook for refresh persistence.
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event: any, session: any) => {
+    let unsubscribe: (() => void) | undefined;
+    let cancelled = false;
+
+    const handleAuthEvent = async (event: any, session: any) => {
       if (event === 'INITIAL_SESSION') {
-        // First load / refresh: if session exists, hydrate user
         if (session) {
           await hydrateUser(session.access_token);
         } else {
-          // No session at all — user is genuinely not logged in
           setAuthLoading(false);
         }
         hasInitialized.current = true;
@@ -62,7 +93,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       }
 
       if (event === 'TOKEN_REFRESHED' && session) {
-        // Token was silently refreshed; re-hydrate in background
         await hydrateUser(session.access_token);
         return;
       }
@@ -75,10 +105,24 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       }
 
       setAuthLoading(false);
-    });
+    };
+
+    loadSupabase()
+      .then((supabase) => {
+        if (cancelled) return;
+        const {
+          data: { subscription },
+        } = supabase.auth.onAuthStateChange(handleAuthEvent);
+        unsubscribe = () => subscription.unsubscribe();
+      })
+      .catch((err) => {
+        console.warn('Auth init notice:', err);
+        setAuthLoading(false);
+      });
 
     return () => {
-      subscription.unsubscribe();
+      cancelled = true;
+      unsubscribe?.();
     };
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -95,25 +139,73 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       });
 
       if (res.ok) {
-        const data = await res.json();
-        const userProfile = data.user;
+        const raw = await res.json();
+        const userProfile = raw.user || raw.data?.user;
+        const accessToken = raw.data?.accessToken || raw.accessToken;
+        // NOTE: we deliberately do NOT write gs_access_token here any more.
+        // /api/auth/sync already sets it as an httpOnly cookie on this very
+        // response; re-writing it from JavaScript silently replaced that with
+        // a script-readable one, defeating the protection entirely.
         if (userProfile) {
+          const resolvedName = (userProfile.name && userProfile.name.trim())
+            ? userProfile.name.trim()
+            : (userProfile.email ? userProfile.email.split('@')[0] : (userProfile.phone ? `User (${userProfile.phone.slice(-4)})` : 'Customer'));
+
           setUser({
             id: userProfile.id,
-            name: userProfile.name ?? '',
+            name: resolvedName,
             phone: userProfile.phone || '',
             email: userProfile.email || '',
             avatar_url: userProfile.avatar_url || '',
             role: userProfile.role ?? 'customer',
+            // Was never mapped, so the profile screen had no real balance to
+            // read and fell back to a hardcoded 150.
+            loyalty_points: userProfile.loyalty_points ?? 0,
             saved_addresses: userProfile.saved_addresses || [],
           });
 
-          // Sync cart in background
-          const cart = localCart;
-          if (cart.length > 0) {
+          // Parallel fetch cart, wishlist, and addresses — faster than sequential .then() waterfall
+          const [dbCart, wishlistItems, addresses] = await Promise.allSettled([
+            getCart(userProfile.id),
+            getWishlist(userProfile.id),
+            getUserAddresses(userProfile.id),
+          ]);
+
+          // Apply cart
+          if (dbCart.status === 'fulfilled' && dbCart.value && dbCart.value.length > 0) {
+            setCart(
+              dbCart.value.map((item) => ({
+                productId: item.product_id,
+                variantId: item.variant_id,
+                quantity: item.quantity,
+              }))
+            );
+          }
+
+          // Apply wishlist
+          if (wishlistItems.status === 'fulfilled' && wishlistItems.value) {
+            setWishlist(wishlistItems.value);
+          }
+
+          // Apply addresses
+          if (addresses.status === 'fulfilled' && addresses.value && addresses.value.length > 0) {
+            setUser({
+              id: userProfile.id,
+              name: resolvedName,
+              phone: userProfile.phone || '',
+              email: userProfile.email || '',
+              avatar_url: userProfile.avatar_url || '',
+              role: userProfile.role ?? 'customer',
+              loyalty_points: userProfile.loyalty_points ?? 0,
+              saved_addresses: addresses.value.map(a => ({ label: a.label, address: a.address })),
+            });
+          }
+
+          // Merge any local cart items into DB in background (non-blocking)
+          if (localCart.length > 0) {
             mergeLocalCart(
               userProfile.id,
-              cart.map((i) => ({
+              localCart.map((i) => ({
                 productId: i.productId,
                 variantId: i.variantId,
                 quantity: i.quantity,
@@ -121,18 +213,44 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             ).catch(() => {});
           }
 
-          getCart(userProfile.id).then((dbCart) => {
-            if (dbCart && dbCart.length > 0) {
-              setCart(
-                dbCart.map((item) => ({
-                  productId: item.product_id,
-                  variantId: item.variant_id,
-                  quantity: item.quantity,
-                }))
-              );
-            }
-          }).catch(() => {});
+          return;
         }
+      }
+
+      // Fallback if sync API failed to return profile
+      const supabase = await loadSupabase();
+      const { data: { user: sbUser } } = await supabase.auth.getUser();
+      if (sbUser) {
+        const fallbackName = sbUser.user_metadata?.full_name 
+          || sbUser.user_metadata?.name 
+          || sbUser.user_metadata?.display_name 
+          || (sbUser.email ? sbUser.email.split('@')[0] : (sbUser.phone ? `User (${sbUser.phone.slice(-4)})` : 'Customer'));
+
+        setUser({
+          id: sbUser.id,
+          name: fallbackName,
+          phone: sbUser.phone || '',
+          email: sbUser.email || '',
+          avatar_url: sbUser.user_metadata?.avatar_url || sbUser.user_metadata?.picture || sbUser.user_metadata?.image || '',
+          role: 'customer',
+          saved_addresses: [],
+        });
+
+        getWishlist(sbUser.id).then((items) => {
+          if (items) setWishlist(items);
+        }).catch(() => {});
+
+        getCart(sbUser.id).then((dbCart) => {
+          if (dbCart && dbCart.length > 0) {
+            setCart(
+              dbCart.map((item) => ({
+                productId: item.product_id,
+                variantId: item.variant_id,
+                quantity: item.quantity,
+              }))
+            );
+          }
+        }).catch(() => {});
       }
     } catch (err) {
       console.warn('Auth hydration notice:', err);

@@ -6,9 +6,10 @@ import { useTranslation } from '@/lib/i18n';
 
 interface QuickActionsProps {
   onLanguageClick: () => void;
+  hideHeader?: boolean;
 }
 
-export function QuickActions({ onLanguageClick }: QuickActionsProps) {
+export function QuickActions({ onLanguageClick, hideHeader = false }: QuickActionsProps) {
   const { t } = useTranslation();
 
   const actions = [
@@ -44,7 +45,9 @@ export function QuickActions({ onLanguageClick }: QuickActionsProps) {
 
   return (
     <div>
-      <h2 className="text-lg font-black text-dark tracking-wide mb-4">Settings & Support</h2>
+      {!hideHeader && (
+        <h2 className="text-lg font-black text-dark tracking-wide mb-4">Settings & Support</h2>
+      )}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
         {actions.map((action, idx) => {
           const Icon = action.icon;

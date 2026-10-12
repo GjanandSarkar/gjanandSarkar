@@ -1,5 +1,6 @@
 import type { NextConfig } from "next";
 import { withSentryConfig } from "@sentry/nextjs";
+import path from "path";
 
 const nextConfig: NextConfig = {
   /* Production optimizations */
@@ -7,24 +8,77 @@ const nextConfig: NextConfig = {
   poweredByHeader: false,
   compress: true,
 
+  // Silence the multiple lockfiles warning
+  outputFileTracingRoot: path.join(__dirname, '../..'),
+
+  // Keep heavy server-only packages out of the edge bundle for faster cold starts
+  serverExternalPackages: ['pg', 'ioredis'],
+
+  allowedDevOrigins: [
+    "scary-porcupine-headsman.ngrok-free.dev",
+  ],
   /* Image optimization */
   images: {
     formats: ['image/avif', 'image/webp'],
     remotePatterns: [
       {
         protocol: 'https',
+        hostname: 'ik.imagekit.io',
+      },
+      {
+        protocol: 'https',
+        hostname: '**.imagekit.io',
+      },
+      {
+        protocol: 'https',
         hostname: '**.supabase.co',
       },
       {
         protocol: 'https',
+        hostname: '**.amazonaws.com',
+      },
+      {
+        protocol: 'https',
         hostname: 'images.unsplash.com',
+      },
+      {
+        protocol: 'https',
+        hostname: 'lh3.googleusercontent.com',
+      },
+      {
+        protocol: 'https',
+        hostname: '**.googleusercontent.com',
+      },
+      {
+        protocol: 'https',
+        hostname: 'avatars.githubusercontent.com',
       },
     ],
     deviceSizes: [640, 750, 828, 1080, 1200, 1920],
     imageSizes: [16, 32, 48, 64, 96, 128, 256, 384],
   },
 
-  /* Security headers */
+  /* Rewrites */
+  async rewrites() {
+    return {
+      beforeFiles: [
+        // The landing URL used to be a client component that rendered an empty
+        // div, waited for React to hydrate, waited for the Supabase auth
+        // session to resolve, and only then client-side navigated to /home.
+        // Every first-time visitor therefore stared at a blank page for the
+        // length of: JS download + hydration + auth round-trip + a second
+        // route transition — before any content existed.
+        //
+        // A rewrite serves the real (statically rendered) storefront HTML at
+        // `/` immediately, with no redirect hop and no JS required to paint.
+        { source: '/', destination: '/home' },
+      ],
+      afterFiles: [],
+      fallback: [],
+    };
+  },
+
+  /* Security + caching headers */
   async headers() {
     return [
       {
@@ -35,6 +89,13 @@ const nextConfig: NextConfig = {
           { key: 'X-XSS-Protection', value: '1; mode=block' },
           { key: 'Referrer-Policy', value: 'strict-origin-when-cross-origin' },
           { key: 'Permissions-Policy', value: 'camera=(), microphone=(), geolocation=()' },
+        ],
+      },
+      {
+        // Cache public product API responses for 60s at CDN/browser level
+        source: '/api/products',
+        headers: [
+          { key: 'Cache-Control', value: 'public, s-maxage=60, stale-while-revalidate=300' },
         ],
       },
     ];

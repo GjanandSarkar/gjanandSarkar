@@ -1,34 +1,11 @@
-import { createBrowserClient } from '@supabase/ssr';
+import { getSupabaseBrowserClient } from './supabase/client';
+import { getAdminSupabase } from './supabase/admin';
 
-// Singleton pattern — reuse across the app
-const globalForSupabase = globalThis as unknown as {
-  __supabaseInstance: ReturnType<typeof createBrowserClient> | undefined;
-};
+export { getSupabaseBrowserClient, getAdminSupabase };
+export const supabase = getSupabaseBrowserClient();
+export const adminSupabase = typeof window === 'undefined' ? getAdminSupabase() : null;
 
-let supabaseInstance = globalForSupabase.__supabaseInstance;
-
-export function getSupabaseClient() {
-  if (!supabaseInstance) {
-    const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
-    const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
-
-    if (!url || !key) {
-      // In dev without env, return a dummy client that fails gracefully
-      console.warn(
-        '[Gjanand Sarkar] Supabase env vars not set. ' +
-        'Copy .env.local.example → .env.local and fill in your values.'
-      );
-    }
-
-    supabaseInstance = createBrowserClient(url ?? '', key ?? '');
-    globalForSupabase.__supabaseInstance = supabaseInstance;
-  }
-  return supabaseInstance;
-}
-
-export const supabase = getSupabaseClient();
-
-// ─── Types (mirrors DB schema) ───────────────────────────────
+// ─── Shared Database Types ─────────────────────────────────────
 
 export type DBProfile = {
   id: string;
@@ -38,6 +15,8 @@ export type DBProfile = {
   avatar_url: string | null;
   address: string | null;
   role: 'customer' | 'admin';
+  loyalty_points: number;
+  referral_code?: string | null;
   default_upi_id?: string | null;
   created_at: string;
 };
@@ -45,7 +24,10 @@ export type DBProfile = {
 export type DBProduct = {
   id: string;
   name: string;
-  category: 'Milk' | 'Paneer' | 'Ghee' | 'Buttermilk' | 'Curd' | 'Lassi';
+  // Was a closed union of six dairy values, which the UI had already
+  // outgrown (it offers Electronics, Fashion, Books...). Categories are data,
+  // defined in src/lib/constants/categories.ts, not a compile-time constant.
+  category: string;
   description: string | null;
   image_url: string | null;
   is_freshness_guarantee: boolean;
@@ -62,17 +44,34 @@ export type DBProductVariant = {
   original_price: number | null;
   cost_price: number;
   stock: number;
+  reserved_quantity: number;
+  available_quantity: number;
+  low_stock_threshold: number;
+  batch_number?: string | null;
+  expiry_date?: string | null;
+  version?: number;
   created_at: string;
 };
 
 export type DBOrder = {
   id: string;
+  order_number: string;
   user_id: string | null;
+  subtotal: number;
+  delivery_fee: number;
+  discount_amount: number;
   total_amount: number;
   status: 'pending' | 'confirmed' | 'out_for_delivery' | 'delivered' | 'cancelled';
+  payment_status: 'pending' | 'paid' | 'failed' | 'refunded';
+  payment_method: string;
+  razorpay_order_id?: string | null;
+  razorpay_payment_id?: string | null;
   delivery_date: string | null;
+  delivery_slot?: string | null;
+  shipping_address?: string | null;
+  notes?: string | null;
   created_at: string;
-  profiles?: { name: string | null; phone: string | null };
+  profiles?: { name: string | null; phone: string | null; email?: string | null };
   order_items?: DBOrderItem[];
 };
 
@@ -83,6 +82,47 @@ export type DBOrderItem = {
   variant_id: string | null;
   quantity: number;
   price: number;
+  cost_price?: number;
+  product_name?: string;
+  variant_weight?: string;
+  status?: 'pending' | 'confirmed' | 'out_for_delivery' | 'delivered' | 'cancelled' | 'returned';
+  cancelled_at?: string | null;
+  delivered_at?: string | null;
+  seller_id?: string | null;
+  return_requests?: DBReturnRequest[];
+};
+
+export type DBReturnRequest = {
+  id: string;
+  order_id: string;
+  order_item_id?: string | null;
+  product_id?: string | null;
+  seller_id?: string | null;
+  user_id: string;
+  request_type: 'cancellation' | 'return';
+  reason: string;
+  description?: string | null;
+  images?: string[];
+  status: 'submitted' | 'under_review' | 'approved' | 'rejected' | 'return_in_progress' | 'item_received' | 'inspection_completed' | 'refund_pending' | 'refunded';
+  refund_amount?: number | null;
+  seller_notes?: string | null;
+  seller_status?: 'pending' | 'approved' | 'rejected';
+  admin_notes?: string | null;
+  rejection_reason?: string | null;
+  history?: Array<{
+    action: string;
+    actor_id: string;
+    actor_type: 'customer' | 'seller' | 'admin';
+    timestamp: string;
+    notes?: string;
+  }>;
+  orders?: DBOrder;
+  profiles?: DBProfile;
+  order_items?: DBOrderItem;
+  products?: DBProduct;
+  created_at: string;
+  updated_at?: string;
+  resolved_at?: string | null;
 };
 
 export type DBSubscription = {
@@ -91,34 +131,47 @@ export type DBSubscription = {
   product_id: string;
   variant_id: string;
   volume: number;
-  plan: string;
+  plan: 'daily' | 'alternate' | 'custom';
   status: 'active' | 'paused' | 'cancelled' | 'pending_review';
+  delivery_slot?: string | null;
   start_date: string;
   next_delivery_date: string | null;
   created_at: string;
-  products?: any;
+  products?: DBProduct;
+  product_variants?: DBProductVariant;
 };
 
-export type DBModificationReport = {
+export type DBDeliverySlot = {
   id: string;
-  subscription_id: string;
-  user_id: string;
-  action: string;
-  new_volume: number | null;
-  new_plan: string | null;
-  created_at: string;
+  slot_name: string;
+  start_time: string;
+  end_time: string;
+  max_orders_capacity: number;
+  is_active: boolean;
 };
 
-export type DBNotification = {
+export type DBBusinessSettings = {
   id: string;
-  user_id: string | null;
-  role_target: string;
-  title: string;
-  message: string;
-  type: 'order' | 'subscription' | 'system' | 'delivery' | null;
-  is_read: boolean;
-  related_id: string | null;
-  created_at: string;
+  min_order_value: number;
+  standard_delivery_fee: number;
+  free_delivery_threshold: number;
+  min_profit_margin_percent: number;
+  freshness_guarantee_hours: number;
+  is_store_open: boolean;
+  store_closure_reason?: string | null;
+  support_phone: string;
+  support_email: string;
+};
+
+export type DBCoupon = {
+  id: string;
+  code: string;
+  discount_type: 'flat' | 'percentage';
+  discount_value: number;
+  min_order_amount: number;
+  max_discount_amount?: number | null;
+  is_active: boolean;
+  expires_at?: string | null;
 };
 
 export type DBCartItem = {
@@ -131,3 +184,27 @@ export type DBCartItem = {
   products?: DBProduct;
   product_variants?: DBProductVariant;
 };
+
+export type DBNotification = {
+  id: string;
+  user_id: string | null;
+  role_target: 'customer' | 'admin' | 'all' | 'seller';
+  title: string;
+  message: string;
+  type: 'order' | 'subscription' | 'alert' | 'promo' | 'system' | 'return';
+  related_id?: string | null;
+  is_read: boolean;
+  created_at: string;
+};
+
+export type DBModificationReport = {
+  id: string;
+  subscription_id: string;
+  user_id: string;
+  new_volume: number;
+  new_plan: string;
+  status: 'pending' | 'accepted' | 'rejected';
+  created_at: string;
+};
+
+

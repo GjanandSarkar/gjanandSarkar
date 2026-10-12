@@ -1,43 +1,21 @@
-import { supabase } from '@/lib/supabase';
+import { api } from './client';
 
 export async function getWishlist(userId: string): Promise<string[]> {
   try {
-    const { data, error } = await supabase
-      .from('wishlists')
-      .select('product_id')
-      .eq('user_id', userId);
-
-    if (error) throw error;
-    return ((data as any[]) || []).map((item: any) => item.product_id);
+    const res = await api.wishlist.get(userId);
+    return res.wishlist || [];
   } catch (err) {
-    // If table doesn't exist yet or offline, local store persists
+    console.error('getWishlist error:', err);
     return [];
   }
 }
 
 export async function toggleWishlist(userId: string, productId: string): Promise<boolean> {
   try {
-    const { data: existing } = await supabase
-      .from('wishlists')
-      .select('id')
-      .eq('user_id', userId)
-      .eq('product_id', productId)
-      .single();
-
-    if (existing) {
-      await supabase
-        .from('wishlists')
-        .delete()
-        .eq('user_id', userId)
-        .eq('product_id', productId);
-      return false; // Removed
-    } else {
-      await supabase
-        .from('wishlists')
-        .insert({ user_id: userId, product_id: productId });
-      return true; // Added
-    }
+    const res = await api.wishlist.toggle(userId, productId);
+    return res.added ?? true;
   } catch (err) {
+    console.error('toggleWishlist error:', err);
     return true;
   }
 }

@@ -1,249 +1,418 @@
+/**
+ * GET/PUT/DELETE /api/products/[id]
+ * Single product management with dual AWS PostgreSQL + Supabase Fallback.
+ */
+
 import { NextRequest, NextResponse } from 'next/server';
-import { supabaseAdmin } from '@/lib/db';
+import { query, withTransaction, isPgConfigured } from '@/lib/aws/rds';
 import { getAuthUser } from '@/lib/api/auth-middleware';
+import { invalidateProductsCache, getCachedProductDetail, cacheProductDetail } from '@/lib/aws/redis';
+import { isValidUUID } from '@/lib/security/sanitize';
+import { getAdminSupabase } from '@/lib/supabase/admin';
+import { writeAuditLog } from '@/lib/security/audit';
+import { revalidateInventory } from '@/lib/inventory/cache-invalidation';
 
 interface Props {
   params: Promise<{ id: string }>;
 }
 
+async function fetchProductDetails(id: string): Promise<any> {
+  if (isPgConfigured) {
+    try {
+      const result = await query(
+        `SELECT 
+           p.id, p.name, p.category, p.description, p.image_url, p.s3_image_key,
+           p.is_freshness_guarantee, p.is_active, p.tags, p.brand, p.state_origin,
+           p.rating, p.reviews_count, p.created_at, p.updated_at,
+           json_agg(
+             json_build_object(
+               'id', pv.id,
+               'product_id', pv.product_id,
+               'weight', pv.weight,
+               'price', pv.price,
+               'original_price', pv.original_price,
+               'cost_price', pv.cost_price,
+               'stock', pv.stock,
+               'created_at', pv.created_at
+             ) ORDER BY pv.price ASC
+           ) FILTER (WHERE pv.id IS NOT NULL) as product_variants
+         FROM products p
+         LEFT JOIN product_variants pv ON pv.product_id = p.id
+         WHERE p.id = $1
+         GROUP BY p.id`,
+        [id]
+      );
+
+      if (result.rows.length > 0) {
+        return result.rows[0];
+      }
+    } catch (err: any) {
+      console.warn('[fetchProductDetails] RDS failed, fallback to Supabase:', err.message);
+    }
+  }
+
+  const sb = getAdminSupabase();
+  const { data: prodData, error } = await sb
+    .from('products')
+    .select('*, product_variants(*)')
+    .eq('id', id)
+    .maybeSingle();
+
+  if (error || !prodData) {
+    return null;
+  }
+
+  return prodData;
+}
+
 export async function GET(request: NextRequest, { params }: Props) {
   try {
     const { id } = await params;
-    const { data, error } = await supabaseAdmin
-      .from('products')
-      .select('*, product_variants(*)')
-      .eq('id', id)
-      .single();
+    if (!isValidUUID(id)) {
+      return NextResponse.json({ error: 'Invalid product ID' }, { status: 400 });
+    }
 
-    if (error || !data) {
+    // Check Redis cache first
+    const cached = await getCachedProductDetail(id);
+    if (cached) {
+      return NextResponse.json(
+        { product: cached },
+        { headers: { 'X-Cache': 'HIT' } }
+      );
+    }
+
+    const product = await fetchProductDetails(id);
+    if (!product) {
       return NextResponse.json({ error: 'Product not found' }, { status: 404 });
     }
 
-    return NextResponse.json({ product: data });
+    // Visibility rule: Customers cannot view pending/rejected/suspended or inactive products
+    const auth = await getAuthUser(request);
+    const isOwnerOrAdmin = auth?.isAdmin || (auth?.userId && auth.userId === product.created_by);
+    if (!isOwnerOrAdmin) {
+      if (product.approval_status !== 'approved' || !product.is_active) {
+        return NextResponse.json({ error: 'Product not found or unavailable' }, { status: 404 });
+      }
+      if (product.seller_id) {
+        const sb = getAdminSupabase();
+        const { data: seller } = await sb
+          .from('sellers')
+          .select('status')
+          .eq('id', product.seller_id)
+          .maybeSingle();
+        if (seller && seller.status !== 'active') {
+          return NextResponse.json({ error: 'Product not found or unavailable' }, { status: 404 });
+        }
+      }
+    }
+
+    // Cache asynchronously — do not block response
+    cacheProductDetail(id, product).catch(() => {});
+
+    return NextResponse.json(
+      { product },
+      { headers: { 'X-Cache': 'MISS' } }
+    );
   } catch (error: any) {
-    console.error('Product GET error:', error);
-    return NextResponse.json({ error: error.message || 'Internal server error' }, { status: 500 });
+    console.error('[Product GET] Error:', error.message);
+    return NextResponse.json({ error: 'Failed to fetch product' }, { status: 500 });
   }
 }
 
 export async function PUT(request: NextRequest, { params }: Props) {
   try {
     const { id } = await params;
-    const auth = await getAuthUser(request);
-    if (!auth) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    if (!isValidUUID(id)) {
+      return NextResponse.json({ error: 'Invalid product ID' }, { status: 400 });
     }
 
-    if (!auth.isAdmin) {
+    const auth = await getAuthUser(request);
+    if (!auth?.isAdmin) {
       return NextResponse.json({ error: 'Admin access required' }, { status: 403 });
     }
 
     const body = await request.json();
-    const { name, category, description, image_url, is_freshness_guarantee, is_active, variants } = body;
+    const { name, category, description, image_url, gallery_images, is_freshness_guarantee, is_active, variants } = body;
 
-    // Fetch minimum profit margin
-    const { data: settings } = await supabaseAdmin
-      .from('business_settings')
-      .select('min_profit_margin_percent')
-      .single();
+    const finalGalleryImages = Array.isArray(gallery_images)
+      ? gallery_images
+      : (image_url ? [image_url] : undefined);
+    const finalImageUrl = image_url !== undefined
+      ? image_url
+      : (finalGalleryImages && finalGalleryImages.length > 0 ? finalGalleryImages[0] : undefined);
 
-    const minMargin = settings?.min_profit_margin_percent || 20;
-
-    // Validate variants if provided
-    if (variants && Array.isArray(variants) && variants.length > 0) {
-      for (const v of variants) {
-        const cost = Number(v.cost_price) || 0;
-        const selling = Number(v.price) || 0;
-        if (cost <= 0) {
-          return NextResponse.json(
-            { error: `Cost price must be greater than 0 for variant "${v.weight || 'unknown'}"` },
-            { status: 400 }
+    if (isPgConfigured) {
+      try {
+        await withTransaction(async (client) => {
+          await client.query(
+            `UPDATE products
+             SET name = COALESCE($1, name),
+                 category = COALESCE($2, category),
+                 description = COALESCE($3, description),
+                 image_url = COALESCE($4, image_url),
+                 gallery_images = COALESCE($5, gallery_images),
+                 is_freshness_guarantee = COALESCE($6, is_freshness_guarantee),
+                 is_active = COALESCE($7, is_active),
+                 updated_at = now()
+             WHERE id = $8`,
+            [
+              name !== undefined ? name : null,
+              category !== undefined ? category : null,
+              description !== undefined ? description : null,
+              finalImageUrl !== undefined ? finalImageUrl : null,
+              finalGalleryImages !== undefined ? finalGalleryImages : null,
+              is_freshness_guarantee !== undefined ? is_freshness_guarantee : null,
+              is_active !== undefined ? is_active : null,
+              id
+            ]
           );
+
+          if (variants && Array.isArray(variants)) {
+            // Delete variants that were removed in the edit modal
+            const incomingIds = variants.map(v => v.id).filter((vid): vid is string => !!vid && isValidUUID(vid));
+            if (incomingIds.length > 0) {
+              await client.query(
+                `DELETE FROM product_variants WHERE product_id = $1 AND id NOT IN (${incomingIds.map((_, i) => `$${i + 2}`).join(',')})`,
+                [id, ...incomingIds]
+              );
+            } else {
+              await client.query(`DELETE FROM product_variants WHERE product_id = $1`, [id]);
+            }
+
+            for (const v of variants) {
+              if (v.id && isValidUUID(v.id)) {
+                await client.query(
+                  `UPDATE product_variants
+                   SET weight = $1, price = $2, cost_price = $3, original_price = $4, stock = $5, updated_at = now()
+                   WHERE id = $6 AND product_id = $7`,
+                  [v.weight, v.price, v.cost_price || 0, v.original_price || null, v.stock || 100, v.id, id]
+                );
+              } else {
+                await client.query(
+                  `INSERT INTO product_variants (product_id, weight, price, cost_price, original_price, stock)
+                   VALUES ($1, $2, $3, $4, $5, $6)`,
+                  [id, v.weight, v.price, v.cost_price || 0, v.original_price || null, v.stock || 100]
+                );
+              }
+            }
+          }
+        });
+
+        await invalidateProductsCache(id);
+        const updatedProduct = await fetchProductDetails(id);
+        
+        if (auth?.userId) {
+          await writeAuditLog({
+            adminId: auth.userId,
+            action: 'product.update' as any,
+            resourceType: 'product',
+            resourceId: id,
+            details: { name, category, is_active },
+            ipAddress: request.headers.get('x-forwarded-for') || ''
+          });
         }
-        const minSelling = cost * (1 + minMargin / 100);
-        if (selling < minSelling) {
-          return NextResponse.json(
-            {
-              error: `Selling price for "${v.weight}" must be at least ₹${minSelling.toFixed(2)} (Minimum ${minMargin}% margin)`,
-            },
-            { status: 400 }
-          );
-        }
+        
+        return NextResponse.json({ success: true, product: updatedProduct });
+      } catch (err: any) {
+        console.warn('[Product PUT] RDS failed, fallback to Supabase:', err.message);
       }
     }
 
-    // Update product table
-    const productUpdatePayload: Record<string, any> = {
+    const sb = getAdminSupabase();
+    const updatePayload: any = {
       updated_at: new Date().toISOString(),
     };
-    if (name !== undefined) productUpdatePayload.name = name;
-    if (category !== undefined) productUpdatePayload.category = category;
-    if (description !== undefined) productUpdatePayload.description = description;
-    if (image_url !== undefined) productUpdatePayload.image_url = image_url;
-    if (is_freshness_guarantee !== undefined) productUpdatePayload.is_freshness_guarantee = is_freshness_guarantee;
-    if (is_active !== undefined) productUpdatePayload.is_active = is_active;
+    if (name !== undefined) updatePayload.name = name;
+    if (category !== undefined) updatePayload.category = category;
+    if (description !== undefined) updatePayload.description = description;
+    if (finalImageUrl !== undefined) updatePayload.image_url = finalImageUrl;
+    if (finalGalleryImages !== undefined) updatePayload.gallery_images = finalGalleryImages;
+    if (is_freshness_guarantee !== undefined) updatePayload.is_freshness_guarantee = is_freshness_guarantee;
+    if (is_active !== undefined) updatePayload.is_active = is_active;
 
-    const { error: productError } = await supabaseAdmin
-      .from('products')
-      .update(productUpdatePayload)
-      .eq('id', id);
+    await sb.from('products').update(updatePayload).eq('id', id);
 
-    if (productError) {
-      return NextResponse.json({ error: productError.message }, { status: 500 });
-    }
-
-    // Handle variants sync if supplied
     if (variants && Array.isArray(variants)) {
-      // Get existing variants for this product
-      const { data: existingVariants } = await supabaseAdmin
-        .from('product_variants')
-        .select('id')
-        .eq('product_id', id);
-
-      const existingIds = (existingVariants || []).map((ev) => ev.id);
-      const incomingIds = variants.filter((v: any) => v.id).map((v: any) => v.id);
-
-      // Identify variants to delete
-      const toDeleteIds = existingIds.filter((evId) => !incomingIds.includes(evId));
-
-      for (const delId of toDeleteIds) {
-        // Check references before deleting
-        const { data: orderRefs } = await supabaseAdmin
-          .from('order_items')
-          .select('id')
-          .eq('variant_id', delId)
-          .limit(1);
-
-        const { data: subRefs } = await supabaseAdmin
-          .from('subscriptions')
-          .select('id')
-          .eq('variant_id', delId)
-          .limit(1);
-
-        if ((orderRefs && orderRefs.length > 0) || (subRefs && subRefs.length > 0)) {
-          // If referenced in order history or subscriptions, set stock to 0 rather than breaking foreign key
-          await supabaseAdmin
-            .from('product_variants')
-            .update({ stock: 0 })
-            .eq('id', delId);
-        } else {
-          // Safe to delete
-          await supabaseAdmin.from('cart_items').delete().eq('variant_id', delId);
-          await supabaseAdmin.from('product_variants').delete().eq('id', delId);
-        }
+      // Delete variants that were removed in the edit modal
+      const incomingIds = variants.map(v => v.id).filter((vid): vid is string => !!vid && isValidUUID(vid));
+      if (incomingIds.length > 0) {
+        await sb.from('product_variants').delete().eq('product_id', id).not('id', 'in', `(${incomingIds.join(',')})`);
+      } else {
+        await sb.from('product_variants').delete().eq('product_id', id);
       }
 
-      // Upsert/Insert variants
       for (const v of variants) {
-        if (v.id && existingIds.includes(v.id)) {
-          // Update existing variant
-          await supabaseAdmin
+        if (v.id) {
+          await sb
             .from('product_variants')
             .update({
               weight: v.weight,
-              price: Number(v.price),
-              cost_price: Number(v.cost_price),
-              original_price: v.original_price ? Number(v.original_price) : null,
-              stock: v.stock !== undefined ? parseInt(v.stock, 10) || 0 : 0,
+              price: v.price,
+              cost_price: v.cost_price || 0,
+              original_price: v.original_price || null,
+              stock: v.stock || 100,
+              updated_at: new Date().toISOString(),
             })
             .eq('id', v.id);
         } else {
-          // Insert new variant
-          await supabaseAdmin.from('product_variants').insert({
+          await sb.from('product_variants').insert({
             product_id: id,
             weight: v.weight,
-            price: Number(v.price),
-            cost_price: Number(v.cost_price),
-            original_price: v.original_price ? Number(v.original_price) : null,
-            stock: v.stock !== undefined ? parseInt(v.stock, 10) || 0 : 0,
+            price: v.price,
+            cost_price: v.cost_price || 0,
+            original_price: v.original_price || null,
+            stock: v.stock || 100,
           });
         }
       }
     }
 
-    // Return updated product
-    const { data: updatedProduct } = await supabaseAdmin
-      .from('products')
-      .select('*, product_variants(*)')
-      .eq('id', id)
-      .single();
+    // Sync updates to seller_product table in Supabase
+    const spPayload: any = { updated_at: new Date().toISOString() };
+    if (name !== undefined) spPayload.name = name;
+    if (category !== undefined) spPayload.category = category;
+    if (description !== undefined) spPayload.description = description;
+    if (image_url !== undefined) spPayload.image_url = image_url;
+    if (is_active !== undefined) spPayload.status = is_active ? 'active' : 'inactive';
+    if (variants && variants[0]) {
+      if (variants[0].price !== undefined) spPayload.price = variants[0].price;
+      if (variants[0].stock !== undefined) spPayload.stock = variants[0].stock;
+    }
+    try {
+      await sb.from('seller_product').update(spPayload).eq('product_id', id);
+    } catch (spErr: any) {
+      console.warn('[Product PUT] seller_product update warning:', spErr?.message || spErr);
+    }
+
+    await invalidateProductsCache(id);
+    await revalidateInventory({ productId: id });
+    const updatedProduct = await fetchProductDetails(id);
+    
+    if (auth?.userId) {
+      await writeAuditLog({
+        adminId: auth.userId,
+        action: 'product.update' as any,
+        resourceType: 'product',
+        resourceId: id,
+        details: { name, category, is_active },
+        ipAddress: request.headers.get('x-forwarded-for') || ''
+      });
+    }
 
     return NextResponse.json({ success: true, product: updatedProduct });
   } catch (error: any) {
-    console.error('Product PUT error:', error);
-    return NextResponse.json({ error: error.message || 'Internal server error' }, { status: 500 });
+    console.error('[Product PUT] Error:', error.message);
+    return NextResponse.json({ error: 'Failed to update product' }, { status: 500 });
   }
 }
 
 export async function DELETE(request: NextRequest, { params }: Props) {
   try {
     const { id } = await params;
-    const auth = await getAuthUser(request);
-    if (!auth) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    if (!isValidUUID(id)) {
+      return NextResponse.json({ error: 'Invalid product ID' }, { status: 400 });
     }
 
-    if (!auth.isAdmin) {
+    const auth = await getAuthUser(request);
+    if (!auth?.isAdmin) {
       return NextResponse.json({ error: 'Admin access required' }, { status: 403 });
     }
 
     const { searchParams } = new URL(request.url);
     const permanent = searchParams.get('permanent') === 'true';
 
-    // Check if product is referenced in order_items or subscriptions
-    const { data: orderRefs } = await supabaseAdmin
-      .from('order_items')
-      .select('id')
-      .eq('product_id', id)
-      .limit(1);
+    if (isPgConfigured) {
+      try {
+        if (permanent) {
+          await withTransaction(async (client) => {
+            await client.query('DELETE FROM seller_product WHERE product_id = $1', [id]).catch(() => {});
+            await client.query('DELETE FROM product_variants WHERE product_id = $1', [id]);
+            await client.query('DELETE FROM products WHERE id = $1', [id]);
+          });
+          await invalidateProductsCache(id);
+          
+          if (auth?.userId) {
+            await writeAuditLog({
+              adminId: auth.userId,
+              action: 'product.delete' as any,
+              resourceType: 'product',
+              resourceId: id,
+              details: { permanent: true },
+              ipAddress: request.headers.get('x-forwarded-for') || ''
+            });
+          }
 
-    const { data: subRefs } = await supabaseAdmin
-      .from('subscriptions')
-      .select('id')
-      .eq('product_id', id)
-      .limit(1);
+          return NextResponse.json({ success: true, permanent: true, message: 'Product deleted permanently' });
+        } else {
+          await query('UPDATE products SET is_active = false, updated_at = now() WHERE id = $1', [id]);
+          await query("UPDATE seller_product SET status = 'inactive', updated_at = now() WHERE product_id = $1", [id]).catch(() => {});
+          await invalidateProductsCache(id);
+          if (auth?.userId) {
+            await writeAuditLog({
+              adminId: auth.userId,
+              action: 'product.delete' as any,
+              resourceType: 'product',
+              resourceId: id,
+              details: { permanent: false },
+              ipAddress: request.headers.get('x-forwarded-for') || ''
+            });
+          }
+          return NextResponse.json({ success: true, softDeleted: true, message: 'Product archived' });
+        }
+      } catch (err: any) {
+        console.warn('[Product DELETE] RDS failed, fallback to Supabase:', err.message);
+      }
+    }
 
-    const isReferenced = (orderRefs && orderRefs.length > 0) || (subRefs && subRefs.length > 0);
-
-    if (permanent && !isReferenced) {
-      // Hard delete from database
-      await supabaseAdmin.from('cart_items').delete().eq('product_id', id);
-      await supabaseAdmin.from('product_variants').delete().eq('product_id', id);
-      const { error: deleteError } = await supabaseAdmin.from('products').delete().eq('id', id);
-
-      if (deleteError) {
-        return NextResponse.json({ error: deleteError.message }, { status: 500 });
+    const sb = getAdminSupabase();
+    if (permanent) {
+      // Delete from seller_product, variants, and products
+      try {
+        await sb.from('seller_product').delete().eq('product_id', id);
+      } catch (spErr: any) {
+        console.warn('[Product DELETE] seller_product delete warning:', spErr?.message || spErr);
+      }
+      await sb.from('product_variants').delete().eq('product_id', id);
+      await sb.from('products').delete().eq('id', id);
+      await invalidateProductsCache(id);
+      
+      if (auth?.userId) {
+        await writeAuditLog({
+          adminId: auth.userId,
+          action: 'product.delete' as any,
+          resourceType: 'product',
+          resourceId: id,
+          details: { permanent: true },
+          ipAddress: request.headers.get('x-forwarded-for') || ''
+        });
       }
 
-      return NextResponse.json({
-        success: true,
-        permanent: true,
-        message: 'Product permanently removed from catalogue.',
-      });
+      return NextResponse.json({ success: true, permanent: true, message: 'Product deleted permanently' });
+    } else {
+      await sb.from('products').update({ is_active: false, updated_at: new Date().toISOString() }).eq('id', id);
+      try {
+        await sb.from('seller_product').update({ status: 'inactive', updated_at: new Date().toISOString() }).eq('product_id', id);
+      } catch (spErr: any) {
+        console.warn('[Product DELETE] seller_product update warning:', spErr?.message || spErr);
+      }
+      await invalidateProductsCache(id);
+      await revalidateInventory({ productId: id });
+      
+      if (auth?.userId) {
+        await writeAuditLog({
+          adminId: auth.userId,
+          action: 'product.delete' as any,
+          resourceType: 'product',
+          resourceId: id,
+          details: { permanent: false },
+          ipAddress: request.headers.get('x-forwarded-for') || ''
+        });
+      }
+
+      return NextResponse.json({ success: true, softDeleted: true, message: 'Product archived' });
     }
-
-    // Soft delete: Deactivate product so historical orders & subscriptions remain intact
-    const { error: updateError } = await supabaseAdmin
-      .from('products')
-      .update({ is_active: false, updated_at: new Date().toISOString() })
-      .eq('id', id);
-
-    // Remove from active shopping carts
-    await supabaseAdmin.from('cart_items').delete().eq('product_id', id);
-
-    if (updateError) {
-      return NextResponse.json({ error: updateError.message }, { status: 500 });
-    }
-
-    return NextResponse.json({
-      success: true,
-      softDeleted: true,
-      message: isReferenced
-        ? 'Product was archived and deactivated because it has existing order/subscription history.'
-        : 'Product deactivated and removed from storefront.',
-    });
   } catch (error: any) {
-    console.error('Product DELETE error:', error);
-    return NextResponse.json({ error: error.message || 'Internal server error' }, { status: 500 });
+    console.error('[Product DELETE] Error:', error.message);
+    return NextResponse.json({ error: 'Failed to delete product' }, { status: 500 });
   }
 }

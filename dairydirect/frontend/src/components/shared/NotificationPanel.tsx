@@ -10,7 +10,7 @@ import {
   subscribeToNotifications,
 } from '@/lib/api/notifications';
 import type { DBNotification } from '@/lib/supabase';
-import { Bell, X, Package, CalendarDays, Info, Truck } from 'lucide-react';
+import { Bell, X, Package, CalendarDays, Info, Truck, AlertTriangle, Tag, RotateCcw } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useRouter } from 'next/navigation';
 
@@ -24,12 +24,16 @@ function timeAgo(dateStr: string): string {
   return `${Math.floor(hrs / 24)}d ago`;
 }
 
-const TYPE_ICON = {
+const TYPE_ICON: Record<string, any> = {
   order: Package,
   subscription: CalendarDays,
   delivery: Truck,
   system: Info,
+  alert: AlertTriangle,
+  promo: Tag,
+  return: RotateCcw,
 };
+
 
 interface NotificationPanelProps {
   /** 'mobile' = bottom sheet, 'desktop' = dropdown */

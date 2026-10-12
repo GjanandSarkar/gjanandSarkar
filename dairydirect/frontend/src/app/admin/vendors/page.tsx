@@ -1,5 +1,5 @@
-import AdminVendorInquiriesPage from '../vendor-inquiries/page';
+import AdminSellersPage from '../sellers/page';
 
 export default function AdminVendorsPage() {
-  return <AdminVendorInquiriesPage />;
+  return <AdminSellersPage />;
 }

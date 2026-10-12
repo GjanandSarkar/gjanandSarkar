@@ -10,6 +10,7 @@ import {
   uploadProductImage,
   type ProductWithVariants,
 } from '@/lib/api/products';
+import { MultiImageUpload, ImageItem } from '@/components/admin/MultiImageUpload';
 import {
   ArrowLeft,
   Plus,
@@ -25,7 +26,11 @@ import {
 } from 'lucide-react';
 import { motion } from 'framer-motion';
 
-const CATEGORIES = ['Milk', 'Paneer', 'Ghee', 'Buttermilk', 'Curd', 'Lassi'];
+// Was a dairy-only list, so an admin editing an Electronics product would
+// have had its category silently reset to a dairy value.
+import { CATEGORY_NAMES } from '@/lib/constants/categories';
+
+const CATEGORIES = CATEGORY_NAMES;
 
 export default function EditProductPage() {
   const router = useRouter();
@@ -56,8 +61,7 @@ export default function EditProductPage() {
     }>
   >([]);
 
-  const [imageFile, setImageFile] = useState<File | null>(null);
-  const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [images, setImages] = useState<ImageItem[]>([]);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [permanentDelete, setPermanentDelete] = useState(false);
 
@@ -74,7 +78,29 @@ export default function EditProductPage() {
         setCategory(data.category || 'Milk');
         setDescription(data.description || '');
         setImageUrl(data.image_url || '');
-        setImagePreview(data.image_url || null);
+
+        // Populate existing images into MultiImageUpload items
+        const existingImages: ImageItem[] = [];
+        if (data.image_url) {
+          existingImages.push({
+            id: 'main-cover',
+            url: data.image_url,
+            isPrimary: true,
+          });
+        }
+        if (Array.isArray(data.gallery_images)) {
+          data.gallery_images.forEach((imgUrl: string, idx: number) => {
+            if (imgUrl && imgUrl !== data.image_url) {
+              existingImages.push({
+                id: `gallery-img-${idx}`,
+                url: imgUrl,
+                isPrimary: false,
+              });
+            }
+          });
+        }
+        setImages(existingImages);
+
         setIsFreshnessGuarantee(data.is_freshness_guarantee ?? true);
         setIsActive(data.is_active ?? true);
         setVariants(
@@ -132,20 +158,35 @@ export default function EditProductPage() {
     setSuccess('');
 
     try {
-      let finalImageUrl = imageUrl;
-      if (imageFile) {
-        const uploadRes = await uploadProductImage(imageFile);
-        if (uploadRes.error || !uploadRes.url) {
-          throw new Error(uploadRes.error || 'Failed to upload image');
+      // Upload any new files in images array
+      const uploadedImageUrls: string[] = [];
+      let primaryUrl = '';
+
+      for (const item of images) {
+        let finalUrl = item.url;
+        if (item.file) {
+          const uploadRes = await uploadProductImage(item.file);
+          if (uploadRes.error || !uploadRes.url) {
+            throw new Error(uploadRes.error || 'Failed to upload one of the product images');
+          }
+          finalUrl = uploadRes.url;
         }
-        finalImageUrl = uploadRes.url;
+        uploadedImageUrls.push(finalUrl);
+        if (item.isPrimary) {
+          primaryUrl = finalUrl;
+        }
+      }
+
+      if (!primaryUrl && uploadedImageUrls.length > 0) {
+        primaryUrl = uploadedImageUrls[0];
       }
 
       const res = await updateProduct(productId, {
         name,
         category,
         description,
-        image_url: finalImageUrl,
+        image_url: primaryUrl || undefined,
+        gallery_images: uploadedImageUrls,
         is_freshness_guarantee: isFreshnessGuarantee,
         is_active: isActive,
         variants: validVariants.map((v) => ({
@@ -236,7 +277,7 @@ export default function EditProductPage() {
           disabled={isSubmitting || isDeleting}
           className="flex items-center gap-2 px-5 py-2.5 rounded-[12px] font-bold text-[13px] text-white transition-all active:scale-95 shadow-md disabled:opacity-50"
           style={{
-            background: 'linear-gradient(135deg, #3f6530, #577f46)',
+            background: 'var(--cta-gradient)',
           }}
         >
           {isSubmitting ? (
@@ -385,67 +426,20 @@ export default function EditProductPage() {
           </label>
         </div>
 
-        {/* Product Image */}
+        {/* Product Images (Multiple allowed) */}
         <div>
           <label
             className="text-[12px] font-bold uppercase tracking-wider mb-2 block"
             style={{ color: 'var(--color-outline)' }}
           >
-            Product Image
+            Product Photos (Upload multiple at once)
           </label>
-          <div className="flex items-center gap-4">
-            <label
-              className="cursor-pointer relative flex flex-col items-center justify-center w-28 h-28 rounded-[14px] border-2 border-dashed transition-all hover:border-primary overflow-hidden group"
-              style={{
-                borderColor: 'rgba(195,201,187,0.6)',
-                background: 'var(--color-surface-container)',
-              }}
-            >
-              <input
-                type="file"
-                className="hidden"
-                accept="image/*"
-                onChange={(e) => {
-                  const file = e.target.files?.[0];
-                  if (file) {
-                    setImageFile(file);
-                    setImagePreview(URL.createObjectURL(file));
-                  }
-                }}
-              />
-              {imagePreview ? (
-                <>
-                  <img
-                    src={imagePreview}
-                    alt="Product preview"
-                    className="w-full h-full object-cover"
-                  />
-                  <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center text-white text-[11px] font-bold">
-                    Change
-                  </div>
-                </>
-              ) : (
-                <>
-                  <UploadCloud className="w-6 h-6 mb-1 text-gray-400" />
-                  <span className="text-[11px] font-bold text-gray-500">Upload</span>
-                </>
-              )}
-            </label>
-
-            {imagePreview && (
-              <button
-                type="button"
-                onClick={() => {
-                  setImageFile(null);
-                  setImagePreview(null);
-                  setImageUrl('');
-                }}
-                className="text-[12px] font-bold text-red-600 hover:underline"
-              >
-                Remove Image
-              </button>
-            )}
-          </div>
+          <MultiImageUpload
+            images={images}
+            onChange={setImages}
+            disabled={isSubmitting}
+            maxImages={10}
+          />
         </div>
 
         {/* Variants Manager */}
@@ -468,7 +462,7 @@ export default function EditProductPage() {
               onClick={addVariant}
               className="flex items-center gap-1 px-3 py-1.5 rounded-[10px] text-[12px] font-bold text-white transition-all active:scale-95 shadow-sm"
               style={{
-                background: 'linear-gradient(135deg, #3f6530, #577f46)',
+                background: 'var(--cta-gradient)',
               }}
             >
               <Plus className="w-4 h-4" /> Add Variant

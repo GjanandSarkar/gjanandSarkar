@@ -1,55 +1,64 @@
-# 🏗️ DairyDirect Architecture
+# 🏛️ Gjanand Sarkar (DairyDirect) — Supabase Pro Production Architecture
 
-This document explains the technical design and data flow of the DairyDirect platform.
-
-## 🏛️ System Overview
-
-DairyDirect follows a **Monorepo** structure, providing everything needed for a dairy commerce business in one place.
-
-### 1. Frontend (Next.js 14+)
-- **Primary Framework**: Next.js App Router for server-side rendering and API routes.
-- **Client State**: **Zustand** is used for the cart and user session persistence.
-- **Styling**: Vanilla CSS with **Tailwind CSS** for a premium, custom aesthetic.
-- **Animations**: **Framer Motion** for liquid-smooth transitions.
-
-### 2. Backend Strategy (Dual-Tier)
-DairyDirect is unique in offering two ways to handle backend logic:
-- **Built-in (Primary)**: Heavy usage of Next.js API Routes (`/src/app/api`). This handles Auth, Order Placement, and Pricing.
-- **Standalone (Optional)**: A dedicated Node.js/Express service in the `backend/` directory. This is intended for developers who want to migrate to a microservices architecture.
-
-### 3. Database (Supabase / PostgreSQL)
-- **Supabase** handles authentication and real-time database updates.
-- **RLS (Row Level Security)** is strictly enforced: users can only see their own orders and cart items.
-- **Schema Safety**: Business logic is partially enforced via PostgreSQL `CHECK` constraints (e.g., `profit_check`).
+**DairyDirect (Gjanand Sarkar)** is a high-performance dairy e-commerce platform engineered with **Next.js 16**, **Supabase Pro (PostgreSQL 16, Auth, Storage, Realtime)**, **Razorpay Payments**, and **Redis Caching**.
 
 ---
 
-## 💰 The Profit-Safe Pricing Engine
+## 📐 High-Level Architecture Diagram
 
-At the heart of the platform is the **Pricing Engine** (`lib/pricing.ts`).
-
-### How it works:
-1. **Source of Truth**: When an order is placed, the backend ignores prices sent from the client.
-2. **Re-calculation**: Every item is fetched from the database to get its `cost_price` and `selling_price`.
-3. **Margin Protection**: The engine calculates:
-   `Final Selling Price - Discount >= Cost Price + Min Profit Margin`
-4. **Safety Valve**: If a coupon makes an order unprofitable, the engine automatically reduces the discount or rejects the order.
+```
+                                [ Cloudflare / Vercel Edge CDN ]
+                                                │
+                                                ▼
+                             [ Next.js 16 Full-Stack Application ]
+                                  (App Router + Route Handlers)
+                                                │
+               ┌────────────────────────────────┼────────────────────────────────┐
+               │                                │                                │
+               ▼                                ▼                                ▼
+    [ Supabase Pro Database ]        [ Supabase Pro Auth ]            [ Supabase Storage ]
+   (Postgres 16 + RLS Policies)       (Google OAuth & Phone OTP)       (Products & Reports)
+               │                                │                                │
+               ▼                                ▼                                ▼
+     [ Redis Cache / Rate Limit ]     [ Razorpay Payment Gateway ]      [ Admin Control Suite ]
+    (OTP + Session Rate-Limiting)    (Instant UPI, Cards & Webhooks)    (Stats, Stock & Freshness)
+```
 
 ---
 
-## 🚦 Data Flow
+## 🛠️ Core Technology Stack
 
-1. **Ordering**:
-   `Frontend (Cart)` → `API (/api/orders/place)` → `Pricing Engine` → `PostgreSQL (Orders)` → `Notification Service`
-
-2. **Delivery Fees**:
-   `Frontend` → `API (/api/coupons/validate)` → `Pricing Engine` (checks against `business_settings` table).
+| Layer | Technology | Role & Key Features |
+|---|---|---|
+| **Frontend UI** | Next.js 16 (App Router), React 19, Tailwind CSS | SSR + CSR, Mobile-First, Framer Motion animations |
+| **Backend API** | Next.js Server Route Handlers | Strict Zod validation, parameterised SQL, audit logging |
+| **Primary Database** | Supabase Pro (PostgreSQL 16 with Supavisor) | ACID transactions, Row Level Security, atomic order placement |
+| **Authentication** | Supabase Auth & JWT Session Tokens | Google One-Tap, SMS Phone OTP, HttpOnly cookie sessions |
+| **Media & Storage** | Supabase Pro Storage | Public `products` & `quality-reports`, private `return-claims` |
+| **Realtime Updates** | Supabase Realtime Channels | Instant order status notifications & admin alerts |
+| **Payment Gateway** | Razorpay Node.js SDK | UPI Instant Pay, Cards, NetBanking, HMAC-SHA256 verification |
+| **Cache & Rate-Limit** | Redis (Upstash / Cloud / In-Memory fallback) | Sliding window rate-limiting, catalog caching |
 
 ---
 
-## 🤖 AI Development Flow
+## 🔒 Security & Defense-in-Depth
 
-The project is structured to be "Self-Documenting" for AI tools:
-- Database changes should be documented in `dairydirect/database/supabase/schema.sql`.
-- API endpoints map directly to folder names in `frontend/src/app/api`.
-- All shared logic is localized in `frontend/src/lib`.
+1. **Payment Signature Verification**: Every Razorpay transaction (`razorpay_order_id`, `razorpay_payment_id`, `razorpay_signature`) is validated cryptographically using `HMAC-SHA256` in constant time (`timingSafeEqual`) to prevent payment tampering.
+2. **Profit-Margin Safeguard**: Dynamic calculation against unit cost prices prevents negative profit margins from coupon abuse.
+3. **Atomic Stock Decrement**: Transactions lock variant rows with `SELECT FOR UPDATE` to prevent overselling.
+4. **Row-Level Security (RLS)**: Fine-grained PostgreSQL RLS policies guarantee customers can only access their own orders and profile data.
+5. **Role-Based Access Control (RBAC)**: Admin routes (`/admin/*` and `/api/admin/*`) enforce strict role validation via JWT claims and environment admin whitelisting.
+
+---
+
+## 📊 Database Schema Summary (`database/supabase/schema.sql`)
+
+- **`profiles`**: User profiles with roles (`customer`, `admin`, `seller`), loyalty points, referral codes, default UPI.
+- **`products` & `product_variants`**: Catalog with weights, prices, cost prices, live stock, batch numbers, freshness certificates.
+- **`orders` & `order_items`**: Order lifecycle (`pending` → `confirmed` → `out_for_delivery` → `delivered` → `cancelled`).
+- **`subscriptions`**: Daily/alternate milk delivery plans, pause/resume mechanisms, volume selections.
+- **`return_requests`**: 100% Freshness Guarantee return claims, photo evidence, refund processing.
+- **`delivery_slots`**: Operational time slots (`5:00 AM - 7:00 AM`, `7:00 AM - 9:00 AM`, `5:00 PM - 7:00 PM`).
+- **`business_settings`**: Minimum order limits, delivery fees, free delivery thresholds, profit margin minimums.
+- **`notifications`**: Realtime user alerts and administrative events.
+- **`audit_logs`**: Administrative audit trail for financial adjustments and stock updates.

@@ -6,6 +6,7 @@ import { CalendarCheck, Droplets, Pause, Play, Settings2, MoreHorizontal, AlertT
 import type { SubscriptionWithProduct } from '@/lib/api/subscriptions';
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { PLACEHOLDER_PRODUCT_IMAGE } from '@/lib/constants/brand';
 
 interface SubscriptionCardProps {
   subscription: SubscriptionWithProduct;
@@ -25,6 +26,7 @@ export function SubscriptionCard({ subscription, onPauseToggle, onCancel }: Subs
   function formatDeliveryDate(dateStr: string | null): string {
     if (!dateStr) return 'Tomorrow';
     const date = new Date(dateStr);
+    // eslint-disable-next-line react-hooks/purity
     const tomorrow = new Date(Date.now() + 86400000);
     if (date.toDateString() === tomorrow.toDateString()) return 'Tomorrow, 7:00 – 9:00 AM';
     return date.toLocaleDateString('en-IN', { weekday: 'short', month: 'short', day: 'numeric' });
@@ -96,7 +98,7 @@ export function SubscriptionCard({ subscription, onPauseToggle, onCancel }: Subs
         <div className="flex gap-4 mb-5">
           <div className="w-20 h-20 rounded-[18px] bg-sky-50 border border-sand/50 shrink-0 flex items-center justify-center overflow-hidden p-2">
             <img 
-              src={product?.image_url || '/milk.png'} 
+              src={product?.image_url || PLACEHOLDER_PRODUCT_IMAGE} 
               alt={product?.name} 
               className="w-full h-full object-contain"
             />
@@ -106,12 +108,12 @@ export function SubscriptionCard({ subscription, onPauseToggle, onCancel }: Subs
               {product?.name || 'A2 Milk'}
             </h3>
             <p className="text-xs font-bold uppercase tracking-wider text-muted mb-2">
-              {subscription.plan === 'monthly' ? 'Monthly' : 'Weekly'} Delivery
+              {subscription.plan === 'daily' ? 'Daily' : subscription.plan === 'alternate' ? 'Alternate Days' : 'Custom'} Delivery
             </p>
             <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-mint/20 text-primary">
               <Droplets className="w-3 h-3" />
               <span className="text-[12px] font-black">
-                {subscription.volume}L Daily
+                {subscription.volume}L
               </span>
             </div>
           </div>
