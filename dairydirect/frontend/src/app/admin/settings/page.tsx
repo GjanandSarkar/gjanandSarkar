@@ -73,7 +73,7 @@ export default function AdminSettingsPage() {
             </Link>
             <div>
               <h1 className="font-extrabold text-[24px]" style={{ color: 'var(--color-on-surface)' }}>Business Configuration</h1>
-              <p className="text-[12px]" style={{ color: 'var(--color-outline)' }}>Profit protection rules, cutoff timings, and delivery fees</p>
+              <p className="text-[12px]" style={{ color: 'var(--color-on-surface-variant)' }}>Profit protection rules, cutoff timings, and delivery fees</p>
             </div>
           </div>
         </div>
@@ -100,7 +100,7 @@ export default function AdminSettingsPage() {
                 <Shield className="w-5 h-5" style={{ color: 'var(--color-primary)' }} />
                 <h2 className="font-bold text-[16px]" style={{ color: 'var(--color-on-surface)' }}>Profit Margin Protection</h2>
               </div>
-              <p className="text-[12px] mb-4" style={{ color: 'var(--color-outline)' }}>
+              <p className="text-[12px] mb-4" style={{ color: 'var(--color-on-surface-variant)' }}>
                 System-level guard: No product or coupon will be allowed to sell below this margin over cost price.
               </p>
               <div>
@@ -118,7 +118,7 @@ export default function AdminSettingsPage() {
                     className="w-full px-3 py-2 rounded-[10px] text-[14px] font-bold border"
                     style={{ background: 'var(--color-surface-container-low)', borderColor: 'rgba(195,201,187,0.4)', color: 'var(--color-on-surface)' }}
                   />
-                  <span className="font-bold text-[14px]" style={{ color: 'var(--color-outline)' }}>%</span>
+                  <span className="font-bold text-[14px]" style={{ color: 'var(--color-on-surface-variant)' }}>%</span>
                 </div>
               </div>
             </div>
@@ -197,7 +197,7 @@ export default function AdminSettingsPage() {
             <div className="rounded-[16px] p-6 flex items-center justify-between" style={{ background: 'var(--color-surface-container-lowest)', border: '1px solid rgba(195,201,187,0.25)' }}>
               <div>
                 <h2 className="font-bold text-[15px]" style={{ color: 'var(--color-on-surface)' }}>Accepting Customer Orders</h2>
-                <p className="text-[12px]" style={{ color: 'var(--color-outline)' }}>Toggle off during stock counts or holiday closures</p>
+                <p className="text-[12px]" style={{ color: 'var(--color-on-surface-variant)' }}>Toggle off during stock counts or holiday closures</p>
               </div>
               <label className="relative inline-flex items-center cursor-pointer">
                 <input

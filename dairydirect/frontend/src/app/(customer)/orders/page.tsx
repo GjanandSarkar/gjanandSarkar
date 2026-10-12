@@ -84,7 +84,7 @@ export default function OrdersScreen() {
           <h1 className="font-extrabold text-[24px] tracking-tight mb-4"
             style={{ color: 'var(--color-on-surface)' }}>
             {t('myOrders')}
-            <span className="ml-2 text-[15px] font-normal" style={{ color: 'var(--color-outline)' }}>
+            <span className="ml-2 text-[15px] font-normal" style={{ color: 'var(--color-on-surface-variant)' }}>
               ({filteredOrders.length})
             </span>
           </h1>
@@ -146,7 +146,7 @@ export default function OrdersScreen() {
                       onClick={() => setExpandedId(isExpanded ? null : order.id)}>
                       <div>
                         <p className="font-bold text-[14px]" style={{ color: 'var(--color-primary)' }}>{order.id}</p>
-                        <p className="text-[11px]" style={{ color: 'var(--color-outline)' }}>
+                        <p className="text-[11px]" style={{ color: 'var(--color-on-surface-variant)' }}>
                           {format(new Date(order.created_at), 'MMM d, hh:mm a')}
                         </p>
                       </div>
@@ -163,7 +163,7 @@ export default function OrdersScreen() {
                         </div>
                         <ChevronDown className="w-4 h-4 shrink-0 transition-transform duration-200"
                           style={{
-                            color: 'var(--color-outline)',
+                            color: 'var(--color-on-surface-variant)',
                             transform: isExpanded ? 'rotate(180deg)' : 'rotate(0deg)',
                           }} />
                       </div>

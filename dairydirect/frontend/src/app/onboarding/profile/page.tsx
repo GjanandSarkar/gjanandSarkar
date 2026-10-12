@@ -83,7 +83,7 @@ export default function ProfileOnboardingScreen() {
             Complete Your Profile
           </h1>
         </div>
-        <p className="text-sm" style={{ color: 'var(--color-outline)' }}>
+        <p className="text-sm" style={{ color: 'var(--color-on-surface-variant)' }}>
           Please enter your details to continue
         </p>
       </div>

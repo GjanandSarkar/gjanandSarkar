@@ -111,7 +111,7 @@ export function AdminSidebar() {
       {/* Nav */}
       <nav className="flex-1 px-3 py-2 flex flex-col gap-0.5 overflow-y-auto no-scrollbar">
         <p className="px-3 py-2 text-[10px] font-bold uppercase tracking-[0.1em]"
-          style={{ color: 'var(--color-outline)' }}>Management</p>
+          style={{ color: 'var(--color-on-surface-variant)' }}>Management</p>
 
         {navItems.map((item) => {
           const active = isActive(item);

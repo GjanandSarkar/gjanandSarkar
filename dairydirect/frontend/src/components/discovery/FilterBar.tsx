@@ -33,7 +33,7 @@ export function FilterBar({
             flex items-center gap-2 px-3 py-1.5 rounded-full text-[12px] font-bold transition-all ml-auto md:ml-0
             ${freshnessFilter 
               ? 'bg-primary text-white shadow-sm' 
-              : 'bg-surface-container-low text-outline hover:bg-surface-container'
+              : 'bg-surface-container-low text-on-surface-variant hover:bg-surface-container'
             }
           `}
         >
@@ -43,10 +43,10 @@ export function FilterBar({
       </div>
 
       <div className="relative w-full">
-        <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 pointer-events-none text-outline" strokeWidth={2.5} />
+        <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 pointer-events-none text-on-surface-variant" strokeWidth={2.5} />
         <input
           type="text"
-          className="w-full pl-10 pr-4 py-3.5 rounded-[14px] text-[15px] font-medium outline-none transition-all bg-surface-container-low text-on-surface placeholder:text-outline focus:bg-surface-container-lowest focus:ring-2 focus:ring-primary/20"
+          className="w-full pl-10 pr-4 py-3.5 rounded-[14px] text-[15px] font-medium outline-none transition-all bg-surface-container-low text-on-surface placeholder:text-on-surface-variant focus:bg-surface-container-lowest focus:ring-2 focus:ring-primary/20"
           placeholder={t('searchPlaceholder') as string}
           value={searchQuery}
           onChange={(e) => onSearchChange(e.target.value)}

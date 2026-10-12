@@ -44,7 +44,6 @@ export default function CheckoutScreen() {
   const [isProcessing, setIsProcessing] = useState(false);
   const [stockError, setStockError] = useState<string | null>(null);
 
-  const [selectedSlot, setSelectedSlot] = useState('morning1');
   const [upiId, setUpiId] = useState('');
 
   const [couponCode, setCouponCode] = useState('');
@@ -58,12 +57,6 @@ export default function CheckoutScreen() {
     total: number,
     nextTier: number
   } | null>(null);
-
-  const slots = [
-    { id: 'morning1', time: '6:00 AM - 8:00 AM', avail: 'Fastest' },
-    { id: 'morning2', time: '8:00 AM - 10:00 AM', avail: 'Available' },
-    { id: 'evening', time: '5:00 PM - 7:00 PM', avail: 'Available' },
-  ];
 
   // Fetch Data
   useEffect(() => {
@@ -353,9 +346,16 @@ export default function CheckoutScreen() {
     : 100;
   const isFreeDelivery = pricing.delivery === 0;
 
+  const ctaLabel =
+    selectedMethod === 'razorpay'
+      ? `Pay ₹${pricing.total} with Razorpay`
+      : selectedMethod === 'cod'
+        ? 'Place Order (Cash on Delivery)'
+        : 'Place Order';
+
   return (
     <>
-      <div className="flex flex-col min-h-screen bg-cream pb-[140px] relative">
+      <div className="flex flex-col min-h-screen bg-cream pb-[140px] lg:pb-10 relative">
         <div className="sticky top-0 z-30 bg-white border-b border-sand shadow-sm">
           <div className="flex justify-between items-center p-4">
             <div className="flex items-center">
@@ -371,14 +371,18 @@ export default function CheckoutScreen() {
           </div>
         </div>
 
-        <div className="p-4 flex-1 space-y-6">
+        {/* Checkout used to be a single unbounded column, so on anything wider
+            than a phone every card and button stretched the full width of the
+            display. Constrain it and, from `lg` up, split it into the standard
+            two-column checkout: the steps on the left, a sticky order summary
+            and CTA on the right. */}
+        <div className="flex-1 w-full max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-5">
+          <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_minmax(320px,380px)] gap-6 lg:gap-8 items-start">
+            <div className="min-w-0 space-y-5">
           <AddressSelection
             addresses={addresses}
             selectedAddressId={checkoutAddressId}
             onSelectAddress={setCheckoutAddressId}
-            slots={slots}
-            selectedSlot={selectedSlot}
-            onSelectSlot={setSelectedSlot}
             onAddressCreated={(newAddr) => {
               setAddresses((prev) => [
                 newAddr,
@@ -431,25 +435,6 @@ export default function CheckoutScreen() {
             </div>
           </div>
 
-          {/* Order Summary component handles the total breakdown */}
-          <OrderSummary
-            subtotal={pricing.subtotal}
-            delivery={pricing.delivery}
-            total={pricing.total}
-            isFreeDelivery={isFreeDelivery}
-            deliveryProgress={deliveryProgress}
-            neededForFree={pricing.nextTier}
-          />
-
-          {/* Add a manual discount line if OrderSummary doesn't show it natively, or it handles it. 
-              Looking at OrderSummary, it doesn't natively show 'discount' so we'll inject it. */}
-          {pricing.discount > 0 && (
-            <div className="bg-green-50 border border-green-200 rounded-[12px] p-3 flex justify-between items-center -mt-4">
-              <span className="text-sm font-bold text-green-700">Coupon Discount</span>
-              <span className="text-sm font-bold text-green-700">-₹{pricing.discount}</span>
-            </div>
-          )}
-
           <PaymentSelection 
             selectedMethod={selectedMethod} 
             onSelectMethod={setSelectedMethod} 
@@ -457,10 +442,48 @@ export default function CheckoutScreen() {
             onChangeUpiId={setUpiId} 
           />
 
-          <CheckoutConfidence />
+              <CheckoutConfidence />
+            </div>
+
+            {/* Sticky summary rail (desktop). On mobile this content still
+                appears inline, followed by the fixed bottom bar. */}
+            <aside className="min-w-0 space-y-4 lg:sticky lg:top-24">
+              <OrderSummary
+                subtotal={pricing.subtotal}
+                delivery={pricing.delivery}
+                total={pricing.total}
+                isFreeDelivery={isFreeDelivery}
+                deliveryProgress={deliveryProgress}
+                neededForFree={pricing.nextTier}
+              />
+
+              {pricing.discount > 0 && (
+                <div className="bg-green-50 border border-green-200 rounded-[12px] p-3 flex justify-between items-center">
+                  <span className="text-sm font-bold text-green-700">Coupon Discount</span>
+                  <span className="text-sm font-bold text-green-700">-₹{pricing.discount}</span>
+                </div>
+              )}
+
+              {/* Desktop CTA. The fixed bottom bar is mobile-only. */}
+              <div className="hidden lg:block bg-white rounded-[20px] p-4 border border-sand shadow-sm space-y-3">
+                <div className="flex items-baseline justify-between">
+                  <span className="text-[11px] font-bold text-muted uppercase tracking-wider">Total Pay</span>
+                  <span className="text-2xl font-black text-dark">₹{pricing.total}</span>
+                </div>
+                <Button
+                  size="lg"
+                  className="w-full shadow-active"
+                  onClick={handlePlaceOrder}
+                  disabled={isProcessing || !checkoutAddressId || cartItemsData.length === 0}
+                >
+                  {ctaLabel}
+                </Button>
+              </div>
+            </aside>
+          </div>
         </div>
 
-        <div className="fixed bottom-0 left-0 right-0 md:left-[260px] p-4 bg-white border-t border-sand z-40 pb-safe shadow-[0_-10px_20px_rgba(0,0,0,0.05)]">
+        <div className="lg:hidden fixed bottom-0 left-0 right-0 md:left-[260px] p-4 bg-white border-t border-sand z-40 pb-safe shadow-[0_-10px_20px_rgba(0,0,0,0.05)]">
           <div className="max-w-[800px] mx-auto flex items-center justify-between gap-4">
             <div className="flex flex-col">
               <span className="text-[11px] font-bold text-muted uppercase">Total Pay</span>
@@ -472,11 +495,7 @@ export default function CheckoutScreen() {
               onClick={handlePlaceOrder}
               disabled={isProcessing || !checkoutAddressId || cartItemsData.length === 0}
             >
-              {selectedMethod === 'razorpay' 
-                ? `Pay ₹${pricing.total} with Razorpay` 
-                : selectedMethod === 'cod' 
-                  ? 'Place Order (Cash on Delivery)' 
-                  : 'Place Order'}
+              {ctaLabel}
             </Button>
           </div>
         </div>

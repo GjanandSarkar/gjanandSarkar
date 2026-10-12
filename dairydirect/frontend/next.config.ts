@@ -88,7 +88,15 @@ const nextConfig: NextConfig = {
           { key: 'X-Frame-Options', value: 'DENY' },
           { key: 'X-XSS-Protection', value: '1; mode=block' },
           { key: 'Referrer-Policy', value: 'strict-origin-when-cross-origin' },
-          { key: 'Permissions-Policy', value: 'camera=(), microphone=(), geolocation=()' },
+          // geolocation=(self) allows OUR OWN origin to ask for location, and
+          // nobody else. The previous value was `geolocation=()`, an EMPTY
+          // allowlist, which disables the API for every origin including this
+          // one: the browser rejected getCurrentPosition() instantly with
+          // PERMISSION_DENIED and never showed a permission prompt. That is
+          // why "Use My Location" always failed and why telling the user to
+          // click the lock icon could never help -- the site itself was
+          // forbidding it. Camera and microphone stay fully disabled.
+          { key: 'Permissions-Policy', value: 'camera=(), microphone=(), geolocation=(self)' },
         ],
       },
       {

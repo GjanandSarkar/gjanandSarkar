@@ -120,7 +120,7 @@ function CustomerReturnsContent() {
             <h1 className="font-extrabold text-[20px] md:text-[24px]" style={{ color: 'var(--color-on-surface)' }}>
               Returns & Freshness Claims
             </h1>
-            <p className="text-[12px]" style={{ color: 'var(--color-outline)' }}>
+            <p className="text-[12px]" style={{ color: 'var(--color-on-surface-variant)' }}>
               100% Freshness Guarantee Replacement Policy
             </p>
           </div>

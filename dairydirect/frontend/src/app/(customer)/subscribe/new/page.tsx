@@ -152,7 +152,7 @@ function NewSubscriptionContent() {
           <div className="w-full space-y-6">
             <div className="flex flex-col gap-3">
               <label className="text-[10px] font-black text-muted uppercase tracking-[0.2em] ml-1">Daily Requirement</label>
-              <div className="grid grid-cols-4 gap-2">
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
                 {volumePresets.map(preset => (
                   <button
                     key={preset.label}
@@ -191,7 +191,7 @@ function NewSubscriptionContent() {
 
         {/* Plan Selection */}
         <h3 className="font-bold text-dark mb-3 text-lg px-1">Delivery Plan</h3>
-        <div className="grid grid-cols-3 gap-3 mb-6">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-6">
           <div 
             onClick={() => setPlan('daily')}
             className={cn(

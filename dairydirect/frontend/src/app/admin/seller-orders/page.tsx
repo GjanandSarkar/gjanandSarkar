@@ -204,7 +204,7 @@ export default function AllSellerOrdersListPage() {
               <h1 className="font-extrabold text-[24px] tracking-tight mt-1"
                 style={{ color: 'var(--color-on-surface)' }}>
                 All Seller Orders List
-                <span className="ml-2 text-[15px] font-normal" style={{ color: 'var(--color-outline)' }}>
+                <span className="ml-2 text-[15px] font-normal" style={{ color: 'var(--color-on-surface-variant)' }}>
                   ({filteredOrders.length})
                 </span>
               </h1>
@@ -303,7 +303,7 @@ export default function AllSellerOrdersListPage() {
                 <Store className="w-7 h-7 text-purple-700" strokeWidth={1.5} />
               </div>
               <p className="font-bold text-[18px]" style={{ color: 'var(--color-on-surface)' }}>No seller orders found</p>
-              <p className="text-[13px] mt-1 max-w-sm" style={{ color: 'var(--color-outline)' }}>
+              <p className="text-[13px] mt-1 max-w-sm" style={{ color: 'var(--color-on-surface-variant)' }}>
                 {selectedSellerId !== 'all' 
                   ? 'No orders found for the selected seller. Try changing the seller filter.'
                   : 'Seller orders will appear here when customers purchase vendor products.'}
@@ -378,7 +378,7 @@ export default function AllSellerOrdersListPage() {
                             </span>
                           </div>
 
-                          <p className="text-[11px] mt-0.5" style={{ color: 'var(--color-outline)' }}>
+                          <p className="text-[11px] mt-0.5" style={{ color: 'var(--color-on-surface-variant)' }}>
                             {order.profiles?.name || 'Customer'} {order.profiles?.phone ? `(${order.profiles.phone})` : ''} · {format(new Date(order.created_at), 'MMM d, hh:mm a')}
                           </p>
                         </div>
@@ -397,7 +397,7 @@ export default function AllSellerOrdersListPage() {
                         </div>
                         <ChevronDown className="w-4 h-4 shrink-0 transition-transform duration-200"
                           style={{
-                            color: 'var(--color-outline)',
+                            color: 'var(--color-on-surface-variant)',
                             transform: isExpanded ? 'rotate(180deg)' : 'rotate(0deg)',
                           }} />
                       </div>

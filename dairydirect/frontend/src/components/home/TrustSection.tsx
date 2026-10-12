@@ -49,7 +49,7 @@ export function TrustSection() {
                 {item.icon}
               </div>
               <span className="text-[13px] font-bold text-on-surface mb-1 leading-tight">{item.title}</span>
-              <span className="text-[11px] font-medium text-outline">{item.description}</span>
+              <span className="text-[11px] font-medium text-on-surface-variant">{item.description}</span>
             </div>
           ))}
         </div>

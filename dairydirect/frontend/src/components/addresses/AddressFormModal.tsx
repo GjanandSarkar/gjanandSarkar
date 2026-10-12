@@ -187,8 +187,8 @@ export function AddressFormModal({
         setLocationNotice({
           text:
             reasonNotice ||
-            'Location auto-filled via network! Please enter your Flat / House number manually.',
-          type: 'success',
+            'Filled in from your network location. This is approximate, so please check the pincode and city before saving, and add your flat / house number.',
+          type: 'info',
         });
         setTimeout(() => setLocationNotice(null), 7000);
         return true;
@@ -240,33 +240,45 @@ export function AddressFormModal({
         }
       },
       async (err) => {
-        // When device GPS is denied, timed out, or unavailable:
-        // Automatically attempt network/IP fallback so the user is never stuck!
+        // Fall back to the network location so the user is never stuck, but
+        // describe what actually happened rather than blaming the browser for
+        // every failure mode.
+        const reason =
+          err.code === err.PERMISSION_DENIED
+            ? 'Location access was declined, so we used your network location instead.'
+            : err.code === err.TIMEOUT
+              ? 'Your device took too long to get a GPS fix, so we used your network location instead.'
+              : 'Your device could not provide a GPS fix, so we used your network location instead.';
+
         const success = await attemptIPLocationFallback(
-          'Location auto-filled via network! (Note: GPS was blocked by browser. Click the lock/tune icon in your address bar to enable precise GPS).'
+          `${reason} It is approximate - please check the pincode and city before saving.`
         );
         setIsLocating(false);
 
         if (!success) {
           if (err.code === err.PERMISSION_DENIED) {
             setLocationNotice({
-              text: 'Location permission was denied. Click the lock/tune icon 🔒 next to the website URL in your browser bar to allow location, or enter manually.',
+              text: 'Location access is blocked for this site. Open your browser site settings (the icon to the left of the address bar), set Location to Allow, then try again - or just type the address in.',
               type: 'error',
             });
           } else if (err.code === err.TIMEOUT) {
             setLocationNotice({
-              text: 'Location request timed out. Please try again or fill manually.',
+              text: 'Getting your location timed out. Moving somewhere with a clearer view of the sky can help, or enter the address manually.',
               type: 'error',
             });
           } else {
             setLocationNotice({
-              text: 'Unable to detect your location. Please enter manually.',
+              text: 'We could not detect your location. Please enter the address manually.',
               type: 'error',
             });
           }
         }
       },
-      { enableHighAccuracy: false, timeout: 6000, maximumAge: 60000 }
+      // A delivery address needs a real GPS fix. enableHighAccuracy was false
+      // with a 60s cache, which let the browser hand back a coarse, cached,
+      // often network-derived position - the very thing the fallback exists
+      // for. GPS needs longer than 6s from a cold start.
+      { enableHighAccuracy: true, timeout: 15000, maximumAge: 0 }
     );
   };
 

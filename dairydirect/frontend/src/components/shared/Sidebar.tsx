@@ -80,7 +80,7 @@ export function Sidebar() {
           </div>
           <div className="flex-1 min-w-0">
             <p className="text-[11px] font-semibold uppercase tracking-wider"
-              style={{ color: 'var(--color-outline)' }}>Good morning</p>
+              style={{ color: 'var(--color-on-surface-variant)' }}>Good morning</p>
             <p className="font-bold text-[15px] leading-tight mt-0.5 truncate"
               style={{ color: 'var(--color-on-surface)' }}>
               {user.name?.split(' ')[0] || 'Guest'}
@@ -92,7 +92,7 @@ export function Sidebar() {
       {/* Nav Items */}
       <nav className="flex-1 px-3 py-3 flex flex-col gap-0.5 overflow-y-auto no-scrollbar">
         <p className="px-3 py-2 text-[10px] font-bold uppercase tracking-[0.1em]"
-          style={{ color: 'var(--color-outline)' }}>Navigation</p>
+          style={{ color: 'var(--color-on-surface-variant)' }}>Navigation</p>
 
         {navItems.map((item) => {
           const isActive = pathname.startsWith(item.href);
