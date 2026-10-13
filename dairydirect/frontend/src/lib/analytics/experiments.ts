@@ -75,9 +75,27 @@ interface AnalyticsEvent {
   properties?: Record<string, unknown>;
 }
 
+/**
+ * Read the analytics credentials.
+ *
+ * `POSTHOG_KEY` is deliberately *not* prefixed `NEXT_PUBLIC_`. Every caller of
+ * `captureEvent` is an API route, so this never needs to reach the browser,
+ * and Next.js inlines `NEXT_PUBLIC_*` values into the bundle at build time —
+ * which would both ship the key to every visitor and require a full redeploy
+ * before a key change took effect. A server-only variable is read at runtime.
+ *
+ * The `NEXT_PUBLIC_` names are still accepted so that setting either one works
+ * rather than silently doing nothing.
+ */
 function analyticsConfig() {
-  const key = process.env.NEXT_PUBLIC_POSTHOG_KEY;
-  const host = process.env.NEXT_PUBLIC_POSTHOG_HOST || 'https://app.posthog.com';
+  const key = process.env.POSTHOG_KEY || process.env.NEXT_PUBLIC_POSTHOG_KEY;
+  // Must match the region the PostHog project was created in: US Cloud is
+  // us.i.posthog.com, EU Cloud is eu.i.posthog.com. The older app.posthog.com
+  // is the legacy domain and is not the documented capture host.
+  const host =
+    process.env.POSTHOG_HOST ||
+    process.env.NEXT_PUBLIC_POSTHOG_HOST ||
+    'https://us.i.posthog.com';
   return key ? { key, host } : null;
 }
 

@@ -125,8 +125,10 @@ device switch.
 
 The variant is written onto every `product_events` and `ad_events` row.
 Comparison happens in an external analytics tool via a PostHog-compatible
-capture endpoint, configured with `NEXT_PUBLIC_POSTHOG_KEY` /
-`NEXT_PUBLIC_POSTHOG_HOST`. Forwarding is fire-and-forget with a 2s timeout —
+capture endpoint, configured with `POSTHOG_KEY` / `POSTHOG_HOST`. These are
+server-only variables (no `NEXT_PUBLIC_` prefix) because every caller is an
+API route: the key never reaches the browser, and it is read at runtime rather
+than inlined at build time, so rotating it does not require a redeploy. Forwarding is fire-and-forget with a 2s timeout —
 analytics must never slow a page — and the first-party tables remain
 authoritative, so a dropped forward loses reporting convenience, not data. With
 no key set, bucketing still works and `/admin/campaigns` shows a warning so

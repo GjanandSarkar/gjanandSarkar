@@ -156,7 +156,7 @@ export default function AdminCampaignsPage() {
           <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />
           <span>
             External analytics is not configured, so A/B results are not being forwarded for
-            analysis. Set <code className="font-mono">NEXT_PUBLIC_POSTHOG_KEY</code> to enable it.
+            analysis. Set <code className="font-mono">POSTHOG_KEY</code> to enable it.
             The figures below are still recorded first-party and are accurate.
           </span>
         </div>
