@@ -367,7 +367,7 @@ CREATE TABLE IF NOT EXISTS return_requests (
   description    TEXT,
   images         TEXT[]        DEFAULT ARRAY[]::TEXT[],
   status         TEXT          NOT NULL DEFAULT 'pending'
-                 CHECK (status IN ('pending', 'approved', 'rejected', 'refunded')),
+                 CHECK (status IN ('submitted', 'under_review', 'pending', 'approved', 'rejected', 'return_in_progress', 'item_received', 'inspection_completed', 'refund_pending', 'refunded')),
   refund_amount  NUMERIC(10,2) NOT NULL DEFAULT 0.00,
   admin_notes    TEXT,
   created_at     TIMESTAMPTZ   NOT NULL DEFAULT now(),

@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useTranslation } from '@/lib/i18n';
 import { createProduct, uploadProductImage } from '@/lib/api/products';
+import { MultiImageUpload, ImageItem } from '@/components/admin/MultiImageUpload';
 import { api } from '@/lib/api/client';
 import {
   ArrowLeft,
@@ -35,8 +36,7 @@ function AddProductPage() {
   const [variants, setVariants] = useState([{ weight: '', price: '', cost_price: '', stock: '' }]);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState('');
-  const [imageFile, setImageFile] = useState<File | null>(null);
-  const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [images, setImages] = useState<ImageItem[]>([]);
 
   useEffect(() => {
     async function loadCategories() {
@@ -102,13 +102,27 @@ function AddProductPage() {
     setError('');
 
     try {
-      let image_url = '';
-      if (imageFile) {
-        const uploadRes = await uploadProductImage(imageFile);
-        if (uploadRes.error || !uploadRes.url) {
-          throw new Error(uploadRes.error || 'Failed to upload image');
+      // Upload all files in images array
+      const uploadedImageUrls: string[] = [];
+      let primaryUrl = '';
+
+      for (const item of images) {
+        let finalUrl = item.url;
+        if (item.file) {
+          const uploadRes = await uploadProductImage(item.file);
+          if (uploadRes.error || !uploadRes.url) {
+            throw new Error(uploadRes.error || 'Failed to upload one of the product images');
+          }
+          finalUrl = uploadRes.url;
         }
-        image_url = uploadRes.url;
+        uploadedImageUrls.push(finalUrl);
+        if (item.isPrimary) {
+          primaryUrl = finalUrl;
+        }
+      }
+
+      if (!primaryUrl && uploadedImageUrls.length > 0) {
+        primaryUrl = uploadedImageUrls[0];
       }
 
       const res = await createProduct(
@@ -116,7 +130,8 @@ function AddProductPage() {
           name: name.trim(),
           category: selectedCategory,
           description: description.trim() || undefined,
-          image_url: image_url || undefined,
+          image_url: primaryUrl || undefined,
+          gallery_images: uploadedImageUrls,
           is_freshness_guarantee: true,
         },
         validVariants.map(v => ({
@@ -296,62 +311,19 @@ function AddProductPage() {
               </div>
             </div>
 
-            {/* Product Image (Optional) */}
+            {/* Product Images (Multiple allowed) */}
             <div>
               <label className="text-[13px] font-semibold mb-2 block"
                 style={{ color: 'var(--color-foreground, #1c201e)' }}>
-                Product Image (Optional)
+                Product Photos (Upload multiple at once)
               </label>
 
-              <div
-                className="w-full h-44 rounded-[12px] border-2 border-dashed flex flex-col items-center justify-center relative p-4 transition-colors hover:border-primary/50"
-                style={{
-                  background: 'var(--color-surface, #ffffff)',
-                  borderColor: 'var(--color-border, #d8d4c9)',
-                }}
-              >
-                {imagePreview ? (
-                  <div className="relative w-full h-full flex items-center justify-center group">
-                    <img src={imagePreview} alt="Preview" className="max-h-full max-w-full object-contain rounded-[8px]" />
-                    <button
-                      type="button"
-                      onClick={() => { setImageFile(null); setImagePreview(null); }}
-                      className="absolute top-1 right-1 p-1.5 rounded-full bg-red-500 text-white shadow-md hover:bg-red-600 transition-all"
-                    >
-                      <X className="w-4 h-4" />
-                    </button>
-                  </div>
-                ) : (
-                  <>
-                    <div className="p-3 rounded-full mb-2" style={{ background: 'var(--color-surface-muted, #f2ede4)' }}>
-                      <UploadCloud className="w-7 h-7" style={{ color: 'var(--color-primary, #0c3c26)' }} />
-                    </div>
-                    <span className="font-bold text-[14px] mb-0.5" style={{ color: 'var(--color-foreground, #1c201e)' }}>
-                      Upload product image
-                    </span>
-                    <span className="text-[12px] font-medium mb-3" style={{ color: 'var(--color-foreground-muted, #8a948e)' }}>
-                      PNG, JPG or WEBP (Max 5MB)
-                    </span>
-                    <label className="cursor-pointer inline-flex items-center gap-1.5 px-4 py-1.5 rounded-[8px] border text-[13px] font-semibold transition-colors hover:bg-primary/5"
-                      style={{ borderColor: 'var(--color-primary, #0c3c26)', color: 'var(--color-primary, #0c3c26)' }}>
-                      <Plus className="w-3.5 h-3.5" />
-                      <span>Choose File</span>
-                      <input
-                        type="file"
-                        className="hidden"
-                        accept="image/*"
-                        onChange={(e) => {
-                          const file = e.target.files?.[0];
-                          if (file) {
-                            setImageFile(file);
-                            setImagePreview(URL.createObjectURL(file));
-                          }
-                        }}
-                      />
-                    </label>
-                  </>
-                )}
-              </div>
+              <MultiImageUpload
+                images={images}
+                onChange={setImages}
+                disabled={isSubmitting}
+                maxImages={10}
+              />
             </div>
           </div>
         </div>

@@ -15,6 +15,7 @@ import { useStore } from '@/store/useStore';
 import { getProducts } from '@/lib/api/products';
 import { toggleWishlist } from '@/lib/api/wishlist';
 import type { ProductWithVariants } from '@/lib/api/products';
+import { ProductGridSkeleton } from '@/components/shared/Skeletons';
 
 export default function WishlistPage() {
   const user = useStore((s) => s.user);
@@ -52,8 +53,8 @@ export default function WishlistPage() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-[#fafaf8]">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#0f3e26]" />
+      <div className="min-h-screen bg-[#fafaf8] px-4 md:px-8 py-6 max-w-[1440px] mx-auto">
+        <ProductGridSkeleton count={6} />
       </div>
     );
   }

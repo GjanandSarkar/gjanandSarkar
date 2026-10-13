@@ -1,35 +1,88 @@
 "use client";
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { X, CheckCircle2 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { NotificationItem, type NotificationData } from './NotificationItem';
 import { NotificationEmptyState } from './NotificationEmptyState';
+import { api } from '@/lib/api/client';
 
 interface NotificationCenterProps {
   isOpen: boolean;
   onClose: () => void;
 }
 
-// Dummy data for visual preview. In real app, fetch from backend.
-const DUMMY_NOTIFICATIONS: NotificationData[] = [
-  { id: '1', type: 'delivery', title: 'Out for Delivery', message: 'Your morning milk delivery is on the way and will reach you by 6:30 AM.', isRead: false, time: 'Just now' },
-  { id: '2', type: 'offer', title: 'Unlock Free Ghee!', message: 'Add 2 items to your upcoming subscription delivery to unlock a free sample of A2 Ghee.', isRead: false, time: '2h ago' },
-  { id: '3', type: 'order', title: 'Subscription Paused', message: 'Your delivery for tomorrow has been successfully paused.', isRead: true, time: 'Yesterday' },
-];
+/**
+ * Relative time label, e.g. "2h ago".
+ */
+function relativeTime(iso?: string | null): string {
+  if (!iso) return '';
+  const then = new Date(iso).getTime();
+  if (Number.isNaN(then)) return '';
+  const diffSec = Math.floor((Date.now() - then) / 1000);
+  if (diffSec < 60) return 'Just now';
+  if (diffSec < 3600) return `${Math.floor(diffSec / 60)}m ago`;
+  if (diffSec < 86400) return `${Math.floor(diffSec / 3600)}h ago`;
+  if (diffSec < 172800) return 'Yesterday';
+  return `${Math.floor(diffSec / 86400)}d ago`;
+}
 
 export function NotificationCenter({ isOpen, onClose }: NotificationCenterProps) {
-  const [notifications, setNotifications] = useState<NotificationData[]>(DUMMY_NOTIFICATIONS);
+  /**
+   * These were three hardcoded DUMMY_NOTIFICATIONS shown to every visitor —
+   * "Your morning milk delivery is on the way", "unlock a free sample of A2
+   * Ghee" — regardless of whether they had ever ordered anything. A real
+   * `/api/notifications` endpoint and a NotificationEmptyState component both
+   * already existed; the component simply was not wired to them.
+   */
+  const [notifications, setNotifications] = useState<NotificationData[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
+
+  useEffect(() => {
+    if (!isOpen) return;
+    let cancelled = false;
+
+    (async () => {
+      setIsLoading(true);
+      try {
+        const res = await api.notifications.get();
+        if (cancelled) return;
+        const rows = Array.isArray(res?.notifications) ? res.notifications : [];
+        setNotifications(
+          rows.map((n: Record<string, unknown>) => ({
+            id: String(n.id ?? ''),
+            type: (n.type as NotificationData['type']) ?? 'order',
+            title: String(n.title ?? ''),
+            message: String(n.message ?? ''),
+            isRead: Boolean(n.is_read ?? n.isRead ?? false),
+            time: relativeTime(
+              (n.created_at as string) ?? (n.createdAt as string) ?? null,
+            ),
+          })),
+        );
+      } catch {
+        // Endpoint unreachable: show the empty state rather than invented rows.
+        if (!cancelled) setNotifications([]);
+      } finally {
+        if (!cancelled) setIsLoading(false);
+      }
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [isOpen]);
 
   const unreadCount = notifications.filter(n => !n.isRead).length;
 
   const handleMarkAllRead = () => {
     setNotifications(prev => prev.map(n => ({ ...n, isRead: true })));
+    void api.notifications.markRead(undefined, true).catch(() => {});
   };
 
   const handleNotificationClick = (id: string) => {
     setNotifications(prev => prev.map(n => n.id === id ? { ...n, isRead: true } : n));
-    // Optional: navigate based on notification type
+    void api.notifications.markRead(id).catch(() => {});
   };
 
   const content = (

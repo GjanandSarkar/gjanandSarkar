@@ -17,7 +17,7 @@ export function SubscriptionSkeleton() {
               <div className="h-3 w-20 bg-sand/30 rounded" />
             </div>
           </div>
-          <div className="grid grid-cols-3 gap-2">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
             {[1, 2, 3].map(i => (
               <div key={i} className="h-24 bg-white/50 rounded-[16px] border border-sand/50" />
             ))}

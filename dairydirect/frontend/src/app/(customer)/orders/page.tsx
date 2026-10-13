@@ -7,7 +7,7 @@ import { getUserOrders } from '@/lib/api/orders';
 import { supabase } from '@/lib/supabase';
 import type { OrderWithItems } from '@/lib/api/orders';
 import { format } from 'date-fns';
-import { ShoppingBag, ChevronDown, ArrowRight, Package, Truck, CheckCircle2, Clock, AlertCircle } from 'lucide-react';
+import { ShoppingBag, ChevronDown, ArrowRight, Package, Truck, CheckCircle2, Clock, AlertCircle, RotateCcw } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import Link from 'next/link';
 import { BuyAgainCarousel } from '@/components/discovery/BuyAgainCarousel';
@@ -80,11 +80,11 @@ export default function OrdersScreen() {
     <div className="flex flex-col min-h-screen">
       {/* Sticky Header + Tabs */}
       <div className="sticky top-0 z-30 glass-surface">
-        <div className="px-5 md:px-10 pt-6 pb-0">
+        <div className="page-medium px-5 md:px-10 pt-6 pb-0">
           <h1 className="font-extrabold text-[24px] tracking-tight mb-4"
             style={{ color: 'var(--color-on-surface)' }}>
             {t('myOrders')}
-            <span className="ml-2 text-[15px] font-normal" style={{ color: 'var(--color-outline)' }}>
+            <span className="ml-2 text-[15px] font-normal" style={{ color: 'var(--color-on-surface-variant)' }}>
               ({filteredOrders.length})
             </span>
           </h1>
@@ -93,9 +93,9 @@ export default function OrdersScreen() {
               <button key={tab} onClick={() => setActiveTab(tab)}
                 className="whitespace-nowrap px-4 py-2 rounded-full text-[12px] font-semibold transition-all duration-200 shrink-0"
                 style={activeTab === tab ? {
-                  background: 'linear-gradient(135deg, #3f6530, #577f46)',
+                  background: 'var(--cta-gradient)',
                   color: 'white',
-                  boxShadow: '0 3px 10px rgba(63, 101, 48, 0.25)',
+                  boxShadow: '0 3px 10px rgba(12, 60, 38, 0.25)',
                 } : {
                   background: 'var(--color-surface-container-low)',
                   color: 'var(--color-on-surface-variant)',
@@ -108,7 +108,7 @@ export default function OrdersScreen() {
         <div className="h-px mt-2 opacity-25" style={{ background: 'var(--color-outline-variant)' }} />
       </div>
 
-      <div className="px-5 md:px-10 py-5 flex flex-col gap-3">
+      <div className="page-medium px-5 md:px-10 py-5 flex flex-col gap-3">
         {filteredOrders.length > 0 && activeTab === 'All' && (
           <div className="mb-6 -mx-5 px-5 md:mx-0 md:px-0">
             <BuyAgainCarousel />
@@ -146,7 +146,7 @@ export default function OrdersScreen() {
                       onClick={() => setExpandedId(isExpanded ? null : order.id)}>
                       <div>
                         <p className="font-bold text-[14px]" style={{ color: 'var(--color-primary)' }}>{order.id}</p>
-                        <p className="text-[11px]" style={{ color: 'var(--color-outline)' }}>
+                        <p className="text-[11px]" style={{ color: 'var(--color-on-surface-variant)' }}>
                           {format(new Date(order.created_at), 'MMM d, hh:mm a')}
                         </p>
                       </div>
@@ -163,7 +163,7 @@ export default function OrdersScreen() {
                         </div>
                         <ChevronDown className="w-4 h-4 shrink-0 transition-transform duration-200"
                           style={{
-                            color: 'var(--color-outline)',
+                            color: 'var(--color-on-surface-variant)',
                             transform: isExpanded ? 'rotate(180deg)' : 'rotate(0deg)',
                           }} />
                       </div>
@@ -202,9 +202,18 @@ export default function OrdersScreen() {
                             {(order.status === 'out_for_delivery' || order.status === 'confirmed') && (
                               <Link href={`/tracking/${order.id}`}
                                 className="flex items-center justify-center gap-2 w-full py-3 rounded-[12px] font-bold text-sm text-white"
-                                style={{ background: 'linear-gradient(135deg, #3f6530, #577f46)' }}>
+                                style={{ background: 'var(--cta-gradient)' }}>
                                 <Truck className="w-4 h-4" />
                                 {t('trackLive')}
+                              </Link>
+                            )}
+
+                            {/* Return / Freshness Guarantee claim button */}
+                            {order.status === 'delivered' && (
+                              <Link href={`/returns?orderId=${order.id}`}
+                                className="flex items-center justify-center gap-2 w-full py-2.5 rounded-[12px] font-bold text-xs text-primary bg-primary/10 hover:bg-primary/20 transition-colors">
+                                <RotateCcw className="w-3.5 h-3.5" />
+                                Freshness Guarantee / Report Issue
                               </Link>
                             )}
                           </div>

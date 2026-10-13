@@ -24,48 +24,58 @@ export default function FAQPage() {
   const [selectedCategory, setSelectedCategory] = useState('All');
   const [openIndex, setOpenIndex] = useState<number | null>(0);
 
-  const categories = ['All', 'Delivery & Timing', 'A2 Purity & Quality', 'Subscriptions', 'Payments & Refunds'];
+  const categories = ['All', 'About the Platform', 'Orders & Delivery', 'Subscriptions', 'Payments & Refunds'];
 
   const faqs: FAQItem[] = [
     {
-      category: 'Delivery & Timing',
-      question: 'What time does the morning milk delivery arrive?',
-      answer: 'Our dedicated cold-chain delivery fleet delivers daily between 5:30 AM and 7:30 AM directly to your door in insulated carrier crates, ensuring you have fresh milk before morning tea or breakfast.'
+      category: 'About the Platform',
+      question: 'What is Gjanand Sarkar?',
+      answer: 'Gjanand Sarkar is a curated marketplace for products made in India. We bring trusted Indian brands onto one platform across dairy, groceries, spices, wellness, home, fashion, electronics and more.'
     },
     {
-      category: 'Delivery & Timing',
-      question: 'Do you deliver in glass bottles or pouches?',
-      answer: 'All our fresh milk and Vedic ghee is bottled in sanitized, reusable food-grade glass bottles to prevent microplastic leeching and preserve the rich natural flavor.'
+      category: 'About the Platform',
+      question: 'Why is there only one brand per category?',
+      answer: 'We partner with exactly one verified company in each category. Instead of scrolling through dozens of near-identical listings and guessing which seller is genuine, you get one brand we have vetted and taken responsibility for. It is the core of how we work.'
     },
     {
-      category: 'A2 Purity & Quality',
-      question: 'What makes Gjanand Sarkar A2 Gir Cow Milk special?',
-      answer: 'Our milk is exclusively obtained from indigenous Bos Indicus (Gir, Kankrej, and Sahiwal) cows grazing on open pastures with organic fodder. It contains 100% natural A2 beta-casein protein which is easily digestible and free from the inflammatory A1 mutant proteins found in hybrid/jersey cow milk.'
+      category: 'About the Platform',
+      question: 'How do you verify a partner brand?',
+      answer: 'Every partner is checked for business registration, GST and applicable category licences before they can list. Food and wellness partners additionally hold the certifications required for their category. Partners remain active only while they meet those standards.'
     },
     {
-      category: 'A2 Purity & Quality',
-      question: 'How do you ensure zero adulteration?',
-      answer: 'Every morning batch is tested for 24 distinct parameters including fat percentage, solid-not-fat (SNF), microbial load, water dilution, urea, maltodextrin, antibiotics, and detergent traces before leaving the farm gate.'
+      category: 'Orders & Delivery',
+      question: 'Where do you deliver?',
+      answer: 'We deliver across India. Enter your pincode at checkout to see the delivery window and charges for your address.'
+    },
+    {
+      category: 'Orders & Delivery',
+      question: 'Can I order from multiple categories in one basket?',
+      answer: 'Yes. You can mix products from any categories in a single order. Items may ship from different partner warehouses, so parts of your order can arrive separately \u2014 you can track each shipment from the Orders page.'
+    },
+    {
+      category: 'Orders & Delivery',
+      question: 'How do I track my order?',
+      answer: 'Open the Orders tab in your profile to see live status for every shipment, along with the expected delivery date and courier details.'
     },
     {
       category: 'Subscriptions',
-      question: 'How do I pause or modify my daily milk subscription when I go out of town?',
-      answer: 'You can pause, resume, or change your daily quantity anytime via the "Subscriptions" tab in your profile before 8:00 PM for the next morning’s delivery without any penalty.'
+      question: 'Which products can I subscribe to?',
+      answer: 'Repeat-purchase essentials \u2014 such as dairy, groceries and household staples \u2014 support scheduled delivery. Look for the Subscribe option on the product page.'
     },
     {
       category: 'Subscriptions',
-      question: 'Is there a minimum lock-in period for subscriptions?',
-      answer: 'No! There is zero lock-in period. You can choose daily, alternate day, or custom schedule delivery and cancel anytime with 1 click.'
+      question: 'Can I pause or change a subscription?',
+      answer: 'Yes. Pause, resume or change quantity anytime from the Subscriptions tab in your profile. There is zero lock-in and you can cancel in one click.'
     },
     {
       category: 'Payments & Refunds',
       question: 'Which payment methods are accepted?',
-      answer: 'We support all major payment modes via Razorpay including UPI (Google Pay, PhonePe, Paytm), Credit/Debit Cards, Net Banking, and Wallet balances.'
+      answer: 'We support all major payment modes via Razorpay including UPI (Google Pay, PhonePe, Paytm), credit and debit cards, net banking and wallets.'
     },
     {
       category: 'Payments & Refunds',
-      question: 'What is your refund policy for broken glass or missed delivery?',
-      answer: 'We have a 100% "No Questions Asked" replacement or instant refund guarantee. If a bottle is damaged or missing, simply report it on the Returns & Refunds page and the amount is immediately credited back to your wallet or original payment method.'
+      question: 'What if an item arrives damaged or never arrives?',
+      answer: 'Report it from the Returns & Refunds page and we will arrange a replacement or refund. Because each category has a single accountable partner, we resolve the issue directly rather than leaving you to chase a seller.'
     }
   ];
 
@@ -87,7 +97,8 @@ export default function FAQPage() {
             Frequently Asked Questions
           </h1>
           <p className="text-xs sm:text-sm text-gray-600 max-w-xl mx-auto leading-relaxed">
-            Everything you need to know about Gjanand Sarkar’s Vedic products, cold-chain delivery slots, subscriptions, and purity standards.
+            Everything you need to know about ordering, delivery, subscriptions
+            and how we pick our partner brands.
           </p>
         </div>
 
@@ -149,7 +160,8 @@ export default function FAQPage() {
               Still have questions?
             </h3>
             <p className="text-xs text-emerald-100/90 leading-relaxed max-w-md">
-              Our customer success team is here to assist you with order modifications, Gaushala visits, or custom inquiries.
+              Our customer success team is here to help with order changes, returns
+              or any other question.
             </p>
           </div>
           <Link

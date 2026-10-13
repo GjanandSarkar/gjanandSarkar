@@ -26,6 +26,14 @@ export function AuthGuard() {
       pathname === '/profile/saved-addresses' ||
       pathname.startsWith('/seller/dashboard');
 
+    // `/` is rewritten to the storefront, so an admin landing there should be
+    // moved to their console — but only AFTER the storefront has already
+    // painted, which is the opposite of the old blocking blank-page redirect.
+    if (user && user.role === 'admin' && pathname === '/') {
+      router.replace('/admin');
+      return;
+    }
+
     // Not logged in -> go to login if on protected route
     if (!user && isProtectedRoute) {
       router.replace('/auth/login?redirect=' + encodeURIComponent(pathname));

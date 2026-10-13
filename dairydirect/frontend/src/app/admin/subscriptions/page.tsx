@@ -66,7 +66,7 @@ export default function AdminSubscriptionsPage() {
           <h1 className="font-extrabold text-[24px] tracking-tight mb-4"
             style={{ color: 'var(--color-on-surface)' }}>
             Subscriptions
-            <span className="ml-2 text-[15px] font-normal" style={{ color: 'var(--color-outline)' }}>
+            <span className="ml-2 text-[15px] font-normal" style={{ color: 'var(--color-on-surface-variant)' }}>
               ({filtered.length})
             </span>
           </h1>
@@ -75,9 +75,9 @@ export default function AdminSubscriptionsPage() {
               <button key={tab} onClick={() => setActiveTab(tab)}
                 className="whitespace-nowrap px-4 py-2 rounded-full text-[12px] font-semibold transition-all duration-200 shrink-0 capitalize"
                 style={activeTab === tab ? {
-                  background: 'linear-gradient(135deg, #3f6530, #577f46)',
+                  background: 'var(--cta-gradient)',
                   color: 'white',
-                  boxShadow: '0 3px 10px rgba(63, 101, 48, 0.25)',
+                  boxShadow: '0 3px 10px rgba(12, 60, 38, 0.25)',
                 } : {
                   background: 'var(--color-surface-container-low)',
                   color: 'var(--color-on-surface-variant)',
@@ -97,10 +97,10 @@ export default function AdminSubscriptionsPage() {
               className="flex flex-col items-center justify-center py-24 text-center">
               <div className="w-16 h-16 rounded-full flex items-center justify-center mb-4"
                 style={{ background: 'var(--color-surface-container-low)' }}>
-                <Repeat className="w-7 h-7" style={{ color: 'var(--color-outline)' }} strokeWidth={1.5} />
+                <Repeat className="w-7 h-7" style={{ color: 'var(--color-on-surface-variant)' }} strokeWidth={1.5} />
               </div>
               <p className="font-bold text-[18px]" style={{ color: 'var(--color-on-surface)' }}>No subscriptions</p>
-              <p className="text-[13px] mt-1" style={{ color: 'var(--color-outline)' }}>
+              <p className="text-[13px] mt-1" style={{ color: 'var(--color-on-surface-variant)' }}>
                 Subscriptions will appear when customers subscribe to products.
               </p>
             </motion.div>
@@ -122,7 +122,7 @@ export default function AdminSubscriptionsPage() {
                         <p className="font-bold text-[15px]" style={{ color: 'var(--color-on-surface)' }}>
                           {sub.products?.name || 'Product'} ({sub.volume} {t('volume_unit')})
                         </p>
-                        <p className="text-[12px] mt-0.5" style={{ color: 'var(--color-outline)' }}>
+                        <p className="text-[12px] mt-0.5" style={{ color: 'var(--color-on-surface-variant)' }}>
                           {sub.plan === 'weekly' ? 'Weekly Delivery' : 'Monthly Delivery'}
                         </p>
                       </div>
@@ -137,20 +137,20 @@ export default function AdminSubscriptionsPage() {
 
                     <div className="flex-1 space-y-2 mb-5">
                       <div className="flex justify-between text-[13px]">
-                        <span style={{ color: 'var(--color-outline)' }}>Customer</span>
+                        <span style={{ color: 'var(--color-on-surface-variant)' }}>Customer</span>
                         <span className="font-medium truncate max-w-[120px]" style={{ color: 'var(--color-on-surface)' }}>
                           {sub.profiles?.name || sub.user_id?.slice(0,8)}
                         </span>
                       </div>
                       <div className="flex justify-between text-[13px]">
-                        <span style={{ color: 'var(--color-outline)' }}>Start Date</span>
+                        <span style={{ color: 'var(--color-on-surface-variant)' }}>Start Date</span>
                         <span className="font-medium" style={{ color: 'var(--color-on-surface)' }}>
                           {format(new Date(sub.start_date), 'MMM d, yyyy')}
                         </span>
                       </div>
                       {sub.next_delivery_date && (
                         <div className="flex justify-between text-[13px]">
-                          <span style={{ color: 'var(--color-outline)' }}>Next Delivery</span>
+                          <span style={{ color: 'var(--color-on-surface-variant)' }}>Next Delivery</span>
                           <span className="font-medium" style={{ color: 'var(--color-on-surface)' }}>
                             {format(new Date(sub.next_delivery_date), 'MMM d, yyyy')}
                           </span>

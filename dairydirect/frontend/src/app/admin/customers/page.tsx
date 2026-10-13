@@ -58,14 +58,14 @@ export default function AdminCustomersPage() {
             </Link>
             <div>
               <h1 className="font-extrabold text-[24px]" style={{ color: 'var(--color-on-surface)' }}>Customer Directory</h1>
-              <p className="text-[12px]" style={{ color: 'var(--color-outline)' }}>{total} registered customers</p>
+              <p className="text-[12px]" style={{ color: 'var(--color-on-surface-variant)' }}>{total} registered customers</p>
             </div>
           </div>
         </div>
 
         <div className="flex items-center bg-white rounded-[12px] px-4 h-12"
           style={{ border: '1px solid rgba(195,201,187,0.5)' }}>
-          <Search className="w-5 h-5" style={{ color: 'var(--color-outline)' }} />
+          <Search className="w-5 h-5" style={{ color: 'var(--color-on-surface-variant)' }} />
           <input
             type="text"
             value={search}
@@ -87,7 +87,7 @@ export default function AdminCustomersPage() {
           <div className="flex justify-center py-20"><Loader2 className="w-7 h-7 animate-spin" style={{ color: 'var(--color-primary)' }} /></div>
         ) : customers.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-24 text-center">
-            <Users className="w-12 h-12 mb-4" style={{ color: 'var(--color-outline)' }} strokeWidth={1.5} />
+            <Users className="w-12 h-12 mb-4" style={{ color: 'var(--color-on-surface-variant)' }} strokeWidth={1.5} />
             <p className="font-bold text-[18px]" style={{ color: 'var(--color-on-surface)' }}>No customers found</p>
           </div>
         ) : (
@@ -103,7 +103,7 @@ export default function AdminCustomersPage() {
                 style={{ background: 'var(--color-surface-container-lowest)', border: '1px solid rgba(195,201,187,0.3)' }}
               >
                 <div className="w-11 h-11 rounded-full flex items-center justify-center font-bold text-white text-[15px]"
-                  style={{ background: 'linear-gradient(135deg, #3f6530, #577f46)' }}>
+                  style={{ background: 'var(--cta-gradient)' }}>
                   {(c.name || c.email || 'C')[0].toUpperCase()}
                 </div>
                 <div className="flex-1 min-w-0">
@@ -112,12 +112,12 @@ export default function AdminCustomersPage() {
                   </p>
                   <div className="flex flex-wrap items-center gap-3 mt-1">
                     {c.phone && (
-                      <span className="text-[11px] flex items-center gap-1" style={{ color: 'var(--color-outline)' }}>
+                      <span className="text-[11px] flex items-center gap-1" style={{ color: 'var(--color-on-surface-variant)' }}>
                         <Phone className="w-3 h-3" /> +91 {c.phone}
                       </span>
                     )}
                     {c.email && (
-                      <span className="text-[11px] flex items-center gap-1" style={{ color: 'var(--color-outline)' }}>
+                      <span className="text-[11px] flex items-center gap-1" style={{ color: 'var(--color-on-surface-variant)' }}>
                         <Mail className="w-3 h-3" /> {c.email}
                       </span>
                     )}
@@ -170,7 +170,7 @@ export default function AdminCustomersPage() {
                     <h2 className="font-extrabold text-[18px]" style={{ color: 'var(--color-on-surface)' }}>
                       {selectedCustomer.name || 'Customer'}
                     </h2>
-                    <p className="text-[12px]" style={{ color: 'var(--color-outline)' }}>
+                    <p className="text-[12px]" style={{ color: 'var(--color-on-surface-variant)' }}>
                       Member since {new Date(selectedCustomer.created_at).toLocaleDateString('en-IN', { month: 'short', year: 'numeric' })}
                     </p>
                   </div>
@@ -180,7 +180,7 @@ export default function AdminCustomersPage() {
                 </button>
               </div>
 
-              <div className="grid grid-cols-3 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                 <div className="p-3 rounded-[12px] bg-green-50 border border-green-100 text-center">
                   <p className="text-[10px] font-bold uppercase text-green-800">Total Spent</p>
                   <p className="font-extrabold text-[16px] text-green-900 mt-1">

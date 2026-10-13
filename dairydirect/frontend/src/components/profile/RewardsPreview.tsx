@@ -1,9 +1,25 @@
+"use client";
+
 import React from 'react';
 import { Trophy, ChevronRight } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 
+import { useStore } from '@/store/useStore';
+
+const REWARD_THRESHOLD = 200;
+
+/**
+ * Had 150 points, a 75%-wide progress bar and "50 pts to Free Delivery" all
+ * hardcoded, so every account looked identical. Reads the real
+ * `profiles.loyalty_points` balance now, matching the profile screen.
+ */
 export function RewardsPreview() {
   const router = useRouter();
+  const user = useStore((s) => s.user);
+
+  const points = user?.loyalty_points ?? 0;
+  const pointsToReward = Math.max(0, REWARD_THRESHOLD - points);
+  const progressPct = Math.min(100, Math.round((points / REWARD_THRESHOLD) * 100));
 
   return (
     <div 
@@ -22,16 +38,18 @@ export function RewardsPreview() {
       
       <div className="flex items-end justify-between mb-2">
         <div className="flex items-baseline gap-1">
-          <span className="text-2xl font-black text-dark tracking-tight">150</span>
+          <span className="text-2xl font-black text-dark tracking-tight tabular-nums">{points}</span>
           <span className="text-[11px] font-bold text-muted uppercase tracking-wider">Points</span>
         </div>
-        <span className="text-[11px] font-medium text-primary">50 pts to Free Delivery</span>
+        <span className="text-[11px] font-medium text-primary tabular-nums">
+          {pointsToReward > 0 ? `${pointsToReward} pts to your next reward` : 'Reward unlocked'}
+        </span>
       </div>
       
       <div className="h-2 w-full bg-sand rounded-full overflow-hidden">
         <div 
-          className="h-full bg-primary rounded-full"
-          style={{ width: '75%' }}
+          className="h-full bg-primary rounded-full transition-[width] duration-500"
+          style={{ width: `${progressPct}%` }}
         />
       </div>
     </div>

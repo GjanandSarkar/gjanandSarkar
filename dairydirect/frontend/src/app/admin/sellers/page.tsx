@@ -103,6 +103,10 @@ export default function AdminSellersPage() {
       if (selectedSeller) {
         const updated = data.find((s) => s.id === selectedSeller.id);
         if (updated) setSelectedSeller(updated);
+        else if (data.length > 0) handleSelectSeller(data[0]);
+        else setSelectedSeller(null);
+      } else if (data.length > 0) {
+        handleSelectSeller(data[0]);
       }
     } catch (err) {
       console.error('Failed to load sellers:', err);

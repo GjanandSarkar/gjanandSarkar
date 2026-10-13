@@ -147,7 +147,7 @@ export default function NotificationsPage() {
                     onClick={() => handleNotificationClick(notif)}
                     className="w-full flex items-start gap-4 px-6 py-5 text-left transition-all relative hover:bg-surface-container-low group"
                     style={{
-                      background: notif.is_read ? 'transparent' : 'rgba(63, 101, 48, 0.04)',
+                      background: notif.is_read ? 'transparent' : 'rgba(12, 60, 38, 0.04)',
                       borderBottom: i < notifications.length - 1 ? '1px solid rgba(195,201,187,0.3)' : 'none'
                     }}
                   >

@@ -65,7 +65,7 @@ export async function POST(request: NextRequest) {
     }
 
     const { items, addressId, paymentMethod, couponCode, upiId, deliverySlot,
-            razorpayOrderId, razorpayPaymentId, razorpaySignature } = parseResult.data;
+            razorpayOrderId, razorpayPaymentId, razorpaySignature, reservationId } = parseResult.data;
 
     // ─── Validate Razorpay IDs (CRITICAL security check) ───
     // For Razorpay payments, we MUST have the payment IDs to link the payment to the order.
@@ -110,23 +110,34 @@ export async function POST(request: NextRequest) {
                                   paymentMethod === 'upi' ? 'paid' : 
                                   'pending'; // COD is always pending
 
-    // ─── Verify that no ordered product belongs to a deactivated seller ───
+    // ─── Enforce Complete Product Approval & Seller Status Matrix ───
     const productIds = Array.from(new Set(items.map((i) => i.productId).filter(Boolean)));
     if (productIds.length > 0) {
       const sbCheck = getAdminSupabase();
       const { data: prodsWithSellers } = await sbCheck
         .from('products')
-        .select('id, name, seller_id, sellers:seller_id(status, store_name)')
+        .select('id, name, is_active, approval_status, seller_id, sellers:seller_id(status, store_name)')
         .in('id', productIds);
 
       if (prodsWithSellers) {
         for (const p of prodsWithSellers) {
-          const seller = (p as any).sellers;
-          if (seller && ['deactivated', 'permanently_deactivated'].includes(seller.status)) {
+          // 1. Product must have approval_status = 'approved' and is_active = true
+          if (p.approval_status !== 'approved' || !p.is_active) {
             return NextResponse.json(
-              { error: `Cannot place order. Product "${p.name}" is unavailable because the seller "${seller.store_name}" is currently deactivated.` },
+              { error: `Cannot place order. Product "${p.name}" is currently ${p.approval_status || 'unavailable'} and cannot be purchased.` },
               { status: 400 }
             );
+          }
+
+          // 2. If product has a seller, seller must be active / approved
+          const seller = (p as any).sellers;
+          if (p.seller_id && seller) {
+            if (seller.status !== 'active') {
+              return NextResponse.json(
+                { error: `Cannot place order. Product "${p.name}" is unavailable because the seller "${seller.store_name}" is currently ${seller.status}.` },
+                { status: 400 }
+              );
+            }
           }
         }
       }
@@ -262,6 +273,26 @@ export async function POST(request: NextRequest) {
             );
           }
 
+          // Record or commit inventory reservations
+          try {
+            if (reservationId) {
+              await client.query(
+                `UPDATE inventory_reservations SET status = 'committed', order_id = $1, updated_at = NOW() WHERE id = $2`,
+                [orderId, reservationId]
+              );
+            } else {
+              for (const item of items) {
+                await client.query(
+                  `INSERT INTO inventory_reservations (variant_id, user_id, quantity, status, expires_at, order_id)
+                   VALUES ($1, $2, $3, 'committed', NOW() + INTERVAL '10 minutes', $4)`,
+                  [item.variantId, auth.userId, item.quantity, orderId]
+                );
+              }
+            }
+          } catch (resErr) {
+            console.warn('[PlaceOrder RDS] Reservation record warning:', resErr);
+          }
+
           // Save default UPI ID if provided
           if (upiId && paymentMethod === 'upi') {
             await client.query('UPDATE profiles SET default_upi_id = $1 WHERE id = $2', [upiId, auth.userId]);
@@ -345,6 +376,24 @@ export async function POST(request: NextRequest) {
         });
       } catch (notifErr) {
         console.warn('[PlaceOrder] Failed to insert notification:', notifErr);
+      }
+
+      // Record fallback reservation in inventory_reservations if not already reserved
+      if (!reservationId) {
+        try {
+          for (const item of items) {
+            await sb.from('inventory_reservations').insert({
+              variant_id: item.variantId,
+              user_id: auth.userId,
+              quantity: item.quantity,
+              status: 'committed',
+              expires_at: new Date(Date.now() + 600000).toISOString(),
+              order_id: placedOrderId,
+            });
+          }
+        } catch (resErr) {
+          console.warn('[PlaceOrder Supabase] Reservation record warning:', resErr);
+        }
       }
     }
 

@@ -1,6 +1,7 @@
 "use client";
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Suspense } from 'react';
+import { useSearchParams } from 'next/navigation';
 import { motion } from 'framer-motion';
 import {
   RotateCcw, Package, AlertCircle, CheckCircle2,
@@ -8,7 +9,8 @@ import {
 } from 'lucide-react';
 import Link from 'next/link';
 
-export default function CustomerReturnsPage() {
+function CustomerReturnsContent() {
+  const searchParams = useSearchParams();
   const [returns, setReturns] = useState<any[]>([]);
   const [orders, setOrders] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -16,7 +18,7 @@ export default function CustomerReturnsPage() {
   const [showModal, setShowModal] = useState(false);
 
   const [selectedOrderId, setSelectedOrderId] = useState('');
-  const [selectedProductId, setSelectedProductId] = useState('');
+  const [selectedItemId, setSelectedItemId] = useState('');
   const [quantity, setQuantity] = useState(1);
   const [reason, setReason] = useState('spoiled_sour');
   const [customReason, setCustomReason] = useState('');
@@ -31,7 +33,15 @@ export default function CustomerReturnsPage() {
       ]);
       const [retData, ordData] = await Promise.all([retRes.json(), ordRes.json()]);
       if (retData.returns) setReturns(retData.returns);
-      if (ordData.orders) setOrders(ordData.orders.filter((o: any) => o.status === 'delivered'));
+      if (ordData.orders) {
+        const delivered = ordData.orders.filter((o: any) => o.status === 'delivered');
+        setOrders(delivered);
+        const queryOrderId = searchParams.get('orderId');
+        if (queryOrderId && delivered.some((o: any) => o.id === queryOrderId)) {
+          setSelectedOrderId(queryOrderId);
+          setShowModal(true);
+        }
+      }
     } catch (e) {
       console.error(e);
     } finally {
@@ -43,7 +53,7 @@ export default function CustomerReturnsPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!selectedOrderId || !selectedProductId) {
+    if (!selectedOrderId || !selectedItemId) {
       setToast({ type: 'error', message: 'Please select an order and item.' });
       return;
     }
@@ -51,15 +61,31 @@ export default function CustomerReturnsPage() {
     setIsSubmitting(true);
     setToast(null);
 
+    const chosenItem = (selectedOrder?.order_items || []).find(
+      (item: any) => item.id === selectedItemId || item.product_id === selectedItemId
+    );
+
+    const reasonMap: Record<string, string> = {
+      'spoiled_sour': 'Perishable item is spoiled',
+      'damaged_seal': 'Seal broken or packet leaking',
+      'wrong_item': 'Wrong item delivered',
+      'expired': 'Near or past expiry date',
+      'other': 'Other issue',
+    };
+    const readableReason = reasonMap[reason] || reason;
+
     try {
       const res = await fetch('/api/admin/returns', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           orderId: selectedOrderId,
-          productId: selectedProductId,
+          orderItemId: chosenItem?.id || selectedItemId,
+          productId: chosenItem?.product_id,
+          requestType: 'return',
           quantity: Number(quantity),
-          reason: customReason ? `${reason}: ${customReason}` : reason,
+          reason: customReason ? `${readableReason}: ${customReason}` : readableReason,
+          description: customReason || undefined,
         }),
       });
 
@@ -68,6 +94,9 @@ export default function CustomerReturnsPage() {
 
       setToast({ type: 'success', message: 'Return request submitted! Our team will inspect and process it.' });
       setShowModal(false);
+      setSelectedOrderId('');
+      setSelectedItemId('');
+      setCustomReason('');
       loadData();
     } catch (err: any) {
       setToast({ type: 'error', message: err.message });
@@ -91,7 +120,7 @@ export default function CustomerReturnsPage() {
             <h1 className="font-extrabold text-[20px] md:text-[24px]" style={{ color: 'var(--color-on-surface)' }}>
               Returns & Freshness Claims
             </h1>
-            <p className="text-[12px]" style={{ color: 'var(--color-outline)' }}>
+            <p className="text-[12px]" style={{ color: 'var(--color-on-surface-variant)' }}>
               100% Freshness Guarantee Replacement Policy
             </p>
           </div>
@@ -100,7 +129,7 @@ export default function CustomerReturnsPage() {
         <button
           onClick={() => setShowModal(true)}
           className="flex items-center gap-1.5 px-4 py-2 rounded-full font-bold text-[12px] text-white shadow-sm"
-          style={{ background: 'linear-gradient(135deg, #3f6530, #577f46)' }}
+          style={{ background: 'var(--cta-gradient)' }}
         >
           <RotateCcw className="w-3.5 h-3.5" /> Request Return
         </button>
@@ -123,7 +152,8 @@ export default function CustomerReturnsPage() {
           <div>
             <p className="font-bold text-[14px] text-[#2d5a27]">Gjanand Sarkar Freshness Promise</p>
             <p className="text-[12px] text-[#43493e]">
-              If any milk or dairy product delivered to you is sour, damaged, or not fresh, report it within 24 hours for an instant replacement or refund.
+              If a perishable item arrives spoiled, damaged or not fresh, report it within
+              24 hours for an instant replacement or refund.
             </p>
           </div>
         </div>
@@ -193,7 +223,7 @@ export default function CustomerReturnsPage() {
                   value={selectedOrderId}
                   onChange={e => {
                     setSelectedOrderId(e.target.value);
-                    setSelectedProductId('');
+                    setSelectedItemId('');
                   }}
                   className="w-full px-3 py-2 rounded-[10px] border text-[13px] bg-gray-50"
                   required
@@ -212,17 +242,21 @@ export default function CustomerReturnsPage() {
                 <div>
                   <label className="block text-[12px] font-bold text-gray-700 mb-1">Select Item</label>
                   <select
-                    value={selectedProductId}
-                    onChange={e => setSelectedProductId(e.target.value)}
+                    value={selectedItemId}
+                    onChange={e => setSelectedItemId(e.target.value)}
                     className="w-full px-3 py-2 rounded-[10px] border text-[13px] bg-gray-50"
                     required
                   >
                     <option value="">-- Select product --</option>
-                    {(selectedOrder.order_items || []).map((item: any) => (
-                      <option key={item.product_id} value={item.product_id}>
-                        {item.product_name || item.product_id} ({item.quantity} qty)
-                      </option>
-                    ))}
+                    {(selectedOrder.order_items || []).map((item: any) => {
+                      const itemVal = item.id || item.product_id;
+                      const itemName = item.product_name || item.products?.name || item.product_id;
+                      return (
+                        <option key={itemVal} value={itemVal}>
+                          {itemName} ({item.quantity} qty)
+                        </option>
+                      );
+                    })}
                   </select>
                 </div>
               )}
@@ -235,7 +269,7 @@ export default function CustomerReturnsPage() {
                   onChange={e => setReason(e.target.value)}
                   className="w-full px-3 py-2 rounded-[10px] border text-[13px] bg-gray-50"
                 >
-                  <option value="spoiled_sour">Milk / Dairy is sour or spoiled</option>
+                  <option value="spoiled_sour">Perishable item is spoiled</option>
                   <option value="damaged_seal">Seal broken or packet leaking</option>
                   <option value="wrong_item">Wrong item delivered</option>
                   <option value="expired">Near or past expiry date</option>
@@ -257,9 +291,9 @@ export default function CustomerReturnsPage() {
 
               <button
                 type="submit"
-                disabled={isSubmitting || !selectedOrderId || !selectedProductId}
-                className="w-full py-3 rounded-[12px] font-bold text-white text-[14px] shadow-md transition-opacity"
-                style={{ background: 'var(--color-primary)', opacity: isSubmitting ? 0.7 : 1 }}
+                disabled={isSubmitting || !selectedOrderId || !selectedItemId}
+                className="w-full py-3 rounded-[12px] font-bold text-white text-[14px] shadow-md transition-opacity cursor-pointer disabled:opacity-50"
+                style={{ background: 'var(--color-primary)' }}
               >
                 {isSubmitting ? 'Submitting...' : 'Submit Claim'}
               </button>
@@ -268,5 +302,13 @@ export default function CustomerReturnsPage() {
         </div>
       )}
     </div>
+  );
+}
+
+export default function CustomerReturnsPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen flex items-center justify-center"><Loader2 className="w-8 h-8 animate-spin text-primary" /></div>}>
+      <CustomerReturnsContent />
+    </Suspense>
   );
 }

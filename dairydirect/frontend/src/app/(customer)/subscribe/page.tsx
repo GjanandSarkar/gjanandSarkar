@@ -19,6 +19,7 @@ import { UpcomingDeliveries } from '@/components/subscribe/UpcomingDeliveries';
 import { SubscriptionConfidence } from '@/components/trust/SubscriptionConfidence';
 import { SubscriptionReminderCard } from '@/components/subscribe/SubscriptionReminderCard';
 import { BuyAgainCarousel } from '@/components/discovery/BuyAgainCarousel';
+import { PLACEHOLDER_PRODUCT_IMAGE } from '@/lib/constants/brand';
 
 export default function SubscriptionHubScreen() {
   const { t } = useTranslation();
@@ -101,13 +102,14 @@ export default function SubscriptionHubScreen() {
         ) : (
           <div className="flex flex-col items-center justify-center py-20 text-center bg-white rounded-[24px] border border-sand/50 shadow-sm">
             <div className="w-24 h-24 rounded-[20px] flex items-center justify-center mb-6 bg-sky-50 shadow-inner">
-              <img src="/milk.png" alt="No Subscriptions" className="w-16 h-16 object-contain opacity-60 grayscale" />
+              <img src={PLACEHOLDER_PRODUCT_IMAGE} alt="No Subscriptions" className="w-16 h-16 object-contain opacity-60 grayscale" />
             </div>
             <h2 className="text-xl font-bold mb-2 text-dark">
-              Wake up to fresh milk
+              Never run out of the essentials
             </h2>
             <p className="text-sm max-w-[250px] mb-8 leading-relaxed text-muted">
-              Never run out of essentials. Subscribe once and get fresh dairy delivered every morning before 7 AM.
+              Subscribe once and your regulars arrive on schedule — groceries,
+              dairy, household staples and more.
             </p>
             <Link href="/products">
               <Button size="lg" className="px-8 shadow-active shadow-primary/20 bg-primary hover:bg-primary/90 text-white font-bold rounded-full mb-8">

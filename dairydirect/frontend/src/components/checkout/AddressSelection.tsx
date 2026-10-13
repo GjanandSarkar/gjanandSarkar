@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { cn } from '@/lib/utils';
-import { MapPin, Plus, Clock, Edit3 } from 'lucide-react';
+import { MapPin, Plus, Edit3 } from 'lucide-react';
 import type { UserAddress, CreateAddressInput } from '@/lib/api/addresses';
 import { saveAddressAPI, updateAddressAPI } from '@/lib/api/addresses';
 import { AddressFormModal } from '@/components/addresses/AddressFormModal';
@@ -12,9 +12,6 @@ interface AddressSelectionProps {
   addresses: UserAddress[];
   selectedAddressId: string | null;
   onSelectAddress: (id: string) => void;
-  slots: { id: string; time: string; avail: string }[];
-  selectedSlot: string;
-  onSelectSlot: (id: string) => void;
   onAddressCreated?: (newAddress: UserAddress) => void;
   onAddressUpdated?: (updatedAddress: UserAddress) => void;
 }
@@ -23,9 +20,6 @@ export function AddressSelection({
   addresses,
   selectedAddressId,
   onSelectAddress,
-  slots,
-  selectedSlot,
-  onSelectSlot,
   onAddressCreated,
   onAddressUpdated,
 }: AddressSelectionProps) {
@@ -173,41 +167,6 @@ export function AddressSelection({
           </div>
         )}
       </div>
-
-      {/* Delivery Slot */}
-      {addresses.length > 0 && (
-        <div className="bg-white rounded-[20px] p-4 border border-sand shadow-sm">
-          <div className="flex items-center gap-2 mb-3">
-            <Clock className="w-4 h-4 text-primary" />
-            <h3 className="text-sm font-bold text-dark uppercase tracking-wider">Delivery Slot</h3>
-          </div>
-
-          <div className="grid grid-cols-1 gap-2">
-            {slots.map((slot) => (
-              <div
-                key={slot.id}
-                onClick={() => onSelectSlot(slot.id)}
-                className={cn(
-                  "p-3 rounded-[12px] border transition-all cursor-pointer flex justify-between items-center",
-                  selectedSlot === slot.id
-                    ? "border-primary bg-primary text-white shadow-active"
-                    : "border-sand bg-white text-dark hover:border-primary/30"
-                )}
-              >
-                <span className="font-bold text-xs tracking-wide">{slot.time}</span>
-                <span
-                  className={cn(
-                    "text-[10px] uppercase font-bold px-2 py-1 rounded-full",
-                    selectedSlot === slot.id ? "bg-white/20" : "bg-mint/30 text-primary"
-                  )}
-                >
-                  {slot.avail}
-                </span>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
 
       {/* Address Form Modal */}
       <AddressFormModal

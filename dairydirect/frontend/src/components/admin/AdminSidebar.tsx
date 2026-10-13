@@ -6,23 +6,27 @@ import { useRouter } from 'next/navigation';
 import { useStore } from '@/store/useStore';
 import {
   LayoutDashboard, ShoppingBag, Users, Package, BarChart3,
-  Truck, LogOut, Leaf, ShieldCheck, Bell, Settings, Tags, CalendarDays, User, Building2, Store
+  Truck, LogOut, Leaf, ShieldCheck, Bell, Settings, Tags, CalendarDays, User, Building2, Store, RotateCcw, Megaphone
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 const navItems = [
   { href: '/admin', icon: LayoutDashboard, label: 'Dashboard', exact: true },
   { href: '/admin/sellers', icon: Store, label: 'Sellers' },
-  { href: '/admin/vendor-inquiries', icon: Building2, label: 'Seller Inquiries' },
-  { href: '/admin/orders', icon: ShoppingBag, label: 'Orders' },
-  { href: '/admin/subscriptions', icon: CalendarDays, label: 'Subscriptions' },
-  { href: '/admin/products', icon: Package, label: 'Products' },
+  { href: '/admin/vendor-inquiries', icon: Building2, label: 'Seller Applications' },
+  { href: '/admin/products/approvals', icon: ShieldCheck, label: 'Product Approvals' },
+  { href: '/admin/products', icon: Package, label: 'Products', exact: true },
   { href: '/admin/categories', icon: Tags, label: 'Categories' },
+  { href: '/admin/orders', icon: ShoppingBag, label: 'Admin Orders', exact: true },
+  { href: '/admin/seller-orders', icon: Store, label: 'All Seller Orders List' },
+  { href: '/admin/returns', icon: RotateCcw, label: 'Returns & Cancellations' },
+  { href: '/admin/subscriptions', icon: CalendarDays, label: 'Subscriptions' },
   { href: '/admin/customers', icon: Users, label: 'Customers' },
   { href: '/admin/delivery', icon: Truck, label: 'Deliveries' },
   { href: '/admin/analytics', icon: BarChart3, label: 'Analytics' },
   { href: '/admin/coupons', icon: Package, label: 'Coupons' },
-  { href: '/admin/audit-log', icon: ShieldCheck, label: 'Audit Log' },
+  { href: '/admin/audit', icon: ShieldCheck, label: 'Audit Log' },
+  { href: '/admin/campaigns', icon: Megaphone, label: 'Ad Campaigns' },
   { href: '/home', icon: Leaf, label: 'Visit Storefront' },
 ];
 
@@ -39,6 +43,12 @@ export function AdminSidebar() {
 
   const isActive = (item: typeof navItems[0]) => {
     if (item.exact) return pathname === item.href;
+    if (item.href === '/admin/products' && pathname.startsWith('/admin/products/approvals')) {
+      return false;
+    }
+    if (item.href === '/admin/orders' && pathname.startsWith('/admin/seller-orders')) {
+      return false;
+    }
     return pathname.startsWith(item.href);
   };
 
@@ -102,7 +112,7 @@ export function AdminSidebar() {
       {/* Nav */}
       <nav className="flex-1 px-3 py-2 flex flex-col gap-0.5 overflow-y-auto no-scrollbar">
         <p className="px-3 py-2 text-[10px] font-bold uppercase tracking-[0.1em]"
-          style={{ color: 'var(--color-outline)' }}>Management</p>
+          style={{ color: 'var(--color-on-surface-variant)' }}>Management</p>
 
         {navItems.map((item) => {
           const active = isActive(item);

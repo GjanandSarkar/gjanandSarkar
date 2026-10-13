@@ -10,6 +10,7 @@ import { useTranslation } from '@/lib/i18n';
 import { getOrderById } from '@/lib/api/orders';
 import type { OrderWithItems } from '@/lib/api/orders';
 import { useStore } from '@/store/useStore';
+import { trackProductEvent } from '@/lib/analytics/session';
 
 export default function OrderConfirmedScreen() {
   const router = useRouter();
@@ -30,6 +31,29 @@ export default function OrderConfirmedScreen() {
     getOrderById(id).then(res => {
       setOrder(res);
       setIsLoading(false);
+
+      // Purchase is the strongest recommendation signal there is, and the
+      // only place it can be captured client-side is here, once the order is
+      // known to exist. Guarded by a per-order key so a refresh of this page
+      // cannot inflate the same purchase into several events.
+      if (res) {
+        const key = `gj_purchase_tracked_${id}`;
+        try {
+          if (!window.sessionStorage.getItem(key)) {
+            window.sessionStorage.setItem(key, '1');
+            for (const item of res.order_items ?? []) {
+              if (item.product_id) {
+                trackProductEvent(item.product_id, 'purchase', {
+                  source: 'order_confirmed',
+                  quantity: item.quantity ?? 1,
+                });
+              }
+            }
+          }
+        } catch {
+          // Storage unavailable: skip tracking rather than risk duplicates.
+        }
+      }
     });
   }, [id, setCheckoutAddressId, setCheckoutPaymentMethod]);
 

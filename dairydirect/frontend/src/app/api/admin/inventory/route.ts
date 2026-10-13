@@ -7,6 +7,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { query, withTransaction, isPgConfigured } from '@/lib/aws/rds';
 import { getAuthUser } from '@/lib/api/auth-middleware';
+import { writeAuditLog } from '@/lib/security/audit';
 import { invalidateProductsCache } from '@/lib/aws/redis';
 import { getAdminSupabase } from '@/lib/supabase/admin';
 import { z } from 'zod';
@@ -140,6 +141,7 @@ export async function PUT(request: NextRequest) {
         });
 
         await invalidateProductsCache();
+        await logStockEdit(auth.userId, updates, request);
         return NextResponse.json({ success: true, updated: updates.length });
       } catch (err: any) {
         console.warn('[Inventory PUT] RDS failed, fallback to Supabase:', err.message);
@@ -155,9 +157,32 @@ export async function PUT(request: NextRequest) {
     }
 
     await invalidateProductsCache();
+    await logStockEdit(auth.userId, updates, request);
     return NextResponse.json({ success: true, updated: updates.length });
   } catch (error: any) {
     console.error('[Inventory PUT] Error:', error.message);
     return NextResponse.json({ error: 'Failed to update stock' }, { status: 500 });
   }
+}
+
+/**
+ * Record a manual stock adjustment.
+ *
+ * Stock edits change what can be sold and are a classic source of
+ * "who changed this?" disputes, so every adjustment names the admin who made
+ * it and the exact variant/quantity pairs they submitted.
+ */
+async function logStockEdit(
+  adminId: string,
+  updates: { variantId: string; stock: number }[],
+  request: NextRequest
+) {
+  await writeAuditLog({
+    adminId,
+    action: 'stock.update',
+    resourceType: 'product_variant',
+    resourceId: updates.map((u) => u.variantId).join(','),
+    details: { updates },
+    ipAddress: request.headers.get('x-forwarded-for') || undefined,
+  });
 }

@@ -25,7 +25,7 @@ export default function GlobalError({
           <h1 className="font-bold text-[24px] mb-2 text-on-surface">
             Fatal System Error
           </h1>
-          <p className="text-[14px] max-w-[280px] leading-relaxed text-outline mb-8">
+          <p className="text-[14px] max-w-[280px] leading-relaxed text-on-surface-variant mb-8">
             A critical error occurred. Please refresh the page to try again.
           </p>
           <button

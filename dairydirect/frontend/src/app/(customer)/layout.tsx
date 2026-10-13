@@ -6,6 +6,7 @@ import { Footer } from '@/components/navigation/Footer';
 import { BottomNav } from '@/components/shared/BottomNav';
 import { AuthGuard } from '@/components/auth/AuthGuard';
 import { CartContainer } from '@/components/cart/CartContainer';
+import { SupportChat } from '@/components/support/SupportChat';
 
 export default function CustomerLayout({ children }: { children: React.ReactNode }) {
   return (
@@ -22,7 +23,11 @@ export default function CustomerLayout({ children }: { children: React.ReactNode
       <CategoryNavBar />
 
       {/* Main Content Area */}
-      <main className="flex-1 w-full pb-20 md:pb-0">
+      {/* Admin is capped at 1400px but the customer shell was not, so every
+          page below stretched to the full width of the display. A generous cap
+          leaves laptops unchanged and stops the content sprawling on wide
+          monitors; individual pages narrow this further where it reads better. */}
+      <main className="flex-1 w-full max-w-[1600px] mx-auto pb-20 md:pb-0">
         {children}
       </main>
 
@@ -32,6 +37,9 @@ export default function CustomerLayout({ children }: { children: React.ReactNode
       {/* Floating Cart Drawer & Mobile Navigation */}
       <CartContainer />
       <BottomNav />
+
+      {/* Scripted, order-aware help assistant */}
+      <SupportChat />
     </div>
   );
 }

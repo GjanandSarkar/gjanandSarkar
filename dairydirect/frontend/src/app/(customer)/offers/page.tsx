@@ -44,7 +44,9 @@ export default async function OffersPage() {
                     {coupon.code}
                   </span>
                   <div className="mt-4 font-bold text-2xl text-emerald-900">
-                    ₹{coupon.discount_amount} OFF
+                    {coupon.type === 'percentage' 
+                      ? `${coupon.value || coupon.discount_amount}% OFF` 
+                      : `₹${coupon.value || coupon.discount_amount} OFF`}
                   </div>
                 </div>
                 <div className="p-6 flex-1 flex flex-col">

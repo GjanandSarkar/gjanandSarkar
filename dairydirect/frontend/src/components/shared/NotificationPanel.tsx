@@ -226,7 +226,7 @@ function NotificationSheet({
             {t('notifications')}
           </h2>
           {unreadCount > 0 && (
-            <p className="text-[11px] font-semibold mt-0.5" style={{ color: 'var(--color-outline)' }}>
+            <p className="text-[11px] font-semibold mt-0.5" style={{ color: 'var(--color-on-surface-variant)' }}>
               {unreadCount} unread
             </p>
           )}
@@ -262,7 +262,7 @@ function NotificationSheet({
           </div>
         ) : notifications.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-14 text-center px-6">
-            <Bell className="w-10 h-10 mb-4" style={{ color: 'var(--color-outline)' }} strokeWidth={1.5} />
+            <Bell className="w-10 h-10 mb-4" style={{ color: 'var(--color-on-surface-variant)' }} strokeWidth={1.5} />
             <p className="font-semibold text-[15px]" style={{ color: 'var(--color-on-surface)' }}>
               {t('noNotifications')}
             </p>
@@ -295,7 +295,7 @@ function NotificationSheet({
                       {notif.message}
                     </p>
                     <p className="text-[10px] mt-1.5 font-semibold uppercase tracking-wide"
-                      style={{ color: 'var(--color-outline)' }}>
+                      style={{ color: 'var(--color-on-surface-variant)' }}>
                       {timeAgo(notif.created_at)}
                     </p>
                   </div>
