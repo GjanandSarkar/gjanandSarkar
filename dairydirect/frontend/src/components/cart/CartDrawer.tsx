@@ -152,26 +152,26 @@ export function CartDrawer({ isOpen, onClose }: CartDrawerProps) {
           animate={{ y: 0, x: 0 }}
           exit={{ y: '100%', x: 0 }}
           transition={{ type: 'spring', stiffness: 300, damping: 30 }}
-          className="fixed z-[60] bottom-0 left-0 right-0 h-[85vh] bg-surface rounded-t-[24px] md:top-0 md:bottom-0 md:left-auto md:right-0 md:h-full md:w-[420px] md:rounded-none flex flex-col shadow-2xl"
+          className="fixed z-[60] bottom-0 left-0 right-0 h-[88vh] bg-surface rounded-t-2xl md:top-0 md:bottom-0 md:left-auto md:right-0 md:h-full md:w-[420px] md:rounded-none flex flex-col shadow-2xl border-t md:border-t-0 md:border-l border-border"
         >
         {/* Header */}
-        <div className="flex items-center justify-between p-5 border-b border-outline-variant/30 shrink-0">
+        <div className="flex items-center justify-between p-4 sm:p-5 border-b border-border/80 shrink-0">
           <div>
-            <h2 id="cart-title" className="font-extrabold text-[20px] text-on-surface">
+            <h2 id="cart-title" className="font-extrabold text-lg sm:text-xl text-foreground">
               {t('myCart')}
             </h2>
             {!isEmpty && (
-              <p className="text-[13px] text-on-surface-variant font-medium">
+              <p className="text-xs text-muted font-medium">
                 {cartItemsData.length} {t('items')}
               </p>
             )}
           </div>
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2.5">
             {!isEmpty && (
               <button 
                 onClick={handleClearAll}
                 aria-label={t('clearAll')}
-                className="text-[12px] font-bold text-error bg-error/10 px-3 py-1.5 rounded-full"
+                className="text-xs font-bold text-rose-500 bg-rose-500/10 px-2.5 py-1 rounded-lg hover:bg-rose-500/20 transition-colors cursor-pointer"
               >
                 {t('clearAll')}
               </button>
@@ -180,27 +180,27 @@ export function CartDrawer({ isOpen, onClose }: CartDrawerProps) {
               onClick={onClose}
               data-autofocus
               aria-label="Close cart drawer"
-              className="w-8 h-8 rounded-full bg-surface-container-low flex items-center justify-center text-on-surface focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+              className="w-8 h-8 rounded-lg bg-surface-muted hover:bg-border/60 flex items-center justify-center text-foreground transition-colors cursor-pointer"
             >
-              <X className="w-5 h-5" />
+              <X className="w-4 h-4" />
             </button>
           </div>
         </div>
 
-        {/* Content */}
-        <div className="flex-1 overflow-y-auto px-5 py-6">
+        {/* Scrollable Content */}
+        <div className="flex-1 overflow-y-auto px-4 sm:px-5 py-5 space-y-6">
           {isLoading ? (
-            <div className="flex flex-col gap-4">
+            <div className="flex flex-col gap-3">
               {[1, 2, 3].map(i => (
-                <div key={i} className="h-24 rounded-[16px] animate-pulse bg-surface-container-low" />
+                <div key={i} className="h-20 rounded-xl animate-pulse bg-surface-muted border border-border/50" />
               ))}
             </div>
           ) : isEmpty ? (
             <EmptyCart onActionClick={onClose} />
           ) : (
-            <div className="flex flex-col gap-6">
-              {/* Items */}
-              <div className="flex flex-col gap-3">
+            <div className="flex flex-col gap-5">
+              {/* Items List */}
+              <div className="flex flex-col gap-2.5">
                 <AnimatePresence initial={false}>
                   {cartItemsData.map((item) => (
                     <motion.div
@@ -209,48 +209,47 @@ export function CartDrawer({ isOpen, onClose }: CartDrawerProps) {
                       initial={{ opacity: 0, scale: 0.95 }}
                       animate={{ opacity: 1, scale: 1 }}
                       exit={{ opacity: 0, scale: 0.95 }}
-                      className="flex gap-4 p-3 rounded-[16px] bg-surface-container-lowest border border-outline-variant/20"
+                      className="flex gap-3.5 p-3 rounded-xl bg-surface-muted/40 border border-border/80 hover:border-border transition-colors"
                     >
                       <div 
-                        className="w-16 h-16 rounded-[12px] flex items-center justify-center shrink-0 overflow-hidden"
-                        style={{ background: getCategoryBg(item.product.category) }}
+                        className="w-16 h-16 rounded-lg flex items-center justify-center shrink-0 overflow-hidden bg-surface-muted border border-border/60 p-1"
                       >
-                        <img src={item.product.image_url ?? PLACEHOLDER_PRODUCT_IMAGE} alt={item.product.name} className="w-full h-full object-cover" />
+                        <img src={item.product.image_url ?? PLACEHOLDER_PRODUCT_IMAGE} alt={item.product.name} className="w-full h-full object-contain" />
                       </div>
 
-                      <div className="flex-1 flex flex-col justify-center">
-                        <div className="flex justify-between items-start">
-                          <h3 className="font-semibold text-[14px] leading-tight text-on-surface line-clamp-2 pr-2">
+                      <div className="flex-1 flex flex-col justify-center min-w-0">
+                        <div className="flex justify-between items-start gap-1">
+                          <h3 className="font-bold text-xs sm:text-sm leading-tight text-foreground line-clamp-1">
                             {item.product.name}
                           </h3>
                           <button
                             onClick={() => handleRemove(item.productId, item.variantId)}
                             aria-label={`Remove ${item.product.name} from cart`}
-                            className="p-1 text-on-surface-variant hover:text-error transition-colors focus-visible:outline-2 focus-visible:outline-primary rounded-md"
+                            className="p-1 text-muted hover:text-rose-500 transition-colors rounded-md shrink-0 cursor-pointer"
                           >
-                            <Trash2 className="w-4 h-4" />
+                            <Trash2 className="w-3.5 h-3.5" />
                           </button>
                         </div>
                         
-                        <span className="inline-block px-2 py-0.5 rounded-full text-[10px] font-bold bg-primary-fixed text-primary w-fit mt-1 mb-2">
+                        <span className="inline-block px-1.5 py-0.5 rounded-md text-[10px] font-bold bg-primary/10 text-primary w-fit mt-0.5 mb-1.5">
                           {item.variant.weight}
                         </span>
 
                         <div className="flex items-center justify-between">
-                          <span className="font-bold text-[15px] text-primary">
+                          <span className="font-extrabold text-sm sm:text-base text-primary tabular-nums">
                             {t('currency')}{item.variant.price * item.quantity}
                           </span>
 
-                          <div className="flex items-center rounded-[8px] bg-surface-container border border-outline-variant/30">
+                          <div className="flex items-center rounded-lg bg-surface border border-border shadow-2xs">
                             <button
                               onClick={() => handleUpdateQuantity(item.productId, item.variantId, item.quantity - 1)}
                               aria-label={`Decrease quantity of ${item.product.name}`}
-                              className="w-7 h-7 flex items-center justify-center text-primary active:scale-95 focus-visible:outline-2 focus-visible:outline-primary"
+                              className="w-6 h-6 sm:w-7 sm:h-7 flex items-center justify-center text-foreground hover:text-primary active:scale-95 transition-colors cursor-pointer"
                             >
-                              <Minus className="w-3 h-3" strokeWidth={2.5} />
+                              <Minus className="w-3 h-3 stroke-[2.5]" />
                             </button>
                             <span 
-                              className="w-6 text-center text-[12px] font-bold text-on-surface"
+                              className="w-6 text-center text-xs font-black text-foreground tabular-nums select-none"
                               aria-live="polite"
                               aria-label={`Quantity: ${item.quantity}`}
                             >
@@ -259,9 +258,9 @@ export function CartDrawer({ isOpen, onClose }: CartDrawerProps) {
                             <button
                               onClick={() => handleUpdateQuantity(item.productId, item.variantId, item.quantity + 1)}
                               aria-label={`Increase quantity of ${item.product.name}`}
-                              className="w-7 h-7 flex items-center justify-center text-primary active:scale-95 focus-visible:outline-2 focus-visible:outline-primary"
+                              className="w-6 h-6 sm:w-7 sm:h-7 flex items-center justify-center text-foreground hover:text-primary active:scale-95 transition-colors cursor-pointer"
                             >
-                              <Plus className="w-3 h-3" strokeWidth={2.5} />
+                              <Plus className="w-3 h-3 stroke-[2.5]" />
                             </button>
                           </div>
                         </div>
@@ -271,7 +270,12 @@ export function CartDrawer({ isOpen, onClose }: CartDrawerProps) {
                 </AnimatePresence>
               </div>
 
-              {/* Summary */}
+              {/* Cross Sells (Inside scrollable container so user items aren't pushed off-screen) */}
+              <div className="pt-2 border-t border-border/60">
+                <CartCrossSells />
+              </div>
+
+              {/* Order Summary */}
               <OrderSummary 
                 subtotal={subtotal}
                 delivery={delivery}
@@ -285,31 +289,22 @@ export function CartDrawer({ isOpen, onClose }: CartDrawerProps) {
           )}
         </div>
 
-        {/* Smart Commerce: Cart Cross Sells */}
-        {!isLoading && (
-          <div className="shrink-0 bg-surface">
-            <CartCrossSells />
-          </div>
-        )}
-
         {/* Footer CTA */}
         {!isEmpty && !isLoading && (
-          <div className="p-5 border-t border-outline-variant/30 bg-surface shrink-0 pb-safe">
+          <div 
+            className="p-4 sm:p-5 border-t border-border/80 bg-surface shrink-0"
+            style={{ paddingBottom: 'max(env(safe-area-inset-bottom, 0px), 16px)' }}
+          >
             <button
               onClick={() => {
                 onClose();
                 router.push('/checkout');
               }}
               aria-label="Proceed to checkout"
-              className="flex items-center justify-between w-full px-6 py-4 rounded-[16px] font-bold text-[16px] transition-transform active:scale-[0.98] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
-              style={{
-                background: 'var(--cta-gradient)',
-                color: 'white',
-                boxShadow: '0 6px 20px rgba(12, 60, 38, 0.25)',
-              }}
+              className="flex items-center justify-between w-full px-5 py-3.5 rounded-xl font-black text-sm sm:text-base bg-primary hover:bg-primary-hover text-foreground-inverse transition-transform active:scale-[0.98] shadow-md cursor-pointer"
             >
               <span>{t('proceedToCheckout')}</span>
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-1.5 tabular-nums">
                 <span>{t('currency')}{total}</span>
                 <ArrowRight className="w-4 h-4" />
               </div>

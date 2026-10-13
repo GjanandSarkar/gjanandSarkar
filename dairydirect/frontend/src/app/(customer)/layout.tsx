@@ -10,7 +10,7 @@ import { SupportChat } from '@/components/support/SupportChat';
 
 export default function CustomerLayout({ children }: { children: React.ReactNode }) {
   return (
-    <div className="flex flex-col min-h-screen bg-[#fafaf8]" suppressHydrationWarning>
+    <div className="flex flex-col min-h-screen bg-background text-foreground transition-colors duration-150" suppressHydrationWarning>
       <AuthGuard />
       
       {/* Top Announcement Bar */}

@@ -25,19 +25,13 @@ export function BottomNav() {
   ];
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 flex justify-around items-end z-50 md:hidden pb-safe"
-      style={{ 
-        background: 'rgba(255, 255, 255, 0.92)',
-        backdropFilter: 'blur(20px)',
-        WebkitBackdropFilter: 'blur(20px)',
+    <nav
+      className="fixed bottom-0 left-0 right-0 flex justify-around items-end z-50 md:hidden pb-safe bg-surface/92 backdrop-blur-xl border-t border-border/80 transition-colors duration-150"
+      style={{
         paddingBottom: 'max(env(safe-area-inset-bottom, 0px), 8px)',
         paddingTop: '8px',
-      }}>
-      
-      {/* Top tonal line */}
-      <div className="absolute top-0 left-0 right-0 h-[1px] opacity-25"
-        style={{ background: 'var(--color-outline-variant)' }} />
-
+      }}
+    >
       {navItems.map((item, idx) => {
         const isActive = item.href !== '#' && pathname.startsWith(item.href);
         const Icon = item.icon;
@@ -45,16 +39,14 @@ export function BottomNav() {
         const content = (
           <div className="flex flex-col items-center gap-1 flex-1 py-1 relative w-full h-full cursor-pointer">
             {/* Active indicator pill */}
-            <div className={cn(
-              "flex items-center justify-center w-12 h-7 rounded-full transition-all duration-300",
-              isActive 
-                ? "scale-100" 
-                : "scale-90 opacity-0 pointer-events-none"
-            )}
-              style={isActive ? { 
-                background: 'linear-gradient(135deg, #c2efac, #a7d392)',
-              } : {}}>
-            </div>
+            <div
+              className={cn(
+                "flex items-center justify-center w-12 h-7 rounded-full transition-all duration-300",
+                isActive 
+                  ? "scale-100 bg-primary/15" 
+                  : "scale-90 opacity-0 pointer-events-none"
+              )}
+            />
             
             {/* Icon positioned over pill */}
             <div className="absolute top-1 flex items-center justify-center w-12 h-7">

@@ -40,14 +40,14 @@ export function ProductCarousel({
                 </span>
               </div>
             )}
-            <h2 className="font-bold text-[22px] md:text-[26px] tracking-tight text-on-surface">
+            <h2 className="font-extrabold text-xl md:text-2xl tracking-tight text-foreground">
               {title}
             </h2>
           </div>
           {viewAllLink && (
             <Link 
               href={viewAllLink} 
-              className="flex items-center gap-1 text-[13px] font-bold text-primary hover:opacity-80 transition-opacity"
+              className="flex items-center gap-1 text-xs sm:text-sm font-bold text-primary hover:text-primary-hover transition-colors"
             >
               See All <ArrowRight className="w-3.5 h-3.5" strokeWidth={2.5} />
             </Link>
@@ -55,11 +55,11 @@ export function ProductCarousel({
         </div>
       </div>
 
-      <div className="flex gap-4 overflow-x-auto no-scrollbar snap-rail reveal pl-5 md:pl-10 pr-5 pb-6">
+      <div className="flex gap-3 sm:gap-4 overflow-x-auto no-scrollbar snap-rail reveal pl-5 md:pl-10 pr-5 pb-6">
         {isLoading ? (
           <>
             {[1, 2, 3, 4].map(i => (
-              <div key={i} className="w-[160px] md:w-[180px] h-[240px] shrink-0 rounded-[20px] animate-pulse bg-surface-container-low" />
+              <div key={i} className="w-[160px] md:w-[190px] h-[260px] shrink-0 rounded-2xl animate-pulse bg-surface-muted border border-border/60" />
             ))}
           </>
         ) : (

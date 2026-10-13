@@ -2,7 +2,7 @@
 
 import React, { useState, useCallback, useEffect } from 'react';
 import Link from 'next/link';
-import { Plus, Minus, Pencil, Star, ShoppingCart, Heart } from 'lucide-react';
+import { Plus, Minus, Pencil, Star, Heart } from 'lucide-react';
 import { useTranslation } from '@/lib/i18n';
 import { useStore } from '@/store/useStore';
 import { addToCart, updateCartItem } from '@/lib/api/cart';
@@ -199,18 +199,14 @@ export function ProductCard({
         controls in z-order. The whole card is clickable, the link is properly
         announced and focusable, and the buttons stay genuinely separate.
       */}
-      <div className="flex flex-col h-full bg-white rounded-2xl border border-gray-200/90 p-3.5 shadow-2xs hover:border-[#c88a23] group relative lift pressable focus-within:ring-2 focus-within:ring-[#0f3e26]/40">
-        <Link
-          href={`/products/${product.id}`}
-          className="absolute inset-0 z-10 rounded-2xl"
-        >
-          <span className="sr-only">
-            {product.name}
-            {product.brand ? ` by ${product.brand}` : ''}, ₹{selectedVariant.price}
-          </span>
-        </Link>
+      <div className="flex flex-col h-full bg-surface rounded-2xl border border-border/80 p-3.5 shadow-2xs hover:border-secondary group relative lift pressable transition-colors duration-150">
         {/* Product Image Container */}
-        <div className="relative w-full aspect-square bg-gray-50/80 rounded-xl overflow-hidden mb-3 p-2 flex items-center justify-center">
+        <div className="relative w-full aspect-square bg-surface-muted rounded-xl overflow-hidden mb-3 p-2 flex items-center justify-center border border-border/40">
+          <Link
+            href={`/products/${product.id}`}
+            className="absolute inset-0 z-0"
+            aria-label={`View details for ${product.name}`}
+          />
           
           <Image
             src={product.image_url || PLACEHOLDER_PRODUCT_IMAGE}
@@ -218,7 +214,7 @@ export function ProductCard({
             fill
             sizes="(max-width: 768px) 50vw, 25vw"
             priority={priority}
-            className={`w-full h-full object-contain transition-transform duration-300 group-hover:scale-105 ${
+            className={`w-full h-full object-contain transition-transform duration-300 group-hover:scale-105 pointer-events-none ${
               isAllOutOfStock ? 'grayscale opacity-75' : ''
             }`}
             onError={(e) => {
@@ -226,22 +222,20 @@ export function ProductCard({
             }}
           />
 
-          {/* A real discount badge, shown only when there is a genuine saving.
-              This is the single strongest scanning cue on a listing grid and
-              the card had none. */}
+          {/* Real discount badge */}
           {hasRealDiscount && discountPct >= 1 && (
-            <span className="absolute top-2 left-2 bg-[#c88a23] text-white text-[10px] font-black px-1.5 py-0.5 rounded-md shadow-sm tabular-nums">
+            <span className="absolute top-2 left-2 bg-secondary text-white text-[10px] font-black px-1.5 py-0.5 rounded-md shadow-2xs tabular-nums">
               {discountPct}% OFF
             </span>
           )}
 
           {/* Stock Badges */}
           {isAllOutOfStock ? (
-            <span className="absolute bottom-2 left-2 bg-rose-600 text-white text-[10px] font-extrabold px-2 py-0.5 rounded-md shadow-xs">
+            <span className="absolute bottom-2 left-2 bg-rose-600 text-white text-[10px] font-extrabold px-2 py-0.5 rounded-md shadow-2xs">
               Out of Stock
             </span>
           ) : isLowStock ? (
-            <span className="absolute bottom-2 left-2 bg-amber-600 text-white text-[10px] font-extrabold px-2 py-0.5 rounded-md shadow-xs">
+            <span className="absolute bottom-2 left-2 bg-amber-600 text-white text-[10px] font-extrabold px-2 py-0.5 rounded-md shadow-2xs">
               Only {availableStock} left
             </span>
           ) : null}
@@ -250,8 +244,8 @@ export function ProductCard({
           <button
             type="button"
             onClick={handleToggleWishlist}
-            className={`absolute top-2 right-2 w-7 h-7 rounded-full bg-white/95 backdrop-blur-xs shadow-sm border border-gray-200 flex items-center justify-center transition-all hover:scale-110 active:scale-95 z-20 ${
-              isSaved ? 'text-rose-600' : 'text-gray-400 hover:text-rose-500'
+            className={`absolute top-2 right-2 w-7 h-7 rounded-full bg-surface/90 backdrop-blur-xs shadow-2xs border border-border/80 flex items-center justify-center transition-all hover:scale-110 active:scale-95 z-20 ${
+              isSaved ? 'text-rose-600' : 'text-muted hover:text-rose-500'
             }`}
             title={isSaved ? 'Remove from Wishlist' : 'Add to Wishlist'}
           >
@@ -267,7 +261,7 @@ export function ProductCard({
                 e.stopPropagation();
                 setIsEditModalOpen(true);
               }}
-              className="absolute top-2 right-10 w-7 h-7 rounded-full bg-white shadow-md border border-gray-200 flex items-center justify-center transition-all hover:scale-110 active:scale-95 z-20 text-[#0f3e26]"
+              className="absolute top-2 right-10 w-7 h-7 rounded-full bg-surface shadow-md border border-border flex items-center justify-center transition-all hover:scale-110 active:scale-95 z-20 text-primary"
               title="Admin: Quick Edit"
             >
               <Pencil className="w-3.5 h-3.5" strokeWidth={2.5} />
@@ -277,7 +271,7 @@ export function ProductCard({
           {/* Cart Quantity Badge */}
           {isInCart && (
             <div
-              className={`absolute bottom-2 right-2 w-5 h-5 rounded-full bg-[#c88a23] text-white text-[10px] font-black flex items-center justify-center shadow-md z-10`}
+              className="absolute bottom-2 right-2 w-5 h-5 rounded-full bg-secondary text-white text-[10px] font-black flex items-center justify-center shadow-md z-10"
             >
               {totalQuantity}
             </div>
@@ -287,50 +281,45 @@ export function ProductCard({
         {/* Content Section */}
         <div className="flex flex-col flex-1 justify-between">
           <div>
-            {/* The partner brand. This was hardcoded to "By Gjanand Farm" on
-                every card, which is wrong on a marketplace whose entire pitch
-                is one verified brand per category — and absurd on electronics
-                or books. */}
             {product.brand && (
-              <span className="text-[10px] text-gray-500 font-semibold block mb-0.5 truncate">
+              <span className="text-[10px] text-muted font-bold block mb-0.5 truncate uppercase tracking-wider">
                 {product.brand}
               </span>
             )}
 
-            <h3 className="text-xs sm:text-sm font-bold text-gray-900 line-clamp-1 group-hover:text-[#0f3e26] transition-colors leading-snug">
-              {product.name}
-            </h3>
+            <Link href={`/products/${product.id}`} className="block">
+              <h3 className="text-xs sm:text-sm font-bold text-foreground line-clamp-1 group-hover:text-primary transition-colors leading-snug">
+                {product.name}
+              </h3>
+            </Link>
 
             <div className="flex items-center gap-1 text-[10px] font-bold mt-1 mb-2">
               {showRating && (
                 <>
-                  <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded bg-emerald-600 text-white">
-                    <Star className="w-2.5 h-2.5 fill-white text-white" />
+                  <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-md bg-primary text-foreground-inverse">
+                    <Star className="w-2.5 h-2.5 fill-current" />
                     {rating!.toFixed(1)}
                   </span>
-                  <span className="text-gray-400 font-normal">({reviewCount})</span>
-                  <span className="text-gray-300">•</span>
+                  <span className="text-muted font-normal">({reviewCount})</span>
+                  <span className="text-border">•</span>
                 </>
               )}
-              <span className="text-gray-500 font-medium">
+              <span className="text-muted font-semibold bg-surface-muted px-1.5 py-0.5 rounded-md">
                 {selectedVariant.weight}
                 {variants.length > 1 && ` (+${variants.length - 1})`}
               </span>
             </div>
           </div>
 
-          {/* Price & Action Button.
-              `relative z-20` lifts this row above the stretched link (z-10)
-              so the add button and quantity stepper stay directly clickable
-              instead of being covered by the card-wide anchor. */}
-          <div className="relative z-20 flex items-center justify-between gap-2 pt-2 border-t border-gray-100 mt-1">
+          {/* Price & Action Button Row */}
+          <div className="relative z-20 flex items-center justify-between gap-2 pt-2 border-t border-border/60 mt-1">
             <div className="flex flex-col">
               <div className="flex items-baseline gap-1">
-                <span className="text-base font-black text-[#0f3e26]">
+                <span className="text-base font-black text-primary">
                   ₹{selectedVariant.price}
                 </span>
                 {hasRealDiscount && (
-                  <span className="text-[11px] text-gray-400 line-through">
+                  <span className="text-[11px] text-muted line-through">
                     ₹{originalPrice}
                   </span>
                 )}
@@ -340,35 +329,38 @@ export function ProductCard({
             {variants.length === 1 && isOutOfStock ? (
               <button
                 disabled
-                className="px-3 py-1.5 bg-gray-100 text-gray-400 text-xs font-bold rounded-lg cursor-not-allowed border border-gray-200"
+                className="px-3 py-1.5 bg-surface-muted text-muted text-xs font-bold rounded-lg cursor-not-allowed border border-border"
               >
                 Sold Out
               </button>
             ) : !isInCart ? (
               <button
+                type="button"
                 onClick={handleAdd}
                 disabled={busy || (variants.length === 1 && isOutOfStock)}
-                className="px-3.5 py-1.5 bg-[#0f3e26] hover:bg-[#144f31] text-white text-xs font-bold rounded-lg transition-colors flex items-center justify-center gap-1 shadow-xs active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="px-3.5 py-1.5 bg-primary/10 hover:bg-primary text-primary hover:text-foreground-inverse border border-primary/30 font-black text-xs uppercase tracking-wider rounded-lg transition-all duration-150 flex items-center justify-center gap-1 shadow-2xs active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
               >
-                <ShoppingCart className="w-3.5 h-3.5" />
-                <span>{variants.length > 1 ? 'Select' : 'Add'}</span>
+                <span>{variants.length > 1 ? 'Select' : 'ADD'}</span>
+                <Plus className="w-3.5 h-3.5 stroke-[2.5]" />
               </button>
             ) : (
-              <div className="flex items-center bg-gray-100 rounded-lg overflow-hidden border border-gray-300">
+              <div className="flex items-center bg-primary text-foreground-inverse rounded-lg overflow-hidden shadow-2xs">
                 <button
+                  type="button"
                   onClick={(e) => handleUpdate(e, 'dec')}
                   disabled={busy}
-                  className="w-7 h-7 flex items-center justify-center text-gray-700 hover:bg-gray-200 transition-colors active:scale-90"
+                  className="w-7 h-7 flex items-center justify-center text-foreground-inverse hover:bg-primary-hover transition-colors active:scale-90 cursor-pointer"
                 >
                   <Minus className="w-3 h-3 stroke-[3]" />
                 </button>
-                <span className="px-1.5 text-center text-xs font-black text-gray-900 min-w-[20px]">
+                <span className="px-1.5 text-center text-xs font-black min-w-[20px] select-none">
                   {variants.length > 1 ? totalQuantity : currentVariantQty}
                 </span>
                 <button
+                  type="button"
                   onClick={(e) => handleUpdate(e, 'inc')}
                   disabled={busy || (variants.length === 1 && currentVariantQty >= availableStock)}
-                  className="w-7 h-7 flex items-center justify-center bg-[#0f3e26] text-white hover:bg-[#144f31] transition-colors active:scale-90 disabled:opacity-40 disabled:cursor-not-allowed"
+                  className="w-7 h-7 flex items-center justify-center hover:bg-primary-hover transition-colors active:scale-90 disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"
                   title={currentVariantQty >= availableStock ? 'Max available stock reached' : undefined}
                 >
                   <Plus className="w-3 h-3 stroke-[3]" />
@@ -391,20 +383,21 @@ export function ProductCard({
             <motion.div
               initial={{ y: '100%' }} animate={{ y: 0 }} exit={{ y: '100%' }}
               transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-              className="fixed bottom-0 left-0 right-0 rounded-t-3xl z-[70] p-6 max-w-lg mx-auto bg-white shadow-2xl"
+              className="fixed bottom-0 left-0 right-0 rounded-t-2xl z-[70] p-5 sm:p-6 max-w-lg mx-auto bg-surface text-foreground border-t border-border shadow-2xl max-h-[85vh] overflow-y-auto"
+              style={{ paddingBottom: 'max(env(safe-area-inset-bottom, 0px), 24px)' }}
             >
-              <div className="w-12 h-1.5 rounded-full mx-auto mb-6 bg-gray-300" />
-              <div className="flex items-start gap-4 mb-6">
+              <div className="w-10 h-1.5 rounded-full mx-auto mb-4 bg-border" />
+              <div className="flex items-start gap-4 mb-4">
                 <img
                   src={product.image_url ?? PLACEHOLDER_PRODUCT_IMAGE}
                   alt={product.name}
-                  className="w-16 h-16 rounded-xl object-contain bg-gray-50 border p-1"
+                  className="w-16 h-16 rounded-xl object-contain bg-surface-muted border border-border p-1"
                 />
                 <div>
-                  <h2 className="text-base font-bold text-gray-900">
+                  <h2 className="text-base font-bold text-foreground">
                     {product.name}
                   </h2>
-                  <p className="text-xs text-gray-500">
+                  <p className="text-xs text-muted">
                     {t('selectSizeToAddToCart')}
                   </p>
                 </div>
@@ -424,31 +417,31 @@ export function ProductCard({
                       key={v.id}
                       className={`flex items-center justify-between p-3.5 rounded-xl border transition-colors ${
                         isVOutOfStock
-                          ? 'border-gray-200 bg-gray-50/70 opacity-60'
+                          ? 'border-border/60 bg-surface-muted/60 opacity-60'
                           : qty > 0
-                          ? 'border-[#0f3e26] bg-emerald-50/40'
-                          : 'border-gray-200 bg-white'
+                          ? 'border-primary bg-primary/10'
+                          : 'border-border bg-surface hover:border-border-hover'
                       }`}
                     >
                       <div className="flex flex-col">
                         <div className="flex items-center gap-2">
-                          <span className="font-bold text-xs text-gray-900">{v.weight}</span>
+                          <span className="font-bold text-xs text-foreground">{v.weight}</span>
                           {isVOutOfStock ? (
-                            <span className="text-[10px] font-bold text-rose-600 bg-rose-50 px-1.5 py-0.5 rounded">
+                            <span className="text-[10px] font-bold text-rose-500 bg-rose-500/10 px-1.5 py-0.5 rounded">
                               Out of Stock
                             </span>
                           ) : isVLowStock ? (
-                            <span className="text-[10px] font-bold text-amber-600 bg-amber-50 px-1.5 py-0.5 rounded">
+                            <span className="text-[10px] font-bold text-amber-500 bg-amber-500/10 px-1.5 py-0.5 rounded">
                               Only {vStock} left
                             </span>
                           ) : null}
                         </div>
                         <div className="flex items-baseline gap-1.5 mt-0.5">
-                          <span className="text-sm font-black text-[#0f3e26]">
+                          <span className="text-sm font-black text-primary">
                             ₹{v.price}
                           </span>
                           {v.original_price && (
-                            <span className="text-xs line-through text-gray-400">
+                            <span className="text-xs line-through text-muted">
                               ₹{v.original_price}
                             </span>
                           )}
@@ -458,7 +451,7 @@ export function ProductCard({
                       {isVOutOfStock ? (
                         <button
                           disabled
-                          className="px-4 py-1.5 rounded-lg font-bold text-xs bg-gray-100 text-gray-400 border border-gray-200 cursor-not-allowed"
+                          className="px-4 py-1.5 rounded-lg font-bold text-xs bg-surface-muted text-muted border border-border cursor-not-allowed"
                         >
                           Sold Out
                         </button>
@@ -466,24 +459,24 @@ export function ProductCard({
                         <button
                           onClick={(e) => handleAdd(e, v.id)}
                           disabled={busy}
-                          className="px-5 py-2 rounded-lg font-bold text-xs bg-[#0f3e26] hover:bg-[#144f31] text-white active:scale-95 disabled:opacity-50 shadow-xs"
+                          className="px-5 py-2 rounded-lg font-bold text-xs bg-primary hover:bg-primary-hover text-foreground-inverse active:scale-95 disabled:opacity-50 shadow-xs cursor-pointer"
                         >
                           Add
                         </button>
                       ) : (
-                        <div className="flex items-center gap-2 bg-white rounded-lg border border-emerald-300 p-1 shadow-2xs">
+                        <div className="flex items-center gap-2 bg-primary text-foreground-inverse rounded-lg p-1 shadow-2xs">
                           <button
                             onClick={(e) => handleUpdate(e, 'dec', v.id)}
                             disabled={busy}
-                            className="w-7 h-7 rounded-md flex items-center justify-center bg-gray-100 text-gray-700 hover:bg-gray-200"
+                            className="w-7 h-7 rounded-md flex items-center justify-center hover:bg-primary-hover transition-colors cursor-pointer"
                           >
                             <Minus className="w-3.5 h-3.5 stroke-[2.5]" />
                           </button>
-                          <span className="w-5 text-center text-xs font-bold text-gray-900">{qty}</span>
+                          <span className="w-5 text-center text-xs font-bold">{qty}</span>
                           <button
                             onClick={(e) => handleUpdate(e, 'inc', v.id)}
                             disabled={busy || qty >= vStock}
-                            className="w-7 h-7 rounded-md flex items-center justify-center bg-[#0f3e26] text-white hover:bg-[#144f31] disabled:opacity-40 disabled:cursor-not-allowed"
+                            className="w-7 h-7 rounded-md flex items-center justify-center hover:bg-primary-hover transition-colors disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"
                             title={qty >= vStock ? 'Max available stock reached' : undefined}
                           >
                             <Plus className="w-3.5 h-3.5 stroke-[2.5]" />
@@ -497,7 +490,7 @@ export function ProductCard({
 
               <button
                 onClick={() => setShowDrawer(false)}
-                className="w-full py-3 bg-[#0f3e26] hover:bg-[#144f31] rounded-xl font-bold text-white text-sm active:scale-95 shadow-md"
+                className="w-full py-3 bg-primary hover:bg-primary-hover rounded-xl font-bold text-foreground-inverse text-sm active:scale-95 shadow-md cursor-pointer"
               >
                 Done
               </button>

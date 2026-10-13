@@ -355,16 +355,16 @@ export default function CheckoutScreen() {
 
   return (
     <>
-      <div className="flex flex-col min-h-screen bg-cream pb-[140px] lg:pb-10 relative">
-        <div className="sticky top-0 z-30 bg-white border-b border-sand shadow-sm">
+      <div className="flex flex-col min-h-screen bg-background text-foreground pb-[140px] lg:pb-10 relative">
+        <div className="sticky top-0 z-30 bg-surface border-b border-border shadow-xs">
           <div className="flex justify-between items-center p-4">
             <div className="flex items-center">
-              <button onClick={() => !isProcessing && router.back()} className="p-2 -ml-2 mr-2 rounded-full hover:bg-sand/30" disabled={isProcessing}>
-                <ArrowLeft className="w-6 h-6 text-dark" />
+              <button onClick={() => !isProcessing && router.back()} className="p-2 -ml-2 mr-2 rounded-full hover:bg-surface-muted transition-colors" disabled={isProcessing}>
+                <ArrowLeft className="w-6 h-6 text-foreground" />
               </button>
-              <h1 className="text-xl font-black text-dark">Secure Checkout</h1>
+              <h1 className="text-xl font-black text-foreground">Secure Checkout</h1>
             </div>
-            <div className="flex items-center gap-1 text-green-600 bg-green-50 px-2 py-1 rounded-md border border-green-100">
+            <div className="flex items-center gap-1 text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/40 px-2.5 py-1 rounded-md border border-emerald-200 dark:border-emerald-800/40">
               <ShieldCheck className="w-4 h-4" />
               <span className="text-[10px] font-bold uppercase tracking-wider">100% Safe</span>
             </div>
@@ -483,11 +483,11 @@ export default function CheckoutScreen() {
           </div>
         </div>
 
-        <div className="lg:hidden fixed bottom-0 left-0 right-0 md:left-[260px] p-4 bg-white border-t border-sand z-40 pb-safe shadow-[0_-10px_20px_rgba(0,0,0,0.05)]">
+        <div className="lg:hidden fixed bottom-0 left-0 right-0 md:left-[260px] p-4 bg-surface/95 backdrop-blur-md border-t border-border z-40 pb-safe shadow-[0_-10px_20px_rgba(0,0,0,0.05)]">
           <div className="max-w-[800px] mx-auto flex items-center justify-between gap-4">
             <div className="flex flex-col">
               <span className="text-[11px] font-bold text-muted uppercase">Total Pay</span>
-              <span className="text-xl font-black text-dark">₹{pricing.total}</span>
+              <span className="text-xl font-black text-foreground">₹{pricing.total}</span>
             </div>
             <Button
               size="lg"
@@ -512,10 +512,10 @@ export default function CheckoutScreen() {
             <motion.div
               initial={{ scale: 0.9, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
-              className="bg-white rounded-[20px] p-8 w-full max-w-[280px] flex flex-col items-center justify-center shadow-xl"
+              className="bg-surface text-foreground rounded-[20px] border border-border p-8 w-full max-w-[280px] flex flex-col items-center justify-center shadow-xl"
             >
-              <div className="w-16 h-16 rounded-full border-4 border-sand border-t-primary animate-spin mb-6" />
-              <h3 className="font-bold text-dark text-lg mb-2">Placing Order...</h3>
+              <div className="w-16 h-16 rounded-full border-4 border-border border-t-primary animate-spin mb-6" />
+              <h3 className="font-bold text-foreground text-lg mb-2">Placing Order...</h3>
               <p className="text-sm text-muted text-center">Please do not close the app or press back.</p>
             </motion.div>
           </motion.div>
@@ -532,7 +532,7 @@ export default function CheckoutScreen() {
               initial={{ scale: 0.95, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.95, opacity: 0 }}
-              className="bg-white rounded-2xl p-6 w-full max-w-md shadow-2xl border border-rose-200"
+              className="bg-surface rounded-2xl p-6 w-full max-w-md shadow-2xl border border-rose-500/30"
             >
               <div className="flex items-center gap-3 text-rose-600 mb-3">
                 <AlertCircle className="w-6 h-6 shrink-0" />

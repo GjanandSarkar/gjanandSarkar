@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useRef } from 'react';
+import React from 'react';
 import Link from 'next/link';
 import { CategoryIcon } from '@/components/shared/CategoryIcon';
 import {
@@ -8,21 +8,7 @@ import {
   ChevronDown,
   Truck,
   ShieldCheck,
-  Milk,
-  Flame,
-  Droplets,
-  Hammer,
-  Wheat,
-  Shirt,
-  FlaskConical,
-  CookingPot,
   Sparkles,
-  Sun,
-  Heart,
-  Plug,
-  BookOpen,
-  LayoutGrid,
-  type LucideIcon,
 } from 'lucide-react';
 import {
   CATEGORIES,
@@ -30,19 +16,16 @@ import {
   SECONDARY_CATEGORIES,
   categoryHref,
 } from '@/lib/constants/categories';
+import {
+  DropdownMenu,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+} from '@/components/ui/DropdownMenu';
 
-// Icons are resolved from the canonical taxonomy's `icon` field so the nav
-// can never drift out of sync with the category list again.
 export function CategoryNavBar() {
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [isMoreOpen, setIsMoreOpen] = useState(false);
-  const menuRef = useRef<HTMLDivElement>(null);
-  const moreRef = useRef<HTMLDivElement>(null);
-
-  // All three menus are now projections of the single source of truth in
-  // src/lib/constants/categories.ts. They used to be three hand-maintained
-  // arrays with different names for the same things ("Ghee" vs "Vedic Bilona
-  // Ghee" vs "Organic Curd & Lassi"), all of them dairy-first.
   const reducedCategories = FEATURED_CATEGORIES.map((c) => ({
     name: c.name,
     href: categoryHref(c),
@@ -70,126 +53,116 @@ export function CategoryNavBar() {
     { name: 'View Complete Catalog', href: '/products', desc: 'All departments', icon: 'LayoutGrid' },
   ];
 
-  useEffect(() => {
-    function handleClickOutside(event: MouseEvent) {
-      if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
-        setIsMenuOpen(false);
-      }
-      if (moreRef.current && !moreRef.current.contains(event.target as Node)) {
-        setIsMoreOpen(false);
-      }
-    }
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, []);
-
   return (
-    <div className="w-full bg-white border-b border-gray-200/90 text-gray-700 relative z-30 shadow-2xs">
-      <div className="max-w-[1440px] mx-auto px-4 md:px-8 flex items-center justify-start gap-4 lg:gap-8 h-11 md:h-12">
+    <div className="w-full bg-surface border-b border-border/80 text-foreground relative z-30 shadow-2xs transition-colors duration-150">
+      <div className="max-w-[1440px] mx-auto px-4 md:px-8 flex items-center justify-start gap-3 lg:gap-8 h-11 md:h-12">
         
-        {/* All Categories Dropdown */}
-        <div ref={menuRef} className="relative shrink-0">
-          <button
-            type="button"
-            onClick={() => setIsMenuOpen(!isMenuOpen)}
-            className="flex items-center gap-2 font-black text-gray-900 hover:text-[#0f3e26] transition-colors py-1.5 px-2 rounded-lg hover:bg-gray-100/70 cursor-pointer"
-          >
-            <Menu className="w-4 h-4 text-[#0f3e26]" />
-            <span className="text-xs md:text-sm font-extrabold tracking-tight">All Categories</span>
-            <ChevronDown className={`w-3.5 h-3.5 text-gray-500 transition-transform duration-200 ${isMenuOpen ? 'rotate-180' : ''}`} />
-          </button>
+        {/* All Categories Dropdown (Radix DropdownMenu) */}
+        <div className="shrink-0">
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <button
+                type="button"
+                className="flex items-center gap-2 font-black text-foreground hover:text-primary transition-colors py-1.5 px-2.5 rounded-xl hover:bg-surface-muted cursor-pointer text-xs md:text-sm"
+              >
+                <Menu className="w-4 h-4 text-primary" />
+                <span className="font-extrabold tracking-tight">All Categories</span>
+                <ChevronDown className="w-3.5 h-3.5 text-muted opacity-70" />
+              </button>
+            </DropdownMenuTrigger>
 
-          {isMenuOpen && (
-            <div className="absolute left-0 top-full mt-2 w-72 max-h-[420px] overflow-y-auto bg-white rounded-2xl shadow-2xl border border-gray-200 py-2 z-50 animate-in fade-in slide-in-from-top-1">
-              <div className="px-4 py-2 text-[10px] font-black text-[#c88a23] uppercase tracking-wider border-b border-gray-100 flex items-center justify-between">
-                <span className="flex items-center gap-1.5">
+            <DropdownMenuContent align="start" className="w-72 max-h-[420px] overflow-y-auto p-1.5">
+              <DropdownMenuLabel className="flex items-center justify-between pb-1.5 border-b border-border/60">
+                <span className="flex items-center gap-1.5 text-secondary text-[11px] font-black uppercase tracking-wider">
                   <Sparkles className="w-3.5 h-3.5" />
                   Explore Departments
                 </span>
-                <span className="text-gray-400 font-medium">{CATEGORIES.length} categories</span>
-              </div>
+                <span className="text-muted text-[10px] font-normal">{CATEGORIES.length} items</span>
+              </DropdownMenuLabel>
+
               <div className="py-1">
                 {allCategories.map((cat) => (
-                  <Link
-                    key={cat.name}
-                    href={cat.href}
-                    onClick={() => setIsMenuOpen(false)}
-                    className="flex items-center gap-3 px-4 py-2 text-xs font-semibold text-gray-700 hover:bg-emerald-50 hover:text-[#0f3e26] transition-colors"
-                  >
-                    <span className="w-5 h-5 flex items-center justify-center shrink-0">
-                      <CategoryIcon name={cat.icon} />
-                    </span>
-                    <span>{cat.name}</span>
-                  </Link>
+                  <DropdownMenuItem key={cat.name} asChild>
+                    <Link
+                      href={cat.href}
+                      className="flex items-center gap-3 px-3 py-2 text-xs font-semibold text-foreground hover:bg-surface-muted transition-colors rounded-lg"
+                    >
+                      <span className="w-5 h-5 flex items-center justify-center shrink-0">
+                        <CategoryIcon name={cat.icon} />
+                      </span>
+                      <span>{cat.name}</span>
+                    </Link>
+                  </DropdownMenuItem>
                 ))}
               </div>
-            </div>
-          )}
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
 
         {/* Vertical Divider */}
-        <div className="h-5 w-px bg-gray-300/80 shrink-0 hidden sm:block" />
+        <div className="h-5 w-px bg-border/80 shrink-0 hidden sm:block" />
 
-        {/* Category Nav Links */}
-        <nav className="hidden md:flex items-center gap-8 lg:gap-12 xl:gap-14 overflow-x-auto no-scrollbar py-1">
+        {/* Category Nav Links (Horizontal Rail) */}
+        <nav className="hidden md:flex items-center gap-6 lg:gap-10 xl:gap-12 overflow-x-auto no-scrollbar py-1">
           {reducedCategories.map((item) => (
             <Link
               key={item.name}
               href={item.href}
-              className="text-gray-800 hover:text-[#0f3e26] font-bold text-xs lg:text-[13px] tracking-tight hover:underline underline-offset-8 decoration-2 decoration-[#c88a23] transition-all whitespace-nowrap py-1 px-1 group flex items-center gap-1.5"
+              className="text-foreground/90 hover:text-primary font-bold text-xs lg:text-[13px] tracking-tight hover:underline underline-offset-8 decoration-2 decoration-secondary transition-all whitespace-nowrap py-1 px-0.5 group flex items-center gap-1.5"
             >
               <span>{item.name}</span>
             </Link>
           ))}
 
-          {/* More Dropdown */}
-          <div ref={moreRef} className="relative shrink-0">
-            <button
-              type="button"
-              onClick={() => setIsMoreOpen(!isMoreOpen)}
-              className="flex items-center gap-1 text-gray-700 hover:text-[#0f3e26] font-bold text-xs lg:text-[13px] hover:bg-gray-100/70 py-1 px-2 rounded-lg transition-colors cursor-pointer"
-            >
-              <span>More</span>
-              <ChevronDown className={`w-3.5 h-3.5 text-gray-500 transition-transform duration-200 ${isMoreOpen ? 'rotate-180' : ''}`} />
-            </button>
+          {/* More Dropdown (Radix DropdownMenu) */}
+          <div className="shrink-0">
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <button
+                  type="button"
+                  className="flex items-center gap-1 text-foreground/80 hover:text-primary font-bold text-xs lg:text-[13px] hover:bg-surface-muted py-1 px-2.5 rounded-lg transition-colors cursor-pointer"
+                >
+                  <span>More</span>
+                  <ChevronDown className="w-3.5 h-3.5 text-muted opacity-70" />
+                </button>
+              </DropdownMenuTrigger>
 
-            {isMoreOpen && (
-              <div className="absolute left-0 top-full mt-2 w-64 bg-white rounded-2xl shadow-xl border border-gray-200 py-2 z-50 animate-in fade-in slide-in-from-top-1">
-                <div className="px-3.5 py-1.5 text-[10px] font-black text-[#c88a23] uppercase tracking-wider border-b border-gray-100">
+              <DropdownMenuContent align="start" className="w-64 p-1.5">
+                <DropdownMenuLabel className="text-[11px] font-black text-secondary uppercase tracking-wider pb-1 border-b border-border/60">
                   More Categories
-                </div>
+                </DropdownMenuLabel>
                 <div className="py-1">
                   {moreCategories.map((cat) => (
-                    <Link
-                      key={cat.name}
-                      href={cat.href}
-                      onClick={() => setIsMoreOpen(false)}
-                      className="flex items-center gap-3 px-3.5 py-2 text-xs text-gray-800 hover:bg-emerald-50 hover:text-[#0f3e26] transition-colors group"
-                    >
-                      <span className="w-5 h-5 flex items-center justify-center shrink-0">
-                        <CategoryIcon name={cat.icon} />
-                      </span>
-                      <div className="min-w-0">
-                        <p className="font-bold text-gray-900 group-hover:text-[#0f3e26] truncate">{cat.name}</p>
-                        <p className="text-[10px] text-gray-500 truncate">{cat.desc}</p>
-                      </div>
-                    </Link>
+                    <DropdownMenuItem key={cat.name} asChild>
+                      <Link
+                        href={cat.href}
+                        className="flex items-center gap-3 px-3 py-2 text-xs text-foreground hover:bg-surface-muted transition-colors rounded-lg"
+                      >
+                        <span className="w-5 h-5 flex items-center justify-center shrink-0">
+                          <CategoryIcon name={cat.icon} />
+                        </span>
+                        <div className="min-w-0">
+                          <p className="font-bold text-foreground truncate">{cat.name}</p>
+                          <p className="text-[10px] text-muted truncate">{cat.desc}</p>
+                        </div>
+                      </Link>
+                    </DropdownMenuItem>
                   ))}
                 </div>
-              </div>
-            )}
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
         </nav>
 
-        {/* Right: Trust Highlights */}
-        <div className="ml-auto hidden xl:flex items-center gap-6 shrink-0 text-xs font-semibold text-gray-600">
-          <div className="flex items-center gap-1.5 text-emerald-800 bg-emerald-50/90 px-3 py-1 rounded-full border border-emerald-200/60">
-            <Truck className="w-3.5 h-3.5 text-emerald-700 animate-pulse" />
-            <span className="text-[11px] font-bold">Doorstep by 7:00 AM</span>
+        {/* Right: Quick Delivery & Purity Badges (Country Delight / Zepto Style) */}
+        <div className="ml-auto hidden xl:flex items-center gap-4 shrink-0 text-xs font-semibold">
+          <div className="flex items-center gap-1.5 text-primary bg-primary/10 px-3 py-1 rounded-full border border-primary/20">
+            <Truck className="w-3.5 h-3.5 text-primary" />
+            <span className="text-[11px] font-bold">Doorstep by 6:30 AM</span>
           </div>
 
-          <div className="flex items-center gap-1.5 text-amber-900 bg-amber-50/90 px-3 py-1 rounded-full border border-amber-200/60">
-            <ShieldCheck className="w-3.5 h-3.5 text-amber-700" />
+          <div className="flex items-center gap-1.5 text-secondary bg-secondary/10 px-3 py-1 rounded-full border border-secondary/20">
+            <ShieldCheck className="w-3.5 h-3.5 text-secondary" />
             <span className="text-[11px] font-bold">100% Lab Tested Purity</span>
           </div>
         </div>

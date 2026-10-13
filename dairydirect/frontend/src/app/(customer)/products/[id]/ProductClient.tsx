@@ -199,14 +199,14 @@ export function ProductClient({ product: initialProduct }: ProductClientProps) {
   };
 
   return (
-    <div className="flex flex-col min-h-screen pb-32 bg-[#fafaf8]">
+    <div className="flex flex-col min-h-screen pb-32 bg-background text-foreground transition-colors duration-150">
       
       {/* Premium Navigation Header */}
-      <div className="w-full bg-white/80 backdrop-blur-md border-b border-gray-200/50 sticky top-0 z-30 px-4 md:px-8 py-3.5">
+      <div className="w-full bg-surface/85 backdrop-blur-md border-b border-border/60 sticky top-0 z-30 px-4 md:px-8 py-3.5 transition-colors duration-150">
         <div className="max-w-6xl mx-auto flex items-center justify-between">
           <button 
             onClick={() => router.back()} 
-            className="flex items-center gap-1 text-xs font-extrabold text-gray-700 hover:text-[#0f3e26] transition-colors py-1.5 px-3.5 rounded-full hover:bg-gray-100 cursor-pointer"
+            className="flex items-center gap-1 text-xs font-extrabold text-foreground hover:text-primary transition-colors py-1.5 px-3.5 rounded-full hover:bg-surface-muted cursor-pointer"
           >
             <ChevronLeft className="w-4 h-4" />
             <span>Back</span>
@@ -492,40 +492,40 @@ export function ProductClient({ product: initialProduct }: ProductClientProps) {
       </div>
 
       {/* Floating Bottom Action Bar */}
-      <div className="fixed bottom-0 left-0 right-0 p-4 bg-white/95 backdrop-blur-md border-t border-gray-200 z-30 shadow-lg">
+      <div className="fixed bottom-0 left-0 right-0 p-4 bg-surface/95 backdrop-blur-md border-t border-border z-30 shadow-lg transition-colors duration-150">
         <div className="flex items-center justify-between gap-4 max-w-xl mx-auto">
           <div>
-            <p className="text-[10px] font-bold uppercase tracking-wider text-gray-500">Price</p>
-            <p className="text-xl sm:text-2xl font-black text-[#0f3e26]">₹{selectedVariant.price}</p>
+            <p className="text-[10px] font-bold uppercase tracking-wider text-muted">Price</p>
+            <p className="text-xl sm:text-2xl font-black text-primary">₹{selectedVariant.price}</p>
           </div>
 
           {isOutOfStock ? (
             <button
               disabled
-              className="flex-1 h-12 bg-gray-200 text-gray-500 font-bold rounded-xl text-xs sm:text-sm cursor-not-allowed flex items-center justify-center gap-1.5"
+              className="flex-1 h-12 bg-surface-muted text-muted font-bold rounded-xl text-xs sm:text-sm cursor-not-allowed flex items-center justify-center gap-1.5 border border-border"
             >
               <span>Currently Out of Stock</span>
             </button>
           ) : quantity === 0 ? (
             <button
               onClick={() => handleUpdate('inc')}
-              className="flex-1 h-12 bg-[#0f3e26] hover:bg-[#144f31] text-white font-bold rounded-xl shadow-md active:scale-95 transition-all text-xs sm:text-sm cursor-pointer"
+              className="flex-1 h-12 bg-primary hover:bg-primary-hover text-foreground-inverse font-bold rounded-xl shadow-md active:scale-95 transition-all text-xs sm:text-sm cursor-pointer"
             >
               Add to Cart
             </button>
           ) : (
-            <div className="flex-1 flex items-center justify-between h-12 bg-emerald-50 border border-emerald-200 rounded-xl px-3">
+            <div className="flex-1 flex items-center justify-between h-12 bg-primary text-foreground-inverse rounded-xl px-3 shadow-sm">
               <button
                 onClick={() => handleUpdate('dec')}
-                className="w-8 h-8 flex items-center justify-center rounded-lg bg-white text-[#0f3e26] shadow-2xs font-black cursor-pointer"
+                className="w-8 h-8 flex items-center justify-center rounded-lg bg-surface text-foreground shadow-2xs font-black cursor-pointer hover:bg-surface-muted transition-colors"
               >
                 <Minus className="w-4 h-4 stroke-[3]" />
               </button>
-              <span className="text-base font-black text-[#0f3e26]">{quantity}</span>
+              <span className="text-base font-black text-foreground-inverse">{quantity}</span>
               <button
                 onClick={() => handleUpdate('inc')}
                 disabled={quantity >= availableStock}
-                className="w-8 h-8 flex items-center justify-center rounded-lg bg-[#0f3e26] text-white shadow-2xs font-black disabled:opacity-50 cursor-pointer"
+                className="w-8 h-8 flex items-center justify-center rounded-lg bg-surface text-foreground shadow-2xs font-black disabled:opacity-50 cursor-pointer hover:bg-surface-muted transition-colors"
                 title={quantity >= availableStock ? 'Maximum available stock reached' : undefined}
               >
                 <Plus className="w-4 h-4 stroke-[3]" />

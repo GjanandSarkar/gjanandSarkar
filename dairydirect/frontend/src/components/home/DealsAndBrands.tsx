@@ -14,7 +14,7 @@ import { addToCart } from '@/lib/api/cart';
 import { PLACEHOLDER_PRODUCT_IMAGE } from '@/lib/constants/brand';
 
 interface DealsAndBrandsProps {
-  products: CatalogProduct[];
+  products?: CatalogProduct[];
 }
 
 export function DealsAndBrands({ products }: DealsAndBrandsProps) {
@@ -77,10 +77,6 @@ export function DealsAndBrands({ products }: DealsAndBrandsProps) {
     return v && v.original_price && v.original_price > v.price;
   }).slice(0, 4);
 
-  // There used to be a fallback to `products.slice(0, 4)` here, which
-  // presented four full-price products under a "Deal of the Day" heading with
-  // a countdown timer. If nothing is actually discounted, show nothing —
-  // an empty deals rail is honest, a fake one is misleading advertising.
   const displayProducts = dealProducts;
   if (displayProducts.length === 0) return null;
 
@@ -88,18 +84,18 @@ export function DealsAndBrands({ products }: DealsAndBrandsProps) {
     <section className="w-full max-w-[1440px] mx-auto px-4 md:px-8 py-6">
       <div>
         {/* ── DEAL OF THE DAY (Full Width) ── */}
-        <div className="bg-white rounded-2xl p-5 md:p-6 border border-gray-200/80 shadow-xs flex flex-col justify-between">
+        <div className="bg-surface rounded-2xl p-5 md:p-6 border border-border/80 shadow-xs flex flex-col justify-between transition-colors duration-150">
 
           {/* Header & Countdown */}
-          <div className="flex flex-wrap items-center justify-between gap-3 pb-4 border-b border-gray-100 mb-5">
+          <div className="flex flex-wrap items-center justify-between gap-3 pb-4 border-b border-border/60 mb-5">
             <div className="flex items-center gap-3">
-               <h2 className="text-xl md:text-2xl font-black text-[#0f3e26] tracking-tight">
+               <h2 className="text-xl md:text-2xl font-black text-foreground tracking-tight">
                 Deal of the Day
               </h2>
               {/* Reserve the pill's space before the client clock resolves so
                   the header does not shift on hydration. */}
-              <div className="flex items-center gap-1.5 bg-emerald-100/80 text-emerald-900 text-xs font-bold px-3 py-1 rounded-full min-h-[26px]">
-                <Clock className="w-3.5 h-3.5 text-emerald-700" />
+              <div className="flex items-center gap-1.5 bg-primary/10 text-primary text-xs font-bold px-3 py-1 rounded-full min-h-[26px]">
+                <Clock className="w-3.5 h-3.5 text-primary" />
                 {timeLeft ? (
                   <span className="tabular-nums">
                     Ends in {String(timeLeft.hours).padStart(2, '0')} :{' '}
@@ -114,7 +110,7 @@ export function DealsAndBrands({ products }: DealsAndBrandsProps) {
               </div>
             </div>
 
-            <Link href="/offers" className="text-xs font-bold text-[#c88a23] hover:text-[#0f3e26] flex items-center gap-1">
+            <Link href="/offers" className="text-xs font-bold text-secondary hover:text-primary flex items-center gap-1">
               <span>View Offers</span>
               <ArrowRight className="w-3.5 h-3.5" />
             </Link>
@@ -131,7 +127,7 @@ export function DealsAndBrands({ products }: DealsAndBrandsProps) {
               return (
                 <div
                   key={prod.id}
-                  className="bg-gray-50/60 rounded-xl p-2.5 border border-gray-200/60 flex flex-col justify-between group hover:border-[#c88a23] hover:shadow-md transition-all"
+                  className="bg-surface-muted rounded-xl p-2.5 border border-border/80 flex flex-col justify-between group hover:border-secondary transition-all"
                 >
                   <div className="relative">
                     {/* Discount Badge */}
@@ -140,7 +136,7 @@ export function DealsAndBrands({ products }: DealsAndBrandsProps) {
                     </span>
 
                     {/* Image */}
-                    <div className="w-full aspect-square bg-white rounded-lg p-2 flex items-center justify-center overflow-hidden mb-2">
+                    <div className="w-full aspect-square bg-surface rounded-lg p-2 flex items-center justify-center overflow-hidden mb-2 border border-border/40">
                       <img
                         src={prod.image_url || PLACEHOLDER_PRODUCT_IMAGE}
                         alt={prod.name}
@@ -150,19 +146,19 @@ export function DealsAndBrands({ products }: DealsAndBrandsProps) {
                   </div>
 
                   <div>
-                    <h3 className="text-xs font-bold text-gray-900 line-clamp-1 leading-snug">
+                    <h3 className="text-xs font-bold text-foreground line-clamp-1 leading-snug">
                       {prod.name}
                     </h3>
-                    <p className="text-[10px] text-gray-500 line-clamp-1 mb-1.5">
+                    <p className="text-[10px] text-muted line-clamp-1 mb-1.5">
                       {variant?.weight || 'Standard Pack'}
                     </p>
 
                     {/* Pricing */}
                     <div className="flex items-baseline gap-1.5 mb-2">
-                      <span className="text-sm font-black text-[#0f3e26]">
+                      <span className="text-sm font-black text-primary">
                         ₹{price}
                       </span>
-                      <span className="text-[10px] text-gray-400 line-through">
+                      <span className="text-[10px] text-muted line-through">
                         ₹{originalPrice}
                       </span>
                     </div>
@@ -170,8 +166,8 @@ export function DealsAndBrands({ products }: DealsAndBrandsProps) {
                     {/* Rating */}
                     <div className="flex items-center gap-1 text-[10px] text-amber-500 font-bold mb-2">
                       <Star className="w-3 h-3 fill-amber-400 text-amber-400" />
-                      <span className="text-gray-700">4.{7 - idx}</span>
-                      <span className="text-gray-400 font-normal">({85 + idx * 42})</span>
+                      <span className="text-foreground">4.{7 - idx}</span>
+                      <span className="text-muted font-normal">({85 + idx * 42})</span>
                     </div>
 
                     {/* Quick Add */}
@@ -181,7 +177,7 @@ export function DealsAndBrands({ products }: DealsAndBrandsProps) {
                         addToCartLocal(prod.id, variant.id, 1);
                         if (user) await addToCart(user.id, prod.id, variant.id, 1);
                       }}
-                      className="w-full py-1.5 bg-[#0f3e26] hover:bg-[#144f31] text-white text-[11px] font-bold rounded-lg transition-colors flex items-center justify-center gap-1 shadow-xs active:scale-95 cursor-pointer"
+                      className="w-full py-1.5 bg-primary hover:bg-primary-hover text-foreground-inverse text-[11px] font-bold rounded-lg transition-colors flex items-center justify-center gap-1 shadow-xs active:scale-95 cursor-pointer"
                     >
                       <ShoppingCart className="w-3 h-3" />
                       <span>Add</span>

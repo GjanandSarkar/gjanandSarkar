@@ -87,15 +87,15 @@ export function HeritageBanner() {
               <Link
                 key={item.title}
                 href={item.href}
-                className="min-w-[130px] sm:min-w-[150px] bg-white rounded-2xl p-3.5 flex flex-col items-center text-center text-gray-900 group hover:scale-105 transition-all shadow-md shrink-0"
+                className="min-w-[130px] sm:min-w-[150px] bg-surface rounded-2xl p-3.5 flex flex-col items-center text-center text-foreground group hover:scale-105 transition-all shadow-md shrink-0 border border-border/40"
               >
-                <div className={`w-16 h-16 rounded-xl ${item.bg} flex items-center justify-center mb-2.5 group-hover:scale-105 transition-transform`}>
+                <div className={`w-16 h-16 rounded-xl ${item.bg} dark:bg-surface-elevated flex items-center justify-center mb-2.5 group-hover:scale-105 transition-transform`}>
                   {item.icon}
                 </div>
-                <h3 className="text-xs sm:text-sm font-black text-[#0d3b24] line-clamp-1">
+                <h3 className="text-xs sm:text-sm font-black text-primary line-clamp-1">
                   {item.title}
                 </h3>
-                <span className="text-[10px] text-gray-500 font-medium line-clamp-1 mt-0.5">
+                <span className="text-[10px] text-muted-foreground font-medium line-clamp-1 mt-0.5">
                   {item.subtitle}
                 </span>
               </Link>

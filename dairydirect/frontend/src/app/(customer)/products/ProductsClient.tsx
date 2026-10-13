@@ -19,6 +19,13 @@ import {
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ProductGridSkeleton } from '@/components/shared/Skeletons';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/Select';
 
 function ProductsScreenContent({ initialProducts }: { initialProducts: CatalogProduct[] }) {
   const searchParams = useSearchParams();
@@ -143,20 +150,20 @@ function ProductsScreenContent({ initialProducts }: { initialProducts: CatalogPr
   };
 
   return (
-    <div className="min-h-screen bg-[#fafaf8] py-6 px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-background text-foreground py-6 px-4 sm:px-6 lg:px-8 transition-colors duration-150">
       <div className="max-w-[1440px] mx-auto">
         
         {/* Top Header Banner */}
-        <div className="mb-6 bg-gradient-to-r from-[#0f3e26] via-[#144f31] to-[#0f3e26] rounded-2xl p-6 sm:p-8 text-white relative overflow-hidden shadow-md">
+        <div className="mb-6 bg-gradient-to-r from-primary via-primary-hover to-primary rounded-2xl p-6 sm:p-8 text-foreground-inverse relative overflow-hidden shadow-md">
           <div className="relative z-10 max-w-2xl">
-            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/10 backdrop-blur-xs border border-white/20 text-[#c88a23] text-xs font-black uppercase tracking-wider mb-2">
+            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/10 backdrop-blur-xs border border-white/20 text-secondary text-xs font-black uppercase tracking-wider mb-2">
               <Sparkles className="w-3.5 h-3.5" />
               <span>Authentic Bharat Heritage</span>
             </div>
             <h1 className="text-2xl sm:text-3xl font-black tracking-tight">
               Direct-from-Farm & Artisan Marketplace
             </h1>
-            <p className="text-xs text-gray-200 mt-1">
+            <p className="text-xs text-white/80 mt-1">
               Explore 100% lab-tested Gir A2 dairy, cold-pressed oils, handlooms, and state specialities.
             </p>
           </div>
@@ -169,8 +176,8 @@ function ProductsScreenContent({ initialProducts }: { initialProducts: CatalogPr
           <aside className="space-y-6">
             
             {/* Categories Filter */}
-            <div className="bg-white rounded-2xl border border-gray-200/90 p-4 shadow-2xs">
-              <h3 className="text-xs font-black text-gray-900 mb-3 uppercase tracking-wider">
+            <div className="bg-surface rounded-2xl border border-border/80 p-4 shadow-2xs">
+              <h3 className="text-xs font-black text-foreground mb-3 uppercase tracking-wider">
                 Categories
               </h3>
               <div className="space-y-1">
@@ -178,10 +185,10 @@ function ProductsScreenContent({ initialProducts }: { initialProducts: CatalogPr
                   <button
                     key={cat}
                     onClick={() => setActiveCategory(cat)}
-                    className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-bold transition-colors ${
+                    className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-bold transition-colors cursor-pointer ${
                       activeCategory.toLowerCase() === cat.toLowerCase()
-                        ? 'bg-[#0f3e26] text-white shadow-2xs'
-                        : 'text-gray-600 hover:bg-gray-100'
+                        ? 'bg-primary text-foreground-inverse shadow-2xs'
+                        : 'text-muted hover:bg-surface-muted hover:text-foreground'
                     }`}
                   >
                     <span>{cat}</span>
@@ -194,9 +201,9 @@ function ProductsScreenContent({ initialProducts }: { initialProducts: CatalogPr
             </div>
 
             {/* State Origin Filter */}
-            <div className="bg-white rounded-2xl border border-gray-200/90 p-4 shadow-2xs">
-              <h3 className="text-xs font-black text-gray-900 mb-3 uppercase tracking-wider flex items-center gap-1.5">
-                <MapPin className="w-3.5 h-3.5 text-[#c88a23]" />
+            <div className="bg-surface rounded-2xl border border-border/80 p-4 shadow-2xs">
+              <h3 className="text-xs font-black text-foreground mb-3 uppercase tracking-wider flex items-center gap-1.5">
+                <MapPin className="w-3.5 h-3.5 text-secondary" />
                 <span>Shop by State Origin</span>
               </h3>
               <div className="space-y-1">
@@ -204,10 +211,10 @@ function ProductsScreenContent({ initialProducts }: { initialProducts: CatalogPr
                   <button
                     key={st}
                     onClick={() => setActiveState(st)}
-                    className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-bold transition-colors ${
+                    className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-bold transition-colors cursor-pointer ${
                       activeState === st
-                        ? 'bg-[#c88a23] text-white shadow-2xs'
-                        : 'text-gray-600 hover:bg-gray-100'
+                        ? 'bg-secondary text-white shadow-2xs'
+                        : 'text-muted hover:bg-surface-muted hover:text-foreground'
                     }`}
                   >
                     <span>{st}</span>
@@ -218,8 +225,8 @@ function ProductsScreenContent({ initialProducts }: { initialProducts: CatalogPr
             </div>
 
             {/* Price Range Filter */}
-            <div className="bg-white rounded-2xl border border-gray-200/90 p-4 shadow-2xs">
-              <h3 className="text-xs font-black text-gray-900 mb-3 uppercase tracking-wider">
+            <div className="bg-surface rounded-2xl border border-border/80 p-4 shadow-2xs">
+              <h3 className="text-xs font-black text-foreground mb-3 uppercase tracking-wider">
                 Price Filter
               </h3>
               <div className="space-y-1">
@@ -232,14 +239,14 @@ function ProductsScreenContent({ initialProducts }: { initialProducts: CatalogPr
                   <button
                     key={p.id}
                     onClick={() => setPriceRange(p.id as any)}
-                    className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-bold transition-colors ${
+                    className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-bold transition-colors cursor-pointer ${
                       priceRange === p.id
-                        ? 'bg-emerald-100 text-emerald-900'
-                        : 'text-gray-600 hover:bg-gray-100'
+                        ? 'bg-primary/15 text-primary'
+                        : 'text-muted hover:bg-surface-muted hover:text-foreground'
                     }`}
                   >
                     <span>{p.label}</span>
-                    {priceRange === p.id && <Check className="w-3.5 h-3.5 text-emerald-700" />}
+                    {priceRange === p.id && <Check className="w-3.5 h-3.5 text-primary" />}
                   </button>
                 ))}
               </div>
@@ -251,30 +258,33 @@ function ProductsScreenContent({ initialProducts }: { initialProducts: CatalogPr
           <main className="space-y-4">
             
             {/* Top Toolbar (Sort + Count + Active Filter Tags) */}
-            <div className="bg-white rounded-2xl border border-gray-200/90 p-4 shadow-2xs flex flex-wrap items-center justify-between gap-4">
-              <div className="text-xs font-bold text-gray-700">
-                Showing <strong className="text-[#0f3e26]">{filteredProducts.length}</strong> authentic products
+            <div className="bg-surface rounded-2xl border border-border/80 p-4 shadow-2xs flex flex-wrap items-center justify-between gap-4 transition-colors duration-150">
+              <div className="text-xs font-bold text-foreground">
+                Showing <strong className="text-primary">{filteredProducts.length}</strong> authentic products
               </div>
 
               <div className="flex items-center gap-3">
-                <span className="text-xs text-gray-500 font-bold">Sort By:</span>
-                <select
-                  value={sortBy}
-                  onChange={(e) => setSortBy(e.target.value as any)}
-                  className="px-3 py-1.5 rounded-xl border border-gray-300 text-xs font-bold text-gray-800 bg-white focus:border-[#0f3e26] outline-none"
-                >
-                  <option value="featured">Featured / Popular</option>
-                  <option value="price_asc">Price: Low to High</option>
-                  <option value="price_desc">Price: High to Low</option>
-                </select>
+                <span className="text-xs text-muted font-bold">Sort By:</span>
+                <div className="w-44">
+                  <Select value={sortBy} onValueChange={(val: any) => setSortBy(val)}>
+                    <SelectTrigger className="h-9 text-xs">
+                      <SelectValue placeholder="Sort by" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="featured">Featured / Popular</SelectItem>
+                      <SelectItem value="price_asc">Price: Low to High</SelectItem>
+                      <SelectItem value="price_desc">Price: High to Low</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
 
                 {(activeCategory !== 'All' || activeState !== 'All' || searchQuery || priceRange !== 'all') && (
                   <button
                     onClick={handleClearFilters}
-                    className="text-xs font-bold text-rose-600 hover:underline flex items-center gap-1"
+                    className="text-xs font-bold text-rose-600 hover:underline flex items-center gap-1 cursor-pointer"
                   >
                     <X className="w-3.5 h-3.5" />
-                    <span>Clear Filters</span>
+                    <span>Clear</span>
                   </button>
                 )}
               </div>
