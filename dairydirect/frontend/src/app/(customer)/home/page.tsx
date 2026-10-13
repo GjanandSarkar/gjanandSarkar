@@ -7,6 +7,8 @@ import { HeritageBanner } from '@/components/home/HeritageBanner';
 import { TrendingProducts } from '@/components/home/TrendingProducts';
 
 import { WhyGjanandSarkar } from '@/components/home/WhyGjanandSarkar';
+import { RecommendationRail } from '@/components/discovery/RecommendationRail';
+import { AdSlot } from '@/components/discovery/AdSlot';
 
 // Previously `force-dynamic` + `revalidate = 0`: every visitor triggered a
 // full-catalogue database query and a fresh server render, so the homepage
@@ -36,6 +38,14 @@ export default async function HomeScreen() {
 
       {/* 6. Trending Products (Live Store Catalog) */}
       <TrendingProducts products={prods} />
+
+      {/* 7. Personalised rail. Client-rendered on purpose: the page itself is
+          statically generated and revalidated every 5 minutes, and a
+          per-visitor rail baked into that cache would be served to everyone. */}
+      <RecommendationRail placement="home" limit={8} />
+
+      {/* 8. House promotion slot. */}
+      <AdSlot placement="home" />
 
       {/* 8. How the marketplace works (replaced invented stats + testimonials) */}
       <WhyGjanandSarkar />

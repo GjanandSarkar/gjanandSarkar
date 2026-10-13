@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useTranslation } from '@/lib/i18n';
 import { Analytics } from '@/lib/analytics';
+import { trackProductEvent } from '@/lib/analytics/session';
 import { useStore } from '@/store/useStore';
 import { updateCartItem, addToCart, removeFromCart } from '@/lib/api/cart';
 import { toggleWishlist } from '@/lib/api/wishlist';
@@ -95,6 +96,10 @@ export function ProductClient({ product: initialProduct }: ProductClientProps) {
       productName: product.name,
       category: product.category 
     });
+    // Also recorded first-party in product_events, which is what the
+    // recommender learns from. The Analytics call above goes to a different
+    // sink and is not queryable for scoring.
+    trackProductEvent(product.id, 'view', { source: 'product_page' });
   }, [product.id, product.name, product.category]);
 
   useRealtimeInventory({

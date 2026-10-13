@@ -6,7 +6,7 @@ import { useRouter } from 'next/navigation';
 import { useStore } from '@/store/useStore';
 import {
   LayoutDashboard, ShoppingBag, Users, Package, BarChart3,
-  Truck, LogOut, Leaf, ShieldCheck, Bell, Settings, Tags, CalendarDays, User, Building2, Store, RotateCcw
+  Truck, LogOut, Leaf, ShieldCheck, Bell, Settings, Tags, CalendarDays, User, Building2, Store, RotateCcw, Megaphone
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -25,7 +25,8 @@ const navItems = [
   { href: '/admin/delivery', icon: Truck, label: 'Deliveries' },
   { href: '/admin/analytics', icon: BarChart3, label: 'Analytics' },
   { href: '/admin/coupons', icon: Package, label: 'Coupons' },
-  { href: '/admin/audit-log', icon: ShieldCheck, label: 'Audit Log' },
+  { href: '/admin/audit', icon: ShieldCheck, label: 'Audit Log' },
+  { href: '/admin/campaigns', icon: Megaphone, label: 'Ad Campaigns' },
   { href: '/home', icon: Leaf, label: 'Visit Storefront' },
 ];
 

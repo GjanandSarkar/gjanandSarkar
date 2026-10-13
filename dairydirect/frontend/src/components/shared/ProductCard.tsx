@@ -24,6 +24,7 @@ const ProductEditModal = dynamic(
 );
 import Image from 'next/image';
 import { PLACEHOLDER_PRODUCT_IMAGE } from '@/lib/constants/brand';
+import { trackProductEvent } from '@/lib/analytics/session';
 
 interface ProductCardProps {
   product: CatalogProduct;
@@ -115,6 +116,9 @@ export function ProductCard({
       }
 
       setBusy(true);
+      // A cart add is weighted far above a view in popularity scoring, so it
+      // has to be recorded wherever it can happen.
+      trackProductEvent(product.id, 'add_to_cart', { source: 'product_card' });
       addToCartLocal(product.id, vid, 1);
       if (user) {
         await addToCart(user.id, product.id, vid, 1);

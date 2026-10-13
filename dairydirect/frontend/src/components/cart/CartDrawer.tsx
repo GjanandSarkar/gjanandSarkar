@@ -10,7 +10,7 @@ import { OrderSummary } from './OrderSummary';
 import { EmptyCart } from './EmptyCart';
 import { updateCartItem, removeFromCart, clearCart as apiClearCart } from '@/lib/api/cart';
 import { useRouter, usePathname } from 'next/navigation';
-import { CartCrossSells } from '@/components/discovery/CartCrossSells';
+import { RecommendationRail } from '@/components/discovery/RecommendationRail';
 import { PLACEHOLDER_PRODUCT_IMAGE } from '@/lib/constants/brand';
 import { categoryBg } from '@/lib/constants/categories';
 
@@ -285,10 +285,12 @@ export function CartDrawer({ isOpen, onClose }: CartDrawerProps) {
           )}
         </div>
 
-        {/* Smart Commerce: Cart Cross Sells */}
+        {/* Cart recommendations. Replaces the old CartCrossSells, which
+            picked same-category products and called an unsorted catalogue
+            slice "best sellers". */}
         {!isLoading && (
           <div className="shrink-0 bg-surface">
-            <CartCrossSells />
+            <RecommendationRail placement="cart" limit={6} compact />
           </div>
         )}
 

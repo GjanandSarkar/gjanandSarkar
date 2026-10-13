@@ -5,6 +5,8 @@ import { JsonLd } from '@/components/seo/JsonLd';
 import { ChevronLeft, Sparkles, ArrowRight, PackageOpen } from 'lucide-react';
 import Link from 'next/link';
 import { CATEGORIES } from '@/lib/constants/categories';
+import { RecommendationRail } from '@/components/discovery/RecommendationRail';
+import { AdSlot } from '@/components/discovery/AdSlot';
 
 interface Props {
   params: Promise<{ category: string }>;
@@ -70,6 +72,11 @@ export default async function CategoryPage({ params }: Props) {
   )
     .slice(0, 6)
     .map((c) => ({ name: c.name, category: c.name }));
+
+  // "all" is a browsing pseudo-category with no matching products.category
+  // value, so scoping the rail to it would filter everything out.
+  const railCategory =
+    rawCategory.toLowerCase() === 'all' ? undefined : categoryTitle;
 
   return (
     <div className="min-h-screen bg-[#fafaf8] pb-24">
@@ -144,6 +151,11 @@ export default async function CategoryPage({ params }: Props) {
           </div>
         )}
       </main>
+
+      {/* Scoped to this category: on a category page, suggesting an unrelated
+          department is noise rather than discovery. */}
+      <RecommendationRail placement="category" category={railCategory} limit={8} />
+      <AdSlot placement="category" category={railCategory} />
     </div>
   );
 }
