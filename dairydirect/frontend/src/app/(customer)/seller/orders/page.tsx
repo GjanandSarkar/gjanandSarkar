@@ -3,7 +3,7 @@
 import React, { useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { ArrowLeft, ShoppingBag, Store } from 'lucide-react';
+import { ShoppingBag, Store } from 'lucide-react';
 import { useStore } from '@/store/useStore';
 import { SellerOrdersManager } from '@/components/seller/SellerOrdersManager';
 
@@ -19,30 +19,22 @@ export default function SellerOrdersDedicatedPage() {
   }, [isAuthLoading, user, router]);
 
   return (
-    <div className="min-h-screen bg-[#fafaf8] py-8 px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-background text-foreground transition-colors duration-150 py-8 px-4 sm:px-6 lg:px-8">
       <div className="max-w-7xl mx-auto space-y-6">
         {/* Navigation Breadcrumb / Header */}
-        <div className="bg-white rounded-3xl border border-gray-200/90 shadow-2xs p-6 sm:p-8 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div className="bg-surface rounded-3xl border border-border shadow-2xs p-6 sm:p-8 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div className="flex items-center gap-4">
-            <Link
-              href="/seller/dashboard"
-              className="p-2.5 rounded-xl border border-gray-200 text-gray-700 hover:bg-gray-50 flex items-center justify-center transition-colors shrink-0"
-              title="Return to Seller Dashboard"
-            >
-              <ArrowLeft className="w-5 h-5 text-gray-700" />
-            </Link>
-
             <div className="space-y-0.5">
               <div className="flex items-center gap-2">
-                <span className="px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 text-[10px] font-black uppercase tracking-wider">
+                <span className="px-2 py-0.5 rounded-full bg-primary-fixed text-primary text-[10px] font-bold uppercase tracking-wider">
                   Seller Orders Portal
                 </span>
               </div>
-              <h1 className="text-xl sm:text-2xl font-black text-[#0f3e26] tracking-tight flex items-center gap-2">
-                <ShoppingBag className="w-6 h-6 text-[#c88a23]" />
+              <h1 className="text-xl sm:text-2xl font-bold text-foreground tracking-tight flex items-center gap-2">
+                <ShoppingBag className="w-5 h-5 text-primary" />
                 <span>Seller Order Management</span>
               </h1>
-              <p className="text-xs text-gray-500">
+              <p className="text-xs text-muted-foreground">
                 Track incoming customer purchases, advance fulfillment milestones (Confirmed → Out for Delivery → Delivered), and manage cancellations.
               </p>
             </div>

@@ -330,11 +330,11 @@ export function SellerOrdersManager({ initialStatusFilter = 'all' }: SellerOrder
           onClick={() => setActiveTab('all')}
           className={`p-4 rounded-2xl border text-left transition-all cursor-pointer ${
             activeTab === 'all'
-              ? 'bg-[#0f3e26] text-white border-[#0f3e26] shadow-sm'
+              ? 'bg-primary text-primary-foreground border-primary shadow-sm'
               : 'bg-white hover:bg-gray-50 border-gray-200 text-gray-800'
           }`}
         >
-          <span className={`text-[11px] font-bold uppercase tracking-wider block ${activeTab === 'all' ? 'text-emerald-200' : 'text-gray-400'}`}>
+          <span className={`text-[11px] font-bold uppercase tracking-wider block ${activeTab === 'all' ? 'text-primary-foreground/80' : 'text-gray-400'}`}>
             Total Orders
           </span>
           <span className="text-2xl font-black mt-1 block">{orders.length}</span>
@@ -344,15 +344,15 @@ export function SellerOrdersManager({ initialStatusFilter = 'all' }: SellerOrder
           onClick={() => setActiveTab('requests')}
           className={`p-4 rounded-2xl border text-left transition-all cursor-pointer ${
             activeTab === 'requests'
-              ? 'bg-[#c88a23] text-white border-[#c88a23] shadow-sm'
+              ? 'bg-amber-600 text-white border-amber-600 shadow-sm'
               : 'bg-white hover:bg-amber-50/40 border-gray-200 text-gray-800'
           }`}
         >
           <div className="flex items-center justify-between">
-            <span className={`text-[11px] font-bold uppercase tracking-wider block ${activeTab === 'requests' ? 'text-amber-100' : 'text-[#c88a23]'}`}>
+            <span className={`text-[11px] font-bold uppercase tracking-wider block ${activeTab === 'requests' ? 'text-amber-100' : 'text-amber-700'}`}>
               Requests
             </span>
-            <RotateCcw className={`w-3.5 h-3.5 ${activeTab === 'requests' ? 'text-white' : 'text-[#c88a23]'}`} />
+            <RotateCcw className={`w-3.5 h-3.5 ${activeTab === 'requests' ? 'text-white' : 'text-amber-700'}`} />
           </div>
           <span className="text-2xl font-black mt-1 block">{requestsCount}</span>
         </button>
@@ -412,15 +412,15 @@ export function SellerOrdersManager({ initialStatusFilter = 'all' }: SellerOrder
           onClick={() => setActiveTab('delivered')}
           className={`p-4 rounded-2xl border text-left transition-all cursor-pointer ${
             activeTab === 'delivered'
-              ? 'bg-[#0f3e26] text-white border-[#0f3e26] shadow-sm'
-              : 'bg-white hover:bg-emerald-50/40 border-gray-200 text-gray-800'
+              ? 'bg-primary text-primary-foreground border-primary shadow-sm'
+              : 'bg-white hover:bg-primary-fixed/40 border-gray-200 text-gray-800'
           }`}
         >
           <div className="flex items-center justify-between">
-            <span className={`text-[11px] font-bold uppercase tracking-wider block ${activeTab === 'delivered' ? 'text-emerald-200' : 'text-[#0f3e26]'}`}>
+            <span className={`text-[11px] font-bold uppercase tracking-wider block ${activeTab === 'delivered' ? 'text-primary-foreground/80' : 'text-primary'}`}>
               Delivered
             </span>
-            <Check className={`w-3.5 h-3.5 ${activeTab === 'delivered' ? 'text-white' : 'text-[#0f3e26]'}`} />
+            <Check className={`w-3.5 h-3.5 ${activeTab === 'delivered' ? 'text-white' : 'text-primary'}`} />
           </div>
           <span className="text-2xl font-black mt-1 block">{deliveredCount}</span>
         </button>
@@ -444,7 +444,7 @@ export function SellerOrdersManager({ initialStatusFilter = 'all' }: SellerOrder
               onClick={() => setActiveTab(tab.id)}
               className={`px-3 py-1.5 rounded-full text-xs font-bold whitespace-nowrap transition-all cursor-pointer ${
                 activeTab === tab.id
-                  ? 'bg-[#0f3e26] text-white shadow-xs'
+                  ? 'bg-primary text-primary-foreground shadow-xs'
                   : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'
               }`}
             >
@@ -462,7 +462,7 @@ export function SellerOrdersManager({ initialStatusFilter = 'all' }: SellerOrder
               placeholder="Search order ID, product, phone..."
               value={searchQuery}
               onChange={e => setSearchQuery(e.target.value)}
-              className="w-full pl-9 pr-3 py-2 bg-gray-50 border border-gray-200 rounded-xl text-xs font-medium placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#0f3e26]/20 focus:bg-white"
+              className="w-full pl-9 pr-3 py-2 bg-gray-50 border border-gray-200 rounded-xl text-xs font-medium placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:bg-white"
             />
             {searchQuery && (
               <button
@@ -480,7 +480,7 @@ export function SellerOrdersManager({ initialStatusFilter = 'all' }: SellerOrder
             title="Refresh Orders"
             className="p-2 border border-gray-200 text-gray-700 hover:bg-gray-50 rounded-xl transition-colors cursor-pointer shrink-0"
           >
-            <RefreshCw className={`w-4 h-4 ${isLoading ? 'animate-spin text-[#0f3e26]' : ''}`} />
+            <RefreshCw className={`w-4 h-4 ${isLoading ? 'animate-spin text-primary' : ''}`} />
           </button>
         </div>
       </div>
@@ -488,7 +488,7 @@ export function SellerOrdersManager({ initialStatusFilter = 'all' }: SellerOrder
       {/* ─── Orders List ─── */}
       {isLoading ? (
         <div className="py-20 flex flex-col items-center justify-center gap-3">
-          <Loader2 className="w-8 h-8 text-[#0f3e26] animate-spin" />
+          <Loader2 className="w-8 h-8 text-primary animate-spin" />
           <p className="text-xs font-semibold text-gray-500">Loading your store orders...</p>
         </div>
       ) : filteredOrders.length === 0 ? (
@@ -538,7 +538,7 @@ export function SellerOrdersManager({ initialStatusFilter = 'all' }: SellerOrder
                   {/* Left: ID, Date, Customer */}
                   <div className="space-y-1">
                     <div className="flex items-center gap-2.5 flex-wrap">
-                      <span className="font-mono font-black text-sm text-[#0f3e26]">
+                      <span className="font-mono font-bold text-sm text-foreground">
                         {order.order_number || `ORD-${order.id.slice(0, 8).toUpperCase()}`}
                       </span>
                       <span
@@ -630,8 +630,8 @@ export function SellerOrdersManager({ initialStatusFilter = 'all' }: SellerOrder
                         
                         {/* Ordered Products (2 cols) */}
                         <div className="lg:col-span-2 space-y-3">
-                          <h5 className="text-xs font-bold uppercase tracking-wider text-gray-500 flex items-center gap-1.5">
-                            <Package className="w-4 h-4 text-[#0f3e26]" />
+                          <h5 className="text-xs font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-1.5">
+                            <Package className="w-4 h-4 text-primary" />
                             <span>Ordered Items ({items.length})</span>
                           </h5>
 
@@ -855,8 +855,8 @@ export function SellerOrdersManager({ initialStatusFilter = 'all' }: SellerOrder
 
                         {/* Customer & Delivery Address (1 col) */}
                         <div className="space-y-3">
-                          <h5 className="text-xs font-bold uppercase tracking-wider text-gray-500 flex items-center gap-1.5">
-                            <MapPin className="w-4 h-4 text-[#0f3e26]" />
+                          <h5 className="text-xs font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-1.5">
+                            <MapPin className="w-4 h-4 text-primary" />
                             <span>Delivery Destination</span>
                           </h5>
 
@@ -933,16 +933,16 @@ export function SellerOrdersManager({ initialStatusFilter = 'all' }: SellerOrder
                                       isCancelled
                                         ? 'bg-gray-100 text-gray-400 border border-gray-300'
                                         : isCurrent
-                                          ? 'bg-[#0f3e26] text-white shadow-md ring-4 ring-[#0f3e26]/10'
+                                          ? 'bg-primary text-primary-foreground shadow-sm ring-4 ring-primary/10'
                                           : isPassed
-                                            ? 'bg-emerald-600 text-white'
+                                            ? 'bg-primary text-primary-foreground'
                                             : 'bg-gray-100 text-gray-400 border border-gray-200'
                                     }`}
                                   >
                                     {isPassed ? <Check className="w-3.5 h-3.5" /> : idx + 1}
                                   </div>
                                   <span className={`text-[10px] mt-1 font-bold whitespace-nowrap capitalize ${
-                                    isCurrent ? 'text-[#0f3e26]' : 'text-gray-400'
+                                    isCurrent ? 'text-primary' : 'text-gray-400'
                                   }`}>
                                     {stepStatus.replace(/_/g, ' ')}
                                   </span>
@@ -950,7 +950,7 @@ export function SellerOrdersManager({ initialStatusFilter = 'all' }: SellerOrder
                                 {idx < arr.length - 1 && (
                                   <div
                                     className={`flex-1 h-1 mx-2 rounded-full transition-colors ${
-                                      isPassed && !isCancelled ? 'bg-emerald-500' : 'bg-gray-200'
+                                      isPassed && !isCancelled ? 'bg-primary' : 'bg-gray-200'
                                     }`}
                                   />
                                 )}
@@ -977,10 +977,10 @@ export function SellerOrdersManager({ initialStatusFilter = 'all' }: SellerOrder
                                 title={blockedReason ?? (isCurrent ? 'Current Status' : 'Confirm Order and prepare for dispatch')}
                                 className={`px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer ${
                                   isCurrent
-                                    ? 'bg-emerald-100 text-emerald-900 border-2 border-emerald-500 shadow-2xs cursor-default'
+                                    ? 'bg-primary-fixed text-primary border-2 border-primary shadow-2xs cursor-default'
                                     : isBlocked
                                       ? 'bg-gray-100 text-gray-400 border border-gray-200 cursor-not-allowed line-through opacity-50'
-                                      : 'bg-[#0f3e26] hover:bg-[#144f31] text-white shadow-xs active:scale-95'
+                                      : 'bg-primary hover:bg-primary-hover text-primary-foreground shadow-xs active:scale-95'
                                 }`}
                               >
                                 {isBusy ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <CheckCircle2 className="w-3.5 h-3.5" />}
@@ -1003,10 +1003,10 @@ export function SellerOrdersManager({ initialStatusFilter = 'all' }: SellerOrder
                                 title={blockedReason ?? (isCurrent ? 'Current Status' : 'Mark Out for Delivery')}
                                 className={`px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer ${
                                   isCurrent
-                                    ? 'bg-yellow-100 text-yellow-900 border-2 border-yellow-500 shadow-2xs cursor-default'
+                                    ? 'bg-blue-100 text-blue-900 border-2 border-blue-500 shadow-2xs cursor-default'
                                     : isBlocked
                                       ? 'bg-gray-100 text-gray-400 border border-gray-200 cursor-not-allowed line-through opacity-50'
-                                      : 'bg-[#c88a23] hover:bg-[#ad7418] text-white shadow-xs active:scale-95'
+                                      : 'bg-blue-600 hover:bg-blue-700 text-white shadow-xs active:scale-95'
                                 }`}
                               >
                                 {isBusy ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Truck className="w-3.5 h-3.5" />}
@@ -1125,7 +1125,7 @@ export function SellerOrdersManager({ initialStatusFilter = 'all' }: SellerOrder
                 <select
                   value={cancelReason}
                   onChange={e => setCancelReason(e.target.value)}
-                  className="w-full p-2.5 rounded-xl border border-gray-200 text-xs font-semibold outline-none focus:ring-2 focus:ring-[#0f3e26]/20 bg-white"
+                  className="w-full p-2.5 rounded-xl border border-gray-200 text-xs font-semibold outline-none focus:ring-2 focus:ring-primary/20 bg-white"
                 >
                   <option value="Out of stock">Product Out of Stock</option>
                   <option value="Quality check failed">Freshness / Quality Standards Not Met</option>
@@ -1143,7 +1143,7 @@ export function SellerOrdersManager({ initialStatusFilter = 'all' }: SellerOrder
                     value={customCancelReason}
                     onChange={e => setCustomCancelReason(e.target.value)}
                     placeholder="Enter details..."
-                    className="w-full p-2.5 rounded-xl border border-gray-200 text-xs font-medium outline-none focus:ring-2 focus:ring-[#0f3e26]/20"
+                    className="w-full p-2.5 rounded-xl border border-gray-200 text-xs font-medium outline-none focus:ring-2 focus:ring-primary/20"
                   />
                 </div>
               )}
@@ -1237,7 +1237,7 @@ export function SellerOrdersManager({ initialStatusFilter = 'all' }: SellerOrder
                       ? 'Explain why this request is being rejected (mandatory)...'
                       : 'Add any optional notes for the customer and audit log...'
                   }
-                  className="w-full p-2.5 rounded-xl border border-gray-200 text-xs font-medium outline-none focus:ring-2 focus:ring-[#0f3e26]/20 resize-none"
+                  className="w-full p-2.5 rounded-xl border border-gray-200 text-xs font-medium outline-none focus:ring-2 focus:ring-primary/20 resize-none"
                   required={decisionModal.action === 'reject'}
                 />
               </div>

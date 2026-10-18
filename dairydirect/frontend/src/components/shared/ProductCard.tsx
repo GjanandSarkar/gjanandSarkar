@@ -184,24 +184,9 @@ export function ProductCard({
 
   return (
     <>
-      {/*
-        The card was a plain <div> with an onClick handler: unreachable by
-        keyboard, not announced as a link, no focus ring, and impossible to
-        middle-click or open in a new tab.
-
-        It is not wrapped in an <a> either, because the card contains buttons
-        (wishlist, add to cart, quantity stepper) and interactive content
-        nested inside an anchor is invalid HTML — it breaks keyboard order and
-        confuses screen readers.
-
-        Instead this uses the "stretched link" pattern: a real anchor that is
-        visually hidden but absolutely covers the card, sitting *below* the
-        controls in z-order. The whole card is clickable, the link is properly
-        announced and focusable, and the buttons stay genuinely separate.
-      */}
-      <div className="flex flex-col h-full bg-surface rounded-2xl border border-border/80 p-3.5 shadow-2xs hover:border-secondary group relative lift pressable transition-colors duration-150">
+      <div className="flex flex-col h-full bg-surface rounded-xl border border-border hover:border-gray-300 p-2.5 sm:p-3 shadow-2xs hover:shadow-sm group relative transition-all duration-150">
         {/* Product Image Container */}
-        <div className="relative w-full aspect-square bg-surface-muted rounded-xl overflow-hidden mb-3 p-2 flex items-center justify-center border border-border/40">
+        <div className="relative w-full aspect-square bg-surface-muted/40 rounded-lg overflow-hidden mb-2.5 flex items-center justify-center border border-border/50">
           <Link
             href={`/products/${product.id}`}
             className="absolute inset-0 z-0"
@@ -214,40 +199,41 @@ export function ProductCard({
             fill
             sizes="(max-width: 768px) 50vw, 25vw"
             priority={priority}
-            className={`w-full h-full object-contain transition-transform duration-300 group-hover:scale-105 pointer-events-none ${
-              isAllOutOfStock ? 'grayscale opacity-75' : ''
+            className={`w-full h-full object-cover transition-transform duration-200 group-hover:scale-105 pointer-events-none ${
+              isAllOutOfStock ? 'grayscale opacity-60' : ''
             }`}
             onError={(e) => {
               (e.currentTarget as HTMLImageElement).srcset = PLACEHOLDER_PRODUCT_IMAGE;
             }}
           />
 
-          {/* Real discount badge */}
+          {/* Genuine discount badge */}
           {hasRealDiscount && discountPct >= 1 && (
-            <span className="absolute top-2 left-2 bg-secondary text-white text-[10px] font-black px-1.5 py-0.5 rounded-md shadow-2xs tabular-nums">
+            <span className="absolute top-1.5 left-1.5 bg-primary text-white text-[10px] font-bold px-1.5 py-0.5 rounded shadow-2xs tabular-nums">
               {discountPct}% OFF
             </span>
           )}
 
           {/* Stock Badges */}
           {isAllOutOfStock ? (
-            <span className="absolute bottom-2 left-2 bg-rose-600 text-white text-[10px] font-extrabold px-2 py-0.5 rounded-md shadow-2xs">
+            <span className="absolute bottom-1.5 left-1.5 bg-neutral-900/90 text-white text-[10px] font-semibold px-1.5 py-0.5 rounded shadow-2xs">
               Out of Stock
             </span>
           ) : isLowStock ? (
-            <span className="absolute bottom-2 left-2 bg-amber-600 text-white text-[10px] font-extrabold px-2 py-0.5 rounded-md shadow-2xs">
+            <span className="absolute bottom-1.5 left-1.5 bg-amber-600 text-white text-[10px] font-semibold px-1.5 py-0.5 rounded shadow-2xs">
               Only {availableStock} left
             </span>
           ) : null}
 
-          {/* Wishlist Heart Button */}
+          {/* Wishlist Button */}
           <button
             type="button"
             onClick={handleToggleWishlist}
-            className={`absolute top-2 right-2 w-7 h-7 rounded-full bg-surface/90 backdrop-blur-xs shadow-2xs border border-border/80 flex items-center justify-center transition-all hover:scale-110 active:scale-95 z-20 ${
-              isSaved ? 'text-rose-600' : 'text-muted hover:text-rose-500'
+            className={`absolute top-1.5 right-1.5 w-7 h-7 rounded-full bg-surface/90 shadow-2xs border border-border flex items-center justify-center transition-all hover:scale-110 active:scale-95 z-20 ${
+              isSaved ? 'text-rose-600' : 'text-foreground-muted hover:text-rose-500'
             }`}
             title={isSaved ? 'Remove from Wishlist' : 'Add to Wishlist'}
+            aria-label={isSaved ? 'Remove from Wishlist' : 'Add to Wishlist'}
           >
             <Heart className={`w-3.5 h-3.5 ${isSaved ? 'fill-rose-600' : ''}`} />
           </button>
@@ -261,17 +247,17 @@ export function ProductCard({
                 e.stopPropagation();
                 setIsEditModalOpen(true);
               }}
-              className="absolute top-2 right-10 w-7 h-7 rounded-full bg-surface shadow-md border border-border flex items-center justify-center transition-all hover:scale-110 active:scale-95 z-20 text-primary"
+              className="absolute top-1.5 right-9 w-7 h-7 rounded-full bg-surface shadow-xs border border-border flex items-center justify-center transition-all hover:scale-110 active:scale-95 z-20 text-primary"
               title="Admin: Quick Edit"
             >
-              <Pencil className="w-3.5 h-3.5" strokeWidth={2.5} />
+              <Pencil className="w-3.5 h-3.5 stroke-[2.5]" />
             </button>
           )}
 
-          {/* Cart Quantity Badge */}
-          {isInCart && (
+          {/* Cart Quantity Badge (when looking at multi-variant items) */}
+          {isInCart && variants.length > 1 && (
             <div
-              className="absolute bottom-2 right-2 w-5 h-5 rounded-full bg-secondary text-white text-[10px] font-black flex items-center justify-center shadow-md z-10"
+              className="absolute bottom-1.5 right-1.5 w-5 h-5 rounded-full bg-primary text-white text-[10px] font-bold flex items-center justify-center shadow-xs z-10"
             >
               {totalQuantity}
             </div>
@@ -281,45 +267,43 @@ export function ProductCard({
         {/* Content Section */}
         <div className="flex flex-col flex-1 justify-between">
           <div>
-            {product.brand && (
-              <span className="text-[10px] text-muted font-bold block mb-0.5 truncate uppercase tracking-wider">
-                {product.brand}
-              </span>
-            )}
+            {/* Weight / Pack Size */}
+            <div className="flex items-center justify-between text-[11px] text-foreground-muted font-medium mb-1">
+              <span>{selectedVariant.weight}</span>
+              {variants.length > 1 && (
+                <span className="text-[10px] text-primary font-semibold">
+                  +{variants.length - 1} options
+                </span>
+              )}
+            </div>
 
             <Link href={`/products/${product.id}`} className="block">
-              <h3 className="text-xs sm:text-sm font-bold text-foreground line-clamp-1 group-hover:text-primary transition-colors leading-snug">
+              <h3 className="text-xs sm:text-[13px] font-semibold text-foreground line-clamp-2 min-h-[2rem] sm:min-h-[2.4rem] group-hover:text-primary transition-colors leading-snug">
                 {product.name}
               </h3>
             </Link>
 
-            <div className="flex items-center gap-1 text-[10px] font-bold mt-1 mb-2">
-              {showRating && (
-                <>
-                  <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-md bg-primary text-foreground-inverse">
-                    <Star className="w-2.5 h-2.5 fill-current" />
-                    {rating!.toFixed(1)}
-                  </span>
-                  <span className="text-muted font-normal">({reviewCount})</span>
-                  <span className="text-border">•</span>
-                </>
-              )}
-              <span className="text-muted font-semibold bg-surface-muted px-1.5 py-0.5 rounded-md">
-                {selectedVariant.weight}
-                {variants.length > 1 && ` (+${variants.length - 1})`}
-              </span>
-            </div>
+            {/* Rating only if real reviews exist */}
+            {showRating && (
+              <div className="flex items-center gap-1 text-[11px] font-medium mt-1 text-foreground-muted">
+                <span className="inline-flex items-center gap-0.5 px-1 py-0.2 rounded bg-primary/10 text-primary font-bold text-[10px]">
+                  <Star className="w-2.5 h-2.5 fill-current" />
+                  {rating!.toFixed(1)}
+                </span>
+                <span>({reviewCount})</span>
+              </div>
+            )}
           </div>
 
           {/* Price & Action Button Row */}
-          <div className="relative z-20 flex items-center justify-between gap-2 pt-2 border-t border-border/60 mt-1">
-            <div className="flex flex-col">
-              <div className="flex items-baseline gap-1">
-                <span className="text-base font-black text-primary">
+          <div className="relative z-20 flex items-center justify-between gap-2 pt-2 border-t border-border/50 mt-2">
+            <div className="flex flex-col min-w-0">
+              <div className="flex items-baseline gap-1.5">
+                <span className="text-sm sm:text-base font-bold text-foreground">
                   ₹{selectedVariant.price}
                 </span>
                 {hasRealDiscount && (
-                  <span className="text-[11px] text-muted line-through">
+                  <span className="text-[11px] text-foreground-muted line-through truncate">
                     ₹{originalPrice}
                   </span>
                 )}
@@ -329,41 +313,43 @@ export function ProductCard({
             {variants.length === 1 && isOutOfStock ? (
               <button
                 disabled
-                className="px-3 py-1.5 bg-surface-muted text-muted text-xs font-bold rounded-lg cursor-not-allowed border border-border"
+                className="px-3 py-1.5 bg-surface-muted text-foreground-muted text-xs font-semibold rounded-lg cursor-not-allowed border border-border"
               >
-                Sold Out
+                Out of Stock
               </button>
             ) : !isInCart ? (
               <button
                 type="button"
                 onClick={handleAdd}
                 disabled={busy || (variants.length === 1 && isOutOfStock)}
-                className="px-3.5 py-1.5 bg-primary/10 hover:bg-primary text-primary hover:text-foreground-inverse border border-primary/30 font-black text-xs uppercase tracking-wider rounded-lg transition-all duration-150 flex items-center justify-center gap-1 shadow-2xs active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
+                className="px-3 sm:px-4 py-1.5 bg-primary-fixed hover:bg-primary text-primary hover:text-white border border-primary/40 hover:border-primary font-bold text-xs uppercase tracking-wide rounded-lg transition-all duration-150 flex items-center justify-center gap-1 shadow-2xs active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
               >
-                <span>{variants.length > 1 ? 'Select' : 'ADD'}</span>
+                <span>{variants.length > 1 ? 'Options' : 'ADD'}</span>
                 <Plus className="w-3.5 h-3.5 stroke-[2.5]" />
               </button>
             ) : (
-              <div className="flex items-center bg-primary text-foreground-inverse rounded-lg overflow-hidden shadow-2xs">
+              <div className="flex items-center bg-primary text-white rounded-lg overflow-hidden shadow-2xs border border-primary">
                 <button
                   type="button"
                   onClick={(e) => handleUpdate(e, 'dec')}
                   disabled={busy}
-                  className="w-7 h-7 flex items-center justify-center text-foreground-inverse hover:bg-primary-hover transition-colors active:scale-90 cursor-pointer"
+                  className="w-7 h-7 flex items-center justify-center text-white hover:bg-primary-hover transition-colors active:scale-90 cursor-pointer"
+                  aria-label="Decrease quantity"
                 >
-                  <Minus className="w-3 h-3 stroke-[3]" />
+                  <Minus className="w-3 h-3 stroke-[2.5]" />
                 </button>
-                <span className="px-1.5 text-center text-xs font-black min-w-[20px] select-none">
+                <span className="px-1.5 text-center text-xs font-bold min-w-[20px] select-none text-white">
                   {variants.length > 1 ? totalQuantity : currentVariantQty}
                 </span>
                 <button
                   type="button"
                   onClick={(e) => handleUpdate(e, 'inc')}
                   disabled={busy || (variants.length === 1 && currentVariantQty >= availableStock)}
-                  className="w-7 h-7 flex items-center justify-center hover:bg-primary-hover transition-colors active:scale-90 disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"
+                  className="w-7 h-7 flex items-center justify-center hover:bg-primary-hover transition-colors active:scale-90 disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer text-white"
                   title={currentVariantQty >= availableStock ? 'Max available stock reached' : undefined}
+                  aria-label="Increase quantity"
                 >
-                  <Plus className="w-3 h-3 stroke-[3]" />
+                  <Plus className="w-3 h-3 stroke-[2.5]" />
                 </button>
               </div>
             )}

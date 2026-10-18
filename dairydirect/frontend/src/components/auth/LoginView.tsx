@@ -178,11 +178,7 @@ function LoginScreenInner() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4 bg-background relative overflow-hidden transition-colors duration-150" suppressHydrationWarning>
-      
-      {/* Decorative Palace Glow Background */}
-      <div className="absolute -top-32 -right-32 w-96 h-96 rounded-full bg-primary/10 blur-[100px] pointer-events-none" />
-      <div className="absolute -bottom-32 -left-32 w-96 h-96 rounded-full bg-secondary/15 blur-[100px] pointer-events-none" />
+    <div className="min-h-screen flex items-center justify-center p-4 bg-background relative transition-colors duration-150" suppressHydrationWarning>
 
       <div className="w-full max-w-[440px] relative z-10">
         
@@ -370,8 +366,8 @@ function LoginScreenInner() {
                 className="w-full p-3.5 rounded-xl border border-border hover:border-primary bg-primary/5 hover:bg-primary/10 flex items-center justify-between text-left transition-all group cursor-pointer"
               >
                 <div className="flex items-center gap-3">
-                  <div className="w-9 h-9 rounded-lg bg-primary text-foreground-inverse flex items-center justify-center font-bold text-sm">
-                    👤
+                  <div className="w-9 h-9 rounded-lg bg-primary text-white flex items-center justify-center font-bold text-sm">
+                    <User className="w-4 h-4" />
                   </div>
                   <div>
                     <h4 className="text-xs font-bold text-foreground group-hover:text-primary transition-colors">
@@ -389,11 +385,11 @@ function LoginScreenInner() {
               <button
                 type="button"
                 onClick={() => handleQuickLogin('seller')}
-                className="w-full p-3.5 rounded-xl border border-border hover:border-secondary bg-secondary/5 hover:bg-secondary/10 flex items-center justify-between text-left transition-all group cursor-pointer"
+                className="w-full p-3.5 rounded-xl border border-border hover:border-secondary bg-surface-muted/50 hover:bg-surface-muted flex items-center justify-between text-left transition-all group cursor-pointer"
               >
                 <div className="flex items-center gap-3">
                   <div className="w-9 h-9 rounded-lg bg-secondary text-white flex items-center justify-center font-bold text-sm">
-                    🏪
+                    <Store className="w-4 h-4" />
                   </div>
                   <div>
                     <h4 className="text-xs font-bold text-foreground group-hover:text-secondary transition-colors">
@@ -411,14 +407,14 @@ function LoginScreenInner() {
               <button
                 type="button"
                 onClick={() => handleQuickLogin('admin')}
-                className="w-full p-3.5 rounded-xl border border-border hover:border-indigo-500 bg-indigo-500/5 hover:bg-indigo-500/10 flex items-center justify-between text-left transition-all group cursor-pointer"
+                className="w-full p-3.5 rounded-xl border border-border hover:border-slate-800 bg-surface-muted/50 hover:bg-surface-muted flex items-center justify-between text-left transition-all group cursor-pointer"
               >
                 <div className="flex items-center gap-3">
-                  <div className="w-9 h-9 rounded-lg bg-indigo-600 text-white flex items-center justify-center font-bold text-xs tracking-tight">
-                    SA
+                  <div className="w-9 h-9 rounded-lg bg-slate-900 text-white flex items-center justify-center">
+                    <ShieldCheck className="w-4 h-4" />
                   </div>
                   <div>
-                    <h4 className="text-xs font-bold text-foreground group-hover:text-indigo-400 transition-colors">
+                    <h4 className="text-xs font-bold text-foreground group-hover:text-slate-900 transition-colors">
                       Super Admin
                     </h4>
                     <p className="text-[10px] text-muted">
@@ -426,7 +422,7 @@ function LoginScreenInner() {
                     </p>
                   </div>
                 </div>
-                <ArrowRight className="w-4 h-4 text-muted group-hover:text-indigo-400 group-hover:translate-x-0.5 transition-transform" />
+                <ArrowRight className="w-4 h-4 text-muted group-hover:text-slate-900 group-hover:translate-x-0.5 transition-transform" />
               </button>
             </div>
           )}

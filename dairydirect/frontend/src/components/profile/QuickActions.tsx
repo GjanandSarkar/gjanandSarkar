@@ -17,60 +17,52 @@ export function QuickActions({ onLanguageClick, hideHeader = false }: QuickActio
       label: t('qualityReports') || 'Quality Reports',
       icon: HeartHandshake,
       href: '/profile/quality-reports',
-      color: 'text-blue-600',
-      bg: 'bg-blue-50',
     },
     {
-      label: t('helpCentre') || 'Support',
+      label: t('helpCentre') || 'Support & Help',
       icon: HelpCircle,
-      href: '#', // Placeholder
-      color: 'text-orange-600',
-      bg: 'bg-orange-50',
+      href: '/support',
     },
     {
       label: t('termsPolicy') || 'Terms & Policy',
       icon: FileText,
-      href: '#', // Placeholder
-      color: 'text-purple-600',
-      bg: 'bg-purple-50',
+      href: '/terms',
     },
     {
       label: t('languageSettings') || 'Language',
       icon: Globe,
       onClick: onLanguageClick,
-      color: 'text-emerald-600',
-      bg: 'bg-emerald-50',
     },
   ];
 
   return (
     <div>
       {!hideHeader && (
-        <h2 className="text-lg font-black text-dark tracking-wide mb-4">Settings & Support</h2>
+        <h2 className="text-sm font-bold text-foreground mb-3">Settings & Support</h2>
       )}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
         {actions.map((action, idx) => {
           const Icon = action.icon;
           
           const Content = (
-            <div className="bg-white rounded-[20px] p-4 border border-sand/50 shadow-sm flex flex-col items-center justify-center text-center h-full hover:border-primary/50 transition-colors active:scale-95 cursor-pointer">
-              <div className={`w-10 h-10 rounded-full ${action.bg} ${action.color} flex items-center justify-center mb-3`}>
-                <Icon className="w-5 h-5" />
+            <div className="bg-surface rounded-lg p-3 border border-border flex items-center gap-3 hover:border-border/80 hover:bg-surface-muted/30 transition-colors cursor-pointer">
+              <div className="w-8 h-8 rounded-lg bg-surface-muted border border-border flex items-center justify-center text-primary shrink-0">
+                <Icon className="w-4 h-4" />
               </div>
-              <span className="font-bold text-dark text-xs">{action.label}</span>
+              <span className="font-bold text-foreground text-xs">{action.label}</span>
             </div>
           );
 
           if (action.href) {
             return (
-              <Link key={idx} href={action.href} className="block h-full">
+              <Link key={idx} href={action.href} className="block">
                 {Content}
               </Link>
             );
           }
 
           return (
-            <div key={idx} onClick={action.onClick} className="h-full">
+            <div key={idx} onClick={action.onClick}>
               {Content}
             </div>
           );

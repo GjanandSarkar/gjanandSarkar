@@ -133,7 +133,7 @@ export default function SupportPage() {
   if (isAuthLoading || loading) {
     return (
       <div className="min-h-screen bg-[#fafaf8] flex flex-col items-center justify-center gap-3">
-        <Loader2 className="w-8 h-8 animate-spin text-[#0f3e26]" />
+        <Loader2 className="w-8 h-8 animate-spin text-primary" />
         <p className="text-xs font-bold text-gray-500">Loading support portal...</p>
       </div>
     );
@@ -174,8 +174,8 @@ export default function SupportPage() {
         {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8 border-b border-gray-200 pb-4">
           <div>
-            <span className="text-[10px] font-black uppercase tracking-widest text-[#c88a23]">Customer Care</span>
-            <h1 className="text-2xl md:text-3xl font-black text-[#0f3e26]">Support Tickets</h1>
+            <span className="text-[10px] font-bold uppercase tracking-widest text-primary">Customer Care</span>
+            <h1 className="text-2xl md:text-3xl font-bold text-foreground">Support Tickets</h1>
           </div>
           <div className="flex items-center gap-2">
             <button
@@ -184,16 +184,16 @@ export default function SupportPage() {
               className="p-2.5 bg-white border border-gray-200 rounded-xl text-gray-600 hover:bg-gray-50 transition shadow-2xs disabled:opacity-50"
               title="Refresh tickets"
             >
-              <RefreshCw className={`w-4 h-4 ${isRefreshing ? 'animate-spin text-emerald-600' : ''}`} />
+              <RefreshCw className={`w-4 h-4 ${isRefreshing ? 'animate-spin text-primary' : ''}`} />
             </button>
             <button 
               onClick={() => {
                 setShowNew(!showNew);
                 setError('');
               }}
-              className="flex items-center gap-2 px-5 py-2.5 bg-[#0f3e26] text-white text-xs font-bold rounded-xl hover:bg-[#144f31] transition shadow-sm active:scale-95"
+              className="flex items-center gap-2 px-5 py-2.5 bg-primary text-primary-foreground text-xs font-bold rounded-xl hover:bg-primary-hover transition shadow-sm active:scale-95"
             >
-              {showNew ? 'Cancel' : <><Plus className="w-4 h-4 text-[#c88a23]" /> New Ticket</>}
+              {showNew ? 'Cancel' : <><Plus className="w-4 h-4 text-primary-foreground" /> New Ticket</>}
             </button>
           </div>
         </div>
@@ -212,8 +212,8 @@ export default function SupportPage() {
         {/* New Ticket Form Modal/Drawer */}
         {showNew && (
           <div className="bg-white rounded-3xl shadow-md border border-gray-200/80 p-6 sm:p-8 mb-8 animate-in fade-in zoom-in-95">
-            <h2 className="text-base font-black text-[#0f3e26] mb-1">Create Support Ticket</h2>
-            <p className="text-xs text-gray-500 mb-6">
+            <h2 className="text-base font-bold text-foreground mb-1">Create Support Ticket</h2>
+            <p className="text-xs text-muted-foreground mb-6">
               Our support team will review your inquiry and respond as soon as possible.
             </p>
 
@@ -235,7 +235,7 @@ export default function SupportPage() {
                     required 
                     value={form.subject} 
                     onChange={e => setForm({...form, subject: e.target.value})}
-                    className="w-full px-4 py-2.5 rounded-xl border border-gray-300 text-xs focus:ring-1 focus:ring-[#0f3e26] focus:border-[#0f3e26] outline-none"
+                    className="w-full px-4 py-2.5 rounded-xl border border-gray-300 text-xs focus:ring-1 focus:ring-primary focus:border-primary outline-none"
                     placeholder="e.g. Question about order delivery or ghee purity"
                   />
                 </div>
@@ -248,7 +248,7 @@ export default function SupportPage() {
                     type="text" 
                     value={form.orderId} 
                     onChange={e => setForm({...form, orderId: e.target.value})}
-                    className="w-full px-4 py-2.5 rounded-xl border border-gray-300 text-xs focus:ring-1 focus:ring-[#0f3e26] focus:border-[#0f3e26] outline-none font-mono"
+                    className="w-full px-4 py-2.5 rounded-xl border border-gray-300 text-xs focus:ring-1 focus:ring-primary focus:border-primary outline-none font-mono"
                     placeholder="e.g. ORD-2026-1001 or order UUID"
                   />
                   <p className="text-[10px] text-gray-400 mt-1">If your issue is related to an existing order, enter it here.</p>
@@ -261,7 +261,7 @@ export default function SupportPage() {
                   <select
                     value={form.priority}
                     onChange={e => setForm({...form, priority: e.target.value})}
-                    className="w-full px-4 py-2.5 rounded-xl border border-gray-300 text-xs bg-white focus:ring-1 focus:ring-[#0f3e26] outline-none font-medium"
+                    className="w-full px-4 py-2.5 rounded-xl border border-gray-300 text-xs bg-white focus:ring-1 focus:ring-primary outline-none font-medium"
                   >
                     <option value="low">Low (General Query)</option>
                     <option value="normal">Normal (Standard Assistance)</option>
@@ -279,7 +279,7 @@ export default function SupportPage() {
                     rows={4} 
                     value={form.message} 
                     onChange={e => setForm({...form, message: e.target.value})}
-                    className="w-full px-4 py-2.5 rounded-xl border border-gray-300 text-xs focus:ring-1 focus:ring-[#0f3e26] focus:border-[#0f3e26] outline-none resize-none"
+                    className="w-full px-4 py-2.5 rounded-xl border border-gray-300 text-xs focus:ring-1 focus:ring-primary focus:border-primary outline-none resize-none"
                     placeholder="Describe your issue or question in detail..."
                   />
                 </div>
@@ -296,16 +296,16 @@ export default function SupportPage() {
                 <button 
                   type="submit" 
                   disabled={submitting}
-                  className="px-6 py-2.5 bg-[#0f3e26] hover:bg-[#144f31] text-white text-xs font-bold rounded-xl shadow-md flex items-center gap-2 transition disabled:opacity-50 active:scale-95"
+                  className="px-6 py-2.5 bg-primary hover:bg-primary-hover text-primary-foreground text-xs font-bold rounded-xl shadow-sm flex items-center gap-2 transition disabled:opacity-50 active:scale-95"
                 >
                   {submitting ? (
                     <>
-                      <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                      <Loader2 className="w-3.5 h-3.5 animate-spin text-primary-foreground" />
                       <span>Submitting Ticket...</span>
                     </>
                   ) : (
                     <>
-                      <Send className="w-3.5 h-3.5 text-[#c88a23]" />
+                      <Send className="w-3.5 h-3.5 text-primary-foreground" />
                       <span>Submit Ticket</span>
                     </>
                   )}

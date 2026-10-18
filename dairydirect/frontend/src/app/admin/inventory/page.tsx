@@ -124,25 +124,29 @@ export default function AdminInventoryPage() {
   );
 
   const statusStyle = {
-    in_stock: { bg: '#c2efac', text: '#2d5a27', label: 'In Stock' },
-    low_stock: { bg: '#fff8e6', text: '#7d5200', label: 'Low Stock' },
-    out_of_stock: { bg: '#ffdcc7', text: '#774117', label: 'Out of Stock' },
+    in_stock: { bg: 'bg-emerald-50 text-emerald-700 border-emerald-200', label: 'In Stock' },
+    low_stock: { bg: 'bg-amber-50 text-amber-700 border-amber-200', label: 'Low Stock' },
+    out_of_stock: { bg: 'bg-rose-50 text-rose-700 border-rose-200', label: 'Out of Stock' },
   };
 
   return (
-    <div className="flex flex-col min-h-screen" style={{ background: 'var(--color-background)' }}>
+    <div className="flex flex-col min-h-screen bg-background">
       {/* Header */}
-      <div
-        className="px-6 md:px-10 pt-8 pb-6"
-        style={{ background: 'var(--color-surface-container-lowest)', borderBottom: '1px solid rgba(195,201,187,0.2)' }}
-      >
+      <div className="px-5 sm:px-8 pt-6 pb-5 bg-surface border-b border-border">
         <div className="flex items-center gap-3 mb-4">
-          <Link href="/admin" className="p-1.5 rounded-[8px] hover:opacity-70 transition-opacity" style={{ background: 'var(--color-surface-container-low)' }}>
-            <ArrowLeft className="w-4 h-4" style={{ color: 'var(--color-on-surface)' }} />
+          <Link 
+            href="/admin" 
+            className="p-2 rounded-lg border border-border bg-surface hover:bg-surface-muted text-foreground-muted hover:text-foreground transition-colors"
+          >
+            <ArrowLeft className="w-4 h-4" />
           </Link>
           <div>
-            <h1 className="font-extrabold text-[24px]" style={{ color: 'var(--color-on-surface)' }}>Inventory Management</h1>
-            <p className="text-[12px]" style={{ color: 'var(--color-on-surface-variant)' }}>Monitor and update stock levels for all products</p>
+            <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-foreground">
+              Inventory & Realtime Stock
+            </h1>
+            <p className="text-xs text-foreground-muted mt-0.5">
+              Live stock levels, SKU thresholds, batch numbers, and reorder alerts
+            </p>
           </div>
         </div>
 
@@ -150,18 +154,20 @@ export default function AdminInventoryPage() {
         {stats && (
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
             {[
-              { label: 'Out of Stock', value: stats.out_of_stock, bg: '#ffdcc7', text: '#774117', icon: X },
-              { label: 'Low Stock', value: stats.low_stock, bg: '#fff8e6', text: '#7d5200', icon: AlertTriangle },
-              { label: 'In Stock', value: stats.in_stock, bg: '#c2efac', text: '#2d5a27', icon: CheckCircle2 },
-              { label: 'Inventory Value', value: `₹${parseFloat(stats.total_inventory_value || '0').toLocaleString('en-IN', { maximumFractionDigits: 0 })}`, bg: '#dce8ff', text: '#4a6fa5', icon: Package },
+              { label: 'Out of Stock', value: stats.out_of_stock, iconClass: 'text-rose-600 bg-rose-50', icon: X },
+              { label: 'Low Stock', value: stats.low_stock, iconClass: 'text-amber-600 bg-amber-50', icon: AlertTriangle },
+              { label: 'In Stock', value: stats.in_stock, iconClass: 'text-primary bg-primary-fixed', icon: CheckCircle2 },
+              { label: 'Inventory Value', value: `₹${parseFloat(stats.total_inventory_value || '0').toLocaleString('en-IN', { maximumFractionDigits: 0 })}`, iconClass: 'text-blue-600 bg-blue-50', icon: Package },
             ].map((s) => {
               const Icon = s.icon;
               return (
-                <div key={s.label} className="rounded-[12px] px-4 py-3 flex items-center gap-3" style={{ background: s.bg }}>
-                  <Icon className="w-5 h-5 shrink-0" style={{ color: s.text }} strokeWidth={2} />
+                <div key={s.label} className="rounded-xl p-3.5 bg-surface border border-border flex items-center gap-3 shadow-2xs">
+                  <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${s.iconClass} shrink-0`}>
+                    <Icon className="w-4 h-4" strokeWidth={2.2} />
+                  </div>
                   <div>
-                    <p className="font-extrabold text-[18px] leading-none" style={{ color: s.text }}>{s.value}</p>
-                    <p className="text-[10px] font-semibold mt-0.5" style={{ color: s.text, opacity: 0.7 }}>{s.label}</p>
+                    <p className="text-lg font-bold text-foreground leading-none">{s.value}</p>
+                    <p className="text-[10px] text-foreground-muted font-medium mt-1">{s.label}</p>
                   </div>
                 </div>
               );
@@ -170,23 +176,18 @@ export default function AdminInventoryPage() {
         )}
       </div>
 
-      <div className="px-6 md:px-10 py-5">
+      <div className="px-5 sm:px-8 py-5">
         {/* Controls */}
-        <div className="flex flex-wrap gap-3 mb-5">
+        <div className="flex flex-wrap gap-2.5 mb-5 items-center">
           {/* Search */}
           <div className="flex-1 min-w-[200px] relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4" style={{ color: 'var(--color-on-surface-variant)' }} />
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-foreground-muted" />
             <input
               type="text"
-              placeholder="Search products..."
+              placeholder="Search products by title, SKU, or category..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="w-full pl-9 pr-3 py-2.5 rounded-[10px] text-[13px] outline-none"
-              style={{
-                background: 'var(--color-surface-container-lowest)',
-                border: '1px solid rgba(195,201,187,0.4)',
-                color: 'var(--color-on-surface)',
-              }}
+              className="w-full pl-9 pr-3 py-2 rounded-xl text-xs bg-surface border border-border focus:border-primary focus:ring-1 focus:ring-primary outline-none text-foreground placeholder:text-foreground-muted transition-all"
             />
           </div>
 
@@ -194,77 +195,76 @@ export default function AdminInventoryPage() {
           {(['all', 'low_stock', 'out_of_stock'] as const).map((f) => (
             <button
               key={f}
+              type="button"
               onClick={() => setFilter(f)}
-              className="px-3 py-2 rounded-[10px] text-[12px] font-semibold transition-all"
-              style={{
-                background: filter === f ? 'var(--color-primary)' : 'var(--color-surface-container-low)',
-                color: filter === f ? '#fff' : 'var(--color-on-surface)',
-              }}
+              className={`px-3 py-2 rounded-xl text-xs font-semibold transition-all border cursor-pointer ${
+                filter === f
+                  ? 'bg-primary text-white border-primary shadow-2xs font-bold'
+                  : 'bg-surface text-foreground-muted border-border hover:text-foreground hover:bg-surface-muted'
+              }`}
             >
               {f === 'all' ? 'All Items' : f === 'low_stock' ? 'Low Stock' : 'Out of Stock'}
             </button>
           ))}
 
           <button
+            type="button"
             onClick={fetchInventory}
-            className="p-2 rounded-[10px]"
-            style={{ background: 'var(--color-surface-container-low)' }}
+            title="Refresh Inventory"
+            className="p-2 rounded-xl border border-border bg-surface hover:bg-surface-muted text-foreground-muted hover:text-foreground transition-colors cursor-pointer"
           >
-            <RefreshCw className="w-4 h-4" style={{ color: 'var(--color-primary)' }} />
+            <RefreshCw className="w-4 h-4" />
           </button>
         </div>
 
         {error && (
-          <div className="mb-4 px-4 py-3 rounded-[10px] flex items-center gap-2 text-[13px]"
-            style={{ background: '#ffdcc7', color: '#774117' }}>
-            <AlertTriangle className="w-4 h-4" />
-            {error}
-            <button onClick={() => setError('')} className="ml-auto"><X className="w-4 h-4" /></button>
+          <div className="mb-4 px-4 py-3 rounded-xl flex items-center gap-2 text-xs bg-rose-50 border border-rose-200 text-rose-700">
+            <AlertTriangle className="w-4 h-4 shrink-0" />
+            <span>{error}</span>
+            <button type="button" onClick={() => setError('')} className="ml-auto cursor-pointer"><X className="w-4 h-4" /></button>
           </div>
         )}
 
         {isLoading ? (
-          <div className="flex justify-center py-20"><Loader2 className="w-7 h-7 animate-spin" style={{ color: 'var(--color-primary)' }} /></div>
+          <div className="flex justify-center py-20"><Loader2 className="w-7 h-7 animate-spin text-primary" /></div>
         ) : (
-          <div className="rounded-[16px] overflow-hidden" style={{ background: 'var(--color-surface-container-lowest)', border: '1px solid rgba(195,201,187,0.25)' }}>
+          <div className="rounded-xl overflow-hidden bg-surface border border-border shadow-2xs">
             <div className="overflow-x-auto">
-              <table className="w-full">
+              <table className="w-full text-left">
                 <thead>
-                  <tr style={{ background: 'var(--color-surface-container-low)' }}>
-                    {['Product', 'Category', 'Weight', 'Price', 'Stock', 'Status', 'Batch / Expiry', ''].map(h => (
-                      <th key={h} className="text-left px-4 py-3 text-[10px] font-bold uppercase tracking-wider whitespace-nowrap"
-                        style={{ color: 'var(--color-on-surface-variant)' }}>{h}</th>
+                  <tr className="bg-surface-muted/50 border-b border-border text-[11px] font-semibold text-foreground-muted uppercase tracking-wider">
+                    {['Product', 'Category', 'Weight', 'Price', 'Stock', 'Status', 'Batch / Expiry', 'Actions'].map(h => (
+                      <th key={h} className="px-4 py-3 whitespace-nowrap">{h}</th>
                     ))}
                   </tr>
                 </thead>
-                <tbody>
+                <tbody className="divide-y divide-border">
                   {filtered.map((variant, i) => {
                     const isEditing = !!editMap[variant.variant_id];
                     const editData = editMap[variant.variant_id];
                     const isSaving = savingIds.has(variant.variant_id);
-                    const ss = statusStyle[variant.stock_status];
+                    const ss = statusStyle[variant.stock_status] || statusStyle.in_stock;
 
                     return (
                       <motion.tr
                         key={variant.variant_id}
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
-                        transition={{ delay: i * 0.02 }}
-                        style={{ borderTop: i > 0 ? '1px solid rgba(195,201,187,0.15)' : undefined }}
-                        className={isEditing ? '' : 'hover:bg-black/[0.01]'}
+                        transition={{ delay: Math.min(i * 0.02, 0.3) }}
+                        className={isEditing ? 'bg-primary-fixed/20' : 'hover:bg-surface-muted/40 transition-colors'}
                       >
                         <td className="px-4 py-3">
-                          <p className="font-semibold text-[13px]" style={{ color: 'var(--color-on-surface)' }}>{variant.product_name}</p>
+                          <p className="font-semibold text-xs text-foreground">{variant.product_name}</p>
                         </td>
                         <td className="px-4 py-3">
-                          <span className="text-[11px] font-medium px-2 py-0.5 rounded-full" style={{ background: 'var(--color-surface-container)', color: 'var(--color-on-surface)' }}>
+                          <span className="text-[10px] font-semibold px-2 py-0.5 rounded-md bg-surface-muted text-foreground-muted border border-border">
                             {variant.category}
                           </span>
                         </td>
-                        <td className="px-4 py-3 text-[12px] font-medium" style={{ color: 'var(--color-on-surface)' }}>
+                        <td className="px-4 py-3 text-xs text-foreground">
                           {variant.weight}
                         </td>
-                        <td className="px-4 py-3 text-[12px] font-semibold" style={{ color: 'var(--color-on-surface)' }}>
+                        <td className="px-4 py-3 text-xs font-bold text-foreground">
                           ₹{variant.price}
                         </td>
                         <td className="px-4 py-3">
@@ -274,17 +274,16 @@ export default function AdminInventoryPage() {
                               min={0}
                               value={editData.stock}
                               onChange={e => setEditMap(prev => ({ ...prev, [variant.variant_id]: { ...editData, stock: parseInt(e.target.value) || 0 } }))}
-                              className="w-20 px-2 py-1.5 rounded-[8px] text-[13px] font-bold outline-none"
-                              style={{ background: 'var(--color-surface-container)', border: '1.5px solid var(--color-primary)', color: 'var(--color-on-surface)' }}
+                              className="w-20 px-2 py-1 rounded-lg text-xs font-bold bg-surface border border-primary outline-none text-foreground"
                             />
                           ) : (
-                            <span className="font-bold text-[14px]" style={{ color: variant.stock === 0 ? '#774117' : variant.stock <= variant.low_stock_threshold ? '#7d5200' : 'var(--color-on-surface)' }}>
+                            <span className={`font-bold text-xs ${variant.stock === 0 ? 'text-rose-600' : variant.stock <= variant.low_stock_threshold ? 'text-amber-600' : 'text-foreground'}`}>
                               {variant.stock}
                             </span>
                           )}
                         </td>
                         <td className="px-4 py-3">
-                          <span className="inline-flex items-center gap-1 px-2 py-1 rounded-[6px] text-[10px] font-bold" style={{ background: ss.bg, color: ss.text }}>
+                          <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full border text-[10px] font-bold ${ss.bg}`}>
                             {ss.label}
                           </span>
                         </td>
@@ -295,34 +294,44 @@ export default function AdminInventoryPage() {
                               placeholder="Batch #"
                               value={editData.batch}
                               onChange={e => setEditMap(prev => ({ ...prev, [variant.variant_id]: { ...editData, batch: e.target.value } }))}
-                              className="w-24 px-2 py-1.5 rounded-[8px] text-[11px] outline-none"
-                              style={{ background: 'var(--color-surface-container)', border: '1px solid rgba(195,201,187,0.4)', color: 'var(--color-on-surface)' }}
+                              className="w-24 px-2 py-1 rounded-lg text-xs bg-surface border border-border outline-none text-foreground"
                             />
                           ) : (
-                            <p className="text-[11px]" style={{ color: 'var(--color-on-surface-variant)' }}>
-                              {variant.batch_number || '—'}
-                              {variant.expiry_date && <span className="block">{format(new Date(variant.expiry_date), 'dd MMM yy')}</span>}
-                            </p>
+                            <div className="text-[11px] text-foreground-muted">
+                              <span>{variant.batch_number || '—'}</span>
+                              {variant.expiry_date && <span className="block text-[10px]">{format(new Date(variant.expiry_date), 'dd MMM yy')}</span>}
+                            </div>
                           )}
                         </td>
                         <td className="px-4 py-3">
                           {isEditing ? (
-                            <div className="flex items-center gap-2">
+                            <div className="flex items-center gap-1.5">
                               <button
+                                type="button"
                                 onClick={() => handleSave(variant.variant_id)}
                                 disabled={isSaving}
-                                className="p-1.5 rounded-[6px] transition-opacity hover:opacity-80"
-                                style={{ background: 'var(--color-primary)' }}
+                                className="p-1.5 rounded-md bg-primary hover:bg-primary-hover text-white transition-colors cursor-pointer"
+                                title="Save"
                               >
-                                {isSaving ? <Loader2 className="w-3.5 h-3.5 animate-spin text-white" /> : <Save className="w-3.5 h-3.5 text-white" />}
+                                {isSaving ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Save className="w-3.5 h-3.5" />}
                               </button>
-                              <button onClick={() => handleCancel(variant.variant_id)} className="p-1.5 rounded-[6px]" style={{ background: '#e3e3dc' }}>
-                                <X className="w-3.5 h-3.5" style={{ color: '#43493e' }} />
+                              <button 
+                                type="button"
+                                onClick={() => handleCancel(variant.variant_id)} 
+                                className="p-1.5 rounded-md bg-surface-muted hover:bg-border text-foreground-muted transition-colors cursor-pointer"
+                                title="Cancel"
+                              >
+                                <X className="w-3.5 h-3.5" />
                               </button>
                             </div>
                           ) : (
-                            <button onClick={() => handleEdit(variant)} className="p-1.5 rounded-[6px] hover:opacity-70 transition-opacity" style={{ background: 'var(--color-surface-container-low)' }}>
-                              <Edit3 className="w-3.5 h-3.5" style={{ color: 'var(--color-on-surface)' }} />
+                            <button 
+                              type="button"
+                              onClick={() => handleEdit(variant)} 
+                              className="p-1.5 rounded-md border border-border bg-surface hover:bg-surface-muted text-foreground-muted hover:text-foreground transition-colors cursor-pointer"
+                              title="Edit Stock"
+                            >
+                              <Edit3 className="w-3.5 h-3.5" />
                             </button>
                           )}
                         </td>
@@ -333,9 +342,9 @@ export default function AdminInventoryPage() {
               </table>
               {filtered.length === 0 && (
                 <div className="text-center py-16">
-                  <Package className="w-8 h-8 mx-auto mb-3" style={{ color: 'var(--color-on-surface-variant)' }} strokeWidth={1.5} />
-                  <p className="font-semibold" style={{ color: 'var(--color-on-surface)' }}>
-                    {search ? 'No products match your search' : 'No inventory data'}
+                  <Package className="w-8 h-8 mx-auto mb-2 text-foreground-muted opacity-40" strokeWidth={1.5} />
+                  <p className="font-semibold text-xs text-foreground">
+                    {search ? 'No products match your search' : 'No inventory data found'}
                   </p>
                 </div>
               )}

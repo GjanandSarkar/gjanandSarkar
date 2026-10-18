@@ -182,7 +182,7 @@ export default function AdminVendorInquiriesPage() {
       {/* Top Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-100 text-[#c88a23] text-xs font-black uppercase tracking-wider mb-1">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 text-primary text-xs font-bold uppercase tracking-wider mb-1">
             <Clock className="w-3.5 h-3.5" />
             <span>Marketplace Onboarding</span>
           </div>
@@ -255,7 +255,7 @@ export default function AdminVendorInquiriesPage() {
               onClick={() => setSelectedStatus(f.id)}
               className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all ${
                 selectedStatus === f.id
-                  ? 'bg-[#0f3e26] text-white shadow-2xs'
+                  ? 'bg-primary text-white shadow-2xs'
                   : 'text-gray-600 hover:bg-gray-100'
               }`}
             >
@@ -271,7 +271,7 @@ export default function AdminVendorInquiriesPage() {
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="Search seller, email, phone, or ID..."
-            className="w-full pl-9 pr-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-xs text-gray-900 placeholder:text-gray-400 focus:bg-white focus:border-[#0f3e26] outline-none"
+            className="w-full pl-9 pr-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-xs text-gray-900 placeholder:text-gray-400 focus:bg-white focus:border-primary outline-none"
           />
         </div>
       </div>
@@ -290,7 +290,7 @@ export default function AdminVendorInquiriesPage() {
         <div className="lg:col-span-5 space-y-3">
           {isLoading ? (
             <div className="bg-white rounded-2xl p-10 border border-gray-200 text-center space-y-3">
-              <Loader2 className="w-6 h-6 animate-spin text-[#0f3e26] mx-auto" />
+              <Loader2 className="w-6 h-6 animate-spin text-primary mx-auto" />
               <p className="text-xs text-gray-500 font-medium">Loading seller applications...</p>
             </div>
           ) : filteredInquiries.length === 0 ? (
@@ -308,7 +308,7 @@ export default function AdminVendorInquiriesPage() {
                   onClick={() => handleSelectInquiry(inq)}
                   className={`p-4 rounded-2xl border transition-all cursor-pointer text-left space-y-2.5 ${
                     isSelected
-                      ? 'bg-emerald-50/40 border-[#0f3e26] shadow-sm'
+                      ? 'bg-emerald-50/40 border-primary shadow-sm'
                       : 'bg-white border-gray-200 hover:border-gray-300'
                   }`}
                 >
@@ -411,8 +411,8 @@ export default function AdminVendorInquiriesPage() {
 
               {/* 1. Owner & Contact Information */}
               <div className="space-y-3">
-                <h4 className="text-xs font-black text-[#0f3e26] uppercase tracking-wider flex items-center gap-2">
-                  <PhoneCall className="w-3.5 h-3.5 text-[#c88a23]" />
+                <h4 className="text-xs font-black text-foreground uppercase tracking-wider flex items-center gap-2">
+                  <PhoneCall className="w-3.5 h-3.5 text-primary" />
                   <span>Applicant & Contact Details</span>
                 </h4>
                 
@@ -434,8 +434,8 @@ export default function AdminVendorInquiriesPage() {
 
               {/* 2. Business Address & Structure */}
               <div className="space-y-3">
-                <h4 className="text-xs font-black text-[#0f3e26] uppercase tracking-wider flex items-center gap-2">
-                  <Building2 className="w-3.5 h-3.5 text-[#c88a23]" />
+                <h4 className="text-xs font-black text-foreground uppercase tracking-wider flex items-center gap-2">
+                  <Building2 className="w-3.5 h-3.5 text-primary" />
                   <span>Business Address & Structure</span>
                 </h4>
                 
@@ -462,8 +462,8 @@ export default function AdminVendorInquiriesPage() {
 
               {/* 3. Verification Details (PAN, GSTIN, FSSAI, Docs) */}
               <div className="space-y-3">
-                <h4 className="text-xs font-black text-[#0f3e26] uppercase tracking-wider flex items-center gap-2">
-                  <CreditCard className="w-3.5 h-3.5 text-[#c88a23]" />
+                <h4 className="text-xs font-black text-foreground uppercase tracking-wider flex items-center gap-2">
+                  <CreditCard className="w-3.5 h-3.5 text-primary" />
                   <span>Tax & Compliance Verification</span>
                 </h4>
                 
@@ -524,7 +524,7 @@ export default function AdminVendorInquiriesPage() {
                   value={adminNotes}
                   onChange={(e) => setAdminNotes(e.target.value)}
                   placeholder="Enter feedback or mandatory rejection reason to communicate with the seller..."
-                  className="w-full px-4 py-2.5 rounded-2xl border border-gray-300 text-xs text-gray-900 focus:border-[#0f3e26] outline-none resize-none"
+                  className="w-full px-4 py-2.5 rounded-2xl border border-gray-300 text-xs text-gray-900 focus:border-primary outline-none resize-none"
                 />
               </div>
 
@@ -558,9 +558,9 @@ export default function AdminVendorInquiriesPage() {
                     type="button"
                     onClick={() => handleTriggerConfirm('approved')}
                     disabled={isUpdating}
-                    className="px-6 py-2.5 bg-[#0f3e26] hover:bg-[#144f31] text-white text-xs font-black rounded-xl shadow-md flex items-center gap-1.5 transition-all active:scale-95 cursor-pointer"
+                    className="px-6 py-2.5 bg-primary hover:bg-primary-hover text-white text-xs font-black rounded-xl shadow-md flex items-center gap-1.5 transition-all active:scale-95 cursor-pointer"
                   >
-                    <ShieldCheck className="w-4 h-4 text-[#c88a23]" />
+                    <ShieldCheck className="w-4 h-4 text-white" />
                     <span>Approve Seller Account</span>
                   </button>
                 )}
@@ -585,11 +585,11 @@ export default function AdminVendorInquiriesPage() {
             <div className="flex items-center gap-3">
               <div className={`w-12 h-12 rounded-2xl flex items-center justify-center ${
                 confirmModal.action === 'approved' 
-                  ? 'bg-emerald-100 text-[#0f3e26]' 
+                  ? 'bg-primary/10 text-primary' 
                   : 'bg-rose-100 text-rose-600'
               }`}>
                 {confirmModal.action === 'approved' ? (
-                  <ShieldCheck className="w-6 h-6 text-emerald-700" />
+                  <ShieldCheck className="w-6 h-6 text-primary" />
                 ) : (
                   <AlertTriangle className="w-6 h-6 text-rose-600" />
                 )}
@@ -622,7 +622,7 @@ export default function AdminVendorInquiriesPage() {
                 disabled={isUpdating}
                 className={`px-6 py-2.5 text-white text-xs font-black rounded-xl shadow-md flex items-center gap-2 cursor-pointer ${
                   confirmModal.action === 'approved'
-                    ? 'bg-[#0f3e26] hover:bg-[#144f31]'
+                    ? 'bg-primary hover:bg-primary-hover'
                     : 'bg-rose-600 hover:bg-rose-700'
                 }`}
               >

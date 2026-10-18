@@ -43,9 +43,29 @@ export function SupportChat() {
   const [isBusy, setIsBusy] = useState(false);
   const [orders, setOrders] = useState<OrderWithItems[] | null>(null);
   const [handoffSent, setHandoffSent] = useState(false);
+  const [isFooterVisible, setIsFooterVisible] = useState(false);
 
   const endRef = useRef<HTMLDivElement | null>(null);
   const panelRef = useRef<HTMLDivElement | null>(null);
+
+  // Show launcher button ONLY when the footer is in view
+  useEffect(() => {
+    const footerEl = document.getElementById('main-footer') || document.querySelector('footer');
+    if (!footerEl) return;
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        setIsFooterVisible(entry.isIntersecting);
+      },
+      {
+        root: null,
+        threshold: 0.05,
+      }
+    );
+
+    observer.observe(footerEl);
+    return () => observer.disconnect();
+  }, []);
 
   // Seed the greeting the first time the panel is opened.
   useEffect(() => {
@@ -281,12 +301,12 @@ export function SupportChat() {
   // ─── Render ─────────────────────────────────────────────────────────────
   return (
     <>
-      {/* Launcher. Sits above the mobile bottom nav. */}
-      {!isOpen && (
+      {/* Launcher. Only visible when footer is in view (per user requirement) */}
+      {!isOpen && isFooterVisible && (
         <button
           onClick={() => setIsOpen(true)}
           aria-label="Open help and support"
-          className="fixed z-50 bottom-24 right-4 md:bottom-6 md:right-6 h-14 w-14 rounded-full bg-primary text-foreground-inverse shadow-lg flex items-center justify-center transition-transform active:scale-95 hover:scale-105"
+          className="fixed z-50 bottom-24 right-4 md:bottom-6 md:right-6 h-14 w-14 rounded-full bg-primary text-foreground-inverse shadow-lg flex items-center justify-center transition-all duration-300 animate-in fade-in zoom-in-90 active:scale-95 hover:scale-105 cursor-pointer"
         >
           <MessageCircle className="w-6 h-6" />
         </button>

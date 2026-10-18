@@ -224,15 +224,15 @@ export default function AdminReturnsPage() {
 
             <div>
               <div className="flex items-center gap-2">
-                <span className="px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 text-[10px] font-black uppercase tracking-wider">
+                <span className="px-2 py-0.5 rounded-full bg-primary-fixed text-primary text-[10px] font-bold uppercase tracking-wider">
                   Admin Global Desk
                 </span>
               </div>
-              <h1 className="text-xl md:text-2xl font-black text-[#0f3e26] tracking-tight flex items-center gap-2 mt-0.5">
-                <RotateCcw className="w-6 h-6 text-[#c88a23]" />
+              <h1 className="text-xl md:text-2xl font-bold text-foreground tracking-tight flex items-center gap-2 mt-0.5">
+                <RotateCcw className="w-5 h-5 text-primary" />
                 <span>Returns & Cancellations Management</span>
               </h1>
-              <p className="text-xs text-gray-500 mt-0.5">
+              <p className="text-xs text-muted-foreground mt-0.5">
                 Global multi-seller request desk: review customer claims, inspect evidence, enforce policies, and authorize refunds.
               </p>
             </div>
@@ -242,10 +242,10 @@ export default function AdminReturnsPage() {
             <button
               onClick={fetchRequests}
               disabled={isLoading}
-              className="p-2.5 border border-gray-200 text-gray-700 hover:bg-gray-50 rounded-xl transition-colors shrink-0 cursor-pointer"
+              className="p-2.5 border border-border text-foreground hover:bg-muted rounded-xl transition-colors shrink-0 cursor-pointer"
               title="Refresh Requests"
             >
-              <RefreshCw className={`w-4 h-4 ${isLoading ? 'animate-spin text-[#0f3e26]' : ''}`} />
+              <RefreshCw className={`w-4 h-4 ${isLoading ? 'animate-spin text-primary' : ''}`} />
             </button>
           </div>
         </div>
@@ -308,7 +308,7 @@ export default function AdminReturnsPage() {
                 placeholder="Search by Request ID, Order #, Customer, or Product..."
                 value={searchQuery}
                 onChange={e => setSearchQuery(e.target.value)}
-                className="w-full pl-10 pr-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-xs font-medium placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#0f3e26]/20 focus:bg-white"
+                className="w-full pl-10 pr-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-xs font-medium placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:bg-white"
               />
               {searchQuery && (
                 <button
@@ -355,7 +355,7 @@ export default function AdminReturnsPage() {
                 onClick={() => setStatusFilter(tab.id)}
                 className={`px-3 py-1.5 rounded-full text-xs font-bold whitespace-nowrap transition-all cursor-pointer ${
                   statusFilter === tab.id
-                    ? 'bg-[#0f3e26] text-white shadow-xs'
+                    ? 'bg-primary text-primary-foreground shadow-xs'
                     : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'
                 }`}
               >
@@ -368,7 +368,7 @@ export default function AdminReturnsPage() {
         {/* Requests List */}
         {isLoading ? (
           <div className="py-20 flex flex-col items-center justify-center gap-3">
-            <Loader2 className="w-8 h-8 text-[#0f3e26] animate-spin" />
+            <Loader2 className="w-8 h-8 text-primary animate-spin" />
             <p className="text-xs font-semibold text-gray-500">Loading requests...</p>
           </div>
         ) : filteredRequests.length === 0 ? (
@@ -451,7 +451,7 @@ export default function AdminReturnsPage() {
                             Qty: <strong className="text-gray-800">{req.item_quantity}</strong>
                             {req.variant_weight && ` • ${req.variant_weight}`}
                           </p>
-                          <p className="text-xs font-black text-[#0f3e26]">
+                          <p className="text-xs font-bold text-primary">
                             ₹{req.item_price * req.item_quantity}
                           </p>
                         </div>
@@ -461,7 +461,7 @@ export default function AdminReturnsPage() {
                         <span>Order: </span>
                         <Link
                           href={`/admin/orders`}
-                          className="font-bold text-[#0f3e26] hover:underline"
+                          className="font-bold text-primary hover:underline"
                         >
                           #{req.order_number}
                         </Link>
@@ -492,7 +492,7 @@ export default function AdminReturnsPage() {
                         )}
                         {req.delivery_address && (
                           <div className="pt-1.5 mt-1 border-t border-gray-100 flex items-start gap-1.5 text-gray-700">
-                            <MapPin className="w-3.5 h-3.5 text-[#0f3e26] shrink-0 mt-0.5" />
+                            <MapPin className="w-3.5 h-3.5 text-primary shrink-0 mt-0.5" />
                             <p className="leading-snug text-[11px] font-medium text-gray-700">
                               {req.delivery_address}
                             </p>
@@ -517,7 +517,7 @@ export default function AdminReturnsPage() {
                         </div>
                         <div className="flex justify-between items-center">
                           <span className="text-gray-400">Refund Target:</span>
-                          <span className="font-black text-[#0f3e26]">
+                          <span className="font-bold text-primary">
                             ₹{req.refund_amount || (req.item_price * req.item_quantity)}
                           </span>
                         </div>
@@ -681,9 +681,9 @@ export default function AdminReturnsPage() {
                             setRefundAmountInput(String(req.refund_amount || (req.item_price * req.item_quantity)));
                             setReasonInput('Refund authorized & processed');
                           }}
-                          className="px-3.5 py-1.5 rounded-xl bg-[#0f3e26] hover:bg-[#165a37] text-white text-xs font-bold flex items-center gap-1.5 shadow-xs transition-colors"
+                          className="px-3.5 py-1.5 rounded-xl bg-primary hover:bg-primary-hover text-primary-foreground text-xs font-bold flex items-center gap-1.5 shadow-xs transition-colors"
                         >
-                          <IndianRupee className="w-3.5 h-3.5 text-[#c88a23]" />
+                          <IndianRupee className="w-3.5 h-3.5" />
                           <span>Authorize & Finalize Refund</span>
                         </button>
                       )}
@@ -704,8 +704,8 @@ export default function AdminReturnsPage() {
           <div className="bg-white rounded-3xl max-w-md w-full p-6 space-y-5 shadow-2xl animate-in fade-in">
             <div className="flex items-center justify-between border-b border-gray-100 pb-3">
               <div className="flex items-center gap-2">
-                <div className="p-2 rounded-xl bg-gray-100 text-[#0f3e26]">
-                  <RotateCcw className="w-5 h-5 text-[#c88a23]" />
+                <div className="p-2 rounded-xl bg-primary-fixed text-primary">
+                  <RotateCcw className="w-5 h-5 text-primary" />
                 </div>
                 <div>
                   <h3 className="font-extrabold text-base text-gray-900 capitalize">
@@ -746,7 +746,7 @@ export default function AdminReturnsPage() {
                       step="0.01"
                       value={refundAmountInput}
                       onChange={e => setRefundAmountInput(e.target.value)}
-                      className="w-full p-2.5 rounded-xl border border-gray-200 text-xs font-bold outline-none focus:ring-2 focus:ring-[#0f3e26]/20 bg-white"
+                      className="w-full p-2.5 rounded-xl border border-gray-200 text-xs font-bold outline-none focus:ring-2 focus:ring-primary/20 bg-white"
                       placeholder="Enter refund amount..."
                       required
                     />
@@ -782,7 +782,7 @@ export default function AdminReturnsPage() {
                       ? 'Enter detailed justification (mandatory)...'
                       : 'Add any optional notes for this administrative action...'
                   }
-                  className="w-full p-2.5 rounded-xl border border-gray-200 text-xs font-medium outline-none focus:ring-2 focus:ring-[#0f3e26]/20 resize-none"
+                  className="w-full p-2.5 rounded-xl border border-gray-200 text-xs font-medium outline-none focus:ring-2 focus:ring-primary/20 resize-none"
                   required={['reject', 'override'].includes(actionType)}
                 />
               </div>
@@ -804,7 +804,7 @@ export default function AdminReturnsPage() {
                 type="button"
                 disabled={isProcessing || (['reject', 'override'].includes(actionType) && !reasonInput.trim())}
                 onClick={handleConfirmAction}
-                className="px-5 py-2 text-xs font-bold bg-[#0f3e26] hover:bg-[#165a37] text-white rounded-xl shadow-xs disabled:opacity-50 flex items-center gap-1.5"
+                className="px-5 py-2 text-xs font-bold bg-primary hover:bg-primary-hover text-primary-foreground rounded-xl shadow-xs disabled:opacity-50 flex items-center gap-1.5"
               >
                 {isProcessing && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
                 <span>Confirm {actionType.replace(/_/g, ' ')}</span>
@@ -820,7 +820,7 @@ export default function AdminReturnsPage() {
           <div className="bg-white rounded-3xl max-w-lg w-full p-6 space-y-4 shadow-2xl animate-in fade-in">
             <div className="flex items-center justify-between border-b border-gray-100 pb-3">
               <div className="flex items-center gap-2">
-                <History className="w-5 h-5 text-[#0f3e26]" />
+                <History className="w-5 h-5 text-primary" />
                 <div>
                   <h3 className="font-extrabold text-base text-gray-900">Request Lifecycle History</h3>
                   <p className="text-xs text-gray-500">
@@ -843,7 +843,7 @@ export default function AdminReturnsPage() {
                 historyModalRequest.history.map((h, i) => (
                   <div key={i} className="p-3 rounded-2xl bg-gray-50 border border-gray-100 space-y-1">
                     <div className="flex items-center justify-between text-gray-500 text-[10px]">
-                      <span className="font-bold uppercase tracking-wider text-[#0f3e26]">
+                      <span className="font-bold uppercase tracking-wider text-primary">
                         {h.actor_type || 'system'}
                       </span>
                       <span>{format(new Date(h.timestamp), 'MMM d, yyyy · h:mm a')}</span>

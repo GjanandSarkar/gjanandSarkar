@@ -77,9 +77,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     let cancelled = false;
 
     const handleAuthEvent = async (event: any, session: any) => {
+      const currentUserId = useStore.getState().user?.id;
+
       if (event === 'INITIAL_SESSION') {
         if (session) {
-          await hydrateUser(session.access_token);
+          if (currentUserId !== session.user.id) {
+            await hydrateUser(session.access_token);
+          }
         } else {
           setAuthLoading(false);
         }
@@ -88,12 +92,22 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       }
 
       if (event === 'SIGNED_IN' && session) {
-        await hydrateUser(session.access_token);
+        // Supabase emits SIGNED_IN on every window/tab focus or session recovery.
+        // Only run full hydration if we are NOT already logged in as this user.
+        if (currentUserId !== session.user.id) {
+          await hydrateUser(session.access_token);
+        }
+        hasInitialized.current = true;
         return;
       }
 
       if (event === 'TOKEN_REFRESHED' && session) {
-        await hydrateUser(session.access_token);
+        // Supabase refreshes token on window focus / tab switch.
+        // Never re-hydrate if user is already loaded.
+        if (currentUserId !== session.user.id) {
+          await hydrateUser(session.access_token);
+        }
+        hasInitialized.current = true;
         return;
       }
 
@@ -142,15 +156,24 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         const raw = await res.json();
         const userProfile = raw.user || raw.data?.user;
         const accessToken = raw.data?.accessToken || raw.accessToken;
-        // NOTE: we deliberately do NOT write gs_access_token here any more.
-        // /api/auth/sync already sets it as an httpOnly cookie on this very
-        // response; re-writing it from JavaScript silently replaced that with
-        // a script-readable one, defeating the protection entirely.
+
         if (userProfile) {
           const resolvedName = (userProfile.name && userProfile.name.trim())
             ? userProfile.name.trim()
             : (userProfile.email ? userProfile.email.split('@')[0] : (userProfile.phone ? `User (${userProfile.phone.slice(-4)})` : 'Customer'));
 
+          // Parallel fetch cart, wishlist, and addresses before setting user state
+          const [dbCart, wishlistItems, addresses] = await Promise.allSettled([
+            getCart(userProfile.id),
+            getWishlist(userProfile.id),
+            getUserAddresses(userProfile.id),
+          ]);
+
+          const savedAddrs = (addresses.status === 'fulfilled' && addresses.value && addresses.value.length > 0)
+            ? addresses.value.map(a => ({ label: a.label, address: a.address }))
+            : (userProfile.saved_addresses || []);
+
+          // Single, atomic setUser call with all fresh data
           setUser({
             id: userProfile.id,
             name: resolvedName,
@@ -158,18 +181,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             email: userProfile.email || '',
             avatar_url: userProfile.avatar_url || '',
             role: userProfile.role ?? 'customer',
-            // Was never mapped, so the profile screen had no real balance to
-            // read and fell back to a hardcoded 150.
             loyalty_points: userProfile.loyalty_points ?? 0,
-            saved_addresses: userProfile.saved_addresses || [],
+            saved_addresses: savedAddrs,
           });
-
-          // Parallel fetch cart, wishlist, and addresses — faster than sequential .then() waterfall
-          const [dbCart, wishlistItems, addresses] = await Promise.allSettled([
-            getCart(userProfile.id),
-            getWishlist(userProfile.id),
-            getUserAddresses(userProfile.id),
-          ]);
 
           // Apply cart
           if (dbCart.status === 'fulfilled' && dbCart.value && dbCart.value.length > 0) {
@@ -185,20 +199,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           // Apply wishlist
           if (wishlistItems.status === 'fulfilled' && wishlistItems.value) {
             setWishlist(wishlistItems.value);
-          }
-
-          // Apply addresses
-          if (addresses.status === 'fulfilled' && addresses.value && addresses.value.length > 0) {
-            setUser({
-              id: userProfile.id,
-              name: resolvedName,
-              phone: userProfile.phone || '',
-              email: userProfile.email || '',
-              avatar_url: userProfile.avatar_url || '',
-              role: userProfile.role ?? 'customer',
-              loyalty_points: userProfile.loyalty_points ?? 0,
-              saved_addresses: addresses.value.map(a => ({ label: a.label, address: a.address })),
-            });
           }
 
           // Merge any local cart items into DB in background (non-blocking)

@@ -5,7 +5,7 @@ import { useSearchParams } from 'next/navigation';
 import { motion } from 'framer-motion';
 import {
   RotateCcw, Package, AlertCircle, CheckCircle2,
-  Clock, ArrowLeft, Loader2, IndianRupee, ShieldCheck, X
+  Clock, Loader2, IndianRupee, ShieldCheck, X
 } from 'lucide-react';
 import Link from 'next/link';
 
@@ -108,31 +108,27 @@ function CustomerReturnsContent() {
   const selectedOrder = orders.find(o => o.id === selectedOrderId);
 
   return (
-    <div className="flex flex-col min-h-screen" style={{ background: 'var(--color-background)' }}>
-      {/* Header */}
-      <div className="sticky top-0 z-30 glass-surface px-5 md:px-10 pt-6 pb-4 flex items-center justify-between"
-        style={{ borderBottom: '1px solid rgba(195,201,187,0.25)' }}>
-        <div className="flex items-center gap-3">
-          <Link href="/profile" className="p-2 rounded-full hover:bg-black/5 text-on-surface">
-            <ArrowLeft className="w-5 h-5" />
-          </Link>
+    <div className="flex flex-col min-h-screen bg-background text-foreground transition-colors duration-150">
+      {/* Standardized Page Header */}
+      <div className="max-w-[1440px] mx-auto px-4 md:px-8 pt-6 pb-2 w-full">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-border/60 pb-5">
           <div>
-            <h1 className="font-extrabold text-[20px] md:text-[24px]" style={{ color: 'var(--color-on-surface)' }}>
+            <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-foreground">
               Returns & Freshness Claims
             </h1>
-            <p className="text-[12px]" style={{ color: 'var(--color-on-surface-variant)' }}>
-              100% Freshness Guarantee Replacement Policy
+            <p className="text-xs sm:text-sm text-foreground-muted mt-1">
+              100% Farm Freshness Guarantee Replacement & Refund Policy
             </p>
           </div>
-        </div>
 
-        <button
-          onClick={() => setShowModal(true)}
-          className="flex items-center gap-1.5 px-4 py-2 rounded-full font-bold text-[12px] text-white shadow-sm"
-          style={{ background: 'var(--cta-gradient)' }}
-        >
-          <RotateCcw className="w-3.5 h-3.5" /> Request Return
-        </button>
+          <button
+            onClick={() => setShowModal(true)}
+            className="self-start sm:self-auto flex items-center gap-2 px-4 py-2.5 rounded-xl font-bold text-xs sm:text-sm text-white bg-primary hover:bg-primary-hover shadow-xs active:scale-95 transition-all cursor-pointer"
+          >
+            <RotateCcw className="w-4 h-4" />
+            <span>Request Return</span>
+          </button>
+        </div>
       </div>
 
       <div className="px-5 md:px-10 py-6 max-w-4xl">

@@ -287,7 +287,7 @@ export default function SellerDashboardPage() {
     return (
       <div className="min-h-screen flex items-center justify-center bg-[#fafaf8]">
         <div className="flex flex-col items-center gap-3">
-          <div className="animate-spin rounded-full h-9 w-9 border-b-2 border-[#0f3e26]" />
+          <div className="animate-spin rounded-full h-9 w-9 border-b-2 border-primary" />
           <p className="text-xs font-semibold text-gray-500">Loading Seller Dashboard...</p>
         </div>
       </div>
@@ -345,7 +345,7 @@ export default function SellerDashboardPage() {
             <div className="flex flex-col sm:flex-row items-center justify-center gap-3 pt-2">
               <Link
                 href="/become-seller?resubmit=true"
-                className="w-full sm:w-auto px-6 py-3 bg-[#0f3e26] hover:bg-[#0c331f] text-white text-xs font-bold rounded-xl flex items-center justify-center gap-2 shadow-sm transition-all"
+                className="w-full sm:w-auto px-6 py-3 bg-primary hover:bg-primary-hover text-white text-xs font-bold rounded-xl flex items-center justify-center gap-2 shadow-xs transition-all"
               >
                 <RotateCcw className="w-4 h-4" />
                 <span>Edit & Resubmit Application</span>
@@ -374,7 +374,7 @@ export default function SellerDashboardPage() {
         <div className="max-w-3xl mx-auto space-y-8 animate-in fade-in">
           
           <div className="bg-white rounded-3xl border border-amber-200 shadow-sm p-8 sm:p-10 text-center space-y-6">
-            <div className="w-16 h-16 rounded-2xl bg-amber-100 text-[#c88a23] flex items-center justify-center mx-auto shadow-inner">
+            <div className="w-16 h-16 rounded-2xl bg-amber-50 text-amber-700 flex items-center justify-center mx-auto shadow-inner">
               <Clock className="w-8 h-8" />
             </div>
 
@@ -413,7 +413,7 @@ export default function SellerDashboardPage() {
               </div>
               <div className="flex justify-between py-1 border-b border-gray-200">
                 <span className="text-gray-500">Product Category:</span>
-                <span className="font-bold text-[#0f3e26]">{inquiry.category}</span>
+                <span className="font-bold text-primary">{inquiry.category}</span>
               </div>
               <div className="flex justify-between py-1">
                 <span className="text-gray-500">Current Status:</span>
@@ -425,8 +425,8 @@ export default function SellerDashboardPage() {
 
             {/* Verification Checklist */}
             <div className="bg-emerald-50/70 border border-emerald-200/80 rounded-2xl p-5 text-left space-y-2 max-w-lg mx-auto text-xs text-emerald-900">
-              <h4 className="font-black uppercase tracking-wider flex items-center gap-1.5 text-[#0f3e26]">
-                <FileCheck2 className="w-4 h-4 text-[#0f3e26]" />
+              <h4 className="font-bold uppercase tracking-wider flex items-center gap-1.5 text-primary">
+                <FileCheck2 className="w-4 h-4 text-primary" />
                 <span>What Happens Next</span>
               </h4>
               <p>1. Our compliance team verifies your business GSTIN/PAN and category licences.</p>
@@ -497,7 +497,7 @@ export default function SellerDashboardPage() {
             <div className="pt-2 flex items-center justify-center gap-3">
               <Link
                 href="/home"
-                className="px-6 py-2.5 bg-[#0f3e26] hover:bg-[#0c331f] text-white text-xs font-bold rounded-xl transition-all"
+                className="px-6 py-2.5 bg-primary hover:bg-primary-hover text-white text-xs font-bold rounded-xl transition-all"
               >
                 Return to Storefront
               </Link>
@@ -517,7 +517,7 @@ export default function SellerDashboardPage() {
     return (
       <div className="min-h-screen bg-[#fafaf8] py-12 px-4 sm:px-6 lg:px-8 flex items-center justify-center">
         <div className="max-w-md w-full bg-white rounded-3xl border border-gray-200 p-8 text-center space-y-5 shadow-sm">
-          <div className="w-16 h-16 rounded-2xl bg-emerald-100 text-[#0f3e26] flex items-center justify-center mx-auto">
+          <div className="w-16 h-16 rounded-2xl bg-emerald-50 text-primary flex items-center justify-center mx-auto">
             <Store className="w-8 h-8" />
           </div>
           <h2 className="text-xl font-black text-gray-900">Seller Dashboard Access Required</h2>
@@ -527,7 +527,7 @@ export default function SellerDashboardPage() {
           <div className="pt-2">
             <Link
               href="/become-seller"
-              className="w-full px-6 py-3 bg-[#0f3e26] hover:bg-[#0c331f] text-white text-xs font-bold rounded-xl flex items-center justify-center gap-2 shadow-sm transition-all"
+              className="w-full px-6 py-3 bg-primary hover:bg-primary-hover text-white text-xs font-bold rounded-xl flex items-center justify-center gap-2 shadow-xs transition-all"
             >
               <Building2 className="w-4 h-4" />
               <span>Become a Seller</span>
@@ -593,12 +593,12 @@ export default function SellerDashboardPage() {
         {/* ─── Top Banner & Store Header ─── */}
         <div className="bg-white rounded-3xl border border-gray-200/90 shadow-2xs p-6 sm:p-8 flex flex-col md:flex-row md:items-center justify-between gap-6">
           <div className="flex items-center gap-4">
-            <div className="w-16 h-16 rounded-2xl bg-[#0f3e26] text-white flex items-center justify-center font-black text-2xl shadow-md border border-[#c88a23]/40 shrink-0">
-              <Store className="w-8 h-8 text-[#c88a23]" />
+            <div className="w-16 h-16 rounded-2xl bg-primary text-white flex items-center justify-center font-bold text-2xl shadow-xs border border-primary/20 shrink-0">
+              <Store className="w-8 h-8 text-white" />
             </div>
             <div>
               <div className="flex items-center gap-2 flex-wrap">
-                <h1 className="text-xl sm:text-2xl font-black text-[#0f3e26] tracking-tight">
+                <h1 className="text-xl sm:text-2xl font-black text-gray-900 tracking-tight">
                   {storeName}
                 </h1>
                 <span className="px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-800 text-[10px] font-black uppercase tracking-wider flex items-center gap-1">
@@ -607,7 +607,7 @@ export default function SellerDashboardPage() {
                 </span>
               </div>
               <p className="text-xs text-gray-500 mt-1">
-                Category: <strong className="text-gray-800">{storeCategory}</strong> • Region: <strong className="text-gray-800">{storeState}</strong> • Commission: <span className="capitalize font-bold text-[#c88a23]">{storeCommission}% Platform Fee</span>
+                Category: <strong className="text-gray-800">{storeCategory}</strong> • Region: <strong className="text-gray-800">{storeState}</strong> • Commission: <span className="capitalize font-bold text-primary">{storeCommission}% Platform Fee</span>
               </p>
             </div>
           </div>
@@ -623,7 +623,7 @@ export default function SellerDashboardPage() {
               title="Refresh live metrics & products"
               className="p-2.5 rounded-xl border border-gray-200 text-gray-700 hover:bg-gray-50 flex items-center gap-1.5 transition-colors cursor-pointer"
             >
-              <RefreshCw className={`w-3.5 h-3.5 ${isLoadingProducts ? 'animate-spin text-[#0f3e26]' : ''}`} />
+              <RefreshCw className={`w-3.5 h-3.5 ${isLoadingProducts ? 'animate-spin text-primary' : ''}`} />
             </button>
 
             <Link
@@ -643,7 +643,7 @@ export default function SellerDashboardPage() {
 
             <button
               onClick={handleOpenAddProduct}
-              className="px-5 py-2.5 rounded-xl bg-[#0f3e26] text-white text-xs font-bold hover:bg-[#144f31] flex items-center gap-1.5 shadow-sm transition-all cursor-pointer active:scale-95"
+              className="px-5 py-2.5 rounded-xl bg-primary text-white text-xs font-bold hover:bg-primary-hover flex items-center gap-1.5 shadow-xs transition-all cursor-pointer active:scale-95"
             >
               <Plus className="w-4 h-4" strokeWidth={2.5} />
               <span>Add New Product</span>
@@ -672,7 +672,7 @@ export default function SellerDashboardPage() {
                 onClick={() => setActiveTab(tab.id as DashboardTab)}
                 className={`flex items-center gap-2 px-4 py-2.5 text-xs font-bold whitespace-nowrap rounded-xl transition-all cursor-pointer ${
                   isActive
-                    ? 'bg-[#0f3e26] text-white shadow-xs'
+                    ? 'bg-primary text-white shadow-xs'
                     : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'
                 }`}
               >
@@ -696,7 +696,7 @@ export default function SellerDashboardPage() {
               <div className="bg-white p-6 rounded-2xl border border-gray-200/90 shadow-2xs">
                 <div className="flex items-center justify-between text-gray-500 mb-2">
                   <span className="text-xs font-bold uppercase tracking-wider">Gross Revenue</span>
-                  <div className="w-8 h-8 rounded-xl bg-emerald-50 text-[#0f3e26] flex items-center justify-center">
+                  <div className="w-8 h-8 rounded-xl bg-emerald-50 text-primary flex items-center justify-center">
                     <IndianRupee className="w-4 h-4" />
                   </div>
                 </div>
@@ -783,7 +783,7 @@ export default function SellerDashboardPage() {
                 </h3>
                 <button
                   onClick={() => setActiveTab('orders')}
-                  className="text-xs font-bold text-[#0f3e26] hover:underline"
+                  className="text-xs font-bold text-primary hover:underline"
                 >
                   View All Orders →
                 </button>
@@ -832,7 +832,7 @@ export default function SellerDashboardPage() {
                     onClick={() => setProductStatusFilter(pill.id as any)}
                     className={`px-3.5 py-2 rounded-xl text-xs font-bold whitespace-nowrap transition-all cursor-pointer flex items-center gap-2 ${
                       productStatusFilter === pill.id
-                        ? 'bg-[#0f3e26] text-white shadow-xs'
+                        ? 'bg-primary text-white shadow-xs'
                         : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                     }`}
                   >
@@ -855,13 +855,13 @@ export default function SellerDashboardPage() {
                     value={productSearch}
                     onChange={e => setProductSearch(e.target.value)}
                     placeholder="Search by name, SKU..."
-                    className="w-full pl-9 pr-3 py-2 text-xs rounded-xl border border-gray-200 bg-white focus:outline-none focus:ring-2 focus:ring-[#0c3c26]/20"
+                    className="w-full pl-9 pr-3 py-2 text-xs rounded-xl border border-gray-200 bg-white focus:outline-none focus:ring-2 focus:ring-primary/20"
                   />
                 </div>
 
                 <button
                   onClick={handleOpenAddProduct}
-                  className="px-4 py-2 bg-[#0f3e26] text-white text-xs font-bold rounded-xl flex items-center gap-1.5 hover:bg-[#144f31] transition-colors cursor-pointer shrink-0"
+                  className="px-4 py-2 bg-primary text-white text-xs font-bold rounded-xl flex items-center gap-1.5 hover:bg-primary-hover transition-colors cursor-pointer shrink-0"
                 >
                   <Plus className="w-4 h-4" />
                   <span>Add Product</span>
@@ -949,7 +949,7 @@ export default function SellerDashboardPage() {
                           <div className="flex items-center justify-between pt-2 border-t border-gray-100">
                             <div>
                               <div className="flex items-baseline gap-1.5">
-                                <span className="text-base font-black text-[#0f3e26]">₹{price}</span>
+                                <span className="text-base font-black text-primary">₹{price}</span>
                                 {compareAt && compareAt > price && (
                                   <span className="text-xs text-gray-400 line-through">₹{compareAt}</span>
                                 )}
@@ -1037,7 +1037,7 @@ export default function SellerDashboardPage() {
                 </div>
                 <button
                   onClick={handleOpenAddProduct}
-                  className="px-5 py-2.5 bg-[#0f3e26] text-white text-xs font-bold rounded-xl hover:bg-[#144f31] transition-colors inline-flex items-center gap-1.5 cursor-pointer"
+                  className="px-5 py-2.5 bg-primary text-white text-xs font-bold rounded-xl hover:bg-primary-hover transition-colors inline-flex items-center gap-1.5 cursor-pointer"
                 >
                   <Plus className="w-4 h-4" />
                   <span>Add Product</span>
@@ -1090,7 +1090,7 @@ export default function SellerDashboardPage() {
                               <span className="text-[11px] text-gray-500">{p.category}</span>
                             </div>
                             <h4 className="font-black text-gray-900 text-sm mt-0.5">{p.name}</h4>
-                            <p className="text-xs font-bold text-[#0f3e26] mt-0.5">
+                            <p className="text-xs font-bold text-primary mt-0.5">
                               ₹{variant?.price || 0} • {variant?.weight || 'Standard'}
                             </p>
                           </div>
@@ -1178,7 +1178,7 @@ export default function SellerDashboardPage() {
                             </div>
                           </td>
                           <td className="py-3 px-4 font-mono text-gray-600">{p.sku || '—'}</td>
-                          <td className="py-3 px-4 font-black text-[#0f3e26]">₹{variant?.price || 0}</td>
+                          <td className="py-3 px-4 font-black text-primary">₹{variant?.price || 0}</td>
                           <td className="py-3 px-4">
                             <span className={`px-2 py-0.5 rounded-md font-bold text-[11px] ${
                               (variant?.stock || 0) < 10 ? 'bg-amber-100 text-amber-800' : 'bg-emerald-100 text-emerald-800'
@@ -1194,7 +1194,7 @@ export default function SellerDashboardPage() {
                           <td className="py-3 px-4 text-right">
                             <button
                               onClick={() => handleOpenQuickUpdate(p)}
-                              className="px-3 py-1.5 bg-[#0f3e26] hover:bg-[#144f31] text-white font-bold rounded-lg text-xs transition-colors cursor-pointer"
+                              className="px-3 py-1.5 bg-primary hover:bg-primary-hover text-white font-bold rounded-lg text-xs transition-colors cursor-pointer"
                             >
                               Update Stock/Price
                             </button>
@@ -1214,7 +1214,7 @@ export default function SellerDashboardPage() {
           <div className="bg-white rounded-3xl border border-gray-200 shadow-2xs p-6 sm:p-8 space-y-6 animate-in fade-in">
             <div>
               <h3 className="text-lg font-black text-gray-900 tracking-tight flex items-center gap-2">
-                <Building2 className="w-5 h-5 text-[#0f3e26]" />
+                <Building2 className="w-5 h-5 text-primary" />
                 <span>Seller Store Profile & Business Identity</span>
               </h3>
               <p className="text-xs text-gray-500 mt-0.5">
@@ -1273,7 +1273,7 @@ export default function SellerDashboardPage() {
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div>
                   <h3 className="text-lg font-black text-gray-900 tracking-tight flex items-center gap-2">
-                    <ShoppingBag className="w-5 h-5 text-[#0f3e26]" />
+                    <ShoppingBag className="w-5 h-5 text-primary" />
                     <span>Store Order Fulfillment</span>
                   </h3>
                   <p className="text-xs text-gray-500 mt-0.5">
@@ -1491,7 +1491,7 @@ export default function SellerDashboardPage() {
                   value={reactivationReason}
                   onChange={(e) => setReactivationReason(e.target.value)}
                   placeholder="Explain why your account should be reactivated, corrective actions taken, compliance updates..."
-                  className="w-full p-3 bg-white border border-gray-200 rounded-xl text-xs text-gray-900 outline-none focus:border-[#0f3e26]"
+                  className="w-full p-3 bg-white border border-gray-200 rounded-xl text-xs text-gray-900 outline-none focus:border-primary"
                 />
               </div>
 
@@ -1502,7 +1502,7 @@ export default function SellerDashboardPage() {
                   value={reactivationNotes}
                   onChange={(e) => setReactivationNotes(e.target.value)}
                   placeholder="Supporting details or references..."
-                  className="w-full p-3 bg-white border border-gray-200 rounded-xl text-xs text-gray-900 outline-none focus:border-[#0f3e26]"
+                  className="w-full p-3 bg-white border border-gray-200 rounded-xl text-xs text-gray-900 outline-none focus:border-primary"
                 />
               </div>
             </div>
@@ -1535,7 +1535,7 @@ export default function SellerDashboardPage() {
                     setIsSubmittingReactivation(false);
                   }
                 }}
-                className="px-5 py-2.5 rounded-xl bg-[#0f3e26] hover:bg-[#144f31] text-white font-bold text-xs shadow-sm transition-all flex items-center gap-2 cursor-pointer disabled:opacity-50"
+                className="px-5 py-2.5 rounded-xl bg-primary hover:bg-primary-hover text-white font-bold text-xs shadow-xs transition-all flex items-center gap-2 cursor-pointer disabled:opacity-50"
               >
                 {isSubmittingReactivation ? 'Submitting...' : 'Submit Appeal'}
               </button>

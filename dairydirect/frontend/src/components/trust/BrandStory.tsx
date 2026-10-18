@@ -2,14 +2,11 @@ import { CheckCircle2, ShieldCheck, ThermometerSnowflake, Leaf } from 'lucide-re
 
 export function BrandStory() {
   return (
-    <div className="bg-white rounded-[24px] p-6 border border-sand overflow-hidden relative mt-4">
-      {/* Decorative Blob */}
-      <div className="absolute top-0 right-0 w-32 h-32 bg-primary/5 rounded-full blur-2xl -mr-10 -mt-10" />
-      
-      <div className="relative z-10">
-        <h3 className="text-sm font-black text-dark uppercase tracking-wider mb-2">The GjanandSarkar Promise</h3>
-        <p className="text-sm text-on-surface-variant leading-relaxed mb-6">
-          We bring you the purest dairy products, directly from our ethical farms to your doorstep. Every product is rigorously tested to ensure it meets our premium quality standards.
+    <div className="bg-white rounded-2xl p-6 border border-border mt-4 shadow-2xs">
+      <div>
+        <h3 className="text-sm font-bold text-foreground uppercase tracking-wider mb-2">The GjanandSarkar Promise</h3>
+        <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed mb-6">
+          We bring you pure products, directly from verified brands to your doorstep. Every product is rigorously tested to ensure it meets our quality standards.
         </p>
 
         <div className="grid grid-cols-2 gap-4">

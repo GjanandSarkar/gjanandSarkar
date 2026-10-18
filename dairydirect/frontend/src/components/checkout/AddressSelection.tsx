@@ -70,18 +70,18 @@ export function AddressSelection({
   return (
     <div className="flex flex-col gap-4">
       {/* Delivery Address */}
-      <div className="bg-white rounded-[20px] p-4 border border-sand shadow-sm">
-        <div className="flex items-center justify-between mb-3">
+      <div className="bg-surface rounded-xl p-4 border border-border">
+        <div className="flex items-center justify-between mb-3 pb-2 border-b border-border/60">
           <div className="flex items-center gap-2">
             <MapPin className="w-4 h-4 text-primary" />
-            <h3 className="text-sm font-bold text-dark uppercase tracking-wider">Delivery Address</h3>
+            <h3 className="text-xs font-bold text-foreground uppercase tracking-wider">Delivery Address</h3>
           </div>
 
           {addresses.length > 0 && (
             <button
               type="button"
               onClick={handleOpenAdd}
-              className="text-xs font-bold text-primary hover:text-primary/80 flex items-center gap-1 transition-colors cursor-pointer"
+              className="text-xs font-bold text-primary hover:underline flex items-center gap-1 transition-colors cursor-pointer"
             >
               <Plus className="w-3.5 h-3.5" />
               Add New
@@ -93,12 +93,12 @@ export function AddressSelection({
           <button
             type="button"
             onClick={handleOpenAdd}
-            className="w-full p-4 rounded-[16px] border border-dashed border-clay text-clay bg-white hover:bg-clay/5 flex items-center justify-center font-semibold text-sm transition-colors cursor-pointer"
+            className="w-full p-4 rounded-xl border border-dashed border-border text-foreground hover:border-primary/50 bg-surface-muted/50 flex items-center justify-center font-bold text-xs transition-colors cursor-pointer"
           >
-            <Plus className="w-5 h-5 mr-2" /> Add Delivery Address
+            <Plus className="w-4 h-4 mr-1.5 text-primary" /> Add Delivery Address
           </button>
         ) : (
-          <div className="space-y-3">
+          <div className="space-y-2.5">
             {addresses.map((addr) => {
               const isSelected = selectedAddressId === addr.id;
 
@@ -107,34 +107,34 @@ export function AddressSelection({
                   key={addr.id}
                   onClick={() => onSelectAddress(addr.id)}
                   className={cn(
-                    "p-3.5 rounded-[16px] border transition-all cursor-pointer flex items-start justify-between gap-3",
+                    "p-3 rounded-xl border transition-all cursor-pointer flex items-start justify-between gap-3",
                     isSelected
-                      ? "border-primary bg-mint/10 shadow-sm ring-1 ring-primary/20"
-                      : "border-sand bg-white hover:border-sand/80"
+                      ? "border-primary bg-primary/5 ring-1 ring-primary/30"
+                      : "border-border bg-surface hover:border-border/80"
                   )}
                 >
                   <div className="flex items-start gap-3 flex-1 min-w-0">
                     <div className="pt-0.5">
                       <div
                         className={cn(
-                          "w-5 h-5 rounded-full border-2 flex items-center justify-center shrink-0",
-                          isSelected ? "border-primary" : "border-sand"
+                          "w-4 h-4 rounded-full border-2 flex items-center justify-center shrink-0",
+                          isSelected ? "border-primary" : "border-border"
                         )}
                       >
-                        {isSelected && <div className="w-2.5 h-2.5 rounded-full bg-primary" />}
+                        {isSelected && <div className="w-2 h-2 rounded-full bg-primary" />}
                       </div>
                     </div>
 
                     <div className="min-w-0 flex-1">
                       <div className="flex items-center gap-2 mb-0.5 flex-wrap">
-                        <span className="font-bold text-dark text-sm capitalize">{addr.label || addr.address_type}</span>
+                        <span className="font-bold text-foreground text-xs capitalize">{addr.label || addr.address_type}</span>
                         {addr.is_default && (
-                          <span className="bg-primary/10 text-primary text-[10px] font-black uppercase px-1.5 py-0.5 rounded tracking-wider">
+                          <span className="bg-primary/10 text-primary text-[10px] font-bold uppercase px-1.5 py-0.2 rounded">
                             Default
                           </span>
                         )}
                         {addr.full_name && (
-                          <span className="text-xs text-muted font-medium">• {addr.full_name}</span>
+                          <span className="text-[11px] text-muted font-medium">• {addr.full_name}</span>
                         )}
                       </div>
 
@@ -148,7 +148,7 @@ export function AddressSelection({
                       </p>
 
                       {addr.mobile_number && (
-                        <p className="text-[11px] text-muted/80 mt-0.5">Phone: +91 {addr.mobile_number}</p>
+                        <p className="text-[11px] text-muted mt-0.5">Phone: +91 {addr.mobile_number}</p>
                       )}
                     </div>
                   </div>
@@ -156,10 +156,10 @@ export function AddressSelection({
                   <button
                     type="button"
                     onClick={(e) => handleOpenEdit(addr, e)}
-                    className="p-1.5 text-muted hover:text-primary hover:bg-white rounded-lg transition-colors shrink-0 cursor-pointer"
+                    className="p-1 text-muted hover:text-foreground transition-colors shrink-0 cursor-pointer"
                     title="Edit address"
                   >
-                    <Edit3 className="w-4 h-4" />
+                    <Edit3 className="w-3.5 h-3.5" />
                   </button>
                 </div>
               );

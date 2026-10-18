@@ -21,6 +21,8 @@ import { AddressSnippet } from '@/components/profile/AddressSnippet';
 import { QuickActions } from '@/components/profile/QuickActions';
 import { BuyAgainCarousel } from '@/components/discovery/BuyAgainCarousel';
 import { EngagementBanner } from '@/components/profile/EngagementBanner';
+import { ThemeToggle } from '@/components/theme/ThemeToggle';
+import { useTheme } from '@/components/theme/ThemeProvider';
 
 // Icons & Animations
 import { 
@@ -40,7 +42,14 @@ import {
   Clock,
   XCircle,
   ArrowRight,
-  AlertTriangle
+  AlertTriangle,
+  Globe,
+  Heart,
+  Bell,
+  ChevronRight,
+  Sparkles,
+  Sun,
+  Moon
 } from 'lucide-react';
 import Link from 'next/link';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -66,31 +75,31 @@ function CollapsibleSection({
   children,
 }: CollapsibleSectionProps) {
   return (
-    <div className="bg-white rounded-[24px] border border-sand/50 shadow-xs overflow-hidden transition-all duration-300">
+    <div className="bg-surface rounded-xl border border-border shadow-xs overflow-hidden transition-all duration-200">
       <button
         type="button"
         onClick={onToggle}
-        className="w-full px-5 py-4.5 flex items-center justify-between hover:bg-sand/10 active:bg-sand/20 transition-colors text-left cursor-pointer"
+        className="w-full px-4 py-3.5 flex items-center justify-between hover:bg-surface-muted/50 transition-colors text-left cursor-pointer"
       >
-        <div className="flex items-center gap-4">
-          <div className="w-10 h-10 rounded-full bg-sand/30 flex items-center justify-center text-primary shrink-0">
+        <div className="flex items-center gap-3">
+          <div className="w-8 h-8 rounded-lg bg-surface-muted border border-border flex items-center justify-center text-primary shrink-0">
             {icon}
           </div>
           <div>
-            <h3 className="font-extrabold text-dark text-[15px] tracking-wide leading-tight">{title}</h3>
+            <h3 className="font-bold text-foreground text-xs sm:text-sm tracking-tight leading-tight">{title}</h3>
             {subtitle && (
-              <p className="text-[11px] font-semibold text-muted tracking-tight mt-0.5">{subtitle}</p>
+              <p className="text-[11px] font-medium text-muted mt-0.5">{subtitle}</p>
             )}
           </div>
         </div>
 
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2">
           {badge && (
-            <span className="text-[10px] font-black uppercase tracking-wider bg-[#0f3e26]/10 text-[#0f3e26] px-2.5 py-0.5 rounded-full">
+            <span className="text-[10px] font-bold uppercase tracking-wider bg-primary/10 text-primary px-2 py-0.5 rounded-md">
               {badge}
             </span>
           )}
-          <ChevronDown className={`w-5 h-5 text-muted transition-transform duration-300 ${isOpen ? 'rotate-180 text-dark' : ''}`} />
+          <ChevronDown className={`w-4 h-4 text-muted transition-transform duration-200 ${isOpen ? 'rotate-180 text-foreground' : ''}`} />
         </div>
       </button>
 
@@ -100,9 +109,9 @@ function CollapsibleSection({
             initial={{ height: 0, opacity: 0 }}
             animate={{ height: 'auto', opacity: 1 }}
             exit={{ height: 0, opacity: 0 }}
-            transition={{ duration: 0.25, ease: 'easeInOut' }}
+            transition={{ duration: 0.2, ease: 'easeInOut' }}
           >
-            <div className="px-5 pb-5 pt-1.5 border-t border-sand/30 bg-gray-50/20">
+            <div className="px-4 pb-4 pt-1 border-t border-border/60 bg-surface-muted/20">
               {children}
             </div>
           </motion.div>
@@ -130,7 +139,9 @@ export default function ProfileScreen() {
   const setLanguage = useStore((s) => s.setLanguage);
   const updateProfileLocal = useStore((s) => s.updateProfile);
   const addToCartLocal = useStore(state => state.addToCartLocal);
+  const setNotificationDrawerOpen = useStore((s) => s.setNotificationDrawerOpen);
 
+  const { theme, toggleTheme } = useTheme();
   const [orders, setOrders] = useState<OrderWithItems[]>([]);
   const [subscriptions, setSubscriptions] = useState<SubscriptionWithProduct[]>([]);
   const [addresses, setAddresses] = useState<UserAddress[]>([]);
@@ -176,7 +187,7 @@ export default function ProfileScreen() {
       setSellerInquiry(inqData);
       setIsLoading(false);
     });
-  }, [user, router, isAuthLoading]);
+  }, [user?.id, router, isAuthLoading]);
 
   const handleLogout = async () => {
     await supabaseLogout();
@@ -216,281 +227,627 @@ export default function ProfileScreen() {
 
   if (isLoading) {
     return (
-      <div className="flex flex-col min-h-screen pb-[100px] bg-surface-container animate-pulse p-4 gap-6 pt-10">
-        <div className="h-32 bg-sand/30 rounded-[24px]" />
-        <div className="h-20 bg-sand/30 rounded-[24px]" />
-        <div className="h-20 bg-sand/30 rounded-[24px]" />
-        <div className="h-20 bg-sand/30 rounded-[24px]" />
-        <div className="h-20 bg-sand/30 rounded-[24px]" />
+      <div className="flex flex-col min-h-screen pb-[100px] bg-background animate-pulse p-4 gap-4 max-w-2xl mx-auto w-full pt-8">
+        <div className="h-32 bg-surface-muted rounded-xl border border-border" />
+        <div className="h-16 bg-surface-muted rounded-xl border border-border" />
+        <div className="h-16 bg-surface-muted rounded-xl border border-border" />
+        <div className="h-16 bg-surface-muted rounded-xl border border-border" />
       </div>
     );
   }
 
   return (
-    <div className="flex flex-col min-h-screen pb-[120px] bg-surface-container">
-      <div className="flex-1 max-w-[800px] mx-auto w-full p-4 pt-6 space-y-4">
+    <div className="flex flex-col min-h-screen pb-24 bg-background text-foreground transition-colors duration-150">
+      <div className="max-w-[1440px] mx-auto px-4 md:px-8 py-6 w-full">
         
-        {/* Profile Summary (Always visible at the top) */}
-        <ProfileSummary 
-          user={user} 
-          onUpdateProfile={updateProfileLocal} 
-        />
+        {/* ========================================================= */}
+        {/* DESKTOP BENTO GRID LAYOUT (>= md)                        */}
+        {/* ========================================================= */}
+        <div className="hidden md:grid grid-cols-12 gap-5">
+          
+          {/* Bento Cell 1: Profile Summary & Identity (8 Cols) */}
+          <div className="col-span-8">
+            <ProfileSummary 
+              user={user} 
+              onUpdateProfile={updateProfileLocal} 
+            />
+          </div>
 
-        {/* Seller Account / Application Status Card */}
-        {sellerInquiry ? (
-          <div className="bg-white rounded-[24px] border border-sand/50 shadow-xs p-5 space-y-3">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-full bg-[#0f3e26]/10 flex items-center justify-center text-[#0f3e26]">
+          {/* Bento Cell 2: Rewards & Loyalty (4 Cols) */}
+          <div className="col-span-4 bg-surface rounded-2xl border border-border p-5 shadow-2xs flex flex-col justify-between">
+            <div>
+              <div className="flex items-center justify-between mb-3">
+                <div className="w-10 h-10 rounded-xl bg-primary/10 text-primary flex items-center justify-center">
+                  <Trophy className="w-5 h-5" />
+                </div>
+                <span className="text-[10px] font-bold uppercase tracking-wider bg-primary/10 text-primary px-2 py-0.5 rounded-md">
+                  Farm Club Member
+                </span>
+              </div>
+              <h3 className="font-black text-base text-foreground tracking-tight">GjanandSarkar Rewards</h3>
+              <p className="text-xs text-foreground-muted mt-0.5">Earn points and unlock free farm deliveries</p>
+
+              <div className="py-4">
+                <div className="flex items-baseline justify-between mb-2">
+                  <span className="text-3xl font-black text-foreground tracking-tight tabular-nums">
+                    {loyaltyPoints}
+                  </span>
+                  <span className="text-xs font-semibold text-primary">
+                    {pointsToReward > 0 ? `${pointsToReward} pts to reward` : 'Reward Unlocked!'}
+                  </span>
+                </div>
+                <div className="h-2.5 w-full bg-surface-muted rounded-full overflow-hidden border border-border/40">
+                  <div
+                    className="h-full bg-primary rounded-full transition-all duration-500"
+                    style={{ width: `${rewardProgressPct}%` }}
+                  />
+                </div>
+              </div>
+            </div>
+
+            <p className="text-[11px] text-foreground-muted border-t border-border/60 pt-3">
+              Earn 10 points for every ₹100 spent across all verified dairy products.
+            </p>
+          </div>
+
+          {/* Bento Cell 3: Active Subscriptions (4 Cols) */}
+          <div className="col-span-4 bg-surface rounded-2xl border border-border p-5 shadow-2xs flex flex-col justify-between">
+            <div>
+              <div className="flex items-center justify-between mb-3">
+                <div className="flex items-center gap-2.5">
+                  <div className="w-9 h-9 rounded-xl bg-primary/10 text-primary flex items-center justify-center">
+                    <CalendarDays className="w-4.5 h-4.5" />
+                  </div>
+                  <div>
+                    <h4 className="font-bold text-sm text-foreground">Subscriptions</h4>
+                    <span className="text-[11px] text-foreground-muted">Daily milk & recurring staples</span>
+                  </div>
+                </div>
+                <span className="text-[10px] font-bold bg-primary/15 text-primary px-2 py-0.5 rounded-md">
+                  {subscriptions.length} Active
+                </span>
+              </div>
+
+              {subscriptions.length > 0 ? (
+                <div className="py-2 space-y-2">
+                  {subscriptions.slice(0, 2).map((sub) => (
+                    <div key={sub.id} className="p-2.5 rounded-xl bg-surface-muted border border-border/70 flex items-center justify-between">
+                      <div className="min-w-0 pr-2">
+                        <p className="text-xs font-bold text-foreground truncate">{sub.products?.name || 'Daily Plan'}</p>
+                        <p className="text-[10px] text-foreground-muted">{sub.plan} • {sub.volume} unit(s)</p>
+                      </div>
+                      <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-primary/10 text-primary uppercase">
+                        {sub.status}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="py-4 text-center">
+                  <p className="text-xs text-foreground-muted">No active daily subscriptions.</p>
+                </div>
+              )}
+            </div>
+
+            <Link
+              href="/subscribe"
+              className="inline-flex items-center gap-1.5 text-xs font-bold text-primary hover:underline pt-3 border-t border-border/60"
+            >
+              <span>Manage Subscriptions</span>
+              <ArrowRight className="w-3.5 h-3.5" />
+            </Link>
+          </div>
+
+          {/* Bento Cell 4: Recent Orders (4 Cols) */}
+          <div className="col-span-4 bg-surface rounded-2xl border border-border p-5 shadow-2xs flex flex-col justify-between">
+            <div>
+              <div className="flex items-center justify-between mb-3">
+                <div className="flex items-center gap-2.5">
+                  <div className="w-9 h-9 rounded-xl bg-primary/10 text-primary flex items-center justify-center">
+                    <Package className="w-4.5 h-4.5" />
+                  </div>
+                  <div>
+                    <h4 className="font-bold text-sm text-foreground">Recent Orders</h4>
+                    <span className="text-[11px] text-foreground-muted">Track & reorder essentials</span>
+                  </div>
+                </div>
+                <span className="text-[10px] font-bold bg-surface-muted text-foreground-muted px-2 py-0.5 rounded-md border border-border">
+                  {orders.length} Total
+                </span>
+              </div>
+
+              {orders.length > 0 ? (
+                <div className="py-2 space-y-2">
+                  {orders.slice(0, 2).map((order) => (
+                    <div key={order.id} className="p-2.5 rounded-xl bg-surface-muted border border-border/70 flex items-center justify-between">
+                      <div>
+                        <span className="font-mono text-xs font-bold text-foreground">
+                          #{order.id.slice(0, 8).toUpperCase()}
+                        </span>
+                        <p className="text-[10px] text-foreground-muted">
+                          ₹{order.total_amount} • {order.order_items?.length || 1} items
+                        </p>
+                      </div>
+                      <span className="text-[10px] font-bold px-2 py-0.5 rounded-md bg-primary/10 text-primary border border-primary/20">
+                        {order.status}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="py-4 text-center">
+                  <p className="text-xs text-foreground-muted">No orders placed yet.</p>
+                </div>
+              )}
+            </div>
+
+            <Link
+              href="/orders"
+              className="inline-flex items-center gap-1.5 text-xs font-bold text-primary hover:underline pt-3 border-t border-border/60"
+            >
+              <span>View All Orders</span>
+              <ArrowRight className="w-3.5 h-3.5" />
+            </Link>
+          </div>
+
+          {/* Bento Cell 5: Saved Addresses (4 Cols) */}
+          <div className="col-span-4 bg-surface rounded-2xl border border-border p-5 shadow-2xs flex flex-col justify-between">
+            <div>
+              <div className="flex items-center justify-between mb-3">
+                <div className="flex items-center gap-2.5">
+                  <div className="w-9 h-9 rounded-xl bg-primary/10 text-primary flex items-center justify-center">
+                    <MapPin className="w-4.5 h-4.5" />
+                  </div>
+                  <div>
+                    <h4 className="font-bold text-sm text-foreground">Saved Addresses</h4>
+                    <span className="text-[11px] text-foreground-muted">Delivery locations & pin</span>
+                  </div>
+                </div>
+                <span className="text-[10px] font-bold bg-surface-muted text-foreground-muted px-2 py-0.5 rounded-md border border-border">
+                  {addresses.length} Saved
+                </span>
+              </div>
+
+              {addresses.length > 0 ? (
+                <div className="py-2">
+                  <div className="p-2.5 rounded-xl bg-surface-muted border border-border/70">
+                    <div className="flex items-center gap-1.5 mb-1">
+                      <span className="text-xs font-bold text-foreground">{addresses[0].label}</span>
+                      {addresses[0].is_default && (
+                        <span className="text-[9px] bg-primary/15 text-primary px-1.5 py-0.2 rounded font-bold">Default</span>
+                      )}
+                    </div>
+                    <p className="text-[11px] text-foreground-muted line-clamp-2">{addresses[0].address}</p>
+                  </div>
+                </div>
+              ) : (
+                <div className="py-4 text-center">
+                  <p className="text-xs text-foreground-muted">No addresses saved yet.</p>
+                </div>
+              )}
+            </div>
+
+            <Link
+              href="/profile/saved-addresses"
+              className="inline-flex items-center gap-1.5 text-xs font-bold text-primary hover:underline pt-3 border-t border-border/60"
+            >
+              <span>Manage Addresses</span>
+              <ArrowRight className="w-3.5 h-3.5" />
+            </Link>
+          </div>
+
+          {/* Bento Cell 6: Settings, Appearance & Preferences (6 Cols) */}
+          <div className="col-span-6 bg-surface rounded-2xl border border-border p-5 shadow-2xs flex flex-col justify-between">
+            <div>
+              <div className="flex items-center gap-2.5 pb-3 border-b border-border/60 mb-3.5">
+                <div className="w-9 h-9 rounded-xl bg-primary/10 flex items-center justify-center text-primary shrink-0">
+                  <Settings2 className="w-5 h-5" />
+                </div>
+                <div>
+                  <h4 className="font-bold text-sm text-foreground">Preferences & Theme</h4>
+                  <p className="text-[11px] text-foreground-muted">Display mode, language and notifications</p>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-2.5">
+                {/* 1. Theme Toggle Button */}
+                <button
+                  type="button"
+                  onClick={toggleTheme}
+                  className="p-3.5 rounded-xl bg-surface-muted hover:bg-surface border border-border/70 hover:border-border transition-all flex items-center justify-between text-left cursor-pointer active:scale-[0.99] group shadow-2xs"
+                >
+                  <div className="flex items-center gap-3 min-w-0">
+                    <div className="w-9 h-9 rounded-lg bg-surface border border-border/70 flex items-center justify-center text-primary shrink-0 group-hover:scale-105 transition-transform">
+                      {theme === 'dark' ? <Moon className="w-4.5 h-4.5" /> : <Sun className="w-4.5 h-4.5 text-amber-500" />}
+                    </div>
+                    <div className="min-w-0">
+                      <p className="text-xs font-bold text-foreground">Color Theme</p>
+                      <p className="text-[11px] text-foreground-muted capitalize">{theme === 'dark' ? 'Dark Mode' : 'Light Mode'}</p>
+                    </div>
+                  </div>
+                  <ChevronRight className="w-4 h-4 text-foreground-muted group-hover:text-foreground group-hover:translate-x-0.5 transition-all shrink-0 ml-1" />
+                </button>
+
+                {/* 2. Language Selection Button */}
+                <button
+                  type="button"
+                  onClick={() => setShowLanguageSettings(true)}
+                  className="p-3.5 rounded-xl bg-surface-muted hover:bg-surface border border-border/70 hover:border-border transition-all flex items-center justify-between text-left cursor-pointer active:scale-[0.99] group shadow-2xs"
+                >
+                  <div className="flex items-center gap-3 min-w-0">
+                    <div className="w-9 h-9 rounded-lg bg-surface border border-border/70 flex items-center justify-center text-primary shrink-0 group-hover:scale-105 transition-transform">
+                      <Globe className="w-4.5 h-4.5" />
+                    </div>
+                    <div className="min-w-0">
+                      <p className="text-xs font-bold text-foreground">App Language</p>
+                      <p className="text-[11px] text-foreground-muted truncate">{language === 'hi' ? 'हिंदी (Hindi)' : language === 'gu' ? 'ગુજરાતી' : 'English'}</p>
+                    </div>
+                  </div>
+                  <ChevronRight className="w-4 h-4 text-foreground-muted group-hover:text-foreground group-hover:translate-x-0.5 transition-all shrink-0 ml-1" />
+                </button>
+
+                {/* 3. Wishlist Button */}
+                <Link
+                  href="/wishlist"
+                  className="p-3.5 rounded-xl bg-surface-muted hover:bg-surface border border-border/70 hover:border-border transition-all flex items-center justify-between text-left cursor-pointer active:scale-[0.99] group shadow-2xs"
+                >
+                  <div className="flex items-center gap-3 min-w-0">
+                    <div className="w-9 h-9 rounded-lg bg-surface border border-border/70 flex items-center justify-center text-rose-500 shrink-0 group-hover:scale-105 transition-transform">
+                      <Heart className="w-4.5 h-4.5 fill-rose-500/20" />
+                    </div>
+                    <div className="min-w-0">
+                      <p className="text-xs font-bold text-foreground">Saved Wishlist</p>
+                      <p className="text-[11px] text-foreground-muted">Favorite products</p>
+                    </div>
+                  </div>
+                  <ChevronRight className="w-4 h-4 text-foreground-muted group-hover:text-foreground group-hover:translate-x-0.5 transition-all shrink-0 ml-1" />
+                </Link>
+
+                {/* 4. Notifications Drawer Button */}
+                <button
+                  type="button"
+                  onClick={() => setNotificationDrawerOpen(true)}
+                  className="p-3.5 rounded-xl bg-surface-muted hover:bg-surface border border-border/70 hover:border-border transition-all flex items-center justify-between text-left cursor-pointer active:scale-[0.99] group shadow-2xs"
+                >
+                  <div className="flex items-center gap-3 min-w-0">
+                    <div className="w-9 h-9 rounded-lg bg-surface border border-border/70 flex items-center justify-center text-primary shrink-0 group-hover:scale-105 transition-transform">
+                      <Bell className="w-4.5 h-4.5" />
+                    </div>
+                    <div className="min-w-0">
+                      <p className="text-xs font-bold text-foreground">Notifications</p>
+                      <p className="text-[11px] text-foreground-muted">Delivery & updates</p>
+                    </div>
+                  </div>
+                  <ChevronRight className="w-4 h-4 text-foreground-muted group-hover:text-foreground group-hover:translate-x-0.5 transition-all shrink-0 ml-1" />
+                </button>
+              </div>
+            </div>
+          </div>
+
+          {/* Bento Cell 7: Seller Program & Privileges (6 Cols) */}
+          <div className="col-span-6 bg-surface rounded-2xl border border-border p-5 shadow-2xs flex flex-col justify-between">
+            <div>
+              <div className="flex items-center gap-2.5 pb-3 border-b border-border/60 mb-3.5">
+                <div className="w-9 h-9 rounded-xl bg-primary/10 flex items-center justify-center text-primary shrink-0">
                   <Store className="w-5 h-5" />
                 </div>
                 <div>
-                  <h3 className="font-extrabold text-dark text-[15px] leading-tight">
-                    Seller Account Status
-                  </h3>
-                  <p className="text-[12px] font-semibold text-muted">
-                    {sellerInquiry.business_name} ({sellerInquiry.category})
-                  </p>
+                  <h4 className="font-bold text-sm text-foreground">Direct Farm Sourcing</h4>
+                  <p className="text-[11px] text-foreground-muted">Verified producer operations, purity certificates & safety</p>
                 </div>
               </div>
 
-              {sellerInquiry.status === 'approved' && (
-                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-100 text-emerald-800 text-[11px] font-black uppercase tracking-wider">
-                  <ShieldCheck className="w-3.5 h-3.5" />
-                  <span>Approved</span>
-                </span>
-              )}
-              {sellerInquiry.status === 'pending' && (
-                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-100 text-amber-800 text-[11px] font-black uppercase tracking-wider">
-                  <Clock className="w-3.5 h-3.5" />
-                  <span>Pending Approval</span>
-                </span>
-              )}
-              {sellerInquiry.status === 'rejected' && (
-                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-rose-100 text-rose-800 text-[11px] font-black uppercase tracking-wider">
-                  <XCircle className="w-3.5 h-3.5" />
-                  <span>Rejected</span>
-                </span>
-              )}
-              {sellerInquiry.status === 'suspended' && (
-                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-red-100 text-red-800 text-[11px] font-black uppercase tracking-wider">
-                  <AlertTriangle className="w-3.5 h-3.5" />
-                  <span>Suspended</span>
-                </span>
-              )}
-            </div>
-
-            {sellerInquiry.status === 'pending' && (
-              <p className="text-xs text-gray-600 bg-amber-50/60 p-3 rounded-xl border border-amber-200/60 leading-relaxed">
-                Your seller application has been submitted successfully and is awaiting admin approval. Duplicate submissions are prevented while under review.
-              </p>
-            )}
-
-            {sellerInquiry.status === 'rejected' && (
-              <div className="bg-rose-50/60 p-3 rounded-xl border border-rose-200/60 text-xs text-rose-900 space-y-1">
-                <p className="font-bold">Rejection Reason:</p>
-                <p>{sellerInquiry.admin_notes || 'Application did not satisfy verification criteria. You may edit and resubmit.'}</p>
-              </div>
-            )}
-
-            <div className="flex items-center justify-end pt-1">
-              {sellerInquiry.status === 'approved' ? (
-                <Link
-                  href="/seller/dashboard"
-                  className="inline-flex items-center gap-1.5 px-4 py-2 bg-[#0f3e26] hover:bg-[#144f31] text-white text-xs font-bold rounded-xl transition-all shadow-2xs"
-                >
-                  <span>Open Seller Dashboard</span>
-                  <ArrowRight className="w-3.5 h-3.5" />
-                </Link>
-              ) : (
+              <div className="grid grid-cols-2 gap-2.5">
+                {/* 1. Seller Portal */}
                 <Link
                   href="/become-seller"
-                  className="inline-flex items-center gap-1.5 px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-800 text-xs font-bold rounded-xl transition-colors"
+                  className="p-3.5 rounded-xl bg-surface-muted hover:bg-surface border border-border/70 hover:border-border transition-all flex items-center justify-between text-left cursor-pointer active:scale-[0.99] group shadow-2xs"
                 >
-                  <span>{sellerInquiry.status === 'rejected' ? 'Edit & Resubmit Application' : 'View Application Details'}</span>
-                  <ArrowRight className="w-3.5 h-3.5" />
+                  <div className="flex items-center gap-3 min-w-0">
+                    <div className="w-9 h-9 rounded-lg bg-surface border border-border/70 flex items-center justify-center text-primary shrink-0 group-hover:scale-105 transition-transform">
+                      <Store className="w-4.5 h-4.5" />
+                    </div>
+                    <div className="min-w-0">
+                      <p className="text-xs font-bold text-foreground">Seller Portal</p>
+                      <p className="text-[11px] text-foreground-muted truncate">Farm partner program</p>
+                    </div>
+                  </div>
+                  <ChevronRight className="w-4 h-4 text-foreground-muted group-hover:text-foreground group-hover:translate-x-0.5 transition-all shrink-0 ml-1" />
                 </Link>
-              )}
-            </div>
-          </div>
-        ) : (
-          <div className="bg-gradient-to-r from-emerald-50/80 to-amber-50/60 rounded-[24px] border border-emerald-200/50 shadow-xs p-5 flex items-center justify-between gap-4">
-            <div className="flex items-center gap-3.5">
-              <div className="w-10 h-10 rounded-full bg-[#0f3e26] text-white flex items-center justify-center shrink-0">
-                <Store className="w-5 h-5" />
-              </div>
-              <div>
-                <h4 className="font-black text-gray-900 text-sm">Sell on Gjanand Sarkar</h4>
-                <p className="text-xs text-gray-600 mt-0.5">Reach pan-India customers with direct-from-source verified seller privileges.</p>
-              </div>
-            </div>
-            <Link
-              href="/become-seller"
-              className="px-4 py-2.5 bg-[#0f3e26] hover:bg-[#144f31] text-white text-xs font-black rounded-xl shrink-0 transition-all shadow-2xs flex items-center gap-1"
-            >
-              <span>Apply Now</span>
-              <ArrowRight className="w-3.5 h-3.5 text-[#c88a23]" />
-            </Link>
-          </div>
-        )}
 
-        {/* Section 1: GjanandSarkar Rewards */}
-        <CollapsibleSection
-          title="GjanandSarkar Rewards"
-          subtitle="Earn points and unlock free deliveries"
-          badge={`${loyaltyPoints} Points`}
-          icon={<Trophy className="w-5 h-5" />}
-          isOpen={openSections.rewards}
-          onToggle={() => toggleSection('rewards')}
-        >
-          {/* Was a hardcoded 150 points with a 75%-full bar and "50 pts to
-              Free Delivery", shown identically to every account — including
-              brand new ones with no orders. `profiles.loyalty_points` is a
-              real column that orders accrue into, so this now reads it. */}
-          <div className="py-2.5">
-            <div className="flex items-end justify-between mb-2">
-              <div className="flex items-baseline gap-1">
-                <span className="text-2xl font-black text-dark tracking-tight tabular-nums">
-                  {loyaltyPoints}
-                </span>
-                <span className="text-[11px] font-bold text-muted uppercase tracking-wider">Points</span>
+                {/* 2. Quality Lab Reports */}
+                <Link
+                  href="/profile/quality-reports"
+                  className="p-3.5 rounded-xl bg-surface-muted hover:bg-surface border border-border/70 hover:border-border transition-all flex items-center justify-between text-left cursor-pointer active:scale-[0.99] group shadow-2xs"
+                >
+                  <div className="flex items-center gap-3 min-w-0">
+                    <div className="w-9 h-9 rounded-lg bg-surface border border-border/70 flex items-center justify-center text-emerald-600 shrink-0 group-hover:scale-105 transition-transform">
+                      <ShieldCheck className="w-4.5 h-4.5" />
+                    </div>
+                    <div className="min-w-0">
+                      <p className="text-xs font-bold text-foreground">Lab Certificates</p>
+                      <p className="text-[11px] text-foreground-muted truncate">Daily batch purity</p>
+                    </div>
+                  </div>
+                  <ChevronRight className="w-4 h-4 text-foreground-muted group-hover:text-foreground group-hover:translate-x-0.5 transition-all shrink-0 ml-1" />
+                </Link>
+
+                {/* 3. Saved Addresses */}
+                <Link
+                  href="/profile/saved-addresses"
+                  className="p-3.5 rounded-xl bg-surface-muted hover:bg-surface border border-border/70 hover:border-border transition-all flex items-center justify-between text-left cursor-pointer active:scale-[0.99] group shadow-2xs"
+                >
+                  <div className="flex items-center gap-3 min-w-0">
+                    <div className="w-9 h-9 rounded-lg bg-surface border border-border/70 flex items-center justify-center text-primary shrink-0 group-hover:scale-105 transition-transform">
+                      <MapPin className="w-4.5 h-4.5" />
+                    </div>
+                    <div className="min-w-0">
+                      <p className="text-xs font-bold text-foreground">Saved Addresses</p>
+                      <p className="text-[11px] text-foreground-muted truncate">{addresses.length} location(s)</p>
+                    </div>
+                  </div>
+                  <ChevronRight className="w-4 h-4 text-foreground-muted group-hover:text-foreground group-hover:translate-x-0.5 transition-all shrink-0 ml-1" />
+                </Link>
+
+                {/* 4. Sign Out */}
+                <button
+                  type="button"
+                  onClick={handleLogout}
+                  className="p-3.5 rounded-xl bg-surface-muted hover:bg-rose-500/10 border border-border/70 hover:border-rose-200 transition-all flex items-center justify-between text-left cursor-pointer active:scale-[0.99] group shadow-2xs"
+                >
+                  <div className="flex items-center gap-3 min-w-0">
+                    <div className="w-9 h-9 rounded-lg bg-surface border border-border/70 flex items-center justify-center text-rose-500 shrink-0 group-hover:scale-105 transition-transform">
+                      <LogOut className="w-4.5 h-4.5" />
+                    </div>
+                    <div className="min-w-0">
+                      <p className="text-xs font-bold text-rose-600">Sign Out</p>
+                      <p className="text-[11px] text-rose-500/80 truncate">Log out of account</p>
+                    </div>
+                  </div>
+                  <ChevronRight className="w-4 h-4 text-rose-400 group-hover:text-rose-600 group-hover:translate-x-0.5 transition-all shrink-0 ml-1" />
+                </button>
               </div>
-              {pointsToReward > 0 ? (
-                <span className="text-[11px] font-semibold text-primary tabular-nums">
-                  {pointsToReward} pts to your next reward
-                </span>
-              ) : (
-                <span className="text-[11px] font-semibold text-primary">
-                  Reward unlocked
-                </span>
-              )}
             </div>
-            <div className="h-2 w-full bg-sand rounded-full overflow-hidden">
-              <div
-                className="h-full bg-primary rounded-full transition-[width] duration-500"
-                style={{ width: `${rewardProgressPct}%` }}
+          </div>
+
+        </div>
+
+        {/* ========================================================= */}
+        {/* MOBILE LAYOUT (< md)                                      */}
+        {/* ========================================================= */}
+        <div className="block md:hidden space-y-4">
+          
+          {/* Profile Summary with Edit Drawer */}
+          <ProfileSummary 
+            user={user} 
+            onUpdateProfile={updateProfileLocal} 
+          />
+
+          {/* ── Quick Access Shortcuts Grid (Missed Options) ── */}
+          <div className="bg-surface rounded-2xl border border-border p-3.5 shadow-2xs">
+            <h3 className="text-xs font-bold uppercase tracking-wider text-foreground-muted mb-2.5 px-1">
+              Quick Shortcuts
+            </h3>
+            <div className="grid grid-cols-4 gap-2 text-center">
+              <Link
+                href="/subscribe"
+                className="flex flex-col items-center justify-center p-2 rounded-xl bg-surface-muted hover:bg-primary/10 transition-colors group"
+              >
+                <div className="w-9 h-9 rounded-xl bg-primary/10 text-primary flex items-center justify-center mb-1 group-hover:scale-105 transition-transform">
+                  <CalendarDays className="w-4.5 h-4.5" />
+                </div>
+                <span className="text-[11px] font-bold text-foreground leading-tight">Subscriptions</span>
+              </Link>
+
+              <Link
+                href="/profile/saved-addresses"
+                className="flex flex-col items-center justify-center p-2 rounded-xl bg-surface-muted hover:bg-primary/10 transition-colors group"
+              >
+                <div className="w-9 h-9 rounded-xl bg-primary/10 text-primary flex items-center justify-center mb-1 group-hover:scale-105 transition-transform">
+                  <MapPin className="w-4.5 h-4.5" />
+                </div>
+                <span className="text-[11px] font-bold text-foreground leading-tight">Addresses</span>
+              </Link>
+
+              <Link
+                href="/orders"
+                className="flex flex-col items-center justify-center p-2 rounded-xl bg-surface-muted hover:bg-primary/10 transition-colors group"
+              >
+                <div className="w-9 h-9 rounded-xl bg-primary/10 text-primary flex items-center justify-center mb-1 group-hover:scale-105 transition-transform">
+                  <Package className="w-4.5 h-4.5" />
+                </div>
+                <span className="text-[11px] font-bold text-foreground leading-tight">Orders</span>
+              </Link>
+
+              <Link
+                href="/wishlist"
+                className="flex flex-col items-center justify-center p-2 rounded-xl bg-surface-muted hover:bg-primary/10 transition-colors group"
+              >
+                <div className="w-9 h-9 rounded-xl bg-rose-500/10 text-rose-500 flex items-center justify-center mb-1 group-hover:scale-105 transition-transform">
+                  <Heart className="w-4.5 h-4.5" />
+                </div>
+                <span className="text-[11px] font-bold text-foreground leading-tight">Wishlist</span>
+              </Link>
+
+              <button
+                type="button"
+                onClick={() => setNotificationDrawerOpen(true)}
+                className="flex flex-col items-center justify-center p-2 rounded-xl bg-surface-muted hover:bg-primary/10 transition-colors cursor-pointer group"
+              >
+                <div className="w-9 h-9 rounded-xl bg-primary/10 text-primary flex items-center justify-center mb-1 group-hover:scale-105 transition-transform">
+                  <Bell className="w-4.5 h-4.5" />
+                </div>
+                <span className="text-[11px] font-bold text-foreground leading-tight">Alerts</span>
+              </button>
+
+              <div className="flex flex-col items-center justify-center p-2 rounded-xl bg-surface-muted">
+                <ThemeToggle variant="icon" />
+                <span className="text-[11px] font-bold text-foreground leading-tight mt-1">Theme</span>
+              </div>
+
+              <button
+                type="button"
+                onClick={() => setShowLanguageSettings(true)}
+                className="flex flex-col items-center justify-center p-2 rounded-xl bg-surface-muted hover:bg-primary/10 transition-colors cursor-pointer group"
+              >
+                <div className="w-9 h-9 rounded-xl bg-primary/10 text-primary flex items-center justify-center mb-1 group-hover:scale-105 transition-transform">
+                  <Globe className="w-4.5 h-4.5" />
+                </div>
+                <span className="text-[11px] font-bold text-foreground leading-tight">Language</span>
+              </button>
+
+              <Link
+                href="/become-seller"
+                className="flex flex-col items-center justify-center p-2 rounded-xl bg-surface-muted hover:bg-primary/10 transition-colors group"
+              >
+                <div className="w-9 h-9 rounded-xl bg-primary/10 text-primary flex items-center justify-center mb-1 group-hover:scale-105 transition-transform">
+                  <Store className="w-4.5 h-4.5" />
+                </div>
+                <span className="text-[11px] font-bold text-foreground leading-tight">Sell</span>
+              </Link>
+            </div>
+          </div>
+
+          {/* Collapsible Section 1: Rewards */}
+          <CollapsibleSection
+            title="GjanandSarkar Rewards"
+            subtitle="Earn points and unlock free deliveries"
+            badge={`${loyaltyPoints} Points`}
+            icon={<Trophy className="w-5 h-5" />}
+            isOpen={openSections.rewards}
+            onToggle={() => toggleSection('rewards')}
+          >
+            <div className="py-2.5">
+              <div className="flex items-end justify-between mb-2">
+                <div className="flex items-baseline gap-1">
+                  <span className="text-2xl font-black text-foreground tracking-tight tabular-nums">
+                    {loyaltyPoints}
+                  </span>
+                  <span className="text-[11px] font-bold text-foreground-muted uppercase tracking-wider">Points</span>
+                </div>
+                {pointsToReward > 0 ? (
+                  <span className="text-[11px] font-semibold text-primary tabular-nums">
+                    {pointsToReward} pts to your next reward
+                  </span>
+                ) : (
+                  <span className="text-[11px] font-semibold text-primary">
+                    Reward unlocked
+                  </span>
+                )}
+              </div>
+              <div className="h-2 w-full bg-surface-muted rounded-full overflow-hidden">
+                <div
+                  className="h-full bg-primary rounded-full transition-all duration-500"
+                  style={{ width: `${rewardProgressPct}%` }}
+                />
+              </div>
+            </div>
+          </CollapsibleSection>
+
+          {/* Collapsible Section 2: Buy It Again */}
+          <CollapsibleSection
+            title="Buy It Again"
+            subtitle="Frequently ordered products"
+            icon={<Repeat className="w-5 h-5" />}
+            isOpen={openSections.buyAgain}
+            onToggle={() => toggleSection('buyAgain')}
+          >
+            <div className="py-2">
+              <BuyAgainCarousel />
+            </div>
+          </CollapsibleSection>
+
+          {/* Collapsible Section 3: Recent Orders */}
+          <CollapsibleSection
+            title="Recent Orders"
+            subtitle="Track shipments & check order history"
+            badge={orders.length > 0 ? `${orders.length} ${orders.length === 1 ? 'Order' : 'Orders'}` : undefined}
+            icon={<Package className="w-5 h-5" />}
+            isOpen={openSections.orders}
+            onToggle={() => toggleSection('orders')}
+          >
+            <div className="py-2">
+              <RecentOrders 
+                orders={orders} 
+                onReorder={handleReorder} 
+                hideHeader 
               />
             </div>
-          </div>
-        </CollapsibleSection>
+          </CollapsibleSection>
 
-        {/* Section 2: Buy It Again */}
-        <CollapsibleSection
-          title="Buy It Again"
-          subtitle="Frequently ordered products"
-          icon={<Repeat className="w-5 h-5" />}
-          isOpen={openSections.buyAgain}
-          onToggle={() => toggleSection('buyAgain')}
-        >
-          <div className="py-2">
-            <BuyAgainCarousel />
-          </div>
-        </CollapsibleSection>
-
-        {/* Section 3: Recent Orders */}
-        <CollapsibleSection
-          title="Recent Orders"
-          subtitle="Track shipments & check order history"
-          badge={orders.length > 0 ? `${orders.length} ${orders.length === 1 ? 'Order' : 'Orders'}` : undefined}
-          icon={<Package className="w-5 h-5" />}
-          isOpen={openSections.orders}
-          onToggle={() => toggleSection('orders')}
-        >
-          <div className="py-2">
-            <RecentOrders 
-              orders={orders} 
-              onReorder={handleReorder} 
-              hideHeader 
-            />
-          </div>
-        </CollapsibleSection>
-
-        {/* Section 4: Active Subscriptions */}
-        <CollapsibleSection
-          title="My Subscriptions"
-          subtitle="Manage recurring milk & organic plans"
-          badge={subscriptions.length > 0 ? `${subscriptions.length} Active` : undefined}
-          icon={<CalendarDays className="w-5 h-5" />}
-          isOpen={openSections.subscriptions}
-          onToggle={() => toggleSection('subscriptions')}
-        >
-          <div className="py-2">
-            <ActiveSubscriptions 
-              subscriptions={subscriptions} 
-              hideHeader 
-            />
-          </div>
-        </CollapsibleSection>
-
-        {/* Section 5: Saved Addresses */}
-        <CollapsibleSection
-          title="Saved Addresses"
-          subtitle="Configure home & office delivery coordinates"
-          badge={addresses.length > 0 ? `${addresses.length} ${addresses.length === 1 ? 'Address' : 'Addresses'}` : undefined}
-          icon={<MapPin className="w-5 h-5" />}
-          isOpen={openSections.addresses}
-          onToggle={() => toggleSection('addresses')}
-        >
-          <div className="py-2">
-            <AddressSnippet 
-              addresses={addresses} 
-              hideHeader 
-            />
-          </div>
-        </CollapsibleSection>
-
-        {/* Section 6: Settings & Support */}
-        <CollapsibleSection
-          title="Settings & Support"
-          subtitle="Change language, read reports or contact us"
-          icon={<Settings2 className="w-5 h-5" />}
-          isOpen={openSections.settings}
-          onToggle={() => toggleSection('settings')}
-        >
-          <div className="py-2">
-            <QuickActions 
-              onLanguageClick={() => setShowLanguageSettings(true)} 
-              hideHeader 
-            />
-          </div>
-        </CollapsibleSection>
-
-        <EngagementBanner />
-
-        {/* Sign Out Button at the very bottom */}
-        <div className="pt-4 flex justify-center">
-          <button
-            onClick={handleLogout}
-            className="flex items-center justify-center gap-2 text-sm font-extrabold text-red-600 hover:text-red-700 bg-white hover:bg-red-50/50 border border-red-200 hover:border-red-300 px-8 py-3 rounded-full shadow-xs hover:shadow-sm active:scale-95 transition-all duration-200 cursor-pointer"
+          {/* Collapsible Section 4: Active Subscriptions */}
+          <CollapsibleSection
+            title="My Subscriptions"
+            subtitle="Manage recurring milk & organic plans"
+            badge={subscriptions.length > 0 ? `${subscriptions.length} Active` : undefined}
+            icon={<CalendarDays className="w-5 h-5" />}
+            isOpen={openSections.subscriptions}
+            onToggle={() => toggleSection('subscriptions')}
           >
-            <LogOut className="w-4 h-4" />
-            <span>Sign Out</span>
-          </button>
+            <div className="py-2">
+              <ActiveSubscriptions 
+                subscriptions={subscriptions} 
+                hideHeader 
+              />
+            </div>
+          </CollapsibleSection>
+
+          {/* Collapsible Section 5: Saved Addresses */}
+          <CollapsibleSection
+            title="Saved Addresses"
+            subtitle="Configure delivery coordinates"
+            badge={addresses.length > 0 ? `${addresses.length} ${addresses.length === 1 ? 'Address' : 'Addresses'}` : undefined}
+            icon={<MapPin className="w-5 h-5" />}
+            isOpen={openSections.addresses}
+            onToggle={() => toggleSection('addresses')}
+          >
+            <div className="py-2">
+              <AddressSnippet 
+                addresses={addresses} 
+                hideHeader 
+              />
+            </div>
+          </CollapsibleSection>
+
+          <EngagementBanner />
+
+          {/* Sign Out Button */}
+          <div className="pt-4 flex justify-center">
+            <button
+              onClick={handleLogout}
+              className="flex items-center justify-center gap-2 text-xs font-bold text-rose-600 hover:text-rose-700 bg-surface hover:bg-rose-500/10 border border-rose-200 hover:border-rose-300 px-8 py-3 rounded-full shadow-2xs active:scale-95 transition-all duration-200 cursor-pointer"
+            >
+              <LogOut className="w-4 h-4" />
+              <span>Sign Out</span>
+            </button>
+          </div>
+
         </div>
 
       </div>
 
       {/* Language Modal (Reused from previous design) */}
+      {/* Language Modal */}
       <AnimatePresence>
         {showLanguageSettings && (
-          <div className="fixed inset-0 z-50 flex items-end justify-center sm:items-center p-4 bg-black/40 backdrop-blur-sm">
+          <div className="fixed inset-0 z-50 flex items-end justify-center sm:items-center p-4 bg-black/50 backdrop-blur-xs">
             <motion.div
-              initial={{ opacity: 0, y: 100 }}
+              initial={{ opacity: 0, y: 50 }}
               animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: 100 }}
-              className="bg-white w-full max-w-sm rounded-3xl overflow-hidden shadow-2xl relative"
+              exit={{ opacity: 0, y: 50 }}
+              className="bg-surface w-full max-w-sm rounded-2xl overflow-hidden shadow-xl border border-border relative"
             >
-              <div className="flex justify-between items-center p-6 border-b border-sand/50">
-                <h3 className="text-xl font-bold text-dark">{t('languageSettings')}</h3>
+              <div className="flex justify-between items-center p-4 border-b border-border">
+                <h3 className="text-base font-bold text-foreground">{t('languageSettings')}</h3>
                 <button
                   type="button"
                   onClick={() => setShowLanguageSettings(false)}
-                  className="w-10 h-10 rounded-full bg-sand/30 flex items-center justify-center text-dark hover:bg-sand/50 transition-colors"
+                  className="w-8 h-8 rounded-lg bg-surface-muted flex items-center justify-center text-foreground hover:bg-border/60 transition-colors cursor-pointer"
                 >
-                  <X className="w-5 h-5" />
+                  <X className="w-4 h-4" />
                 </button>
               </div>
-              <div className="p-4 space-y-2">
+              <div className="p-3 space-y-1.5">
                 {[
                   { code: 'en', label: 'English', sub: 'English' },
                   { code: 'hi', label: 'हिंदी', sub: 'Hindi' },
@@ -500,21 +857,21 @@ export default function ProfileScreen() {
                     key={lang.code}
                     onClick={() => {
                       setLanguage(lang.code as Language);
-                      setTimeout(() => setShowLanguageSettings(false), 300);
+                      setTimeout(() => setShowLanguageSettings(false), 200);
                     }}
-                    className={`w-full flex items-center justify-between p-4 rounded-[16px] border transition-all ${
+                    className={`w-full flex items-center justify-between p-3 rounded-xl border transition-all cursor-pointer ${
                       language === lang.code
-                        ? 'border-primary bg-primary/5 shadow-[0_4px_20px_rgba(63,101,48,0.08)]'
-                        : 'border-transparent bg-white hover:bg-sand/10'
+                        ? 'border-primary bg-primary/5 text-primary'
+                        : 'border-border bg-surface hover:bg-surface-muted text-foreground'
                     }`}
                   >
                     <div className="text-left">
-                      <span className="block font-bold text-dark text-base">{lang.label}</span>
-                      <span className="block text-xs font-medium text-muted mt-0.5">{lang.sub}</span>
+                      <span className="block font-bold text-xs">{lang.label}</span>
+                      <span className="block text-[11px] text-muted">{lang.sub}</span>
                     </div>
                     {language === lang.code && (
-                      <div className="w-6 h-6 rounded-full bg-primary flex items-center justify-center">
-                        <Check className="w-3.5 h-3.5 text-white" />
+                      <div className="w-5 h-5 rounded-full bg-primary flex items-center justify-center text-foreground-inverse">
+                        <Check className="w-3 h-3 stroke-[3]" />
                       </div>
                     )}
                   </button>

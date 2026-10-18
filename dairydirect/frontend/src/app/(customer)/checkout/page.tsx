@@ -1,8 +1,8 @@
 "use client";
 
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useRef } from 'react';
 import { useRouter } from 'next/navigation';
-import { ArrowLeft, Loader2, Tag, ShieldCheck, AlertCircle } from 'lucide-react';
+import { Loader2, Tag, ShieldCheck, AlertCircle } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import { cn } from '@/lib/utils';
 import { useTranslation } from '@/lib/i18n';
@@ -36,6 +36,22 @@ export default function CheckoutScreen() {
   const setCheckoutAddressId = useStore(state => state.setCheckoutAddressId);
   const selectedMethod = useStore(state => state.checkoutPaymentMethod) || 'razorpay';
   const setSelectedMethod = useStore(state => state.setCheckoutPaymentMethod);
+
+  const summaryRef = useRef<HTMLDivElement>(null);
+  const [isSummaryInView, setIsSummaryInView] = useState(false);
+
+  useEffect(() => {
+    const el = summaryRef.current;
+    if (!el) return;
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        setIsSummaryInView(entry.isIntersecting);
+      },
+      { threshold: 0.15 }
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
 
   const [addresses, setAddresses] = useState<UserAddress[]>([]);
   const [products, setProducts] = useState<ProductWithVariants[]>([]);
@@ -73,7 +89,7 @@ export default function CheckoutScreen() {
         setProducts(prods);
       });
     }
-  }, [user, checkoutAddressId, setCheckoutAddressId]);
+  }, [user?.id, checkoutAddressId, setCheckoutAddressId]);
 
   const cartItemsData = useMemo(() => {
     return cart.map(item => {
@@ -320,20 +336,20 @@ export default function CheckoutScreen() {
          Checkout...". Checkout is the most abandonment-sensitive screen in
          the app: a blank page with a spinner is exactly where people leave.
          A skeleton of the real layout keeps the page feeling present. */
-      <div className="flex flex-col min-h-screen bg-cream">
-        <div className="sticky top-0 z-30 bg-white border-b border-sand">
+      <div className="flex flex-col min-h-screen bg-background">
+        <div className="sticky top-0 z-30 bg-surface border-b border-border">
           <div className="flex justify-between items-center p-4">
             <SkeletonBlock className="h-6 w-40" />
             <SkeletonBlock className="h-6 w-20 rounded-md" />
           </div>
         </div>
         <div className="flex-1 px-4 py-5 space-y-4 max-w-3xl mx-auto w-full">
-          <SkeletonBlock className="h-28 w-full rounded-2xl" />
-          <SkeletonBlock className="h-40 w-full rounded-2xl" />
-          <SkeletonBlock className="h-48 w-full rounded-2xl" />
+          <SkeletonBlock className="h-28 w-full rounded-xl" />
+          <SkeletonBlock className="h-40 w-full rounded-xl" />
+          <SkeletonBlock className="h-48 w-full rounded-xl" />
         </div>
-        <div className="sticky bottom-0 bg-white border-t border-sand p-4">
-          <SkeletonBlock className="h-14 w-full rounded-2xl" />
+        <div className="sticky bottom-0 bg-surface border-t border-border p-4">
+          <SkeletonBlock className="h-12 w-full rounded-xl" />
         </div>
       </div>
     );
@@ -356,14 +372,9 @@ export default function CheckoutScreen() {
   return (
     <>
       <div className="flex flex-col min-h-screen bg-background text-foreground pb-[140px] lg:pb-10 relative">
-        <div className="sticky top-0 z-30 bg-surface border-b border-border shadow-xs">
-          <div className="flex justify-between items-center p-4">
-            <div className="flex items-center">
-              <button onClick={() => !isProcessing && router.back()} className="p-2 -ml-2 mr-2 rounded-full hover:bg-surface-muted transition-colors" disabled={isProcessing}>
-                <ArrowLeft className="w-6 h-6 text-foreground" />
-              </button>
-              <h1 className="text-xl font-black text-foreground">Secure Checkout</h1>
-            </div>
+        <div className="sticky top-0 z-30 bg-surface border-b border-border shadow-2xs">
+          <div className="max-w-6xl mx-auto flex justify-between items-center px-4 py-3 sm:px-6 lg:px-8">
+            <h1 className="text-lg sm:text-xl font-black text-foreground tracking-tight">Secure Checkout</h1>
             <div className="flex items-center gap-1 text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/40 px-2.5 py-1 rounded-md border border-emerald-200 dark:border-emerald-800/40">
               <ShieldCheck className="w-4 h-4" />
               <span className="text-[10px] font-bold uppercase tracking-wider">100% Safe</span>
@@ -406,10 +417,10 @@ export default function CheckoutScreen() {
           <OrderReview items={cartItemsData} />
 
           {/* Coupon Section */}
-          <div className="bg-white rounded-[20px] p-4 border border-sand shadow-sm">
+          <div className="bg-surface rounded-xl p-4 border border-border">
             <div className="flex items-center gap-2 mb-3">
               <Tag className="w-4 h-4 text-primary" />
-              <h3 className="text-sm font-bold text-dark uppercase tracking-wider">Offers</h3>
+              <h3 className="text-xs font-bold text-foreground uppercase tracking-wider">Offers & Coupons</h3>
             </div>
             <div className="flex gap-2">
               <div className="relative flex-1">
@@ -419,18 +430,18 @@ export default function CheckoutScreen() {
                   onChange={(e) => setCouponCode(e.target.value.toUpperCase())}
                   placeholder="Enter Coupon Code"
                   className={cn(
-                    "w-full text-sm font-bold border rounded-[12px] px-3 py-2.5 outline-none transition-all uppercase placeholder:text-muted/50 placeholder:font-medium",
-                    couponError ? "border-red-400 bg-red-50 text-red-600" : "border-sand focus:border-primary"
+                    "w-full text-xs font-bold border rounded-lg px-3 py-2.5 outline-none transition-all uppercase placeholder:text-muted/60 placeholder:font-normal bg-surface text-foreground",
+                    couponError ? "border-rose-400 bg-rose-500/10 text-rose-600" : "border-border focus:border-primary"
                   )}
                 />
-                {couponError && <p className="absolute -bottom-5 left-0 text-[10px] text-red-500 font-bold">{couponError}</p>}
+                {couponError && <p className="absolute -bottom-5 left-0 text-[10px] text-rose-500 font-bold">{couponError}</p>}
               </div>
               <button
                 onClick={handleApplyCoupon}
                 disabled={isApplyingCoupon || !couponCode}
-                className="bg-primary hover:bg-primary-dark disabled:opacity-50 text-white font-bold px-5 py-2.5 rounded-[12px] text-sm shadow-sm transition-all flex items-center justify-center gap-2 min-w-[80px]"
+                className="bg-primary hover:bg-primary-hover disabled:opacity-50 text-foreground-inverse font-bold px-4 py-2.5 rounded-lg text-xs shadow-xs transition-all flex items-center justify-center gap-2 min-w-[72px] cursor-pointer"
               >
-                {isApplyingCoupon ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Apply'}
+                {isApplyingCoupon ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : 'Apply'}
               </button>
             </div>
           </div>
@@ -458,21 +469,23 @@ export default function CheckoutScreen() {
               />
 
               {pricing.discount > 0 && (
-                <div className="bg-green-50 border border-green-200 rounded-[12px] p-3 flex justify-between items-center">
-                  <span className="text-sm font-bold text-green-700">Coupon Discount</span>
-                  <span className="text-sm font-bold text-green-700">-₹{pricing.discount}</span>
+                <div className="bg-primary/10 border border-primary/20 rounded-xl p-3 flex justify-between items-center">
+                  <span className="text-xs font-bold text-primary">Coupon Discount</span>
+                  <span className="text-xs font-bold text-primary tabular-nums">-₹{pricing.discount}</span>
                 </div>
               )}
 
-              {/* Desktop CTA. The fixed bottom bar is mobile-only. */}
-              <div className="hidden lg:block bg-white rounded-[20px] p-4 border border-sand shadow-sm space-y-3">
+              {/* Summary Bottom Actions: On both desktop and mobile inline */}
+              <div ref={summaryRef} className="bg-surface rounded-2xl p-4 sm:p-5 border border-border shadow-2xs space-y-3">
                 <div className="flex items-baseline justify-between">
-                  <span className="text-[11px] font-bold text-muted uppercase tracking-wider">Total Pay</span>
-                  <span className="text-2xl font-black text-dark">₹{pricing.total}</span>
+                  <span className="text-[11px] font-bold text-muted uppercase tracking-wider">
+                    {selectedMethod === 'cod' ? 'Pay on Delivery' : 'Total Payable'}
+                  </span>
+                  <span className="text-2xl font-black text-foreground tabular-nums">₹{pricing.total}</span>
                 </div>
                 <Button
                   size="lg"
-                  className="w-full shadow-active"
+                  className="w-full font-bold text-sm bg-primary hover:bg-primary-hover text-foreground-inverse rounded-xl py-3 shadow-sm cursor-pointer active:scale-95 transition-all"
                   onClick={handlePlaceOrder}
                   disabled={isProcessing || !checkoutAddressId || cartItemsData.length === 0}
                 >
@@ -483,22 +496,51 @@ export default function CheckoutScreen() {
           </div>
         </div>
 
-        <div className="lg:hidden fixed bottom-0 left-0 right-0 md:left-[260px] p-4 bg-surface/95 backdrop-blur-md border-t border-border z-40 pb-safe shadow-[0_-10px_20px_rgba(0,0,0,0.05)]">
-          <div className="max-w-[800px] mx-auto flex items-center justify-between gap-4">
-            <div className="flex flex-col">
-              <span className="text-[11px] font-bold text-muted uppercase">Total Pay</span>
-              <span className="text-xl font-black text-foreground">₹{pricing.total}</span>
-            </div>
-            <Button
-              size="lg"
-              className="flex-1 shadow-active text-base"
-              onClick={handlePlaceOrder}
-              disabled={isProcessing || !checkoutAddressId || cartItemsData.length === 0}
+        {/* ── Fixed Bottom Checkout Bar (Mobile & Tablet) ──
+            Stops when user reaches the inline order summary and estimated delivery.
+            Visible when scrolled above so user can place order instantly. */}
+        <AnimatePresence>
+          {!isSummaryInView && (
+            <motion.div
+              initial={{ y: 80, opacity: 0 }}
+              animate={{ y: 0, opacity: 1 }}
+              exit={{ y: 80, opacity: 0 }}
+              transition={{ duration: 0.2 }}
+              className="lg:hidden fixed bottom-0 left-0 right-0 bg-surface/95 backdrop-blur-md border-t border-border z-40 pb-safe shadow-lg"
             >
-              {ctaLabel}
-            </Button>
-          </div>
-        </div>
+              {/* Active Delivery Address Pill Strip */}
+              {addresses.find((a) => a.id === checkoutAddressId) && (
+                <div className="px-4 py-1.5 bg-primary/5 border-b border-border/60 flex items-center justify-between text-xs">
+                  <div className="flex items-center gap-1.5 min-w-0">
+                    <ShieldCheck className="w-3.5 h-3.5 text-primary shrink-0" />
+                    <span className="text-[11px] text-muted truncate">
+                      Delivering to: <strong className="text-foreground">{addresses.find((a) => a.id === checkoutAddressId)?.label}</strong> (
+                      {addresses.find((a) => a.id === checkoutAddressId)?.address})
+                    </span>
+                  </div>
+                  <span className="text-[10px] font-bold uppercase text-primary shrink-0 ml-2">Verified</span>
+                </div>
+              )}
+
+              <div className="max-w-[800px] mx-auto p-3.5 flex items-center justify-between gap-3">
+                <div className="flex flex-col min-w-0">
+                  <span className="text-[10px] font-bold text-muted uppercase tracking-wider">
+                    {selectedMethod === 'cod' ? 'Pay on Delivery' : 'Total Payable'}
+                  </span>
+                  <span className="text-xl font-black text-primary leading-tight tabular-nums">₹{pricing.total}</span>
+                </div>
+                <Button
+                  size="lg"
+                  className="flex-1 text-sm font-bold py-3 rounded-xl bg-primary hover:bg-primary-hover text-foreground-inverse cursor-pointer active:scale-95"
+                  onClick={handlePlaceOrder}
+                  disabled={isProcessing || !checkoutAddressId || cartItemsData.length === 0}
+                >
+                  {ctaLabel}
+                </Button>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
 
       <AnimatePresence>
@@ -510,13 +552,13 @@ export default function CheckoutScreen() {
             className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4"
           >
             <motion.div
-              initial={{ scale: 0.9, opacity: 0 }}
+              initial={{ scale: 0.95, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
-              className="bg-surface text-foreground rounded-[20px] border border-border p-8 w-full max-w-[280px] flex flex-col items-center justify-center shadow-xl"
+              className="bg-surface text-foreground rounded-2xl border border-border p-6 w-full max-w-[280px] flex flex-col items-center justify-center shadow-xl"
             >
-              <div className="w-16 h-16 rounded-full border-4 border-border border-t-primary animate-spin mb-6" />
-              <h3 className="font-bold text-foreground text-lg mb-2">Placing Order...</h3>
-              <p className="text-sm text-muted text-center">Please do not close the app or press back.</p>
+              <div className="w-12 h-12 rounded-full border-3 border-border border-t-primary animate-spin mb-4" />
+              <h3 className="font-bold text-foreground text-base mb-1">Placing Order...</h3>
+              <p className="text-xs text-muted text-center">Please do not close the window.</p>
             </motion.div>
           </motion.div>
         )}
@@ -532,17 +574,17 @@ export default function CheckoutScreen() {
               initial={{ scale: 0.95, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.95, opacity: 0 }}
-              className="bg-surface rounded-2xl p-6 w-full max-w-md shadow-2xl border border-rose-500/30"
+              className="bg-surface rounded-2xl p-6 w-full max-w-md shadow-2xl border border-border"
             >
               <div className="flex items-center gap-3 text-rose-600 mb-3">
-                <AlertCircle className="w-6 h-6 shrink-0" />
-                <h3 className="font-bold text-lg text-gray-900">Important: Inventory Update</h3>
+                <AlertCircle className="w-5 h-5 shrink-0" />
+                <h3 className="font-bold text-base text-foreground">Inventory Notice</h3>
               </div>
-              <p className="text-sm text-gray-700 leading-relaxed mb-4">
+              <p className="text-xs text-foreground leading-relaxed mb-3">
                 {stockError}
               </p>
-              <p className="text-xs text-gray-500 mb-6">
-                Items in your cart may have been purchased by other customers concurrently. Please return to your cart to review updated quantities.
+              <p className="text-[11px] text-muted mb-5">
+                Items in your cart may have been ordered concurrently. Please return to your cart to update quantities.
               </p>
               <div className="flex justify-end gap-3">
                 <Button
@@ -550,7 +592,7 @@ export default function CheckoutScreen() {
                     setStockError(null);
                     router.push('/cart');
                   }}
-                  className="w-full bg-[#0f3e26] hover:bg-[#144f31] text-white font-bold py-2.5 rounded-xl shadow-md"
+                  className="w-full bg-primary hover:bg-primary-hover text-foreground-inverse font-bold py-2.5 rounded-xl shadow-sm text-xs cursor-pointer"
                 >
                   Return to Cart & Adjust Items
                 </Button>

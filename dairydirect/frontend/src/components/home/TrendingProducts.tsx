@@ -24,23 +24,20 @@ export function TrendingProducts({ products }: TrendingProductsProps) {
   return (
     <section className="w-full max-w-[1440px] mx-auto px-4 md:px-8 py-8">
       {/* Header */}
-      <div className="flex items-center justify-between pb-4 mb-6 border-b border-border/80">
+      <div className="flex items-center justify-between pb-3 mb-5 border-b border-border">
         <div>
-          <div className="flex items-center gap-1.5 mb-1">
-            <Sparkles className="w-4 h-4 text-secondary" />
-            <span className="text-xs font-black text-secondary uppercase tracking-wider">
-              Direct from Farms & Artisans
-            </span>
-          </div>
-          <h2 className="text-2xl md:text-3xl font-black text-foreground tracking-tight">
-            Fresh Arrivals & Essentials
+          <span className="text-xs font-bold text-primary uppercase tracking-wider block mb-1">
+            Farm Direct
+          </span>
+          <h2 className="text-xl sm:text-2xl font-bold text-foreground tracking-tight">
+            Fresh Arrivals & Trending Essentials
           </h2>
         </div>
 
         <div className="flex items-center gap-4">
           <Link
             href="/products"
-            className="text-xs sm:text-sm font-bold text-secondary hover:text-primary flex items-center gap-1 transition-colors"
+            className="text-xs sm:text-sm font-semibold text-primary hover:underline flex items-center gap-1 transition-colors"
           >
             <span>View All</span>
             <ArrowRight className="w-4 h-4" />

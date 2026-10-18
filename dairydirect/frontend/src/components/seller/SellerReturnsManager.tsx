@@ -205,12 +205,12 @@ export function SellerReturnsManager() {
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
             <div className="flex items-center gap-2">
-              <span className="px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-800 text-[10px] font-black uppercase tracking-wider">
+              <span className="px-2.5 py-0.5 rounded-full bg-primary-fixed text-primary text-[10px] font-bold uppercase tracking-wider">
                 Store Claims Desk
               </span>
             </div>
-            <h3 className="text-lg md:text-xl font-black text-gray-900 tracking-tight flex items-center gap-2 mt-1">
-              <RotateCcw className="w-5 h-5 text-[#c88a23]" />
+            <h3 className="text-lg md:text-xl font-bold text-gray-900 tracking-tight flex items-center gap-2 mt-1">
+              <RotateCcw className="w-5 h-5 text-primary" />
               <span>Customer Returns & Cancellations</span>
             </h3>
             <p className="text-xs text-gray-500 mt-0.5">
@@ -224,7 +224,7 @@ export function SellerReturnsManager() {
             className="p-2.5 border border-gray-200 text-gray-700 hover:bg-gray-50 rounded-xl transition-colors shrink-0 cursor-pointer self-start sm:self-center"
             title="Refresh Requests"
           >
-            <RefreshCw className={`w-4 h-4 ${isLoading ? 'animate-spin text-[#0f3e26]' : ''}`} />
+            <RefreshCw className={`w-4 h-4 ${isLoading ? 'animate-spin text-primary' : ''}`} />
           </button>
         </div>
 
@@ -285,7 +285,7 @@ export function SellerReturnsManager() {
               placeholder="Search by Request ID, Order #, Customer, Product, or Address..."
               value={searchQuery}
               onChange={e => setSearchQuery(e.target.value)}
-              className="w-full pl-10 pr-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-xs font-medium placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#0f3e26]/20 focus:bg-white"
+              className="w-full pl-10 pr-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-xs font-medium placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:bg-white"
             />
             {searchQuery && (
               <button
@@ -331,7 +331,7 @@ export function SellerReturnsManager() {
               onClick={() => setStatusFilter(tab.id)}
               className={`px-3 py-1.5 rounded-full text-xs font-bold whitespace-nowrap transition-all cursor-pointer ${
                 statusFilter === tab.id
-                  ? 'bg-[#0f3e26] text-white shadow-xs'
+                  ? 'bg-primary text-primary-foreground shadow-xs'
                   : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'
               }`}
             >
@@ -344,7 +344,7 @@ export function SellerReturnsManager() {
       {/* Requests List */}
       {isLoading ? (
         <div className="py-20 flex flex-col items-center justify-center gap-3 bg-white rounded-3xl border border-gray-200">
-          <Loader2 className="w-8 h-8 text-[#0f3e26] animate-spin" />
+          <Loader2 className="w-8 h-8 text-primary animate-spin" />
           <p className="text-xs font-semibold text-gray-500">Loading product return requests...</p>
         </div>
       ) : filteredRequests.length === 0 ? (
@@ -427,7 +427,7 @@ export function SellerReturnsManager() {
                           Qty: <strong className="text-gray-800">{req.item_quantity}</strong>
                           {req.variant_weight && ` • ${req.variant_weight}`}
                         </p>
-                        <p className="text-xs font-black text-[#0f3e26]">
+                        <p className="text-xs font-bold text-primary">
                           ₹{req.item_price * req.item_quantity}
                         </p>
                       </div>
@@ -435,7 +435,7 @@ export function SellerReturnsManager() {
 
                     <div className="text-[11px] text-gray-500 pt-1">
                       <span>Order: </span>
-                      <span className="font-bold text-[#0f3e26]">#{req.order_number}</span>
+                      <span className="font-bold text-primary">#{req.order_number}</span>
                     </div>
                   </div>
 
@@ -463,7 +463,7 @@ export function SellerReturnsManager() {
                       )}
                       {req.delivery_address && (
                         <div className="pt-1.5 mt-1 border-t border-gray-100 flex items-start gap-1.5 text-gray-700">
-                          <MapPin className="w-3.5 h-3.5 text-[#0f3e26] shrink-0 mt-0.5" />
+                          <MapPin className="w-3.5 h-3.5 text-primary shrink-0 mt-0.5" />
                           <p className="leading-snug text-[11px] font-medium text-gray-700">
                             {req.delivery_address}
                           </p>
@@ -488,7 +488,7 @@ export function SellerReturnsManager() {
                       </div>
                       <div className="flex justify-between items-center">
                         <span className="text-gray-400">Claim Amount:</span>
-                        <span className="font-black text-[#0f3e26]">
+                        <span className="font-bold text-primary">
                           ₹{req.refund_amount || (req.item_price * req.item_quantity)}
                         </span>
                       </div>
@@ -636,8 +636,8 @@ export function SellerReturnsManager() {
           <div className="bg-white rounded-3xl max-w-md w-full p-6 space-y-5 shadow-2xl animate-in fade-in">
             <div className="flex items-center justify-between border-b border-gray-100 pb-3">
               <div className="flex items-center gap-2">
-                <div className="p-2 rounded-xl bg-gray-100 text-[#0f3e26]">
-                  <RotateCcw className="w-5 h-5 text-[#c88a23]" />
+                <div className="p-2 rounded-xl bg-primary-fixed text-primary">
+                  <RotateCcw className="w-5 h-5 text-primary" />
                 </div>
                 <div>
                   <h3 className="font-extrabold text-base text-gray-900 capitalize">
@@ -689,7 +689,7 @@ export function SellerReturnsManager() {
                   value={actionNotes}
                   onChange={e => setActionNotes(e.target.value)}
                   placeholder={actionType === 'reject' ? 'e.g. Item was delivered in good condition, seal was intact...' : 'Add any helpful notes...'}
-                  className="w-full p-2.5 rounded-xl border border-gray-200 text-xs font-medium outline-none focus:ring-2 focus:ring-[#0f3e26]/20 bg-white"
+                  className="w-full p-2.5 rounded-xl border border-gray-200 text-xs font-medium outline-none focus:ring-2 focus:ring-primary/20 bg-white"
                   required={actionType === 'reject'}
                 />
               </div>
@@ -710,7 +710,7 @@ export function SellerReturnsManager() {
                 type="button"
                 disabled={isProcessing || (actionType === 'reject' && !actionNotes.trim())}
                 onClick={handleConfirmAction}
-                className="px-5 py-2 text-xs font-bold bg-[#0f3e26] hover:bg-[#165a37] text-white rounded-xl shadow-xs disabled:opacity-50 flex items-center gap-1.5 cursor-pointer"
+                className="px-5 py-2 text-xs font-bold bg-primary hover:bg-primary-hover text-primary-foreground rounded-xl shadow-xs disabled:opacity-50 flex items-center gap-1.5 cursor-pointer"
               >
                 {isProcessing && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
                 <span>Confirm {actionType.replace(/_/g, ' ')}</span>
@@ -726,7 +726,7 @@ export function SellerReturnsManager() {
           <div className="bg-white rounded-3xl max-w-lg w-full p-6 space-y-4 shadow-2xl animate-in fade-in">
             <div className="flex items-center justify-between border-b border-gray-100 pb-3">
               <div className="flex items-center gap-2">
-                <History className="w-5 h-5 text-[#0f3e26]" />
+                <History className="w-5 h-5 text-primary" />
                 <div>
                   <h3 className="font-extrabold text-base text-gray-900">Request Lifecycle History</h3>
                   <p className="text-xs text-gray-500">
@@ -749,7 +749,7 @@ export function SellerReturnsManager() {
                 historyModalRequest.history.map((h, i) => (
                   <div key={i} className="p-3 rounded-2xl bg-gray-50 border border-gray-100 space-y-1">
                     <div className="flex items-center justify-between text-gray-500 text-[10px]">
-                      <span className="font-bold uppercase tracking-wider text-[#0f3e26]">
+                      <span className="font-bold uppercase tracking-wider text-primary">
                         {h.actor_type || 'system'}
                       </span>
                       <span>{format(new Date(h.timestamp), 'MMM d, yyyy · h:mm a')}</span>

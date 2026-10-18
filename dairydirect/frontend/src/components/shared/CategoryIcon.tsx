@@ -65,7 +65,7 @@ export function CategoryIcon({
   className?: string;
 }) {
   const Icon = iconByName(name);
-  return <Icon className={className ?? 'w-4 h-4 text-[#0f3e26]'} />;
+  return <Icon className={className ?? 'w-4 h-4 text-primary'} />;
 }
 
 /** Render the icon for a category display name. */
@@ -77,5 +77,5 @@ export function CategoryNameIcon({
   className?: string;
 }) {
   const Icon = iconForCategory(category);
-  return <Icon className={className ?? 'w-4 h-4 text-[#0f3e26]'} />;
+  return <Icon className={className ?? 'w-4 h-4 text-primary'} />;
 }

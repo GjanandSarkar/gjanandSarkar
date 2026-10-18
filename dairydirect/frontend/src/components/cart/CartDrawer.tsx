@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Trash2, Plus, Minus, ArrowRight } from 'lucide-react';
 import { useTranslation } from '@/lib/i18n';
@@ -24,6 +24,14 @@ export function CartDrawer({ isOpen, onClose }: CartDrawerProps) {
   const router = useRouter();
   const pathname = usePathname();
   const drawerRef = useRef<HTMLDivElement>(null);
+  const [isDesktop, setIsDesktop] = useState(false);
+
+  useEffect(() => {
+    const updateMedia = () => setIsDesktop(window.innerWidth >= 768);
+    updateMedia();
+    window.addEventListener('resize', updateMedia);
+    return () => window.removeEventListener('resize', updateMedia);
+  }, []);
 
   const user = useStore(s => s.user);
   const updateCartQuantityLocal = useStore(s => s.updateCartQuantityLocal);
@@ -148,9 +156,9 @@ export function CartDrawer({ isOpen, onClose }: CartDrawerProps) {
           role="dialog"
           aria-modal="true"
           aria-labelledby="cart-title"
-          initial={{ y: '100%', x: 0 }}
-          animate={{ y: 0, x: 0 }}
-          exit={{ y: '100%', x: 0 }}
+          initial={isDesktop ? { x: '100%', y: 0 } : { y: '100%', x: 0 }}
+          animate={{ x: 0, y: 0 }}
+          exit={isDesktop ? { x: '100%', y: 0 } : { y: '100%', x: 0 }}
           transition={{ type: 'spring', stiffness: 300, damping: 30 }}
           className="fixed z-[60] bottom-0 left-0 right-0 h-[88vh] bg-surface rounded-t-2xl md:top-0 md:bottom-0 md:left-auto md:right-0 md:h-full md:w-[420px] md:rounded-none flex flex-col shadow-2xl border-t md:border-t-0 md:border-l border-border"
         >

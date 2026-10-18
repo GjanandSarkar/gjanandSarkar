@@ -315,7 +315,7 @@ export default function AdminSellersPage() {
           disabled={isLoading}
           className="self-start md:self-auto px-4 py-2 bg-white border border-gray-200 text-gray-700 text-xs font-bold rounded-xl hover:bg-gray-50 flex items-center gap-2 shadow-2xs transition-all cursor-pointer"
         >
-          <RefreshCw className={`w-3.5 h-3.5 ${isLoading ? 'animate-spin text-[#0f3e26]' : ''}`} />
+          <RefreshCw className={`w-3.5 h-3.5 ${isLoading ? 'animate-spin text-primary' : ''}`} />
           <span>Refresh Data</span>
         </button>
       </div>
@@ -352,7 +352,7 @@ export default function AdminSellersPage() {
             onClick={() => setSelectedStatus(tab.id)}
             className={`px-3.5 py-2 text-xs font-bold rounded-xl whitespace-nowrap transition-all cursor-pointer ${
               selectedStatus === tab.id
-                ? 'bg-[#0f3e26] text-white shadow-sm'
+                ? 'bg-primary text-white shadow-sm'
                 : 'bg-white border border-gray-200 text-gray-600 hover:border-gray-300 hover:text-gray-900'
             }`}
           >
@@ -375,7 +375,7 @@ export default function AdminSellersPage() {
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder="Search by store name, slug, owner, state, status..."
-                className="w-full pl-9 pr-4 py-2 bg-white rounded-xl border border-gray-200 text-xs text-gray-900 focus:border-[#0f3e26] outline-none"
+                className="w-full pl-9 pr-4 py-2 bg-white rounded-xl border border-gray-200 text-xs text-gray-900 focus:border-primary outline-none"
               />
             </div>
           </div>
@@ -384,7 +384,7 @@ export default function AdminSellersPage() {
           <div className="divide-y divide-gray-100 overflow-y-auto max-h-[700px]">
             {isLoading ? (
               <div className="p-12 text-center">
-                <Loader2 className="w-6 h-6 animate-spin text-[#0f3e26] mx-auto" />
+                <Loader2 className="w-6 h-6 animate-spin text-primary mx-auto" />
                 <p className="text-xs text-gray-500 mt-2">Loading sellers...</p>
               </div>
             ) : filteredSellers.length === 0 ? (
@@ -404,12 +404,12 @@ export default function AdminSellersPage() {
                     onClick={() => handleSelectSeller(seller)}
                     className={`p-4 transition-all cursor-pointer flex items-center justify-between gap-4 ${
                       isSelected
-                        ? 'bg-emerald-50/60 border-l-4 border-l-[#0f3e26]'
+                        ? 'bg-emerald-50/60 border-l-4 border-l-primary'
                         : 'hover:bg-gray-50/80 border-l-4 border-l-transparent'
                     }`}
                   >
                     <div className="flex items-center gap-3 min-w-0">
-                      <div className="w-10 h-10 rounded-xl bg-[#0f3e26]/10 text-[#0f3e26] flex items-center justify-center font-bold text-sm shrink-0">
+                      <div className="w-10 h-10 rounded-xl bg-primary-fixed text-primary flex items-center justify-center font-bold text-sm shrink-0">
                         {seller.store_name?.charAt(0) || 'S'}
                       </div>
                       <div className="min-w-0">
@@ -767,7 +767,7 @@ export default function AdminSellersPage() {
                     <select
                       value={actionReason}
                       onChange={(e) => setActionReason(e.target.value)}
-                      className="w-full p-2.5 bg-gray-50 border border-gray-200 rounded-xl text-xs font-medium text-gray-900 outline-none focus:border-[#0f3e26]"
+                      className="w-full p-2.5 bg-gray-50 border border-gray-200 rounded-xl text-xs font-medium text-gray-900 outline-none focus:border-primary"
                     >
                       <option value="">Select predefined reason...</option>
                       {metadata.reviewReasons.map((r) => (
@@ -779,7 +779,7 @@ export default function AdminSellersPage() {
                       placeholder="Or specify custom reason..."
                       value={actionReason}
                       onChange={(e) => setActionReason(e.target.value)}
-                      className="w-full p-2.5 bg-white border border-gray-200 rounded-xl text-xs text-gray-900 outline-none focus:border-[#0f3e26]"
+                      className="w-full p-2.5 bg-white border border-gray-200 rounded-xl text-xs text-gray-900 outline-none focus:border-primary"
                     />
                   </div>
                 ) : modalAction.includes('deactivate') ? (
@@ -787,7 +787,7 @@ export default function AdminSellersPage() {
                     <select
                       value={actionReason}
                       onChange={(e) => setActionReason(e.target.value)}
-                      className="w-full p-2.5 bg-gray-50 border border-gray-200 rounded-xl text-xs font-medium text-gray-900 outline-none focus:border-[#0f3e26]"
+                      className="w-full p-2.5 bg-gray-50 border border-gray-200 rounded-xl text-xs font-medium text-gray-900 outline-none focus:border-primary"
                     >
                       <option value="">Select deactivation reason...</option>
                       {metadata.deactivationReasons.map((r) => (
@@ -799,7 +799,7 @@ export default function AdminSellersPage() {
                       placeholder="Or specify custom deactivation reason..."
                       value={actionReason}
                       onChange={(e) => setActionReason(e.target.value)}
-                      className="w-full p-2.5 bg-white border border-gray-200 rounded-xl text-xs text-gray-900 outline-none focus:border-[#0f3e26]"
+                      className="w-full p-2.5 bg-white border border-gray-200 rounded-xl text-xs text-gray-900 outline-none focus:border-primary"
                     />
                   </div>
                 ) : (
@@ -808,7 +808,7 @@ export default function AdminSellersPage() {
                     placeholder="Enter reason..."
                     value={actionReason}
                     onChange={(e) => setActionReason(e.target.value)}
-                    className="w-full p-2.5 bg-white border border-gray-200 rounded-xl text-xs text-gray-900 outline-none focus:border-[#0f3e26]"
+                    className="w-full p-2.5 bg-white border border-gray-200 rounded-xl text-xs text-gray-900 outline-none focus:border-primary"
                   />
                 )}
               </div>
@@ -833,7 +833,7 @@ export default function AdminSellersPage() {
                         onClick={() => setReviewDuration(opt.id)}
                         className={`py-2 px-2 text-xs font-bold rounded-xl border text-center transition-colors cursor-pointer ${
                           reviewDuration === opt.id
-                            ? 'bg-[#0f3e26] text-white border-[#0f3e26]'
+                            ? 'bg-primary text-white border-primary'
                             : 'bg-white text-gray-700 border-gray-200 hover:border-gray-300'
                         }`}
                       >
@@ -851,7 +851,7 @@ export default function AdminSellersPage() {
                             type="date"
                             value={customStartDate}
                             onChange={(e) => setCustomStartDate(e.target.value)}
-                            className="w-full p-2 bg-white border border-gray-200 rounded-xl text-xs text-gray-900 outline-none"
+                            className="w-full p-2 bg-white border border-gray-200 rounded-xl text-xs text-gray-900 outline-none focus:border-primary"
                           />
                         </div>
                       )}
@@ -861,7 +861,7 @@ export default function AdminSellersPage() {
                           type="date"
                           value={customEndDate}
                           onChange={(e) => setCustomEndDate(e.target.value)}
-                          className="w-full p-2 bg-white border border-gray-200 rounded-xl text-xs text-gray-900 outline-none"
+                          className="w-full p-2 bg-white border border-gray-200 rounded-xl text-xs text-gray-900 outline-none focus:border-primary"
                         />
                       </div>
                     </div>
@@ -877,7 +877,7 @@ export default function AdminSellersPage() {
                   value={actionNotes}
                   onChange={(e) => setActionNotes(e.target.value)}
                   placeholder="Additional notes for audit history..."
-                  className="w-full p-2.5 bg-white border border-gray-200 rounded-xl text-xs text-gray-900 outline-none focus:border-[#0f3e26]"
+                  className="w-full p-2.5 bg-white border border-gray-200 rounded-xl text-xs text-gray-900 outline-none focus:border-primary"
                 />
               </div>
 
@@ -908,7 +908,7 @@ export default function AdminSellersPage() {
                 className={`px-5 py-2.5 text-xs font-bold rounded-xl text-white shadow-sm flex items-center gap-2 transition-all cursor-pointer ${
                   modalAction === 'permanently_deactivate'
                     ? 'bg-red-700 hover:bg-red-800'
-                    : 'bg-[#0f3e26] hover:bg-[#144f31]'
+                    : 'bg-primary hover:bg-primary-hover'
                 } ${isSubmitting || !actionReason.trim() ? 'opacity-50 cursor-not-allowed' : ''}`}
               >
                 {isSubmitting && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
