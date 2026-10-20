@@ -12,7 +12,8 @@ import {
   RefreshCw,
   Search,
   Filter,
-  X
+  X,
+  IndianRupee
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { getAllOrders } from '@/lib/api/orders';
@@ -145,7 +146,12 @@ export default function AllSellerOrdersListPage() {
   const filteredOrders = useMemo(() => {
     return orders.filter(order => {
       // 1. Status Filter
-      const matchesStatus = activeTab === 'all' ? true : order.status === activeTab;
+      const matchesStatus =
+        activeTab === 'all'
+          ? true
+          : activeTab === 'cod_pending'
+          ? (order.payment_method || '').toUpperCase() === 'COD' && order.payment_status === 'pending'
+          : order.status === activeTab;
 
       // 2. Seller Filter
       let matchesSeller = true;
@@ -178,6 +184,7 @@ export default function AllSellerOrdersListPage() {
   const pendingCount = orders.filter(o => o.status === 'pending').length;
   const inTransitCount = orders.filter(o => o.status === 'out_for_delivery').length;
   const deliveredCount = orders.filter(o => o.status === 'delivered').length;
+  const codPendingCount = orders.filter(o => (o.payment_method || '').toUpperCase() === 'COD' && o.payment_status === 'pending').length;
   const totalSellerRevenue = orders.reduce((sum, o) => sum + Number(o.total_amount || 0), 0);
 
   if (isLoading) {
@@ -274,18 +281,25 @@ export default function AllSellerOrdersListPage() {
 
           {/* Status Tabs */}
           <div className="flex gap-2 overflow-x-auto no-scrollbar -mx-6 px-6 pb-1">
-            {['all', 'pending', 'confirmed', 'out_for_delivery', 'delivered', 'cancelled'].map(tab => (
+            {['all', 'cod_pending', 'pending', 'confirmed', 'out_for_delivery', 'delivered', 'cancelled'].map(tab => (
               <button key={tab} onClick={() => setActiveTab(tab)}
-                className="whitespace-nowrap px-4 py-2 rounded-full text-[12px] font-semibold transition-all duration-200 shrink-0 capitalize"
+                className="whitespace-nowrap px-4 py-2 rounded-full text-[12px] font-semibold transition-all duration-200 shrink-0 capitalize flex items-center gap-1.5"
                 style={activeTab === tab ? {
-                  background: 'var(--cta-gradient)',
+                  background: tab === 'cod_pending' ? 'linear-gradient(135deg, #b45309, #d97706)' : 'var(--cta-gradient)',
                   color: 'white',
                   boxShadow: '0 3px 10px rgba(12, 60, 38, 0.25)',
                 } : {
                   background: 'var(--color-surface-container-low)',
                   color: 'var(--color-on-surface-variant)',
                 }}>
-                {tab.replace(/_/g, ' ')}
+                {tab === 'cod_pending' ? (
+                  <>
+                    <IndianRupee className="w-3.5 h-3.5" />
+                    <span>COD Pending ({codPendingCount})</span>
+                  </>
+                ) : (
+                  tab.replace(/_/g, ' ')
+                )}
               </button>
             ))}
           </div>
@@ -481,6 +495,59 @@ export default function AllSellerOrdersListPage() {
                                   </div>
                                 );
                               })}
+                            </div>
+
+                            {/* Cash on Delivery (COD) Payment Tracking Section (Seller-Managed) */}
+                            <div className="rounded-xl border p-4 text-xs space-y-3 bg-white"
+                              style={{ borderColor: order.payment_status === 'paid' ? 'rgba(16, 185, 129, 0.3)' : 'rgba(245, 158, 11, 0.3)' }}>
+                              <div className="flex items-center justify-between flex-wrap gap-2">
+                                <div className="flex items-center gap-2">
+                                  <span className="p-1.5 rounded-lg bg-amber-50 text-amber-800">
+                                    <IndianRupee className="w-4 h-4" />
+                                  </span>
+                                  <div>
+                                    <span className="font-bold text-gray-900 block text-[13px]">
+                                      Payment Tracking ({order.payment_method || 'COD'})
+                                    </span>
+                                    <span className="text-gray-500 text-[11px]">
+                                      Payment Status: <strong className={order.payment_status === 'paid' ? 'text-emerald-700' : 'text-amber-700'}>
+                                        {order.payment_status === 'paid' ? 'Paid (Cash Collected by Seller)' : 'Pending Collection (Seller Managed)'}
+                                      </strong>
+                                    </span>
+                                  </div>
+                                </div>
+
+                                <span className="px-2.5 py-1 rounded-lg bg-purple-50 text-purple-800 border border-purple-200 text-[10px] font-bold">
+                                  Seller Direct Collection
+                                </span>
+                              </div>
+
+                              {order.payment_status === 'paid' && (
+                                <div className="p-2.5 rounded-lg bg-emerald-50/70 border border-emerald-200/80 text-[11px] text-emerald-900 space-y-0.5">
+                                  <div className="flex items-center justify-between">
+                                    <span className="font-semibold">Confirmed Amount:</span>
+                                    <span className="font-bold font-mono">₹{order.cod_collected_amount || order.total_amount}</span>
+                                  </div>
+                                  {order.payment_confirmed_at && (
+                                    <div className="flex items-center justify-between">
+                                      <span className="text-emerald-800/80">Confirmed At:</span>
+                                      <span>{format(new Date(order.payment_confirmed_at), 'MMM d, yyyy · hh:mm a')}</span>
+                                    </div>
+                                  )}
+                                  {order.payment_confirmed_by && (
+                                    <div className="flex items-center justify-between">
+                                      <span className="text-emerald-800/80">Confirmed By (ID):</span>
+                                      <span className="font-mono text-[10px]">{order.payment_confirmed_by.slice(0, 8)}...</span>
+                                    </div>
+                                  )}
+                                </div>
+                              )}
+
+                              {((order.payment_method || '').toUpperCase() === 'COD') && order.payment_status !== 'paid' && order.status === 'cancelled' && (
+                                <div className="p-2 rounded-lg bg-gray-50 border border-gray-200 text-[11px] text-gray-500">
+                                  Order was cancelled before cash collection. Payment remains uncollected.
+                                </div>
+                              )}
                             </div>
 
                             {/* Cancellation Reason Display */}

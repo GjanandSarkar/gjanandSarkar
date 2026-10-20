@@ -159,18 +159,61 @@ export async function POST(request: NextRequest) {
 
       console.log(`[RazorpayWebhook] payment.failed → order marked failed for razorpay_order_id: ${razorpayOrderId}`);
 
+    } else if (eventType === 'refund.created') {
+      const rf = payload.refund?.entity;
+      if (rf) {
+        const { findRefund } = await import('@/lib/refund-helper');
+        const row = await findRefund(rf);
+        if (row && !row.razorpay_refund_id) {
+          const sb = getAdminSupabase();
+          await sb.from('refunds').update({ razorpay_refund_id: rf.id }).eq('id', row.id);
+        }
+      }
+      console.log(`[RazorpayWebhook] refund.created for refund id: ${payload.refund?.entity?.id}`);
+
     } else if (eventType === 'refund.processed') {
-      const refund = payload.refund?.entity;
-      if (!refund) return NextResponse.json({ status: 'ok' });
+      const rf = payload.refund?.entity;
+      if (!rf) return NextResponse.json({ status: 'ok' });
 
-      const paymentId = refund.payment_id;
+      const { findRefund } = await import('@/lib/refund-helper');
+      const { settleRefund } = await import('@/lib/refunds');
+      const row = await findRefund(rf);
 
-      await updateOrderByPaymentId(paymentId, {
-        payment_status: 'refunded',
-      });
+      if (row) {
+        const sb = getAdminSupabase();
+        await sb.from('refunds').update({
+          razorpay_refund_id: rf.id,
+          speed_processed: rf.speed_processed ?? null,
+        }).eq('id', row.id);
+        await settleRefund(row.id);
+      } else {
+        // Fallback for orders refunded directly outside the refunds table
+        await updateOrderByPaymentId(rf.payment_id, {
+          payment_status: 'refunded',
+        });
+      }
 
-      console.log(`[RazorpayWebhook] refund.processed → order marked refunded for payment_id: ${paymentId}`);
+      console.log(`[RazorpayWebhook] refund.processed → handled refund ${rf.id}`);
 
+    } else if (eventType === 'refund.failed') {
+      const rf = payload.refund?.entity;
+      if (rf) {
+        const { findRefund } = await import('@/lib/refund-helper');
+        const { notify } = await import('@/lib/notify');
+        const row = await findRefund(rf);
+        if (row && row.status !== 'completed') {
+          const sb = getAdminSupabase();
+          await sb.from('refunds').update({
+            status: 'failed',
+            failure_reason: 'Razorpay reported refund.failed',
+          }).eq('id', row.id);
+          await notify(['admin'], 'refund_failed', row.id);
+        }
+      }
+      console.log(`[RazorpayWebhook] refund.failed for refund id: ${payload.refund?.entity?.id}`);
+
+    } else if (eventType === 'refund.speed_changed') {
+      console.log(`[RazorpayWebhook] refund.speed_changed received`);
     } else {
       console.log(`[RazorpayWebhook] Unhandled event type: ${eventType}`);
     }

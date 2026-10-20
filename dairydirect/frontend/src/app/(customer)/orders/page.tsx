@@ -12,6 +12,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import Link from 'next/link';
 import { BuyAgainCarousel } from '@/components/discovery/BuyAgainCarousel';
 import { EmptyState } from '@/components/discovery/EmptyState';
+import { CancelOrderButton } from '@/components/orders/CancelOrderButton';
 
 const STATUS_STYLES: Record<string, { bg: string; color: string; dot: string; icon: typeof Clock }> = {
   'pending':          { bg: '#ffdcc7', color: '#774117', dot: '#d4712a', icon: Clock },
@@ -145,7 +146,18 @@ export default function OrdersScreen() {
                     <div className="flex items-center justify-between px-5 py-4 cursor-pointer"
                       onClick={() => setExpandedId(isExpanded ? null : order.id)}>
                       <div>
-                        <p className="font-bold text-[14px]" style={{ color: 'var(--color-primary)' }}>{order.id}</p>
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <p className="font-bold text-[14px]" style={{ color: 'var(--color-primary)' }}>{order.id}</p>
+                          <span className={`px-2 py-0.5 rounded-md text-[10px] font-bold uppercase tracking-wider ${
+                            order.payment_status === 'paid' ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800'
+                          }`}>
+                            {order.payment_status === 'paid'
+                              ? 'Paid'
+                              : (order.payment_method || '').toUpperCase() === 'COD'
+                              ? 'Payment Pending'
+                              : (order.payment_status || 'Pending')} ({(order.payment_method || 'COD').toUpperCase()})
+                          </span>
+                        </div>
                         <p className="text-[11px]" style={{ color: 'var(--color-on-surface-variant)' }}>
                           {format(new Date(order.created_at), 'MMM d, hh:mm a')}
                         </p>
@@ -198,6 +210,34 @@ export default function OrdersScreen() {
                               })}
                             </div>
 
+                            {/* Payment Status & Details */}
+                            <div className="p-3 mb-4 rounded-xl bg-white border border-gray-200/80 text-xs space-y-1.5">
+                              <div className="flex items-center justify-between">
+                                <span className="text-gray-500">Payment Method:</span>
+                                <span className="font-bold text-gray-800">
+                                  {(order.payment_method || '').toUpperCase() === 'COD' ? 'Cash on Delivery (COD)' : (order.payment_method || 'Online')}
+                                </span>
+                              </div>
+                              <div className="flex items-center justify-between">
+                                <span className="text-gray-500">Payment Status:</span>
+                                <span className={`font-black uppercase text-[10px] px-2 py-0.5 rounded-md ${
+                                  order.payment_status === 'paid' ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800'
+                                }`}>
+                                  {order.payment_status === 'paid'
+                                    ? 'Paid'
+                                    : (order.payment_method || '').toUpperCase() === 'COD'
+                                    ? 'Payment Pending'
+                                    : (order.payment_status || 'Pending')}
+                                </span>
+                              </div>
+                              <div className="flex items-center justify-between pt-1 border-t border-gray-100">
+                                <span className="text-gray-500 font-semibold">Total Amount:</span>
+                                <span className="font-extrabold text-emerald-900 font-mono text-[13px]">
+                                  {t('currency')}{order.total_amount}
+                                </span>
+                              </div>
+                            </div>
+
                             {/* Track button */}
                             {(order.status === 'out_for_delivery' || order.status === 'confirmed') && (
                               <Link href={`/tracking/${order.id}`}
@@ -207,6 +247,16 @@ export default function OrdersScreen() {
                                 {t('trackLive')}
                               </Link>
                             )}
+
+                            {/* Cancel Order button */}
+                            <CancelOrderButton
+                              orderId={order.id}
+                              status={order.status}
+                              paymentMethod={order.payment_method}
+                              totalAmount={order.total_amount}
+                              onChanged={() => loadOrders()}
+                              className="flex items-center justify-center gap-2 w-full py-2.5 mt-2 rounded-[12px] font-bold text-xs text-rose-700 bg-rose-50 hover:bg-rose-100 border border-rose-200/60 transition-colors cursor-pointer"
+                            />
 
                             {/* Return / Freshness Guarantee claim button */}
                             {order.status === 'delivered' && (

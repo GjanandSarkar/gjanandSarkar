@@ -31,6 +31,7 @@ import { format } from 'date-fns';
 import { getSellerOrders, updateOrderStatus, processOrderRequest } from '@/lib/api/orders';
 import type { OrderWithItems, OrderStatus } from '@/lib/api/orders';
 import { PLACEHOLDER_PRODUCT_IMAGE } from '@/lib/constants/brand';
+import { ConfirmCodPaymentModal } from '@/components/admin/ConfirmCodPaymentModal';
 
 const STATUS_STYLES: Record<string, { bg: string; color: string; border: string; dot: string; label: string }> = {
   'pending':          { bg: '#fff7ed', color: '#9a3412', border: '#fdba74', dot: '#ea580c', label: 'Pending Confirmation' },
@@ -103,6 +104,7 @@ export function SellerOrdersManager({ initialStatusFilter = 'all' }: SellerOrder
   const [decisionReason, setDecisionReason] = useState('');
   const [isSubmittingDecision, setIsSubmittingDecision] = useState(false);
   const [activeLightboxImage, setActiveLightboxImage] = useState<string | null>(null);
+  const [codConfirmOrder, setCodConfirmOrder] = useState<OrderWithItems | null>(null);
 
   const loadOrders = useCallback(async () => {
     setIsLoading(true);
@@ -155,6 +157,31 @@ export function SellerOrdersManager({ initialStatusFilter = 'all' }: SellerOrder
       }
     };
   }, [loadOrders]);
+
+  const handleUpdateItemAction = async (orderId: string, itemId: string, action: 'pack' | 'dispatch') => {
+    setIsUpdating(orderId);
+    setErrorMessage(null);
+    setSuccessMessage(null);
+    try {
+      const res = await fetch(`/api/seller/orders/${orderId}/items/${itemId}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Failed to update item milestone');
+      setSuccessMessage({
+        orderId,
+        message: action === 'pack' ? 'Item marked as Packed' : 'Item marked as Handed to Dispatch',
+      });
+      loadOrders();
+      setTimeout(() => setSuccessMessage(null), 4000);
+    } catch (e: any) {
+      setErrorMessage({ orderId, message: e.message || 'Operation failed' });
+    } finally {
+      setIsUpdating(null);
+    }
+  };
 
   const handleUpdateStatus = async (orderId: string, targetStatus: OrderStatus) => {
     const order = orders.find(o => o.id === orderId);
@@ -642,7 +669,7 @@ export function SellerOrdersManager({ initialStatusFilter = 'all' }: SellerOrder
                               const img = prod?.image_url || item.product_image || PLACEHOLDER_PRODUCT_IMAGE;
                               const name = item.product_name || prod?.name || 'Dairy Product';
                               const weight = item.variant_weight || item.weight || variant?.weight || '';
-                              const itemStatus = item.status || order.status;
+                              const itemStatus: string = (item.status as any) || order.status;
                               const itemStatusStyle = STATUS_STYLES[itemStatus] || STATUS_STYLES.pending;
                               const itemRequests = item.return_requests || [];
 
@@ -689,28 +716,35 @@ export function SellerOrdersManager({ initialStatusFilter = 'all' }: SellerOrder
                                         ₹{item.price * item.quantity}
                                       </div>
 
-                                      {/* Item-level progression actions */}
+                                      {/* Item-level fulfillment milestones: Pack & Hand Over */}
                                       {order.status !== 'cancelled' && itemStatus !== 'cancelled' && (
                                         <div className="flex items-center gap-1.5 mt-2 justify-end">
-                                          {itemStatus === 'confirmed' && (
+                                          {['pending', 'confirmed'].includes(itemStatus) && (
                                             <button
-                                              onClick={() => handleUpdateItemStatus(order.id, item.id, 'out_for_delivery')}
+                                              onClick={() => handleUpdateItemAction(order.id, item.id, 'pack')}
                                               disabled={isBusy}
-                                              className="px-2.5 py-1 rounded-lg bg-yellow-50 hover:bg-yellow-100 text-yellow-800 border border-yellow-200 text-[10px] font-bold transition-colors"
-                                              title="Advance this specific item to in-transit"
+                                              className="px-2.5 py-1 rounded-lg bg-blue-50 hover:bg-blue-100 text-blue-800 border border-blue-200 text-[10px] font-bold transition-colors flex items-center gap-1"
+                                              title="Mark this item as packed and ready for dispatch"
                                             >
-                                              Dispatch Item
+                                              <Package className="w-3 h-3" />
+                                              <span>Mark Packed</span>
                                             </button>
                                           )}
-                                          {itemStatus === 'out_for_delivery' && (
+                                          {itemStatus === 'packed' && (
                                             <button
-                                              onClick={() => handleUpdateItemStatus(order.id, item.id, 'delivered')}
+                                              onClick={() => handleUpdateItemAction(order.id, item.id, 'dispatch')}
                                               disabled={isBusy}
-                                              className="px-2.5 py-1 rounded-lg bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-200 text-[10px] font-bold transition-colors"
-                                              title="Mark this specific item as delivered"
+                                              className="px-2.5 py-1 rounded-lg bg-amber-50 hover:bg-amber-100 text-amber-900 border border-amber-200 text-[10px] font-bold transition-colors flex items-center gap-1"
+                                              title="Hand over to dispatch / delivery partner"
                                             >
-                                              Mark Delivered
+                                              <Truck className="w-3 h-3" />
+                                              <span>Hand to Dispatch</span>
                                             </button>
+                                          )}
+                                          {itemStatus === 'handed_to_dispatch' && (
+                                            <span className="px-2 py-0.5 rounded-md bg-purple-50 text-purple-800 border border-purple-200 text-[10px] font-bold">
+                                              With Dispatch
+                                            </span>
                                           )}
                                         </div>
                                       )}
@@ -893,6 +927,89 @@ export function SellerOrdersManager({ initialStatusFilter = 'all' }: SellerOrder
                               </div>
                             )}
                           </div>
+
+                          {/* COD Payment Tracking & Confirmation Card for Seller's Own Product Order */}
+                          {((order.payment_method || '').toUpperCase() === 'COD') ? (
+                            <div className="bg-white rounded-2xl border border-gray-200/90 p-4 space-y-3">
+                              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-2 border-b border-gray-100">
+                                <div className="flex items-center gap-2.5">
+                                  <div className="w-8 h-8 rounded-full bg-amber-100 text-amber-900 flex items-center justify-center font-bold text-sm shrink-0">
+                                    ₹
+                                  </div>
+                                  <div>
+                                    <span className="text-[10px] font-bold uppercase tracking-wider text-gray-500 block">PAYMENT METHOD</span>
+                                    <span className="font-extrabold text-sm text-gray-900">Cash on Delivery (COD)</span>
+                                  </div>
+                                </div>
+
+                                <div className="flex items-center gap-2">
+                                  <span className="text-xs text-gray-500">Collection Status:</span>
+                                  <span className={`px-2.5 py-0.5 rounded-full text-xs font-black uppercase tracking-wider ${
+                                    order.payment_status === 'paid'
+                                      ? 'bg-emerald-100 text-emerald-800 border border-emerald-200'
+                                      : 'bg-amber-100 text-amber-900 border border-amber-200'
+                                  }`}>
+                                    {order.payment_status === 'paid' ? '✓ PAID (CASH COLLECTED)' : 'PENDING CASH COLLECTION'}
+                                  </span>
+                                </div>
+                              </div>
+
+                              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs text-gray-600 pt-1">
+                                <div>
+                                  <span className="text-[10px] text-gray-400 font-bold uppercase tracking-wider block">ORDER AMOUNT</span>
+                                  <span className="font-extrabold text-sm text-[#0f3e26]">₹{order.total_amount}</span>
+                                </div>
+                                <div>
+                                  <span className="text-[10px] text-gray-400 font-bold uppercase tracking-wider block">ORDER STATUS</span>
+                                  <span className="font-bold text-gray-800 uppercase">{order.status.replace(/_/g, ' ')}</span>
+                                </div>
+                                <div>
+                                  <span className="text-[10px] text-gray-400 font-bold uppercase tracking-wider block">CASH CONFIRMED AT</span>
+                                  <span className="font-medium text-gray-800">
+                                    {order.payment_confirmed_at 
+                                      ? format(new Date(order.payment_confirmed_at), 'dd MMM yyyy, hh:mm a') 
+                                      : 'Not yet recorded'}
+                                  </span>
+                                </div>
+                                <div>
+                                  <span className="text-[10px] text-gray-400 font-bold uppercase tracking-wider block">CONFIRMED BY</span>
+                                  <span className="font-medium text-gray-800">
+                                    {order.payment_status === 'paid' ? 'Seller Verified' : 'Pending'}
+                                  </span>
+                                </div>
+                              </div>
+
+                              {/* Seller Action Button: Confirm Cash Collected for eligible orders */}
+                              {order.payment_status !== 'paid' && order.status !== 'cancelled' && (
+                                <div className="pt-2 flex justify-end">
+                                  <button
+                                    type="button"
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      setCodConfirmOrder(order);
+                                    }}
+                                    className="px-4 py-2 rounded-xl text-xs font-bold text-white bg-emerald-700 hover:bg-emerald-800 transition-all flex items-center gap-1.5 shadow-sm cursor-pointer"
+                                  >
+                                    <IndianRupee className="w-3.5 h-3.5" />
+                                    <span>Confirm Cash Collected (₹{order.total_amount})</span>
+                                  </button>
+                                </div>
+                              )}
+                            </div>
+                          ) : (
+                            /* Non-COD Payment summary */
+                            <div className="bg-white rounded-xl border border-gray-200 p-4 space-y-2 text-xs">
+                              <span className="text-gray-400 block text-[10px] font-bold uppercase tracking-wider">Payment Information</span>
+                              <div className="flex justify-between items-center">
+                                <span className="text-gray-500">Method:</span>
+                                <span className="font-bold uppercase text-gray-800">{order.payment_method || 'Online'}</span>
+                              </div>
+                              <div className="flex justify-between items-center">
+                                <span className="text-gray-500">Status:</span>
+                                <span className="font-bold uppercase text-emerald-700">{order.payment_status || 'Paid'}</span>
+                              </div>
+                            </div>
+                          )}
                         </div>
 
                       </div>
@@ -1291,6 +1408,20 @@ export function SellerOrdersManager({ initialStatusFilter = 'all' }: SellerOrder
             />
           </div>
         </div>
+      )}
+
+      {/* ─── Confirm COD Payment Modal for Seller ─── */}
+      {codConfirmOrder && (
+        <ConfirmCodPaymentModal
+          order={codConfirmOrder}
+          isOpen={!!codConfirmOrder}
+          endpoint={`/api/seller/orders/${codConfirmOrder.id}/confirm-cod-payment`}
+          onClose={() => setCodConfirmOrder(null)}
+          onSuccess={(updated) => {
+            setOrders(prev => prev.map(o => o.id === codConfirmOrder.id ? { ...o, ...updated } : o));
+            setCodConfirmOrder(null);
+          }}
+        />
       )}
     </div>
   );

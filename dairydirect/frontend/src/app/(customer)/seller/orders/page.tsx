@@ -3,7 +3,7 @@
 import React, { useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { ArrowLeft, ShoppingBag, Store } from 'lucide-react';
+import { ArrowLeft, ShoppingBag, Store, RotateCcw } from 'lucide-react';
 import { useStore } from '@/store/useStore';
 import { SellerOrdersManager } from '@/components/seller/SellerOrdersManager';
 
@@ -49,6 +49,13 @@ export default function SellerOrdersDedicatedPage() {
           </div>
 
           <div className="flex items-center gap-3">
+            <Link
+              href="/seller/returns"
+              className="px-4 py-2.5 bg-amber-50 hover:bg-amber-100 text-amber-900 border border-amber-200 text-xs font-bold rounded-xl flex items-center gap-1.5 transition-colors"
+            >
+              <RotateCcw className="w-4 h-4 text-amber-700" />
+              <span>Returns & Replacements</span>
+            </Link>
             <Link
               href="/seller/dashboard"
               className="px-4 py-2.5 bg-gray-100 hover:bg-gray-200 text-gray-800 text-xs font-bold rounded-xl flex items-center gap-1.5 transition-colors"

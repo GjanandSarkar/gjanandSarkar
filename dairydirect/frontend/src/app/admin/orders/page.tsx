@@ -14,12 +14,14 @@ import {
   CreditCard, 
   CheckCircle2, 
   Ban, 
-  RefreshCw 
+  RefreshCw,
+  IndianRupee 
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { getAllOrders, updateOrderStatus } from '@/lib/api/orders';
 import type { OrderWithItems } from '@/lib/api/orders';
 import { PLACEHOLDER_PRODUCT_IMAGE } from '@/lib/constants/brand';
+import { ConfirmCodPaymentModal } from '@/components/admin/ConfirmCodPaymentModal';
 
 const STATUS_STYLES: Record<string, { bg: string; color: string; dot: string }> = {
   'pending':          { bg: '#ffdcc7', color: '#774117', dot: '#d4712a' },
@@ -64,6 +66,7 @@ export default function AdminOrdersPage() {
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [isUpdating, setIsUpdating] = useState<string | null>(null);
   const [updateError, setUpdateError] = useState<{ orderId: string; message: string } | null>(null);
+  const [codConfirmOrder, setCodConfirmOrder] = useState<OrderWithItems | null>(null);
 
   const fetchOrders = () => {
     getAllOrders({ type: 'admin' }).then(data => {
@@ -133,21 +136,45 @@ export default function AdminOrdersPage() {
     setUpdateError(null);
     setIsUpdating(orderId);
     try {
-      const result = await updateOrderStatus(orderId, status, userId || undefined);
-      if (result.success) {
+      let res: Response;
+      if (status === 'cancelled') {
+        res = await fetch(`/api/admin/orders/${orderId}/cancel`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ reason: 'Cancelled by administrator on behalf' }),
+        });
+      } else {
+        res = await fetch(`/api/admin/orders/${orderId}/status`, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ to: status }),
+        });
+      }
+
+      const json = await res.json().catch(() => ({}));
+      if (res.ok) {
         setOrders(prev => prev.map(o => (o.id === orderId ? { ...o, status } : o)));
       } else {
         setUpdateError({
           orderId,
-          message: result.error || 'Could not update this order. Please try again.',
+          message: json.error || 'Could not update this order status. Please try again.',
         });
       }
+    } catch (err: any) {
+      setUpdateError({
+        orderId,
+        message: err.message || 'Network error updating order status.',
+      });
     } finally {
       setIsUpdating(null);
     }
   };
 
-  const filtered = activeTab === 'all' ? orders : orders.filter(o => o.status === activeTab);
+  const filtered = activeTab === 'all'
+    ? orders
+    : activeTab === 'cod_pending'
+      ? orders.filter(o => o.payment_method?.toUpperCase() === 'COD' && o.payment_status !== 'paid')
+      : orders.filter(o => o.status === activeTab);
 
   if (isLoading) {
     return (
@@ -196,7 +223,7 @@ export default function AdminOrdersPage() {
           </div>
 
           <div className="flex gap-2 overflow-x-auto no-scrollbar -mx-6 px-6 pb-1">
-            {['all', 'pending', 'confirmed', 'out_for_delivery', 'delivered', 'cancelled'].map(tab => (
+            {['all', 'cod_pending', 'confirmed', 'out_for_delivery', 'delivered', 'cancelled'].map(tab => (
               <button key={tab} onClick={() => setActiveTab(tab)}
                 className="whitespace-nowrap px-4 py-2 rounded-full text-[12px] font-semibold transition-all duration-200 shrink-0 capitalize"
                 style={activeTab === tab ? {
@@ -207,7 +234,7 @@ export default function AdminOrdersPage() {
                   background: 'var(--color-surface-container-low)',
                   color: 'var(--color-on-surface-variant)',
                 }}>
-                {tab.replace(/_/g, ' ')}
+                {tab === 'cod_pending' ? 'COD Payment Pending' : tab.replace(/_/g, ' ')}
               </button>
             ))}
           </div>
@@ -404,6 +431,70 @@ export default function AdminOrdersPage() {
                               </div>
                             )}
 
+                            {/* COD Payment Tracking & Confirmation Card */}
+                            {order.payment_method?.toUpperCase() === 'COD' && (
+                              <div className="p-4 rounded-2xl border border-gray-200/90 bg-gray-50/80 space-y-3">
+                                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-2 border-b border-gray-200/60">
+                                  <div className="flex items-center gap-2">
+                                    <div className="w-8 h-8 rounded-xl bg-amber-100 text-amber-800 flex items-center justify-center shrink-0">
+                                      <IndianRupee className="w-4 h-4" />
+                                    </div>
+                                    <div>
+                                      <span className="text-[10px] font-bold uppercase tracking-wider text-gray-500 block">Payment Method</span>
+                                      <span className="font-extrabold text-sm text-gray-900">Cash on Delivery (COD)</span>
+                                    </div>
+                                  </div>
+
+                                  <div className="flex items-center gap-2">
+                                    <span className="text-xs text-gray-500">Collection Status:</span>
+                                    <span className={`px-2.5 py-0.5 rounded-full text-xs font-black uppercase tracking-wider ${
+                                      order.payment_status === 'paid' ? 'bg-emerald-100 text-emerald-800 border border-emerald-200' : 'bg-amber-100 text-amber-900 border border-amber-200'
+                                    }`}>
+                                      {order.payment_status === 'paid' ? '✓ Paid (Cash Collected)' : 'Pending Cash Collection'}
+                                    </span>
+                                  </div>
+                                </div>
+
+                                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs text-gray-600">
+                                  <div>
+                                    <span className="text-[10px] text-gray-400 font-bold uppercase tracking-wider block">Order Amount</span>
+                                    <span className="font-extrabold text-sm text-[#0f3e26]">₹{order.total_amount}</span>
+                                  </div>
+                                  <div>
+                                    <span className="text-[10px] text-gray-400 font-bold uppercase tracking-wider block">Order Status</span>
+                                    <span className="font-bold text-gray-800 uppercase">{order.status.replace(/_/g, ' ')}</span>
+                                  </div>
+                                  <div>
+                                    <span className="text-[10px] text-gray-400 font-bold uppercase tracking-wider block">Cash Confirmed At</span>
+                                    <span className="font-medium text-gray-800">
+                                      {order.payment_confirmed_at 
+                                        ? format(new Date(order.payment_confirmed_at), 'MMM d, hh:mm a') 
+                                        : 'Not yet recorded'}
+                                    </span>
+                                  </div>
+                                  <div>
+                                    <span className="text-[10px] text-gray-400 font-bold uppercase tracking-wider block">Confirmed By</span>
+                                    <span className="font-medium text-gray-800">
+                                      {order.payment_confirmed_at ? 'Authorized Admin' : 'Pending'}
+                                    </span>
+                                  </div>
+                                </div>
+
+                                {order.payment_status !== 'paid' && order.status !== 'cancelled' && (
+                                  <div className="pt-2 flex justify-end">
+                                    <button
+                                      type="button"
+                                      onClick={() => setCodConfirmOrder(order)}
+                                      className="px-4 py-2 rounded-xl text-xs font-bold text-white bg-emerald-700 hover:bg-emerald-800 transition-all flex items-center gap-1.5 shadow-sm cursor-pointer"
+                                    >
+                                      <IndianRupee className="w-3.5 h-3.5" />
+                                      <span>Confirm Cash Collected (₹{order.total_amount})</span>
+                                    </button>
+                                  </div>
+                                )}
+                              </div>
+                            )}
+
                             <div className="relative pt-2">
                               {isUpdating === order.id && (
                                 <div className="absolute inset-0 bg-white/50 flex items-center justify-center z-10">
@@ -494,6 +585,17 @@ export default function AdminOrdersPage() {
           )}
         </AnimatePresence>
       </div>
+
+      {codConfirmOrder && (
+        <ConfirmCodPaymentModal
+          order={codConfirmOrder}
+          isOpen={!!codConfirmOrder}
+          onClose={() => setCodConfirmOrder(null)}
+          onSuccess={(updated) => {
+            setOrders(prev => prev.map(o => o.id === codConfirmOrder.id ? { ...o, ...updated } : o));
+          }}
+        />
+      )}
     </div>
   );
 }

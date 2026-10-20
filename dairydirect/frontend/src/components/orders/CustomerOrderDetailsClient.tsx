@@ -23,13 +23,16 @@ import {
   ChevronRight,
   IndianRupee,
   Package,
-  Image as ImageIcon
+  Image as ImageIcon,
+  RefreshCw,
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { format } from 'date-fns';
 import { submitOrderRequest } from '@/lib/api/orders';
 import type { OrderWithItems, DBReturnRequest } from '@/lib/api/orders';
 import { PLACEHOLDER_PRODUCT_IMAGE } from '@/lib/constants/brand';
+import { StatusBar, ORDER_STEPS, CANCELLED_STEPS } from './StatusBar';
+import { canCancelOrder } from '@/lib/orders/cancel-rules';
 
 const ITEM_STATUS_BADGES: Record<string, { bg: string; text: string; border: string; label: string }> = {
   pending:          { bg: '#fff7ed', text: '#c2410c', border: '#ffedd5', label: 'Pending' },
@@ -83,6 +86,36 @@ export function CustomerOrderDetailsClient({ initialOrder }: CustomerOrderDetail
   const [customCancelNotes, setCustomCancelNotes] = useState('');
   const [isSubmittingCancel, setIsSubmittingCancel] = useState(false);
 
+  // Entire Order Cancellation State
+  const [isCancelOrderModalOpen, setIsCancelOrderModalOpen] = useState(false);
+  const [orderCancelReason, setOrderCancelReason] = useState('Changed my mind');
+  const [isCancellingOrder, setIsCancellingOrder] = useState(false);
+
+  const canCancelEntireOrder = canCancelOrder(order.status);
+
+  const handleCancelEntireOrder = async () => {
+    setIsCancellingOrder(true);
+    try {
+      const res = await fetch(`/api/orders/${order.id}/cancel`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ reason: orderCancelReason }),
+      });
+      const json = await res.json();
+      if (res.ok) {
+        showToast('success', 'Order has been successfully cancelled.');
+        setIsCancelOrderModalOpen(false);
+        await reloadOrder();
+      } else {
+        showToast('error', json.error || 'Failed to cancel order.');
+      }
+    } catch (err) {
+      showToast('error', 'Network error. Could not cancel order.');
+    } finally {
+      setIsCancellingOrder(false);
+    }
+  };
+
   // Return Modal State
   const [returnModalItem, setReturnModalItem] = useState<any | null>(null);
   const [returnReason, setReturnReason] = useState(RETURN_REASONS[0]);
@@ -116,25 +149,31 @@ export function CustomerOrderDetailsClient({ initialOrder }: CustomerOrderDetail
     const files = e.target.files;
     if (!files || files.length === 0) return;
 
-    if (returnImages.length + files.length > 3) {
-      showToast('error', 'You can upload up to 3 defect photos.');
+    const remainingSlots = 6 - returnImages.length;
+    if (remainingSlots <= 0) {
+      showToast('error', 'Maximum limit of 6 photos reached.');
       return;
+    }
+
+    if (files.length > remainingSlots) {
+      showToast('error', `You can only add ${remainingSlots} more photo(s). Maximum 6 photos allowed.`);
     }
 
     setIsUploadingPhoto(true);
 
-    for (let i = 0; i < files.length; i++) {
-      const file = files[i];
+    const filesToUpload = Array.from(files).slice(0, remainingSlots);
+    for (let i = 0; i < filesToUpload.length; i++) {
+      const file = filesToUpload[i];
 
       // Validate file type
-      if (!['image/jpeg', 'image/png', 'image/webp'].includes(file.type)) {
-        showToast('error', 'Only JPG, PNG, and WebP images are allowed.');
+      if (!file.type.startsWith('image/')) {
+        showToast('error', `${file.name}: Only image files (JPG, PNG, WebP) are allowed.`);
         continue;
       }
 
-      // Validate file size (max 5MB)
-      if (file.size > 5 * 1024 * 1024) {
-        showToast('error', 'Image size cannot exceed 5MB.');
+      // Validate file size (max 10MB)
+      if (file.size > 10 * 1024 * 1024) {
+        showToast('error', `${file.name}: Image size cannot exceed 10MB.`);
         continue;
       }
 
@@ -151,9 +190,10 @@ export function CustomerOrderDetailsClient({ initialOrder }: CustomerOrderDetail
         const uploadRes = await fetch('/api/upload/imagekit', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
+          credentials: 'include',
           body: JSON.stringify({
             file: base64Data,
-            fileName: `return_${order.id}_${Date.now()}.png`,
+            fileName: `return_${order.id}_${Date.now()}_${i}.png`,
             folder: '/returns_evidence',
           }),
         });
@@ -292,6 +332,16 @@ export function CustomerOrderDetailsClient({ initialOrder }: CustomerOrderDetail
           </div>
 
           <div className="flex items-center gap-3">
+            {canCancelEntireOrder && (
+              <button
+                onClick={() => setIsCancelOrderModalOpen(true)}
+                className="px-4 py-2.5 border border-rose-300 text-rose-700 hover:bg-rose-50 text-xs font-bold rounded-xl flex items-center gap-1.5 transition-colors shadow-2xs"
+              >
+                <Ban className="w-3.5 h-3.5 text-rose-600" />
+                <span>Cancel Order</span>
+              </button>
+            )}
+
             <Link
               href={`/tracking/${order.id}`}
               className="px-5 py-2.5 bg-[#0f3e26] hover:bg-[#165a37] text-white text-xs font-bold rounded-xl flex items-center gap-2 shadow-sm transition-all"
@@ -299,6 +349,28 @@ export function CustomerOrderDetailsClient({ initialOrder }: CustomerOrderDetail
               <Truck className="w-4 h-4 text-[#c88a23]" />
               <span>Track Live Delivery</span>
             </Link>
+          </div>
+        </div>
+
+        {/* Order Lifecycle Status Bar Card */}
+        <div className="bg-white rounded-3xl border border-gray-200/80 shadow-2xs p-6 md:p-8">
+          <div className="flex items-center justify-between mb-6">
+            <span className="text-xs font-bold text-gray-400 uppercase tracking-wider">
+              Order Lifecycle Progress
+            </span>
+            {order.status === 'cancelled' && (
+              <span className="px-3 py-1 rounded-full text-xs font-bold bg-rose-50 text-rose-700 border border-rose-200">
+                Order Cancelled
+              </span>
+            )}
+          </div>
+          <div className="py-2">
+            <StatusBar
+              steps={order.status === 'cancelled' ? CANCELLED_STEPS : ORDER_STEPS}
+              current={order.status}
+              times={(order as any).times || {}}
+              failed={order.status === 'cancelled'}
+            />
           </div>
         </div>
 
@@ -442,28 +514,32 @@ export function CustomerOrderDetailsClient({ initialOrder }: CustomerOrderDetail
 
                       {/* Buttons */}
                       <div className="flex items-center gap-2">
-                        {canCancelItem && (
-                          <button
-                            onClick={() => setCancelModalItem(item)}
-                            className="px-3.5 py-2 rounded-xl border border-red-200 text-red-700 hover:bg-red-50 text-xs font-bold flex items-center gap-1.5 transition-colors"
+                        {activeReturnReq ? (
+                          <Link
+                            href={`/returns/${activeReturnReq.id}`}
+                            className="px-3.5 py-2 rounded-xl bg-emerald-50 hover:bg-emerald-100 text-emerald-800 text-xs font-bold flex items-center gap-1.5 border border-emerald-200 transition-colors shadow-2xs"
                           >
-                            <Ban className="w-3.5 h-3.5 text-red-600" />
-                            <span>Cancel Item</span>
-                          </button>
-                        )}
-
-                        {canReturnItem && (
-                          <button
-                            onClick={() => {
-                              setReturnModalItem(item);
-                              setReturnImages([]);
-                            }}
-                            className="px-3.5 py-2 rounded-xl bg-[#0f3e26] hover:bg-[#165a37] text-white text-xs font-bold flex items-center gap-1.5 shadow-xs transition-colors"
-                          >
-                            <RotateCcw className="w-3.5 h-3.5 text-[#c88a23]" />
-                            <span>Return Product</span>
-                          </button>
-                        )}
+                            <RotateCcw className="w-3.5 h-3.5 text-emerald-700" />
+                            <span>View Request</span>
+                          </Link>
+                        ) : (order.status === 'delivered' || item.status === 'delivered') ? (
+                          <>
+                            <Link
+                              href={`/returns?orderItemId=${item.id}&type=return`}
+                              className="px-3 py-1.5 rounded-xl border border-emerald-700 text-emerald-800 hover:bg-emerald-50 text-xs font-bold flex items-center gap-1 transition-colors"
+                            >
+                              <RotateCcw className="w-3.5 h-3.5 text-emerald-700" />
+                              <span>Return</span>
+                            </Link>
+                            <Link
+                              href={`/returns?orderItemId=${item.id}&type=replacement`}
+                              className="px-3 py-1.5 rounded-xl bg-[#0f3e26] hover:bg-[#165a37] text-white text-xs font-bold flex items-center gap-1 transition-colors shadow-2xs"
+                            >
+                              <RefreshCw className="w-3.5 h-3.5 text-[#c88a23]" />
+                              <span>Replace</span>
+                            </Link>
+                          </>
+                        ) : null}
                       </div>
                     </div>
                   </div>
@@ -517,21 +593,41 @@ export function CustomerOrderDetailsClient({ initialOrder }: CustomerOrderDetail
             <div className="text-xs text-gray-600 space-y-2">
               <div className="flex justify-between items-center">
                 <span className="text-gray-400">Payment Method:</span>
-                <span className="font-bold text-gray-900 uppercase">{order.payment_method || 'Online'}</span>
-              </div>
-              <div className="flex justify-between items-center">
-                <span className="text-gray-400">Payment Status:</span>
-                <span className={`font-bold uppercase px-2 py-0.5 rounded-full text-[10px] ${
-                  order.payment_status === 'paid' ? 'bg-emerald-100 text-emerald-800' :
-                  order.payment_status === 'refunded' ? 'bg-blue-100 text-blue-800' : 'bg-amber-100 text-amber-800'
-                }`}>
-                  {order.payment_status || 'pending'}
+                <span className="font-bold text-gray-900 uppercase">
+                  {(order.payment_method || '').toUpperCase() === 'COD' ? 'Cash on Delivery (COD)' : (order.payment_method || 'Online')}
                 </span>
               </div>
               <div className="flex justify-between items-center">
-                <span className="text-gray-400">Refund Guarantee:</span>
-                <span className="font-semibold text-emerald-700">Verified Seller Protection</span>
+                <span className="text-gray-400">Payment Status:</span>
+                <span className={`font-bold uppercase px-2.5 py-0.5 rounded-full text-[10px] ${
+                  order.payment_status === 'paid'
+                    ? 'bg-emerald-100 text-emerald-800 border border-emerald-200'
+                    : order.payment_status === 'refunded'
+                    ? 'bg-blue-100 text-blue-800 border border-blue-200'
+                    : 'bg-amber-100 text-amber-800 border border-amber-200'
+                }`}>
+                  {order.payment_status === 'paid'
+                    ? 'Paid'
+                    : (order.payment_method || '').toUpperCase() === 'COD'
+                    ? 'Payment Pending'
+                    : (order.payment_status || 'Pending')}
+                </span>
               </div>
+              <div className="flex justify-between items-center">
+                <span className="text-gray-400">Order Total:</span>
+                <span className="font-extrabold text-gray-900 font-mono">₹{order.total_amount}</span>
+              </div>
+              {order.payment_status === 'paid' && order.payment_confirmed_at && (
+                <div className="flex justify-between items-center pt-1 text-[11px] text-emerald-800">
+                  <span className="text-gray-400">Cash Confirmed At:</span>
+                  <span>{format(new Date(order.payment_confirmed_at), 'dd MMM yyyy, hh:mm a')}</span>
+                </div>
+              )}
+              {(order.payment_method || '').toUpperCase() === 'COD' && order.payment_status !== 'paid' && (
+                <p className="text-[11px] text-amber-700 bg-amber-50 p-2.5 rounded-xl border border-amber-200/60 mt-1">
+                  Cash payment will be collected in person upon delivery and verified by Gjanand Sarkar.
+                </p>
+              )}
             </div>
           </div>
         </div>
@@ -713,9 +809,9 @@ export function CustomerOrderDetailsClient({ initialOrder }: CustomerOrderDetail
               <div>
                 <div className="flex items-center justify-between mb-1.5">
                   <label className="text-xs font-bold text-gray-700">
-                    Upload Defect / Condition Photos (Max 3)
+                    Upload Defect / Condition Photos (Max 6)
                   </label>
-                  <span className="text-[11px] text-gray-400">{returnImages.length}/3 photos</span>
+                  <span className="text-[11px] text-gray-400">{returnImages.length}/6 photos</span>
                 </div>
 
                 <div className="space-y-2">
@@ -737,11 +833,12 @@ export function CustomerOrderDetailsClient({ initialOrder }: CustomerOrderDetail
                     </div>
                   )}
 
-                  {returnImages.length < 3 && (
+                  {returnImages.length < 6 && (
                     <label className="border-2 border-dashed border-gray-300 hover:border-[#0f3e26] rounded-2xl p-4 flex flex-col items-center justify-center cursor-pointer transition-colors bg-gray-50/50">
                       <input
                         type="file"
-                        accept="image/png,image/jpeg,image/webp"
+                        multiple
+                        accept="image/png,image/jpeg,image/webp,image/jpg"
                         onChange={handlePhotoUpload}
                         disabled={isUploadingPhoto}
                         className="hidden"
@@ -749,15 +846,15 @@ export function CustomerOrderDetailsClient({ initialOrder }: CustomerOrderDetail
                       {isUploadingPhoto ? (
                         <div className="flex items-center gap-2 text-xs text-gray-500">
                           <Loader2 className="w-4 h-4 animate-spin text-[#0f3e26]" />
-                          <span>Processing photo...</span>
+                          <span>Uploading photo(s)...</span>
                         </div>
                       ) : (
                         <div className="flex items-center gap-2 text-xs font-semibold text-gray-600">
                           <Upload className="w-4 h-4 text-[#c88a23]" />
-                          <span>Attach photos of product defect / issue</span>
+                          <span>Attach multiple photos of product defect / issue</span>
                         </div>
                       )}
-                      <span className="text-[10px] text-gray-400 mt-0.5">JPG, PNG, or WebP up to 5MB</span>
+                      <span className="text-[10px] text-gray-400 mt-0.5">JPG, PNG, or WebP up to 10MB (select multiple)</span>
                     </label>
                   )}
                 </div>
@@ -780,6 +877,72 @@ export function CustomerOrderDetailsClient({ initialOrder }: CustomerOrderDetail
                 </button>
               </div>
             </form>
+          </motion.div>
+        </div>
+      )}
+
+      {/* Entire Order Cancellation Confirmation Modal */}
+      {isCancelOrderModalOpen && (
+        <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-xs flex items-center justify-center p-4">
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.95 }}
+            className="bg-white rounded-3xl max-w-md w-full p-6 md:p-8 shadow-2xl border border-gray-100"
+          >
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center gap-2">
+                <Ban className="w-5 h-5 text-rose-600" />
+                <h3 className="text-lg font-black text-gray-900 tracking-tight">Cancel this order?</h3>
+              </div>
+              <button
+                onClick={() => setIsCancelOrderModalOpen(false)}
+                className="p-1.5 rounded-full hover:bg-gray-100 text-gray-400"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <p className="text-xs text-gray-500 mb-4 leading-relaxed">
+              If your payment was already captured, an automatic refund will be issued to your original payment method. Inventory reservations will be restored immediately.
+            </p>
+
+            <div className="space-y-4">
+              <div>
+                <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-1.5">
+                  Reason for Cancellation
+                </label>
+                <select
+                  value={orderCancelReason}
+                  onChange={(e) => setOrderCancelReason(e.target.value)}
+                  className="w-full px-3.5 py-2.5 rounded-xl border border-gray-300 text-xs bg-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-rose-500"
+                >
+                  <option>Changed my mind</option>
+                  <option>Ordered by mistake</option>
+                  <option>Delivery is taking too long</option>
+                  <option>Found a better price</option>
+                  <option>Need to change delivery address</option>
+                </select>
+              </div>
+
+              <div className="flex gap-3 pt-2">
+                <button
+                  type="button"
+                  onClick={() => setIsCancelOrderModalOpen(false)}
+                  className="flex-1 py-2.5 rounded-xl border border-gray-300 text-xs font-bold text-gray-700 hover:bg-gray-50 transition-colors"
+                >
+                  Keep Order
+                </button>
+                <button
+                  type="button"
+                  onClick={handleCancelEntireOrder}
+                  disabled={isCancellingOrder}
+                  className="flex-1 py-2.5 rounded-xl bg-rose-600 hover:bg-rose-700 text-white text-xs font-bold shadow-sm flex items-center justify-center gap-1.5 transition-colors disabled:opacity-50"
+                >
+                  {isCancellingOrder ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Yes, Cancel Order'}
+                </button>
+              </div>
+            </div>
           </motion.div>
         </div>
       )}
