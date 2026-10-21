@@ -72,73 +72,69 @@ export default function ProfileOnboardingScreen() {
   };
 
   return (
-    <div className="flex flex-col min-h-screen bg-white">
-      <div className="px-6 pt-12 pb-6 border-b" style={{ borderColor: 'rgba(195,201,187,0.3)' }}>
-        <div className="flex items-center gap-4 mb-4">
-          <button onClick={() => router.back()} className="p-2 -ml-2 rounded-full cursor-pointer hover:bg-sand/20"
-            style={{ color: 'var(--color-on-surface-variant)' }}>
+    <div className="flex flex-col min-h-screen bg-background">
+      <div className="px-6 pt-10 pb-6 border-b border-border bg-surface max-w-xl mx-auto w-full">
+        <div className="flex items-center gap-3 mb-2">
+          <button 
+            type="button"
+            onClick={() => router.back()} 
+            className="p-2 -ml-2 rounded-lg cursor-pointer text-foreground-muted hover:text-foreground hover:bg-surface-muted transition-colors"
+          >
             <ArrowLeft className="w-5 h-5" />
           </button>
-          <h1 className="text-2xl font-black tracking-tight" style={{ color: 'var(--color-on-surface)' }}>
+          <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-foreground">
             Complete Your Profile
           </h1>
         </div>
-        <p className="text-sm" style={{ color: 'var(--color-on-surface-variant)' }}>
-          Please enter your details to continue
+        <p className="text-xs sm:text-sm text-foreground-muted">
+          Please enter your name as you'd like it to appear on orders
         </p>
       </div>
 
-      <div className="flex-1 px-6 py-8 space-y-6">
+      <div className="flex-1 px-6 py-8 space-y-6 max-w-xl mx-auto w-full">
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
-            <label className="block text-[11px] font-extrabold uppercase tracking-wider text-[#4a5c43] px-2 mb-1">
-              FIRST NAME
+            <label className="block text-xs font-semibold text-foreground mb-1.5">
+              First Name
             </label>
             <input
               type="text"
               value={firstName}
               onChange={(e) => setFirstName(e.target.value)}
-              placeholder="First Name"
-              className="w-full bg-[#f3f5f0] text-dark font-bold text-base px-4 py-3 rounded-full outline-none border-2 border-transparent focus:border-[#4b6a41] transition-all"
+              placeholder="e.g. Ramesh"
+              className="w-full bg-surface text-foreground font-medium text-sm px-4 py-2.5 rounded-xl outline-none border border-border focus:border-primary focus:ring-1 focus:ring-primary transition-all"
             />
           </div>
           <div>
-            <label className="block text-[11px] font-extrabold uppercase tracking-wider text-[#4a5c43] px-2 mb-1">
-              LAST NAME
+            <label className="block text-xs font-semibold text-foreground mb-1.5">
+              Last Name
             </label>
             <input
               type="text"
               value={lastName}
               onChange={(e) => setLastName(e.target.value)}
-              placeholder="Last Name"
-              className="w-full bg-[#f3f5f0] text-dark font-bold text-base px-4 py-3 rounded-full outline-none border-2 border-transparent focus:border-[#4b6a41] transition-all"
+              placeholder="e.g. Patel"
+              className="w-full bg-surface text-foreground font-medium text-sm px-4 py-2.5 rounded-xl outline-none border border-border focus:border-primary focus:ring-1 focus:ring-primary transition-all"
             />
           </div>
         </div>
 
         {error && (
-          <p className="text-[13px] font-bold text-red-600 px-2">
+          <p className="text-xs font-semibold text-rose-500 bg-rose-500/10 border border-rose-500/20 rounded-lg p-2.5">
             {error}
           </p>
         )}
       </div>
 
-      <div className="px-6 pb-8">
+      <div className="px-6 pb-8 max-w-xl mx-auto w-full">
         <button
+          type="button"
           onClick={handleSave}
           disabled={isSubmitting || !firstName.trim()}
-          className="w-full h-14 rounded-full font-bold text-white flex items-center justify-center gap-2 transition-all cursor-pointer shadow-sm"
-          style={{
-            background: isSubmitting || !firstName.trim() 
-              ? '#e0e4da' 
-              : 'linear-gradient(135deg, #375e2e, #577f46)',
-            color: isSubmitting || !firstName.trim() 
-              ? '#8c9485' 
-              : 'white',
-          }}
+          className="w-full h-12 rounded-xl font-bold text-white bg-primary hover:bg-primary-hover disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 transition-all cursor-pointer shadow-sm active:scale-[0.99]"
         >
           {isSubmitting ? <Loader2 className="w-5 h-5 animate-spin" /> : <Check className="w-5 h-5 stroke-[2.5]" />}
-          {isSubmitting ? 'Saving...' : 'Continue'}
+          <span>{isSubmitting ? 'Saving...' : 'Continue'}</span>
         </button>
       </div>
     </div>

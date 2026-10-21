@@ -30,12 +30,12 @@ export default function SubscriptionHubScreen() {
   const [isLoading, setIsLoading] = useState(true);
 
   const loadSubs = useCallback(async () => {
-    if (!user) return;
+    if (!user?.id) return;
     setIsLoading(true);
     const data = await getUserSubscriptions(user.id);
     setSubs(data);
     setIsLoading(false);
-  }, [user]);
+  }, [user?.id]);
 
   useEffect(() => { loadSubs(); }, [loadSubs]);
 
@@ -65,24 +65,31 @@ export default function SubscriptionHubScreen() {
   const activeSubscriptions = subs.filter(s => s.status === 'active');
 
   return (
-    <div className="flex flex-col min-h-screen pb-24 bg-surface-container">
-      {/* Header */}
-      <div className="sticky top-0 z-30 flex items-center justify-between px-5 md:px-10 pt-6 pb-4 bg-surface-container-lowest border-b border-sand/30 shadow-sm">
-        <h1 className="font-extrabold text-[24px] tracking-tight text-dark">
-          {t('mySubscriptions')}
-          <span className="ml-2 text-[15px] font-normal text-muted">
-            ({subs.length})
-          </span>
-        </h1>
-        <Link href="/subscribe/new">
-          <button className="flex items-center gap-2 px-4 py-2.5 rounded-[12px] font-bold text-[13px] text-white transition-all active:scale-95 bg-primary shadow-[0_4px_12px_rgba(63,101,48,0.25)] hover:bg-primary/90">
-            <Plus className="w-4 h-4" strokeWidth={2.5} />
-            New
-          </button>
-        </Link>
+    <div className="flex flex-col min-h-screen pb-24 bg-background text-foreground transition-colors duration-150">
+      {/* Standardized Page Header */}
+      <div className="max-w-[1440px] mx-auto px-4 md:px-8 pt-6 pb-2 w-full">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-border/60 pb-5">
+          <div>
+            <h1 className="font-extrabold text-2xl sm:text-3xl tracking-tight text-foreground">
+              {t('mySubscriptions') || 'My Subscriptions'}
+              <span className="ml-2.5 text-base sm:text-lg font-medium text-foreground-muted">
+                ({subs.length})
+              </span>
+            </h1>
+            <p className="text-xs sm:text-sm text-foreground-muted mt-1">
+              Manage recurring morning dairy deliveries and scheduled staples
+            </p>
+          </div>
+          <Link href="/subscribe/new" className="self-start sm:self-auto">
+            <button className="flex items-center gap-2 px-4 py-2.5 rounded-xl font-bold text-xs sm:text-sm text-white transition-all active:scale-95 bg-primary hover:bg-primary-hover shadow-xs cursor-pointer">
+              <Plus className="w-4 h-4" strokeWidth={2.5} />
+              <span>New Plan</span>
+            </button>
+          </Link>
+        </div>
       </div>
 
-      <div className="px-5 md:px-10 py-5">
+      <div className="max-w-[1440px] mx-auto px-4 md:px-8 py-6 space-y-6 w-full">
         {subs.length > 0 ? (
           <>
             <SubscriptionReminderCard />
@@ -100,25 +107,24 @@ export default function SubscriptionHubScreen() {
             </div>
           </>
         ) : (
-          <div className="flex flex-col items-center justify-center py-20 text-center bg-white rounded-[24px] border border-sand/50 shadow-sm">
-            <div className="w-24 h-24 rounded-[20px] flex items-center justify-center mb-6 bg-sky-50 shadow-inner">
-              <img src={PLACEHOLDER_PRODUCT_IMAGE} alt="No Subscriptions" className="w-16 h-16 object-contain opacity-60 grayscale" />
+          <div className="flex flex-col items-center justify-center py-16 text-center bg-surface rounded-2xl border border-border shadow-xs max-w-xl mx-auto p-6 space-y-4">
+            <div className="w-16 h-16 rounded-2xl flex items-center justify-center bg-primary/10 text-primary border border-primary/20">
+              <Plus className="w-8 h-8" />
             </div>
-            <h2 className="text-xl font-bold mb-2 text-dark">
-              Never run out of the essentials
+            <h2 className="text-xl font-bold text-foreground">
+              Never run out of morning essentials
             </h2>
-            <p className="text-sm max-w-[250px] mb-8 leading-relaxed text-muted">
-              Subscribe once and your regulars arrive on schedule — groceries,
-              dairy, household staples and more.
+            <p className="text-xs max-w-sm leading-relaxed text-foreground-muted">
+              Subscribe once and your regulars arrive on schedule — pure A2 milk, bilona ghee, and farm-fresh staples.
             </p>
             <Link href="/products">
-              <Button size="lg" className="px-8 shadow-active shadow-primary/20 bg-primary hover:bg-primary/90 text-white font-bold rounded-full mb-8">
-                Explore Products
-              </Button>
+              <button className="px-6 py-2.5 bg-primary hover:bg-primary-hover text-white text-xs font-bold rounded-xl shadow-xs transition-all active:scale-95 cursor-pointer">
+                Explore Subscription Products
+              </button>
             </Link>
             
-            <div className="w-full text-left pt-6 border-t border-sand">
-              <h3 className="text-lg font-black text-dark mb-4 px-4">Popular for Subscription</h3>
+            <div className="w-full text-left pt-6 border-t border-border/60">
+              <h3 className="text-sm font-bold text-foreground mb-3 px-1">Popular for Daily Delivery</h3>
               <BuyAgainCarousel />
             </div>
           </div>

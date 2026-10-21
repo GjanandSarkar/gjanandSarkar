@@ -131,22 +131,22 @@ export function MultiImageUpload({
           className={`w-full h-48 rounded-[14px] border-2 border-dashed flex flex-col items-center justify-center p-5 text-center cursor-pointer transition-all ${
             isDragging
               ? 'border-primary bg-primary/5 scale-[0.99]'
-              : 'border-[#d8d4c9] hover:border-primary/60 bg-white'
+              : 'border-[#d8d4c9] hover:border-primary/60 bg-surface'
           } ${disabled ? 'opacity-50 cursor-not-allowed' : ''}`}
         >
-          <div className="p-3 rounded-full mb-2 bg-[#f2ede4] text-[#0c3c26]">
+          <div className="p-3 rounded-full mb-2 bg-[#f2ede4] text-primary">
             <UploadCloud className="w-7 h-7" />
           </div>
-          <span className="font-bold text-[14px] text-[#1c201e] mb-0.5">
+          <span className="font-bold text-[14px] text-foreground mb-0.5">
             Click to upload multiple images or drag & drop
           </span>
-          <span className="text-[12px] font-medium text-[#8a948e] mb-3">
+          <span className="text-[12px] font-medium text-foreground-muted mb-3">
             Select 1 or more images (PNG, JPG, WEBP, up to 10 photos)
           </span>
           <div className="flex items-center gap-2">
             <button
               type="button"
-              className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-[8px] border text-[13px] font-semibold border-[#0c3c26] text-[#0c3c26] hover:bg-[#0c3c26]/5"
+              className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-[8px] border text-[13px] font-semibold border-primary text-primary hover:bg-primary/5"
             >
               <Plus className="w-3.5 h-3.5" />
               <span>Choose Files (Multiple)</span>
@@ -157,7 +157,7 @@ export function MultiImageUpload({
                 e.stopPropagation();
                 setShowUrlInput(!showUrlInput);
               }}
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-[8px] border text-[13px] font-medium border-gray-300 text-gray-600 hover:bg-gray-50"
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-[8px] border text-[13px] font-medium border-border-hover text-foreground-muted hover:bg-surface-muted"
             >
               <LinkIcon className="w-3.5 h-3.5" />
               <span>Paste URL</span>
@@ -168,9 +168,9 @@ export function MultiImageUpload({
         /* Image Cards Grid View */
         <div className="flex flex-col gap-3">
           <div className="flex items-center justify-between text-[12px]">
-            <span className="font-semibold text-gray-700">
+            <span className="font-semibold text-foreground">
               {images.length} image{images.length > 1 ? 's' : ''} added{' '}
-              <span className="text-gray-400 font-normal">
+              <span className="text-foreground-muted font-normal">
                 (First image is Cover. Click ★ to change cover)
               </span>
             </span>
@@ -178,7 +178,7 @@ export function MultiImageUpload({
               <button
                 type="button"
                 onClick={() => setShowUrlInput(!showUrlInput)}
-                className="text-xs font-semibold text-gray-500 hover:text-primary flex items-center gap-1"
+                className="text-xs font-semibold text-foreground-muted hover:text-primary flex items-center gap-1"
               >
                 <LinkIcon className="w-3 h-3" />
                 <span>+ Add via URL</span>
@@ -199,16 +199,16 @@ export function MultiImageUpload({
             onDragOver={handleDragOver}
             onDragLeave={handleDragLeave}
             className={`grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3 p-3 rounded-[14px] border bg-[#faf9f6] ${
-              isDragging ? 'border-primary bg-primary/5' : 'border-[#e4e2db]'
+              isDragging ? 'border-primary bg-primary/5' : 'border-border'
             }`}
           >
             {images.map((item, idx) => (
               <div
                 key={item.id}
-                className={`group relative aspect-square rounded-[12px] overflow-hidden border-2 bg-white shadow-sm transition-all ${
+                className={`group relative aspect-square rounded-[12px] overflow-hidden border-2 bg-surface shadow-sm transition-all ${
                   item.isPrimary
                     ? 'border-emerald-600 ring-2 ring-emerald-600/20'
-                    : 'border-gray-200 hover:border-gray-400'
+                    : 'border-border hover:border-gray-400'
                 }`}
               >
                 {/* Thumbnail Image */}
@@ -257,13 +257,13 @@ export function MultiImageUpload({
             {images.length < maxImages && (
               <div
                 onClick={() => !disabled && fileInputRef.current?.click()}
-                className="aspect-square rounded-[12px] border-2 border-dashed border-gray-300 hover:border-primary/60 flex flex-col items-center justify-center cursor-pointer transition-colors bg-white hover:bg-gray-50/80 p-2 text-center"
+                className="aspect-square rounded-[12px] border-2 border-dashed border-border-hover hover:border-primary/60 flex flex-col items-center justify-center cursor-pointer transition-colors bg-surface hover:bg-surface-muted/80 p-2 text-center"
               >
-                <div className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center text-gray-500 mb-1 group-hover:bg-primary/10 group-hover:text-primary">
+                <div className="w-8 h-8 rounded-full bg-surface-muted flex items-center justify-center text-foreground-muted mb-1 group-hover:bg-primary/10 group-hover:text-primary">
                   <Plus className="w-4 h-4" />
                 </div>
-                <span className="text-[11px] font-bold text-gray-700">Add More</span>
-                <span className="text-[9px] text-gray-400">Multiple files</span>
+                <span className="text-[11px] font-bold text-foreground">Add More</span>
+                <span className="text-[9px] text-foreground-muted">Multiple files</span>
               </div>
             )}
           </div>
@@ -272,8 +272,8 @@ export function MultiImageUpload({
 
       {/* URL Input Dropdown/Accordion */}
       {showUrlInput && (
-        <div className="flex items-center gap-2 p-2.5 rounded-[10px] border border-gray-200 bg-white shadow-sm">
-          <ImageIcon className="w-4 h-4 text-gray-400 ml-1" />
+        <div className="flex items-center gap-2 p-2.5 rounded-[10px] border border-border bg-surface shadow-sm">
+          <ImageIcon className="w-4 h-4 text-foreground-muted ml-1" />
           <input
             type="url"
             value={urlInputValue}
@@ -297,7 +297,7 @@ export function MultiImageUpload({
           <button
             type="button"
             onClick={() => setShowUrlInput(false)}
-            className="p-1 text-gray-400 hover:text-gray-600"
+            className="p-1 text-foreground-muted hover:text-foreground-muted"
           >
             <X className="w-4 h-4" />
           </button>

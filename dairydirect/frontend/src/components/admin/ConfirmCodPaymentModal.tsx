@@ -70,64 +70,64 @@ export function ConfirmCodPaymentModal({
       aria-labelledby="cod-modal-title"
       className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-xs animate-in fade-in duration-150"
     >
-      <div className="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl border border-gray-100 space-y-4">
+      <div className="bg-surface rounded-3xl max-w-md w-full p-6 shadow-2xl border border-border space-y-4">
         {/* Header */}
         <div className="flex items-start justify-between">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-2xl bg-emerald-50 text-emerald-700 flex items-center justify-center shrink-0">
+            <div className="w-10 h-10 rounded-2xl bg-success-bg text-success flex items-center justify-center shrink-0">
               <IndianRupee className="w-5 h-5" />
             </div>
             <div>
-              <h3 id="cod-modal-title" className="text-base font-extrabold text-gray-900">
+              <h3 id="cod-modal-title" className="text-base font-extrabold text-foreground">
                 Confirm Cash Collected
               </h3>
-              <p className="text-xs text-gray-500">Order #{order.order_number || order.id.slice(0, 8)}</p>
+              <p className="text-xs text-foreground-muted">Order #{order.order_number || order.id.slice(0, 8)}</p>
             </div>
           </div>
           <button
             type="button"
             disabled={busy}
             onClick={onClose}
-            className="p-1 rounded-xl text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors"
+            className="p-1 rounded-xl text-foreground-muted hover:text-foreground-muted hover:bg-surface-muted transition-colors"
           >
             <X className="w-5 h-5" />
           </button>
         </div>
 
         {/* Order & Payment Summary Card */}
-        <div className="p-4 rounded-2xl bg-gray-50 border border-gray-200/80 space-y-2 text-xs">
+        <div className="p-4 rounded-2xl bg-surface-muted border border-border/80 space-y-2 text-xs">
           <div className="flex justify-between items-center">
-            <span className="text-gray-500">Customer:</span>
-            <span className="font-bold text-gray-900">{order.profiles?.name || 'Customer'}</span>
+            <span className="text-foreground-muted">Customer:</span>
+            <span className="font-bold text-foreground">{order.profiles?.name || 'Customer'}</span>
           </div>
           {order.profiles?.phone && (
             <div className="flex justify-between items-center">
-              <span className="text-gray-500">Phone:</span>
-              <span className="font-mono text-gray-700">+91 {order.profiles.phone}</span>
+              <span className="text-foreground-muted">Phone:</span>
+              <span className="font-mono text-foreground">+91 {order.profiles.phone}</span>
             </div>
           )}
           <div className="flex justify-between items-center">
-            <span className="text-gray-500">Seller / Store:</span>
+            <span className="text-foreground-muted">Seller / Store:</span>
             <span className="font-bold text-purple-700">{sellerStore}</span>
           </div>
           <div className="flex justify-between items-center">
-            <span className="text-gray-500">Order Status:</span>
-            <span className="font-bold uppercase text-gray-800">{order.status.replace(/_/g, ' ')}</span>
+            <span className="text-foreground-muted">Order Status:</span>
+            <span className="font-bold uppercase text-foreground">{order.status.replace(/_/g, ' ')}</span>
           </div>
-          <div className="flex justify-between items-center pt-2 border-t border-gray-200">
-            <span className="text-gray-700 font-extrabold">Total Cash Amount:</span>
-            <span className="text-base font-black text-[#0f3e26]">₹{order.total_amount}</span>
+          <div className="flex justify-between items-center pt-2 border-t border-border">
+            <span className="text-foreground font-extrabold">Total Cash Amount:</span>
+            <span className="text-base font-black text-primary">₹{order.total_amount}</span>
           </div>
         </div>
 
         {/* Verification Notice */}
-        <p className="text-xs text-gray-600 leading-relaxed">
-          Please confirm that the physical cash of <strong className="text-gray-900">₹{order.total_amount}</strong> has been collected from the customer. Once confirmed, this order&apos;s payment status will permanently change to <span className="font-bold text-emerald-700">Paid</span>.
+        <p className="text-xs text-foreground-muted leading-relaxed">
+          Please confirm that the physical cash of <strong className="text-foreground">₹{order.total_amount}</strong> has been collected from the customer. Once confirmed, this order&apos;s payment status will permanently change to <span className="font-bold text-success">Paid</span>.
         </p>
 
         {error && (
-          <div role="alert" className="p-3 rounded-xl bg-rose-50 border border-rose-200 text-rose-800 text-xs font-medium flex items-center gap-2">
-            <AlertCircle className="w-4 h-4 shrink-0 text-rose-600" />
+          <div role="alert" className="p-3 rounded-xl bg-error-bg border border-error/20 text-rose-800 text-xs font-medium flex items-center gap-2">
+            <AlertCircle className="w-4 h-4 shrink-0 text-error" />
             <span>{error}</span>
           </div>
         )}
@@ -138,7 +138,7 @@ export function ConfirmCodPaymentModal({
             type="button"
             disabled={busy}
             onClick={onClose}
-            className="px-4 py-2.5 rounded-xl text-xs font-bold text-gray-700 bg-gray-100 hover:bg-gray-200 transition-colors disabled:opacity-50"
+            className="px-4 py-2.5 rounded-xl text-xs font-bold text-foreground bg-surface-muted hover:bg-border transition-colors disabled:opacity-50"
           >
             Cancel
           </button>

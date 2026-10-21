@@ -64,50 +64,50 @@ const pillars = [
 
 export function WhyGjanandSarkar() {
   return (
-    <section className="w-full max-w-[1440px] mx-auto px-4 md:px-8 py-4">
-      <div className="bg-white rounded-3xl border border-gray-200/80 p-6 md:p-8">
-        <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-3 mb-7">
+    <section className="w-full max-w-[1440px] mx-auto px-4 md:px-8 py-4 mb-4">
+      <div className="bg-surface rounded-xl border border-border p-5 md:p-6">
+        <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-3 mb-6">
           <div>
-            <span className="text-[10px] font-black uppercase tracking-[0.2em] text-[#c88a23]">
-              How we work
+            <span className="text-[11px] font-bold uppercase tracking-wider text-primary">
+              Our Guarantee
             </span>
-            <h2 className="text-xl md:text-2xl font-black text-[#0f3e26] tracking-tight mt-1">
+            <h2 className="text-xl md:text-2xl font-bold text-foreground tracking-tight mt-1">
               Fewer choices. Far better ones.
             </h2>
           </div>
 
-          {/* Derived from the taxonomy, so this number cannot go stale. */}
-          <p className="text-xs text-gray-500 font-medium">
-            <strong className="text-[#0f3e26] font-black tabular-nums">
+          {/* Derived from the taxonomy */}
+          <p className="text-xs text-foreground-muted font-medium">
+            <strong className="text-primary font-bold tabular-nums">
               {CATEGORIES.length}
             </strong>{' '}
-            categories live, one partner brand each
+            verified categories live
           </p>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 reveal">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
           {pillars.map(({ icon: Icon, title, body }) => (
-            <div key={title} className="flex flex-col gap-2.5">
-              <div className="w-10 h-10 rounded-2xl bg-emerald-50 text-[#0f3e26] flex items-center justify-center border border-emerald-100">
+            <div key={title} className="flex flex-col gap-2">
+              <div className="w-10 h-10 rounded-lg bg-primary-fixed text-primary flex items-center justify-center border border-primary/20">
                 <Icon className="w-5 h-5" />
               </div>
-              <h3 className="text-sm font-black text-gray-900 leading-snug">{title}</h3>
-              <p className="text-xs text-gray-500 leading-relaxed">{body}</p>
+              <h3 className="text-sm font-bold text-foreground leading-snug">{title}</h3>
+              <p className="text-xs text-foreground-muted leading-relaxed">{body}</p>
             </div>
           ))}
         </div>
 
-        <div className="mt-7 pt-5 border-t border-gray-100 flex flex-wrap items-center justify-between gap-4">
-          <span className="text-[11px] font-bold text-gray-500 inline-flex items-center gap-1.5">
-            <ShieldCheck className="w-4 h-4 text-emerald-700" />
-            Every partner verified before listing
+        <div className="mt-6 pt-4 border-t border-border flex flex-wrap items-center justify-between gap-4">
+          <span className="text-[11px] font-medium text-foreground-muted inline-flex items-center gap-1.5">
+            <ShieldCheck className="w-4 h-4 text-primary" />
+            Every partner verified and certified before listing
           </span>
 
           <Link
             href="/about#verification"
-            className="text-xs font-black text-[#c88a23] hover:text-[#0f3e26] inline-flex items-center gap-1 transition-colors"
+            className="text-xs font-bold text-primary hover:underline inline-flex items-center gap-1 transition-colors"
           >
-            <span>How we verify partners</span>
+            <span>Learn how we verify quality</span>
             <ArrowRight className="w-3.5 h-3.5" />
           </Link>
         </div>

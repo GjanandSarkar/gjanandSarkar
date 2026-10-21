@@ -138,19 +138,24 @@ export default function AdminCouponsPage() {
     <div className="p-8">
       <div className="flex justify-between items-center mb-6">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Coupons Management</h1>
-          <p className="text-gray-500">Create and manage discount codes.</p>
+          <h1 className="text-2xl font-bold text-foreground">Coupons Management</h1>
+          <p className="text-foreground-muted">Create and manage discount codes.</p>
         </div>
-        <button onClick={() => handleOpen()} className="flex items-center gap-2 bg-[#0f3e26] text-white px-4 py-2 rounded-lg hover:bg-emerald-900 transition">
-          <Plus className="w-4 h-4" /> Add Coupon
+        <button 
+          type="button"
+          onClick={() => handleOpen()} 
+          className="flex items-center gap-2 bg-primary hover:bg-primary-hover text-white text-xs font-bold px-4 py-2.5 rounded-xl shadow-2xs transition-colors cursor-pointer"
+        >
+          <Plus className="w-4 h-4 stroke-[2.5]" />
+          <span>Add Coupon</span>
         </button>
       </div>
 
-      <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+      <div className="bg-surface rounded-xl shadow-sm border border-border overflow-hidden">
         <div className="overflow-x-auto">
         <table className="w-full min-w-[640px] text-left border-collapse">
           <thead>
-            <tr className="bg-gray-50 border-b border-gray-100 text-sm text-gray-500 uppercase tracking-wider">
+            <tr className="bg-surface-muted border-b border-border text-sm text-foreground-muted uppercase tracking-wider">
               <th className="px-6 py-4 font-medium">Code</th>
               <th className="px-6 py-4 font-medium">Discount</th>
               <th className="px-6 py-4 font-medium">Min Order</th>
@@ -160,7 +165,7 @@ export default function AdminCouponsPage() {
               <th className="px-6 py-4 font-medium">Actions</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-gray-100">
+          <tbody className="divide-y divide-border">
             {coupons.map(c => {
               const isPercentage = c.type === 'percentage';
               const discountText = isPercentage 
@@ -168,32 +173,32 @@ export default function AdminCouponsPage() {
                 : `₹${c.value ?? c.discount_amount}`;
 
               return (
-                <tr key={c.id} className="hover:bg-gray-50">
-                  <td className="px-6 py-4 font-bold text-gray-900">
-                    <span className="font-mono bg-gray-100 px-2 py-0.5 rounded text-sm">{c.code}</span>
+                <tr key={c.id} className="hover:bg-surface-muted">
+                  <td className="px-6 py-4 font-bold text-foreground">
+                    <span className="font-mono bg-surface-muted px-2 py-0.5 rounded text-sm">{c.code}</span>
                   </td>
-                  <td className="px-6 py-4 font-medium text-emerald-700">
+                  <td className="px-6 py-4 font-medium text-success">
                     {discountText}
                     {isPercentage && c.max_discount ? ` (up to ₹${c.max_discount})` : ''}
                   </td>
                   <td className="px-6 py-4">₹{c.min_order_value ?? c.min_order_amount ?? 0}</td>
-                  <td className="px-6 py-4 text-sm text-gray-600">
+                  <td className="px-6 py-4 text-sm text-foreground-muted">
                     {(c.expiry_date || c.valid_until) ? new Date(c.expiry_date || c.valid_until).toLocaleDateString() : 'Never'}
                   </td>
-                  <td className="px-6 py-4 text-sm text-gray-600">
+                  <td className="px-6 py-4 text-sm text-foreground-muted">
                     {c.used_count ?? c.usage_count ?? 0} / {c.max_uses ?? c.max_usage ?? '∞'}
                   </td>
                   <td className="px-6 py-4">
-                    <button onClick={() => toggleStatus(c.id, c.is_active)} className={`flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium ${c.is_active ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
+                    <button onClick={() => toggleStatus(c.id, c.is_active)} className={`flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium ${c.is_active ? 'bg-success-bg text-success' : 'bg-error-bg text-error'}`}>
                       {c.is_active ? <CheckCircle2 className="w-3.5 h-3.5"/> : <XCircle className="w-3.5 h-3.5"/>}
                       {c.is_active ? 'Active' : 'Inactive'}
                     </button>
                   </td>
                   <td className="px-6 py-4 flex items-center gap-3">
-                    <button onClick={() => handleOpen(c)} className="text-blue-600 hover:text-blue-800" title="Edit">
+                    <button onClick={() => handleOpen(c)} className="text-info hover:text-blue-800" title="Edit">
                       <Edit2 className="w-4 h-4" />
                     </button>
-                    <button onClick={() => handleDelete(c.id, c.code)} className="text-red-500 hover:text-red-700" title="Delete">
+                    <button onClick={() => handleDelete(c.id, c.code)} className="text-red-500 hover:text-error" title="Delete">
                       <Trash2 className="w-4 h-4" />
                     </button>
                   </td>
@@ -201,7 +206,7 @@ export default function AdminCouponsPage() {
               );
             })}
             {coupons.length === 0 && (
-              <tr><td colSpan={7} className="px-6 py-8 text-center text-gray-500">No coupons found.</td></tr>
+              <tr><td colSpan={7} className="px-6 py-8 text-center text-foreground-muted">No coupons found.</td></tr>
             )}
           </tbody>
         </table>
@@ -210,7 +215,7 @@ export default function AdminCouponsPage() {
 
       {showModal && (
         <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-xl shadow-xl w-full max-w-md p-6">
+          <div className="bg-surface rounded-xl shadow-xl w-full max-w-md p-6">
             <h2 className="text-xl font-bold mb-4">{editingId ? 'Edit Coupon' : 'Create Coupon'}</h2>
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
@@ -224,7 +229,7 @@ export default function AdminCouponsPage() {
                   <select 
                     value={form.type} 
                     onChange={e => setForm({...form, type: e.target.value as any})}
-                    className="w-full px-3 py-2 border rounded-lg bg-white"
+                    className="w-full px-3 py-2 border rounded-lg bg-surface"
                   >
                     <option value="flat">Flat Amount (₹)</option>
                     <option value="percentage">Percentage (%)</option>
@@ -270,13 +275,13 @@ export default function AdminCouponsPage() {
               </div>
 
               <div className="flex items-center gap-2 mt-4">
-                <input type="checkbox" id="isActive" checked={form.is_active} onChange={e => setForm({...form, is_active: e.target.checked})} className="w-4 h-4 rounded text-[#0f3e26]" />
+                <input type="checkbox" id="isActive" checked={form.is_active} onChange={e => setForm({...form, is_active: e.target.checked})} className="w-4 h-4 rounded text-primary focus:ring-primary" />
                 <label htmlFor="isActive" className="text-sm font-medium">Coupon is active</label>
               </div>
 
-              <div className="flex justify-end gap-3 pt-4 border-t border-gray-100">
-                <button type="button" onClick={() => setShowModal(false)} className="px-4 py-2 bg-gray-100 rounded-lg hover:bg-gray-200 transition">Cancel</button>
-                <button type="submit" className="px-4 py-2 bg-[#0f3e26] text-white rounded-lg hover:bg-emerald-900 transition">Save</button>
+              <div className="flex justify-end gap-3 pt-4 border-t border-border">
+                <button type="button" onClick={() => setShowModal(false)} className="px-4 py-2 bg-surface-muted rounded-lg hover:bg-border transition text-xs font-semibold cursor-pointer">Cancel</button>
+                <button type="submit" className="px-5 py-2 bg-primary hover:bg-primary-hover text-white rounded-lg shadow-2xs transition text-xs font-bold cursor-pointer">Save</button>
               </div>
             </form>
           </div>

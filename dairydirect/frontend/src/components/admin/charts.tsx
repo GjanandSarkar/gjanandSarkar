@@ -673,7 +673,7 @@ export function CalendarHeatmapChart({
               {/* Hover Tooltip */}
               {inMonth && (
                 <div className="opacity-0 group-hover:opacity-100 transition-all duration-200 absolute -top-12 bg-gray-900 text-white px-2.5 py-1.5 rounded-lg text-[11px] font-semibold whitespace-nowrap shadow-2xl z-50 pointer-events-none transform -translate-y-1 border border-gray-700/60 flex flex-col gap-0.5 text-center">
-                  <span className="text-[9px] text-gray-400 font-bold uppercase tracking-wider">
+                  <span className="text-[9px] text-foreground-muted font-bold uppercase tracking-wider">
                     {format(day, 'EEEE, MMM d, yyyy')}
                   </span>
                   <div className="flex items-center justify-center gap-1.5 text-[11px]">
@@ -876,7 +876,7 @@ export function DayTimeHeatmapChart({
 
                   {/* Tooltip */}
                   <div className="opacity-0 group-hover:opacity-100 transition-all duration-200 absolute -top-12 bg-gray-900 text-white px-2.5 py-1.5 rounded-lg text-[11px] font-semibold whitespace-nowrap shadow-2xl z-50 pointer-events-none transform -translate-y-1 border border-gray-700/60 flex flex-col gap-0.5 text-center">
-                    <span className="text-[9px] text-gray-400 font-bold uppercase tracking-wider">
+                    <span className="text-[9px] text-foreground-muted font-bold uppercase tracking-wider">
                       {day.label} • {slot.label} ({slot.sub})
                     </span>
                     <div className="flex items-center justify-center gap-1.5 text-[11px]">
@@ -1053,7 +1053,7 @@ export function CategoryTreemapChart({
 
               {/* Tooltip */}
               <div className="opacity-0 group-hover:opacity-100 transition-all duration-200 absolute -top-12 left-1/2 transform -translate-x-1/2 bg-gray-900 text-white px-2.5 py-1.5 rounded-lg text-[11px] font-semibold whitespace-nowrap shadow-2xl z-50 pointer-events-none border border-gray-700/60 flex flex-col gap-0.5 text-center">
-                <span className="text-[9px] text-gray-400 font-bold uppercase tracking-wider">
+                <span className="text-[9px] text-foreground-muted font-bold uppercase tracking-wider">
                   {item.label}
                 </span>
                 <div className="flex items-center justify-center gap-1.5 text-[11px]">
@@ -1309,7 +1309,7 @@ export function TopCategoriesCard({ orders, className = '' }: TopCategoriesCardP
 
                 <div className="flex items-end justify-between mt-4">
                   <span className="text-xs font-semibold opacity-90">{cat.percentage}%</span>
-                  <div className="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center shrink-0">
+                  <div className="w-10 h-10 rounded-full bg-surface/20 flex items-center justify-center shrink-0">
                     <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
                     </svg>

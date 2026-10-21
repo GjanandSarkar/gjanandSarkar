@@ -12,7 +12,7 @@ import {
   AreaChart, Area, BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid, PieChart, Pie, Cell
 } from 'recharts';
 
-const COLORS = ['#4a8c3f', '#4a6fa5', '#d4712a', '#6b21a8', '#065f46', '#c78c2e'];
+const COLORS = ['var(--success)', '#4a6fa5', '#d4712a', '#6b21a8', '#065f46', '#c78c2e'];
 
 export default function AdminReportsPage() {
   const [period, setPeriod] = useState<'7d' | '30d' | '90d'>('30d');
@@ -89,10 +89,10 @@ export default function AdminReportsPage() {
             {/* KPI Overview Grid */}
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
               {[
-                { label: 'Gross Revenue', val: `₹${parseFloat(data?.overview?.gross_revenue || '0').toLocaleString('en-IN', { maximumFractionDigits: 0 })}`, sub: `${data?.overview?.total_orders || 0} orders`, bg: '#c2efac', text: '#2d5a27' },
+                { label: 'Gross Revenue', val: `₹${parseFloat(data?.overview?.gross_revenue || '0').toLocaleString('en-IN', { maximumFractionDigits: 0 })}`, sub: `${data?.overview?.total_orders || 0} orders`, bg: 'var(--success-bg)', text: '#2d5a27' },
                 { label: 'Net Delivered', val: `₹${parseFloat(data?.overview?.net_revenue || '0').toLocaleString('en-IN', { maximumFractionDigits: 0 })}`, sub: `${data?.overview?.delivered_orders || 0} fulfilled`, bg: '#dce8ff', text: '#4a6fa5' },
                 { label: 'Avg Order Value', val: `₹${parseFloat(data?.overview?.avg_order_value || '0').toFixed(0)}`, sub: 'Per transaction', bg: '#f3e8ff', text: '#6b21a8' },
-                { label: 'Discounts Given', val: `₹${parseFloat(data?.overview?.total_discounts || '0').toLocaleString('en-IN', { maximumFractionDigits: 0 })}`, sub: 'Coupons applied', bg: '#ffdcc7', text: '#774117' },
+                { label: 'Discounts Given', val: `₹${parseFloat(data?.overview?.total_discounts || '0').toLocaleString('en-IN', { maximumFractionDigits: 0 })}`, sub: 'Coupons applied', bg: 'var(--warning-bg)', text: '#774117' },
               ].map(kpi => (
                 <div key={kpi.label} className="rounded-[16px] p-4 flex flex-col gap-1" style={{ background: kpi.bg }}>
                   <p className="font-extrabold text-[22px]" style={{ color: kpi.text }}>{kpi.val}</p>
@@ -109,8 +109,8 @@ export default function AdminReportsPage() {
                 <AreaChart data={data?.daily || []}>
                   <defs>
                     <linearGradient id="revArea" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor="#4a8c3f" stopOpacity={0.2} />
-                      <stop offset="95%" stopColor="#4a8c3f" stopOpacity={0} />
+                      <stop offset="5%" stopColor="var(--success)" stopOpacity={0.2} />
+                      <stop offset="95%" stopColor="var(--success)" stopOpacity={0} />
                     </linearGradient>
                   </defs>
                   <CartesianGrid strokeDasharray="3 3" stroke="rgba(195,201,187,0.2)" vertical={false} />
@@ -120,7 +120,7 @@ export default function AdminReportsPage() {
                     contentStyle={{ background: '#fff', border: '1px solid rgba(195,201,187,0.4)', borderRadius: 8, fontSize: 12 }}
                     formatter={(v: any) => [`₹${parseFloat(v).toLocaleString('en-IN')}`, 'Revenue']}
                   />
-                  <Area type="monotone" dataKey="revenue" stroke="#4a8c3f" strokeWidth={2.5} fill="url(#revArea)" />
+                  <Area type="monotone" dataKey="revenue" stroke="var(--success)" strokeWidth={2.5} fill="url(#revArea)" />
                 </AreaChart>
               </ResponsiveContainer>
             </div>

@@ -157,17 +157,17 @@ function AddProductPage() {
     <div className="flex flex-col min-h-screen pb-12" style={{ background: 'var(--color-background, #fbfaf6)' }}>
       {/* Header */}
       <div className="px-6 md:px-10 pt-6 pb-5 flex items-center justify-between border-b"
-        style={{ background: 'var(--color-surface, #ffffff)', borderColor: 'var(--color-border, #e4e2db)' }}>
+        style={{ background: 'var(--color-surface, #ffffff)', borderColor: 'var(--color-border, var(--border))' }}>
         <div className="flex items-center gap-3">
           <button onClick={() => router.back()} className="p-2 -ml-2 rounded-full hover:bg-black/5 transition-colors"
-            style={{ color: 'var(--color-foreground-muted, #58625c)' }}>
+            style={{ color: 'var(--color-foreground-muted, var(--foreground-muted))' }}>
             <ArrowLeft className="w-5 h-5" />
           </button>
           <div>
-            <h1 className="font-extrabold text-[22px] tracking-tight" style={{ color: 'var(--color-foreground, #1c201e)' }}>
+            <h1 className="font-extrabold text-[22px] tracking-tight" style={{ color: 'var(--color-foreground, var(--foreground))' }}>
               Add Product
             </h1>
-            <p className="text-[13px]" style={{ color: 'var(--color-foreground-muted, #58625c)' }}>
+            <p className="text-[13px]" style={{ color: 'var(--color-foreground-muted, var(--foreground-muted))' }}>
               Create a new product listing with custom attributes and pricing variants.
             </p>
           </div>
@@ -178,7 +178,7 @@ function AddProductPage() {
           onClick={handleSubmit}
           disabled={isSubmitting}
           className="inline-flex items-center gap-2 px-6 h-11 rounded-[10px] font-semibold text-[14px] text-white shadow-sm transition-all hover:opacity-95 disabled:opacity-50"
-          style={{ background: 'var(--color-primary, #0c3c26)' }}
+          style={{ background: 'var(--color-primary, var(--primary))' }}
         >
           {isSubmitting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Plus className="w-4 h-4" />}
           {isSubmitting ? 'Creating Product...' : 'Save Product'}
@@ -194,11 +194,11 @@ function AddProductPage() {
             {/* Product Name */}
             <div>
               <label className="text-[13px] font-semibold mb-2 flex items-center"
-                style={{ color: 'var(--color-foreground, #1c201e)' }}>
+                style={{ color: 'var(--color-foreground, var(--foreground))' }}>
                 Product Name <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 ml-1.5"></span>
               </label>
               <div className="relative flex items-center">
-                <Tag className="absolute left-3.5 w-4.5 h-4.5 pointer-events-none" style={{ color: 'var(--color-foreground-muted, #8a948e)' }} />
+                <Tag className="absolute left-3.5 w-4.5 h-4.5 pointer-events-none" style={{ color: 'var(--color-foreground-muted, var(--foreground-muted))' }} />
                 <input
                   value={name}
                   onChange={(e) => setName(e.target.value)}
@@ -206,8 +206,8 @@ function AddProductPage() {
                   className="w-full h-12 pl-11 pr-4 rounded-[10px] text-[14px] font-medium outline-none border transition-all focus:ring-2 focus:ring-primary/20"
                   style={{
                     background: 'var(--color-surface, #ffffff)',
-                    borderColor: 'var(--color-border, #e4e2db)',
-                    color: 'var(--color-foreground, #1c201e)',
+                    borderColor: 'var(--color-border, var(--border))',
+                    color: 'var(--color-foreground, var(--foreground))',
                   }}
                 />
               </div>
@@ -216,11 +216,11 @@ function AddProductPage() {
             {/* Description (Optional) */}
             <div>
               <label className="text-[13px] font-semibold mb-2 block"
-                style={{ color: 'var(--color-foreground, #1c201e)' }}>
+                style={{ color: 'var(--color-foreground, var(--foreground))' }}>
                 Description (Optional)
               </label>
               <div className="relative">
-                <FileText className="absolute left-3.5 top-3.5 w-4.5 h-4.5 pointer-events-none" style={{ color: 'var(--color-foreground-muted, #8a948e)' }} />
+                <FileText className="absolute left-3.5 top-3.5 w-4.5 h-4.5 pointer-events-none" style={{ color: 'var(--color-foreground-muted, var(--foreground-muted))' }} />
                 <textarea
                   maxLength={500}
                   value={description}
@@ -229,12 +229,12 @@ function AddProductPage() {
                   className="w-full h-44 pl-11 pr-4 pt-3 pb-8 rounded-[10px] text-[14px] font-medium outline-none border resize-none transition-all focus:ring-2 focus:ring-primary/20"
                   style={{
                     background: 'var(--color-surface, #ffffff)',
-                    borderColor: 'var(--color-border, #e4e2db)',
-                    color: 'var(--color-foreground, #1c201e)',
+                    borderColor: 'var(--color-border, var(--border))',
+                    color: 'var(--color-foreground, var(--foreground))',
                   }}
                 />
                 <div className="absolute bottom-3 right-3 text-[12px] font-semibold tracking-wide pointer-events-none"
-                  style={{ color: 'var(--color-foreground-muted, #8a948e)' }}>
+                  style={{ color: 'var(--color-foreground-muted, var(--foreground-muted))' }}>
                   {description.length} / 500
                 </div>
               </div>
@@ -247,7 +247,7 @@ function AddProductPage() {
             <div>
               <div className="flex items-center justify-between mb-2">
                 <label className="text-[13px] font-semibold flex items-center"
-                  style={{ color: 'var(--color-foreground, #1c201e)' }}>
+                  style={{ color: 'var(--color-foreground, var(--foreground))' }}>
                   Category <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 ml-1.5"></span>
                 </label>
                 {categories.length > 0 && (
@@ -260,7 +260,7 @@ function AddProductPage() {
                       }
                     }}
                     className="text-[13px] font-semibold flex items-center gap-1 hover:underline"
-                    style={{ color: 'var(--color-primary, #0c3c26)' }}
+                    style={{ color: 'var(--color-primary, var(--primary))' }}
                   >
                     <Plus className="w-3.5 h-3.5" />
                     {isCustomCategory ? "Select Existing Category" : "Add New Category"}
@@ -269,13 +269,13 @@ function AddProductPage() {
               </div>
 
               <div className="relative flex items-center">
-                <LayoutGrid className="absolute left-3.5 w-4.5 h-4.5 pointer-events-none z-10" style={{ color: 'var(--color-foreground-muted, #8a948e)' }} />
+                <LayoutGrid className="absolute left-3.5 w-4.5 h-4.5 pointer-events-none z-10" style={{ color: 'var(--color-foreground-muted, var(--foreground-muted))' }} />
                 
                 {isLoadingCategories ? (
                   <div className="w-full h-12 pl-11 pr-4 rounded-[10px] flex items-center gap-2 border"
-                    style={{ background: 'var(--color-surface, #ffffff)', borderColor: 'var(--color-border, #e4e2db)' }}>
-                    <Loader2 className="w-4 h-4 animate-spin" style={{ color: 'var(--color-foreground-muted, #8a948e)' }} />
-                    <span className="text-[14px] font-medium" style={{ color: 'var(--color-foreground-muted, #8a948e)' }}>Loading categories...</span>
+                    style={{ background: 'var(--color-surface, #ffffff)', borderColor: 'var(--color-border, var(--border))' }}>
+                    <Loader2 className="w-4 h-4 animate-spin" style={{ color: 'var(--color-foreground-muted, var(--foreground-muted))' }} />
+                    <span className="text-[14px] font-medium" style={{ color: 'var(--color-foreground-muted, var(--foreground-muted))' }}>Loading categories...</span>
                   </div>
                 ) : isCustomCategory || categories.length === 0 ? (
                   <input
@@ -285,8 +285,8 @@ function AddProductPage() {
                     className="w-full h-12 pl-11 pr-4 rounded-[10px] text-[14px] font-medium outline-none border transition-all focus:ring-2 focus:ring-primary/20"
                     style={{
                       background: 'var(--color-surface, #ffffff)',
-                      borderColor: 'var(--color-border, #e4e2db)',
-                      color: 'var(--color-foreground, #1c201e)',
+                      borderColor: 'var(--color-border, var(--border))',
+                      color: 'var(--color-foreground, var(--foreground))',
                     }}
                   />
                 ) : (
@@ -297,15 +297,15 @@ function AddProductPage() {
                       className="w-full h-12 pl-11 pr-10 rounded-[10px] text-[14px] font-medium outline-none border appearance-none transition-all focus:ring-2 focus:ring-primary/20 cursor-pointer"
                       style={{
                         background: 'var(--color-surface, #ffffff)',
-                        borderColor: 'var(--color-border, #e4e2db)',
-                        color: 'var(--color-foreground, #1c201e)',
+                        borderColor: 'var(--color-border, var(--border))',
+                        color: 'var(--color-foreground, var(--foreground))',
                       }}
                     >
                       {categories.map(cat => (
                         <option key={cat} value={cat}>{cat}</option>
                       ))}
                     </select>
-                    <ChevronDown className="absolute right-3.5 w-4.5 h-4.5 pointer-events-none" style={{ color: 'var(--color-foreground-muted, #8a948e)' }} />
+                    <ChevronDown className="absolute right-3.5 w-4.5 h-4.5 pointer-events-none" style={{ color: 'var(--color-foreground-muted, var(--foreground-muted))' }} />
                   </>
                 )}
               </div>
@@ -314,7 +314,7 @@ function AddProductPage() {
             {/* Product Images (Multiple allowed) */}
             <div>
               <label className="text-[13px] font-semibold mb-2 block"
-                style={{ color: 'var(--color-foreground, #1c201e)' }}>
+                style={{ color: 'var(--color-foreground, var(--foreground))' }}>
                 Product Photos (Upload multiple at once)
               </label>
 
@@ -330,18 +330,18 @@ function AddProductPage() {
 
         {/* Variants Card Section */}
         <div className="rounded-[16px] border p-6 mt-2"
-          style={{ background: 'var(--color-surface, #ffffff)', borderColor: 'var(--color-border, #e4e2db)' }}>
+          style={{ background: 'var(--color-surface, #ffffff)', borderColor: 'var(--color-border, var(--border))' }}>
           
           <div className="flex items-center justify-between mb-5">
             <div className="flex items-start gap-3">
               <div className="p-2 rounded-[10px] mt-0.5" style={{ background: 'var(--color-surface-muted, #f2ede4)' }}>
-                <Package className="w-5 h-5" style={{ color: 'var(--color-primary, #0c3c26)' }} />
+                <Package className="w-5 h-5" style={{ color: 'var(--color-primary, var(--primary))' }} />
               </div>
               <div>
-                <h2 className="font-extrabold text-[17px] tracking-tight" style={{ color: 'var(--color-foreground, #1c201e)' }}>
+                <h2 className="font-extrabold text-[17px] tracking-tight" style={{ color: 'var(--color-foreground, var(--foreground))' }}>
                   Variants
                 </h2>
-                <p className="text-[13px]" style={{ color: 'var(--color-foreground-muted, #58625c)' }}>
+                <p className="text-[13px]" style={{ color: 'var(--color-foreground-muted, var(--foreground-muted))' }}>
                   Add variants to manage different sizes or packaging.
                 </p>
               </div>
@@ -351,7 +351,7 @@ function AddProductPage() {
               type="button"
               onClick={addVariant}
               className="inline-flex items-center gap-1.5 px-4 py-2 rounded-[8px] border text-[13px] font-semibold transition-colors hover:bg-primary/5"
-              style={{ borderColor: 'var(--color-primary, #0c3c26)', color: 'var(--color-primary, #0c3c26)' }}
+              style={{ borderColor: 'var(--color-primary, var(--primary))', color: 'var(--color-primary, var(--primary))' }}
             >
               <Plus className="w-4 h-4" /> Add Variant
             </button>
@@ -365,15 +365,15 @@ function AddProductPage() {
                 className="p-5 rounded-[12px] border space-y-4 transition-all"
                 style={{
                   background: 'var(--color-surface-muted, #fbfaf6)',
-                  borderColor: 'var(--color-border, #e4e2db)',
+                  borderColor: 'var(--color-border, var(--border))',
                 }}
               >
                 {/* Variant Item Header */}
                 <div className="flex justify-between items-center pb-2 border-b"
-                  style={{ borderColor: 'var(--color-border, #e4e2db)' }}>
+                  style={{ borderColor: 'var(--color-border, var(--border))' }}>
                   <div className="flex items-center gap-2">
-                    <GripVertical className="w-4 h-4 cursor-grab" style={{ color: 'var(--color-foreground-muted, #8a948e)' }} />
-                    <span className="text-[14px] font-bold" style={{ color: 'var(--color-foreground, #1c201e)' }}>
+                    <GripVertical className="w-4 h-4 cursor-grab" style={{ color: 'var(--color-foreground-muted, var(--foreground-muted))' }} />
+                    <span className="text-[14px] font-bold" style={{ color: 'var(--color-foreground, var(--foreground))' }}>
                       Variant {index + 1}
                     </span>
                   </div>
@@ -381,7 +381,7 @@ function AddProductPage() {
                     <button
                       type="button"
                       onClick={() => removeVariant(index)}
-                      className="p-1.5 rounded-md text-red-500 hover:text-red-600 hover:bg-red-50 transition-colors"
+                      className="p-1.5 rounded-md text-red-500 hover:text-error hover:bg-error-bg transition-colors"
                     >
                       <Trash2 className="w-4 h-4" />
                     </button>
@@ -392,11 +392,11 @@ function AddProductPage() {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   {/* Weight */}
                   <div>
-                    <label className="text-[12px] font-semibold mb-1.5 block" style={{ color: 'var(--color-foreground, #1c201e)' }}>
+                    <label className="text-[12px] font-semibold mb-1.5 block" style={{ color: 'var(--color-foreground, var(--foreground))' }}>
                       Weight (e.g. 1L, 500g)
                     </label>
                     <div className="relative flex items-center">
-                      <Scale className="absolute left-3.5 w-4 h-4 pointer-events-none" style={{ color: 'var(--color-foreground-muted, #8a948e)' }} />
+                      <Scale className="absolute left-3.5 w-4 h-4 pointer-events-none" style={{ color: 'var(--color-foreground-muted, var(--foreground-muted))' }} />
                       <input
                         value={variant.weight}
                         onChange={(e) => updateVariant(index, 'weight', e.target.value)}
@@ -404,8 +404,8 @@ function AddProductPage() {
                         className="w-full h-11 pl-10 pr-3 rounded-[8px] text-[14px] font-medium outline-none border transition-all focus:ring-2 focus:ring-primary/20"
                         style={{
                           background: 'var(--color-surface, #ffffff)',
-                          borderColor: 'var(--color-border, #e4e2db)',
-                          color: 'var(--color-foreground, #1c201e)',
+                          borderColor: 'var(--color-border, var(--border))',
+                          color: 'var(--color-foreground, var(--foreground))',
                         }}
                       />
                     </div>
@@ -413,11 +413,11 @@ function AddProductPage() {
 
                   {/* Selling Price */}
                   <div>
-                    <label className="text-[12px] font-semibold mb-1.5 block" style={{ color: 'var(--color-foreground, #1c201e)' }}>
+                    <label className="text-[12px] font-semibold mb-1.5 block" style={{ color: 'var(--color-foreground, var(--foreground))' }}>
                       Selling Price (₹)
                     </label>
                     <div className="relative flex items-center">
-                      <span className="absolute left-3.5 text-[14px] font-bold pointer-events-none" style={{ color: 'var(--color-foreground-muted, #8a948e)' }}>
+                      <span className="absolute left-3.5 text-[14px] font-bold pointer-events-none" style={{ color: 'var(--color-foreground-muted, var(--foreground-muted))' }}>
                         ₹
                       </span>
                       <input
@@ -429,8 +429,8 @@ function AddProductPage() {
                         className="w-full h-11 pl-9 pr-3 rounded-[8px] text-[14px] font-medium outline-none border transition-all focus:ring-2 focus:ring-primary/20"
                         style={{
                           background: 'var(--color-surface, #ffffff)',
-                          borderColor: 'var(--color-border, #e4e2db)',
-                          color: 'var(--color-foreground, #1c201e)',
+                          borderColor: 'var(--color-border, var(--border))',
+                          color: 'var(--color-foreground, var(--foreground))',
                         }}
                       />
                     </div>
@@ -438,11 +438,11 @@ function AddProductPage() {
 
                   {/* Cost Price */}
                   <div>
-                    <label className="text-[12px] font-semibold mb-1.5 block" style={{ color: 'var(--color-foreground, #1c201e)' }}>
+                    <label className="text-[12px] font-semibold mb-1.5 block" style={{ color: 'var(--color-foreground, var(--foreground))' }}>
                       Cost Price (₹)
                     </label>
                     <div className="relative flex items-center">
-                      <span className="absolute left-3.5 text-[14px] font-bold pointer-events-none" style={{ color: 'var(--color-foreground-muted, #8a948e)' }}>
+                      <span className="absolute left-3.5 text-[14px] font-bold pointer-events-none" style={{ color: 'var(--color-foreground-muted, var(--foreground-muted))' }}>
                         ₹
                       </span>
                       <input
@@ -454,8 +454,8 @@ function AddProductPage() {
                         className="w-full h-11 pl-9 pr-3 rounded-[8px] text-[14px] font-medium outline-none border transition-all focus:ring-2 focus:ring-primary/20"
                         style={{
                           background: 'var(--color-surface, #ffffff)',
-                          borderColor: 'var(--color-border, #e4e2db)',
-                          color: 'var(--color-foreground, #1c201e)',
+                          borderColor: 'var(--color-border, var(--border))',
+                          color: 'var(--color-foreground, var(--foreground))',
                         }}
                       />
                     </div>
@@ -463,11 +463,11 @@ function AddProductPage() {
 
                   {/* Stock Quantity */}
                   <div>
-                    <label className="text-[12px] font-semibold mb-1.5 block" style={{ color: 'var(--color-foreground, #1c201e)' }}>
+                    <label className="text-[12px] font-semibold mb-1.5 block" style={{ color: 'var(--color-foreground, var(--foreground))' }}>
                       Stock Quantity
                     </label>
                     <div className="relative flex items-center">
-                      <Package className="absolute left-3.5 w-4 h-4 pointer-events-none" style={{ color: 'var(--color-foreground-muted, #8a948e)' }} />
+                      <Package className="absolute left-3.5 w-4 h-4 pointer-events-none" style={{ color: 'var(--color-foreground-muted, var(--foreground-muted))' }} />
                       <input
                         value={variant.stock}
                         onChange={(e) => updateVariant(index, 'stock', e.target.value)}
@@ -476,8 +476,8 @@ function AddProductPage() {
                         className="w-full h-11 pl-10 pr-3 rounded-[8px] text-[14px] font-medium outline-none border transition-all focus:ring-2 focus:ring-primary/20"
                         style={{
                           background: 'var(--color-surface, #ffffff)',
-                          borderColor: 'var(--color-border, #e4e2db)',
-                          color: 'var(--color-foreground, #1c201e)',
+                          borderColor: 'var(--color-border, var(--border))',
+                          color: 'var(--color-foreground, var(--foreground))',
                         }}
                       />
                     </div>
@@ -490,7 +490,7 @@ function AddProductPage() {
 
         {/* Error message display */}
         {error && (
-          <div className="p-4 rounded-[10px] border border-red-200 bg-red-50 text-red-700 text-[14px] font-semibold flex items-center gap-2">
+          <div className="p-4 rounded-[10px] border border-error/20 bg-error-bg text-error text-[14px] font-semibold flex items-center gap-2">
             <span>{error}</span>
           </div>
         )}
@@ -502,7 +502,7 @@ function AddProductPage() {
             onClick={handleSubmit}
             disabled={isSubmitting}
             className="inline-flex items-center justify-center gap-2 px-8 h-12 rounded-[10px] font-bold text-[15px] text-white shadow-md transition-all hover:opacity-95 disabled:opacity-50"
-            style={{ background: 'var(--color-primary, #0c3c26)' }}
+            style={{ background: 'var(--color-primary, var(--primary))' }}
           >
             {isSubmitting ? <Loader2 className="w-5 h-5 animate-spin" /> : <Plus className="w-5 h-5" />}
             {isSubmitting ? 'Creating Product...' : 'Create Product'}

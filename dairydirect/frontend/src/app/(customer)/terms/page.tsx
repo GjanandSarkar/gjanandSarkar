@@ -15,14 +15,14 @@ export default function TermsPage() {
         
         {/* Header */}
         <div className="border-b border-gray-100 pb-6 mb-8">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-50 text-[#c88a23] text-xs font-bold uppercase tracking-wider mb-3">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary-fixed text-primary text-xs font-bold uppercase tracking-wider mb-3">
             <Scale className="w-3.5 h-3.5" />
             <span>Legal & Marketplace Agreement</span>
           </div>
-          <h1 className="text-2xl sm:text-3xl font-black text-[#0f3e26]">
+          <h1 className="text-2xl sm:text-3xl font-bold text-foreground">
             Terms of Service
           </h1>
-          <p className="text-xs text-gray-500 mt-1">
+          <p className="text-xs text-muted-foreground mt-1">
             Effective Date: August 2026 | Governing all marketplace orders and subscriptions
           </p>
         </div>
@@ -30,8 +30,8 @@ export default function TermsPage() {
         <div className="prose prose-sm max-w-none text-gray-700 space-y-6 text-xs sm:text-sm leading-relaxed">
           
           <section>
-            <h2 className="text-base font-bold text-[#0f3e26] mb-2 flex items-center gap-2">
-              <CheckCircle2 className="w-4 h-4 text-[#c88a23]" />
+            <h2 className="text-base font-bold text-foreground mb-2 flex items-center gap-2">
+              <CheckCircle2 className="w-4 h-4 text-primary" />
               1. Platform Services & Eligibility
             </h2>
             <p>
@@ -43,8 +43,8 @@ export default function TermsPage() {
           </section>
 
           <section>
-            <h2 className="text-base font-bold text-[#0f3e26] mb-2 flex items-center gap-2">
-              <Truck className="w-4 h-4 text-[#c88a23]" />
+            <h2 className="text-base font-bold text-foreground mb-2 flex items-center gap-2">
+              <Truck className="w-4 h-4 text-primary" />
               2. Deliveries, Slots & Cold Chain
             </h2>
             <p>
@@ -59,8 +59,8 @@ export default function TermsPage() {
           </section>
 
           <section>
-            <h2 className="text-base font-bold text-[#0f3e26] mb-2 flex items-center gap-2">
-              <RefreshCw className="w-4 h-4 text-[#c88a23]" />
+            <h2 className="text-base font-bold text-foreground mb-2 flex items-center gap-2">
+              <RefreshCw className="w-4 h-4 text-primary" />
               3. Pricing, Payments & Refunds
             </h2>
             <p>
@@ -73,8 +73,8 @@ export default function TermsPage() {
           </section>
 
           <section>
-            <h2 className="text-base font-bold text-[#0f3e26] mb-2 flex items-center gap-2">
-              <ShieldAlert className="w-4 h-4 text-[#c88a23]" />
+            <h2 className="text-base font-bold text-foreground mb-2 flex items-center gap-2">
+              <ShieldAlert className="w-4 h-4 text-primary" />
               4. Quality & Purity Assurance
             </h2>
             <p>
@@ -88,7 +88,7 @@ export default function TermsPage() {
         </div>
 
         <div className="mt-8 pt-6 border-t border-gray-100 flex items-center justify-between text-xs text-gray-500">
-          <Link href="/privacy" className="text-[#c88a23] font-bold hover:underline">
+          <Link href="/privacy" className="text-primary font-bold hover:underline">
             ← Read Privacy Policy
           </Link>
           <Link href="/contact" className="hover:text-gray-900 transition-colors">

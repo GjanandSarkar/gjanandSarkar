@@ -127,8 +127,8 @@ function Section({
 }) {
   return (
     <section className="mb-14">
-      <h2 className="text-lg font-black text-[#0f3e26] tracking-tight">{title}</h2>
-      <p className="text-xs text-gray-500 mt-1 mb-5 max-w-2xl leading-relaxed">{description}</p>
+      <h2 className="text-lg font-bold text-foreground tracking-tight">{title}</h2>
+      <p className="text-xs text-muted-foreground mt-1 mb-5 max-w-2xl leading-relaxed">{description}</p>
       {children}
     </section>
   );
@@ -138,15 +138,15 @@ export default function StyleguidePage() {
   if (process.env.NODE_ENV !== 'development') notFound();
 
   return (
-    <div className="min-h-screen bg-[#fafaf8] px-5 md:px-10 py-10 max-w-[1280px] mx-auto">
+    <div className="min-h-screen bg-neutral-50 px-5 md:px-10 py-10 max-w-[1280px] mx-auto">
       <header className="mb-12">
-        <span className="text-[10px] font-black uppercase tracking-[0.2em] text-[#c88a23]">
+        <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-primary">
           Internal · development only
         </span>
-        <h1 className="text-3xl font-black text-[#0f3e26] tracking-tight mt-1">
+        <h1 className="text-3xl font-extrabold text-foreground tracking-tight mt-1">
           Design reference
         </h1>
-        <p className="text-sm text-gray-600 mt-2 max-w-2xl leading-relaxed">
+        <p className="text-sm text-muted-foreground mt-2 max-w-2xl leading-relaxed">
           Every listing state rendered with sample data. This route 404s outside
           development.
         </p>
@@ -161,10 +161,10 @@ export default function StyleguidePage() {
             <div key={s.product.id} className="flex flex-col">
               <ProductCard product={s.product} />
               <div className="mt-2 px-1">
-                <p className="text-[10px] font-black text-[#0f3e26] uppercase tracking-wide">
+                <p className="text-[10px] font-bold text-primary uppercase tracking-wide">
                   {s.label}
                 </p>
-                <p className="text-[10px] text-gray-500 leading-snug mt-0.5">{s.note}</p>
+                <p className="text-[10px] text-muted-foreground leading-snug mt-0.5">{s.note}</p>
               </div>
             </div>
           ))}
@@ -245,7 +245,7 @@ export default function StyleguidePage() {
               key={cls}
               className={`px-5 py-4 rounded-2xl bg-white border border-gray-200/90 ${cls}`}
             >
-              <p className="text-xs font-black text-[#0f3e26]">{label}</p>
+              <p className="text-xs font-bold text-foreground">{label}</p>
               <code className="text-[10px] text-gray-500">.{cls}</code>
             </div>
           ))}

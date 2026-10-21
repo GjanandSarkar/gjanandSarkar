@@ -46,10 +46,10 @@ const PLACEMENTS = ['home', 'product', 'category', 'cart', 'search'] as const;
 const OBJECTIVES = ['awareness', 'traffic', 'conversions', 'clearance'] as const;
 
 const STATUS_STYLES: Record<string, string> = {
-  active: 'bg-emerald-100 text-emerald-700 border-emerald-200',
-  paused: 'bg-amber-100 text-amber-700 border-amber-200',
-  draft: 'bg-gray-100 text-gray-600 border-gray-200',
-  ended: 'bg-gray-100 text-gray-500 border-gray-200',
+  active: 'bg-success-bg text-success border-success/20',
+  paused: 'bg-warning-bg text-warning border-warning/20',
+  draft: 'bg-surface-muted text-foreground-muted border-border',
+  ended: 'bg-surface-muted text-foreground-muted border-border',
 };
 
 /** Percentages are shown as "—" when the denominator is zero. */
@@ -133,10 +133,10 @@ export default function AdminCampaignsPage() {
       <div className="flex flex-wrap items-center justify-between gap-3 mb-6">
         <div>
           <div className="flex items-center gap-2 mb-1">
-            <Megaphone className="w-5 h-5 text-[#0f3e26]" />
-            <h1 className="text-xl sm:text-2xl font-black text-gray-900">Ad Campaigns</h1>
+            <Megaphone className="w-5 h-5 text-primary" />
+            <h1 className="text-xl sm:text-2xl font-black text-foreground">Ad Campaigns</h1>
           </div>
-          <p className="text-sm text-gray-500">
+          <p className="text-sm text-foreground-muted">
             House promotions across the storefront, with impression, click and ROAS tracking.
           </p>
         </div>
@@ -144,7 +144,7 @@ export default function AdminCampaignsPage() {
         <button
           type="button"
           onClick={() => setShowForm((v) => !v)}
-          className="px-4 py-2.5 rounded-xl bg-[#0f3e26] text-white text-xs font-bold hover:bg-[#144f31] flex items-center gap-1.5 transition-colors"
+          className="px-4 py-2.5 rounded-xl bg-primary text-white text-xs font-bold hover:bg-primary-hover flex items-center gap-1.5 transition-colors"
         >
           <Plus className="w-4 h-4" strokeWidth={2.5} />
           {showForm ? 'Close' : 'New Campaign'}
@@ -152,7 +152,7 @@ export default function AdminCampaignsPage() {
       </div>
 
       {!analyticsConfigured && (
-        <div className="mb-4 flex items-start gap-2 rounded-xl border border-amber-200 bg-amber-50 px-3 py-2.5 text-[13px] text-amber-900">
+        <div className="mb-4 flex items-start gap-2 rounded-xl border border-warning/20 bg-warning-bg px-3 py-2.5 text-[13px] text-amber-900">
           <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />
           <span>
             External analytics is not configured, so A/B results are not being forwarded for
@@ -165,7 +165,7 @@ export default function AdminCampaignsPage() {
       {error && (
         <div
           role="alert"
-          className="mb-4 flex items-start gap-2 rounded-xl border border-red-200 bg-red-50 px-3 py-2.5 text-[13px] text-red-800"
+          className="mb-4 flex items-start gap-2 rounded-xl border border-error/20 bg-error-bg px-3 py-2.5 text-[13px] text-error"
         >
           <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />
           <span>{error}</span>
@@ -188,27 +188,27 @@ export default function AdminCampaignsPage() {
       </div>
 
       {isLoading ? (
-        <div className="flex items-center gap-2 justify-center py-14 text-sm text-gray-500">
+        <div className="flex items-center gap-2 justify-center py-14 text-sm text-foreground-muted">
           <Loader2 className="w-4 h-4 animate-spin" /> Loading campaigns…
         </div>
       ) : campaigns.length === 0 ? (
-        <div className="text-center py-14 rounded-2xl border border-gray-200 bg-white">
-          <Megaphone className="w-10 h-10 mx-auto mb-3 text-gray-300" />
-          <p className="font-bold text-gray-900 mb-1">No campaigns yet</p>
-          <p className="text-sm text-gray-500">
+        <div className="text-center py-14 rounded-2xl border border-border bg-surface">
+          <Megaphone className="w-10 h-10 mx-auto mb-3 text-foreground-muted" />
+          <p className="font-bold text-foreground mb-1">No campaigns yet</p>
+          <p className="text-sm text-foreground-muted">
             Create one to start promoting products on the storefront.
           </p>
         </div>
       ) : (
-        <div className="overflow-x-auto rounded-2xl border border-gray-200 bg-white">
+        <div className="overflow-x-auto rounded-2xl border border-border bg-surface">
           <table className="w-full min-w-[920px] text-left border-collapse">
             <thead>
-              <tr className="border-b border-gray-200 bg-gray-50/60">
+              <tr className="border-b border-border bg-surface-muted/60">
                 {['Campaign', 'Objective', 'Placements', 'Impr.', 'Clicks', 'CTR', 'Conv.', 'Spend', 'ROAS', 'Status'].map(
                   (h) => (
                     <th
                       key={h}
-                      className="px-3 py-3 text-[11px] font-bold uppercase tracking-wider text-gray-500 whitespace-nowrap"
+                      className="px-3 py-3 text-[11px] font-bold uppercase tracking-wider text-foreground-muted whitespace-nowrap"
                     >
                       {h}
                     </th>
@@ -220,35 +220,35 @@ export default function AdminCampaignsPage() {
               {campaigns.map((c) => {
                 const m = metricsFor(c.id);
                 return (
-                  <tr key={c.id} className="border-b border-gray-100 last:border-0 hover:bg-gray-50/50">
-                    <td className="px-3 py-3 text-[13px] font-bold text-gray-900">
+                  <tr key={c.id} className="border-b border-border last:border-0 hover:bg-surface-muted/50">
+                    <td className="px-3 py-3 text-[13px] font-bold text-foreground">
                       {c.name}
                       {c.target_category && (
-                        <span className="block text-[11px] font-medium text-gray-400">
+                        <span className="block text-[11px] font-medium text-foreground-muted">
                           {c.target_category}
                         </span>
                       )}
                     </td>
-                    <td className="px-3 py-3 text-[12px] text-gray-600 capitalize">{c.objective}</td>
-                    <td className="px-3 py-3 text-[11px] text-gray-500">{c.placements?.join(', ')}</td>
-                    <td className="px-3 py-3 text-[13px] text-gray-700 tabular-nums">
+                    <td className="px-3 py-3 text-[12px] text-foreground-muted capitalize">{c.objective}</td>
+                    <td className="px-3 py-3 text-[11px] text-foreground-muted">{c.placements?.join(', ')}</td>
+                    <td className="px-3 py-3 text-[13px] text-foreground tabular-nums">
                       {(m?.impressions ?? 0).toLocaleString('en-IN')}
                     </td>
-                    <td className="px-3 py-3 text-[13px] text-gray-700 tabular-nums">
+                    <td className="px-3 py-3 text-[13px] text-foreground tabular-nums">
                       {(m?.clicks ?? 0).toLocaleString('en-IN')}
                     </td>
-                    <td className="px-3 py-3 text-[13px] text-gray-700 tabular-nums">{pct(m?.ctr ?? null)}</td>
-                    <td className="px-3 py-3 text-[13px] text-gray-700 tabular-nums">
+                    <td className="px-3 py-3 text-[13px] text-foreground tabular-nums">{pct(m?.ctr ?? null)}</td>
+                    <td className="px-3 py-3 text-[13px] text-foreground tabular-nums">
                       {(m?.conversions ?? 0).toLocaleString('en-IN')}
                     </td>
-                    <td className="px-3 py-3 text-[13px] text-gray-700 tabular-nums">
+                    <td className="px-3 py-3 text-[13px] text-foreground tabular-nums">
                       {money(m?.spend ?? 0)}
                     </td>
                     <td className="px-3 py-3 text-[13px] font-bold tabular-nums">
                       {m?.roas == null ? (
-                        <span className="text-gray-400">—</span>
+                        <span className="text-foreground-muted">—</span>
                       ) : (
-                        <span className={m.roas >= 1 ? 'text-emerald-600' : 'text-red-600'}>
+                        <span className={m.roas >= 1 ? 'text-success' : 'text-error'}>
                           {m.roas.toFixed(2)}x
                         </span>
                       )}
@@ -291,13 +291,13 @@ function SummaryCard({
   hint?: string;
 }) {
   return (
-    <div className="rounded-2xl border border-gray-200 bg-white p-4">
+    <div className="rounded-2xl border border-border bg-surface p-4">
       <div className="flex items-center gap-1.5 mb-1.5">
-        <Icon className="w-3.5 h-3.5 text-gray-400" />
-        <span className="text-[11px] font-bold uppercase tracking-wider text-gray-500">{label}</span>
+        <Icon className="w-3.5 h-3.5 text-foreground-muted" />
+        <span className="text-[11px] font-bold uppercase tracking-wider text-foreground-muted">{label}</span>
       </div>
-      <p className="text-xl font-black text-gray-900 tabular-nums">{value}</p>
-      {hint && <p className="text-[11px] text-gray-400 mt-0.5">{hint}</p>}
+      <p className="text-xl font-black text-foreground tabular-nums">{value}</p>
+      {hint && <p className="text-[11px] text-foreground-muted mt-0.5">{hint}</p>}
     </div>
   );
 }
@@ -364,12 +364,12 @@ function CampaignForm({ onCreated }: { onCreated: () => void }) {
   };
 
   const inputClass =
-    'w-full rounded-xl border border-gray-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#0f3e26]/20 focus:border-[#0f3e26]';
+    'w-full rounded-xl border border-border px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--primary)]/20 focus:border-primary';
 
   return (
-    <form onSubmit={submit} className="mb-6 rounded-2xl border border-gray-200 bg-white p-4 sm:p-5 space-y-4">
+    <form onSubmit={submit} className="mb-6 rounded-2xl border border-border bg-surface p-4 sm:p-5 space-y-4">
       {formError && (
-        <div role="alert" className="flex items-start gap-2 rounded-xl border border-red-200 bg-red-50 px-3 py-2 text-[13px] text-red-800">
+        <div role="alert" className="flex items-start gap-2 rounded-xl border border-error/20 bg-error-bg px-3 py-2 text-[13px] text-error">
           <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />
           <span>{formError}</span>
         </div>
@@ -377,14 +377,14 @@ function CampaignForm({ onCreated }: { onCreated: () => void }) {
 
       <div className="grid sm:grid-cols-2 gap-4">
         <label className="block">
-          <span className="block text-[11px] font-bold uppercase tracking-wider text-gray-500 mb-1.5">
+          <span className="block text-[11px] font-bold uppercase tracking-wider text-foreground-muted mb-1.5">
             Campaign name
           </span>
           <input value={name} onChange={(e) => setName(e.target.value)} className={inputClass} placeholder="Diwali electronics push" />
         </label>
 
         <label className="block">
-          <span className="block text-[11px] font-bold uppercase tracking-wider text-gray-500 mb-1.5">
+          <span className="block text-[11px] font-bold uppercase tracking-wider text-foreground-muted mb-1.5">
             Objective
           </span>
           <select value={objective} onChange={(e) => setObjective(e.target.value)} className={inputClass}>
@@ -398,7 +398,7 @@ function CampaignForm({ onCreated }: { onCreated: () => void }) {
       </div>
 
       <div>
-        <span className="block text-[11px] font-bold uppercase tracking-wider text-gray-500 mb-1.5">
+        <span className="block text-[11px] font-bold uppercase tracking-wider text-foreground-muted mb-1.5">
           Placements
         </span>
         <div className="flex flex-wrap gap-2">
@@ -410,8 +410,8 @@ function CampaignForm({ onCreated }: { onCreated: () => void }) {
               aria-pressed={placements.includes(p)}
               className={`px-3 py-1.5 rounded-lg text-[12px] font-bold capitalize border transition-colors ${
                 placements.includes(p)
-                  ? 'bg-[#0f3e26] text-white border-[#0f3e26]'
-                  : 'bg-white text-gray-600 border-gray-200 hover:bg-gray-50'
+                  ? 'bg-primary text-white border-primary'
+                  : 'bg-surface text-foreground-muted border-border hover:bg-surface-muted'
               }`}
             >
               {p}
@@ -422,14 +422,14 @@ function CampaignForm({ onCreated }: { onCreated: () => void }) {
 
       <div className="grid sm:grid-cols-2 gap-4">
         <label className="block">
-          <span className="block text-[11px] font-bold uppercase tracking-wider text-gray-500 mb-1.5">
+          <span className="block text-[11px] font-bold uppercase tracking-wider text-foreground-muted mb-1.5">
             Target category
           </span>
           <input value={targetCategory} onChange={(e) => setTargetCategory(e.target.value)} className={inputClass} placeholder="Ghee" />
         </label>
 
         <label className="block">
-          <span className="block text-[11px] font-bold uppercase tracking-wider text-gray-500 mb-1.5">
+          <span className="block text-[11px] font-bold uppercase tracking-wider text-foreground-muted mb-1.5">
             Product IDs
           </span>
           <input value={productIds} onChange={(e) => setProductIds(e.target.value)} className={inputClass} placeholder="Comma separated UUIDs" />
@@ -438,34 +438,34 @@ function CampaignForm({ onCreated }: { onCreated: () => void }) {
 
       <div className="grid sm:grid-cols-3 gap-4">
         <label className="block">
-          <span className="block text-[11px] font-bold uppercase tracking-wider text-gray-500 mb-1.5">
+          <span className="block text-[11px] font-bold uppercase tracking-wider text-foreground-muted mb-1.5">
             Budget (₹)
           </span>
           <input type="number" min="0" value={spendAmount} onChange={(e) => setSpendAmount(e.target.value)} className={inputClass} />
-          <span className="block text-[11px] text-gray-400 mt-1">Used as the denominator for ROAS.</span>
+          <span className="block text-[11px] text-foreground-muted mt-1">Used as the denominator for ROAS.</span>
         </label>
 
         <label className="block">
-          <span className="block text-[11px] font-bold uppercase tracking-wider text-gray-500 mb-1.5">
+          <span className="block text-[11px] font-bold uppercase tracking-wider text-foreground-muted mb-1.5">
             Daily frequency cap
           </span>
           <input type="number" min="1" value={frequencyCap} onChange={(e) => setFrequencyCap(e.target.value)} className={inputClass} />
-          <span className="block text-[11px] text-gray-400 mt-1">Max views per visitor per day.</span>
+          <span className="block text-[11px] text-foreground-muted mt-1">Max views per visitor per day.</span>
         </label>
 
         <label className="block">
-          <span className="block text-[11px] font-bold uppercase tracking-wider text-gray-500 mb-1.5">
+          <span className="block text-[11px] font-bold uppercase tracking-wider text-foreground-muted mb-1.5">
             Priority
           </span>
           <input type="number" value={priority} onChange={(e) => setPriority(e.target.value)} className={inputClass} />
-          <span className="block text-[11px] text-gray-400 mt-1">Breaks ties only; relevance wins.</span>
+          <span className="block text-[11px] text-foreground-muted mt-1">Breaks ties only; relevance wins.</span>
         </label>
       </div>
 
       <button
         type="submit"
         disabled={submitting}
-        className="px-5 py-2.5 rounded-xl bg-[#0f3e26] text-white text-xs font-bold hover:bg-[#144f31] disabled:opacity-60 flex items-center gap-2 transition-colors"
+        className="px-5 py-2.5 rounded-xl bg-primary text-white text-xs font-bold hover:bg-primary-hover disabled:opacity-60 flex items-center gap-2 transition-colors"
       >
         {submitting && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
         Create campaign as draft

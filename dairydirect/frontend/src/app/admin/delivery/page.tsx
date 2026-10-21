@@ -79,8 +79,8 @@ export default function AdminDeliveryPage() {
                   </div>
                   <span className="px-3 py-1 rounded-full text-[10px] font-bold uppercase"
                     style={{
-                      background: order.status === 'out_for_delivery' ? '#fff8e6' : '#c2efac',
-                      color: order.status === 'out_for_delivery' ? '#7d5200' : '#042100',
+                      background: order.status === 'out_for_delivery' ? 'var(--warning-bg)' : 'var(--success-bg)',
+                      color: order.status === 'out_for_delivery' ? '#7d5200' : 'var(--success)',
                     }}>
                     {order.status.replace(/_/g, ' ')}
                   </span>

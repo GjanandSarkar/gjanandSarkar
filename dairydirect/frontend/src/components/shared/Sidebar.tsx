@@ -52,10 +52,10 @@ export function Sidebar() {
               }}
             />
             <div className="flex flex-col">
-              <span className="text-xl md:text-2xl font-black tracking-tight leading-none">
-                <span className="text-[#0f3e26]">Gjanand</span>
+              <span className="text-xl md:text-2xl font-bold tracking-tight leading-none text-foreground">
+                <span className="text-primary">Gjanand</span>
               </span>
-              <span className="text-[10px] md:text-[11px] tracking-[0.2em] font-black text-[#c88a23] uppercase text-right leading-none mt-0.5">
+              <span className="text-[10px] md:text-[11px] tracking-[0.2em] font-bold text-muted-foreground uppercase text-right leading-none mt-0.5">
                 SARKAR
               </span>
             </div>
@@ -67,7 +67,7 @@ export function Sidebar() {
       {user && (
         <div className="mx-4 mb-2 px-4 py-3 rounded-[14px] flex items-center gap-3"
           style={{ background: 'var(--color-surface-container-low)' }}>
-          <div className="w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm text-white shrink-0 bg-[#0f3e26] border border-[#0f3e26]/10 relative overflow-hidden">
+          <div className="w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm text-white shrink-0 bg-primary border border-primary/10 relative overflow-hidden">
             <img 
               src={user.avatar_url || '/profile/profile.jpg'} 
               alt="Profile" 

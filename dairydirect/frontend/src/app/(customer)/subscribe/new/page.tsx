@@ -2,7 +2,7 @@
 
 import { useState, useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { ArrowLeft, CheckCircle2, Calendar, Droplets } from 'lucide-react';
+import { CheckCircle2, Calendar, Droplets } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import { cn } from '@/lib/utils';
 import { useStore } from '@/store/useStore';
@@ -124,30 +124,27 @@ function NewSubscriptionContent() {
   }
 
   return (
-    <div className="flex flex-col min-h-screen bg-surface-container pb-32">
-      {/* Header */}
-      <div className="sticky top-0 z-30 bg-surface-container/80 backdrop-blur-md border-b border-sand/30">
-        <div className="flex items-center p-4">
-          <button onClick={() => router.back()} className="p-2 -ml-2 mr-2 text-dark hover:text-primary hover:bg-sand/30 rounded-full transition-colors">
-            <ArrowLeft className="w-6 h-6" />
-          </button>
-          <h1 className="text-[20px] font-extrabold text-dark tracking-tight">
-            {editId ? 'Modify Subscription' : 'New Subscription'}
+    <div className="flex flex-col min-h-screen bg-background text-foreground transition-colors duration-150 pb-32">
+      {/* Standardized Page Header */}
+      <div className="max-w-[800px] mx-auto px-4 pt-6 pb-2 w-full">
+        <div className="border-b border-border/60 pb-4">
+          <h1 className="text-2xl sm:text-3xl font-extrabold text-foreground tracking-tight">
+            {editId ? 'Modify Subscription' : 'New Subscription Plan'}
           </h1>
+          <p className="text-xs sm:text-sm text-foreground-muted mt-1">
+            Configure daily morning doorstep delivery schedule and volume
+          </p>
         </div>
       </div>
 
       <div className="p-4 flex-1 max-w-[800px] mx-auto w-full">
         {/* Product Hero */}
-        <div className="bg-white rounded-[24px] shadow-sm p-6 mb-6 flex flex-col items-center border border-sand/50 relative overflow-hidden">
-          <div className="absolute top-0 right-0 w-48 h-48 bg-primary/5 rounded-full -mr-24 -mt-24 blur-3xl" />
-          <div className="absolute bottom-0 left-0 w-32 h-32 bg-primary/5 rounded-full -ml-16 -mb-16 blur-2xl" />
-          
-          <div className="w-24 h-24 relative mb-4 overflow-hidden rounded-[20px] bg-sky-50 flex items-center justify-center p-2 shadow-inner border border-sand/30">
+        <div className="bg-white rounded-2xl shadow-xs p-6 mb-6 flex flex-col items-center border border-border relative">
+          <div className="w-20 h-20 relative mb-3 overflow-hidden rounded-xl bg-neutral-50 flex items-center justify-center p-2 border border-border">
             <img src={subscriptionProductImage} alt={subscriptionProductName} className="w-full h-full object-contain" />
           </div>
-          <h2 className="font-black text-dark text-xl mb-1 text-center">{subscriptionProductName}</h2>
-          <p className="text-[11px] text-primary font-bold uppercase tracking-widest mb-6 bg-primary/10 px-3 py-1 rounded-full">A2 Quality • Pure Harvest</p>
+          <h2 className="font-extrabold text-foreground text-lg mb-1 text-center">{subscriptionProductName}</h2>
+          <p className="text-[11px] text-primary font-bold uppercase tracking-wider mb-6 bg-primary/10 px-3 py-0.5 rounded-full">Daily Pure Delivery</p>
           
           <div className="w-full space-y-6">
             <div className="flex flex-col gap-3">

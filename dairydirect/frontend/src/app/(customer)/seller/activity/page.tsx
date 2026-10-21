@@ -84,7 +84,7 @@ export default function SellerActivityPage() {
           <Loader2 className="w-4 h-4 animate-spin" /> Loading your activity…
         </div>
       ) : logs.length === 0 ? (
-        <div className="text-center py-14 px-4 rounded-2xl border border-sand bg-white">
+        <div className="text-center py-14 px-4 rounded-2xl border border-sand bg-surface">
           <History className="w-10 h-10 mx-auto mb-3 text-on-surface-variant opacity-40" />
           <p className="font-bold text-dark mb-1">No activity yet</p>
           <p className="text-sm text-on-surface-variant">
@@ -92,7 +92,7 @@ export default function SellerActivityPage() {
           </p>
         </div>
       ) : (
-        <div className="overflow-x-auto rounded-2xl border border-sand bg-white">
+        <div className="overflow-x-auto rounded-2xl border border-sand bg-surface">
           <table className="w-full min-w-[560px] text-left border-collapse">
             <thead>
               <tr className="border-b border-sand">

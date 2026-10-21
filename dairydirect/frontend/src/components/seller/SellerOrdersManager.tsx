@@ -357,11 +357,11 @@ export function SellerOrdersManager({ initialStatusFilter = 'all' }: SellerOrder
           onClick={() => setActiveTab('all')}
           className={`p-4 rounded-2xl border text-left transition-all cursor-pointer ${
             activeTab === 'all'
-              ? 'bg-[#0f3e26] text-white border-[#0f3e26] shadow-sm'
-              : 'bg-white hover:bg-gray-50 border-gray-200 text-gray-800'
+              ? 'bg-primary text-primary-foreground border-primary shadow-sm'
+              : 'bg-surface hover:bg-surface-muted border-border text-foreground'
           }`}
         >
-          <span className={`text-[11px] font-bold uppercase tracking-wider block ${activeTab === 'all' ? 'text-emerald-200' : 'text-gray-400'}`}>
+          <span className={`text-[11px] font-bold uppercase tracking-wider block ${activeTab === 'all' ? 'text-primary-foreground/80' : 'text-foreground-muted'}`}>
             Total Orders
           </span>
           <span className="text-2xl font-black mt-1 block">{orders.length}</span>
@@ -371,15 +371,15 @@ export function SellerOrdersManager({ initialStatusFilter = 'all' }: SellerOrder
           onClick={() => setActiveTab('requests')}
           className={`p-4 rounded-2xl border text-left transition-all cursor-pointer ${
             activeTab === 'requests'
-              ? 'bg-[#c88a23] text-white border-[#c88a23] shadow-sm'
-              : 'bg-white hover:bg-amber-50/40 border-gray-200 text-gray-800'
+              ? 'bg-amber-600 text-white border-amber-600 shadow-sm'
+              : 'bg-surface hover:bg-warning-bg/40 border-border text-foreground'
           }`}
         >
           <div className="flex items-center justify-between">
-            <span className={`text-[11px] font-bold uppercase tracking-wider block ${activeTab === 'requests' ? 'text-amber-100' : 'text-[#c88a23]'}`}>
+            <span className={`text-[11px] font-bold uppercase tracking-wider block ${activeTab === 'requests' ? 'text-amber-100' : 'text-warning'}`}>
               Requests
             </span>
-            <RotateCcw className={`w-3.5 h-3.5 ${activeTab === 'requests' ? 'text-white' : 'text-[#c88a23]'}`} />
+            <RotateCcw className={`w-3.5 h-3.5 ${activeTab === 'requests' ? 'text-white' : 'text-warning'}`} />
           </div>
           <span className="text-2xl font-black mt-1 block">{requestsCount}</span>
         </button>
@@ -389,11 +389,11 @@ export function SellerOrdersManager({ initialStatusFilter = 'all' }: SellerOrder
           className={`p-4 rounded-2xl border text-left transition-all cursor-pointer ${
             activeTab === 'pending'
               ? 'bg-amber-600 text-white border-amber-600 shadow-sm'
-              : 'bg-white hover:bg-amber-50/40 border-gray-200 text-gray-800'
+              : 'bg-surface hover:bg-warning-bg/40 border-border text-foreground'
           }`}
         >
           <div className="flex items-center justify-between">
-            <span className={`text-[11px] font-bold uppercase tracking-wider block ${activeTab === 'pending' ? 'text-amber-100' : 'text-amber-600'}`}>
+            <span className={`text-[11px] font-bold uppercase tracking-wider block ${activeTab === 'pending' ? 'text-amber-100' : 'text-warning'}`}>
               Pending
             </span>
             <Clock className={`w-3.5 h-3.5 ${activeTab === 'pending' ? 'text-white' : 'text-amber-500'}`} />
@@ -406,14 +406,14 @@ export function SellerOrdersManager({ initialStatusFilter = 'all' }: SellerOrder
           className={`p-4 rounded-2xl border text-left transition-all cursor-pointer ${
             activeTab === 'confirmed'
               ? 'bg-emerald-700 text-white border-emerald-700 shadow-sm'
-              : 'bg-white hover:bg-emerald-50/40 border-gray-200 text-gray-800'
+              : 'bg-surface hover:bg-success-bg/40 border-border text-foreground'
           }`}
         >
           <div className="flex items-center justify-between">
-            <span className={`text-[11px] font-bold uppercase tracking-wider block ${activeTab === 'confirmed' ? 'text-emerald-100' : 'text-emerald-700'}`}>
+            <span className={`text-[11px] font-bold uppercase tracking-wider block ${activeTab === 'confirmed' ? 'text-emerald-100' : 'text-success'}`}>
               Confirmed
             </span>
-            <CheckCircle2 className={`w-3.5 h-3.5 ${activeTab === 'confirmed' ? 'text-white' : 'text-emerald-600'}`} />
+            <CheckCircle2 className={`w-3.5 h-3.5 ${activeTab === 'confirmed' ? 'text-white' : 'text-success'}`} />
           </div>
           <span className="text-2xl font-black mt-1 block">{confirmedCount}</span>
         </button>
@@ -423,11 +423,11 @@ export function SellerOrdersManager({ initialStatusFilter = 'all' }: SellerOrder
           className={`p-4 rounded-2xl border text-left transition-all cursor-pointer ${
             activeTab === 'out_for_delivery'
               ? 'bg-yellow-600 text-white border-yellow-600 shadow-sm'
-              : 'bg-white hover:bg-yellow-50/40 border-gray-200 text-gray-800'
+              : 'bg-surface hover:bg-warning-bg/40 border-border text-foreground'
           }`}
         >
           <div className="flex items-center justify-between">
-            <span className={`text-[11px] font-bold uppercase tracking-wider block ${activeTab === 'out_for_delivery' ? 'text-yellow-100' : 'text-yellow-700'}`}>
+            <span className={`text-[11px] font-bold uppercase tracking-wider block ${activeTab === 'out_for_delivery' ? 'text-yellow-100' : 'text-warning'}`}>
               In Transit
             </span>
             <Truck className={`w-3.5 h-3.5 ${activeTab === 'out_for_delivery' ? 'text-white' : 'text-yellow-600'}`} />
@@ -439,22 +439,22 @@ export function SellerOrdersManager({ initialStatusFilter = 'all' }: SellerOrder
           onClick={() => setActiveTab('delivered')}
           className={`p-4 rounded-2xl border text-left transition-all cursor-pointer ${
             activeTab === 'delivered'
-              ? 'bg-[#0f3e26] text-white border-[#0f3e26] shadow-sm'
-              : 'bg-white hover:bg-emerald-50/40 border-gray-200 text-gray-800'
+              ? 'bg-primary text-primary-foreground border-primary shadow-sm'
+              : 'bg-surface hover:bg-primary-fixed/40 border-border text-foreground'
           }`}
         >
           <div className="flex items-center justify-between">
-            <span className={`text-[11px] font-bold uppercase tracking-wider block ${activeTab === 'delivered' ? 'text-emerald-200' : 'text-[#0f3e26]'}`}>
+            <span className={`text-[11px] font-bold uppercase tracking-wider block ${activeTab === 'delivered' ? 'text-primary-foreground/80' : 'text-primary'}`}>
               Delivered
             </span>
-            <Check className={`w-3.5 h-3.5 ${activeTab === 'delivered' ? 'text-white' : 'text-[#0f3e26]'}`} />
+            <Check className={`w-3.5 h-3.5 ${activeTab === 'delivered' ? 'text-white' : 'text-primary'}`} />
           </div>
           <span className="text-2xl font-black mt-1 block">{deliveredCount}</span>
         </button>
       </div>
 
       {/* ─── Search Bar and Status Filter Tabs ─── */}
-      <div className="bg-white rounded-2xl border border-gray-200/90 shadow-2xs p-4 flex flex-col md:flex-row md:items-center justify-between gap-3">
+      <div className="bg-surface rounded-2xl border border-border/90 shadow-2xs p-4 flex flex-col md:flex-row md:items-center justify-between gap-3">
         {/* Filter Pills */}
         <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar pb-1 md:pb-0">
           {[
@@ -471,8 +471,8 @@ export function SellerOrdersManager({ initialStatusFilter = 'all' }: SellerOrder
               onClick={() => setActiveTab(tab.id)}
               className={`px-3 py-1.5 rounded-full text-xs font-bold whitespace-nowrap transition-all cursor-pointer ${
                 activeTab === tab.id
-                  ? 'bg-[#0f3e26] text-white shadow-xs'
-                  : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'
+                  ? 'bg-primary text-primary-foreground shadow-xs'
+                  : 'text-foreground-muted hover:text-foreground hover:bg-surface-muted'
               }`}
             >
               {tab.label}
@@ -483,18 +483,18 @@ export function SellerOrdersManager({ initialStatusFilter = 'all' }: SellerOrder
         {/* Search and Refresh */}
         <div className="flex items-center gap-2">
           <div className="relative flex-1 md:w-64">
-            <Search className="w-4 h-4 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+            <Search className="w-4 h-4 text-foreground-muted absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
             <input
               type="text"
               placeholder="Search order ID, product, phone..."
               value={searchQuery}
               onChange={e => setSearchQuery(e.target.value)}
-              className="w-full pl-9 pr-3 py-2 bg-gray-50 border border-gray-200 rounded-xl text-xs font-medium placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#0f3e26]/20 focus:bg-white"
+              className="w-full pl-9 pr-3 py-2 bg-surface-muted border border-border rounded-xl text-xs font-medium placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:bg-surface"
             />
             {searchQuery && (
               <button
                 onClick={() => setSearchQuery('')}
-                className="absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                className="absolute right-2.5 top-1/2 -translate-y-1/2 text-foreground-muted hover:text-foreground-muted"
               >
                 <X className="w-3.5 h-3.5" />
               </button>
@@ -505,9 +505,9 @@ export function SellerOrdersManager({ initialStatusFilter = 'all' }: SellerOrder
             onClick={loadOrders}
             disabled={isLoading}
             title="Refresh Orders"
-            className="p-2 border border-gray-200 text-gray-700 hover:bg-gray-50 rounded-xl transition-colors cursor-pointer shrink-0"
+            className="p-2 border border-border text-foreground hover:bg-surface-muted rounded-xl transition-colors cursor-pointer shrink-0"
           >
-            <RefreshCw className={`w-4 h-4 ${isLoading ? 'animate-spin text-[#0f3e26]' : ''}`} />
+            <RefreshCw className={`w-4 h-4 ${isLoading ? 'animate-spin text-primary' : ''}`} />
           </button>
         </div>
       </div>
@@ -515,17 +515,17 @@ export function SellerOrdersManager({ initialStatusFilter = 'all' }: SellerOrder
       {/* ─── Orders List ─── */}
       {isLoading ? (
         <div className="py-20 flex flex-col items-center justify-center gap-3">
-          <Loader2 className="w-8 h-8 text-[#0f3e26] animate-spin" />
-          <p className="text-xs font-semibold text-gray-500">Loading your store orders...</p>
+          <Loader2 className="w-8 h-8 text-primary animate-spin" />
+          <p className="text-xs font-semibold text-foreground-muted">Loading your store orders...</p>
         </div>
       ) : filteredOrders.length === 0 ? (
-        <div className="bg-white rounded-3xl border border-gray-200 p-12 text-center space-y-4">
-          <div className="w-16 h-16 rounded-2xl bg-gray-100 text-gray-400 flex items-center justify-center mx-auto">
+        <div className="bg-surface rounded-3xl border border-border p-12 text-center space-y-4">
+          <div className="w-16 h-16 rounded-2xl bg-surface-muted text-foreground-muted flex items-center justify-center mx-auto">
             <ShoppingBag className="w-8 h-8" />
           </div>
           <div className="space-y-1">
-            <h4 className="font-extrabold text-base text-gray-900">No Orders Found</h4>
-            <p className="text-xs text-gray-500 max-w-sm mx-auto">
+            <h4 className="font-extrabold text-base text-foreground">No Orders Found</h4>
+            <p className="text-xs text-foreground-muted max-w-sm mx-auto">
               {searchQuery
                 ? `No orders matching "${searchQuery}". Try a different keyword.`
                 : activeTab !== 'all'
@@ -536,7 +536,7 @@ export function SellerOrdersManager({ initialStatusFilter = 'all' }: SellerOrder
           {searchQuery && (
             <button
               onClick={() => setSearchQuery('')}
-              className="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-800 text-xs font-bold rounded-xl transition-colors"
+              className="px-4 py-2 bg-surface-muted hover:bg-border text-foreground text-xs font-bold rounded-xl transition-colors"
             >
               Clear Search
             </button>
@@ -555,17 +555,17 @@ export function SellerOrdersManager({ initialStatusFilter = 'all' }: SellerOrder
                 key={order.id}
                 initial={{ opacity: 0, y: 8 }}
                 animate={{ opacity: 1, y: 0 }}
-                className="bg-white rounded-2xl border border-gray-200/90 shadow-2xs overflow-hidden transition-all"
+                className="bg-surface rounded-2xl border border-border/90 shadow-2xs overflow-hidden transition-all"
               >
                 {/* Order Summary Bar */}
                 <div
-                  className="p-5 flex flex-col md:flex-row md:items-center justify-between gap-4 cursor-pointer hover:bg-gray-50/50 transition-colors"
+                  className="p-5 flex flex-col md:flex-row md:items-center justify-between gap-4 cursor-pointer hover:bg-surface-muted/50 transition-colors"
                   onClick={() => setExpandedOrderId(isExpanded ? null : order.id)}
                 >
                   {/* Left: ID, Date, Customer */}
                   <div className="space-y-1">
                     <div className="flex items-center gap-2.5 flex-wrap">
-                      <span className="font-mono font-black text-sm text-[#0f3e26]">
+                      <span className="font-mono font-bold text-sm text-foreground">
                         {order.order_number || `ORD-${order.id.slice(0, 8).toUpperCase()}`}
                       </span>
                       <span
@@ -583,25 +583,25 @@ export function SellerOrdersManager({ initialStatusFilter = 'all' }: SellerOrder
                       {/* Payment Status Badge */}
                       <span className={`px-2 py-0.5 rounded-md text-[10px] font-bold uppercase tracking-wider flex items-center gap-1 ${
                         order.payment_status === 'paid'
-                          ? 'bg-emerald-100 text-emerald-800'
-                          : 'bg-amber-100 text-amber-800'
+                          ? 'bg-success-bg text-emerald-800'
+                          : 'bg-warning-bg text-amber-800'
                       }`}>
                         <CreditCard className="w-3 h-3" />
                         <span>{order.payment_status === 'paid' ? 'Paid' : `Payment: ${order.payment_status || 'Pending'}`} ({order.payment_method || 'COD'})</span>
                       </span>
                     </div>
 
-                    <div className="flex items-center gap-3 text-xs text-gray-500 flex-wrap">
+                    <div className="flex items-center gap-3 text-xs text-foreground-muted flex-wrap">
                       <span className="flex items-center gap-1">
-                        <Clock className="w-3.5 h-3.5 text-gray-400" />
+                        <Clock className="w-3.5 h-3.5 text-foreground-muted" />
                         <span>{format(new Date(order.created_at), 'dd MMM yyyy, hh:mm a')}</span>
                       </span>
                       <span>•</span>
-                      <span className="flex items-center gap-1 text-gray-700 font-medium">
-                        <User className="w-3.5 h-3.5 text-gray-400" />
+                      <span className="flex items-center gap-1 text-foreground font-medium">
+                        <User className="w-3.5 h-3.5 text-foreground-muted" />
                         <span>{order.profiles?.name || 'Customer'}</span>
                         {order.profiles?.phone && (
-                          <span className="text-gray-400 font-mono">({order.profiles.phone})</span>
+                          <span className="text-foreground-muted font-mono">({order.profiles.phone})</span>
                         )}
                       </span>
                     </div>
@@ -610,15 +610,15 @@ export function SellerOrdersManager({ initialStatusFilter = 'all' }: SellerOrder
                   {/* Right: Amount & Collapse Toggle */}
                   <div className="flex items-center justify-between md:justify-end gap-5">
                     <div className="text-left md:text-right">
-                      <div className="text-base font-black text-gray-900">
+                      <div className="text-base font-black text-foreground">
                         ₹{order.total_amount}
                       </div>
-                      <div className="text-[11px] text-gray-400">
+                      <div className="text-[11px] text-foreground-muted">
                         {items.length} {items.length === 1 ? 'item' : 'items'}
                       </div>
                     </div>
 
-                    <div className="flex items-center gap-1 text-gray-400 hover:text-gray-600 p-1">
+                    <div className="flex items-center gap-1 text-foreground-muted hover:text-foreground-muted p-1">
                       {isExpanded ? (
                         <ChevronUp className="w-5 h-5" />
                       ) : (
@@ -630,15 +630,15 @@ export function SellerOrdersManager({ initialStatusFilter = 'all' }: SellerOrder
 
                 {/* Status Messages */}
                 {errorMessage?.orderId === order.id && (
-                  <div className="mx-5 mb-3 p-3 rounded-xl bg-rose-50 border border-rose-200 text-rose-800 text-xs font-semibold flex items-start gap-2">
-                    <AlertCircle className="w-4 h-4 text-rose-600 shrink-0 mt-0.5" />
+                  <div className="mx-5 mb-3 p-3 rounded-xl bg-error-bg border border-error/20 text-rose-800 text-xs font-semibold flex items-start gap-2">
+                    <AlertCircle className="w-4 h-4 text-error shrink-0 mt-0.5" />
                     <span>{errorMessage.message}</span>
                   </div>
                 )}
 
                 {successMessage?.orderId === order.id && (
-                  <div className="mx-5 mb-3 p-3 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-semibold flex items-start gap-2">
-                    <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
+                  <div className="mx-5 mb-3 p-3 rounded-xl bg-success-bg border border-success/20 text-emerald-800 text-xs font-semibold flex items-start gap-2">
+                    <CheckCircle2 className="w-4 h-4 text-success shrink-0 mt-0.5" />
                     <span>{successMessage.message}</span>
                   </div>
                 )}
@@ -650,19 +650,19 @@ export function SellerOrdersManager({ initialStatusFilter = 'all' }: SellerOrder
                       initial={{ height: 0, opacity: 0 }}
                       animate={{ height: 'auto', opacity: 1 }}
                       exit={{ height: 0, opacity: 0 }}
-                      className="border-t border-gray-100 bg-[#fafaf8]/60 p-5 space-y-6"
+                      className="border-t border-border bg-background/60 p-5 space-y-6"
                     >
                       {/* Products & Delivery Grid */}
                       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                         
                         {/* Ordered Products (2 cols) */}
                         <div className="lg:col-span-2 space-y-3">
-                          <h5 className="text-xs font-bold uppercase tracking-wider text-gray-500 flex items-center gap-1.5">
-                            <Package className="w-4 h-4 text-[#0f3e26]" />
+                          <h5 className="text-xs font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-1.5">
+                            <Package className="w-4 h-4 text-primary" />
                             <span>Ordered Items ({items.length})</span>
                           </h5>
 
-                          <div className="bg-white rounded-xl border border-gray-200 divide-y divide-gray-100 overflow-hidden">
+                          <div className="bg-surface rounded-xl border border-border divide-y divide-border overflow-hidden">
                             {items.map((item, idx) => {
                               const prod = item.products;
                               const variant = item.product_variants;
@@ -680,14 +680,14 @@ export function SellerOrdersManager({ initialStatusFilter = 'all' }: SellerOrder
                                       <img
                                         src={img}
                                         alt={name}
-                                        className="w-14 h-14 rounded-xl object-cover bg-gray-50 border border-gray-100 shrink-0"
+                                        className="w-14 h-14 rounded-xl object-cover bg-surface-muted border border-border shrink-0"
                                         onError={e => {
                                           (e.target as HTMLImageElement).src = PLACEHOLDER_PRODUCT_IMAGE;
                                         }}
                                       />
                                       <div className="space-y-1">
                                         <div className="flex items-center gap-2 flex-wrap">
-                                          <p className="text-xs font-bold text-gray-900">{name}</p>
+                                          <p className="text-xs font-bold text-foreground">{name}</p>
                                           <span
                                             className="px-2 py-0.5 rounded-md text-[10px] font-black uppercase tracking-wider"
                                             style={{
@@ -701,18 +701,18 @@ export function SellerOrdersManager({ initialStatusFilter = 'all' }: SellerOrder
                                         </div>
 
                                         {weight && (
-                                          <p className="text-[11px] text-gray-500 font-medium">
+                                          <p className="text-[11px] text-foreground-muted font-medium">
                                             Variant: {weight}
                                           </p>
                                         )}
-                                        <div className="text-[11px] text-gray-500">
-                                          Qty: <strong className="text-gray-800">{item.quantity}</strong> × ₹{item.price}
+                                        <div className="text-[11px] text-foreground-muted">
+                                          Qty: <strong className="text-foreground">{item.quantity}</strong> × ₹{item.price}
                                         </div>
                                       </div>
                                     </div>
 
                                     <div className="text-right">
-                                      <div className="font-black text-xs text-gray-900">
+                                      <div className="font-black text-xs text-foreground">
                                         ₹{item.price * item.quantity}
                                       </div>
 
@@ -723,7 +723,7 @@ export function SellerOrdersManager({ initialStatusFilter = 'all' }: SellerOrder
                                             <button
                                               onClick={() => handleUpdateItemAction(order.id, item.id, 'pack')}
                                               disabled={isBusy}
-                                              className="px-2.5 py-1 rounded-lg bg-blue-50 hover:bg-blue-100 text-blue-800 border border-blue-200 text-[10px] font-bold transition-colors flex items-center gap-1"
+                                              className="px-2.5 py-1 rounded-lg bg-info-bg hover:bg-info-bg text-blue-800 border border-info/20 text-[10px] font-bold transition-colors flex items-center gap-1"
                                               title="Mark this item as packed and ready for dispatch"
                                             >
                                               <Package className="w-3 h-3" />
@@ -734,7 +734,7 @@ export function SellerOrdersManager({ initialStatusFilter = 'all' }: SellerOrder
                                             <button
                                               onClick={() => handleUpdateItemAction(order.id, item.id, 'dispatch')}
                                               disabled={isBusy}
-                                              className="px-2.5 py-1 rounded-lg bg-amber-50 hover:bg-amber-100 text-amber-900 border border-amber-200 text-[10px] font-bold transition-colors flex items-center gap-1"
+                                              className="px-2.5 py-1 rounded-lg bg-warning-bg hover:bg-warning-bg text-amber-900 border border-warning/20 text-[10px] font-bold transition-colors flex items-center gap-1"
                                               title="Hand over to dispatch / delivery partner"
                                             >
                                               <Truck className="w-3 h-3" />
@@ -753,7 +753,7 @@ export function SellerOrdersManager({ initialStatusFilter = 'all' }: SellerOrder
 
                                   {/* ─── Item Requests Section (Cancellation / Returns) ─── */}
                                   {itemRequests.length > 0 && (
-                                    <div className="mt-2 pt-2 border-t border-gray-100 space-y-2">
+                                    <div className="mt-2 pt-2 border-t border-border space-y-2">
                                       {itemRequests.map((req: any) => {
                                         const isCancellation = req.request_type === 'cancellation';
                                         const isActionable = ['submitted', 'under_review', 'pending'].includes(req.status);
@@ -763,16 +763,16 @@ export function SellerOrdersManager({ initialStatusFilter = 'all' }: SellerOrder
                                             key={req.id}
                                             className={`p-3 rounded-xl border text-xs space-y-2 ${
                                               isCancellation
-                                                ? 'bg-amber-50/80 border-amber-200 text-amber-950'
-                                                : 'bg-blue-50/80 border-blue-200 text-blue-950'
+                                                ? 'bg-warning-bg/80 border-warning/20 text-amber-950'
+                                                : 'bg-info-bg/80 border-info/20 text-blue-950'
                                             }`}
                                           >
                                             <div className="flex items-center justify-between gap-2 flex-wrap">
                                               <div className="flex items-center gap-1.5">
                                                 {isCancellation ? (
-                                                  <Ban className="w-4 h-4 text-amber-700" />
+                                                  <Ban className="w-4 h-4 text-warning" />
                                                 ) : (
-                                                  <RotateCcw className="w-4 h-4 text-blue-700" />
+                                                  <RotateCcw className="w-4 h-4 text-info" />
                                                 )}
                                                 <span className="font-extrabold uppercase tracking-wider text-[11px]">
                                                   {isCancellation ? 'Cancellation Request' : 'Product Return Request'}
@@ -781,13 +781,13 @@ export function SellerOrdersManager({ initialStatusFilter = 'all' }: SellerOrder
 
                                               <div className="flex items-center gap-2">
                                                 <span className={`px-2 py-0.5 rounded-full text-[10px] font-black uppercase ${
-                                                  req.status === 'approved' ? 'bg-emerald-100 text-emerald-800' :
-                                                  req.status === 'rejected' ? 'bg-red-100 text-red-800' :
-                                                  req.status === 'refunded' ? 'bg-blue-100 text-blue-800' : 'bg-amber-200 text-amber-900'
+                                                  req.status === 'approved' ? 'bg-success-bg text-emerald-800' :
+                                                  req.status === 'rejected' ? 'bg-error-bg text-error' :
+                                                  req.status === 'refunded' ? 'bg-info-bg text-blue-800' : 'bg-amber-200 text-amber-900'
                                                 }`}>
                                                   {req.status}
                                                 </span>
-                                                <span className="text-[10px] text-gray-500">
+                                                <span className="text-[10px] text-foreground-muted">
                                                   {format(new Date(req.created_at), 'MMM d, h:mm a')}
                                                 </span>
                                               </div>
@@ -798,12 +798,12 @@ export function SellerOrdersManager({ initialStatusFilter = 'all' }: SellerOrder
                                                 <strong>Reason:</strong> {req.reason}
                                               </p>
                                               {req.description && (
-                                                <p className="text-gray-600">
+                                                <p className="text-foreground-muted">
                                                   <strong>Customer Notes:</strong> {req.description}
                                                 </p>
                                               )}
                                               {req.rejection_reason && (
-                                                <p className="text-red-700 font-bold">
+                                                <p className="text-error font-bold">
                                                   <strong>Recorded Rejection Reason:</strong> {req.rejection_reason}
                                                 </p>
                                               )}
@@ -812,7 +812,7 @@ export function SellerOrdersManager({ initialStatusFilter = 'all' }: SellerOrder
                                             {/* Photo Evidence Gallery */}
                                             {req.images && req.images.length > 0 && (
                                               <div>
-                                                <span className="text-[10px] font-bold text-gray-500 block mb-1">
+                                                <span className="text-[10px] font-bold text-foreground-muted block mb-1">
                                                   Customer Uploaded Evidence ({req.images.length}):
                                                 </span>
                                                 <div className="flex gap-2 flex-wrap">
@@ -824,7 +824,7 @@ export function SellerOrdersManager({ initialStatusFilter = 'all' }: SellerOrder
                                                         e.stopPropagation();
                                                         setActiveLightboxImage(imgUrl);
                                                       }}
-                                                      className="relative w-12 h-12 rounded-lg border border-gray-200 overflow-hidden hover:opacity-80 transition-opacity bg-white shrink-0 group"
+                                                      className="relative w-12 h-12 rounded-lg border border-border overflow-hidden hover:opacity-80 transition-opacity bg-surface shrink-0 group"
                                                       title="Click to view full photo"
                                                     >
                                                       <img src={imgUrl} alt="Evidence" className="w-full h-full object-cover" />
@@ -839,7 +839,7 @@ export function SellerOrdersManager({ initialStatusFilter = 'all' }: SellerOrder
 
                                             {/* Action Buttons for Seller */}
                                             {isActionable && (
-                                              <div className="flex items-center gap-2 pt-1 border-t border-gray-200/50">
+                                              <div className="flex items-center gap-2 pt-1 border-t border-border/50">
                                                 <button
                                                   type="button"
                                                   onClick={(e) => {
@@ -869,7 +869,7 @@ export function SellerOrdersManager({ initialStatusFilter = 'all' }: SellerOrder
                                                     });
                                                     setDecisionReason('');
                                                   }}
-                                                  className="px-3 py-1.5 rounded-lg border border-red-300 text-red-700 hover:bg-red-50 text-xs font-bold flex items-center gap-1 transition-colors"
+                                                  className="px-3 py-1.5 rounded-lg border border-red-300 text-error hover:bg-error-bg text-xs font-bold flex items-center gap-1 transition-colors"
                                                 >
                                                   <X className="w-3.5 h-3.5" />
                                                   <span>Reject with Reason</span>
@@ -889,38 +889,38 @@ export function SellerOrdersManager({ initialStatusFilter = 'all' }: SellerOrder
 
                         {/* Customer & Delivery Address (1 col) */}
                         <div className="space-y-3">
-                          <h5 className="text-xs font-bold uppercase tracking-wider text-gray-500 flex items-center gap-1.5">
-                            <MapPin className="w-4 h-4 text-[#0f3e26]" />
+                          <h5 className="text-xs font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-1.5">
+                            <MapPin className="w-4 h-4 text-primary" />
                             <span>Delivery Destination</span>
                           </h5>
 
-                          <div className="bg-white rounded-xl border border-gray-200 p-4 space-y-3 text-xs">
+                          <div className="bg-surface rounded-xl border border-border p-4 space-y-3 text-xs">
                             <div>
-                              <span className="text-gray-400 block text-[10px] font-bold uppercase">Customer</span>
-                              <p className="font-bold text-gray-900 mt-0.5">{order.profiles?.name || 'Customer'}</p>
+                              <span className="text-foreground-muted block text-[10px] font-bold uppercase">Customer</span>
+                              <p className="font-bold text-foreground mt-0.5">{order.profiles?.name || 'Customer'}</p>
                               {order.profiles?.phone && (
-                                <p className="text-gray-600 flex items-center gap-1 mt-0.5">
-                                  <Phone className="w-3 h-3 text-gray-400" />
+                                <p className="text-foreground-muted flex items-center gap-1 mt-0.5">
+                                  <Phone className="w-3 h-3 text-foreground-muted" />
                                   <span>+91 {order.profiles.phone}</span>
                                 </p>
                               )}
                             </div>
 
-                            <div className="border-t border-gray-100 pt-2.5">
-                              <span className="text-gray-400 block text-[10px] font-bold uppercase">Shipping Address</span>
-                              <p className="text-gray-700 mt-0.5 leading-relaxed font-medium">
+                            <div className="border-t border-border pt-2.5">
+                              <span className="text-foreground-muted block text-[10px] font-bold uppercase">Shipping Address</span>
+                              <p className="text-foreground mt-0.5 leading-relaxed font-medium">
                                 {order.user_addresses?.address || order.shipping_address || 'Address provided at checkout'}
                               </p>
                               {order.user_addresses?.apartment && (
-                                <p className="text-gray-500 mt-0.5 font-medium">
+                                <p className="text-foreground-muted mt-0.5 font-medium">
                                   Apt/Flat: {order.user_addresses.apartment}
                                 </p>
                               )}
                             </div>
 
                             {order.delivery_slot && (
-                              <div className="border-t border-gray-100 pt-2.5">
-                                <span className="text-gray-400 block text-[10px] font-bold uppercase">Scheduled Slot</span>
+                              <div className="border-t border-border pt-2.5">
+                                <span className="text-foreground-muted block text-[10px] font-bold uppercase">Scheduled Slot</span>
                                 <span className="font-semibold text-emerald-800 block mt-0.5">
                                   {order.delivery_slot}
                                 </span>
@@ -930,50 +930,50 @@ export function SellerOrdersManager({ initialStatusFilter = 'all' }: SellerOrder
 
                           {/* COD Payment Tracking & Confirmation Card for Seller's Own Product Order */}
                           {((order.payment_method || '').toUpperCase() === 'COD') ? (
-                            <div className="bg-white rounded-2xl border border-gray-200/90 p-4 space-y-3">
-                              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-2 border-b border-gray-100">
+                            <div className="bg-surface rounded-2xl border border-border/90 p-4 space-y-3">
+                              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-2 border-b border-border">
                                 <div className="flex items-center gap-2.5">
-                                  <div className="w-8 h-8 rounded-full bg-amber-100 text-amber-900 flex items-center justify-center font-bold text-sm shrink-0">
+                                  <div className="w-8 h-8 rounded-full bg-warning-bg text-amber-900 flex items-center justify-center font-bold text-sm shrink-0">
                                     ₹
                                   </div>
                                   <div>
-                                    <span className="text-[10px] font-bold uppercase tracking-wider text-gray-500 block">PAYMENT METHOD</span>
-                                    <span className="font-extrabold text-sm text-gray-900">Cash on Delivery (COD)</span>
+                                    <span className="text-[10px] font-bold uppercase tracking-wider text-foreground-muted block">PAYMENT METHOD</span>
+                                    <span className="font-extrabold text-sm text-foreground">Cash on Delivery (COD)</span>
                                   </div>
                                 </div>
 
                                 <div className="flex items-center gap-2">
-                                  <span className="text-xs text-gray-500">Collection Status:</span>
+                                  <span className="text-xs text-foreground-muted">Collection Status:</span>
                                   <span className={`px-2.5 py-0.5 rounded-full text-xs font-black uppercase tracking-wider ${
                                     order.payment_status === 'paid'
-                                      ? 'bg-emerald-100 text-emerald-800 border border-emerald-200'
-                                      : 'bg-amber-100 text-amber-900 border border-amber-200'
+                                      ? 'bg-success-bg text-emerald-800 border border-success/20'
+                                      : 'bg-warning-bg text-amber-900 border border-warning/20'
                                   }`}>
                                     {order.payment_status === 'paid' ? '✓ PAID (CASH COLLECTED)' : 'PENDING CASH COLLECTION'}
                                   </span>
                                 </div>
                               </div>
 
-                              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs text-gray-600 pt-1">
+                              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs text-foreground-muted pt-1">
                                 <div>
-                                  <span className="text-[10px] text-gray-400 font-bold uppercase tracking-wider block">ORDER AMOUNT</span>
-                                  <span className="font-extrabold text-sm text-[#0f3e26]">₹{order.total_amount}</span>
+                                  <span className="text-[10px] text-foreground-muted font-bold uppercase tracking-wider block">ORDER AMOUNT</span>
+                                  <span className="font-extrabold text-sm text-primary">₹{order.total_amount}</span>
                                 </div>
                                 <div>
-                                  <span className="text-[10px] text-gray-400 font-bold uppercase tracking-wider block">ORDER STATUS</span>
-                                  <span className="font-bold text-gray-800 uppercase">{order.status.replace(/_/g, ' ')}</span>
+                                  <span className="text-[10px] text-foreground-muted font-bold uppercase tracking-wider block">ORDER STATUS</span>
+                                  <span className="font-bold text-foreground uppercase">{order.status.replace(/_/g, ' ')}</span>
                                 </div>
                                 <div>
-                                  <span className="text-[10px] text-gray-400 font-bold uppercase tracking-wider block">CASH CONFIRMED AT</span>
-                                  <span className="font-medium text-gray-800">
+                                  <span className="text-[10px] text-foreground-muted font-bold uppercase tracking-wider block">CASH CONFIRMED AT</span>
+                                  <span className="font-medium text-foreground">
                                     {order.payment_confirmed_at 
                                       ? format(new Date(order.payment_confirmed_at), 'dd MMM yyyy, hh:mm a') 
                                       : 'Not yet recorded'}
                                   </span>
                                 </div>
                                 <div>
-                                  <span className="text-[10px] text-gray-400 font-bold uppercase tracking-wider block">CONFIRMED BY</span>
-                                  <span className="font-medium text-gray-800">
+                                  <span className="text-[10px] text-foreground-muted font-bold uppercase tracking-wider block">CONFIRMED BY</span>
+                                  <span className="font-medium text-foreground">
                                     {order.payment_status === 'paid' ? 'Seller Verified' : 'Pending'}
                                   </span>
                                 </div>
@@ -998,15 +998,15 @@ export function SellerOrdersManager({ initialStatusFilter = 'all' }: SellerOrder
                             </div>
                           ) : (
                             /* Non-COD Payment summary */
-                            <div className="bg-white rounded-xl border border-gray-200 p-4 space-y-2 text-xs">
-                              <span className="text-gray-400 block text-[10px] font-bold uppercase tracking-wider">Payment Information</span>
+                            <div className="bg-surface rounded-xl border border-border p-4 space-y-2 text-xs">
+                              <span className="text-foreground-muted block text-[10px] font-bold uppercase tracking-wider">Payment Information</span>
                               <div className="flex justify-between items-center">
-                                <span className="text-gray-500">Method:</span>
-                                <span className="font-bold uppercase text-gray-800">{order.payment_method || 'Online'}</span>
+                                <span className="text-foreground-muted">Method:</span>
+                                <span className="font-bold uppercase text-foreground">{order.payment_method || 'Online'}</span>
                               </div>
                               <div className="flex justify-between items-center">
-                                <span className="text-gray-500">Status:</span>
-                                <span className="font-bold uppercase text-emerald-700">{order.payment_status || 'Paid'}</span>
+                                <span className="text-foreground-muted">Status:</span>
+                                <span className="font-bold uppercase text-success">{order.payment_status || 'Paid'}</span>
                               </div>
                             </div>
                           )}
@@ -1015,20 +1015,20 @@ export function SellerOrdersManager({ initialStatusFilter = 'all' }: SellerOrder
                       </div>
 
                       {/* ─── Fulfillment Action Bar ─── */}
-                      <div className="bg-white rounded-2xl border border-gray-200 p-5 space-y-4">
-                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-gray-100 pb-3">
+                      <div className="bg-surface rounded-2xl border border-border p-5 space-y-4">
+                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-border pb-3">
                           <div>
-                            <h5 className="text-xs font-black uppercase tracking-wider text-gray-900">
+                            <h5 className="text-xs font-black uppercase tracking-wider text-foreground">
                               Order Fulfillment Workflow
                             </h5>
-                            <p className="text-[11px] text-gray-500">
+                            <p className="text-[11px] text-foreground-muted">
                               Advance order through required fulfillment milestones or cancel if permitted.
                             </p>
                           </div>
 
                           {/* Cancellation Note / History */}
                           {order.status === 'cancelled' && (
-                            <div className="px-3 py-1 rounded-lg bg-gray-100 text-gray-700 text-xs font-medium">
+                            <div className="px-3 py-1 rounded-lg bg-surface-muted text-foreground text-xs font-medium">
                               {order.notes ? `Reason: ${order.notes}` : 'Order was cancelled'}
                             </div>
                           )}
@@ -1048,18 +1048,18 @@ export function SellerOrdersManager({ initialStatusFilter = 'all' }: SellerOrder
                                   <div
                                     className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold transition-all ${
                                       isCancelled
-                                        ? 'bg-gray-100 text-gray-400 border border-gray-300'
+                                        ? 'bg-surface-muted text-foreground-muted border border-border-hover'
                                         : isCurrent
-                                          ? 'bg-[#0f3e26] text-white shadow-md ring-4 ring-[#0f3e26]/10'
+                                          ? 'bg-primary text-primary-foreground shadow-sm ring-4 ring-primary/10'
                                           : isPassed
-                                            ? 'bg-emerald-600 text-white'
-                                            : 'bg-gray-100 text-gray-400 border border-gray-200'
+                                            ? 'bg-primary text-primary-foreground'
+                                            : 'bg-surface-muted text-foreground-muted border border-border'
                                     }`}
                                   >
                                     {isPassed ? <Check className="w-3.5 h-3.5" /> : idx + 1}
                                   </div>
                                   <span className={`text-[10px] mt-1 font-bold whitespace-nowrap capitalize ${
-                                    isCurrent ? 'text-[#0f3e26]' : 'text-gray-400'
+                                    isCurrent ? 'text-primary' : 'text-foreground-muted'
                                   }`}>
                                     {stepStatus.replace(/_/g, ' ')}
                                   </span>
@@ -1067,7 +1067,7 @@ export function SellerOrdersManager({ initialStatusFilter = 'all' }: SellerOrder
                                 {idx < arr.length - 1 && (
                                   <div
                                     className={`flex-1 h-1 mx-2 rounded-full transition-colors ${
-                                      isPassed && !isCancelled ? 'bg-emerald-500' : 'bg-gray-200'
+                                      isPassed && !isCancelled ? 'bg-primary' : 'bg-border'
                                     }`}
                                   />
                                 )}
@@ -1078,7 +1078,7 @@ export function SellerOrdersManager({ initialStatusFilter = 'all' }: SellerOrder
 
                         {/* Available Action Buttons (Matching Admin Format) */}
                         <div className="flex flex-wrap items-center gap-2.5 pt-2">
-                          <span className="text-xs font-bold text-gray-600 mr-1">Available Actions:</span>
+                          <span className="text-xs font-bold text-foreground-muted mr-1">Available Actions:</span>
 
                           {/* 1. Confirmed Button */}
                           {(() => {
@@ -1094,10 +1094,10 @@ export function SellerOrdersManager({ initialStatusFilter = 'all' }: SellerOrder
                                 title={blockedReason ?? (isCurrent ? 'Current Status' : 'Confirm Order and prepare for dispatch')}
                                 className={`px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer ${
                                   isCurrent
-                                    ? 'bg-emerald-100 text-emerald-900 border-2 border-emerald-500 shadow-2xs cursor-default'
+                                    ? 'bg-primary-fixed text-primary border-2 border-primary shadow-2xs cursor-default'
                                     : isBlocked
-                                      ? 'bg-gray-100 text-gray-400 border border-gray-200 cursor-not-allowed line-through opacity-50'
-                                      : 'bg-[#0f3e26] hover:bg-[#144f31] text-white shadow-xs active:scale-95'
+                                      ? 'bg-surface-muted text-foreground-muted border border-border cursor-not-allowed line-through opacity-50'
+                                      : 'bg-primary hover:bg-primary-hover text-primary-foreground shadow-xs active:scale-95'
                                 }`}
                               >
                                 {isBusy ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <CheckCircle2 className="w-3.5 h-3.5" />}
@@ -1120,10 +1120,10 @@ export function SellerOrdersManager({ initialStatusFilter = 'all' }: SellerOrder
                                 title={blockedReason ?? (isCurrent ? 'Current Status' : 'Mark Out for Delivery')}
                                 className={`px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer ${
                                   isCurrent
-                                    ? 'bg-yellow-100 text-yellow-900 border-2 border-yellow-500 shadow-2xs cursor-default'
+                                    ? 'bg-info-bg text-blue-900 border-2 border-blue-500 shadow-2xs cursor-default'
                                     : isBlocked
-                                      ? 'bg-gray-100 text-gray-400 border border-gray-200 cursor-not-allowed line-through opacity-50'
-                                      : 'bg-[#c88a23] hover:bg-[#ad7418] text-white shadow-xs active:scale-95'
+                                      ? 'bg-surface-muted text-foreground-muted border border-border cursor-not-allowed line-through opacity-50'
+                                      : 'bg-blue-600 hover:bg-blue-700 text-white shadow-xs active:scale-95'
                                 }`}
                               >
                                 {isBusy ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Truck className="w-3.5 h-3.5" />}
@@ -1146,9 +1146,9 @@ export function SellerOrdersManager({ initialStatusFilter = 'all' }: SellerOrder
                                 title={blockedReason ?? (isCurrent ? 'Current Status' : 'Mark as Delivered to customer')}
                                 className={`px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer ${
                                   isCurrent
-                                    ? 'bg-emerald-100 text-emerald-900 border-2 border-emerald-500 shadow-2xs cursor-default'
+                                    ? 'bg-success-bg text-emerald-900 border-2 border-emerald-500 shadow-2xs cursor-default'
                                     : isBlocked
-                                      ? 'bg-gray-100 text-gray-400 border border-gray-200 cursor-not-allowed line-through opacity-50'
+                                      ? 'bg-surface-muted text-foreground-muted border border-border cursor-not-allowed line-through opacity-50'
                                       : 'bg-emerald-700 hover:bg-emerald-800 text-white shadow-xs active:scale-95'
                                 }`}
                               >
@@ -1178,13 +1178,13 @@ export function SellerOrdersManager({ initialStatusFilter = 'all' }: SellerOrder
                                 }
                                 className={`px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer ${
                                   isCancelled
-                                    ? 'bg-gray-100 text-gray-500 border border-gray-200 cursor-default'
+                                    ? 'bg-surface-muted text-foreground-muted border border-border cursor-default'
                                     : !canCancel
-                                      ? 'bg-gray-100 text-gray-400 border border-gray-200 cursor-not-allowed line-through opacity-50'
-                                      : 'bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 shadow-2xs active:scale-95'
+                                      ? 'bg-surface-muted text-foreground-muted border border-border cursor-not-allowed line-through opacity-50'
+                                      : 'bg-error-bg hover:bg-error-bg text-error border border-error/20 shadow-2xs active:scale-95'
                                 }`}
                               >
-                                <Ban className="w-3.5 h-3.5 text-rose-600" />
+                                <Ban className="w-3.5 h-3.5 text-error" />
                                 <span>{isCancelled ? 'Order Cancelled' : 'Cancel Order'}</span>
                               </button>
                             );
@@ -1193,8 +1193,8 @@ export function SellerOrdersManager({ initialStatusFilter = 'all' }: SellerOrder
 
                         {/* Post-Delivered Clarification Notice */}
                         {order.status === 'delivered' && (
-                          <div className="p-3 bg-emerald-50 border border-emerald-200 rounded-xl text-xs text-emerald-900 flex items-center gap-2">
-                            <CheckCircle2 className="w-4 h-4 text-emerald-700 shrink-0" />
+                          <div className="p-3 bg-success-bg border border-success/20 rounded-xl text-xs text-emerald-900 flex items-center gap-2">
+                            <CheckCircle2 className="w-4 h-4 text-success shrink-0" />
                             <span>
                               This order has been fulfilled and delivered. Cancellation is closed. Any issues or damages must be raised by the customer via the Return & Freshness Guarantee portal.
                             </span>
@@ -1214,35 +1214,35 @@ export function SellerOrdersManager({ initialStatusFilter = 'all' }: SellerOrder
       {/* ─── Cancel Order Modal ─── */}
       {cancelModalOrder && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-2xs p-4">
-          <div className="bg-white rounded-3xl max-w-md w-full p-6 space-y-5 shadow-2xl animate-in fade-in">
-            <div className="flex items-center justify-between border-b border-gray-100 pb-3">
-              <div className="flex items-center gap-2 text-rose-700">
+          <div className="bg-surface rounded-3xl max-w-md w-full p-6 space-y-5 shadow-2xl animate-in fade-in">
+            <div className="flex items-center justify-between border-b border-border pb-3">
+              <div className="flex items-center gap-2 text-error">
                 <AlertCircle className="w-5 h-5" />
-                <h3 className="font-extrabold text-base text-gray-900">Cancel Order</h3>
+                <h3 className="font-extrabold text-base text-foreground">Cancel Order</h3>
               </div>
               <button
                 onClick={() => setCancelModalOrder(null)}
-                className="p-1 rounded-lg text-gray-400 hover:text-gray-700"
+                className="p-1 rounded-lg text-foreground-muted hover:text-foreground"
               >
                 <X className="w-5 h-5" />
               </button>
             </div>
 
             <div className="space-y-3 text-xs">
-              <p className="text-gray-600">
-                Are you sure you want to cancel order <strong className="font-mono text-gray-900">{cancelModalOrder.order_number || cancelModalOrder.id}</strong>?
+              <p className="text-foreground-muted">
+                Are you sure you want to cancel order <strong className="font-mono text-foreground">{cancelModalOrder.order_number || cancelModalOrder.id}</strong>?
               </p>
-              <div className="p-3 rounded-xl bg-amber-50 border border-amber-200 text-amber-900">
+              <div className="p-3 rounded-xl bg-warning-bg border border-warning/20 text-amber-900">
                 <p className="font-bold">Important:</p>
                 <p className="mt-0.5">Cancelling will immediately restore all reserved product stock to your store inventory and notify the customer.</p>
               </div>
 
               <div>
-                <label className="block font-bold text-gray-700 mb-1">Reason for Cancellation</label>
+                <label className="block font-bold text-foreground mb-1">Reason for Cancellation</label>
                 <select
                   value={cancelReason}
                   onChange={e => setCancelReason(e.target.value)}
-                  className="w-full p-2.5 rounded-xl border border-gray-200 text-xs font-semibold outline-none focus:ring-2 focus:ring-[#0f3e26]/20 bg-white"
+                  className="w-full p-2.5 rounded-xl border border-border text-xs font-semibold outline-none focus:ring-2 focus:ring-primary/20 bg-surface"
                 >
                   <option value="Out of stock">Product Out of Stock</option>
                   <option value="Quality check failed">Freshness / Quality Standards Not Met</option>
@@ -1254,13 +1254,13 @@ export function SellerOrdersManager({ initialStatusFilter = 'all' }: SellerOrder
 
               {cancelReason === 'Other' && (
                 <div>
-                  <label className="block font-bold text-gray-700 mb-1">Specify Reason</label>
+                  <label className="block font-bold text-foreground mb-1">Specify Reason</label>
                   <textarea
                     rows={2}
                     value={customCancelReason}
                     onChange={e => setCustomCancelReason(e.target.value)}
                     placeholder="Enter details..."
-                    className="w-full p-2.5 rounded-xl border border-gray-200 text-xs font-medium outline-none focus:ring-2 focus:ring-[#0f3e26]/20"
+                    className="w-full p-2.5 rounded-xl border border-border text-xs font-medium outline-none focus:ring-2 focus:ring-primary/20"
                   />
                 </div>
               )}
@@ -1271,7 +1271,7 @@ export function SellerOrdersManager({ initialStatusFilter = 'all' }: SellerOrder
                 type="button"
                 disabled={isSubmittingCancel}
                 onClick={() => setCancelModalOrder(null)}
-                className="px-4 py-2 text-xs font-bold text-gray-600 hover:bg-gray-100 rounded-xl"
+                className="px-4 py-2 text-xs font-bold text-foreground-muted hover:bg-surface-muted rounded-xl"
               >
                 Keep Order
               </button>
@@ -1292,31 +1292,31 @@ export function SellerOrdersManager({ initialStatusFilter = 'all' }: SellerOrder
       {/* ─── Request Decision Modal (Seller Approve / Reject) ─── */}
       {decisionModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-2xs p-4">
-          <div className="bg-white rounded-3xl max-w-md w-full p-6 space-y-5 shadow-2xl animate-in fade-in">
-            <div className="flex items-center justify-between border-b border-gray-100 pb-3">
+          <div className="bg-surface rounded-3xl max-w-md w-full p-6 space-y-5 shadow-2xl animate-in fade-in">
+            <div className="flex items-center justify-between border-b border-border pb-3">
               <div className="flex items-center gap-2">
                 {decisionModal.action === 'approve' ? (
-                  <div className="p-2 rounded-xl bg-emerald-100 text-emerald-800">
+                  <div className="p-2 rounded-xl bg-success-bg text-emerald-800">
                     <Check className="w-4 h-4" />
                   </div>
                 ) : (
-                  <div className="p-2 rounded-xl bg-red-100 text-red-800">
+                  <div className="p-2 rounded-xl bg-error-bg text-error">
                     <X className="w-4 h-4" />
                   </div>
                 )}
                 <div>
-                  <h3 className="font-extrabold text-base text-gray-900">
+                  <h3 className="font-extrabold text-base text-foreground">
                     {decisionModal.action === 'approve' ? 'Approve' : 'Reject'}{' '}
                     {decisionModal.requestType === 'cancellation' ? 'Cancellation' : 'Return'}
                   </h3>
-                  <p className="text-xs text-gray-500 truncate max-w-[260px]">
+                  <p className="text-xs text-foreground-muted truncate max-w-[260px]">
                     {decisionModal.productName}
                   </p>
                 </div>
               </div>
               <button
                 onClick={() => setDecisionModal(null)}
-                className="p-1 rounded-lg text-gray-400 hover:text-gray-700"
+                className="p-1 rounded-lg text-foreground-muted hover:text-foreground"
               >
                 <X className="w-5 h-5" />
               </button>
@@ -1324,7 +1324,7 @@ export function SellerOrdersManager({ initialStatusFilter = 'all' }: SellerOrder
 
             <div className="space-y-3 text-xs">
               {decisionModal.action === 'approve' ? (
-                <div className="p-3 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-900 leading-relaxed">
+                <div className="p-3 rounded-xl bg-success-bg border border-success/20 text-emerald-900 leading-relaxed">
                   <p className="font-bold">Approval Notice:</p>
                   <p className="mt-0.5">
                     {decisionModal.requestType === 'cancellation'
@@ -1333,7 +1333,7 @@ export function SellerOrdersManager({ initialStatusFilter = 'all' }: SellerOrder
                   </p>
                 </div>
               ) : (
-                <div className="p-3 rounded-xl bg-red-50 border border-red-200 text-red-900 leading-relaxed">
+                <div className="p-3 rounded-xl bg-error-bg border border-error/20 text-red-900 leading-relaxed">
                   <p className="font-bold">Rejection Notice:</p>
                   <p className="mt-0.5">
                     A recorded reason is mandatory when rejecting a customer request. This reason will be logged and visible to the customer and admin.
@@ -1342,7 +1342,7 @@ export function SellerOrdersManager({ initialStatusFilter = 'all' }: SellerOrder
               )}
 
               <div>
-                <label className="block font-bold text-gray-700 mb-1">
+                <label className="block font-bold text-foreground mb-1">
                   {decisionModal.action === 'reject' ? 'Rejection Reason (Required)' : 'Notes / Remarks (Optional)'}
                 </label>
                 <textarea
@@ -1354,7 +1354,7 @@ export function SellerOrdersManager({ initialStatusFilter = 'all' }: SellerOrder
                       ? 'Explain why this request is being rejected (mandatory)...'
                       : 'Add any optional notes for the customer and audit log...'
                   }
-                  className="w-full p-2.5 rounded-xl border border-gray-200 text-xs font-medium outline-none focus:ring-2 focus:ring-[#0f3e26]/20 resize-none"
+                  className="w-full p-2.5 rounded-xl border border-border text-xs font-medium outline-none focus:ring-2 focus:ring-primary/20 resize-none"
                   required={decisionModal.action === 'reject'}
                 />
               </div>
@@ -1365,7 +1365,7 @@ export function SellerOrdersManager({ initialStatusFilter = 'all' }: SellerOrder
                 type="button"
                 disabled={isSubmittingDecision}
                 onClick={() => setDecisionModal(null)}
-                className="px-4 py-2 text-xs font-bold text-gray-600 hover:bg-gray-100 rounded-xl"
+                className="px-4 py-2 text-xs font-bold text-foreground-muted hover:bg-surface-muted rounded-xl"
               >
                 Cancel
               </button>

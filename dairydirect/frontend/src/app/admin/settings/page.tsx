@@ -85,7 +85,7 @@ export default function AdminSettingsPage() {
       <div className="px-6 md:px-10 py-6 max-w-4xl">
         {toast && (
           <div className="mb-6 p-4 rounded-[12px] flex items-center gap-3" style={{
-            background: toast.type === 'success' ? '#c2efac' : '#ffdad6',
+            background: toast.type === 'success' ? 'var(--success-bg)' : '#ffdad6',
             color: toast.type === 'success' ? '#2d5a27' : '#93000a',
           }}>
             {toast.type === 'success' ? <CheckCircle2 className="w-5 h-5" /> : <AlertCircle className="w-5 h-5" />}
@@ -216,9 +216,9 @@ export default function AdminSettingsPage() {
                       className="w-full px-3 py-2 rounded-[10px] text-[14px] font-bold border"
                       style={{ background: 'var(--color-surface-container-low)', borderColor: 'rgba(195,201,187,0.4)', color: 'var(--color-on-surface)' }}
                     />
-                    <span className="absolute right-3 top-2 text-[12px] text-gray-400 font-bold">hrs</span>
+                    <span className="absolute right-3 top-2 text-[12px] text-foreground-muted font-bold">hrs</span>
                   </div>
-                  <span className="text-[10px] text-gray-500 mt-1 block">Milk, Curd, Paneer, Butter, Sweets</span>
+                  <span className="text-[10px] text-foreground-muted mt-1 block">Milk, Curd, Paneer, Butter, Sweets</span>
                 </div>
 
                 <div>
@@ -234,9 +234,9 @@ export default function AdminSettingsPage() {
                       className="w-full px-3 py-2 rounded-[10px] text-[14px] font-bold border"
                       style={{ background: 'var(--color-surface-container-low)', borderColor: 'rgba(195,201,187,0.4)', color: 'var(--color-on-surface)' }}
                     />
-                    <span className="absolute right-3 top-2 text-[12px] text-gray-400 font-bold">hrs</span>
+                    <span className="absolute right-3 top-2 text-[12px] text-foreground-muted font-bold">hrs</span>
                   </div>
-                  <span className="text-[10px] text-gray-500 mt-1 block">Ghee, honey, dry pantry items</span>
+                  <span className="text-[10px] text-foreground-muted mt-1 block">Ghee, honey, dry pantry items</span>
                 </div>
 
                 <div>
@@ -252,9 +252,9 @@ export default function AdminSettingsPage() {
                       className="w-full px-3 py-2 rounded-[10px] text-[14px] font-bold border"
                       style={{ background: 'var(--color-surface-container-low)', borderColor: 'rgba(195,201,187,0.4)', color: 'var(--color-on-surface)' }}
                     />
-                    <span className="absolute right-3 top-2 text-[12px] text-gray-400 font-bold">hrs</span>
+                    <span className="absolute right-3 top-2 text-[12px] text-foreground-muted font-bold">hrs</span>
                   </div>
-                  <span className="text-[10px] text-gray-500 mt-1 block">Replacement dispatch window</span>
+                  <span className="text-[10px] text-foreground-muted mt-1 block">Replacement dispatch window</span>
                 </div>
               </div>
             </div>
@@ -272,7 +272,7 @@ export default function AdminSettingsPage() {
                   onChange={e => setSettings({ ...settings, is_ordering_enabled: e.target.checked })}
                   className="sr-only peer"
                 />
-                <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#4a8c3f]"></div>
+                <div className="w-11 h-6 bg-border peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-surface after:border-border-hover after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[var(--success)]"></div>
               </label>
             </div>
 

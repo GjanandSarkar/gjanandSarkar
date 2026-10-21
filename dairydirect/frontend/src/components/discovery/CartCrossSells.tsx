@@ -90,34 +90,34 @@ export function CartCrossSells() {
   if (!isLoading && suggestions.length === 0) return null;
 
   return (
-    <div className="py-4 border-t border-sand/50">
-      <div className="flex items-center gap-2 mb-3 px-4">
+    <div className="py-3">
+      <div className="flex items-center gap-2 mb-2.5">
         <Sparkles className="w-4 h-4 text-primary" />
-        <h3 className="text-sm font-black text-dark">Perfect with your order</h3>
+        <h3 className="text-xs font-bold text-foreground">You might also like</h3>
       </div>
       
-      <div className="flex gap-3 overflow-x-auto no-scrollbar snap-rail px-4 pb-4">
+      <div className="flex gap-2.5 overflow-x-auto no-scrollbar pb-1">
         {isLoading ? (
           <>
             {[1, 2, 3].map(i => (
-              <div key={i} className="w-[120px] shrink-0 h-[140px] bg-sand/20 animate-pulse rounded-xl" />
+              <div key={i} className="w-[110px] shrink-0 h-[140px] bg-surface-muted animate-pulse rounded-xl border border-border" />
             ))}
           </>
         ) : (
           <>
             {suggestions.map(product => (
-              <div key={product.id} className="w-[120px] shrink-0 bg-white border border-sand/50 rounded-[16px] p-2.5 flex flex-col items-center text-center shadow-sm relative">
-                <div className="w-16 h-16 bg-sky-50 rounded-full mb-2 flex items-center justify-center p-1.5 overflow-hidden border border-sand/30">
+              <div key={product.id} className="w-[115px] shrink-0 bg-surface border border-border rounded-xl p-2 flex flex-col items-center text-center">
+                <div className="w-14 h-14 bg-surface-muted rounded-lg mb-1.5 flex items-center justify-center p-1 overflow-hidden border border-border/60">
                   <img src={product.image_url || PLACEHOLDER_PRODUCT_IMAGE} alt={product.name} className="w-full h-full object-contain" />
                 </div>
-                <p className="text-[11px] font-bold text-dark leading-tight mb-1 line-clamp-2">{product.name}</p>
-                <p className="text-[12px] font-black text-primary mb-2 mt-auto">₹{product.product_variants[0]?.price}</p>
+                <p className="text-[11px] font-semibold text-foreground leading-tight mb-1 line-clamp-1 w-full">{product.name}</p>
+                <p className="text-xs font-extrabold text-primary mb-1.5 mt-auto">₹{product.product_variants[0]?.price}</p>
                 <button 
                   onClick={() => handleAdd(product)}
                   disabled={addingId === product.id}
-                  className="w-full h-8 bg-mint/50 hover:bg-mint text-primary rounded-lg flex items-center justify-center transition-colors disabled:opacity-50"
+                  className="w-full h-6 rounded-md bg-primary/10 hover:bg-primary text-primary hover:text-foreground-inverse text-[11px] font-bold flex items-center justify-center transition-colors disabled:opacity-50 cursor-pointer"
                 >
-                  <Plus className="w-4 h-4" />
+                  <Plus className="w-3.5 h-3.5 mr-0.5" /> ADD
                 </button>
               </div>
             ))}

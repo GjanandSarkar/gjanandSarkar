@@ -89,29 +89,29 @@ export default function FAQPage() {
         
         {/* Header */}
         <div className="text-center mb-10">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-100/80 text-[#0f3e26] text-xs font-bold uppercase tracking-wider mb-4">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 text-primary text-xs font-bold uppercase tracking-wider mb-3">
             <HelpCircle className="w-3.5 h-3.5" />
             <span>Customer Knowledge Base</span>
           </div>
-          <h1 className="text-3xl sm:text-4xl font-black text-[#0f3e26] tracking-tight mb-3">
+          <h1 className="text-2xl sm:text-3xl font-extrabold text-foreground tracking-tight mb-2">
             Frequently Asked Questions
           </h1>
-          <p className="text-xs sm:text-sm text-gray-600 max-w-xl mx-auto leading-relaxed">
+          <p className="text-xs sm:text-sm text-muted-foreground max-w-xl mx-auto leading-relaxed">
             Everything you need to know about ordering, delivery, subscriptions
             and how we pick our partner brands.
           </p>
         </div>
 
         {/* Category Filter Pills */}
-        <div className="flex items-center justify-start sm:justify-center gap-2 overflow-x-auto no-scrollbar pb-4 mb-8">
+        <div className="flex items-center justify-start sm:justify-center gap-2 overflow-x-auto no-scrollbar pb-3 mb-6">
           {categories.map((cat) => (
             <button
               key={cat}
               onClick={() => setSelectedCategory(cat)}
               className={`px-4 py-2 rounded-full text-xs font-bold transition-all shrink-0 cursor-pointer ${
                 selectedCategory === cat
-                  ? 'bg-[#0f3e26] text-white shadow-sm'
-                  : 'bg-white text-gray-700 border border-gray-200 hover:bg-gray-50'
+                  ? 'bg-primary text-white shadow-xs'
+                  : 'bg-white text-muted-foreground border border-border hover:bg-neutral-50 hover:text-foreground'
               }`}
             >
               {cat}
@@ -126,25 +126,25 @@ export default function FAQPage() {
             return (
               <div
                 key={idx}
-                className="bg-white border border-gray-200 rounded-2xl overflow-hidden shadow-2xs transition-all"
+                className="bg-white border border-border rounded-xl overflow-hidden shadow-2xs transition-all"
               >
                 <button
                   type="button"
                   onClick={() => setOpenIndex(isOpen ? null : idx)}
-                  className="w-full p-5 text-left flex items-center justify-between gap-4 cursor-pointer hover:bg-gray-50/50 transition-colors"
+                  className="w-full p-4 sm:p-5 text-left flex items-center justify-between gap-4 cursor-pointer hover:bg-neutral-50/70 transition-colors"
                 >
-                  <span className="text-xs sm:text-sm font-bold text-gray-900 leading-snug">
+                  <span className="text-xs sm:text-sm font-bold text-foreground leading-snug">
                     {faq.question}
                   </span>
                   <ChevronDown
-                    className={`w-4 h-4 text-gray-500 shrink-0 transition-transform duration-200 ${
-                      isOpen ? 'rotate-180 text-[#c88a23]' : ''
+                    className={`w-4 h-4 text-muted-foreground shrink-0 transition-transform duration-200 ${
+                      isOpen ? 'rotate-180 text-primary' : ''
                     }`}
                   />
                 </button>
 
                 {isOpen && (
-                  <div className="px-5 pb-5 pt-1 text-xs sm:text-[13px] text-gray-600 leading-relaxed border-t border-gray-100 bg-[#fdfdfc]">
+                  <div className="px-4 sm:px-5 pb-5 pt-1 text-xs sm:text-[13px] text-muted-foreground leading-relaxed border-t border-border/60 bg-neutral-50/40">
                     {faq.answer}
                   </div>
                 )}
@@ -154,19 +154,19 @@ export default function FAQPage() {
         </div>
 
         {/* Still Have Questions Box */}
-        <div className="mt-12 bg-gradient-to-r from-[#0f3e26] to-[#175c3a] rounded-3xl p-6 sm:p-8 text-white flex flex-col sm:flex-row items-center justify-between gap-6 shadow-lg">
+        <div className="mt-10 bg-white border border-border rounded-2xl p-6 sm:p-7 flex flex-col sm:flex-row items-center justify-between gap-6 shadow-xs">
           <div>
-            <h3 className="text-lg font-black text-amber-300 mb-1">
+            <h3 className="text-base font-extrabold text-foreground mb-1">
               Still have questions?
             </h3>
-            <p className="text-xs text-emerald-100/90 leading-relaxed max-w-md">
+            <p className="text-xs text-muted-foreground leading-relaxed max-w-md">
               Our customer success team is here to help with order changes, returns
               or any other question.
             </p>
           </div>
           <Link
             href="/contact"
-            className="px-6 py-3 bg-[#c88a23] hover:bg-[#b0781c] text-white text-xs font-extrabold rounded-xl transition-all shadow-md shrink-0 flex items-center gap-2"
+            className="px-5 py-2.5 bg-primary hover:bg-primary-hover text-white text-xs font-bold rounded-xl transition-all shadow-xs shrink-0 flex items-center gap-2"
           >
             <PhoneCall className="w-4 h-4" />
             <span>Contact Support</span>

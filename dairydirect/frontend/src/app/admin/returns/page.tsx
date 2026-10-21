@@ -107,7 +107,7 @@ type AdminRequestRecord = {
 
 const STATUS_BADGES: Record<string, { bg: string; text: string; label: string }> = {
   initiated:        { bg: '#fef3c7', text: '#92400e', label: 'Initiated' },
-  picked_up:        { bg: '#e0e7ff', text: '#3730a3', label: 'Picked Up' },
+  picked_up:        { bg: 'var(--info-bg)', text: '#3730a3', label: 'Picked Up' },
   received:         { bg: '#dbeafe', text: '#1e40af', label: 'Received' },
   refund_initiated: { bg: '#fed7aa', text: '#9a3412', label: 'Refund Initiated' },
   refunded:         { bg: '#dcfce7', text: '#166534', label: 'Refunded' },
@@ -292,36 +292,36 @@ export default function AdminReturnsPage() {
   };
 
   return (
-    <div className="flex flex-col min-h-screen bg-[#fafaf8]">
+    <div className="flex flex-col min-h-screen bg-background">
       {/* Top Header */}
-      <div className="px-6 md:px-10 pt-8 pb-6 bg-white border-b border-gray-200/90 shadow-2xs">
+      <div className="px-6 md:px-10 pt-8 pb-6 bg-surface border-b border-border/90 shadow-2xs">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div className="flex items-center gap-4">
             <Link
               href="/admin"
-              className="p-2.5 rounded-xl border border-gray-200 text-gray-700 hover:bg-gray-50 flex items-center justify-center transition-colors shrink-0"
+              className="p-2.5 rounded-xl border border-border text-foreground hover:bg-surface-muted flex items-center justify-center transition-colors shrink-0"
               title="Return to Admin"
             >
-              <ArrowLeft className="w-5 h-5 text-gray-700" />
+              <ArrowLeft className="w-5 h-5 text-foreground" />
             </Link>
 
             <div>
               <div className="flex items-center gap-2">
-                <span className="px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 text-[10px] font-black uppercase tracking-wider">
+                <span className="px-2 py-0.5 rounded-full bg-success-bg text-emerald-800 text-[10px] font-black uppercase tracking-wider">
                   Admin Global Operations
                 </span>
                 {stuckCount > 0 && (
-                  <span className="px-2 py-0.5 rounded-full bg-red-100 text-red-800 text-[10px] font-black uppercase tracking-wider flex items-center gap-1 animate-pulse">
+                  <span className="px-2 py-0.5 rounded-full bg-error-bg text-error text-[10px] font-black uppercase tracking-wider flex items-center gap-1 animate-pulse">
                     <AlertTriangle className="w-3 h-3" />
                     <span>{stuckCount} Stuck &gt;3d</span>
                   </span>
                 )}
               </div>
-              <h1 className="text-xl md:text-2xl font-black text-[#0f3e26] tracking-tight flex items-center gap-2 mt-0.5">
+              <h1 className="text-xl md:text-2xl font-black text-primary tracking-tight flex items-center gap-2 mt-0.5">
                 <RotateCcw className="w-6 h-6 text-[#c88a23]" />
                 <span>Returns & Replacements Monitoring Desk</span>
               </h1>
-              <p className="text-xs text-gray-500 mt-0.5">
+              <p className="text-xs text-foreground-muted mt-0.5">
                 Monitor fulfillment progression, enforce policy compliance, oversee Razorpay refunds, and execute COD payouts.
               </p>
             </div>
@@ -331,10 +331,10 @@ export default function AdminReturnsPage() {
             <button
               onClick={fetchRequests}
               disabled={isLoading}
-              className="p-2.5 border border-gray-200 text-gray-700 hover:bg-gray-50 rounded-xl transition-colors shrink-0 cursor-pointer"
+              className="p-2.5 border border-border text-foreground hover:bg-surface-muted rounded-xl transition-colors shrink-0 cursor-pointer"
               title="Refresh Requests"
             >
-              <RefreshCw className={`w-4 h-4 ${isLoading ? 'animate-spin text-[#0f3e26]' : ''}`} />
+              <RefreshCw className={`w-4 h-4 ${isLoading ? 'animate-spin text-primary' : ''}`} />
             </button>
           </div>
         </div>
@@ -344,7 +344,7 @@ export default function AdminReturnsPage() {
           <button
             onClick={() => setTabFilter('all')}
             className={`p-3.5 rounded-2xl border text-left transition-all ${
-              tabFilter === 'all' ? 'bg-[#0f3e26] text-white border-[#0f3e26] shadow-sm' : 'bg-gray-50 border-gray-200/80 text-gray-700 hover:bg-gray-100'
+              tabFilter === 'all' ? 'bg-primary text-white border-primary shadow-sm' : 'bg-surface-muted border-border/80 text-foreground hover:bg-surface-muted'
             }`}
           >
             <p className="text-[10px] font-bold uppercase tracking-wider opacity-80">Total</p>
@@ -354,7 +354,7 @@ export default function AdminReturnsPage() {
           <button
             onClick={() => setTabFilter('returns')}
             className={`p-3.5 rounded-2xl border text-left transition-all ${
-              tabFilter === 'returns' ? 'bg-blue-900 text-white border-blue-900 shadow-sm' : 'bg-blue-50/50 border-blue-100 text-blue-900 hover:bg-blue-50'
+              tabFilter === 'returns' ? 'bg-blue-900 text-white border-blue-900 shadow-sm' : 'bg-info-bg/50 border-blue-100 text-blue-900 hover:bg-info-bg'
             }`}
           >
             <p className="text-[10px] font-bold uppercase tracking-wider opacity-80">Open Returns</p>
@@ -364,7 +364,7 @@ export default function AdminReturnsPage() {
           <button
             onClick={() => setTabFilter('replacements')}
             className={`p-3.5 rounded-2xl border text-left transition-all ${
-              tabFilter === 'replacements' ? 'bg-amber-900 text-white border-amber-900 shadow-sm' : 'bg-amber-50/50 border-amber-100 text-amber-900 hover:bg-amber-50'
+              tabFilter === 'replacements' ? 'bg-amber-900 text-white border-amber-900 shadow-sm' : 'bg-warning-bg/50 border-amber-100 text-amber-900 hover:bg-warning-bg'
             }`}
           >
             <p className="text-[10px] font-bold uppercase tracking-wider opacity-80">Open Replacements</p>
@@ -384,20 +384,20 @@ export default function AdminReturnsPage() {
           <button
             onClick={() => setTabFilter('failed_refunds')}
             className={`p-3.5 rounded-2xl border text-left transition-all ${
-              tabFilter === 'failed_refunds' ? 'bg-red-800 text-white border-red-800 shadow-sm' : 'bg-red-50/60 border-red-100 text-red-900 hover:bg-red-50'
+              tabFilter === 'failed_refunds' ? 'bg-red-800 text-white border-red-800 shadow-sm' : 'bg-error-bg/60 border-red-100 text-red-900 hover:bg-error-bg'
             }`}
           >
             <div className="flex items-center justify-between">
               <p className="text-[10px] font-bold uppercase tracking-wider opacity-80">Refunds Failed</p>
               {failedRefundsCount > 0 && <span className="w-2 h-2 rounded-full bg-red-600 animate-ping" />}
             </div>
-            <p className="text-xl font-black text-red-700">{failedRefundsCount}</p>
+            <p className="text-xl font-black text-error">{failedRefundsCount}</p>
           </button>
 
           <button
             onClick={() => setTabFilter('cod_awaiting')}
             className={`p-3.5 rounded-2xl border text-left transition-all ${
-              tabFilter === 'cod_awaiting' ? 'bg-emerald-900 text-white border-emerald-900 shadow-sm' : 'bg-emerald-50/50 border-emerald-100 text-emerald-900 hover:bg-emerald-50'
+              tabFilter === 'cod_awaiting' ? 'bg-emerald-900 text-white border-emerald-900 shadow-sm' : 'bg-success-bg/50 border-emerald-100 text-emerald-900 hover:bg-success-bg'
             }`}
           >
             <p className="text-[10px] font-bold uppercase tracking-wider opacity-80">COD Awaiting Payout</p>
@@ -410,15 +410,15 @@ export default function AdminReturnsPage() {
       <div className="flex-1 px-6 md:px-10 py-6 max-w-7xl w-full mx-auto space-y-6">
         
         {/* Search & Status Filters */}
-        <div className="bg-white rounded-3xl border border-gray-200/90 shadow-2xs p-4 flex flex-col md:flex-row gap-4 items-center justify-between">
+        <div className="bg-surface rounded-3xl border border-border/90 shadow-2xs p-4 flex flex-col md:flex-row gap-4 items-center justify-between">
           <div className="relative w-full md:w-96">
-            <Search className="w-4 h-4 text-gray-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
+            <Search className="w-4 h-4 text-foreground-muted absolute left-3.5 top-1/2 -translate-y-1/2" />
             <input
               type="text"
               placeholder="Search by order #, customer, phone, seller..."
               value={searchQuery}
               onChange={e => setSearchQuery(e.target.value)}
-              className="w-full pl-10 pr-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-xs text-gray-800 focus:outline-none focus:ring-2 focus:ring-[#0f3e26]"
+              className="w-full pl-10 pr-4 py-2 bg-surface-muted border border-border rounded-xl text-xs text-foreground focus:outline-none focus:ring-2 focus:ring-[var(--primary)]"
             />
           </div>
 
@@ -437,8 +437,8 @@ export default function AdminReturnsPage() {
                 onClick={() => setStatusFilter(tab.id)}
                 className={`px-3 py-1.5 rounded-full text-xs font-bold whitespace-nowrap transition-all cursor-pointer ${
                   statusFilter === tab.id
-                    ? 'bg-[#0f3e26] text-white shadow-xs'
-                    : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'
+                    ? 'bg-primary text-white shadow-xs'
+                    : 'text-foreground-muted hover:text-foreground hover:bg-surface-muted'
                 }`}
               >
                 {tab.label}
@@ -450,17 +450,17 @@ export default function AdminReturnsPage() {
         {/* Requests List */}
         {isLoading ? (
           <div className="py-20 flex flex-col items-center justify-center gap-3">
-            <Loader2 className="w-8 h-8 text-[#0f3e26] animate-spin" />
-            <p className="text-xs font-semibold text-gray-500">Loading returns & replacements...</p>
+            <Loader2 className="w-8 h-8 text-primary animate-spin" />
+            <p className="text-xs font-semibold text-foreground-muted">Loading returns & replacements...</p>
           </div>
         ) : filteredRequests.length === 0 ? (
-          <div className="bg-white rounded-3xl border border-gray-200 p-12 text-center space-y-4">
-            <div className="w-16 h-16 rounded-2xl bg-gray-100 text-gray-400 flex items-center justify-center mx-auto">
+          <div className="bg-surface rounded-3xl border border-border p-12 text-center space-y-4">
+            <div className="w-16 h-16 rounded-2xl bg-surface-muted text-foreground-muted flex items-center justify-center mx-auto">
               <RotateCcw className="w-8 h-8" />
             </div>
             <div className="space-y-1">
-              <h4 className="font-extrabold text-base text-gray-900">No Requests Found</h4>
-              <p className="text-xs text-gray-500 max-w-sm mx-auto">
+              <h4 className="font-extrabold text-base text-foreground">No Requests Found</h4>
+              <p className="text-xs text-foreground-muted max-w-sm mx-auto">
                 No return or replacement records match the active search and queue criteria.
               </p>
             </div>
@@ -477,19 +477,19 @@ export default function AdminReturnsPage() {
               return (
                 <div
                   key={req.id}
-                  className={`bg-white rounded-3xl border p-6 space-y-5 transition-all shadow-2xs ${
-                    stuck ? 'border-amber-400/80 ring-2 ring-amber-100' : 'border-gray-200/90 hover:border-gray-300'
+                  className={`bg-surface rounded-3xl border p-6 space-y-5 transition-all shadow-2xs ${
+                    stuck ? 'border-amber-400/80 ring-2 ring-amber-100' : 'border-border/90 hover:border-border-hover'
                   }`}
                 >
                   {/* Top Bar: ID, Type, Status, Stuck Warning, Dates */}
-                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-gray-100">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-border">
                     <div className="flex items-center gap-3 flex-wrap">
-                      <span className="font-mono text-xs font-black text-gray-500">
+                      <span className="font-mono text-xs font-black text-foreground-muted">
                         REQ #{req.id.slice(0, 8).toUpperCase()}
                       </span>
 
                       <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider flex items-center gap-1 ${
-                        isReplacement ? 'bg-purple-100 text-purple-900' : 'bg-blue-100 text-blue-900'
+                        isReplacement ? 'bg-purple-100 text-purple-900' : 'bg-info-bg text-blue-900'
                       }`}>
                         {isReplacement ? <Repeat className="w-3 h-3" /> : <RotateCcw className="w-3 h-3" />}
                         <span>{req.request_type}</span>
@@ -503,18 +503,18 @@ export default function AdminReturnsPage() {
                       </span>
 
                       {stuck && (
-                        <span className="px-2 py-0.5 rounded-full bg-amber-100 text-amber-900 text-[10px] font-black uppercase tracking-wider flex items-center gap-1">
-                          <Clock className="w-3 h-3 text-amber-700" />
+                        <span className="px-2 py-0.5 rounded-full bg-warning-bg text-amber-900 text-[10px] font-black uppercase tracking-wider flex items-center gap-1">
+                          <Clock className="w-3 h-3 text-warning" />
                           <span>Stuck &gt; 3 Days</span>
                         </span>
                       )}
                     </div>
 
-                    <div className="flex items-center gap-3 text-xs text-gray-500">
+                    <div className="flex items-center gap-3 text-xs text-foreground-muted">
                       <span>Submitted {format(new Date(req.created_at), 'MMM d, yyyy · h:mm a')}</span>
                       <button
                         onClick={() => setHistoryModalRequest(req)}
-                        className="p-1 rounded-lg hover:bg-gray-100 text-gray-400 hover:text-gray-700 transition-colors"
+                        className="p-1 rounded-lg hover:bg-surface-muted text-foreground-muted hover:text-foreground transition-colors"
                         title="View Complete Request History"
                       >
                         <History className="w-4 h-4" />
@@ -527,28 +527,28 @@ export default function AdminReturnsPage() {
 
                     {/* Column 1: Product & Order */}
                     <div className="space-y-2">
-                      <span className="text-[10px] font-bold uppercase tracking-wider text-gray-400 block">
+                      <span className="text-[10px] font-bold uppercase tracking-wider text-foreground-muted block">
                         Item & Order Information
                       </span>
                       <div className="flex items-start gap-3">
                         <img
                           src={req.product_image || PLACEHOLDER_PRODUCT_IMAGE}
                           alt={req.product_name}
-                          className="w-14 h-14 rounded-xl object-cover bg-gray-50 border border-gray-100 shrink-0"
+                          className="w-14 h-14 rounded-xl object-cover bg-surface-muted border border-border shrink-0"
                           onError={e => {
                             (e.target as HTMLImageElement).src = PLACEHOLDER_PRODUCT_IMAGE;
                           }}
                         />
                         <div className="space-y-0.5 min-w-0">
-                          <p className="text-xs font-bold text-gray-900 leading-snug">{req.product_name}</p>
-                          <p className="text-[11px] text-gray-500">
+                          <p className="text-xs font-bold text-foreground leading-snug">{req.product_name}</p>
+                          <p className="text-[11px] text-foreground-muted">
                             {req.variant_weight && <span className="font-medium mr-2">{req.variant_weight}</span>}
-                            <span>Qty: <strong className="text-gray-800">{req.item_quantity}</strong></span>
+                            <span>Qty: <strong className="text-foreground">{req.item_quantity}</strong></span>
                             <span className="mx-1">·</span>
-                            <span>Price: <strong className="text-gray-800">₹{req.item_price}</strong></span>
+                            <span>Price: <strong className="text-foreground">₹{req.item_price}</strong></span>
                           </p>
-                          <p className="text-[11px] text-gray-600">
-                            Order: <Link href={`/orders/${req.order_id}`} className="font-mono font-bold text-[#0f3e26] hover:underline" target="_blank">
+                          <p className="text-[11px] text-foreground-muted">
+                            Order: <Link href={`/orders/${req.order_id}`} className="font-mono font-bold text-primary hover:underline" target="_blank">
                               #{req.order_number}
                             </Link>
                           </p>
@@ -558,23 +558,23 @@ export default function AdminReturnsPage() {
 
                     {/* Column 2: Customer & Seller */}
                     <div className="space-y-2">
-                      <span className="text-[10px] font-bold uppercase tracking-wider text-gray-400 block">
+                      <span className="text-[10px] font-bold uppercase tracking-wider text-foreground-muted block">
                         Customer & Fulfillment
                       </span>
-                      <div className="space-y-1 text-xs text-gray-600">
-                        <div className="flex items-center gap-1.5 font-bold text-gray-900">
-                          <User className="w-3.5 h-3.5 text-gray-400" />
+                      <div className="space-y-1 text-xs text-foreground-muted">
+                        <div className="flex items-center gap-1.5 font-bold text-foreground">
+                          <User className="w-3.5 h-3.5 text-foreground-muted" />
                           <span>{req.customer_name}</span>
                         </div>
                         {req.customer_phone && (
-                          <div className="flex items-center gap-1.5 text-gray-500">
-                            <Phone className="w-3.5 h-3.5 text-gray-400" />
+                          <div className="flex items-center gap-1.5 text-foreground-muted">
+                            <Phone className="w-3.5 h-3.5 text-foreground-muted" />
                             <span>{req.customer_phone}</span>
                           </div>
                         )}
-                        <div className="flex items-center gap-1.5 text-gray-500">
-                          <Store className="w-3.5 h-3.5 text-gray-400" />
-                          <span>Seller: <strong className="text-gray-800">{req.seller_name}</strong></span>
+                        <div className="flex items-center gap-1.5 text-foreground-muted">
+                          <Store className="w-3.5 h-3.5 text-foreground-muted" />
+                          <span>Seller: <strong className="text-foreground">{req.seller_name}</strong></span>
                         </div>
                         {req.replacement_tracking_no && (
                           <div className="flex items-center gap-1.5 text-purple-700 font-bold bg-purple-50 px-2 py-0.5 rounded-lg border border-purple-200">
@@ -587,17 +587,17 @@ export default function AdminReturnsPage() {
 
                     {/* Column 3: Payment & Refund Status */}
                     <div className="space-y-2">
-                      <span className="text-[10px] font-bold uppercase tracking-wider text-gray-400 block">
+                      <span className="text-[10px] font-bold uppercase tracking-wider text-foreground-muted block">
                         Payment & Refund Lifecycle
                       </span>
-                      <div className="space-y-1.5 text-xs text-gray-600">
+                      <div className="space-y-1.5 text-xs text-foreground-muted">
                         <div className="flex justify-between items-center">
-                          <span className="text-gray-400">Order Payment:</span>
-                          <span className="font-bold text-gray-900 uppercase">{req.payment_method} · {req.payment_status}</span>
+                          <span className="text-foreground-muted">Order Payment:</span>
+                          <span className="font-bold text-foreground uppercase">{req.payment_method} · {req.payment_status}</span>
                         </div>
                         <div className="flex justify-between items-center">
-                          <span className="text-gray-400">Target Refund:</span>
-                          <span className="font-black text-[#0f3e26]">
+                          <span className="text-foreground-muted">Target Refund:</span>
+                          <span className="font-black text-primary">
                             ₹{req.refund_amount || (req.item_price * req.item_quantity)}
                           </span>
                         </div>
@@ -605,9 +605,9 @@ export default function AdminReturnsPage() {
                         {req.refund && (
                           <div className={`p-2.5 rounded-xl border text-[11px] space-y-1 ${
                             req.refund.status === 'failed'
-                              ? 'bg-red-50 border-red-200 text-red-900'
+                              ? 'bg-error-bg border-error/20 text-red-900'
                               : req.refund.status === 'completed'
-                              ? 'bg-emerald-50 border-emerald-200 text-emerald-900'
+                              ? 'bg-success-bg border-success/20 text-emerald-900'
                               : 'bg-orange-50 border-orange-200 text-orange-900'
                           }`}>
                             <div className="flex justify-between items-center font-bold">
@@ -616,13 +616,13 @@ export default function AdminReturnsPage() {
                             </div>
 
                             {req.refund.razorpay_refund_id && (
-                              <div className="font-mono text-[10px] truncate text-gray-600">
+                              <div className="font-mono text-[10px] truncate text-foreground-muted">
                                 Rzp ID: {req.refund.razorpay_refund_id}
                               </div>
                             )}
 
                             {req.refund.failure_reason && (
-                              <p className="text-red-700 font-medium">Error: {req.refund.failure_reason}</p>
+                              <p className="text-error font-medium">Error: {req.refund.failure_reason}</p>
                             )}
 
                             {upiId && (
@@ -631,10 +631,10 @@ export default function AdminReturnsPage() {
                                 <button
                                   type="button"
                                   onClick={() => copyToClipboard(upiId)}
-                                  className="p-1 hover:bg-black/5 rounded text-gray-700"
+                                  className="p-1 hover:bg-black/5 rounded text-foreground"
                                   title="Copy UPI ID"
                                 >
-                                  {copiedUpi === upiId ? <Check className="w-3 h-3 text-emerald-600" /> : <Copy className="w-3 h-3" />}
+                                  {copiedUpi === upiId ? <Check className="w-3 h-3 text-success" /> : <Copy className="w-3 h-3" />}
                                 </button>
                               </div>
                             )}
@@ -646,22 +646,22 @@ export default function AdminReturnsPage() {
                   </div>
 
                   {/* Customer Reason & Evidence Photos */}
-                  <div className="p-4 rounded-2xl bg-gray-50 border border-gray-200/80 text-xs space-y-2">
+                  <div className="p-4 rounded-2xl bg-surface-muted border border-border/80 text-xs space-y-2">
                     <div>
-                      <span className="font-bold text-gray-700">Reason: </span>
-                      <span className="font-semibold text-gray-900">{req.reason}</span>
+                      <span className="font-bold text-foreground">Reason: </span>
+                      <span className="font-semibold text-foreground">{req.reason}</span>
                     </div>
 
                     {req.description && (
                       <div>
-                        <span className="font-bold text-gray-700">Description: </span>
-                        <span className="text-gray-600 leading-relaxed">{req.description}</span>
+                        <span className="font-bold text-foreground">Description: </span>
+                        <span className="text-foreground-muted leading-relaxed">{req.description}</span>
                       </div>
                     )}
 
                     {req.images && req.images.length > 0 && (
-                      <div className="pt-2 border-t border-gray-200">
-                        <span className="font-bold text-gray-700 block mb-1.5">
+                      <div className="pt-2 border-t border-border">
+                        <span className="font-bold text-foreground block mb-1.5">
                           Evidence Photos ({req.images.length}):
                         </span>
                         <div className="flex gap-2 flex-wrap">
@@ -670,7 +670,7 @@ export default function AdminReturnsPage() {
                               key={idx}
                               type="button"
                               onClick={() => setActiveLightboxImage(imgUrl)}
-                              className="relative w-16 h-16 rounded-xl border border-gray-200 overflow-hidden hover:opacity-80 transition-opacity bg-white group"
+                              className="relative w-16 h-16 rounded-xl border border-border overflow-hidden hover:opacity-80 transition-opacity bg-surface group"
                             >
                               <img src={imgUrl} alt="Defect proof" className="w-full h-full object-cover" />
                               <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity">
@@ -684,8 +684,8 @@ export default function AdminReturnsPage() {
                   </div>
 
                   {/* Admin Actions Bar */}
-                  <div className="pt-2 flex flex-wrap items-center justify-between gap-3 border-t border-gray-100">
-                    <div className="text-[11px] text-gray-500 flex items-center gap-2">
+                  <div className="pt-2 flex flex-wrap items-center justify-between gap-3 border-t border-border">
+                    <div className="text-[11px] text-foreground-muted flex items-center gap-2">
                       <span className="font-medium">Lifecycle Milestones:</span>
                       {req.picked_up_at && <span>Picked up: {format(new Date(req.picked_up_at), 'MMM d, h:mm a')} ·</span>}
                       {req.received_at && <span>Received: {format(new Date(req.received_at), 'MMM d, h:mm a')} ·</span>}
@@ -736,9 +736,9 @@ export default function AdminReturnsPage() {
                               note: '',
                             });
                           }}
-                          className="px-3.5 py-1.5 rounded-xl border border-gray-300 hover:bg-gray-50 text-gray-800 text-xs font-bold flex items-center gap-1.5 transition-colors"
+                          className="px-3.5 py-1.5 rounded-xl border border-border-hover hover:bg-surface-muted text-foreground text-xs font-bold flex items-center gap-1.5 transition-colors"
                         >
-                          <ShieldAlert className="w-3.5 h-3.5 text-amber-600" />
+                          <ShieldAlert className="w-3.5 h-3.5 text-warning" />
                           <span>Override / Advance Status</span>
                         </button>
                       )}
@@ -758,28 +758,28 @@ export default function AdminReturnsPage() {
           <motion.div
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
-            className="w-full max-w-md rounded-3xl bg-white p-6 shadow-2xl space-y-4"
+            className="w-full max-w-md rounded-3xl bg-surface p-6 shadow-2xl space-y-4"
           >
             <div className="flex items-center justify-between pb-2 border-b">
-              <h3 className="font-extrabold text-base text-gray-900 flex items-center gap-2">
-                <ShieldAlert className="w-5 h-5 text-amber-600" />
+              <h3 className="font-extrabold text-base text-foreground flex items-center gap-2">
+                <ShieldAlert className="w-5 h-5 text-warning" />
                 <span>Admin Status Override</span>
               </h3>
-              <button onClick={() => setOverrideModal(null)} className="p-1 rounded-lg hover:bg-gray-100 text-gray-400">
+              <button onClick={() => setOverrideModal(null)} className="p-1 rounded-lg hover:bg-surface-muted text-foreground-muted">
                 <X className="w-5 h-5" />
               </button>
             </div>
 
-            <p className="text-xs text-gray-600">
+            <p className="text-xs text-foreground-muted">
               Request #{overrideModal.request.id.slice(0, 8)} ({overrideModal.request.request_type}) · Current status: <strong className="uppercase">{overrideModal.request.status}</strong>
             </p>
 
             <div className="space-y-1">
-              <label className="text-xs font-bold text-gray-700">Target Next Status</label>
+              <label className="text-xs font-bold text-foreground">Target Next Status</label>
               <select
                 value={overrideModal.toStatus}
                 onChange={e => setOverrideModal({ ...overrideModal, toStatus: e.target.value })}
-                className="w-full p-2.5 rounded-xl border border-gray-300 text-xs font-semibold"
+                className="w-full p-2.5 rounded-xl border border-border-hover text-xs font-semibold"
               >
                 {overrideModal.request.request_type === 'return' ? (
                   <>
@@ -799,27 +799,27 @@ export default function AdminReturnsPage() {
             </div>
 
             <div className="space-y-1">
-              <label className="text-xs font-bold text-gray-700">Audit Log Note (Mandatory)</label>
+              <label className="text-xs font-bold text-foreground">Audit Log Note (Mandatory)</label>
               <textarea
                 rows={3}
                 placeholder="State the justification or inspection findings for this override..."
                 value={overrideModal.note}
                 onChange={e => setOverrideModal({ ...overrideModal, note: e.target.value })}
-                className="w-full p-2.5 rounded-xl border border-gray-300 text-xs text-gray-800 focus:outline-none focus:ring-2 focus:ring-[#0f3e26]"
+                className="w-full p-2.5 rounded-xl border border-border-hover text-xs text-foreground focus:outline-none focus:ring-2 focus:ring-[var(--primary)]"
               />
             </div>
 
             <div className="flex justify-end gap-2 pt-2">
               <button
                 onClick={() => setOverrideModal(null)}
-                className="px-4 py-2 rounded-xl border border-gray-200 text-xs font-bold text-gray-700 hover:bg-gray-50"
+                className="px-4 py-2 rounded-xl border border-border text-xs font-bold text-foreground hover:bg-surface-muted"
               >
                 Cancel
               </button>
               <button
                 disabled={isProcessing || !overrideModal.note.trim()}
                 onClick={handleConfirmOverride}
-                className="px-4 py-2 rounded-xl bg-[#0f3e26] hover:bg-[#165a38] text-white text-xs font-bold disabled:opacity-50 flex items-center gap-1.5"
+                className="px-4 py-2 rounded-xl bg-primary hover:bg-[#165a38] text-white text-xs font-bold disabled:opacity-50 flex items-center gap-1.5"
               >
                 {isProcessing && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
                 <span>Confirm Override</span>
@@ -835,40 +835,40 @@ export default function AdminReturnsPage() {
           <motion.div
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
-            className="w-full max-w-md rounded-3xl bg-white p-6 shadow-2xl space-y-4"
+            className="w-full max-w-md rounded-3xl bg-surface p-6 shadow-2xl space-y-4"
           >
             <div className="flex items-center justify-between pb-2 border-b">
-              <h3 className="font-extrabold text-base text-gray-900 flex items-center gap-2">
-                <CreditCard className="w-5 h-5 text-[#0f3e26]" />
+              <h3 className="font-extrabold text-base text-foreground flex items-center gap-2">
+                <CreditCard className="w-5 h-5 text-primary" />
                 <span>{refundActionModal.action === 'retry_refund' ? 'Retry Failed Razorpay Refund' : 'Mark COD Refund Paid'}</span>
               </h3>
-              <button onClick={() => setRefundActionModal(null)} className="p-1 rounded-lg hover:bg-gray-100 text-gray-400">
+              <button onClick={() => setRefundActionModal(null)} className="p-1 rounded-lg hover:bg-surface-muted text-foreground-muted">
                 <X className="w-5 h-5" />
               </button>
             </div>
 
-            <div className="p-3 bg-gray-50 rounded-2xl border text-xs space-y-1">
+            <div className="p-3 bg-surface-muted rounded-2xl border text-xs space-y-1">
               <p>Order: <strong>#{refundActionModal.request.order_number}</strong></p>
-              <p>Refund Amount: <strong className="text-[#0f3e26]">₹{refundActionModal.request.refund_amount}</strong></p>
+              <p>Refund Amount: <strong className="text-primary">₹{refundActionModal.request.refund_amount}</strong></p>
               {refundActionModal.request.refund?.destination?.upi_id && (
                 <p>Customer UPI ID: <strong className="font-mono text-blue-900">{refundActionModal.request.refund.destination.upi_id}</strong></p>
               )}
             </div>
 
             <div className="space-y-1">
-              <label className="text-xs font-bold text-gray-700">Audit Note</label>
+              <label className="text-xs font-bold text-foreground">Audit Note</label>
               <textarea
                 rows={2}
                 value={refundActionModal.note}
                 onChange={e => setRefundActionModal({ ...refundActionModal, note: e.target.value })}
-                className="w-full p-2.5 rounded-xl border border-gray-300 text-xs text-gray-800"
+                className="w-full p-2.5 rounded-xl border border-border-hover text-xs text-foreground"
               />
             </div>
 
             <div className="flex justify-end gap-2 pt-2">
               <button
                 onClick={() => setRefundActionModal(null)}
-                className="px-4 py-2 rounded-xl border border-gray-200 text-xs font-bold text-gray-700 hover:bg-gray-50"
+                className="px-4 py-2 rounded-xl border border-border text-xs font-bold text-foreground hover:bg-surface-muted"
               >
                 Cancel
               </button>
@@ -899,7 +899,7 @@ export default function AdminReturnsPage() {
             />
             <button
               onClick={() => setActiveLightboxImage(null)}
-              className="absolute -top-3 -right-3 p-2 bg-white rounded-full shadow-lg text-gray-800 hover:bg-gray-100"
+              className="absolute -top-3 -right-3 p-2 bg-surface rounded-full shadow-lg text-foreground hover:bg-surface-muted"
             >
               <X className="w-5 h-5" />
             </button>
@@ -915,7 +915,7 @@ export default function AdminReturnsPage() {
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: 30 }}
             className={`fixed bottom-6 right-6 z-50 px-4 py-3 rounded-2xl shadow-xl flex items-center gap-2 text-xs font-bold ${
-              toast.type === 'success' ? 'bg-[#0f3e26] text-white' : 'bg-red-600 text-white'
+              toast.type === 'success' ? 'bg-primary text-white' : 'bg-red-600 text-white'
             }`}
           >
             {toast.type === 'success' ? <CheckCircle2 className="w-4 h-4" /> : <AlertTriangle className="w-4 h-4" />}

@@ -55,6 +55,7 @@ export const viewport: Viewport = {
 
 import { LanguageManager } from "@/components/shared/LanguageManager";
 import { AuthProvider } from "@/components/shared/AuthProvider";
+import { ThemeProvider } from "@/components/theme/ThemeProvider";
 import { JsonLd } from "@/components/seo/JsonLd";
 import { BRAND } from "@/lib/constants/brand";
 
@@ -89,19 +90,25 @@ export default function RootLayout({
   return (
     <html lang="en-IN" data-scroll-behavior="smooth" className={`${inter.variable}`} suppressHydrationWarning>
       <head>
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `(function(){try{var t=localStorage.getItem('gjanand-theme');if(t==='dark'){document.documentElement.classList.add('dark');}else{document.documentElement.classList.remove('dark');}}catch(e){}})();`,
+          }}
+        />
         <JsonLd data={orgStructuredData} />
         <JsonLd data={webSiteStructuredData} />
         <link rel="icon" href="/application logo/gjanand sarkar logo.png" type="image/png" />
       </head>
       <body
-        className={`${inter.className} min-h-screen antialiased`}
-        style={{ background: '#fafaf3', color: '#1a1c18' }}
+        className={`${inter.className} min-h-screen antialiased bg-background text-foreground transition-colors duration-150`}
         suppressHydrationWarning
       >
-        <AuthProvider>
-          <LanguageManager />
-          {children}
-        </AuthProvider>
+        <ThemeProvider>
+          <AuthProvider>
+            <LanguageManager />
+            {children}
+          </AuthProvider>
+        </ThemeProvider>
       </body>
     </html>
   );

@@ -14,11 +14,11 @@ export function OrderStatusTimeline({ currentStatus, times = {} }: OrderStatusTi
   const steps = isCancelled ? CANCELLED_STEPS : ORDER_STEPS;
 
   return (
-    <div className="bg-white rounded-[24px] p-6 shadow-sm border border-sand">
+    <div className="bg-surface rounded-xl p-4 sm:p-6 border border-border">
       <div className="flex items-center justify-between mb-6">
-        <h3 className="text-base font-black text-dark tracking-tight">Order Lifecycle Status</h3>
+        <h3 className="text-xs font-bold text-foreground uppercase tracking-wider">Order Progress</h3>
         {isCancelled && (
-          <span className="px-3 py-1 rounded-full text-xs font-bold bg-rose-50 text-rose-700 border border-rose-200">
+          <span className="px-3 py-1 rounded-full text-xs font-bold bg-error-bg text-error border border-error/20">
             Order Cancelled
           </span>
         )}

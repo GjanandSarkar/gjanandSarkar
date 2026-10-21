@@ -6,11 +6,12 @@ import { Footer } from '@/components/navigation/Footer';
 import { BottomNav } from '@/components/shared/BottomNav';
 import { AuthGuard } from '@/components/auth/AuthGuard';
 import { CartContainer } from '@/components/cart/CartContainer';
+import { NotificationDrawer } from '@/components/notifications/NotificationDrawer';
 import { SupportChat } from '@/components/support/SupportChat';
 
 export default function CustomerLayout({ children }: { children: React.ReactNode }) {
   return (
-    <div className="flex flex-col min-h-screen bg-[#fafaf8]" suppressHydrationWarning>
+    <div className="flex flex-col min-h-screen bg-background text-foreground transition-colors duration-150" suppressHydrationWarning>
       <AuthGuard />
       
       {/* Top Announcement Bar */}
@@ -27,15 +28,16 @@ export default function CustomerLayout({ children }: { children: React.ReactNode
           page below stretched to the full width of the display. A generous cap
           leaves laptops unchanged and stops the content sprawling on wide
           monitors; individual pages narrow this further where it reads better. */}
-      <main className="flex-1 w-full max-w-[1600px] mx-auto pb-20 md:pb-0">
+      <main className="flex-1 w-full max-w-[1600px] mx-auto">
         {children}
       </main>
 
       {/* Full Marketplace Footer */}
       <Footer />
 
-      {/* Floating Cart Drawer & Mobile Navigation */}
+      {/* Floating Cart Drawer, Notifications & Mobile Navigation */}
       <CartContainer />
+      <NotificationDrawer />
       <BottomNav />
 
       {/* Scripted, order-aware help assistant */}
