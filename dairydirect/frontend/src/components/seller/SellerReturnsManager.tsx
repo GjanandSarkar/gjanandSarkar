@@ -562,7 +562,7 @@ export function SellerReturnsManager() {
                             setActionType('approve');
                             setActionNotes('');
                           }}
-                          className="px-3.5 py-1.5 rounded-xl bg-success hover:bg-success text-white text-xs font-bold flex items-center gap-1.5 shadow-xs transition-colors cursor-pointer"
+                          className="px-3.5 py-1.5 rounded-xl bg-success hover:bg-success text-on-success text-xs font-bold flex items-center gap-1.5 shadow-xs transition-colors cursor-pointer"
                         >
                           <CheckCircle2 className="w-3.5 h-3.5" />
                           <span>Approve {req.request_type === 'cancellation' ? 'Cancellation' : 'Return'}</span>
@@ -710,7 +710,7 @@ export function SellerReturnsManager() {
                 type="button"
                 disabled={isProcessing || (actionType === 'reject' && !actionNotes.trim())}
                 onClick={handleConfirmAction}
-                className="px-5 py-2 text-xs font-bold bg-primary hover:bg-[#165a37] text-white rounded-xl shadow-xs disabled:opacity-50 flex items-center gap-1.5 cursor-pointer"
+                className="px-5 py-2 text-xs font-bold bg-primary hover:bg-[#165a37] text-on-primary rounded-xl shadow-xs disabled:opacity-50 flex items-center gap-1.5 cursor-pointer"
               >
                 {isProcessing && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
                 <span>Confirm {actionType.replace(/_/g, ' ')}</span>

@@ -39,7 +39,7 @@ export default function QualityReportsScreen() {
         <div className="bg-gradient-to-br from-primary/10 to-primary/5 rounded-[28px] p-6 border border-primary/10 relative overflow-hidden">
           <ShieldCheck className="absolute -right-4 -bottom-4 w-32 h-32 text-primary/10 rotate-12" />
           <div className="relative z-10 flex flex-col gap-2">
-            <div className="w-10 h-10 rounded-full bg-primary flex items-center justify-center text-white mb-2">
+            <div className="w-10 h-10 rounded-full bg-primary flex items-center justify-center text-on-primary mb-2">
               <FlaskConical className="w-5 h-5" />
             </div>
             <h2 className="text-lg font-black text-primary">Lab-Tested Categories</h2>

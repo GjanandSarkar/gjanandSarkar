@@ -25,6 +25,10 @@
   
   --color-on-primary: var(--on-primary);
   --color-on-secondary: var(--on-secondary);
+  --color-on-success: var(--on-success);
+  --color-on-warning: var(--on-warning);
+  --color-on-error: var(--on-error);
+  --color-on-info: var(--on-info);
 
   /* === Backgrounds and Surfaces === */
   --color-background: var(--background);
@@ -110,10 +114,14 @@
     --cta-gradient: linear-gradient(135deg, #0c3c26, #1b6342);
     --cta-shadow: 0 6px 20px rgba(12, 60, 38, 0.28);
 
-    --secondary: #b87d20;
-    --secondary-hover: #9e6b18;
+    --secondary: #9c6819;
+    --secondary-hover: #855615;
     
     --on-primary: #ffffff;
+    --on-success: #ffffff;
+    --on-warning: #ffffff;
+    --on-error: #ffffff;
+    --on-info: #ffffff;
     --on-secondary: #ffffff;
 
     --background: #fbfaf6;
@@ -131,7 +139,7 @@
 
     --success: #007600;
     --success-bg: #eaf6ef;
-    --warning: #c45500;
+    --warning: #b84f00;
     --warning-bg: #fff8f2;
     --error: #ba1a1a;
     --error-bg: #ffdad6;
@@ -154,6 +162,12 @@
     --secondary-hover: #f3cc8f;
     
     --on-primary: #1c201e;
+    --on-success: #06220f;
+    --on-warning: #2b1600;
+    --on-error: #3c0708;
+    --on-info: #04203d;
+    --cta-gradient: linear-gradient(135deg, #16603f, #1f7a50);
+    --cta-shadow: 0 6px 20px rgba(0, 0, 0, 0.45);
     --on-secondary: #1c201e;
 
     --background: #0f1210;

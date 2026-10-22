@@ -414,7 +414,7 @@ export default function AdminCategoriesPage() {
                   <button
                     type="submit"
                     disabled={isSubmitting}
-                    className="px-5 py-2 rounded-xl text-xs font-extrabold text-white bg-primary hover:bg-primary-hover disabled:opacity-50 cursor-pointer flex items-center gap-2"
+                    className="px-5 py-2 rounded-xl text-xs font-extrabold text-on-primary bg-primary hover:bg-primary-hover disabled:opacity-50 cursor-pointer flex items-center gap-2"
                   >
                     {isSubmitting && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
                     {editingCategory ? 'Save Changes' : 'Create Category'}

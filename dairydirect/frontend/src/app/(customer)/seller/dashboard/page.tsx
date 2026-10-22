@@ -346,7 +346,7 @@ export default function SellerDashboardPage() {
             <div className="flex flex-col sm:flex-row items-center justify-center gap-3 pt-2">
               <Link
                 href="/become-seller?resubmit=true"
-                className="w-full sm:w-auto px-6 py-3 bg-primary hover:bg-[#0c331f] text-white text-xs font-bold rounded-xl flex items-center justify-center gap-2 shadow-sm transition-all"
+                className="w-full sm:w-auto px-6 py-3 bg-primary hover:bg-[#0c331f] text-on-primary text-xs font-bold rounded-xl flex items-center justify-center gap-2 shadow-sm transition-all"
               >
                 <RotateCcw className="w-4 h-4" />
                 <span>Edit & Resubmit Application</span>
@@ -498,7 +498,7 @@ export default function SellerDashboardPage() {
             <div className="pt-2 flex items-center justify-center gap-3">
               <Link
                 href="/home"
-                className="px-6 py-2.5 bg-primary hover:bg-[#0c331f] text-white text-xs font-bold rounded-xl transition-all"
+                className="px-6 py-2.5 bg-primary hover:bg-[#0c331f] text-on-primary text-xs font-bold rounded-xl transition-all"
               >
                 Return to Storefront
               </Link>
@@ -528,7 +528,7 @@ export default function SellerDashboardPage() {
           <div className="pt-2">
             <Link
               href="/become-seller"
-              className="w-full px-6 py-3 bg-primary hover:bg-[#0c331f] text-white text-xs font-bold rounded-xl flex items-center justify-center gap-2 shadow-sm transition-all"
+              className="w-full px-6 py-3 bg-primary hover:bg-[#0c331f] text-on-primary text-xs font-bold rounded-xl flex items-center justify-center gap-2 shadow-sm transition-all"
             >
               <Building2 className="w-4 h-4" />
               <span>Become a Seller</span>
@@ -594,7 +594,7 @@ export default function SellerDashboardPage() {
         {/* ─── Top Banner & Store Header ─── */}
         <div className="bg-surface rounded-3xl border border-border/90 shadow-2xs p-6 sm:p-8 flex flex-col md:flex-row md:items-center justify-between gap-6">
           <div className="flex items-center gap-4">
-            <div className="w-16 h-16 rounded-2xl bg-primary text-white flex items-center justify-center font-black text-2xl shadow-md border border-[#c88a23]/40 shrink-0">
+            <div className="w-16 h-16 rounded-2xl bg-primary text-on-primary flex items-center justify-center font-black text-2xl shadow-md border border-[#c88a23]/40 shrink-0">
               <Store className="w-8 h-8 text-[#c88a23]" />
             </div>
             <div>
@@ -646,7 +646,7 @@ export default function SellerDashboardPage() {
 
             <button
               onClick={handleOpenAddProduct}
-              className="px-5 py-2.5 rounded-xl bg-primary text-white text-xs font-bold hover:bg-primary-hover flex items-center gap-1.5 shadow-sm transition-all cursor-pointer active:scale-95"
+              className="px-5 py-2.5 rounded-xl bg-primary text-on-primary text-xs font-bold hover:bg-primary-hover flex items-center gap-1.5 shadow-sm transition-all cursor-pointer active:scale-95"
             >
               <Plus className="w-4 h-4" strokeWidth={2.5} />
               <span>Add New Product</span>
@@ -682,7 +682,7 @@ export default function SellerDashboardPage() {
                 <Icon className="w-3.5 h-3.5" />
                 <span>{tab.label}</span>
                 {tab.badge && tab.badge > 0 && !isActive ? (
-                  <span className="px-1.5 py-0.2 rounded-full text-[10px] font-black bg-error text-white">
+                  <span className="px-1.5 py-0.2 rounded-full text-[10px] font-black bg-error text-on-error">
                     {tab.badge}
                   </span>
                 ) : null}
@@ -864,7 +864,7 @@ export default function SellerDashboardPage() {
 
                 <button
                   onClick={handleOpenAddProduct}
-                  className="px-4 py-2 bg-primary text-white text-xs font-bold rounded-xl flex items-center gap-1.5 hover:bg-primary-hover transition-colors cursor-pointer shrink-0"
+                  className="px-4 py-2 bg-primary text-on-primary text-xs font-bold rounded-xl flex items-center gap-1.5 hover:bg-primary-hover transition-colors cursor-pointer shrink-0"
                 >
                   <Plus className="w-4 h-4" />
                   <span>Add Product</span>
@@ -1006,7 +1006,7 @@ export default function SellerDashboardPage() {
                         ) : isRejected ? (
                           <button
                             onClick={() => handleOpenEditProduct(p)}
-                            className="w-full py-2.5 bg-error hover:bg-error text-white rounded-xl text-xs font-bold transition-all shadow-xs flex items-center justify-center gap-1.5 cursor-pointer"
+                            className="w-full py-2.5 bg-error hover:bg-error text-on-error rounded-xl text-xs font-bold transition-all shadow-xs flex items-center justify-center gap-1.5 cursor-pointer"
                           >
                             <RotateCcw className="w-3.5 h-3.5" />
                             <span>Edit & Resubmit for Review</span>
@@ -1040,7 +1040,7 @@ export default function SellerDashboardPage() {
                 </div>
                 <button
                   onClick={handleOpenAddProduct}
-                  className="px-5 py-2.5 bg-primary text-white text-xs font-bold rounded-xl hover:bg-primary-hover transition-colors inline-flex items-center gap-1.5 cursor-pointer"
+                  className="px-5 py-2.5 bg-primary text-on-primary text-xs font-bold rounded-xl hover:bg-primary-hover transition-colors inline-flex items-center gap-1.5 cursor-pointer"
                 >
                   <Plus className="w-4 h-4" />
                   <span>Add Product</span>
@@ -1101,7 +1101,7 @@ export default function SellerDashboardPage() {
 
                         <button
                           onClick={() => handleOpenEditProduct(p)}
-                          className="px-5 py-2.5 bg-error hover:bg-error text-white rounded-xl text-xs font-bold transition-all shadow-xs flex items-center justify-center gap-2 cursor-pointer self-start sm:self-center"
+                          className="px-5 py-2.5 bg-error hover:bg-error text-on-error rounded-xl text-xs font-bold transition-all shadow-xs flex items-center justify-center gap-2 cursor-pointer self-start sm:self-center"
                         >
                           <RotateCcw className="w-4 h-4" />
                           <span>Edit & Resubmit</span>
@@ -1197,7 +1197,7 @@ export default function SellerDashboardPage() {
                           <td className="py-3 px-4 text-right">
                             <button
                               onClick={() => handleOpenQuickUpdate(p)}
-                              className="px-3 py-1.5 bg-primary hover:bg-primary-hover text-white font-bold rounded-lg text-xs transition-colors cursor-pointer"
+                              className="px-3 py-1.5 bg-primary hover:bg-primary-hover text-on-primary font-bold rounded-lg text-xs transition-colors cursor-pointer"
                             >
                               Update Stock/Price
                             </button>
@@ -1443,7 +1443,7 @@ export default function SellerDashboardPage() {
                 type="button"
                 disabled={quickUpdateModal.isSubmitting}
                 onClick={handleExecuteQuickUpdate}
-                className="px-5 py-2 text-xs font-bold bg-primary text-white rounded-xl hover:bg-primary-hover disabled:opacity-50"
+                className="px-5 py-2 text-xs font-bold bg-primary text-on-primary rounded-xl hover:bg-primary-hover disabled:opacity-50"
               >
                 {quickUpdateModal.isSubmitting ? 'Saving...' : 'Save Changes'}
               </button>
@@ -1538,7 +1538,7 @@ export default function SellerDashboardPage() {
                     setIsSubmittingReactivation(false);
                   }
                 }}
-                className="px-5 py-2.5 rounded-xl bg-primary hover:bg-primary-hover text-white font-bold text-xs shadow-sm transition-all flex items-center gap-2 cursor-pointer disabled:opacity-50"
+                className="px-5 py-2.5 rounded-xl bg-primary hover:bg-primary-hover text-on-primary font-bold text-xs shadow-sm transition-all flex items-center gap-2 cursor-pointer disabled:opacity-50"
               >
                 {isSubmittingReactivation ? 'Submitting...' : 'Submit Appeal'}
               </button>

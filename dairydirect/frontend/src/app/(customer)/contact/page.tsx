@@ -100,7 +100,7 @@ export default function ContactPage() {
             {/* WhatsApp Quick Support */}
             <div className="bg-success-bg border border-success/20/80 rounded-2xl p-5 shadow-xs">
               <div className="flex items-center gap-3 mb-2">
-                <div className="w-10 h-10 rounded-xl bg-primary text-white flex items-center justify-center">
+                <div className="w-10 h-10 rounded-xl bg-primary text-on-primary flex items-center justify-center">
                   <MessageCircle className="w-5 h-5 text-success" />
                 </div>
                 <div>
@@ -115,7 +115,7 @@ export default function ContactPage() {
                 href="https://wa.me/919876543210?text=Hello%20Gjanand%20Sarkar%20Team%2C%20I%20have%20a%20query%20about%20my%20order."
                 target="_blank"
                 rel="noreferrer"
-                className="inline-flex items-center justify-center gap-2 w-full py-2.5 bg-primary hover:bg-primary-hover text-white text-xs font-bold rounded-xl transition-all shadow-xs"
+                className="inline-flex items-center justify-center gap-2 w-full py-2.5 bg-primary hover:bg-primary-hover text-on-primary text-xs font-bold rounded-xl transition-all shadow-xs"
               >
                 <MessageCircle className="w-4 h-4" />
                 <span>Chat on WhatsApp</span>
@@ -287,7 +287,7 @@ export default function ContactPage() {
                 <button
                   type="submit"
                   disabled={loading}
-                  className="w-full sm:w-auto px-8 py-3 bg-primary hover:bg-primary-hover text-white font-bold text-xs rounded-xl shadow-md transition-all flex items-center justify-center gap-2 cursor-pointer"
+                  className="w-full sm:w-auto px-8 py-3 bg-primary hover:bg-primary-hover text-on-primary font-bold text-xs rounded-xl shadow-md transition-all flex items-center justify-center gap-2 cursor-pointer"
                 >
                   <Send className="w-3.5 h-3.5" />
                   <span>{loading ? 'Sending...' : 'Submit Inquiry'}</span>

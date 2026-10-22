@@ -558,7 +558,7 @@ export default function AdminVendorInquiriesPage() {
                     type="button"
                     onClick={() => handleTriggerConfirm('approved')}
                     disabled={isUpdating}
-                    className="px-6 py-2.5 bg-primary hover:bg-primary-hover text-white text-xs font-black rounded-xl shadow-md flex items-center gap-1.5 transition-all active:scale-95 cursor-pointer"
+                    className="px-6 py-2.5 bg-primary hover:bg-primary-hover text-on-primary text-xs font-black rounded-xl shadow-md flex items-center gap-1.5 transition-all active:scale-95 cursor-pointer"
                   >
                     <ShieldCheck className="w-4 h-4 text-[#c88a23]" />
                     <span>Approve Seller Account</span>

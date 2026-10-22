@@ -716,7 +716,7 @@ export default function AdminReturnsPage() {
                             action: 'mark_cod_paid',
                             note: `COD refund of ₹${req.refund_amount} paid via manual UPI`,
                           })}
-                          className="px-3.5 py-1.5 rounded-xl bg-success hover:bg-success text-white text-xs font-bold flex items-center gap-1.5 shadow-xs transition-colors"
+                          className="px-3.5 py-1.5 rounded-xl bg-success hover:bg-success text-on-success text-xs font-bold flex items-center gap-1.5 shadow-xs transition-colors"
                         >
                           <CheckCircle2 className="w-3.5 h-3.5" />
                           <span>Mark COD Refund Paid</span>
@@ -819,7 +819,7 @@ export default function AdminReturnsPage() {
               <button
                 disabled={isProcessing || !overrideModal.note.trim()}
                 onClick={handleConfirmOverride}
-                className="px-4 py-2 rounded-xl bg-primary hover:bg-[#165a38] text-white text-xs font-bold disabled:opacity-50 flex items-center gap-1.5"
+                className="px-4 py-2 rounded-xl bg-primary hover:bg-[#165a38] text-on-primary text-xs font-bold disabled:opacity-50 flex items-center gap-1.5"
               >
                 {isProcessing && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
                 <span>Confirm Override</span>
@@ -875,7 +875,7 @@ export default function AdminReturnsPage() {
               <button
                 disabled={isProcessing || !refundActionModal.note.trim()}
                 onClick={handleConfirmRefundAction}
-                className="px-4 py-2 rounded-xl bg-success hover:bg-success text-white text-xs font-bold disabled:opacity-50 flex items-center gap-1.5"
+                className="px-4 py-2 rounded-xl bg-success hover:bg-success text-on-success text-xs font-bold disabled:opacity-50 flex items-center gap-1.5"
               >
                 {isProcessing && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
                 <span>Execute Action</span>

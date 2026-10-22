@@ -191,7 +191,7 @@ export default function SupportPage() {
                 setShowNew(!showNew);
                 setError('');
               }}
-              className="flex items-center gap-2 px-5 py-2.5 bg-primary text-white text-xs font-bold rounded-xl hover:bg-primary-hover transition shadow-sm active:scale-95"
+              className="flex items-center gap-2 px-5 py-2.5 bg-primary text-on-primary text-xs font-bold rounded-xl hover:bg-primary-hover transition shadow-sm active:scale-95"
             >
               {showNew ? 'Cancel' : <><Plus className="w-4 h-4 text-[#c88a23]" /> New Ticket</>}
             </button>
@@ -296,7 +296,7 @@ export default function SupportPage() {
                 <button 
                   type="submit" 
                   disabled={submitting}
-                  className="px-6 py-2.5 bg-primary hover:bg-primary-hover text-white text-xs font-bold rounded-xl shadow-md flex items-center gap-2 transition disabled:opacity-50 active:scale-95"
+                  className="px-6 py-2.5 bg-primary hover:bg-primary-hover text-on-primary text-xs font-bold rounded-xl shadow-md flex items-center gap-2 transition disabled:opacity-50 active:scale-95"
                 >
                   {submitting ? (
                     <>

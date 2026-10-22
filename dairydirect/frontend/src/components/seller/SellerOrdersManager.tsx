@@ -851,7 +851,7 @@ export function SellerOrdersManager({ initialStatusFilter = 'all' }: SellerOrder
                                                       productName: name,
                                                     });
                                                   }}
-                                                  className="px-3 py-1.5 rounded-lg bg-success hover:bg-success text-white text-xs font-bold flex items-center gap-1 shadow-xs transition-colors"
+                                                  className="px-3 py-1.5 rounded-lg bg-success hover:bg-success text-on-success text-xs font-bold flex items-center gap-1 shadow-xs transition-colors"
                                                 >
                                                   <Check className="w-3.5 h-3.5" />
                                                   <span>Approve {isCancellation ? 'Cancellation' : 'Return'}</span>
@@ -988,7 +988,7 @@ export function SellerOrdersManager({ initialStatusFilter = 'all' }: SellerOrder
                                       e.stopPropagation();
                                       setCodConfirmOrder(order);
                                     }}
-                                    className="px-4 py-2 rounded-xl text-xs font-bold text-white bg-success hover:bg-success transition-all flex items-center gap-1.5 shadow-sm cursor-pointer"
+                                    className="px-4 py-2 rounded-xl text-xs font-bold text-on-success bg-success hover:bg-success transition-all flex items-center gap-1.5 shadow-sm cursor-pointer"
                                   >
                                     <IndianRupee className="w-3.5 h-3.5" />
                                     <span>Confirm Cash Collected (₹{order.total_amount})</span>
@@ -1279,7 +1279,7 @@ export function SellerOrdersManager({ initialStatusFilter = 'all' }: SellerOrder
                 type="button"
                 disabled={isSubmittingCancel}
                 onClick={handleConfirmCancelOrder}
-                className="px-5 py-2 text-xs font-bold bg-error hover:bg-error text-white rounded-xl shadow-xs disabled:opacity-50 flex items-center gap-1.5"
+                className="px-5 py-2 text-xs font-bold bg-error hover:bg-error text-on-error rounded-xl shadow-xs disabled:opacity-50 flex items-center gap-1.5"
               >
                 {isSubmittingCancel && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
                 <span>Confirm Cancellation</span>

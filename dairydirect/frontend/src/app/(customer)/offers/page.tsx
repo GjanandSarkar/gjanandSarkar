@@ -31,7 +31,7 @@ export default async function OffersPage() {
           <div className="bg-surface rounded-xl shadow-sm border border-border p-12 text-center">
             <h2 className="text-xl font-medium text-foreground mb-2">No active offers right now</h2>
             <p className="text-foreground-muted mb-6">Check back later for new discounts and deals.</p>
-            <Link href="/" className="px-6 py-2 bg-success text-white rounded-lg hover:bg-success transition">
+            <Link href="/" className="px-6 py-2 bg-success text-on-success rounded-lg hover:bg-success transition">
               Continue Shopping
             </Link>
           </div>

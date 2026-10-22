@@ -523,7 +523,7 @@ export function SellerProductModal({
               <div className="w-20 h-20 rounded-full bg-success-bg text-success flex items-center justify-center ring-8 ring-emerald-50 shadow-inner">
                 <CheckCircle2 className="w-10 h-10" strokeWidth={2.2} />
               </div>
-              <span className="absolute -bottom-1 -right-1 bg-warning text-white p-1 rounded-full shadow-xs">
+              <span className="absolute -bottom-1 -right-1 bg-warning text-on-warning p-1 rounded-full shadow-xs">
                 <Clock className="w-4 h-4" />
               </span>
             </div>
@@ -594,7 +594,7 @@ export function SellerProductModal({
                 onClick={() => {
                   onClose();
                 }}
-                className="w-full sm:w-1/2 py-3 px-4 rounded-xl bg-primary hover:bg-[#092b1b] text-white text-xs font-bold transition-all shadow-md cursor-pointer flex items-center justify-center gap-1.5"
+                className="w-full sm:w-1/2 py-3 px-4 rounded-xl bg-primary hover:bg-[#092b1b] text-on-primary text-xs font-bold transition-all shadow-md cursor-pointer flex items-center justify-center gap-1.5"
               >
                 <Package className="w-4 h-4" />
                 <span>Done & View Products</span>
@@ -1213,7 +1213,7 @@ export function SellerProductModal({
               <button
                 type="submit"
                 disabled={isSubmitting || isUploadingPrimary || isUploadingGallery}
-                className="px-6 py-2.5 rounded-xl text-xs font-bold bg-primary hover:bg-primary-hover text-white shadow-xs transition-all flex items-center gap-2 cursor-pointer disabled:opacity-50"
+                className="px-6 py-2.5 rounded-xl text-xs font-bold bg-primary hover:bg-primary-hover text-on-primary shadow-xs transition-all flex items-center gap-2 cursor-pointer disabled:opacity-50"
               >
                 {isSubmitting || isUploadingPrimary || isUploadingGallery ? (
                   <>

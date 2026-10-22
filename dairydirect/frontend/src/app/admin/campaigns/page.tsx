@@ -144,7 +144,7 @@ export default function AdminCampaignsPage() {
         <button
           type="button"
           onClick={() => setShowForm((v) => !v)}
-          className="px-4 py-2.5 rounded-xl bg-primary text-white text-xs font-bold hover:bg-primary-hover flex items-center gap-1.5 transition-colors"
+          className="px-4 py-2.5 rounded-xl bg-primary text-on-primary text-xs font-bold hover:bg-primary-hover flex items-center gap-1.5 transition-colors"
         >
           <Plus className="w-4 h-4" strokeWidth={2.5} />
           {showForm ? 'Close' : 'New Campaign'}
@@ -465,7 +465,7 @@ function CampaignForm({ onCreated }: { onCreated: () => void }) {
       <button
         type="submit"
         disabled={submitting}
-        className="px-5 py-2.5 rounded-xl bg-primary text-white text-xs font-bold hover:bg-primary-hover disabled:opacity-60 flex items-center gap-2 transition-colors"
+        className="px-5 py-2.5 rounded-xl bg-primary text-on-primary text-xs font-bold hover:bg-primary-hover disabled:opacity-60 flex items-center gap-2 transition-colors"
       >
         {submitting && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
         Create campaign as draft

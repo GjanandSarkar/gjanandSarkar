@@ -250,7 +250,7 @@ function ProductApprovalsContent() {
             </button>
             <button
               onClick={() => router.push('/admin/products')}
-              className="px-4 py-2 rounded-xl text-sm font-bold bg-primary text-white shadow-xs hover:bg-primary-hover transition-all cursor-pointer"
+              className="px-4 py-2 rounded-xl text-sm font-bold bg-primary text-on-primary shadow-xs hover:bg-primary-hover transition-all cursor-pointer"
             >
               View All Catalogue
             </button>
@@ -464,7 +464,7 @@ function ProductApprovalsContent() {
                         <>
                           <button
                             onClick={() => handleOpenDecisionModal(product, 'approved')}
-                            className="flex-1 py-2 px-3 rounded-xl bg-primary hover:bg-primary-hover text-white font-bold text-xs flex items-center justify-center gap-1.5 transition-all shadow-xs cursor-pointer"
+                            className="flex-1 py-2 px-3 rounded-xl bg-primary hover:bg-primary-hover text-on-primary font-bold text-xs flex items-center justify-center gap-1.5 transition-all shadow-xs cursor-pointer"
                           >
                             <Check className="w-3.5 h-3.5" strokeWidth={3} /> Approve
                           </button>
@@ -765,7 +765,7 @@ function ProductApprovalsContent() {
                       setIsPreviewOpen(false);
                       handleOpenDecisionModal(selectedProduct, 'approved');
                     }}
-                    className="px-5 py-2 rounded-xl text-xs font-bold bg-primary hover:bg-primary-hover text-white transition-colors shadow-xs cursor-pointer"
+                    className="px-5 py-2 rounded-xl text-xs font-bold bg-primary hover:bg-primary-hover text-on-primary transition-colors shadow-xs cursor-pointer"
                   >
                     Approve Product
                   </button>

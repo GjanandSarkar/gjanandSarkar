@@ -542,7 +542,7 @@ function ReturnsContent() {
                             type="button"
                             onClick={() => setImages(images.filter((_, idx) => idx !== i))}
                             title="Remove photo"
-                            className="p-1.5 rounded-full bg-error text-white hover:bg-error hover:scale-110 transition-transform shadow-xs"
+                            className="p-1.5 rounded-full bg-error text-on-error hover:bg-error hover:scale-110 transition-transform shadow-xs"
                           >
                             <Trash2 className="w-3.5 h-3.5" />
                           </button>
@@ -602,7 +602,7 @@ function ReturnsContent() {
             <button
               type="submit"
               disabled={isSubmitting || deliveredItems.length === 0}
-              className="w-full py-3.5 bg-primary hover:bg-[#165a37] text-white text-xs font-extrabold uppercase tracking-wider rounded-2xl shadow-sm transition-all disabled:opacity-50 flex items-center justify-center gap-2"
+              className="w-full py-3.5 bg-primary hover:bg-[#165a37] text-on-primary text-xs font-extrabold uppercase tracking-wider rounded-2xl shadow-sm transition-all disabled:opacity-50 flex items-center justify-center gap-2"
             >
               {isSubmitting ? (
                 <>

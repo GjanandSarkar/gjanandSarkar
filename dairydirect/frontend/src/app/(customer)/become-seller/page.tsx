@@ -271,7 +271,7 @@ export default function BecomeSellerPage() {
           </div>
           <Link
             href="/login?redirect=/become-seller"
-            className="w-full py-3.5 px-6 bg-primary hover:bg-primary-hover text-white text-xs font-black rounded-xl shadow-md flex items-center justify-center gap-2 transition-all active:scale-95"
+            className="w-full py-3.5 px-6 bg-primary hover:bg-primary-hover text-on-primary text-xs font-black rounded-xl shadow-md flex items-center justify-center gap-2 transition-all active:scale-95"
           >
             <LogIn className="w-4 h-4 text-[#c88a23]" />
             <span>Sign In to Continue</span>
@@ -506,7 +506,7 @@ export default function BecomeSellerPage() {
                 <div className="flex flex-col sm:flex-row items-center justify-center gap-3 pt-2">
                   <Link
                     href="/seller/dashboard"
-                    className="w-full sm:w-auto px-8 py-3.5 bg-primary hover:bg-primary-hover text-white text-xs font-black rounded-xl shadow-md flex items-center justify-center gap-2 transition-all active:scale-95"
+                    className="w-full sm:w-auto px-8 py-3.5 bg-primary hover:bg-primary-hover text-on-primary text-xs font-black rounded-xl shadow-md flex items-center justify-center gap-2 transition-all active:scale-95"
                   >
                     <Store className="w-4 h-4 text-[#c88a23]" />
                     <span>Go to Seller Dashboard</span>
@@ -564,7 +564,7 @@ export default function BecomeSellerPage() {
                       setIsEditing(true);
                       setError('');
                     }}
-                    className="w-full sm:w-auto px-6 py-3.5 bg-primary hover:bg-primary-hover text-white text-xs font-black rounded-xl shadow-md flex items-center justify-center gap-2 transition-all active:scale-95 cursor-pointer"
+                    className="w-full sm:w-auto px-6 py-3.5 bg-primary hover:bg-primary-hover text-on-primary text-xs font-black rounded-xl shadow-md flex items-center justify-center gap-2 transition-all active:scale-95 cursor-pointer"
                   >
                     <Edit3 className="w-4 h-4 text-[#c88a23]" />
                     <span>Edit & Resubmit Application</span>
@@ -614,7 +614,7 @@ export default function BecomeSellerPage() {
                       setIsEditing(true);
                       setError('');
                     }}
-                    className="w-full sm:w-auto px-6 py-3.5 bg-primary hover:bg-primary-hover text-white text-xs font-black rounded-xl shadow-md flex items-center justify-center gap-2 transition-all active:scale-95 cursor-pointer"
+                    className="w-full sm:w-auto px-6 py-3.5 bg-primary hover:bg-primary-hover text-on-primary text-xs font-black rounded-xl shadow-md flex items-center justify-center gap-2 transition-all active:scale-95 cursor-pointer"
                   >
                     <Edit3 className="w-4 h-4 text-[#c88a23]" />
                     <span>Update Business Details</span>
@@ -984,7 +984,7 @@ export default function BecomeSellerPage() {
                 <button
                   type="submit"
                   disabled={isLoading}
-                  className="w-full sm:w-auto px-8 py-3.5 bg-primary hover:bg-primary-hover text-white text-xs font-black rounded-xl shadow-md flex items-center justify-center gap-2 transition-all active:scale-95 disabled:opacity-50 cursor-pointer"
+                  className="w-full sm:w-auto px-8 py-3.5 bg-primary hover:bg-primary-hover text-on-primary text-xs font-black rounded-xl shadow-md flex items-center justify-center gap-2 transition-all active:scale-95 disabled:opacity-50 cursor-pointer"
                 >
                   {isLoading ? (
                     <>

@@ -88,7 +88,7 @@ export function AdminSidebar() {
       {/* Admin user chip */}
       <div className="mx-4 mb-3 px-3.5 py-3 rounded-[12px] flex items-center gap-3"
         style={{ background: 'var(--color-surface-container-low)' }}>
-        <div className="w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm text-white shrink-0 bg-primary border border-primary/10 relative overflow-hidden">
+        <div className="w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm text-on-primary shrink-0 bg-primary border border-primary/10 relative overflow-hidden">
           <img
             src={user?.avatar_url || '/profile/profile.jpg'}
             alt="Profile"

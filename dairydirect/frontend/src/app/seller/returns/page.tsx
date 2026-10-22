@@ -306,7 +306,7 @@ export default function SellerReturnsPage() {
                             <button
                               onClick={() => handleAction(r.id, 'picked_up')}
                               disabled={isBusy}
-                              className="px-3 py-1.5 rounded-xl bg-warning hover:bg-warning text-white font-bold text-xs shadow-2xs transition-colors disabled:opacity-50"
+                              className="px-3 py-1.5 rounded-xl bg-warning hover:bg-warning text-on-warning font-bold text-xs shadow-2xs transition-colors disabled:opacity-50"
                             >
                               {isBusy ? 'Saving...' : 'Mark Picked Up'}
                             </button>
@@ -316,7 +316,7 @@ export default function SellerReturnsPage() {
                             <button
                               onClick={() => handleAction(r.id, 'received')}
                               disabled={isBusy}
-                              className="px-3 py-1.5 rounded-xl bg-success hover:bg-success text-white font-bold text-xs shadow-2xs transition-colors disabled:opacity-50"
+                              className="px-3 py-1.5 rounded-xl bg-success hover:bg-success text-on-success font-bold text-xs shadow-2xs transition-colors disabled:opacity-50"
                             >
                               {isBusy ? 'Saving...' : 'Mark Received'}
                             </button>
@@ -326,7 +326,7 @@ export default function SellerReturnsPage() {
                             <button
                               onClick={() => setDispatchModalReq(r)}
                               disabled={isBusy}
-                              className="px-3 py-1.5 rounded-xl bg-primary hover:bg-[#165a37] text-white font-bold text-xs shadow-2xs transition-colors disabled:opacity-50"
+                              className="px-3 py-1.5 rounded-xl bg-primary hover:bg-[#165a37] text-on-primary font-bold text-xs shadow-2xs transition-colors disabled:opacity-50"
                             >
                               Dispatch Replacement
                             </button>
@@ -419,7 +419,7 @@ export default function SellerReturnsPage() {
                 <button
                   type="submit"
                   disabled={isSubmittingDispatch || !trackingNo.trim()}
-                  className="flex-1 py-2.5 rounded-xl bg-primary hover:bg-[#165a37] text-white text-xs font-bold shadow-sm flex items-center justify-center gap-1.5 disabled:opacity-50"
+                  className="flex-1 py-2.5 rounded-xl bg-primary hover:bg-[#165a37] text-on-primary text-xs font-bold shadow-sm flex items-center justify-center gap-1.5 disabled:opacity-50"
                 >
                   {isSubmittingDispatch ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Confirm Dispatch'}
                 </button>

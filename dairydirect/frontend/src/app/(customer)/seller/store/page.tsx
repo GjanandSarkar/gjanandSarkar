@@ -272,7 +272,7 @@ export default function SellerStoreSettings() {
             </button>
             <button 
               type="submit" disabled={saving}
-              className="px-6 py-2.5 bg-primary text-white text-xs font-bold rounded-xl hover:bg-primary-hover transition flex items-center gap-2 disabled:opacity-50 cursor-pointer shadow-sm"
+              className="px-6 py-2.5 bg-primary text-on-primary text-xs font-bold rounded-xl hover:bg-primary-hover transition flex items-center gap-2 disabled:opacity-50 cursor-pointer shadow-sm"
             >
               <Save className="w-4 h-4" />
               {saving ? 'Saving Live Changes...' : 'Save Live Store Settings'}

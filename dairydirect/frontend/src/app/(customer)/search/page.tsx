@@ -106,7 +106,7 @@ export default async function SearchPage({
               </p>
               <Link
                 href="/products"
-                className="inline-block mt-5 px-5 py-2.5 bg-primary hover:bg-primary-hover text-white text-xs font-bold rounded-xl pressable"
+                className="inline-block mt-5 px-5 py-2.5 bg-primary hover:bg-primary-hover text-on-primary text-xs font-bold rounded-xl pressable"
               >
                 Browse all products
               </Link>

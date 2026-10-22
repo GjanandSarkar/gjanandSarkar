@@ -228,7 +228,7 @@ export function ProductClient({ product: initialProduct }: ProductClientProps) {
             {user?.role === 'admin' && (
               <button
                 onClick={() => setIsEditModalOpen(true)}
-                className="h-8 px-3 rounded-full bg-primary hover:bg-primary-hover text-white text-xs font-bold flex items-center gap-1.5 shadow-sm cursor-pointer"
+                className="h-8 px-3 rounded-full bg-primary hover:bg-primary-hover text-on-primary text-xs font-bold flex items-center gap-1.5 shadow-sm cursor-pointer"
               >
                 <Pencil className="w-3.5 h-3.5" />
                 <span>Edit</span>
@@ -464,7 +464,7 @@ export function ProductClient({ product: initialProduct }: ProductClientProps) {
                   <button
                     type="submit"
                     disabled={isSubmittingReview}
-                    className="ml-auto px-4 py-2 bg-primary hover:bg-primary-hover text-white font-bold text-xs rounded-lg shadow-2xs flex items-center gap-1.5 cursor-pointer"
+                    className="ml-auto px-4 py-2 bg-primary hover:bg-primary-hover text-on-primary font-bold text-xs rounded-lg shadow-2xs flex items-center gap-1.5 cursor-pointer"
                   >
                     <Send className="w-3 h-3" />
                     <span>Submit</span>
@@ -547,7 +547,7 @@ export function ProductClient({ product: initialProduct }: ProductClientProps) {
           ) : quantity === 0 ? (
             <button
               onClick={() => handleUpdate('inc')}
-              className="flex-1 h-12 bg-primary hover:bg-primary-hover text-white font-bold rounded-xl shadow-md active:scale-95 transition-all text-xs sm:text-sm cursor-pointer"
+              className="flex-1 h-12 bg-primary hover:bg-primary-hover text-on-primary font-bold rounded-xl shadow-md active:scale-95 transition-all text-xs sm:text-sm cursor-pointer"
             >
               Add to Cart
             </button>
@@ -563,7 +563,7 @@ export function ProductClient({ product: initialProduct }: ProductClientProps) {
               <button
                 onClick={() => handleUpdate('inc')}
                 disabled={quantity >= availableStock}
-                className="w-8 h-8 flex items-center justify-center rounded-lg bg-primary text-white shadow-2xs font-black disabled:opacity-50 cursor-pointer"
+                className="w-8 h-8 flex items-center justify-center rounded-lg bg-primary text-on-primary shadow-2xs font-black disabled:opacity-50 cursor-pointer"
                 title={quantity >= availableStock ? 'Maximum available stock reached' : undefined}
               >
                 <Plus className="w-4 h-4 stroke-[3]" />

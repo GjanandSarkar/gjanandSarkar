@@ -433,7 +433,7 @@ export function AddressFormModal({
                     if (pendingLocationRef.current) applyLocationData(pendingLocationRef.current);
                     setShowOverwriteConfirm(false);
                   }}
-                  className="px-3 py-1.5 bg-warning hover:bg-warning text-white font-semibold rounded-lg text-xs transition-colors"
+                  className="px-3 py-1.5 bg-warning hover:bg-warning text-on-warning font-semibold rounded-lg text-xs transition-colors"
                 >
                   Yes, Update Fields
                 </button>
@@ -464,7 +464,7 @@ export function AddressFormModal({
               type="button"
               onClick={handleUseMyLocation}
               disabled={isLocating}
-              className="flex items-center gap-1.5 px-3.5 py-2 bg-success hover:bg-success text-white font-semibold text-xs rounded-xl shadow-sm transition-all active:scale-95 disabled:opacity-50 shrink-0"
+              className="flex items-center gap-1.5 px-3.5 py-2 bg-success hover:bg-success text-on-success font-semibold text-xs rounded-xl shadow-sm transition-all active:scale-95 disabled:opacity-50 shrink-0"
             >
               {isLocating ? (
                 <>
@@ -838,7 +838,7 @@ export function AddressFormModal({
             <button
               type="submit"
               disabled={isSaving}
-              className="flex items-center gap-2 px-6 py-2.5 rounded-xl bg-success hover:bg-success text-white font-semibold text-xs shadow-sm shadow-emerald-700/20 transition-all active:scale-95 disabled:opacity-50 cursor-pointer"
+              className="flex items-center gap-2 px-6 py-2.5 rounded-xl bg-success hover:bg-success text-on-success font-semibold text-xs shadow-sm shadow-emerald-700/20 transition-all active:scale-95 disabled:opacity-50 cursor-pointer"
             >
               {isSaving && <Loader2 className="w-4 h-4 animate-spin" />}
               {isEditMode ? 'Update Address' : 'Save Address'}

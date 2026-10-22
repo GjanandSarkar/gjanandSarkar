@@ -41,7 +41,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         {/* Mobile Header */}
         <header className="md:hidden flex items-center justify-between p-4 bg-surface border-b border-sand z-40 sticky top-0">
           <div className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded-lg flex items-center justify-center bg-primary text-white">
+            <div className="w-8 h-8 rounded-lg flex items-center justify-center bg-primary text-on-primary">
               <span className="font-bold text-xs">GS</span>
             </div>
             <h1 className="font-bold text-sm">Operations</h1>

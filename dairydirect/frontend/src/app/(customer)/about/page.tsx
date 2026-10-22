@@ -203,7 +203,7 @@ export default function AboutPage() {
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
           {milestones.map((m, i) => (
             <div key={i} className="relative bg-surface p-5 rounded-2xl border border-border shadow-xs">
-              <span className="inline-block px-2.5 py-1 rounded-md bg-primary text-white text-[11px] font-black tracking-wider mb-3">
+              <span className="inline-block px-2.5 py-1 rounded-md bg-primary text-on-primary text-[11px] font-black tracking-wider mb-3">
                 {m.year}
               </span>
               <h3 className="text-xs font-bold text-foreground mb-1">{m.title}</h3>

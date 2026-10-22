@@ -61,7 +61,7 @@ export default function ReturnRequestDetailPage() {
         <p className="text-sm text-foreground-muted mb-6">{error || 'Could not find this return request'}</p>
         <Link
           href="/returns"
-          className="px-5 py-2.5 bg-primary text-white text-xs font-bold rounded-xl shadow-sm"
+          className="px-5 py-2.5 bg-primary text-on-primary text-xs font-bold rounded-xl shadow-sm"
         >
           Back to Returns
         </Link>

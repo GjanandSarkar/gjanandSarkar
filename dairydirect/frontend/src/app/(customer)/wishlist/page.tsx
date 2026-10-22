@@ -78,7 +78,7 @@ export default function WishlistPage() {
           {wishlistProducts.length > 0 && (
             <button
               onClick={handleMoveAllToCart}
-              className="px-5 py-2.5 bg-primary hover:bg-primary-hover text-white font-bold text-xs rounded-xl shadow-sm transition-all flex items-center gap-2"
+              className="px-5 py-2.5 bg-primary hover:bg-primary-hover text-on-primary font-bold text-xs rounded-xl shadow-sm transition-all flex items-center gap-2"
             >
               <ShoppingCart className="w-4 h-4" />
               <span>Move All to Cart</span>
@@ -100,7 +100,7 @@ export default function WishlistPage() {
             </p>
             <Link
               href="/products"
-              className="inline-flex items-center gap-2 px-6 py-3 bg-primary hover:bg-primary-hover text-white font-bold text-xs rounded-xl shadow-md transition-all mt-2"
+              className="inline-flex items-center gap-2 px-6 py-3 bg-primary hover:bg-primary-hover text-on-primary font-bold text-xs rounded-xl shadow-md transition-all mt-2"
             >
               <span>Explore Authentic Products</span>
               <ArrowRight className="w-4 h-4" />
@@ -139,7 +139,7 @@ export default function WishlistPage() {
                       <Trash2 className="w-4 h-4" />
                     </button>
 
-                    <div className="absolute bottom-3 left-3 px-2 py-0.5 rounded-md bg-primary/90 text-white text-[10px] font-bold">
+                    <div className="absolute bottom-3 left-3 px-2 py-0.5 rounded-md bg-primary/90 text-on-primary text-[10px] font-bold">
                       {product.category}
                     </div>
                   </div>
@@ -172,7 +172,7 @@ export default function WishlistPage() {
                             addToCartLocal(product.id, defaultVariant.id, 1);
                           }
                         }}
-                        className="w-full py-2 bg-primary hover:bg-primary-hover text-white font-bold text-xs rounded-xl shadow-2xs transition-all flex items-center justify-center gap-1.5 active:scale-[0.98]"
+                        className="w-full py-2 bg-primary hover:bg-primary-hover text-on-primary font-bold text-xs rounded-xl shadow-2xs transition-all flex items-center justify-center gap-1.5 active:scale-[0.98]"
                       >
                         <ShoppingCart className="w-3.5 h-3.5" />
                         <span>Add to Cart</span>

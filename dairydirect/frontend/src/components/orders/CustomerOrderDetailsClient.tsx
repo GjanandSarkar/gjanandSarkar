@@ -345,7 +345,7 @@ export function CustomerOrderDetailsClient({ initialOrder }: CustomerOrderDetail
 
             <Link
               href={`/tracking/${order.id}`}
-              className="px-5 py-2.5 bg-primary hover:bg-[#165a37] text-white text-xs font-bold rounded-xl flex items-center gap-2 shadow-sm transition-all"
+              className="px-5 py-2.5 bg-primary hover:bg-[#165a37] text-on-primary text-xs font-bold rounded-xl flex items-center gap-2 shadow-sm transition-all"
             >
               <Truck className="w-4 h-4 text-[#c88a23]" />
               <span>Track Live Delivery</span>
@@ -534,7 +534,7 @@ export function CustomerOrderDetailsClient({ initialOrder }: CustomerOrderDetail
                             </Link>
                             <Link
                               href={`/returns?orderItemId=${item.id}&type=replacement`}
-                              className="px-3 py-1.5 rounded-xl bg-primary hover:bg-[#165a37] text-white text-xs font-bold flex items-center gap-1 transition-colors shadow-2xs"
+                              className="px-3 py-1.5 rounded-xl bg-primary hover:bg-[#165a37] text-on-primary text-xs font-bold flex items-center gap-1 transition-colors shadow-2xs"
                             >
                               <RefreshCw className="w-3.5 h-3.5 text-[#c88a23]" />
                               <span>Replace</span>
@@ -876,7 +876,7 @@ export function CustomerOrderDetailsClient({ initialOrder }: CustomerOrderDetail
                 <button
                   type="submit"
                   disabled={isSubmittingReturn || !returnDescription.trim()}
-                  className="flex-1 py-2.5 rounded-xl bg-primary hover:bg-[#165a37] text-white text-xs font-bold shadow-sm flex items-center justify-center gap-1.5 transition-colors disabled:opacity-50"
+                  className="flex-1 py-2.5 rounded-xl bg-primary hover:bg-[#165a37] text-on-primary text-xs font-bold shadow-sm flex items-center justify-center gap-1.5 transition-colors disabled:opacity-50"
                 >
                   {isSubmittingReturn ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Submit Return Request'}
                 </button>
@@ -942,7 +942,7 @@ export function CustomerOrderDetailsClient({ initialOrder }: CustomerOrderDetail
                   type="button"
                   onClick={handleCancelEntireOrder}
                   disabled={isCancellingOrder}
-                  className="flex-1 py-2.5 rounded-xl bg-error hover:bg-error text-white text-xs font-bold shadow-sm flex items-center justify-center gap-1.5 transition-colors disabled:opacity-50"
+                  className="flex-1 py-2.5 rounded-xl bg-error hover:bg-error text-on-error text-xs font-bold shadow-sm flex items-center justify-center gap-1.5 transition-colors disabled:opacity-50"
                 >
                   {isCancellingOrder ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Yes, Cancel Order'}
                 </button>

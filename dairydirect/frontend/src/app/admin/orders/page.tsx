@@ -485,7 +485,7 @@ export default function AdminOrdersPage() {
                                     <button
                                       type="button"
                                       onClick={() => setCodConfirmOrder(order)}
-                                      className="px-4 py-2 rounded-xl text-xs font-bold text-white bg-success hover:bg-success transition-all flex items-center gap-1.5 shadow-sm cursor-pointer"
+                                      className="px-4 py-2 rounded-xl text-xs font-bold text-on-success bg-success hover:bg-success transition-all flex items-center gap-1.5 shadow-sm cursor-pointer"
                                     >
                                       <IndianRupee className="w-3.5 h-3.5" />
                                       <span>Confirm Cash Collected (₹{order.total_amount})</span>

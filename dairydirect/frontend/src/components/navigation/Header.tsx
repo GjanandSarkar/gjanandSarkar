@@ -397,7 +397,7 @@ function HeaderContent() {
                         {user.phone || user.email || 'Logged In'}
                       </p>
                       {user.role && user.role !== 'customer' && (
-                        <span className="inline-block mt-1 text-[9px] font-black uppercase tracking-wider px-2 py-0.5 bg-primary text-white rounded-full">
+                        <span className="inline-block mt-1 text-[9px] font-black uppercase tracking-wider px-2 py-0.5 bg-primary text-on-primary rounded-full">
                           {user.role}
                         </span>
                       )}
@@ -502,7 +502,7 @@ function HeaderContent() {
                     <Link
                       href="/login"
                       onClick={() => setIsProfileOpen(false)}
-                      className="block w-full py-2 bg-primary hover:bg-[#0a2c1b] text-white text-xs font-bold rounded-xl transition-colors text-center"
+                      className="block w-full py-2 bg-primary hover:bg-[#0a2c1b] text-on-primary text-xs font-bold rounded-xl transition-colors text-center"
                     >
                       Login / Sign Up
                     </Link>

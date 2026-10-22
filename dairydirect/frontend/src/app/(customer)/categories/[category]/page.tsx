@@ -143,7 +143,7 @@ export default async function CategoryPage({ params }: Props) {
 
             <Link
               href="/products"
-              className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-primary hover:bg-primary-hover text-white text-xs font-bold shadow-md transition-all active:scale-95"
+              className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-primary hover:bg-primary-hover text-on-primary text-xs font-bold shadow-md transition-all active:scale-95"
             >
               <Sparkles className="w-4 h-4 text-[#c88a23]" />
               <span>Browse All Available Products</span>

@@ -278,7 +278,7 @@ export default function SavedAddressesPage() {
             </div>
             <button
               onClick={handleOpenAdd}
-              className="flex items-center gap-2 px-4 py-2.5 bg-success hover:bg-success text-white text-xs font-semibold rounded-xl shadow transition-all active:scale-95 cursor-pointer"
+              className="flex items-center gap-2 px-4 py-2.5 bg-success hover:bg-success text-on-success text-xs font-semibold rounded-xl shadow transition-all active:scale-95 cursor-pointer"
             >
               <Plus className="w-4 h-4" />
               Add First Address
@@ -333,7 +333,7 @@ export default function SavedAddressesPage() {
               </button>
               <button
                 onClick={() => handleDelete(deleteConfirmId)}
-                className="flex-1 py-2 rounded-xl bg-error hover:bg-error text-white font-semibold text-xs transition-colors cursor-pointer"
+                className="flex-1 py-2 rounded-xl bg-error hover:bg-error text-on-error font-semibold text-xs transition-colors cursor-pointer"
               >
                 Delete
               </button>

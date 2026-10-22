@@ -92,7 +92,7 @@ export function NotificationCenter({ isOpen, onClose }: NotificationCenterProps)
         <div className="flex items-center gap-2">
           <h2 className="text-lg font-black text-dark">Notifications</h2>
           {unreadCount > 0 && (
-            <span className="bg-primary text-white text-[10px] font-bold px-2 py-0.5 rounded-full">
+            <span className="bg-primary text-on-primary text-[10px] font-bold px-2 py-0.5 rounded-full">
               {unreadCount} New
             </span>
           )}

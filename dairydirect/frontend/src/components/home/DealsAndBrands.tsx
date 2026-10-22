@@ -181,7 +181,7 @@ export function DealsAndBrands({ products }: DealsAndBrandsProps) {
                         addToCartLocal(prod.id, variant.id, 1);
                         if (user) await addToCart(user.id, prod.id, variant.id, 1);
                       }}
-                      className="w-full py-1.5 bg-primary hover:bg-primary-hover text-white text-[11px] font-bold rounded-lg transition-colors flex items-center justify-center gap-1 shadow-xs active:scale-95 cursor-pointer"
+                      className="w-full py-1.5 bg-primary hover:bg-primary-hover text-on-primary text-[11px] font-bold rounded-lg transition-colors flex items-center justify-center gap-1 shadow-xs active:scale-95 cursor-pointer"
                     >
                       <ShoppingCart className="w-3 h-3" />
                       <span>Add</span>

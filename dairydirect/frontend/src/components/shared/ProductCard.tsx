@@ -241,11 +241,11 @@ export function ProductCard({
 
           {/* Stock Badges */}
           {isAllOutOfStock ? (
-            <span className="absolute bottom-2 left-2 bg-error text-white text-[10px] font-extrabold px-2 py-0.5 rounded-md shadow-xs">
+            <span className="absolute bottom-2 left-2 bg-error text-on-error text-[10px] font-extrabold px-2 py-0.5 rounded-md shadow-xs">
               Out of Stock
             </span>
           ) : isLowStock ? (
-            <span className="absolute bottom-2 left-2 bg-warning text-white text-[10px] font-extrabold px-2 py-0.5 rounded-md shadow-xs">
+            <span className="absolute bottom-2 left-2 bg-warning text-on-warning text-[10px] font-extrabold px-2 py-0.5 rounded-md shadow-xs">
               Only {availableStock} left
             </span>
           ) : null}
@@ -308,7 +308,7 @@ export function ProductCard({
             <div className="flex items-center gap-1 text-[10px] font-bold mt-1 mb-2">
               {showRating && (
                 <>
-                  <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded bg-success text-white">
+                  <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded bg-success text-on-success">
                     <Star className="w-2.5 h-2.5 fill-white text-white" />
                     {rating!.toFixed(1)}
                   </span>
@@ -352,7 +352,7 @@ export function ProductCard({
               <button
                 onClick={handleAdd}
                 disabled={busy || (variants.length === 1 && isOutOfStock)}
-                className="px-3.5 py-1.5 bg-primary hover:bg-primary-hover text-white text-xs font-bold rounded-lg transition-colors flex items-center justify-center gap-1 shadow-xs active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="px-3.5 py-1.5 bg-primary hover:bg-primary-hover text-on-primary text-xs font-bold rounded-lg transition-colors flex items-center justify-center gap-1 shadow-xs active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 <ShoppingCart className="w-3.5 h-3.5" />
                 <span>{variants.length > 1 ? 'Select' : 'Add'}</span>
@@ -372,7 +372,7 @@ export function ProductCard({
                 <button
                   onClick={(e) => handleUpdate(e, 'inc')}
                   disabled={busy || (variants.length === 1 && currentVariantQty >= availableStock)}
-                  className="w-7 h-7 flex items-center justify-center bg-primary text-white hover:bg-primary-hover transition-colors active:scale-90 disabled:opacity-40 disabled:cursor-not-allowed"
+                  className="w-7 h-7 flex items-center justify-center bg-primary text-on-primary hover:bg-primary-hover transition-colors active:scale-90 disabled:opacity-40 disabled:cursor-not-allowed"
                   title={currentVariantQty >= availableStock ? 'Max available stock reached' : undefined}
                 >
                   <Plus className="w-3 h-3 stroke-[3]" />
@@ -470,7 +470,7 @@ export function ProductCard({
                         <button
                           onClick={(e) => handleAdd(e, v.id)}
                           disabled={busy}
-                          className="px-5 py-2 rounded-lg font-bold text-xs bg-primary hover:bg-primary-hover text-white active:scale-95 disabled:opacity-50 shadow-xs"
+                          className="px-5 py-2 rounded-lg font-bold text-xs bg-primary hover:bg-primary-hover text-on-primary active:scale-95 disabled:opacity-50 shadow-xs"
                         >
                           Add
                         </button>
@@ -487,7 +487,7 @@ export function ProductCard({
                           <button
                             onClick={(e) => handleUpdate(e, 'inc', v.id)}
                             disabled={busy || qty >= vStock}
-                            className="w-7 h-7 rounded-md flex items-center justify-center bg-primary text-white hover:bg-primary-hover disabled:opacity-40 disabled:cursor-not-allowed"
+                            className="w-7 h-7 rounded-md flex items-center justify-center bg-primary text-on-primary hover:bg-primary-hover disabled:opacity-40 disabled:cursor-not-allowed"
                             title={qty >= vStock ? 'Max available stock reached' : undefined}
                           >
                             <Plus className="w-3.5 h-3.5 stroke-[2.5]" />
@@ -501,7 +501,7 @@ export function ProductCard({
 
               <button
                 onClick={() => setShowDrawer(false)}
-                className="w-full py-3 bg-primary hover:bg-primary-hover rounded-xl font-bold text-white text-sm active:scale-95 shadow-md"
+                className="w-full py-3 bg-primary hover:bg-primary-hover rounded-xl font-bold text-on-primary text-sm active:scale-95 shadow-md"
               >
                 Done
               </button>

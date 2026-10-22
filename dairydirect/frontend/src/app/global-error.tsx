@@ -30,7 +30,7 @@ export default function GlobalError({
           </p>
           <button
             onClick={() => reset()}
-            className="flex items-center gap-2 px-6 py-3 rounded-full text-sm font-bold bg-primary text-white shadow-lg shadow-primary/20 transition-transform active:scale-95"
+            className="flex items-center gap-2 px-6 py-3 rounded-full text-sm font-bold bg-primary text-on-primary shadow-lg shadow-primary/20 transition-transform active:scale-95"
           >
             <RefreshCcw className="w-4 h-4" />
             Reload Application

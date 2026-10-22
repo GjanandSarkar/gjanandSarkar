@@ -72,7 +72,7 @@ export function BottomNav() {
               {item.badge ? (
                 <span
                   key={item.badge}
-                  className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full text-[9px] font-bold text-white bg-secondary border border-white pop tabular-nums"
+                  className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full text-[9px] font-bold text-on-secondary bg-secondary border border-white pop tabular-nums"
                 >
                   {item.badge}
                 </span>

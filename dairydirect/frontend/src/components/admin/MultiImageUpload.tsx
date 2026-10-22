@@ -220,7 +220,7 @@ export function MultiImageUpload({
 
                 {/* Primary Badge */}
                 {item.isPrimary ? (
-                  <div className="absolute top-1.5 left-1.5 z-10 flex items-center gap-1 px-2 py-0.5 rounded-full bg-success text-white text-[10px] font-black tracking-wide shadow-md">
+                  <div className="absolute top-1.5 left-1.5 z-10 flex items-center gap-1 px-2 py-0.5 rounded-full bg-success text-on-success text-[10px] font-black tracking-wide shadow-md">
                     <Star className="w-3 h-3 fill-current" />
                     <span>COVER</span>
                   </div>
@@ -290,7 +290,7 @@ export function MultiImageUpload({
           <button
             type="button"
             onClick={handleAddUrl}
-            className="px-3 py-1 rounded-[6px] bg-primary text-white text-[12px] font-bold hover:bg-primary/90"
+            className="px-3 py-1 rounded-[6px] bg-primary text-on-primary text-[12px] font-bold hover:bg-primary/90"
           >
             Add
           </button>

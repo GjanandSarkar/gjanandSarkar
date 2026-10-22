@@ -111,7 +111,7 @@ export function ShopByState() {
             Over 28 States &amp; 8 Union Territories connected directly with millions of conscious Indian buyers.
           </p>
 
-          <div className="inline-flex items-center gap-2 bg-primary text-white text-xs font-bold px-4 py-2 rounded-full relative z-10 shadow-xs">
+          <div className="inline-flex items-center gap-2 bg-primary text-on-primary text-xs font-bold px-4 py-2 rounded-full relative z-10 shadow-xs">
             <MapPin className="w-3.5 h-3.5 text-warning" />
             <span>Discover State Specialties</span>
           </div>

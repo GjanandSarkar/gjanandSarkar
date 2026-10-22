@@ -75,7 +75,7 @@ export default function SubscriptionHubScreen() {
           </span>
         </h1>
         <Link href="/subscribe/new">
-          <button className="flex items-center gap-2 px-4 py-2.5 rounded-[12px] font-bold text-[13px] text-white transition-all active:scale-95 bg-primary shadow-[0_4px_12px_rgba(63,101,48,0.25)] hover:bg-primary/90">
+          <button className="flex items-center gap-2 px-4 py-2.5 rounded-[12px] font-bold text-[13px] text-on-primary transition-all active:scale-95 bg-primary shadow-[0_4px_12px_rgba(63,101,48,0.25)] hover:bg-primary/90">
             <Plus className="w-4 h-4" strokeWidth={2.5} />
             New
           </button>
@@ -112,7 +112,7 @@ export default function SubscriptionHubScreen() {
               dairy, household staples and more.
             </p>
             <Link href="/products">
-              <Button size="lg" className="px-8 shadow-active shadow-primary/20 bg-primary hover:bg-primary/90 text-white font-bold rounded-full mb-8">
+              <Button size="lg" className="px-8 shadow-active shadow-primary/20 bg-primary hover:bg-primary/90 text-on-primary font-bold rounded-full mb-8">
                 Explore Products
               </Button>
             </Link>

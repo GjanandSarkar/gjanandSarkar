@@ -89,7 +89,7 @@ export default function OrderConfirmedScreen() {
           initial={{ scale: 0.5, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
           transition={{ type: "spring", damping: 15, stiffness: 200 }}
-          className="w-24 h-24 bg-primary rounded-full flex items-center justify-center mx-auto mb-6 shadow-active"
+          className="w-24 h-24 bg-primary text-on-primary rounded-full flex items-center justify-center mx-auto mb-6 shadow-active"
         >
           <Check className="w-12 h-12 text-white" strokeWidth={3} />
         </motion.div>

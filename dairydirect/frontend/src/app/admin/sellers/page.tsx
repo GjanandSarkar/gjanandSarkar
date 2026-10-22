@@ -558,7 +558,7 @@ export default function AdminSellersPage() {
                   <div className="space-y-2">
                     <button
                       onClick={() => openActionModal('keep_active')}
-                      className="w-full px-4 py-2.5 bg-success hover:bg-success text-white text-xs font-bold rounded-xl flex items-center justify-center gap-2 shadow-sm transition-colors cursor-pointer"
+                      className="w-full px-4 py-2.5 bg-success hover:bg-success text-on-success text-xs font-bold rounded-xl flex items-center justify-center gap-2 shadow-sm transition-colors cursor-pointer"
                     >
                       <Check className="w-4 h-4" />
                       <span>Keep Active / Complete Review (Restore)</span>
@@ -606,7 +606,7 @@ export default function AdminSellersPage() {
                   <div className="space-y-2">
                     <button
                       onClick={() => openActionModal('approve_reactivation')}
-                      className="w-full px-4 py-2.5 bg-success hover:bg-success text-white text-xs font-bold rounded-xl flex items-center justify-center gap-2 shadow-sm transition-colors cursor-pointer"
+                      className="w-full px-4 py-2.5 bg-success hover:bg-success text-on-success text-xs font-bold rounded-xl flex items-center justify-center gap-2 shadow-sm transition-colors cursor-pointer"
                     >
                       <CheckCircle2 className="w-4 h-4" />
                       <span>Approve Reactivation (Restore to Active)</span>

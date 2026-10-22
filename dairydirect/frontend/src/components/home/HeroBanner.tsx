@@ -190,7 +190,7 @@ export function HeroBanner({ products }: HeroBannerProps) {
           <div className="flex flex-wrap items-center gap-4">
             <Link
               href="/products"
-              className="px-7 py-3.5 bg-primary hover:bg-primary-hover text-white font-black text-sm rounded-xl shadow-lg shadow-[var(--primary)]/20 active:scale-95 transition-all flex items-center gap-2"
+              className="px-7 py-3.5 bg-primary hover:bg-primary-hover text-on-primary font-black text-sm rounded-xl shadow-lg shadow-[var(--primary)]/20 active:scale-95 transition-all flex items-center gap-2"
             >
               <span>Shop Now</span>
               <ArrowRight className="w-4 h-4 text-[#c88a23]" />
@@ -308,7 +308,7 @@ export function HeroBanner({ products }: HeroBannerProps) {
               <button
                 onClick={handlePrev}
                 aria-label="Previous product"
-                className="absolute left-1 sm:left-3 top-1/2 -translate-y-1/2 z-40 w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-surface/90 border border-warning/20 text-primary hover:bg-primary hover:text-white shadow-lg flex items-center justify-center transition-all cursor-pointer hover:scale-110 active:scale-95"
+                className="absolute left-1 sm:left-3 top-1/2 -translate-y-1/2 z-40 w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-surface/90 border border-warning/20 text-primary hover:bg-primary hover:text-on-primary shadow-lg flex items-center justify-center transition-all cursor-pointer hover:scale-110 active:scale-95"
               >
                 <ChevronLeft className="w-5 h-5" />
               </button>
@@ -317,7 +317,7 @@ export function HeroBanner({ products }: HeroBannerProps) {
               <button
                 onClick={handleNext}
                 aria-label="Next product"
-                className="absolute right-1 sm:right-3 top-1/2 -translate-y-1/2 z-40 w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-surface/90 border border-warning/20 text-primary hover:bg-primary hover:text-white shadow-lg flex items-center justify-center transition-all cursor-pointer hover:scale-110 active:scale-95"
+                className="absolute right-1 sm:right-3 top-1/2 -translate-y-1/2 z-40 w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-surface/90 border border-warning/20 text-primary hover:bg-primary hover:text-on-primary shadow-lg flex items-center justify-center transition-all cursor-pointer hover:scale-110 active:scale-95"
               >
                 <ChevronRight className="w-5 h-5" />
               </button>
@@ -357,7 +357,7 @@ export function HeroBanner({ products }: HeroBannerProps) {
             </p>
             <Link
               href="/become-seller"
-              className="px-6 py-3 bg-primary hover:bg-primary-hover text-white text-xs font-bold rounded-xl transition-all shadow-md active:scale-95"
+              className="px-6 py-3 bg-primary hover:bg-primary-hover text-on-primary text-xs font-bold rounded-xl transition-all shadow-md active:scale-95"
             >
               List Products as Seller
             </Link>

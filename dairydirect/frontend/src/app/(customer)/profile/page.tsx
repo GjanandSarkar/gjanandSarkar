@@ -297,7 +297,7 @@ export default function ProfileScreen() {
               {sellerInquiry.status === 'approved' ? (
                 <Link
                   href="/seller/dashboard"
-                  className="inline-flex items-center gap-1.5 px-4 py-2 bg-primary hover:bg-primary-hover text-white text-xs font-bold rounded-xl transition-all shadow-2xs"
+                  className="inline-flex items-center gap-1.5 px-4 py-2 bg-primary hover:bg-primary-hover text-on-primary text-xs font-bold rounded-xl transition-all shadow-2xs"
                 >
                   <span>Open Seller Dashboard</span>
                   <ArrowRight className="w-3.5 h-3.5" />
@@ -316,7 +316,7 @@ export default function ProfileScreen() {
         ) : (
           <div className="bg-gradient-to-r from-emerald-50/80 to-amber-50/60 rounded-[24px] border border-success/20/50 shadow-xs p-5 flex items-center justify-between gap-4">
             <div className="flex items-center gap-3.5">
-              <div className="w-10 h-10 rounded-full bg-primary text-white flex items-center justify-center shrink-0">
+              <div className="w-10 h-10 rounded-full bg-primary text-on-primary flex items-center justify-center shrink-0">
                 <Store className="w-5 h-5" />
               </div>
               <div>
@@ -326,7 +326,7 @@ export default function ProfileScreen() {
             </div>
             <Link
               href="/become-seller"
-              className="px-4 py-2.5 bg-primary hover:bg-primary-hover text-white text-xs font-black rounded-xl shrink-0 transition-all shadow-2xs flex items-center gap-1"
+              className="px-4 py-2.5 bg-primary hover:bg-primary-hover text-on-primary text-xs font-black rounded-xl shrink-0 transition-all shadow-2xs flex items-center gap-1"
             >
               <span>Apply Now</span>
               <ArrowRight className="w-3.5 h-3.5 text-[#c88a23]" />
@@ -513,7 +513,7 @@ export default function ProfileScreen() {
                       <span className="block text-xs font-medium text-muted mt-0.5">{lang.sub}</span>
                     </div>
                     {language === lang.code && (
-                      <div className="w-6 h-6 rounded-full bg-primary flex items-center justify-center">
+                      <div className="w-6 h-6 rounded-full bg-primary text-on-primary flex items-center justify-center">
                         <Check className="w-3.5 h-3.5 text-white" />
                       </div>
                     )}

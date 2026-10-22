@@ -141,7 +141,7 @@ export default function AdminCouponsPage() {
           <h1 className="text-2xl font-bold text-foreground">Coupons Management</h1>
           <p className="text-foreground-muted">Create and manage discount codes.</p>
         </div>
-        <button onClick={() => handleOpen()} className="flex items-center gap-2 bg-primary text-white px-4 py-2 rounded-lg hover:bg-success transition">
+        <button onClick={() => handleOpen()} className="flex items-center gap-2 bg-primary text-on-primary px-4 py-2 rounded-lg hover:bg-success transition">
           <Plus className="w-4 h-4" /> Add Coupon
         </button>
       </div>
@@ -276,7 +276,7 @@ export default function AdminCouponsPage() {
 
               <div className="flex justify-end gap-3 pt-4 border-t border-border">
                 <button type="button" onClick={() => setShowModal(false)} className="px-4 py-2 bg-surface-muted rounded-lg hover:bg-border transition">Cancel</button>
-                <button type="submit" className="px-4 py-2 bg-primary text-white rounded-lg hover:bg-success transition">Save</button>
+                <button type="submit" className="px-4 py-2 bg-primary text-on-primary rounded-lg hover:bg-success transition">Save</button>
               </div>
             </form>
           </div>

@@ -160,7 +160,7 @@ function NewSubscriptionContent() {
                     className={cn(
                       "py-3 rounded-[16px] text-sm font-black transition-all border-2",
                       volume === preset.value 
-                        ? "bg-primary border-primary text-white shadow-active" 
+                        ? "bg-primary border-primary text-on-primary shadow-active" 
                         : "bg-surface-container border-transparent text-muted hover:border-sand"
                     )}
                   >

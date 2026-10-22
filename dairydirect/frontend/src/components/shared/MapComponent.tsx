@@ -118,7 +118,7 @@ export default function MapComponent({
               transition={{ repeat: Infinity, duration: 2 }}
               className="flex flex-col items-center"
             >
-              <div className="w-10 h-10 bg-primary rounded-full flex items-center justify-center border-4 border-white shadow-2xl relative">
+              <div className="w-10 h-10 bg-primary text-on-primary rounded-full flex items-center justify-center border-4 border-white shadow-2xl relative">
                 <div className="w-2.5 h-2.5 bg-surface rounded-full" />
                 <div className="absolute inset-0 rounded-full bg-primary animate-ping opacity-20 -z-10" />
               </div>
@@ -152,7 +152,7 @@ export default function MapComponent({
                 boxShadow: ["0 0 0 rgba(63,101,48,0)", "0 0 25px rgba(63,101,48,0.6)", "0 0 0 rgba(63,101,48,0)"] 
               }}
               transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
-              className="bg-primary text-white p-2.5 rounded-full border-[3px] border-white relative z-20"
+              className="bg-primary text-on-primary p-2.5 rounded-full border-[3px] border-white relative z-20"
             >
               <Truck className="w-6 h-6" />
             </motion.div>

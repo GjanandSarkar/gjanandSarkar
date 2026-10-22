@@ -428,7 +428,7 @@ export default function CheckoutScreen() {
               <button
                 onClick={handleApplyCoupon}
                 disabled={isApplyingCoupon || !couponCode}
-                className="bg-primary hover:bg-primary-dark disabled:opacity-50 text-white font-bold px-5 py-2.5 rounded-[12px] text-sm shadow-sm transition-all flex items-center justify-center gap-2 min-w-[80px]"
+                className="bg-primary hover:bg-primary-dark disabled:opacity-50 text-on-primary font-bold px-5 py-2.5 rounded-[12px] text-sm shadow-sm transition-all flex items-center justify-center gap-2 min-w-[80px]"
               >
                 {isApplyingCoupon ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Apply'}
               </button>
@@ -550,7 +550,7 @@ export default function CheckoutScreen() {
                     setStockError(null);
                     router.push('/cart');
                   }}
-                  className="w-full bg-primary hover:bg-primary-hover text-white font-bold py-2.5 rounded-xl shadow-md"
+                  className="w-full bg-primary hover:bg-primary-hover text-on-primary font-bold py-2.5 rounded-xl shadow-md"
                 >
                   Return to Cart & Adjust Items
                 </Button>
