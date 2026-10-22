@@ -404,12 +404,12 @@ export default function AdminSellersPage() {
                     onClick={() => handleSelectSeller(seller)}
                     className={`p-4 transition-all cursor-pointer flex items-center justify-between gap-4 ${
                       isSelected
-                        ? 'bg-success-bg/60 border-l-4 border-l-primary'
+                        ? 'bg-success-bg/60 border-l-4 border-l-[var(--primary)]'
                         : 'hover:bg-surface-muted/80 border-l-4 border-l-transparent'
                     }`}
                   >
                     <div className="flex items-center gap-3 min-w-0">
-                      <div className="w-10 h-10 rounded-xl bg-primary-fixed text-primary flex items-center justify-center font-bold text-sm shrink-0">
+                      <div className="w-10 h-10 rounded-xl bg-primary/10 text-primary flex items-center justify-center font-bold text-sm shrink-0">
                         {seller.store_name?.charAt(0) || 'S'}
                       </div>
                       <div className="min-w-0">
@@ -851,7 +851,7 @@ export default function AdminSellersPage() {
                             type="date"
                             value={customStartDate}
                             onChange={(e) => setCustomStartDate(e.target.value)}
-                            className="w-full p-2 bg-surface border border-border rounded-xl text-xs text-foreground outline-none focus:border-primary"
+                            className="w-full p-2 bg-surface border border-border rounded-xl text-xs text-foreground outline-none"
                           />
                         </div>
                       )}
@@ -861,7 +861,7 @@ export default function AdminSellersPage() {
                           type="date"
                           value={customEndDate}
                           onChange={(e) => setCustomEndDate(e.target.value)}
-                          className="w-full p-2 bg-surface border border-border rounded-xl text-xs text-foreground outline-none focus:border-primary"
+                          className="w-full p-2 bg-surface border border-border rounded-xl text-xs text-foreground outline-none"
                         />
                       </div>
                     </div>

@@ -132,7 +132,7 @@ export default function AdminCustomersPage() {
                       {c.total_orders} Orders
                     </span>
                     {parseInt(c.active_subscriptions) > 0 && (
-                      <span className="text-[10px] font-bold px-2 py-0.5 rounded-full" style={{ background: 'var(--warning-bg)', color: '#774117' }}>
+                      <span className="text-[10px] font-bold px-2 py-0.5 rounded-full" style={{ background: '#ffdcc7', color: '#774117' }}>
                         {c.active_subscriptions} Subs
                       </span>
                     )}
@@ -163,7 +163,7 @@ export default function AdminCustomersPage() {
             >
               <div className="flex justify-between items-center pb-4 border-b border-border">
                 <div className="flex items-center gap-3">
-                  <div className="w-12 h-12 rounded-full flex items-center justify-center font-bold text-white text-[18px]" style={{ background: 'var(--success)' }}>
+                  <div className="w-12 h-12 rounded-full flex items-center justify-center font-bold text-white text-[18px]" style={{ background: '#4a8c3f' }}>
                     {(selectedCustomer.name || selectedCustomer.email || 'C')[0].toUpperCase()}
                   </div>
                   <div>
@@ -208,7 +208,7 @@ export default function AdminCustomersPage() {
                 </div>
                 <div className="flex justify-between py-2 border-b border-border">
                   <span className="text-foreground-muted">Loyalty Points</span>
-                  <span className="font-bold text-[var(--success)]">{selectedCustomer.loyalty_points || 0} pts</span>
+                  <span className="font-bold text-[#4a8c3f]">{selectedCustomer.loyalty_points || 0} pts</span>
                 </div>
                 <div className="flex justify-between py-2">
                   <span className="text-foreground-muted">Last Login</span>

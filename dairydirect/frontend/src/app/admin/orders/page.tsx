@@ -24,10 +24,10 @@ import { PLACEHOLDER_PRODUCT_IMAGE } from '@/lib/constants/brand';
 import { ConfirmCodPaymentModal } from '@/components/admin/ConfirmCodPaymentModal';
 
 const STATUS_STYLES: Record<string, { bg: string; color: string; dot: string }> = {
-  'pending':          { bg: 'var(--warning-bg)', color: '#774117', dot: '#d4712a' },
-  'confirmed':        { bg: 'var(--success-bg)', color: 'var(--success)', dot: 'var(--success)' },
-  'out_for_delivery': { bg: 'var(--warning-bg)', color: '#7d5200', dot: '#c78c2e' },
-  'delivered':        { bg: 'var(--success-bg)', color: 'var(--success)', dot: 'var(--success)' },
+  'pending':          { bg: '#ffdcc7', color: '#774117', dot: '#d4712a' },
+  'confirmed':        { bg: '#c2efac', color: '#042100', dot: '#3f6530' },
+  'out_for_delivery': { bg: '#fff8e6', color: '#7d5200', dot: '#c78c2e' },
+  'delivered':        { bg: '#eaf4e2', color: '#2a4f1d', dot: '#3f6530' },
   'cancelled':        { bg: '#e3e3dc', color: '#43493e', dot: '#73796d' },
 };
 
@@ -222,18 +222,18 @@ export default function AdminOrdersPage() {
             </div>
           </div>
 
-          <div className="flex gap-1.5 overflow-x-auto no-scrollbar pb-1">
+          <div className="flex gap-2 overflow-x-auto no-scrollbar -mx-6 px-6 pb-1">
             {['all', 'cod_pending', 'confirmed', 'out_for_delivery', 'delivered', 'cancelled'].map(tab => (
-              <button
-                key={tab}
-                type="button"
-                onClick={() => setActiveTab(tab)}
-                className={`whitespace-nowrap px-3 py-1.5 rounded-lg text-xs font-semibold transition-all shrink-0 capitalize border cursor-pointer ${
-                  activeTab === tab
-                    ? 'bg-primary text-on-primary border-primary shadow-2xs font-bold'
-                    : 'bg-surface text-foreground-muted border-border hover:text-foreground hover:bg-surface-muted'
-                }`}
-              >
+              <button key={tab} onClick={() => setActiveTab(tab)}
+                className="whitespace-nowrap px-4 py-2 rounded-full text-[12px] font-semibold transition-all duration-200 shrink-0 capitalize"
+                style={activeTab === tab ? {
+                  background: 'var(--cta-gradient)',
+                  color: 'white',
+                  boxShadow: '0 3px 10px rgba(12, 60, 38, 0.25)',
+                } : {
+                  background: 'var(--color-surface-container-low)',
+                  color: 'var(--color-on-surface-variant)',
+                }}>
                 {tab === 'cod_pending' ? 'COD Payment Pending' : tab.replace(/_/g, ' ')}
               </button>
             ))}

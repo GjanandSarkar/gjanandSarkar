@@ -357,11 +357,11 @@ export function SellerOrdersManager({ initialStatusFilter = 'all' }: SellerOrder
           onClick={() => setActiveTab('all')}
           className={`p-4 rounded-2xl border text-left transition-all cursor-pointer ${
             activeTab === 'all'
-              ? 'bg-primary text-primary-foreground border-primary shadow-sm'
+              ? 'bg-primary text-white border-primary shadow-sm'
               : 'bg-surface hover:bg-surface-muted border-border text-foreground'
           }`}
         >
-          <span className={`text-[11px] font-bold uppercase tracking-wider block ${activeTab === 'all' ? 'text-primary-foreground/80' : 'text-foreground-muted'}`}>
+          <span className={`text-[11px] font-bold uppercase tracking-wider block ${activeTab === 'all' ? 'text-emerald-200' : 'text-foreground-muted'}`}>
             Total Orders
           </span>
           <span className="text-2xl font-black mt-1 block">{orders.length}</span>
@@ -371,15 +371,15 @@ export function SellerOrdersManager({ initialStatusFilter = 'all' }: SellerOrder
           onClick={() => setActiveTab('requests')}
           className={`p-4 rounded-2xl border text-left transition-all cursor-pointer ${
             activeTab === 'requests'
-              ? 'bg-amber-600 text-white border-amber-600 shadow-sm'
+              ? 'bg-[#c88a23] text-white border-[#c88a23] shadow-sm'
               : 'bg-surface hover:bg-warning-bg/40 border-border text-foreground'
           }`}
         >
           <div className="flex items-center justify-between">
-            <span className={`text-[11px] font-bold uppercase tracking-wider block ${activeTab === 'requests' ? 'text-amber-100' : 'text-warning'}`}>
+            <span className={`text-[11px] font-bold uppercase tracking-wider block ${activeTab === 'requests' ? 'text-amber-100' : 'text-[#c88a23]'}`}>
               Requests
             </span>
-            <RotateCcw className={`w-3.5 h-3.5 ${activeTab === 'requests' ? 'text-white' : 'text-warning'}`} />
+            <RotateCcw className={`w-3.5 h-3.5 ${activeTab === 'requests' ? 'text-white' : 'text-[#c88a23]'}`} />
           </div>
           <span className="text-2xl font-black mt-1 block">{requestsCount}</span>
         </button>
@@ -439,12 +439,12 @@ export function SellerOrdersManager({ initialStatusFilter = 'all' }: SellerOrder
           onClick={() => setActiveTab('delivered')}
           className={`p-4 rounded-2xl border text-left transition-all cursor-pointer ${
             activeTab === 'delivered'
-              ? 'bg-primary text-primary-foreground border-primary shadow-sm'
-              : 'bg-surface hover:bg-primary-fixed/40 border-border text-foreground'
+              ? 'bg-primary text-white border-primary shadow-sm'
+              : 'bg-surface hover:bg-success-bg/40 border-border text-foreground'
           }`}
         >
           <div className="flex items-center justify-between">
-            <span className={`text-[11px] font-bold uppercase tracking-wider block ${activeTab === 'delivered' ? 'text-primary-foreground/80' : 'text-primary'}`}>
+            <span className={`text-[11px] font-bold uppercase tracking-wider block ${activeTab === 'delivered' ? 'text-emerald-200' : 'text-primary'}`}>
               Delivered
             </span>
             <Check className={`w-3.5 h-3.5 ${activeTab === 'delivered' ? 'text-white' : 'text-primary'}`} />
@@ -471,7 +471,7 @@ export function SellerOrdersManager({ initialStatusFilter = 'all' }: SellerOrder
               onClick={() => setActiveTab(tab.id)}
               className={`px-3 py-1.5 rounded-full text-xs font-bold whitespace-nowrap transition-all cursor-pointer ${
                 activeTab === tab.id
-                  ? 'bg-primary text-primary-foreground shadow-xs'
+                  ? 'bg-primary text-white shadow-xs'
                   : 'text-foreground-muted hover:text-foreground hover:bg-surface-muted'
               }`}
             >
@@ -489,7 +489,7 @@ export function SellerOrdersManager({ initialStatusFilter = 'all' }: SellerOrder
               placeholder="Search order ID, product, phone..."
               value={searchQuery}
               onChange={e => setSearchQuery(e.target.value)}
-              className="w-full pl-9 pr-3 py-2 bg-surface-muted border border-border rounded-xl text-xs font-medium placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:bg-surface"
+              className="w-full pl-9 pr-3 py-2 bg-surface-muted border border-border rounded-xl text-xs font-medium placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[var(--primary)]/20 focus:bg-surface"
             />
             {searchQuery && (
               <button
@@ -565,7 +565,7 @@ export function SellerOrdersManager({ initialStatusFilter = 'all' }: SellerOrder
                   {/* Left: ID, Date, Customer */}
                   <div className="space-y-1">
                     <div className="flex items-center gap-2.5 flex-wrap">
-                      <span className="font-mono font-bold text-sm text-foreground">
+                      <span className="font-mono font-black text-sm text-primary">
                         {order.order_number || `ORD-${order.id.slice(0, 8).toUpperCase()}`}
                       </span>
                       <span
@@ -657,7 +657,7 @@ export function SellerOrdersManager({ initialStatusFilter = 'all' }: SellerOrder
                         
                         {/* Ordered Products (2 cols) */}
                         <div className="lg:col-span-2 space-y-3">
-                          <h5 className="text-xs font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-1.5">
+                          <h5 className="text-xs font-bold uppercase tracking-wider text-foreground-muted flex items-center gap-1.5">
                             <Package className="w-4 h-4 text-primary" />
                             <span>Ordered Items ({items.length})</span>
                           </h5>
@@ -889,7 +889,7 @@ export function SellerOrdersManager({ initialStatusFilter = 'all' }: SellerOrder
 
                         {/* Customer & Delivery Address (1 col) */}
                         <div className="space-y-3">
-                          <h5 className="text-xs font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-1.5">
+                          <h5 className="text-xs font-bold uppercase tracking-wider text-foreground-muted flex items-center gap-1.5">
                             <MapPin className="w-4 h-4 text-primary" />
                             <span>Delivery Destination</span>
                           </h5>
@@ -1050,9 +1050,9 @@ export function SellerOrdersManager({ initialStatusFilter = 'all' }: SellerOrder
                                       isCancelled
                                         ? 'bg-surface-muted text-foreground-muted border border-border-hover'
                                         : isCurrent
-                                          ? 'bg-primary text-primary-foreground shadow-sm ring-4 ring-primary/10'
+                                          ? 'bg-primary text-white shadow-md ring-4 ring-[var(--primary)]/10'
                                           : isPassed
-                                            ? 'bg-primary text-primary-foreground'
+                                            ? 'bg-emerald-600 text-white'
                                             : 'bg-surface-muted text-foreground-muted border border-border'
                                     }`}
                                   >
@@ -1067,7 +1067,7 @@ export function SellerOrdersManager({ initialStatusFilter = 'all' }: SellerOrder
                                 {idx < arr.length - 1 && (
                                   <div
                                     className={`flex-1 h-1 mx-2 rounded-full transition-colors ${
-                                      isPassed && !isCancelled ? 'bg-primary' : 'bg-border'
+                                      isPassed && !isCancelled ? 'bg-emerald-500' : 'bg-border'
                                     }`}
                                   />
                                 )}
@@ -1094,10 +1094,10 @@ export function SellerOrdersManager({ initialStatusFilter = 'all' }: SellerOrder
                                 title={blockedReason ?? (isCurrent ? 'Current Status' : 'Confirm Order and prepare for dispatch')}
                                 className={`px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer ${
                                   isCurrent
-                                    ? 'bg-primary-fixed text-primary border-2 border-primary shadow-2xs cursor-default'
+                                    ? 'bg-success-bg text-emerald-900 border-2 border-emerald-500 shadow-2xs cursor-default'
                                     : isBlocked
                                       ? 'bg-surface-muted text-foreground-muted border border-border cursor-not-allowed line-through opacity-50'
-                                      : 'bg-primary hover:bg-primary-hover text-primary-foreground shadow-xs active:scale-95'
+                                      : 'bg-primary hover:bg-primary-hover text-white shadow-xs active:scale-95'
                                 }`}
                               >
                                 {isBusy ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <CheckCircle2 className="w-3.5 h-3.5" />}
@@ -1120,10 +1120,10 @@ export function SellerOrdersManager({ initialStatusFilter = 'all' }: SellerOrder
                                 title={blockedReason ?? (isCurrent ? 'Current Status' : 'Mark Out for Delivery')}
                                 className={`px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer ${
                                   isCurrent
-                                    ? 'bg-info-bg text-blue-900 border-2 border-blue-500 shadow-2xs cursor-default'
+                                    ? 'bg-warning-bg text-yellow-900 border-2 border-yellow-500 shadow-2xs cursor-default'
                                     : isBlocked
                                       ? 'bg-surface-muted text-foreground-muted border border-border cursor-not-allowed line-through opacity-50'
-                                      : 'bg-blue-600 hover:bg-blue-700 text-white shadow-xs active:scale-95'
+                                      : 'bg-[#c88a23] hover:bg-[#ad7418] text-white shadow-xs active:scale-95'
                                 }`}
                               >
                                 {isBusy ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Truck className="w-3.5 h-3.5" />}
@@ -1242,7 +1242,7 @@ export function SellerOrdersManager({ initialStatusFilter = 'all' }: SellerOrder
                 <select
                   value={cancelReason}
                   onChange={e => setCancelReason(e.target.value)}
-                  className="w-full p-2.5 rounded-xl border border-border text-xs font-semibold outline-none focus:ring-2 focus:ring-primary/20 bg-surface"
+                  className="w-full p-2.5 rounded-xl border border-border text-xs font-semibold outline-none focus:ring-2 focus:ring-[var(--primary)]/20 bg-surface"
                 >
                   <option value="Out of stock">Product Out of Stock</option>
                   <option value="Quality check failed">Freshness / Quality Standards Not Met</option>
@@ -1260,7 +1260,7 @@ export function SellerOrdersManager({ initialStatusFilter = 'all' }: SellerOrder
                     value={customCancelReason}
                     onChange={e => setCustomCancelReason(e.target.value)}
                     placeholder="Enter details..."
-                    className="w-full p-2.5 rounded-xl border border-border text-xs font-medium outline-none focus:ring-2 focus:ring-primary/20"
+                    className="w-full p-2.5 rounded-xl border border-border text-xs font-medium outline-none focus:ring-2 focus:ring-[var(--primary)]/20"
                   />
                 </div>
               )}
@@ -1354,7 +1354,7 @@ export function SellerOrdersManager({ initialStatusFilter = 'all' }: SellerOrder
                       ? 'Explain why this request is being rejected (mandatory)...'
                       : 'Add any optional notes for the customer and audit log...'
                   }
-                  className="w-full p-2.5 rounded-xl border border-border text-xs font-medium outline-none focus:ring-2 focus:ring-primary/20 resize-none"
+                  className="w-full p-2.5 rounded-xl border border-border text-xs font-medium outline-none focus:ring-2 focus:ring-[var(--primary)]/20 resize-none"
                   required={decisionModal.action === 'reject'}
                 />
               </div>

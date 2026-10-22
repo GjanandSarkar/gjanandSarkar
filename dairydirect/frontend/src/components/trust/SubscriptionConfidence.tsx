@@ -7,7 +7,7 @@ export function SubscriptionConfidence() {
       
       <div className="flex flex-col gap-4">
         <div className="flex items-start gap-3">
-          <div className="w-8 h-8 rounded-full bg-white text-primary flex items-center justify-center shrink-0 shadow-sm border border-sand">
+          <div className="w-8 h-8 rounded-full bg-surface text-primary flex items-center justify-center shrink-0 shadow-sm border border-sand">
             <PauseCircle className="w-4 h-4" />
           </div>
           <div>
@@ -17,7 +17,7 @@ export function SubscriptionConfidence() {
         </div>
         
         <div className="flex items-start gap-3">
-          <div className="w-8 h-8 rounded-full bg-white text-primary flex items-center justify-center shrink-0 shadow-sm border border-sand">
+          <div className="w-8 h-8 rounded-full bg-surface text-primary flex items-center justify-center shrink-0 shadow-sm border border-sand">
             <Truck className="w-4 h-4" />
           </div>
           <div>
@@ -27,7 +27,7 @@ export function SubscriptionConfidence() {
         </div>
 
         <div className="flex items-start gap-3">
-          <div className="w-8 h-8 rounded-full bg-white text-primary flex items-center justify-center shrink-0 shadow-sm border border-sand">
+          <div className="w-8 h-8 rounded-full bg-surface text-primary flex items-center justify-center shrink-0 shadow-sm border border-sand">
             <Bell className="w-4 h-4" />
           </div>
           <div>

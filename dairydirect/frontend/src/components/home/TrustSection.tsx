@@ -18,7 +18,7 @@ export function TrustSection() {
       icon: <ShieldCheck className="w-6 h-6" />,
       title: 'Quality Checked',
       description: 'Rigorous 24-step testing',
-      color: 'text-green-600',
+      color: 'text-success',
       bg: 'bg-green-600/10'
     },
     {

@@ -141,13 +141,8 @@ export default function AdminCouponsPage() {
           <h1 className="text-2xl font-bold text-foreground">Coupons Management</h1>
           <p className="text-foreground-muted">Create and manage discount codes.</p>
         </div>
-        <button 
-          type="button"
-          onClick={() => handleOpen()} 
-          className="flex items-center gap-2 bg-primary hover:bg-primary-hover text-white text-xs font-bold px-4 py-2.5 rounded-xl shadow-2xs transition-colors cursor-pointer"
-        >
-          <Plus className="w-4 h-4 stroke-[2.5]" />
-          <span>Add Coupon</span>
+        <button onClick={() => handleOpen()} className="flex items-center gap-2 bg-primary text-white px-4 py-2 rounded-lg hover:bg-emerald-900 transition">
+          <Plus className="w-4 h-4" /> Add Coupon
         </button>
       </div>
 
@@ -275,13 +270,13 @@ export default function AdminCouponsPage() {
               </div>
 
               <div className="flex items-center gap-2 mt-4">
-                <input type="checkbox" id="isActive" checked={form.is_active} onChange={e => setForm({...form, is_active: e.target.checked})} className="w-4 h-4 rounded text-primary focus:ring-primary" />
+                <input type="checkbox" id="isActive" checked={form.is_active} onChange={e => setForm({...form, is_active: e.target.checked})} className="w-4 h-4 rounded text-primary" />
                 <label htmlFor="isActive" className="text-sm font-medium">Coupon is active</label>
               </div>
 
               <div className="flex justify-end gap-3 pt-4 border-t border-border">
-                <button type="button" onClick={() => setShowModal(false)} className="px-4 py-2 bg-surface-muted rounded-lg hover:bg-border transition text-xs font-semibold cursor-pointer">Cancel</button>
-                <button type="submit" className="px-5 py-2 bg-primary hover:bg-primary-hover text-white rounded-lg shadow-2xs transition text-xs font-bold cursor-pointer">Save</button>
+                <button type="button" onClick={() => setShowModal(false)} className="px-4 py-2 bg-surface-muted rounded-lg hover:bg-border transition">Cancel</button>
+                <button type="submit" className="px-4 py-2 bg-primary text-white rounded-lg hover:bg-emerald-900 transition">Save</button>
               </div>
             </form>
           </div>

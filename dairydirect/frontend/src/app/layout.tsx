@@ -55,8 +55,8 @@ export const viewport: Viewport = {
 
 import { LanguageManager } from "@/components/shared/LanguageManager";
 import { AuthProvider } from "@/components/shared/AuthProvider";
-import { ThemeProvider } from "@/components/theme/ThemeProvider";
 import { JsonLd } from "@/components/seo/JsonLd";
+import { ThemeProvider } from "@/components/theme/ThemeProvider";
 import { BRAND } from "@/lib/constants/brand";
 
 const orgStructuredData = {
@@ -90,17 +90,20 @@ export default function RootLayout({
   return (
     <html lang="en-IN" data-scroll-behavior="smooth" className={`${inter.variable}`} suppressHydrationWarning>
       <head>
-        <script
-          dangerouslySetInnerHTML={{
-            __html: `(function(){try{var t=localStorage.getItem('gjanand-theme');if(t==='dark'){document.documentElement.classList.add('dark');}else{document.documentElement.classList.remove('dark');}}catch(e){}})();`,
-          }}
-        />
         <JsonLd data={orgStructuredData} />
         <JsonLd data={webSiteStructuredData} />
         <link rel="icon" href="/application logo/gjanand sarkar logo.png" type="image/png" />
+        <script
+          // Applied before first paint so dark-mode users never see a flash of
+          // the cream theme. Must stay in sync with ThemeProvider's storage key.
+          dangerouslySetInnerHTML={{
+            __html: `(function(){try{var t=localStorage.getItem('gjanand-theme');var m=window.matchMedia('(prefers-color-scheme: dark)').matches;if(t==='dark'||(!t&&m)){document.documentElement.classList.add('dark');}else{document.documentElement.classList.remove('dark');}}catch(e){}})();`,
+          }}
+        />
       </head>
       <body
-        className={`${inter.className} min-h-screen antialiased bg-background text-foreground transition-colors duration-150`}
+        className={`${inter.className} min-h-screen antialiased`}
+        style={{ background: 'var(--background)', color: 'var(--foreground)' }}
         suppressHydrationWarning
       >
         <ThemeProvider>

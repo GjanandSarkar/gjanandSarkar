@@ -2,7 +2,7 @@
 
 import React, { useState, useCallback, useEffect } from 'react';
 import Link from 'next/link';
-import { Plus, Minus, Pencil, Star, Heart } from 'lucide-react';
+import { Plus, Minus, Pencil, Star, ShoppingCart, Heart } from 'lucide-react';
 import { useTranslation } from '@/lib/i18n';
 import { useStore } from '@/store/useStore';
 import { addToCart, updateCartItem } from '@/lib/api/cart';
@@ -116,7 +116,7 @@ export function ProductCard({
       }
 
       setBusy(true);
-      // A cart add is weighted well above a view in popularity scoring, so it
+      // A cart add is weighted far above a view in popularity scoring, so it
       // has to be recorded wherever it can happen.
       trackProductEvent(product.id, 'add_to_cart', { source: 'product_card' });
       addToCartLocal(product.id, vid, 1);
@@ -188,14 +188,33 @@ export function ProductCard({
 
   return (
     <>
-      <div className="card-surface press flex flex-col h-full p-2.5 sm:p-3 group relative">
+      {/*
+        The card was a plain <div> with an onClick handler: unreachable by
+        keyboard, not announced as a link, no focus ring, and impossible to
+        middle-click or open in a new tab.
+
+        It is not wrapped in an <a> either, because the card contains buttons
+        (wishlist, add to cart, quantity stepper) and interactive content
+        nested inside an anchor is invalid HTML — it breaks keyboard order and
+        confuses screen readers.
+
+        Instead this uses the "stretched link" pattern: a real anchor that is
+        visually hidden but absolutely covers the card, sitting *below* the
+        controls in z-order. The whole card is clickable, the link is properly
+        announced and focusable, and the buttons stay genuinely separate.
+      */}
+      <div className="flex flex-col h-full bg-surface rounded-2xl border border-border/90 p-3.5 shadow-2xs hover:border-[#c88a23] group relative lift pressable focus-within:ring-2 focus-within:ring-[var(--primary)]/40">
+        <Link
+          href={`/products/${product.id}`}
+          className="absolute inset-0 z-10 rounded-2xl"
+        >
+          <span className="sr-only">
+            {product.name}
+            {product.brand ? ` by ${product.brand}` : ''}, ₹{selectedVariant.price}
+          </span>
+        </Link>
         {/* Product Image Container */}
-        <div className="relative w-full aspect-square bg-surface-muted rounded-lg overflow-hidden mb-2.5 flex items-center justify-center">
-          <Link
-            href={`/products/${product.id}`}
-            className="absolute inset-0 z-0"
-            aria-label={`View details for ${product.name}`}
-          />
+        <div className="relative w-full aspect-square bg-surface-muted/80 rounded-xl overflow-hidden mb-3 p-2 flex items-center justify-center">
           
           <Image
             src={product.image_url || PLACEHOLDER_PRODUCT_IMAGE}
@@ -203,41 +222,42 @@ export function ProductCard({
             fill
             sizes="(max-width: 768px) 50vw, 25vw"
             priority={priority}
-            className={`w-full h-full object-cover transition-transform duration-200 group-hover:scale-105 pointer-events-none ${
-              isAllOutOfStock ? 'grayscale opacity-60' : ''
+            className={`w-full h-full object-contain transition-transform duration-300 group-hover:scale-105 ${
+              isAllOutOfStock ? 'grayscale opacity-75' : ''
             }`}
             onError={(e) => {
               (e.currentTarget as HTMLImageElement).srcset = PLACEHOLDER_PRODUCT_IMAGE;
             }}
           />
 
-          {/* Genuine discount badge */}
+          {/* A real discount badge, shown only when there is a genuine saving.
+              This is the single strongest scanning cue on a listing grid and
+              the card had none. */}
           {hasRealDiscount && discountPct >= 1 && (
-            <span className="absolute top-1.5 left-1.5 bg-accent text-on-accent text-[10px] font-extrabold px-1.5 py-0.5 rounded-md shadow-2xs tabular-nums tracking-tight">
+            <span className="absolute top-2 left-2 bg-[#c88a23] text-white text-[10px] font-black px-1.5 py-0.5 rounded-md shadow-sm tabular-nums">
               {discountPct}% OFF
             </span>
           )}
 
           {/* Stock Badges */}
           {isAllOutOfStock ? (
-            <span className="absolute bottom-1.5 left-1.5 bg-neutral-900/90 text-white text-[10px] font-semibold px-1.5 py-0.5 rounded shadow-2xs">
+            <span className="absolute bottom-2 left-2 bg-rose-600 text-white text-[10px] font-extrabold px-2 py-0.5 rounded-md shadow-xs">
               Out of Stock
             </span>
           ) : isLowStock ? (
-            <span className="absolute bottom-1.5 left-1.5 bg-amber-600 text-white text-[10px] font-semibold px-1.5 py-0.5 rounded shadow-2xs">
+            <span className="absolute bottom-2 left-2 bg-amber-600 text-white text-[10px] font-extrabold px-2 py-0.5 rounded-md shadow-xs">
               Only {availableStock} left
             </span>
           ) : null}
 
-          {/* Wishlist Button */}
+          {/* Wishlist Heart Button */}
           <button
             type="button"
             onClick={handleToggleWishlist}
-            className={`absolute top-1.5 right-1.5 w-7 h-7 rounded-full bg-surface/90 shadow-2xs border border-border flex items-center justify-center transition-all hover:scale-110 active:scale-95 z-20 ${
-              isSaved ? 'text-rose-600' : 'text-foreground-muted hover:text-rose-500'
+            className={`absolute top-2 right-2 w-7 h-7 rounded-full bg-surface/95 backdrop-blur-xs shadow-sm border border-border flex items-center justify-center transition-all hover:scale-110 active:scale-95 z-20 ${
+              isSaved ? 'text-error' : 'text-foreground-muted hover:text-rose-500'
             }`}
             title={isSaved ? 'Remove from Wishlist' : 'Add to Wishlist'}
-            aria-label={isSaved ? 'Remove from Wishlist' : 'Add to Wishlist'}
           >
             <Heart className={`w-3.5 h-3.5 ${isSaved ? 'fill-rose-600' : ''}`} />
           </button>
@@ -251,17 +271,17 @@ export function ProductCard({
                 e.stopPropagation();
                 setIsEditModalOpen(true);
               }}
-              className="absolute top-1.5 right-9 w-7 h-7 rounded-full bg-surface shadow-xs border border-border flex items-center justify-center transition-all hover:scale-110 active:scale-95 z-20 text-primary"
+              className="absolute top-2 right-10 w-7 h-7 rounded-full bg-surface shadow-md border border-border flex items-center justify-center transition-all hover:scale-110 active:scale-95 z-20 text-primary"
               title="Admin: Quick Edit"
             >
-              <Pencil className="w-3.5 h-3.5 stroke-[2.5]" />
+              <Pencil className="w-3.5 h-3.5" strokeWidth={2.5} />
             </button>
           )}
 
-          {/* Cart Quantity Badge (when looking at multi-variant items) */}
-          {isInCart && variants.length > 1 && (
+          {/* Cart Quantity Badge */}
+          {isInCart && (
             <div
-              className="absolute bottom-1.5 right-1.5 w-5 h-5 rounded-full bg-primary text-white text-[10px] font-bold flex items-center justify-center shadow-xs z-10"
+              className={`absolute bottom-2 right-2 w-5 h-5 rounded-full bg-[#c88a23] text-white text-[10px] font-black flex items-center justify-center shadow-md z-10`}
             >
               {totalQuantity}
             </div>
@@ -271,43 +291,50 @@ export function ProductCard({
         {/* Content Section */}
         <div className="flex flex-col flex-1 justify-between">
           <div>
-            {/* Weight / Pack Size */}
-            <div className="flex items-center justify-between text-[11px] text-foreground-muted font-medium mb-1">
-              <span>{selectedVariant.weight}</span>
-              {variants.length > 1 && (
-                <span className="text-[10px] text-primary font-semibold">
-                  +{variants.length - 1} options
-                </span>
-              )}
-            </div>
-
-            <Link href={`/products/${product.id}`} className="block">
-              <h3 className="text-xs sm:text-[13px] font-semibold text-foreground line-clamp-2 min-h-[2rem] sm:min-h-[2.4rem] group-hover:text-primary transition-colors leading-snug">
-                {product.name}
-              </h3>
-            </Link>
-
-            {/* Rating only if real reviews exist */}
-            {showRating && (
-              <div className="flex items-center gap-1 text-[11px] font-medium mt-1 text-foreground-muted">
-                <span className="inline-flex items-center gap-0.5 px-1 py-0.2 rounded bg-primary/10 text-primary font-bold text-[10px]">
-                  <Star className="w-2.5 h-2.5 fill-current" />
-                  {rating!.toFixed(1)}
-                </span>
-                <span>({reviewCount})</span>
-              </div>
+            {/* The partner brand. This was hardcoded to "By Gjanand Farm" on
+                every card, which is wrong on a marketplace whose entire pitch
+                is one verified brand per category — and absurd on electronics
+                or books. */}
+            {product.brand && (
+              <span className="text-[10px] text-foreground-muted font-semibold block mb-0.5 truncate">
+                {product.brand}
+              </span>
             )}
+
+            <h3 className="text-xs sm:text-sm font-bold text-foreground line-clamp-1 group-hover:text-primary transition-colors leading-snug">
+              {product.name}
+            </h3>
+
+            <div className="flex items-center gap-1 text-[10px] font-bold mt-1 mb-2">
+              {showRating && (
+                <>
+                  <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded bg-emerald-600 text-white">
+                    <Star className="w-2.5 h-2.5 fill-white text-white" />
+                    {rating!.toFixed(1)}
+                  </span>
+                  <span className="text-foreground-muted font-normal">({reviewCount})</span>
+                  <span className="text-foreground-muted">•</span>
+                </>
+              )}
+              <span className="text-foreground-muted font-medium">
+                {selectedVariant.weight}
+                {variants.length > 1 && ` (+${variants.length - 1})`}
+              </span>
+            </div>
           </div>
 
-          {/* Price & Action Button Row */}
-          <div className="relative z-20 flex items-center justify-between gap-2 pt-2 border-t border-border/50 mt-2">
-            <div className="flex flex-col min-w-0">
-              <div className="flex items-baseline gap-1.5">
-                <span className="text-sm sm:text-base font-bold text-foreground">
+          {/* Price & Action Button.
+              `relative z-20` lifts this row above the stretched link (z-10)
+              so the add button and quantity stepper stay directly clickable
+              instead of being covered by the card-wide anchor. */}
+          <div className="relative z-20 flex items-center justify-between gap-2 pt-2 border-t border-border mt-1">
+            <div className="flex flex-col">
+              <div className="flex items-baseline gap-1">
+                <span className="text-base font-black text-primary">
                   ₹{selectedVariant.price}
                 </span>
                 {hasRealDiscount && (
-                  <span className="text-[11px] text-foreground-muted line-through truncate">
+                  <span className="text-[11px] text-foreground-muted line-through">
                     ₹{originalPrice}
                   </span>
                 )}
@@ -317,43 +344,38 @@ export function ProductCard({
             {variants.length === 1 && isOutOfStock ? (
               <button
                 disabled
-                className="px-3 py-1.5 bg-surface-muted text-foreground-muted text-xs font-semibold rounded-lg cursor-not-allowed border border-border"
+                className="px-3 py-1.5 bg-surface-muted text-foreground-muted text-xs font-bold rounded-lg cursor-not-allowed border border-border"
               >
-                Out of Stock
+                Sold Out
               </button>
             ) : !isInCart ? (
               <button
-                type="button"
                 onClick={handleAdd}
                 disabled={busy || (variants.length === 1 && isOutOfStock)}
-                className="px-3 sm:px-4 py-1.5 bg-primary-fixed hover:bg-primary text-primary hover:text-white border border-primary/40 hover:border-primary font-bold text-xs uppercase tracking-wide rounded-lg transition-all duration-150 flex items-center justify-center gap-1 shadow-2xs active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
+                className="px-3.5 py-1.5 bg-primary hover:bg-primary-hover text-white text-xs font-bold rounded-lg transition-colors flex items-center justify-center gap-1 shadow-xs active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                <span>{variants.length > 1 ? 'Options' : 'ADD'}</span>
-                <Plus className="w-3.5 h-3.5 stroke-[2.5]" />
+                <ShoppingCart className="w-3.5 h-3.5" />
+                <span>{variants.length > 1 ? 'Select' : 'Add'}</span>
               </button>
             ) : (
-              <div className="flex items-center bg-primary text-white rounded-lg overflow-hidden shadow-2xs border border-primary">
+              <div className="flex items-center bg-surface-muted rounded-lg overflow-hidden border border-border-hover">
                 <button
-                  type="button"
                   onClick={(e) => handleUpdate(e, 'dec')}
                   disabled={busy}
-                  className="w-7 h-7 flex items-center justify-center text-white hover:bg-primary-hover transition-colors active:scale-90 cursor-pointer"
-                  aria-label="Decrease quantity"
+                  className="w-7 h-7 flex items-center justify-center text-foreground hover:bg-border transition-colors active:scale-90"
                 >
-                  <Minus className="w-3 h-3 stroke-[2.5]" />
+                  <Minus className="w-3 h-3 stroke-[3]" />
                 </button>
-                <span className="px-1.5 text-center text-xs font-bold min-w-[20px] select-none text-white">
+                <span className="px-1.5 text-center text-xs font-black text-foreground min-w-[20px]">
                   {variants.length > 1 ? totalQuantity : currentVariantQty}
                 </span>
                 <button
-                  type="button"
                   onClick={(e) => handleUpdate(e, 'inc')}
                   disabled={busy || (variants.length === 1 && currentVariantQty >= availableStock)}
-                  className="w-7 h-7 flex items-center justify-center hover:bg-primary-hover transition-colors active:scale-90 disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer text-white"
+                  className="w-7 h-7 flex items-center justify-center bg-primary text-white hover:bg-primary-hover transition-colors active:scale-90 disabled:opacity-40 disabled:cursor-not-allowed"
                   title={currentVariantQty >= availableStock ? 'Max available stock reached' : undefined}
-                  aria-label="Increase quantity"
                 >
-                  <Plus className="w-3 h-3 stroke-[2.5]" />
+                  <Plus className="w-3 h-3 stroke-[3]" />
                 </button>
               </div>
             )}
@@ -373,21 +395,20 @@ export function ProductCard({
             <motion.div
               initial={{ y: '100%' }} animate={{ y: 0 }} exit={{ y: '100%' }}
               transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-              className="fixed bottom-0 left-0 right-0 rounded-t-2xl z-[70] p-5 sm:p-6 max-w-lg mx-auto bg-surface text-foreground border-t border-border shadow-2xl max-h-[85vh] overflow-y-auto"
-              style={{ paddingBottom: 'max(env(safe-area-inset-bottom, 0px), 24px)' }}
+              className="fixed bottom-0 left-0 right-0 rounded-t-3xl z-[70] p-6 max-w-lg mx-auto bg-surface shadow-2xl"
             >
-              <div className="w-10 h-1.5 rounded-full mx-auto mb-4 bg-border" />
-              <div className="flex items-start gap-4 mb-4">
+              <div className="w-12 h-1.5 rounded-full mx-auto mb-6 bg-gray-300" />
+              <div className="flex items-start gap-4 mb-6">
                 <img
                   src={product.image_url ?? PLACEHOLDER_PRODUCT_IMAGE}
                   alt={product.name}
-                  className="w-16 h-16 rounded-xl object-contain bg-surface-muted border border-border p-1"
+                  className="w-16 h-16 rounded-xl object-contain bg-surface-muted border p-1"
                 />
                 <div>
                   <h2 className="text-base font-bold text-foreground">
                     {product.name}
                   </h2>
-                  <p className="text-xs text-muted">
+                  <p className="text-xs text-foreground-muted">
                     {t('selectSizeToAddToCart')}
                   </p>
                 </div>
@@ -407,21 +428,21 @@ export function ProductCard({
                       key={v.id}
                       className={`flex items-center justify-between p-3.5 rounded-xl border transition-colors ${
                         isVOutOfStock
-                          ? 'border-border/60 bg-surface-muted/60 opacity-60'
+                          ? 'border-border bg-surface-muted/70 opacity-60'
                           : qty > 0
-                          ? 'border-primary bg-primary/10'
-                          : 'border-border bg-surface hover:border-border-hover'
+                          ? 'border-primary bg-success-bg/40'
+                          : 'border-border bg-surface'
                       }`}
                     >
                       <div className="flex flex-col">
                         <div className="flex items-center gap-2">
                           <span className="font-bold text-xs text-foreground">{v.weight}</span>
                           {isVOutOfStock ? (
-                            <span className="text-[10px] font-bold text-rose-500 bg-rose-500/10 px-1.5 py-0.5 rounded">
+                            <span className="text-[10px] font-bold text-error bg-error-bg px-1.5 py-0.5 rounded">
                               Out of Stock
                             </span>
                           ) : isVLowStock ? (
-                            <span className="text-[10px] font-bold text-amber-500 bg-amber-500/10 px-1.5 py-0.5 rounded">
+                            <span className="text-[10px] font-bold text-warning bg-warning-bg px-1.5 py-0.5 rounded">
                               Only {vStock} left
                             </span>
                           ) : null}
@@ -431,7 +452,7 @@ export function ProductCard({
                             ₹{v.price}
                           </span>
                           {v.original_price && (
-                            <span className="text-xs line-through text-muted">
+                            <span className="text-xs line-through text-foreground-muted">
                               ₹{v.original_price}
                             </span>
                           )}
@@ -441,7 +462,7 @@ export function ProductCard({
                       {isVOutOfStock ? (
                         <button
                           disabled
-                          className="px-4 py-1.5 rounded-lg font-bold text-xs bg-surface-muted text-muted border border-border cursor-not-allowed"
+                          className="px-4 py-1.5 rounded-lg font-bold text-xs bg-surface-muted text-foreground-muted border border-border cursor-not-allowed"
                         >
                           Sold Out
                         </button>
@@ -449,24 +470,24 @@ export function ProductCard({
                         <button
                           onClick={(e) => handleAdd(e, v.id)}
                           disabled={busy}
-                          className="px-5 py-2 rounded-lg font-bold text-xs bg-primary hover:bg-primary-hover text-foreground-inverse active:scale-95 disabled:opacity-50 shadow-xs cursor-pointer"
+                          className="px-5 py-2 rounded-lg font-bold text-xs bg-primary hover:bg-primary-hover text-white active:scale-95 disabled:opacity-50 shadow-xs"
                         >
                           Add
                         </button>
                       ) : (
-                        <div className="flex items-center gap-2 bg-primary text-foreground-inverse rounded-lg p-1 shadow-2xs">
+                        <div className="flex items-center gap-2 bg-surface rounded-lg border border-emerald-300 p-1 shadow-2xs">
                           <button
                             onClick={(e) => handleUpdate(e, 'dec', v.id)}
                             disabled={busy}
-                            className="w-7 h-7 rounded-md flex items-center justify-center hover:bg-primary-hover transition-colors cursor-pointer"
+                            className="w-7 h-7 rounded-md flex items-center justify-center bg-surface-muted text-foreground hover:bg-border"
                           >
                             <Minus className="w-3.5 h-3.5 stroke-[2.5]" />
                           </button>
-                          <span className="w-5 text-center text-xs font-bold">{qty}</span>
+                          <span className="w-5 text-center text-xs font-bold text-foreground">{qty}</span>
                           <button
                             onClick={(e) => handleUpdate(e, 'inc', v.id)}
                             disabled={busy || qty >= vStock}
-                            className="w-7 h-7 rounded-md flex items-center justify-center hover:bg-primary-hover transition-colors disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"
+                            className="w-7 h-7 rounded-md flex items-center justify-center bg-primary text-white hover:bg-primary-hover disabled:opacity-40 disabled:cursor-not-allowed"
                             title={qty >= vStock ? 'Max available stock reached' : undefined}
                           >
                             <Plus className="w-3.5 h-3.5 stroke-[2.5]" />
@@ -480,7 +501,7 @@ export function ProductCard({
 
               <button
                 onClick={() => setShowDrawer(false)}
-                className="w-full py-3 bg-primary hover:bg-primary-hover rounded-xl font-bold text-foreground-inverse text-sm active:scale-95 shadow-md cursor-pointer"
+                className="w-full py-3 bg-primary hover:bg-primary-hover rounded-xl font-bold text-white text-sm active:scale-95 shadow-md"
               >
                 Done
               </button>

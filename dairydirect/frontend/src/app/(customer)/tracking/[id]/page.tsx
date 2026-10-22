@@ -2,8 +2,7 @@
 
 import { useEffect, useState, useMemo } from 'react';
 import { useParams, useRouter } from 'next/navigation';
-import Link from 'next/link';
-import { Phone, MessageSquare, Star, Info, MapPin, Repeat, ThermometerSnowflake, ShieldCheck } from 'lucide-react';
+import { ArrowLeft, Phone, MessageSquare, Star, Info, MapPin, Repeat, ThermometerSnowflake, ShieldCheck } from 'lucide-react';
 import { motion } from 'framer-motion';
 import OrderTrackingMap from '@/components/shared/OrderTrackingMap';
 import type { Coordinates } from '@/components/shared/MapComponent';
@@ -83,22 +82,22 @@ export default function TrackingPage() {
   const addressText = order.user_addresses?.address || 'Details unavailable';
 
   return (
-    <div className="min-h-screen flex flex-col bg-background relative pb-[100px]">
+    <div className="min-h-screen flex flex-col bg-surface-container relative pb-[120px]">
       {/* Header Over Map */}
-      <div className="absolute top-0 left-0 right-0 z-10 p-4 pt-10 flex justify-between items-center bg-gradient-to-b from-black/60 to-transparent pointer-events-none">
-        <Link 
-          href="/orders"
-          className="px-3 py-1.5 rounded-full bg-black/40 backdrop-blur-md flex items-center gap-1.5 text-white pointer-events-auto transition-transform active:scale-95 hover:bg-black/60 text-xs font-bold"
+      <div className="absolute top-0 left-0 right-0 z-10 p-4 pt-12 flex justify-between items-center bg-gradient-to-b from-black/50 to-transparent pointer-events-none">
+        <button 
+          onClick={() => router.back()}
+          className="w-10 h-10 rounded-full bg-surface/20 backdrop-blur-md flex items-center justify-center text-white pointer-events-auto transition-transform active:scale-95 hover:bg-surface/30"
         >
-          <span>All Orders</span>
-        </Link>
-        <div className="px-3 py-1 rounded-full bg-black/40 backdrop-blur-md text-white text-xs font-mono font-bold pointer-events-auto shadow-sm">
-          #{order.id.substring(0, 8).toUpperCase()}
+          <ArrowLeft className="w-5 h-5" />
+        </button>
+        <div className="px-4 py-2 rounded-full bg-surface/20 backdrop-blur-md text-white text-[13px] font-bold pointer-events-auto shadow-sm">
+          Order #{order.id.substring(0, 8)}
         </div>
       </div>
 
       {/* Map Segment */}
-      <div className="relative w-full" style={{ height: '36vh' }}>
+      <div className="relative w-full" style={{ height: '40vh' }}>
         <OrderTrackingMap 
           farmLocation={farmCoords} 
           customerLocation={customerCoords} 
@@ -112,36 +111,46 @@ export default function TrackingPage() {
         initial={{ y: "100%" }}
         animate={{ y: 0 }}
         transition={{ type: "spring", stiffness: 300, damping: 30 }}
-        className="bg-surface rounded-t-2xl shadow-xl border-t border-border z-20 -mt-6 relative flex-1 flex flex-col gap-4 p-4 pt-4 w-full max-w-2xl mx-auto"
+        className="bg-cream rounded-t-[32px] shadow-[0_-10px_40px_rgba(0,0,0,0.08)] z-20 -mt-8 relative flex-1 flex flex-col gap-6 p-4 pt-6 w-full max-w-3xl mx-auto"
       >
-        <div className="w-10 h-1 bg-border rounded-full mx-auto mb-1" />
+        <div className="w-12 h-1.5 bg-sand rounded-full mx-auto mb-2" />
 
         {/* Status Header */}
-        <div className="flex justify-between items-end border-b border-border/60 pb-4">
+        <div className="flex justify-between items-end border-b border-sand pb-6">
           <div>
-            <h2 className="text-xl font-black text-foreground mb-0.5">
-              {order.status === 'delivered' ? 'Order Delivered' : 
-               order.status === 'out_for_delivery' ? 'Out for Delivery' : 
-               'Preparing at Farm'}
+            <h2 className="text-2xl font-black text-dark mb-1">
+              {order.status === 'delivered' ? 'Delivered' : 
+               order.status === 'out_for_delivery' ? 'Arriving Soon' : 
+               'Preparing'}
             </h2>
-            <p className="text-muted text-xs">
-              Delivery expected by {new Date(order.delivery_date || Date.now()).toLocaleDateString()} • 6:30 AM
+            <p className="text-muted text-sm font-medium">
+              Expected by {new Date(order.delivery_date || Date.now()).toLocaleDateString()}
             </p>
           </div>
-          <div className="px-2.5 py-1 rounded-md bg-primary/10 text-primary text-[11px] font-bold uppercase tracking-wider border border-primary/20">
+          <div className="px-3 py-1.5 rounded-xl bg-mint/20 text-primary text-xs font-bold uppercase tracking-wide border border-mint/50">
             {order.status.replace(/_/g, ' ')}
           </div>
         </div>
+
+        {/* Driver Profile (Only if out for delivery) */}
+        {order.status === 'out_for_delivery' && (
+          <div className="flex items-center justify-center bg-surface-muted p-4 rounded-[20px] border border-border shadow-inner">
+            <div className="flex items-center gap-2 text-foreground-muted">
+              <MapPin className="w-5 h-5" />
+              <span className="text-sm font-bold tracking-wide">Live Driver GPS: NOT CONFIGURED</span>
+            </div>
+          </div>
+        )}
 
         {/* Timeline */}
         <OrderStatusTimeline currentStatus={order.status} />
 
         {/* Delivery Address Summary */}
-        <div className="bg-surface rounded-xl p-4 border border-border">
-          <h3 className="font-bold text-foreground text-xs flex items-center mb-2 uppercase tracking-wider">
-            <MapPin className="w-3.5 h-3.5 mr-1.5 text-primary" /> {addressLabel}
+        <div className="bg-surface rounded-[20px] p-6 shadow-[0_4px_20px_rgba(0,0,0,0.03)] border border-sand">
+          <h3 className="font-bold text-dark text-sm flex items-center mb-3 uppercase tracking-wider">
+            <MapPin className="w-4 h-4 mr-2 text-primary" /> {addressLabel}
           </h3>
-          <p className="text-muted text-xs leading-relaxed">
+          <p className="text-muted text-sm leading-relaxed font-medium">
             {addressText}
           </p>
         </div>
@@ -149,31 +158,32 @@ export default function TrackingPage() {
         {/* Order Items */}
         <OrderItemsReview order={order} />
         
-        {/* Freshness Assurance */}
-        <div className="bg-surface rounded-xl p-3.5 border border-border flex items-start gap-2.5 text-xs">
-          <ThermometerSnowflake className="w-4 h-4 text-primary shrink-0 mt-0.5" />
-          <div>
-            <h4 className="font-bold text-foreground mb-0.5">Cold-Chain Guaranteed (4°C)</h4>
-            <p className="text-muted text-[11px] leading-relaxed">Transported in temperature-controlled chilled insulation direct from the farm.</p>
+        {/* Trust & Freshness Assurance */}
+        <div className="bg-gradient-to-r from-blue-50 to-white border border-blue-100 rounded-[20px] p-5">
+          <h3 className="font-bold text-dark text-[13px] uppercase tracking-wider mb-3 flex items-center gap-2">
+            <ThermometerSnowflake className="w-4 h-4 text-info" />
+            Freshness Guaranteed
+          </h3>
+          <p className="text-[12px] text-muted leading-relaxed mb-4">
+            Your GjanandSarkar order is being transported at an optimal 4°C to lock in freshness. We ensure safe, contactless delivery straight from our farms.
+          </p>
+          <div className="flex gap-2 items-center text-[11px] font-bold text-dark bg-surface rounded-lg p-2 border border-sand">
+            <ShieldCheck className="w-4 h-4 text-success" />
+            Need help? Our support team is ready.
           </div>
         </div>
+
       </motion.div>
 
       {/* Sticky Bottom Actions */}
-      <div className="fixed bottom-0 left-0 right-0 z-40 bg-surface/95 backdrop-blur-md border-t border-border p-3 pb-safe shadow-lg">
-        <div className="max-w-2xl mx-auto flex gap-2.5">
-          <button 
-            className="flex-1 py-2.5 px-4 rounded-xl border border-border font-bold text-xs text-foreground hover:bg-surface-muted transition-colors cursor-pointer" 
-            onClick={() => router.push('/support')}
-          >
+      <div className="fixed bottom-0 left-0 right-0 z-40 bg-surface border-t border-sand p-4 pb-safe shadow-[0_-10px_20px_rgba(0,0,0,0.05)] md:left-[260px]">
+        <div className="max-w-[800px] mx-auto flex gap-3">
+          <Button variant="outline" className="flex-1 shadow-sm font-bold text-sm h-14" onClick={() => router.push('/support')}>
             Need Help?
-          </button>
-          <button 
-            className="flex-1 py-2.5 px-4 rounded-xl bg-primary hover:bg-primary-hover font-bold text-xs text-foreground-inverse flex items-center justify-center gap-1.5 transition-colors cursor-pointer shadow-sm" 
-            onClick={handleReorder}
-          >
-            <Repeat className="w-3.5 h-3.5" /> Reorder Items
-          </button>
+          </Button>
+          <Button className="flex-1 shadow-active font-bold text-sm h-14" onClick={handleReorder}>
+            <Repeat className="w-4 h-4 mr-2" /> Reorder Items
+          </Button>
         </div>
       </div>
     </div>

@@ -137,11 +137,8 @@ const RULES = [
 ];
 
 const files = execSync(
-  "git ls-files 'src/app/admin/*.tsx' 'src/app/admin/**/*.tsx' " +
-    "'src/components/admin/*.tsx' 'src/components/admin/**/*.tsx' " +
-    "'src/app/(customer)/seller/*.tsx' 'src/app/(customer)/seller/**/*.tsx' " +
-    "'src/app/seller/*.tsx' 'src/app/seller/**/*.tsx' " +
-    "'src/components/seller/*.tsx' 'src/components/seller/**/*.tsx'",
+  "git ls-files 'src/app/*.tsx' 'src/app/**/*.tsx' " +
+    "'src/components/*.tsx' 'src/components/**/*.tsx'",
   { encoding: 'utf8' }
 )
   .split('\n')

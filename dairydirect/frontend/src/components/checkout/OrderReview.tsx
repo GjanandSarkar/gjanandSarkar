@@ -28,29 +28,29 @@ export function OrderReview({ items }: OrderReviewProps) {
   if (items.length === 0) return null;
 
   return (
-    <div className="bg-surface rounded-xl p-4 border border-border">
-      <div className="flex items-center gap-2 mb-3 pb-2 border-b border-border/60">
+    <div className="bg-surface rounded-[20px] p-4 border border-sand shadow-sm">
+      <div className="flex items-center gap-2 mb-4">
         <ShoppingBag className="w-4 h-4 text-primary" />
-        <h3 className="text-xs font-bold text-foreground uppercase tracking-wider">Order Items</h3>
-        <span className="text-[11px] font-bold text-primary bg-primary/10 px-2 py-0.5 rounded-md ml-auto">
+        <h3 className="text-sm font-bold text-dark uppercase tracking-wider">Order Items</h3>
+        <span className="text-xs font-bold text-primary bg-primary/10 px-2 py-0.5 rounded-full ml-auto">
           {items.reduce((acc, item) => acc + item.quantity, 0)} Items
         </span>
       </div>
 
-      <div className="space-y-2.5">
-        {items.map((item) => (
+      <div className="space-y-3">
+        {items.map((item, idx) => (
           <div key={`${item.productId}-${item.variantId}`} className="flex items-center gap-3">
             {/* Image */}
-            <div className="w-12 h-12 relative bg-surface-muted rounded-lg overflow-hidden shrink-0 border border-border p-1">
+            <div className="w-12 h-12 relative bg-sand/30 rounded-[10px] overflow-hidden shrink-0 border border-sand/50">
               {item.product.image_url ? (
                 <Image 
                   src={item.product.image_url} 
                   alt={item.product.name} 
                   fill 
-                  className="object-contain"
+                  className="object-cover"
                 />
               ) : (
-                <div className="w-full h-full flex items-center justify-center bg-primary/10 text-primary font-bold text-xs">
+                <div className="w-full h-full flex items-center justify-center bg-mint/20 text-primary font-bold text-xs">
                   {item.product.name.charAt(0)}
                 </div>
               )}
@@ -58,7 +58,7 @@ export function OrderReview({ items }: OrderReviewProps) {
 
             {/* Details */}
             <div className="flex-1 min-w-0">
-              <h4 className="text-xs font-bold text-foreground truncate leading-tight">
+              <h4 className="text-sm font-bold text-dark truncate leading-tight">
                 {item.product.name}
               </h4>
               <p className="text-[11px] font-medium text-muted mt-0.5">
@@ -68,11 +68,11 @@ export function OrderReview({ items }: OrderReviewProps) {
 
             {/* Price */}
             <div className="text-right shrink-0">
-              <span className="text-xs font-extrabold text-foreground tabular-nums">
+              <span className="text-sm font-black text-dark">
                 {t('currency')}{item.variant.price * item.quantity}
               </span>
               {item.variant.original_price && item.variant.original_price > item.variant.price && (
-                <p className="text-[10px] text-muted line-through font-medium tabular-nums mt-0.5">
+                <p className="text-[10px] text-muted line-through font-medium mt-0.5">
                   {t('currency')}{item.variant.original_price * item.quantity}
                 </p>
               )}

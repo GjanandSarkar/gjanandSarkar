@@ -7,13 +7,11 @@ import { ProductCard } from '@/components/shared/ProductCard';
 import type { CatalogProduct } from '@/lib/types/catalog';
 
 interface TrendingProductsProps {
-  products?: CatalogProduct[];
+  products: CatalogProduct[];
 }
 
 export function TrendingProducts({ products }: TrendingProductsProps) {
   const scrollRef = useRef<HTMLDivElement>(null);
-
-  if (!products || products.length === 0) return null;
 
   const handleScroll = (dir: 'left' | 'right') => {
     if (!scrollRef.current) return;
@@ -21,25 +19,36 @@ export function TrendingProducts({ products }: TrendingProductsProps) {
     scrollRef.current.scrollBy({ left: offset, behavior: 'smooth' });
   };
 
+  if (products.length === 0) return null;
+
   return (
     <section className="w-full max-w-[1440px] mx-auto px-4 md:px-8 py-8">
       {/* Header */}
-      <div className="flex items-center justify-between pb-3 mb-5 border-b border-border">
+      <div className="flex items-center justify-between pb-4 mb-6 border-b border-border/80">
         <div>
-          <span className="text-xs font-bold text-primary uppercase tracking-wider block mb-1">
-            Farm Direct
-          </span>
-          <h2 className="text-xl sm:text-2xl font-bold text-foreground tracking-tight">
-            Fresh Arrivals & Trending Essentials
+          <div className="flex items-center gap-1.5 mb-1">
+            <Sparkles className="w-4 h-4 text-[#c88a23]" />
+            <span className="text-xs font-bold text-[#c88a23] uppercase tracking-wider">
+              Just Added
+            </span>
+          </div>
+          {/* Was "Trending Products" / "Top Picks". The feed behind it is
+              simply the newest products by created_at — there is no
+              popularity, view or sales signal involved. Labelling a
+              reverse-chronological list as trending or top-picked is a claim
+              the data does not support, so it says what it actually is.
+              Rename this back once a real ranking signal exists. */}
+          <h2 className="text-2xl md:text-3xl font-black text-primary tracking-tight">
+            New Arrivals
           </h2>
         </div>
 
         <div className="flex items-center gap-4">
           <Link
             href="/products"
-            className="text-xs sm:text-sm font-semibold text-primary hover:underline flex items-center gap-1 transition-colors"
+            className="text-xs sm:text-sm font-bold text-[#c88a23] hover:text-primary flex items-center gap-1 transition-colors"
           >
-            <span>View All</span>
+            <span>View All Products</span>
             <ArrowRight className="w-4 h-4" />
           </Link>
 
@@ -47,14 +56,14 @@ export function TrendingProducts({ products }: TrendingProductsProps) {
           <div className="hidden sm:flex items-center gap-1.5">
             <button
               onClick={() => handleScroll('left')}
-              className="w-8 h-8 rounded-full border border-border bg-surface hover:bg-surface-muted flex items-center justify-center text-foreground transition-colors shadow-2xs cursor-pointer"
+              className="w-8 h-8 rounded-full border border-border-hover bg-surface hover:bg-surface-muted flex items-center justify-center text-foreground transition-colors shadow-2xs"
               aria-label="Scroll left"
             >
               <ChevronLeft className="w-4 h-4" />
             </button>
             <button
               onClick={() => handleScroll('right')}
-              className="w-8 h-8 rounded-full border border-border bg-surface hover:bg-surface-muted flex items-center justify-center text-foreground transition-colors shadow-2xs cursor-pointer"
+              className="w-8 h-8 rounded-full border border-border-hover bg-surface hover:bg-surface-muted flex items-center justify-center text-foreground transition-colors shadow-2xs"
               aria-label="Scroll right"
             >
               <ChevronRight className="w-4 h-4" />

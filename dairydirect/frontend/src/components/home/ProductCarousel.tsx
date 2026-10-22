@@ -28,38 +28,38 @@ export function ProductCarousel({
   if (!isLoading && products.length === 0) return null;
 
   return (
-    <section className="mb-10">
-      <div className="px-4 md:px-8 mb-3">
+    <section className="mb-12">
+      <div className="px-5 md:px-10 mb-4">
         <div className="flex items-end justify-between">
           <div>
             {subtitle && (
-              <div className="flex items-center gap-1.5 mb-1">
+              <div className="flex items-center gap-2 mb-1">
                 {icon}
-                <span className="text-[11px] font-bold uppercase tracking-wider text-primary">
+                <span className="text-[11px] font-black uppercase tracking-widest text-secondary">
                   {subtitle}
                 </span>
               </div>
             )}
-            <h2 className="font-bold text-lg sm:text-xl md:text-2xl tracking-tight text-foreground">
+            <h2 className="font-bold text-[22px] md:text-[26px] tracking-tight text-on-surface">
               {title}
             </h2>
           </div>
           {viewAllLink && (
             <Link 
               href={viewAllLink} 
-              className="flex items-center gap-1 text-xs sm:text-sm font-semibold text-primary hover:underline transition-colors"
+              className="flex items-center gap-1 text-[13px] font-bold text-primary hover:opacity-80 transition-opacity"
             >
-              See All <ArrowRight className="w-3.5 h-3.5" />
+              See All <ArrowRight className="w-3.5 h-3.5" strokeWidth={2.5} />
             </Link>
           )}
         </div>
       </div>
 
-      <div className="flex gap-3 sm:gap-4 overflow-x-auto no-scrollbar snap-rail pl-4 md:pl-8 pr-4 pb-4">
+      <div className="flex gap-4 overflow-x-auto no-scrollbar snap-rail reveal pl-5 md:pl-10 pr-5 pb-6">
         {isLoading ? (
           <>
             {[1, 2, 3, 4].map(i => (
-              <div key={i} className="w-[170px] sm:w-[190px] md:w-[210px] h-[270px] shrink-0 rounded-xl animate-pulse bg-surface-muted border border-border" />
+              <div key={i} className="w-[160px] md:w-[180px] h-[240px] shrink-0 rounded-[20px] animate-pulse bg-surface-container-low" />
             ))}
           </>
         ) : (
@@ -67,7 +67,8 @@ export function ProductCarousel({
             {products.map((product, i) => (
               <div 
                 key={product.id} 
-                className="w-[170px] sm:w-[190px] md:w-[210px] shrink-0"
+                className="w-[160px] md:w-[180px] shrink-0 animate-in fade-in slide-in-from-right-4 duration-500"
+                style={{ animationDelay: `${i < 3 ? i * 50 : 0}ms`, animationFillMode: 'both' }}
               >
                 <ProductCard product={product} priority={priority && i < 3} />
               </div>

@@ -95,7 +95,7 @@ export function AdSlot({ placement, category, className }: AdSlotProps) {
       ref={containerRef}
       className={`w-full max-w-[1440px] mx-auto px-4 md:px-8 py-6 ${className ?? ''}`}
     >
-      <div className="rounded-2xl border border-amber-200/80 bg-gradient-to-br from-amber-50 to-white p-4 sm:p-6">
+      <div className="rounded-2xl border border-warning/20/80 bg-gradient-to-br from-amber-50 to-white p-4 sm:p-6">
         <div className="flex items-center gap-2 mb-4">
           <Megaphone className="w-4 h-4 text-[#c88a23]" />
           <span className="text-[11px] font-bold uppercase tracking-wider text-[#c88a23]">
@@ -103,7 +103,7 @@ export function AdSlot({ placement, category, className }: AdSlotProps) {
           </span>
           {/* Labelling promoted placements is a legal requirement for
               advertising in India and the honest thing to do regardless. */}
-          <span className="ml-auto text-[10px] font-semibold uppercase tracking-wider text-gray-400 border border-gray-200 rounded px-1.5 py-0.5">
+          <span className="ml-auto text-[10px] font-semibold uppercase tracking-wider text-foreground-muted border border-border rounded px-1.5 py-0.5">
             Promoted
           </span>
         </div>
@@ -121,9 +121,9 @@ export function AdSlot({ placement, category, className }: AdSlotProps) {
                     placement,
                   })
                 }
-                className="group bg-white rounded-xl border border-gray-200/80 p-3 hover:border-[#c88a23]/50 hover:shadow-sm transition-all"
+                className="group bg-surface rounded-xl border border-border/80 p-3 hover:border-[#c88a23]/50 hover:shadow-sm transition-all"
               >
-                <div className="relative w-full aspect-square mb-2 rounded-lg overflow-hidden bg-gray-50">
+                <div className="relative w-full aspect-square mb-2 rounded-lg overflow-hidden bg-surface-muted">
                   <Image
                     src={product.image_url || PLACEHOLDER_PRODUCT_IMAGE}
                     alt={product.name}
@@ -136,7 +136,7 @@ export function AdSlot({ placement, category, className }: AdSlotProps) {
                   {product.name}
                 </p>
                 {typeof price === 'number' && (
-                  <p className="text-sm font-black text-[#0f3e26] mt-1">
+                  <p className="text-sm font-black text-primary mt-1">
                     ₹{price.toLocaleString('en-IN')}
                   </p>
                 )}

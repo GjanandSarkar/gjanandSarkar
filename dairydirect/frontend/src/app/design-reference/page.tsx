@@ -127,8 +127,8 @@ function Section({
 }) {
   return (
     <section className="mb-14">
-      <h2 className="text-lg font-bold text-foreground tracking-tight">{title}</h2>
-      <p className="text-xs text-muted-foreground mt-1 mb-5 max-w-2xl leading-relaxed">{description}</p>
+      <h2 className="text-lg font-black text-primary tracking-tight">{title}</h2>
+      <p className="text-xs text-foreground-muted mt-1 mb-5 max-w-2xl leading-relaxed">{description}</p>
       {children}
     </section>
   );
@@ -138,15 +138,15 @@ export default function StyleguidePage() {
   if (process.env.NODE_ENV !== 'development') notFound();
 
   return (
-    <div className="min-h-screen bg-neutral-50 px-5 md:px-10 py-10 max-w-[1280px] mx-auto">
+    <div className="min-h-screen bg-background px-5 md:px-10 py-10 max-w-[1280px] mx-auto">
       <header className="mb-12">
-        <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-primary">
+        <span className="text-[10px] font-black uppercase tracking-[0.2em] text-[#c88a23]">
           Internal · development only
         </span>
-        <h1 className="text-3xl font-extrabold text-foreground tracking-tight mt-1">
+        <h1 className="text-3xl font-black text-primary tracking-tight mt-1">
           Design reference
         </h1>
-        <p className="text-sm text-muted-foreground mt-2 max-w-2xl leading-relaxed">
+        <p className="text-sm text-foreground-muted mt-2 max-w-2xl leading-relaxed">
           Every listing state rendered with sample data. This route 404s outside
           development.
         </p>
@@ -161,10 +161,10 @@ export default function StyleguidePage() {
             <div key={s.product.id} className="flex flex-col">
               <ProductCard product={s.product} />
               <div className="mt-2 px-1">
-                <p className="text-[10px] font-bold text-primary uppercase tracking-wide">
+                <p className="text-[10px] font-black text-primary uppercase tracking-wide">
                   {s.label}
                 </p>
-                <p className="text-[10px] text-muted-foreground leading-snug mt-0.5">{s.note}</p>
+                <p className="text-[10px] text-foreground-muted leading-snug mt-0.5">{s.note}</p>
               </div>
             </div>
           ))}
@@ -177,25 +177,25 @@ export default function StyleguidePage() {
       >
         <div className="space-y-8">
           <div>
-            <p className="text-[10px] font-black text-gray-400 uppercase tracking-wide mb-3">
+            <p className="text-[10px] font-black text-foreground-muted uppercase tracking-wide mb-3">
               Category rail
             </p>
             <CategoryRailSkeleton />
           </div>
           <div>
-            <p className="text-[10px] font-black text-gray-400 uppercase tracking-wide mb-3">
+            <p className="text-[10px] font-black text-foreground-muted uppercase tracking-wide mb-3">
               Product grid
             </p>
             <ProductGridSkeleton count={4} />
           </div>
           <div>
-            <p className="text-[10px] font-black text-gray-400 uppercase tracking-wide mb-3">
+            <p className="text-[10px] font-black text-foreground-muted uppercase tracking-wide mb-3">
               List rows
             </p>
             <ListSkeleton rows={3} />
           </div>
           <div className="max-w-[200px]">
-            <p className="text-[10px] font-black text-gray-400 uppercase tracking-wide mb-3">
+            <p className="text-[10px] font-black text-foreground-muted uppercase tracking-wide mb-3">
               Single card
             </p>
             <ProductCardSkeleton />
@@ -213,7 +213,7 @@ export default function StyleguidePage() {
             return (
               <div
                 key={c.key}
-                className="flex flex-col items-center gap-2 p-4 rounded-2xl bg-white border border-gray-200/90 lift pressable"
+                className="flex flex-col items-center gap-2 p-4 rounded-2xl bg-surface border border-border/90 lift pressable"
               >
                 <div
                   className="w-12 h-12 rounded-full flex items-center justify-center"
@@ -221,7 +221,7 @@ export default function StyleguidePage() {
                 >
                   <CategoryIcon name={c.icon} className="w-5 h-5" />
                 </div>
-                <span className="text-[11px] font-bold text-gray-800 text-center leading-tight">
+                <span className="text-[11px] font-bold text-foreground text-center leading-tight">
                   {c.name}
                 </span>
               </div>
@@ -243,10 +243,10 @@ export default function StyleguidePage() {
           ].map(([cls, label]) => (
             <div
               key={cls}
-              className={`px-5 py-4 rounded-2xl bg-white border border-gray-200/90 ${cls}`}
+              className={`px-5 py-4 rounded-2xl bg-surface border border-border/90 ${cls}`}
             >
-              <p className="text-xs font-bold text-foreground">{label}</p>
-              <code className="text-[10px] text-gray-500">.{cls}</code>
+              <p className="text-xs font-black text-primary">{label}</p>
+              <code className="text-[10px] text-foreground-muted">.{cls}</code>
             </div>
           ))}
         </div>

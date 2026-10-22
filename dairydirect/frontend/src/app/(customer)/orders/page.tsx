@@ -149,7 +149,7 @@ export default function OrdersScreen() {
                         <div className="flex items-center gap-2 flex-wrap">
                           <p className="font-bold text-[14px]" style={{ color: 'var(--color-primary)' }}>{order.id}</p>
                           <span className={`px-2 py-0.5 rounded-md text-[10px] font-bold uppercase tracking-wider ${
-                            order.payment_status === 'paid' ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800'
+                            order.payment_status === 'paid' ? 'bg-success-bg text-emerald-800' : 'bg-warning-bg text-amber-800'
                           }`}>
                             {order.payment_status === 'paid'
                               ? 'Paid'
@@ -211,17 +211,17 @@ export default function OrdersScreen() {
                             </div>
 
                             {/* Payment Status & Details */}
-                            <div className="p-3 mb-4 rounded-xl bg-white border border-gray-200/80 text-xs space-y-1.5">
+                            <div className="p-3 mb-4 rounded-xl bg-surface border border-border/80 text-xs space-y-1.5">
                               <div className="flex items-center justify-between">
-                                <span className="text-gray-500">Payment Method:</span>
-                                <span className="font-bold text-gray-800">
+                                <span className="text-foreground-muted">Payment Method:</span>
+                                <span className="font-bold text-foreground">
                                   {(order.payment_method || '').toUpperCase() === 'COD' ? 'Cash on Delivery (COD)' : (order.payment_method || 'Online')}
                                 </span>
                               </div>
                               <div className="flex items-center justify-between">
-                                <span className="text-gray-500">Payment Status:</span>
+                                <span className="text-foreground-muted">Payment Status:</span>
                                 <span className={`font-black uppercase text-[10px] px-2 py-0.5 rounded-md ${
-                                  order.payment_status === 'paid' ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800'
+                                  order.payment_status === 'paid' ? 'bg-success-bg text-emerald-800' : 'bg-warning-bg text-amber-800'
                                 }`}>
                                   {order.payment_status === 'paid'
                                     ? 'Paid'
@@ -230,8 +230,8 @@ export default function OrdersScreen() {
                                     : (order.payment_status || 'Pending')}
                                 </span>
                               </div>
-                              <div className="flex items-center justify-between pt-1 border-t border-gray-100">
-                                <span className="text-gray-500 font-semibold">Total Amount:</span>
+                              <div className="flex items-center justify-between pt-1 border-t border-border">
+                                <span className="text-foreground-muted font-semibold">Total Amount:</span>
                                 <span className="font-extrabold text-emerald-900 font-mono text-[13px]">
                                   {t('currency')}{order.total_amount}
                                 </span>
@@ -255,7 +255,7 @@ export default function OrdersScreen() {
                               paymentMethod={order.payment_method}
                               totalAmount={order.total_amount}
                               onChanged={() => loadOrders()}
-                              className="flex items-center justify-center gap-2 w-full py-2.5 mt-2 rounded-[12px] font-bold text-xs text-rose-700 bg-rose-50 hover:bg-rose-100 border border-rose-200/60 transition-colors cursor-pointer"
+                              className="flex items-center justify-center gap-2 w-full py-2.5 mt-2 rounded-[12px] font-bold text-xs text-error bg-error-bg hover:bg-error-bg border border-error/20/60 transition-colors cursor-pointer"
                             />
 
                             {/* Return / Freshness Guarantee claim button */}

@@ -74,7 +74,7 @@ export function RazorpayButton({
   return (
     <div className="w-full space-y-2">
       {errorMessage && (
-        <div className="flex items-center gap-2 p-3 bg-red-50 border border-red-200 rounded-xl text-red-700 text-xs font-medium">
+        <div className="flex items-center gap-2 p-3 bg-error-bg border border-error/20 rounded-xl text-error text-xs font-medium">
           <AlertCircle className="w-4 h-4 shrink-0 text-red-500" />
           <span>{errorMessage}</span>
         </div>
@@ -101,7 +101,7 @@ export function RazorpayButton({
           <>
             <CreditCard className="w-4 h-4 text-emerald-300" />
             <span>{buttonText || `Pay ₹${amountInRupees.toFixed(2)} with Razorpay`}</span>
-            <div className="flex items-center gap-1 ml-auto text-[10px] bg-white/15 backdrop-blur-sm px-2 py-0.5 rounded-full uppercase tracking-wider font-semibold">
+            <div className="flex items-center gap-1 ml-auto text-[10px] bg-surface/15 backdrop-blur-sm px-2 py-0.5 rounded-full uppercase tracking-wider font-semibold">
               <ShieldCheck className="w-3 h-3 text-emerald-300" />
               <span>Razorpay</span>
             </div>

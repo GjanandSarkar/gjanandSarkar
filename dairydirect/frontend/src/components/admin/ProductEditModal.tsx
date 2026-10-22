@@ -350,7 +350,7 @@ export function ProductEditModal({
                   className="px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider"
                   style={{
                     background: 'var(--color-primary-fixed, #eaf6ef)',
-                    color: 'var(--color-primary, var(--success))',
+                    color: 'var(--color-primary, #3f6530)',
                   }}
                 >
                   {(product as any)?.seller_id || (product as any)?.isSeller ? 'Seller Hub' : 'Admin Panel'}
@@ -413,7 +413,7 @@ export function ProductEditModal({
               <div>
                 <label
                   className="text-[11px] font-bold uppercase tracking-wider mb-1.5 block"
-                  style={{ color: 'var(--color-outline, var(--foreground-muted))' }}
+                  style={{ color: 'var(--color-outline, #73796e)' }}
                 >
                   Product Name *
                 </label>
@@ -433,7 +433,7 @@ export function ProductEditModal({
               <div>
                 <label
                   className="text-[11px] font-bold uppercase tracking-wider mb-1.5 block"
-                  style={{ color: 'var(--color-outline, var(--foreground-muted))' }}
+                  style={{ color: 'var(--color-outline, #73796e)' }}
                 >
                   Category *
                 </label>
@@ -463,7 +463,7 @@ export function ProductEditModal({
             <div>
               <label
                 className="text-[11px] font-bold uppercase tracking-wider mb-1.5 block"
-                style={{ color: 'var(--color-outline, var(--foreground-muted))' }}
+                style={{ color: 'var(--color-outline, #73796e)' }}
               >
                 Description
               </label>
@@ -528,7 +528,7 @@ export function ProductEditModal({
             <div>
               <label
                 className="text-[11px] font-bold uppercase tracking-wider mb-2 block"
-                style={{ color: 'var(--color-outline, var(--foreground-muted))' }}
+                style={{ color: 'var(--color-outline, #73796e)' }}
               >
                 Product Images
               </label>
@@ -545,7 +545,7 @@ export function ProductEditModal({
                 <div>
                   <h3
                     className="text-[13px] font-bold uppercase tracking-wider flex items-center gap-1.5"
-                    style={{ color: 'var(--color-outline, var(--foreground-muted))' }}
+                    style={{ color: 'var(--color-outline, #73796e)' }}
                   >
                     <Layers className="w-4 h-4 text-primary" />
                     Product Variants & Pricing ({variants.length})

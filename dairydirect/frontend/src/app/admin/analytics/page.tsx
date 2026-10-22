@@ -113,7 +113,7 @@ export default function AdminAnalyticsPage() {
     const cancelledSubs = data.subscriptions.filter((s) => s.status === 'cancelled').length;
     const subDonutData = [
       { label: 'Active', value: activeSubs, color: '#10b981' },
-      { label: 'Paused', value: pausedSubs, color: 'var(--warning)' },
+      { label: 'Paused', value: pausedSubs, color: '#b87d20' },
       { label: 'Cancelled', value: cancelledSubs, color: '#ef4444' },
     ];
 
@@ -128,7 +128,7 @@ export default function AdminAnalyticsPage() {
 
     const customerDonutData = [
       { label: 'New Customers', value: newCustomers, color: 'var(--primary)' },
-      { label: 'Returning Customers', value: repeatCustomers, color: 'var(--warning)' },
+      { label: 'Returning Customers', value: repeatCustomers, color: '#b87d20' },
     ];
 
     // Products Ranking

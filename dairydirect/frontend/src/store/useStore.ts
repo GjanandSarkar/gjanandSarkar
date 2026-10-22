@@ -114,14 +114,6 @@ type AppState = {
   isSubsLoading: boolean;
   setSubsLoading: (v: boolean) => void;
 
-  // ── Cart Drawer (Global Sidebar/Modal) ────────────────────
-  isCartDrawerOpen: boolean;
-  setCartDrawerOpen: (open: boolean) => void;
-
-  // ── Notification Drawer (Sidebar Desktop / Bottom Drawer Mobile) ──
-  isNotificationDrawerOpen: boolean;
-  setNotificationDrawerOpen: (open: boolean) => void;
-
   // ── Checkout State (Temp) ──────────────────────────────────
   checkoutAddressId: string | null;
   setCheckoutAddressId: (id: string | null) => void;
@@ -243,14 +235,6 @@ export const useStore = create<AppState>()(
 
       isSubsLoading: false,
       setSubsLoading: (v) => set({ isSubsLoading: v }),
-
-      // ── Cart Drawer ────────────────────────────────────────
-      isCartDrawerOpen: false,
-      setCartDrawerOpen: (open) => set({ isCartDrawerOpen: open }),
-
-      // ── Notification Drawer ────────────────────────────────
-      isNotificationDrawerOpen: false,
-      setNotificationDrawerOpen: (open) => set({ isNotificationDrawerOpen: open }),
 
       // ── Checkout Selection ─────────────────────────────────
       checkoutAddressId: null,

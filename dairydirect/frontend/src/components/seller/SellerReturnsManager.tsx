@@ -76,9 +76,9 @@ const STATUS_BADGES: Record<string, { bg: string; text: string; label: string }>
   submitted:            { bg: '#fef3c7', text: '#92400e', label: 'Submitted' },
   under_review:         { bg: '#fef3c7', text: '#92400e', label: 'Under Review' },
   approved:             { bg: '#dcfce7', text: '#166534', label: 'Approved' },
-  return_in_progress:   { bg: 'var(--info-bg)', text: '#3730a3', label: 'In Progress' },
-  item_received:        { bg: 'var(--info-bg)', text: '#3730a3', label: 'Item Received' },
-  inspection_completed: { bg: 'var(--info-bg)', text: '#3730a3', label: 'Inspection Done' },
+  return_in_progress:   { bg: '#e0e7ff', text: '#3730a3', label: 'In Progress' },
+  item_received:        { bg: '#e0e7ff', text: '#3730a3', label: 'Item Received' },
+  inspection_completed: { bg: '#e0e7ff', text: '#3730a3', label: 'Inspection Done' },
   refund_pending:       { bg: '#fed7aa', text: '#9a3412', label: 'Refund Pending' },
   refunded:             { bg: '#dbeafe', text: '#1e40af', label: 'Refunded' },
   rejected:             { bg: '#fee2e2', text: '#991b1b', label: 'Rejected' },
@@ -205,12 +205,12 @@ export function SellerReturnsManager() {
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
             <div className="flex items-center gap-2">
-              <span className="px-2.5 py-0.5 rounded-full bg-primary-fixed text-primary text-[10px] font-bold uppercase tracking-wider">
+              <span className="px-2.5 py-0.5 rounded-full bg-success-bg text-emerald-800 text-[10px] font-black uppercase tracking-wider">
                 Store Claims Desk
               </span>
             </div>
-            <h3 className="text-lg md:text-xl font-bold text-foreground tracking-tight flex items-center gap-2 mt-1">
-              <RotateCcw className="w-5 h-5 text-primary" />
+            <h3 className="text-lg md:text-xl font-black text-foreground tracking-tight flex items-center gap-2 mt-1">
+              <RotateCcw className="w-5 h-5 text-[#c88a23]" />
               <span>Customer Returns & Cancellations</span>
             </h3>
             <p className="text-xs text-foreground-muted mt-0.5">
@@ -285,7 +285,7 @@ export function SellerReturnsManager() {
               placeholder="Search by Request ID, Order #, Customer, Product, or Address..."
               value={searchQuery}
               onChange={e => setSearchQuery(e.target.value)}
-              className="w-full pl-10 pr-4 py-2.5 bg-surface-muted border border-border rounded-xl text-xs font-medium placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:bg-surface"
+              className="w-full pl-10 pr-4 py-2.5 bg-surface-muted border border-border rounded-xl text-xs font-medium placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[var(--primary)]/20 focus:bg-surface"
             />
             {searchQuery && (
               <button
@@ -331,7 +331,7 @@ export function SellerReturnsManager() {
               onClick={() => setStatusFilter(tab.id)}
               className={`px-3 py-1.5 rounded-full text-xs font-bold whitespace-nowrap transition-all cursor-pointer ${
                 statusFilter === tab.id
-                  ? 'bg-primary text-primary-foreground shadow-xs'
+                  ? 'bg-primary text-white shadow-xs'
                   : 'text-foreground-muted hover:text-foreground hover:bg-surface-muted'
               }`}
             >
@@ -427,7 +427,7 @@ export function SellerReturnsManager() {
                           Qty: <strong className="text-foreground">{req.item_quantity}</strong>
                           {req.variant_weight && ` • ${req.variant_weight}`}
                         </p>
-                        <p className="text-xs font-bold text-primary">
+                        <p className="text-xs font-black text-primary">
                           ₹{req.item_price * req.item_quantity}
                         </p>
                       </div>
@@ -488,7 +488,7 @@ export function SellerReturnsManager() {
                       </div>
                       <div className="flex justify-between items-center">
                         <span className="text-foreground-muted">Claim Amount:</span>
-                        <span className="font-bold text-primary">
+                        <span className="font-black text-primary">
                           ₹{req.refund_amount || (req.item_price * req.item_quantity)}
                         </span>
                       </div>
@@ -636,8 +636,8 @@ export function SellerReturnsManager() {
           <div className="bg-surface rounded-3xl max-w-md w-full p-6 space-y-5 shadow-2xl animate-in fade-in">
             <div className="flex items-center justify-between border-b border-border pb-3">
               <div className="flex items-center gap-2">
-                <div className="p-2 rounded-xl bg-primary-fixed text-primary">
-                  <RotateCcw className="w-5 h-5 text-primary" />
+                <div className="p-2 rounded-xl bg-surface-muted text-primary">
+                  <RotateCcw className="w-5 h-5 text-[#c88a23]" />
                 </div>
                 <div>
                   <h3 className="font-extrabold text-base text-foreground capitalize">
@@ -689,7 +689,7 @@ export function SellerReturnsManager() {
                   value={actionNotes}
                   onChange={e => setActionNotes(e.target.value)}
                   placeholder={actionType === 'reject' ? 'e.g. Item was delivered in good condition, seal was intact...' : 'Add any helpful notes...'}
-                  className="w-full p-2.5 rounded-xl border border-border text-xs font-medium outline-none focus:ring-2 focus:ring-primary/20 bg-surface"
+                  className="w-full p-2.5 rounded-xl border border-border text-xs font-medium outline-none focus:ring-2 focus:ring-[var(--primary)]/20 bg-surface"
                   required={actionType === 'reject'}
                 />
               </div>
@@ -710,7 +710,7 @@ export function SellerReturnsManager() {
                 type="button"
                 disabled={isProcessing || (actionType === 'reject' && !actionNotes.trim())}
                 onClick={handleConfirmAction}
-                className="px-5 py-2 text-xs font-bold bg-primary hover:bg-primary-hover text-primary-foreground rounded-xl shadow-xs disabled:opacity-50 flex items-center gap-1.5 cursor-pointer"
+                className="px-5 py-2 text-xs font-bold bg-primary hover:bg-[#165a37] text-white rounded-xl shadow-xs disabled:opacity-50 flex items-center gap-1.5 cursor-pointer"
               >
                 {isProcessing && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
                 <span>Confirm {actionType.replace(/_/g, ' ')}</span>

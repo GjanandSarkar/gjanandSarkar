@@ -59,7 +59,7 @@ export function StatusBar({ steps, current, times = {}, failed }: Props) {
                 className={
                   i === 0
                     ? 'flex-1 invisible'
-                    : `h-1 flex-1 ${i <= idx ? (bad ? 'bg-rose-500' : 'bg-emerald-600') : 'bg-gray-200'}`
+                    : `h-1 flex-1 ${i <= idx ? (bad ? 'bg-rose-500' : 'bg-emerald-600') : 'bg-border'}`
                 }
               />
               <span
@@ -70,7 +70,7 @@ export function StatusBar({ steps, current, times = {}, failed }: Props) {
                     ? 'bg-emerald-600 text-white'
                     : active
                     ? 'bg-emerald-600 text-white ring-4 ring-emerald-100 ring-offset-1'
-                    : 'bg-gray-200 text-gray-400'
+                    : 'bg-border text-foreground-muted'
                 }`}
               >
                 {done ? '✓' : i + 1}
@@ -79,19 +79,19 @@ export function StatusBar({ steps, current, times = {}, failed }: Props) {
                 className={
                   last
                     ? 'flex-1 invisible'
-                    : `h-1 flex-1 ${i < idx ? (bad ? 'bg-rose-500' : 'bg-emerald-600') : 'bg-gray-200'}`
+                    : `h-1 flex-1 ${i < idx ? (bad ? 'bg-rose-500' : 'bg-emerald-600') : 'bg-border'}`
                 }
               />
             </div>
             <p
               className={`mt-2.5 text-xs font-semibold leading-tight ${
-                bad ? 'text-rose-600' : active ? 'text-emerald-700' : done ? 'text-gray-900' : 'text-gray-400'
+                bad ? 'text-error' : active ? 'text-success' : done ? 'text-foreground' : 'text-foreground-muted'
               }`}
             >
               {s.label}
             </p>
             {times[s.code] && (
-              <p className="mt-1 text-[11px] text-gray-500">
+              <p className="mt-1 text-[11px] text-foreground-muted">
                 {new Date(times[s.code]).toLocaleString('en-IN', {
                   month: 'short',
                   day: 'numeric',

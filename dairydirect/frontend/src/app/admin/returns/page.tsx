@@ -107,7 +107,7 @@ type AdminRequestRecord = {
 
 const STATUS_BADGES: Record<string, { bg: string; text: string; label: string }> = {
   initiated:        { bg: '#fef3c7', text: '#92400e', label: 'Initiated' },
-  picked_up:        { bg: 'var(--info-bg)', text: '#3730a3', label: 'Picked Up' },
+  picked_up:        { bg: '#e0e7ff', text: '#3730a3', label: 'Picked Up' },
   received:         { bg: '#dbeafe', text: '#1e40af', label: 'Received' },
   refund_initiated: { bg: '#fed7aa', text: '#9a3412', label: 'Refund Initiated' },
   refunded:         { bg: '#dcfce7', text: '#166534', label: 'Refunded' },

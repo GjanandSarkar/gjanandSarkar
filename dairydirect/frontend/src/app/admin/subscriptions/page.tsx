@@ -8,8 +8,8 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { getAllSubscriptions, pauseSubscription, cancelSubscription } from '@/lib/api/subscriptions';
 
 const STATUS_STYLES: Record<string, { bg: string; color: string; icon: any }> = {
-  'active': { bg: 'var(--success-bg)', color: 'var(--success)', icon: CheckCircle2 },
-  'paused': { bg: 'var(--warning-bg)', color: '#7d5200', icon: PauseCircle },
+  'active': { bg: '#eaf4e2', color: '#2a4f1d', icon: CheckCircle2 },
+  'paused': { bg: '#fff8e6', color: '#7d5200', icon: PauseCircle },
   'cancelled': { bg: '#e3e3dc', color: '#43493e', icon: XCircle },
 };
 

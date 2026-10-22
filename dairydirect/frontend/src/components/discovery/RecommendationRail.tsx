@@ -59,7 +59,7 @@ export function RecommendationRail({
   const scrollRef = useRef<HTMLDivElement>(null);
 
   const sectionClass = compact
-    ? 'w-full px-4 py-4 border-t border-gray-200/80'
+    ? 'w-full px-4 py-4 border-t border-border/80'
     : 'w-full max-w-[1440px] mx-auto px-4 md:px-8 py-8';
 
   // Cart contents are sent so the rail never suggests something already in
@@ -106,12 +106,12 @@ export function RecommendationRail({
   if (isLoading) {
     return (
       <section className={sectionClass}>
-        <div className="h-5 w-48 rounded bg-gray-200 animate-pulse mb-6" />
+        <div className="h-5 w-48 rounded bg-border animate-pulse mb-6" />
         <div className="flex gap-4 overflow-hidden">
           {Array.from({ length: 4 }).map((_, i) => (
             <div
               key={i}
-              className="w-[240px] shrink-0 h-[320px] rounded-2xl bg-gray-100 animate-pulse"
+              className="w-[240px] shrink-0 h-[320px] rounded-2xl bg-surface-muted animate-pulse"
             />
           ))}
         </div>
@@ -136,7 +136,7 @@ export function RecommendationRail({
         className={
           compact
             ? 'flex items-end justify-between mb-3'
-            : 'flex items-end justify-between pb-4 mb-6 border-b border-gray-200/80'
+            : 'flex items-end justify-between pb-4 mb-6 border-b border-border/80'
         }
       >
         <div>
@@ -156,7 +156,7 @@ export function RecommendationRail({
             type="button"
             onClick={() => handleScroll('left')}
             aria-label="Scroll recommendations left"
-            className="p-2 rounded-full border border-gray-200 hover:bg-gray-50 transition-colors"
+            className="p-2 rounded-full border border-border hover:bg-surface-muted transition-colors"
           >
             <ChevronLeft className="w-4 h-4" />
           </button>
@@ -164,7 +164,7 @@ export function RecommendationRail({
             type="button"
             onClick={() => handleScroll('right')}
             aria-label="Scroll recommendations right"
-            className="p-2 rounded-full border border-gray-200 hover:bg-gray-50 transition-colors"
+            className="p-2 rounded-full border border-border hover:bg-surface-muted transition-colors"
           >
             <ChevronRight className="w-4 h-4" />
           </button>

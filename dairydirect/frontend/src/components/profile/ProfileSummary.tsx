@@ -223,7 +223,7 @@ export function ProfileSummary({ user, onUpdateProfile }: ProfileSummaryProps) {
   };
 
   return (
-    <div className="bg-surface rounded-2xl p-5 sm:p-6 border border-border relative text-foreground h-full flex flex-col justify-between shadow-2xs">
+    <div className="bg-surface rounded-[28px] p-6 sm:p-8 shadow-xs border border-border relative">
       <input
         ref={fileInputRef}
         type="file"
@@ -233,7 +233,7 @@ export function ProfileSummary({ user, onUpdateProfile }: ProfileSummaryProps) {
       />
 
       {errorMsg && (
-        <div className="mb-6 flex items-center gap-2 p-3.5 rounded-xl bg-red-50 text-red-600 text-xs font-medium border border-red-100 relative z-10">
+        <div className="mb-6 flex items-center gap-2 p-3.5 rounded-xl bg-error-bg text-error text-xs font-medium border border-red-100 relative z-10">
           <AlertCircle className="w-4 h-4 shrink-0" />
           <p>{errorMsg}</p>
         </div>
@@ -241,44 +241,30 @@ export function ProfileSummary({ user, onUpdateProfile }: ProfileSummaryProps) {
 
       <AnimatePresence mode="wait">
         {isEditing ? (
-          <>
-            {/* Mobile Drawer Backdrop */}
-            <div
-              className="fixed inset-0 bg-black/60 z-50 backdrop-blur-xs md:hidden"
-              onClick={() => {
-                setIsEditing(false);
-                setErrorMsg(null);
-              }}
-            />
-
-            <motion.div
-              key="editing-mode"
-              initial={{ opacity: 0, y: 15 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: 15 }}
-              transition={{ duration: 0.2 }}
-              className="fixed bottom-0 left-0 right-0 z-50 md:static md:z-auto bg-surface rounded-t-3xl md:rounded-none border-t md:border-0 border-border p-5 md:p-0 shadow-2xl md:shadow-none max-h-[88vh] md:max-h-none overflow-y-auto space-y-5"
-              style={{ paddingBottom: 'max(env(safe-area-inset-bottom, 0px), 16px)' }}
-            >
-              {/* Drag Pill for Mobile Drawer */}
-              <div className="w-12 h-1.5 bg-border rounded-full mx-auto -mt-1 mb-2 md:hidden" />
-
-              {/* Header Section */}
-              <div className="flex items-start justify-between pb-2 border-b border-border/60 md:border-0 md:pb-0">
-                <div>
-                  <h3 className="text-xl sm:text-2xl font-bold text-foreground tracking-tight">Edit Profile</h3>
-                  <p className="text-xs sm:text-sm font-medium text-foreground-muted mt-0.5">Update your personal details</p>
-                </div>
-                <button
-                  onClick={() => {
-                    setIsEditing(false);
-                    setErrorMsg(null);
-                  }}
-                  className="w-8 h-8 sm:w-9 sm:h-9 rounded-xl border border-border bg-surface hover:bg-surface-muted text-foreground-muted hover:text-foreground flex items-center justify-center transition-colors cursor-pointer shadow-2xs"
-                >
-                  <X className="w-4 h-4" />
-                </button>
+          <motion.div
+            key="editing-mode"
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -10 }}
+            transition={{ duration: 0.2 }}
+            className="space-y-6 relative z-10"
+          >
+            {/* Header Section */}
+            <div className="flex items-start justify-between">
+              <div>
+                <h3 className="text-2xl font-bold text-foreground tracking-tight">Edit Profile</h3>
+                <p className="text-sm font-medium text-foreground-muted mt-0.5">Update your profile information</p>
               </div>
+              <button
+                onClick={() => {
+                  setIsEditing(false);
+                  setErrorMsg(null);
+                }}
+                className="w-9 h-9 rounded-xl border border-border bg-surface hover:bg-surface-muted text-foreground-muted flex items-center justify-center transition-colors cursor-pointer shadow-2xs"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
 
             {/* Main Content Grid: Photo Left, Inputs Right */}
             <div className="grid grid-cols-1 md:grid-cols-12 gap-8 items-start pt-2">
@@ -288,7 +274,7 @@ export function ProfileSummary({ user, onUpdateProfile }: ProfileSummaryProps) {
                 <div className="relative group shrink-0">
                   <div 
                     onClick={handleSelectPhotoClick}
-                    className="w-32 h-32 sm:w-36 sm:h-36 rounded-full overflow-hidden bg-gray-100 border-4 border-white shadow-sm flex items-center justify-center relative cursor-pointer group-hover:brightness-95 transition-all"
+                    className="w-32 h-32 sm:w-36 sm:h-36 rounded-full overflow-hidden bg-surface-muted border-4 border-white shadow-sm flex items-center justify-center relative cursor-pointer group-hover:brightness-95 transition-all"
                   >
                     {isUploading ? (
                       <Loader2 className="w-8 h-8 animate-spin text-primary" />
@@ -309,7 +295,7 @@ export function ProfileSummary({ user, onUpdateProfile }: ProfileSummaryProps) {
                     type="button"
                     onClick={handleSelectPhotoClick}
                     disabled={isUploading}
-                    className="absolute bottom-1 right-1 w-9 h-9 bg-white border border-gray-200 rounded-full flex items-center justify-center text-gray-700 shadow-xs hover:bg-gray-50 transition-colors active:scale-95 cursor-pointer"
+                    className="absolute bottom-1 right-1 w-9 h-9 bg-surface border border-border rounded-full flex items-center justify-center text-foreground shadow-xs hover:bg-surface-muted transition-colors active:scale-95 cursor-pointer"
                     title="Change photo"
                   >
                     <Camera className="w-4 h-4" />
@@ -317,17 +303,17 @@ export function ProfileSummary({ user, onUpdateProfile }: ProfileSummaryProps) {
                 </div>
 
                 <div>
-                  <h4 className="text-sm font-bold text-gray-900">Profile Photo</h4>
-                  <p className="text-[11px] text-gray-400 font-medium mt-0.5">JPG, PNG or WebP. Max size 2MB.</p>
+                  <h4 className="text-sm font-bold text-foreground">Profile Photo</h4>
+                  <p className="text-[11px] text-foreground-muted font-medium mt-0.5">JPG, PNG or WebP. Max size 2MB.</p>
                 </div>
 
                 <button
                   type="button"
                   onClick={handleSelectPhotoClick}
                   disabled={isUploading}
-                  className="px-4 py-2 bg-white border border-gray-200 hover:bg-gray-50 rounded-xl text-xs font-semibold text-gray-800 shadow-2xs flex items-center gap-2 transition-all cursor-pointer active:scale-95"
+                  className="px-4 py-2 bg-surface border border-border hover:bg-surface-muted rounded-xl text-xs font-semibold text-foreground shadow-2xs flex items-center gap-2 transition-all cursor-pointer active:scale-95"
                 >
-                  <Upload className="w-3.5 h-3.5 text-gray-600" />
+                  <Upload className="w-3.5 h-3.5 text-foreground-muted" />
                   <span>Upload Photo</span>
                 </button>
               </div>
@@ -338,34 +324,34 @@ export function ProfileSummary({ user, onUpdateProfile }: ProfileSummaryProps) {
                 {/* First Name & Last Name Input Grid */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <div>
-                    <label className="block text-xs font-bold text-gray-700 mb-1.5">
+                    <label className="block text-xs font-bold text-foreground mb-1.5">
                       First Name
                     </label>
                     <div className="relative">
-                      <User className="w-4 h-4 text-gray-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
+                      <User className="w-4 h-4 text-foreground-muted absolute left-3.5 top-1/2 -translate-y-1/2" />
                       <input
                         type="text"
                         value={firstName}
                         onChange={(e) => setFirstName(e.target.value)}
                         placeholder="First Name"
-                        className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-gray-200 text-sm font-medium text-gray-900 outline-none focus:border-gray-900 transition-all bg-white"
+                        className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-border text-sm font-medium text-foreground outline-none focus:border-gray-900 transition-all bg-surface"
                         autoFocus
                       />
                     </div>
                   </div>
 
                   <div>
-                    <label className="block text-xs font-bold text-gray-700 mb-1.5">
+                    <label className="block text-xs font-bold text-foreground mb-1.5">
                       Last Name
                     </label>
                     <div className="relative">
-                      <User className="w-4 h-4 text-gray-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
+                      <User className="w-4 h-4 text-foreground-muted absolute left-3.5 top-1/2 -translate-y-1/2" />
                       <input
                         type="text"
                         value={lastName}
                         onChange={(e) => setLastName(e.target.value)}
                         placeholder="Last Name"
-                        className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-gray-200 text-sm font-medium text-gray-900 outline-none focus:border-gray-900 transition-all bg-white"
+                        className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-border text-sm font-medium text-foreground outline-none focus:border-gray-900 transition-all bg-surface"
                       />
                     </div>
                   </div>
@@ -373,24 +359,24 @@ export function ProfileSummary({ user, onUpdateProfile }: ProfileSummaryProps) {
 
                 {/* Email Address */}
                 <div>
-                  <label className="block text-xs font-bold text-gray-700 mb-1.5">
+                  <label className="block text-xs font-bold text-foreground mb-1.5">
                     Email Address
                   </label>
                   <div className="relative">
-                    <Mail className="w-4 h-4 text-gray-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
+                    <Mail className="w-4 h-4 text-foreground-muted absolute left-3.5 top-1/2 -translate-y-1/2" />
                     <input
                       type="email"
                       value={profileEmail}
                       onChange={(e) => setProfileEmail(e.target.value)}
                       placeholder="amul.sureja@example.com"
-                      className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-gray-200 text-sm font-medium text-gray-900 outline-none focus:border-gray-900 transition-all bg-white"
+                      className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-border text-sm font-medium text-foreground outline-none focus:border-gray-900 transition-all bg-surface"
                     />
                   </div>
                 </div>
 
                 {/* Phone Number with Country Code Dropdown */}
                 <div>
-                  <label className="block text-xs font-bold text-gray-700 mb-1.5">
+                  <label className="block text-xs font-bold text-foreground mb-1.5">
                     Phone Number
                   </label>
                   <div className="flex relative">
@@ -398,11 +384,11 @@ export function ProfileSummary({ user, onUpdateProfile }: ProfileSummaryProps) {
                     <button
                       type="button"
                       onClick={() => setIsCountryDropdownOpen(!isCountryDropdownOpen)}
-                      className="flex items-center gap-2 px-3.5 py-2.5 bg-white border border-r-0 border-gray-200 rounded-l-xl text-sm font-semibold text-gray-900 shrink-0 select-none hover:bg-gray-50 transition-colors cursor-pointer"
+                      className="flex items-center gap-2 px-3.5 py-2.5 bg-surface border border-r-0 border-border rounded-l-xl text-sm font-semibold text-foreground shrink-0 select-none hover:bg-surface-muted transition-colors cursor-pointer"
                     >
-                      <span className="font-bold text-gray-900">{selectedCountry.code}</span>
-                      <span className="text-gray-900 font-bold">{selectedCountry.dialCode}</span>
-                      <ChevronDown className={`w-3.5 h-3.5 text-gray-500 transition-transform duration-200 ${isCountryDropdownOpen ? 'rotate-180' : ''}`} />
+                      <span className="font-bold text-foreground">{selectedCountry.code}</span>
+                      <span className="text-foreground font-bold">{selectedCountry.dialCode}</span>
+                      <ChevronDown className={`w-3.5 h-3.5 text-foreground-muted transition-transform duration-200 ${isCountryDropdownOpen ? 'rotate-180' : ''}`} />
                     </button>
 
                     {/* Country Selection Dropdown */}
@@ -413,7 +399,7 @@ export function ProfileSummary({ user, onUpdateProfile }: ProfileSummaryProps) {
                           className="fixed inset-0 z-40" 
                           onClick={() => setIsCountryDropdownOpen(false)} 
                         />
-                        <div className="absolute top-full left-0 mt-2 w-72 sm:w-80 bg-white rounded-2xl shadow-xl border border-gray-100/90 p-2 z-50 max-h-64 overflow-y-auto animate-in fade-in zoom-in-95">
+                        <div className="absolute top-full left-0 mt-2 w-72 sm:w-80 bg-surface rounded-2xl shadow-xl border border-border/90 p-2 z-50 max-h-64 overflow-y-auto animate-in fade-in zoom-in-95">
                           <div className="space-y-0.5">
                             {COUNTRY_LIST.map((c) => {
                               const isSelected = selectedCountry.code === c.code;
@@ -427,16 +413,16 @@ export function ProfileSummary({ user, onUpdateProfile }: ProfileSummaryProps) {
                                   }}
                                   className={`w-full text-left px-3.5 py-2.5 rounded-xl text-xs font-medium flex items-center justify-between transition-all cursor-pointer ${
                                     isSelected
-                                      ? 'bg-emerald-50/70 text-[#065f46] font-bold shadow-2xs'
-                                      : 'text-gray-700 hover:bg-gray-50'
+                                      ? 'bg-success-bg/70 text-[#065f46] font-bold shadow-2xs'
+                                      : 'text-foreground hover:bg-surface-muted'
                                   }`}
                                 >
                                   <div className="flex items-center gap-2.5 min-w-0">
-                                    <span className="font-bold text-gray-900 text-xs w-5 shrink-0">{c.code}</span>
-                                    <span className="truncate text-gray-900 text-xs font-medium">{c.name}</span>
-                                    <span className="text-gray-400 text-[11px] font-normal shrink-0">({c.code})</span>
+                                    <span className="font-bold text-foreground text-xs w-5 shrink-0">{c.code}</span>
+                                    <span className="truncate text-foreground text-xs font-medium">{c.name}</span>
+                                    <span className="text-foreground-muted text-[11px] font-normal shrink-0">({c.code})</span>
                                   </div>
-                                  <span className="font-semibold text-gray-900 text-xs shrink-0 ml-2">{c.dialCode}</span>
+                                  <span className="font-semibold text-foreground text-xs shrink-0 ml-2">{c.dialCode}</span>
                                 </button>
                               );
                             })}
@@ -447,7 +433,7 @@ export function ProfileSummary({ user, onUpdateProfile }: ProfileSummaryProps) {
 
                     {/* Phone Digits Input */}
                     <div className="relative flex-1">
-                      <Phone className="w-4 h-4 text-gray-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
+                      <Phone className="w-4 h-4 text-foreground-muted absolute left-3.5 top-1/2 -translate-y-1/2" />
                       <input
                         type="tel"
                         value={rawPhoneDigits}
@@ -457,7 +443,7 @@ export function ProfileSummary({ user, onUpdateProfile }: ProfileSummaryProps) {
                         }}
                         placeholder="98765 43210"
                         maxLength={selectedCountry.maxLength}
-                        className="w-full pl-10 pr-4 py-2.5 rounded-r-xl border border-gray-200 text-sm font-medium text-gray-900 outline-none focus:border-gray-900 transition-all bg-white"
+                        className="w-full pl-10 pr-4 py-2.5 rounded-r-xl border border-border text-sm font-medium text-foreground outline-none focus:border-gray-900 transition-all bg-surface"
                       />
                     </div>
                   </div>
@@ -474,7 +460,7 @@ export function ProfileSummary({ user, onUpdateProfile }: ProfileSummaryProps) {
                   setIsEditing(false);
                   setErrorMsg(null);
                 }}
-                className="px-5 py-2.5 rounded-xl border border-border bg-surface hover:bg-surface-muted text-xs sm:text-sm font-semibold text-foreground transition-all cursor-pointer shadow-2xs active:scale-95"
+                className="px-6 py-2.5 rounded-xl border border-border bg-surface hover:bg-surface-muted text-sm font-semibold text-foreground transition-all cursor-pointer shadow-2xs active:scale-95"
               >
                 Cancel
               </button>
@@ -485,13 +471,12 @@ export function ProfileSummary({ user, onUpdateProfile }: ProfileSummaryProps) {
                   !firstName.trim() || 
                   (rawPhoneDigits.trim() !== '' && !validatePhoneNumber(`+91${rawPhoneDigits}`).isValid)
                 }
-                className="px-5 py-2.5 rounded-xl bg-primary hover:bg-primary-hover text-white text-xs sm:text-sm font-bold transition-all cursor-pointer shadow-xs active:scale-95 disabled:opacity-50"
+                className="px-6 py-2.5 rounded-xl bg-primary hover:bg-primary-hover text-on-primary text-sm font-semibold transition-all cursor-pointer shadow-2xs active:scale-95 disabled:opacity-50"
               >
                 Save Changes
               </button>
             </div>
           </motion.div>
-        </>
         ) : (
           <motion.div
             key="view-mode"
@@ -499,74 +484,78 @@ export function ProfileSummary({ user, onUpdateProfile }: ProfileSummaryProps) {
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -8 }}
             transition={{ duration: 0.2 }}
-            className="flex flex-col justify-between h-full gap-5 relative z-10"
+            className="flex flex-col sm:flex-row items-center sm:items-center justify-between gap-5 relative z-10"
           >
-            {/* Top Row: Avatar, Identity and Edit Button */}
-            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 w-full">
-              <div className="flex items-center gap-4 min-w-0">
-                {/* Avatar Container */}
-                <div 
-                  onClick={handleSelectPhotoClick}
-                  className="relative shrink-0 group cursor-pointer"
-                  title="Change photo"
-                >
-                  <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl overflow-hidden bg-surface-muted border-2 border-border group-hover:border-primary transition-all shadow-xs flex items-center justify-center relative">
-                    {isUploading ? (
-                      <Loader2 className="w-6 h-6 animate-spin text-primary" />
-                    ) : (
-                      <img 
-                        src={user?.avatar_url || '/profile/profile.jpg'} 
-                        alt="Profile Avatar" 
-                        className="w-full h-full object-cover" 
-                        referrerPolicy="no-referrer"
-                        onError={(e) => {
-                          (e.currentTarget as HTMLImageElement).src = '/profile/profile.jpg';
-                        }}
-                      />
-                    )}
-                  </div>
-                  <div className="absolute -bottom-1 -right-1 w-6 h-6 bg-surface border border-border rounded-full flex items-center justify-center text-foreground shadow-xs group-hover:scale-110 transition-transform">
-                    <Camera className="w-3 h-3 text-foreground-muted" />
-                  </div>
+            {/* Left Section: Avatar + Info */}
+            <div className="flex items-center gap-5 w-full sm:w-auto">
+              {/* Avatar Container */}
+              <div 
+                onClick={handleSelectPhotoClick}
+                className="relative shrink-0 group cursor-pointer"
+                title="Change photo"
+              >
+                <div className="w-20 h-20 sm:w-22 sm:h-22 rounded-full overflow-hidden bg-surface-muted border-2 border-white shadow-xs flex items-center justify-center relative group-hover:brightness-95 transition-all">
+                  {isUploading ? (
+                    <Loader2 className="w-7 h-7 animate-spin text-primary" />
+                  ) : (
+                    <img 
+                      src={user?.avatar_url || '/profile/profile.jpg'} 
+                      alt="Profile Avatar" 
+                      className="w-full h-full object-cover" 
+                      referrerPolicy="no-referrer"
+                      onError={(e) => {
+                        (e.currentTarget as HTMLImageElement).src = '/profile/profile.jpg';
+                      }}
+                    />
+                  )}
                 </div>
-
-                {/* User Identity Info */}
-                <div className="min-w-0 flex-1">
-                  <div className="flex items-center gap-2 mb-0.5 flex-wrap">
-                    <h2 className="text-lg sm:text-2xl font-bold text-foreground tracking-tight truncate">
-                      {user?.name || t('name')}
-                    </h2>
-                    {user?.role === 'admin' ? (
-                      <span className="bg-foreground text-background text-[10px] uppercase font-bold px-2 py-0.5 rounded-md tracking-wider shrink-0">
-                        Admin
-                      </span>
-                    ) : (
-                      <span className="bg-primary/10 text-primary border border-primary/20 text-[10px] uppercase font-bold px-2 py-0.5 rounded-md tracking-wider shrink-0">
-                        Verified Member
-                      </span>
-                    )}
-                  </div>
-
-                  <p className="text-xs sm:text-sm font-medium text-foreground-muted truncate mb-1">
-                    {user?.phone ? (() => {
-                      const currentCountry = COUNTRY_LIST.find(c => 
-                        c.name.toLowerCase() === user?.country?.toLowerCase() || 
-                        c.code.toLowerCase() === user?.country?.toLowerCase()
-                      ) || selectedCountry || COUNTRY_LIST[0];
-                      const digits = user.phone.replace(/^\+\d+\s*/, '').replace(/\D/g, '');
-                      return `${currentCountry.dialCode} ${digits}`;
-                    })() : user?.email || 'No phone added'}
-                  </p>
-
-                  <div className="flex items-center gap-2 text-xs text-foreground-muted flex-wrap">
-                    <span className="text-[11px] text-foreground-muted truncate">{user?.email}</span>
-                  </div>
+                <div className="absolute bottom-0 right-0 w-6 h-6 bg-surface border border-border rounded-full flex items-center justify-center text-foreground shadow-xs group-hover:scale-110 transition-transform">
+                  <Camera className="w-3 h-3" />
                 </div>
               </div>
 
-              {/* Action Buttons */}
+              {/* User Identity Info */}
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center gap-2 mb-0.5">
+                  <h2 className="text-xl sm:text-2xl font-bold text-foreground tracking-tight truncate">
+                    {user?.name || t('name')}
+                  </h2>
+                  {user?.role === 'admin' && (
+                    <span className="bg-gray-900 text-white text-[10px] uppercase font-bold px-2 py-0.5 rounded-md tracking-wider shrink-0 ml-1">
+                      Admin
+                    </span>
+                  )}
+                </div>
+
+                <p className="text-sm font-medium text-[#606f7b] truncate mb-2">
+                  {user?.phone ? (() => {
+                    const currentCountry = COUNTRY_LIST.find(c => 
+                      c.name.toLowerCase() === user?.country?.toLowerCase() || 
+                      c.code.toLowerCase() === user?.country?.toLowerCase()
+                    ) || selectedCountry || COUNTRY_LIST[0];
+                    const digits = user.phone.replace(/^\+\d+\s*/, '').replace(/\D/g, '');
+                    return `${currentCountry.dialCode} ${digits}`;
+                  })() : user?.email}
+                </p>
+
+                {/* Metadata Row: Joined + Location */}
+                <div className="flex items-center gap-3 text-xs font-semibold text-foreground-muted">
+                  <div className="flex items-center gap-1.5">
+                    <Calendar className="w-3.5 h-3.5 text-foreground-muted" />
+                    <span>Joined May 2024</span>
+                  </div>
+                  <span className="w-px h-3 bg-gray-300/70" />
+                  <div className="flex items-center gap-1.5">
+                    <MapPin className="w-3.5 h-3.5 text-foreground-muted" />
+                    <span>{user?.country || selectedCountry?.name || 'India'}</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Right Section: Action Buttons */}
+            <div className="flex items-center gap-2.5 w-full sm:w-auto justify-end pt-2 sm:pt-0 border-t sm:border-t-0 border-border">
               <button
-                type="button"
                 onClick={() => {
                   setIsEditing(true);
                   if (user?.first_name || user?.last_name) {
@@ -584,28 +573,11 @@ export function ProfileSummary({ user, onUpdateProfile }: ProfileSummaryProps) {
                     setProfileEmail(user.email);
                   }
                 }}
-                className="w-full sm:w-auto px-4 py-2 bg-surface hover:bg-surface-muted border border-border rounded-xl text-xs sm:text-sm font-semibold text-foreground shadow-2xs flex items-center justify-center gap-2 transition-all active:scale-95 cursor-pointer shrink-0"
+                className="px-4 py-2 bg-surface hover:bg-surface-muted border border-border rounded-xl text-xs sm:text-sm font-semibold text-foreground shadow-2xs flex items-center gap-2 transition-all active:scale-95 cursor-pointer"
               >
-                <Pencil className="w-3.5 h-3.5 text-foreground-muted" />
+                <Pencil className="w-4 h-4 text-foreground-muted" />
                 <span>Edit Profile</span>
               </button>
-            </div>
-
-            {/* Bottom Row (fills empty space in desktop Bento, responsive on mobile) */}
-            <div className="pt-4 border-t border-border/70 flex flex-wrap items-center justify-between gap-3 text-xs text-foreground-muted">
-              <div className="flex items-center gap-4 flex-wrap">
-                <div className="flex items-center gap-1.5">
-                  <Calendar className="w-3.5 h-3.5 text-primary" />
-                  <span>Member since <strong>May 2024</strong></span>
-                </div>
-                <div className="flex items-center gap-1.5">
-                  <MapPin className="w-3.5 h-3.5 text-primary" />
-                  <span>Location: <strong>{user?.country || selectedCountry?.name || 'India'}</strong></span>
-                </div>
-              </div>
-              <span className="text-[11px] text-primary font-bold bg-primary/10 px-2.5 py-0.5 rounded-full border border-primary/20">
-                100% Secure Account
-              </span>
             </div>
           </motion.div>
         )}

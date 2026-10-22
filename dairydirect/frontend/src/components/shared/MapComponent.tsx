@@ -104,7 +104,7 @@ export default function MapComponent({
            <button 
              type="button"
              onClick={(e) => { e.stopPropagation(); toggleStyle(); }}
-             className="bg-white/90 backdrop-blur-sm px-3 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest text-primary shadow-lg border border-primary/20 hover:bg-surface transition-all active:scale-95"
+             className="bg-surface/90 backdrop-blur-sm px-3 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest text-primary shadow-lg border border-primary/20 hover:bg-surface transition-all active:scale-95"
            >
              {mapStyle.includes('dark') ? 'Light Map' : 'Dark Map'}
            </button>
@@ -119,7 +119,7 @@ export default function MapComponent({
               className="flex flex-col items-center"
             >
               <div className="w-10 h-10 bg-primary rounded-full flex items-center justify-center border-4 border-white shadow-2xl relative">
-                <div className="w-2.5 h-2.5 bg-white rounded-full" />
+                <div className="w-2.5 h-2.5 bg-surface rounded-full" />
                 <div className="absolute inset-0 rounded-full bg-primary animate-ping opacity-20 -z-10" />
               </div>
               <div className="w-1.5 h-4 bg-primary rounded-b-full shadow-lg" />
@@ -129,7 +129,7 @@ export default function MapComponent({
 
         {farmLocation && (
           <Marker longitude={farmLocation.lng} latitude={farmLocation.lat} anchor="bottom">
-            <div className="bg-white p-2 rounded-[14px] shadow-xl border-2 border-primary flex items-center justify-center">
+            <div className="bg-surface p-2 rounded-[14px] shadow-xl border-2 border-primary flex items-center justify-center">
               <Leaf className="w-5 h-5 text-primary" />
             </div>
           </Marker>

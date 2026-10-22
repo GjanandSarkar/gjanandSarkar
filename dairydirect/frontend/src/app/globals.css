@@ -42,17 +42,6 @@
   --color-border-hover: var(--border-hover);
   --color-ring: var(--ring);
 
-  /* === Accent (saffron) ===
-     Green alone reads as "grocery app". A warm saffron second colour is what
-     makes the palette feel Indian-marketplace rather than a Blinkit clone,
-     and it gives deals and CTAs somewhere to shout without devaluing the
-     brand green, which stays reserved for trust and confirmation. */
-  --color-accent: var(--accent);
-  --color-accent-hover: var(--accent-hover);
-  --color-accent-bg: var(--accent-bg);
-  --color-accent-fixed: var(--accent-fixed);
-  --color-on-accent: var(--on-accent);
-
   /* === Semantic Colors === */
   --color-success: var(--success);
   --color-success-bg: var(--success-bg);
@@ -65,13 +54,13 @@
 
   --font-sans: var(--font-inter), system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
 
-  /* === Radius Scale (Clean, crisp, modern e-commerce) === */
-  --radius-xs: 2px;
-  --radius-sm: 4px;
-  --radius-md: 8px;
-  --radius-lg: 10px;
-  --radius-xl: 12px;
-  --radius-2xl: 16px;
+  /* === Radius Scale === */
+  --radius-xs: 4px;
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-xl: 24px;
+  --radius-2xl: 32px;
   --radius-full: 9999px;
 
   /* === Legacy Aliases === */
@@ -88,156 +77,91 @@
   --color-surface-container-lowest: var(--surface);
   --color-surface-container-low: var(--surface-muted);
   --color-surface-container: var(--surface-muted);
-  --radius-card: 12px;
+  --radius-card: 16px;
 }
 
 @layer base {
   :root {
-    --primary: #0c831f;
-    --primary-hover: #0a6d1a;
-    --primary-active: #085815;
-    --primary-light: #16a34a;
-    --primary-fixed: #eef9f2;
-    --primary-fixed-dim: #dcf2e3;
+    --primary: #0c3c26;
+    --primary-hover: #114e32;
+    --primary-active: #072617;
+    --primary-light: #1b6342;
+    --primary-fixed: #e6f2ec;
+    --primary-fixed-dim: #cce6d9;
     
-    /* Clean solid call-to-action */
-    --cta-gradient: #0c831f;
-    --cta-shadow: 0 4px 12px rgba(12, 131, 31, 0.18);
+    /* The primary call-to-action gradient.
+       "Proceed to checkout", "Place order" and the floating cart bar were
+       all hardcoded to linear-gradient(135deg, #3f6530, #577f46) — a muted
+       olive that is not the brand green (#0c3c26) and appears nowhere in the
+       palette. The most important button on the site was off-brand in 14
+       places. */
+    --cta-gradient: linear-gradient(135deg, #0c3c26, #1b6342);
+    --cta-shadow: 0 6px 20px rgba(12, 60, 38, 0.28);
 
-    --secondary: #1e293b;
-    --secondary-hover: #0f172a;
+    --secondary: #b87d20;
+    --secondary-hover: #9e6b18;
     
     --on-primary: #ffffff;
     --on-secondary: #ffffff;
 
-    --background: #f8fafc;
+    --background: #fbfaf6;
     --surface: #ffffff;
-    --surface-muted: #f1f5f9;
+    --surface-muted: #f2ede4;
     --surface-elevated: #ffffff;
 
-    --foreground: #0f172a;
-    --foreground-muted: #64748b;
+    --foreground: #1c201e;
+    --foreground-muted: #58625c;
     --foreground-inverse: #ffffff;
     
-    --border: #e2e8f0;
-    --border-hover: #cbd5e1;
-    --ring: rgba(12, 131, 31, 0.2);
+    --border: #e4e2db;
+    --border-hover: #c5c2b6;
+    --ring: rgba(12, 60, 38, 0.25);
 
-    --success: #0c831f;
-    --success-bg: #eef9f2;
-    --warning: #d97706;
-    --warning-bg: #fffbeb;
-    --error: #dc2626;
-    --error-bg: #fef2f2;
-    --info: #2563eb;
-    --info-bg: #eff6ff;
-
-    --accent: #e8590c;
-    --accent-hover: #c94a06;
-    --accent-bg: #fff4ed;
-    --accent-fixed: #ffe8d9;
-    --on-accent: #ffffff;
-
-    /* Elevation. Soft and tight rather than large and blurry: dense product
-       grids need cards to separate from the page without the whole screen
-       looking foggy. */
-    --shadow-card: 0 1px 2px rgba(15, 23, 42, 0.04), 0 1px 3px rgba(15, 23, 42, 0.06);
-    --shadow-card-hover: 0 4px 12px rgba(15, 23, 42, 0.10);
-    --shadow-pop: 0 8px 28px rgba(15, 23, 42, 0.14);
+    --success: #007600;
+    --success-bg: #eaf6ef;
+    --warning: #c45500;
+    --warning-bg: #fff8f2;
+    --error: #ba1a1a;
+    --error-bg: #ffdad6;
+    --info: #0066c0;
+    --info-bg: #f2f8fd;
   }
 
   .dark {
-    /* Minimalist, high-clarity dark mode */
-    --primary: #16a34a;
-    --primary-hover: #22c55e;
-    --primary-active: #15803d;
-    --primary-light: #4ade80;
-    --primary-fixed: #052e16;
-    --primary-fixed-dim: #022c22;
+    --primary: #cce6d9;
+    --primary-hover: #e6f2ec;
+    --primary-active: #b3d9c4;
+    --primary-light: #99ccb0;
+    --primary-fixed: #0c3c26;
+    --primary-fixed-dim: #072617;
     
-    --cta-gradient: #16a34a;
-    --cta-shadow: 0 4px 12px rgba(22, 163, 74, 0.2);
-
-    --secondary: #334155;
-    --secondary-hover: #475569;
+    --secondary: #f0bd6c;
+    --secondary-hover: #f3cc8f;
     
-    --on-primary: #ffffff;
-    --on-secondary: #ffffff;
+    --on-primary: #1c201e;
+    --on-secondary: #1c201e;
 
-    --background: #0b0f19;
-    --surface: #111827;
-    --surface-muted: #1e293b;
-    --surface-elevated: #1f2937;
+    --background: #0f1210;
+    --surface: #171c19;
+    --surface-muted: #212824;
+    --surface-elevated: #2b342e;
 
-    --foreground: #f8fafc;
-    --foreground-muted: #94a3b8;
-    --foreground-inverse: #0b0f19;
+    --foreground: #e6f2ec;
+    --foreground-muted: #a6b2ac;
+    --foreground-inverse: #1c201e;
     
-    --border: #1e293b;
-    --border-hover: #334155;
-    --ring: rgba(22, 163, 74, 0.3);
+    --border: #353f3a;
+    --border-hover: #4b5a53;
+    --ring: rgba(204, 230, 217, 0.25);
 
-    --success: #22c55e;
-    --success-bg: #052e16;
-    --warning: #f59e0b;
-    --warning-bg: #451a03;
-    --error: #ef4444;
-    --error-bg: #450a0a;
-    --info: #3b82f6;
-    --info-bg: #172554;
-
-    /* Saffron is lightened for dark surfaces; the light-mode tone fails
-       contrast against a near-black background. */
-    --accent: #ff8744;
-    --accent-hover: #ffa06b;
-    --accent-bg: #3b1606;
-    --accent-fixed: #4d1d08;
-    --on-accent: #1a0b02;
-
-    --shadow-card: 0 1px 2px rgba(0, 0, 0, 0.40), 0 1px 3px rgba(0, 0, 0, 0.30);
-    --shadow-card-hover: 0 4px 14px rgba(0, 0, 0, 0.50);
-    --shadow-pop: 0 8px 28px rgba(0, 0, 0, 0.60);
-  }
-
-  /* Universal Dark Mode Overrides for surfaces, borders, and typography */
-  .dark .bg-white {
-    background-color: var(--surface) !important;
-  }
-  .dark .border-slate-100,
-  .dark .border-slate-200,
-  .dark .border-slate-300,
-  .dark .border-gray-100,
-  .dark .border-gray-200,
-  .dark .border-gray-300 {
-    border-color: var(--border) !important;
-  }
-  .dark .text-slate-900,
-  .dark .text-slate-800,
-  .dark .text-gray-900,
-  .dark .text-gray-800 {
-    color: var(--foreground) !important;
-  }
-  .dark .text-slate-600,
-  .dark .text-slate-500,
-  .dark .text-gray-600,
-  .dark .text-gray-500 {
-    color: var(--foreground-muted) !important;
-  }
-  .dark .bg-slate-50,
-  .dark .bg-gray-50 {
-    background-color: var(--surface-muted) !important;
-  }
-  .dark .bg-slate-100,
-  .dark .bg-gray-100 {
-    background-color: var(--surface-elevated) !important;
-  }
-  .dark .bg-emerald-50\/60,
-  .dark .bg-emerald-50 {
-    background-color: rgba(34, 197, 94, 0.08) !important;
-  }
-  .dark .border-emerald-100,
-  .dark .border-emerald-200 {
-    border-color: rgba(34, 197, 94, 0.25) !important;
+    --success: #46b76c;
+    --success-bg: #11311b;
+    --warning: #ff9900;
+    --warning-bg: #3c2400;
+    --error: #ffb4ab;
+    --error-bg: #93000a;
+    --info: #46a2ff;
+    --info-bg: #11283e;
   }
 
   *, *::before, *::after {
@@ -435,113 +359,6 @@
   --tw-shadow-color: rgba(12, 60, 38, 0.2) !important;
 }
 
-/* === Universal Theme Color Normalizers (Customer & Admin) === */
-.bg-\[\#fafaf8\],
-.bg-\[\#fafaf3\] {
-  background-color: var(--background) !important;
-}
-
-/* === Dark Mode Utility Overrides for Seamless Instant Theme Support === */
-.dark body {
-  background-color: var(--background);
-  color: var(--foreground);
-}
-
-.dark .bg-white {
-  background-color: var(--surface) !important;
-}
-
-.dark .bg-white\/95,
-.dark .bg-white\/90,
-.dark .bg-white\/80,
-.dark .bg-white\/70 {
-  background-color: color-mix(in srgb, var(--surface) 92%, transparent) !important;
-}
-
-.dark .bg-gray-50,
-.dark .bg-gray-50\/80,
-.dark .bg-gray-100,
-.dark .bg-gray-100\/70,
-.dark .bg-gray-100\/80 {
-  background-color: var(--surface-muted) !important;
-}
-
-.dark .bg-gray-200 {
-  background-color: var(--border) !important;
-}
-
-.dark .text-gray-900,
-.dark .text-gray-800 {
-  color: var(--foreground) !important;
-}
-
-.dark .text-gray-700,
-.dark .text-gray-600 {
-  color: var(--foreground-muted) !important;
-}
-
-.dark .text-gray-500,
-.dark .text-gray-400 {
-  color: color-mix(in srgb, var(--foreground-muted) 85%, transparent) !important;
-}
-
-.dark .border-gray-100,
-.dark .border-gray-200,
-.dark .border-gray-200\/50,
-.dark .border-gray-200\/80,
-.dark .border-gray-200\/90,
-.dark .border-gray-300 {
-  border-color: var(--border) !important;
-}
-
-.dark .divide-gray-100 > :not([hidden]) ~ :not([hidden]),
-.dark .divide-gray-200 > :not([hidden]) ~ :not([hidden]) {
-  border-color: var(--border) !important;
-}
-
-.dark .shadow-xs,
-.dark .shadow-sm,
-.dark .shadow-md,
-.dark .shadow-lg,
-.dark .shadow-2xs {
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.45) !important;
-}
-
-.dark .bg-emerald-50,
-.dark .bg-emerald-50\/60,
-.dark .bg-emerald-50\/70,
-.dark .bg-emerald-50\/90 {
-  background-color: rgba(34, 197, 94, 0.12) !important;
-}
-
-.dark .text-emerald-800,
-.dark .text-emerald-900 {
-  color: #4ade80 !important;
-}
-
-.dark .border-emerald-100,
-.dark .border-emerald-200,
-.dark .border-emerald-200\/60 {
-  border-color: rgba(34, 197, 94, 0.25) !important;
-}
-
-.dark .bg-amber-50,
-.dark .bg-amber-50\/80,
-.dark .bg-amber-50\/90 {
-  background-color: rgba(245, 158, 11, 0.12) !important;
-}
-
-.dark .text-amber-800,
-.dark .text-amber-900 {
-  color: #fbbf24 !important;
-}
-
-.dark .border-amber-100,
-.dark .border-amber-200,
-.dark .border-amber-200\/60 {
-  border-color: rgba(245, 158, 11, 0.25) !important;
-}
-
 /* ============================================================================
  * Interaction & motion system
  *
@@ -670,12 +487,6 @@
  * the ring for keyboard users without putting an outline on mouse clicks.
  * ------------------------------------------------------------------------- */
 @layer base {
-  html,
-  body {
-    max-width: 100vw;
-    overflow-x: hidden;
-  }
-
   :where(a, button, input, select, textarea, [tabindex]):focus-visible {
     outline: 2px solid var(--primary);
     outline-offset: 2px;
@@ -713,119 +524,4 @@
   .page-narrow { width: 100%; max-width: 48rem; margin-inline: auto; }  /* 768px  - single-column detail/reading pages */
   .page-medium { width: 100%; max-width: 64rem; margin-inline: auto; }  /* 1024px - forms, lists */
   .page-wide   { width: 100%; max-width: 90rem; margin-inline: auto; }  /* 1440px - dashboards, product grids */
-}
-
-/* ============================================================================
- * Interaction and motion layer
- *
- * What actually makes a storefront feel alive is not decoration, it is instant
- * feedback: a tile that physically presses when tapped, a skeleton that looks
- * like the content it is replacing, a cart badge that reacts. All of it is
- * CSS-only (no JS animation library) so it costs nothing on the mid-range
- * Android phones most customers are using, and all of it is disabled under
- * prefers-reduced-motion.
- * ========================================================================= */
-
-@layer components {
-  /* Tap/press feedback. The 60ms-out / 120ms-in asymmetry matters: the press
-     must register instantly, the release can relax. Equal timings feel mushy. */
-  .press {
-    transition: transform 120ms cubic-bezier(0.2, 0, 0.2, 1),
-                box-shadow 120ms cubic-bezier(0.2, 0, 0.2, 1);
-    will-change: transform;
-  }
-  .press:active {
-    transform: scale(0.97);
-    transition-duration: 60ms;
-  }
-
-  /* Product/content card lift. Hover only — never bind lift to :active or it
-     fights the press state above. */
-  .card-surface {
-    background-color: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: var(--radius-xl);
-    box-shadow: var(--shadow-card);
-    transition: box-shadow 160ms ease, border-color 160ms ease, transform 160ms ease;
-  }
-  @media (hover: hover) {
-    .card-surface:hover {
-      box-shadow: var(--shadow-card-hover);
-      border-color: var(--border-hover);
-      transform: translateY(-2px);
-    }
-  }
-
-  /* Shimmer skeleton. A moving highlight reads as "loading"; a flat grey block
-     reads as "broken". */
-  .shimmer {
-    position: relative;
-    overflow: hidden;
-    background-color: var(--surface-muted);
-  }
-  .shimmer::after {
-    content: "";
-    position: absolute;
-    inset: 0;
-    transform: translateX(-100%);
-    background: linear-gradient(
-      90deg,
-      transparent,
-      color-mix(in srgb, var(--foreground) 6%, transparent),
-      transparent
-    );
-    animation: shimmer-sweep 1.4s infinite;
-  }
-  @keyframes shimmer-sweep {
-    100% { transform: translateX(100%); }
-  }
-
-  /* Entrance animation for grids and rails. Staggered via --i on each child so
-     content resolves in a wave rather than snapping in all at once. */
-  .rise-in {
-    animation: rise-in 420ms cubic-bezier(0.16, 1, 0.3, 1) both;
-    animation-delay: calc(var(--i, 0) * 45ms);
-  }
-  @keyframes rise-in {
-    from { opacity: 0; transform: translateY(10px); }
-    to   { opacity: 1; transform: none; }
-  }
-
-  /* Attention pulse for the cart badge when an item is added. */
-  .pop-in { animation: pop-in 320ms cubic-bezier(0.34, 1.56, 0.64, 1) both; }
-  @keyframes pop-in {
-    from { transform: scale(0.6); opacity: 0; }
-    60%  { transform: scale(1.12); }
-    to   { transform: scale(1); opacity: 1; }
-  }
-
-  /* Horizontal rails: snap scrolling with the scrollbar hidden. */
-  .rail {
-    display: flex;
-    gap: 0.75rem;
-    overflow-x: auto;
-    scroll-snap-type: x mandatory;
-    scrollbar-width: none;
-    -webkit-overflow-scrolling: touch;
-    overscroll-behavior-x: contain;
-  }
-  .rail::-webkit-scrollbar { display: none; }
-  .rail > * { scroll-snap-align: start; flex: 0 0 auto; }
-
-  /* Focus ring, applied consistently so keyboard users can actually navigate. */
-  .focus-ring:focus-visible {
-    outline: 2px solid var(--primary);
-    outline-offset: 2px;
-    border-radius: var(--radius-md);
-  }
-}
-
-/* Honour the OS "reduce motion" setting. Vestibular disorders are real and
-   this is a one-line obligation, not a nice-to-have. */
-@media (prefers-reduced-motion: reduce) {
-  .press, .card-surface, .rise-in, .pop-in, .shimmer::after {
-    animation: none !important;
-    transition: none !important;
-    transform: none !important;
-  }
 }

@@ -35,9 +35,7 @@ interface UseRealtimeInventoryOptions {
 export function useRealtimeInventory(options: UseRealtimeInventoryOptions = {}) {
   const { productId, variantId, onUpdate } = options;
   const onUpdateRef = useRef(onUpdate);
-  useEffect(() => {
-    onUpdateRef.current = onUpdate;
-  }, [onUpdate]);
+  onUpdateRef.current = onUpdate;
 
   const [stockMap, setStockMap] = useState<Record<string, LiveVariantStock>>({});
 

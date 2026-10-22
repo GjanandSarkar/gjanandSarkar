@@ -38,7 +38,7 @@ function CategorySuggestions() {
           <Link
             key={c.key}
             href={categoryHref(c)}
-            className="flex flex-col items-center gap-2 p-4 rounded-2xl bg-surface border border-border lift pressable"
+            className="flex flex-col items-center gap-2 p-4 rounded-2xl bg-surface border border-border/90 lift pressable"
           >
             <span
               className="w-11 h-11 rounded-full flex items-center justify-center"
@@ -73,7 +73,7 @@ export default async function SearchPage({
       : 'All products';
 
   return (
-    <div className="w-full bg-background text-foreground min-h-screen">
+    <div className="w-full bg-background min-h-screen">
       <div className="max-w-[1440px] mx-auto px-4 md:px-8 py-8 pt-24 md:pt-32">
         <header className="mb-6">
           <h1 className="text-2xl md:text-3xl font-black text-foreground tracking-tight">
@@ -82,7 +82,7 @@ export default async function SearchPage({
           {/* A result count was missing entirely, so there was no way to tell
               a narrow result set from a broken query. */}
           {products.length > 0 && (
-            <p className="text-xs font-semibold text-muted-foreground mt-1 tabular-nums">
+            <p className="text-xs font-semibold text-foreground-muted mt-1 tabular-nums">
               {products.length} {products.length === 1 ? 'product' : 'products'}
             </p>
           )}
@@ -92,15 +92,15 @@ export default async function SearchPage({
           /* The empty state was a dead end: a grey box saying "No products
              found" with no way forward. Every zero-result search ended the
              session. It now offers real routes back into the catalogue. */
-          <div className="bg-surface rounded-2xl border border-border p-8 md:p-12">
+          <div className="bg-surface rounded-2xl border border-border/90 p-8 md:p-12">
             <div className="text-center max-w-md mx-auto">
               <div className="w-14 h-14 rounded-2xl bg-surface-muted flex items-center justify-center mx-auto mb-4">
-                <SearchX className="w-7 h-7 text-muted-foreground" />
+                <SearchX className="w-7 h-7 text-foreground-muted" />
               </div>
               <h2 className="text-base font-black text-foreground mb-1.5">
                 {q ? `No matches for “${q}”` : 'Nothing here yet'}
               </h2>
-              <p className="text-xs text-muted-foreground leading-relaxed">
+              <p className="text-xs text-foreground-muted leading-relaxed">
                 Check the spelling, try a shorter or more general term, or
                 browse a category below.
               </p>
@@ -113,7 +113,7 @@ export default async function SearchPage({
             </div>
 
             <div className="mt-10 pt-8 border-t border-border">
-              <p className="text-[10px] font-black text-muted-foreground uppercase tracking-[0.15em] mb-4 text-center">
+              <p className="text-[10px] font-black text-foreground-muted uppercase tracking-[0.15em] mb-4 text-center">
                 Or explore a category
               </p>
               <CategorySuggestions />

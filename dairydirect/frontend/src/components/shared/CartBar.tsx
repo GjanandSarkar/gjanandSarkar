@@ -69,7 +69,7 @@ export function CartBar() {
                 <div className="relative">
                   <ShoppingCart className="w-6 h-6 text-white" strokeWidth={2.2} />
                   <div 
-                    className="absolute -top-2 -right-2 flex items-center justify-center min-w-[20px] h-[20px] px-1 rounded-full bg-white text-[#3f6530] text-[10px] font-black border-2 border-[#3f6530]"
+                    className="absolute -top-2 -right-2 flex items-center justify-center min-w-[20px] h-[20px] px-1 rounded-full bg-surface text-[#3f6530] text-[10px] font-black border-2 border-[#3f6530]"
                   >
                     {totalItems}
                   </div>
@@ -94,7 +94,7 @@ export function CartBar() {
                       </p>
                     </div>
                     
-                    <div className="w-9 h-9 rounded-full bg-white/20 flex items-center justify-center">
+                    <div className="w-9 h-9 rounded-full bg-surface/20 flex items-center justify-center">
                       <ChevronUp className="w-5 h-5 text-white" strokeWidth={3} />
                     </div>
                   </motion.div>

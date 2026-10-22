@@ -1,8 +1,12 @@
 "use client";
 
-import { ShieldCheck, FlaskConical, Droplets, CheckCircle2, Info, Calendar } from 'lucide-react';
+import { useRouter } from 'next/navigation';
+import { ShieldCheck, ChevronLeft, FlaskConical, Droplets, CheckCircle2, FlaskRound, Info, Calendar } from 'lucide-react';
+import { motion } from 'framer-motion';
 
 export default function QualityReportsScreen() {
+  const router = useRouter();
+
   // These were two hardcoded fake lab reports ("A2 Gir Cow Milk", 99/100,
   // "No Adulterants Found") shown to every customer regardless of what they
   // had ever ordered. Publishing invented lab results is a legal and trust
@@ -19,86 +23,76 @@ export default function QualityReportsScreen() {
   }> = [];
 
   return (
-    <div className="min-h-screen bg-background text-foreground pb-24 transition-colors duration-150">
-      {/* Standardized Page Header */}
-      <div className="max-w-[1440px] mx-auto px-4 md:px-8 pt-6 pb-2">
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-border/60 pb-5">
-          <div>
-            <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-emerald-500/10 text-emerald-600 text-xs font-bold mb-2">
-              <ShieldCheck className="w-3.5 h-3.5" />
-              <span>Certified Quality & Safety</span>
-            </div>
-            <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-foreground">
-              Quality & Lab Reports
-            </h1>
-            <p className="text-xs sm:text-sm text-foreground-muted mt-1">
-              Batch purity tests, fat & SNF analysis, and certified laboratory reports
-            </p>
-          </div>
+    <div className="min-h-screen bg-surface pb-24">
+      {/* Header */}
+      <div className="sticky top-0 z-20 glass-surface px-5 pt-8 pb-4">
+        <div className="flex items-center gap-4">
+          <button onClick={() => router.back()} className="w-10 h-10 rounded-full bg-surface shadow-sm flex items-center justify-center">
+            <ChevronLeft className="w-6 h-6" />
+          </button>
+          <h1 className="text-xl font-black text-on-surface tracking-tight">Quality Reports</h1>
         </div>
       </div>
 
-      <div className="max-w-[1440px] mx-auto px-4 md:px-8 pt-6 space-y-6">
+      <div className="page-narrow px-5 pt-6 space-y-6">
         {/* Banner */}
-        <div className="bg-surface rounded-2xl p-6 border border-border relative overflow-hidden shadow-2xs">
-          <ShieldCheck className="absolute -right-4 -bottom-4 w-32 h-32 text-primary/10 rotate-12 pointer-events-none" />
-          <div className="relative z-10 flex flex-col gap-2 max-w-xl">
-            <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary mb-1">
+        <div className="bg-gradient-to-br from-primary/10 to-primary/5 rounded-[28px] p-6 border border-primary/10 relative overflow-hidden">
+          <ShieldCheck className="absolute -right-4 -bottom-4 w-32 h-32 text-primary/10 rotate-12" />
+          <div className="relative z-10 flex flex-col gap-2">
+            <div className="w-10 h-10 rounded-full bg-primary flex items-center justify-center text-white mb-2">
               <FlaskConical className="w-5 h-5" />
             </div>
-            <h2 className="text-base sm:text-lg font-bold text-foreground">Lab-Tested Direct Produce</h2>
-            <p className="text-xs sm:text-sm text-foreground-muted leading-relaxed">
-              Every dairy and cold-pressed oil batch is laboratory tested for zero adulterants, precise fat percentages, and purity standards before dispatch.
+            <h2 className="text-lg font-black text-primary">Lab-Tested Categories</h2>
+            <p className="text-[13px] text-primary/70 font-medium leading-relaxed">
+              Food and wellness products are batch-tested by our partner brands.
+              When an order includes a lab-tested item, its report appears here.
             </p>
           </div>
         </div>
 
         <div className="space-y-4">
-          <h2 className="text-xs font-bold text-foreground-muted uppercase tracking-wider">Recent Batch Results</h2>
+          <h2 className="text-[10px] font-black text-muted uppercase tracking-[0.2em] ml-2">Recent Test Results</h2>
           {reports.length === 0 && (
-            <div className="bg-surface rounded-2xl p-10 border border-border shadow-2xs text-center max-w-lg mx-auto">
-              <div className="w-12 h-12 rounded-xl bg-surface-muted flex items-center justify-center text-foreground-muted mx-auto mb-3">
-                <FlaskConical className="w-6 h-6" />
-              </div>
-              <h3 className="text-sm font-bold text-foreground mb-1">No Quality Reports Yet</h3>
-              <p className="text-xs text-foreground-muted leading-relaxed">
-                When your order includes a batch-tested dairy or wellness product, certified laboratory test certificates will be displayed here.
+            <div className="bg-surface rounded-[24px] p-8 border border-sand shadow-sm text-center">
+              <p className="text-[13px] text-muted font-medium leading-relaxed">
+                You have no quality reports yet. Reports are published here after you
+                order a lab-tested product.
               </p>
             </div>
           )}
           {reports.map((report) => (
-            <div key={report.id} className="bg-surface rounded-2xl p-5 border border-border shadow-2xs">
+            <div key={report.id} className="bg-surface rounded-[24px] p-5 border border-sand shadow-sm">
               <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary">
+                  <div className="w-10 h-10 rounded-[12px] bg-surface-container flex items-center justify-center text-primary">
                     <Droplets className="w-5 h-5" />
                   </div>
                   <div>
-                    <h3 className="font-bold text-sm text-foreground">{report.item}</h3>
-                    <p className="text-[10px] text-foreground-muted font-bold flex items-center gap-1 uppercase tracking-wider mt-0.5">
+                    <h3 className="font-black text-[15px] text-on-surface">{report.item}</h3>
+                    <p className="text-[10px] text-muted font-bold flex items-center gap-1 uppercase tracking-wider mt-0.5">
                       <Calendar className="w-3 h-3" /> {report.date}
                     </p>
                   </div>
                 </div>
                 <div className="text-right">
-                  <p className="text-sm font-black text-primary">{report.score}</p>
-                  <p className="text-[10px] text-emerald-600 font-bold uppercase tracking-wider">{report.status}</p>
+                  <p className="text-[14px] font-black text-primary">{report.score}</p>
+                  <p className="text-[9px] text-success font-bold uppercase tracking-widest">{report.status}</p>
                 </div>
               </div>
 
               <div className="grid grid-cols-2 gap-3 mb-4">
-                <div className="bg-surface-muted rounded-xl p-3 text-center border border-border/70">
-                  <p className="text-[10px] font-bold text-foreground-muted uppercase tracking-wider mb-1">Fat Content</p>
-                  <p className="text-sm font-bold text-foreground">{report.fat}</p>
+                <div className="bg-surface-container-low rounded-[16px] p-3 text-center border border-sand/50">
+                  <p className="text-[9px] font-black text-muted uppercase tracking-[0.15em] mb-1">Fat Content</p>
+                  <p className="text-[16px] font-black text-on-surface">{report.fat}</p>
                 </div>
-                <div className="bg-surface-muted rounded-xl p-3 text-center border border-border/70">
-                  <p className="text-[10px] font-bold text-foreground-muted uppercase tracking-wider mb-1">SNF Content</p>
-                  <p className="text-sm font-bold text-foreground">{report.snf}</p>
+                <div className="bg-surface-container-low rounded-[16px] p-3 text-center border border-sand/50">
+                  <p className="text-[9px] font-black text-muted uppercase tracking-[0.15em] mb-1">SNF Content</p>
+                  <p className="text-[16px] font-black text-on-surface">{report.snf}</p>
                 </div>
               </div>
 
-              <div className="flex items-center gap-2 text-xs font-semibold text-foreground-muted justify-center py-1">
-                <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500" />
+              <div className="flex items-center gap-2 text-[11px] font-bold text-muted justify-center py-1">
+                <CheckCircle2 className="w-3.5 h-3.5 text-green-500" />
                 No Adulterants Found (Lab ID: {report.id})
               </div>
             </div>
@@ -106,12 +100,13 @@ export default function QualityReportsScreen() {
         </div>
 
         {/* Info Card */}
-        <div className="bg-surface rounded-2xl p-5 border border-border shadow-2xs flex gap-3.5 items-start">
-           <div className="w-9 h-9 shrink-0 rounded-xl bg-amber-500/10 flex items-center justify-center text-amber-500">
-             <Info className="w-4.5 h-4.5" />
+        <div className="bg-surface rounded-[24px] p-5 border border-sand shadow-sm flex gap-4">
+           <div className="w-10 h-10 shrink-0 rounded-full bg-warning-bg flex items-center justify-center text-amber-500">
+             <Info className="w-5 h-5" />
            </div>
-           <p className="text-xs text-foreground-muted leading-relaxed">
-             Reports are verified by NABL-accredited test laboratories before shipment. Contact customer support if you require a physical signed certificate for your batch.
+           <p className="text-[12px] text-muted font-medium leading-relaxed">
+             Reports are published by the partner brand after the batch clears its
+             final quality check, and are linked to the order they belong to.
            </p>
         </div>
       </div>

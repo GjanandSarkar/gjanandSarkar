@@ -82,7 +82,7 @@ export function OTPInput({ length = 6, onComplete, error }: OTPInputProps) {
           onKeyDown={(e) => handleKeyDown(e, index)}
           onPaste={handlePaste}
           className={cn(
-            "w-[52px] h-[52px] rounded-[10px] border border-sand bg-white text-center text-2xl font-semibold text-dark shadow-sm transition-colors",
+            "w-[52px] h-[52px] rounded-[10px] border border-sand bg-surface text-center text-2xl font-semibold text-dark shadow-sm transition-colors",
             "focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary",
             error && "border-red focus:border-red focus:ring-red"
           )}

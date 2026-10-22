@@ -42,12 +42,12 @@ import {
   RotateCcw
 } from 'lucide-react';
 import { useStore } from '@/store/useStore';
-import { ThemeToggle } from '@/components/theme/ThemeToggle';
 import { getSellerDashboard, SellerDashboardData, getSellerProducts, requestSellerReactivation } from '@/lib/api/sellers';
 import { SellerProductModal } from '@/components/seller/SellerProductModal';
 import { SellerOrdersManager } from '@/components/seller/SellerOrdersManager';
 import { SellerReturnsManager } from '@/components/seller/SellerReturnsManager';
 import Link from 'next/link';
+import { ThemeToggle } from '@/components/theme/ThemeToggle';
 import { PLACEHOLDER_PRODUCT_IMAGE } from '@/lib/constants/brand';
 
 type DashboardTab = 
@@ -346,7 +346,7 @@ export default function SellerDashboardPage() {
             <div className="flex flex-col sm:flex-row items-center justify-center gap-3 pt-2">
               <Link
                 href="/become-seller?resubmit=true"
-                className="w-full sm:w-auto px-6 py-3 bg-primary hover:bg-primary-hover text-white text-xs font-bold rounded-xl flex items-center justify-center gap-2 shadow-xs transition-all"
+                className="w-full sm:w-auto px-6 py-3 bg-primary hover:bg-[#0c331f] text-white text-xs font-bold rounded-xl flex items-center justify-center gap-2 shadow-sm transition-all"
               >
                 <RotateCcw className="w-4 h-4" />
                 <span>Edit & Resubmit Application</span>
@@ -375,7 +375,7 @@ export default function SellerDashboardPage() {
         <div className="max-w-3xl mx-auto space-y-8 animate-in fade-in">
           
           <div className="bg-surface rounded-3xl border border-warning/20 shadow-sm p-8 sm:p-10 text-center space-y-6">
-            <div className="w-16 h-16 rounded-2xl bg-warning-bg text-warning flex items-center justify-center mx-auto shadow-inner">
+            <div className="w-16 h-16 rounded-2xl bg-warning-bg text-[#c88a23] flex items-center justify-center mx-auto shadow-inner">
               <Clock className="w-8 h-8" />
             </div>
 
@@ -426,7 +426,7 @@ export default function SellerDashboardPage() {
 
             {/* Verification Checklist */}
             <div className="bg-success-bg/70 border border-success/20/80 rounded-2xl p-5 text-left space-y-2 max-w-lg mx-auto text-xs text-emerald-900">
-              <h4 className="font-bold uppercase tracking-wider flex items-center gap-1.5 text-primary">
+              <h4 className="font-black uppercase tracking-wider flex items-center gap-1.5 text-primary">
                 <FileCheck2 className="w-4 h-4 text-primary" />
                 <span>What Happens Next</span>
               </h4>
@@ -498,7 +498,7 @@ export default function SellerDashboardPage() {
             <div className="pt-2 flex items-center justify-center gap-3">
               <Link
                 href="/home"
-                className="px-6 py-2.5 bg-primary hover:bg-primary-hover text-white text-xs font-bold rounded-xl transition-all"
+                className="px-6 py-2.5 bg-primary hover:bg-[#0c331f] text-white text-xs font-bold rounded-xl transition-all"
               >
                 Return to Storefront
               </Link>
@@ -528,7 +528,7 @@ export default function SellerDashboardPage() {
           <div className="pt-2">
             <Link
               href="/become-seller"
-              className="w-full px-6 py-3 bg-primary hover:bg-primary-hover text-white text-xs font-bold rounded-xl flex items-center justify-center gap-2 shadow-xs transition-all"
+              className="w-full px-6 py-3 bg-primary hover:bg-[#0c331f] text-white text-xs font-bold rounded-xl flex items-center justify-center gap-2 shadow-sm transition-all"
             >
               <Building2 className="w-4 h-4" />
               <span>Become a Seller</span>
@@ -594,12 +594,12 @@ export default function SellerDashboardPage() {
         {/* ─── Top Banner & Store Header ─── */}
         <div className="bg-surface rounded-3xl border border-border/90 shadow-2xs p-6 sm:p-8 flex flex-col md:flex-row md:items-center justify-between gap-6">
           <div className="flex items-center gap-4">
-            <div className="w-16 h-16 rounded-2xl bg-primary text-white flex items-center justify-center font-bold text-2xl shadow-xs border border-primary/20 shrink-0">
-              <Store className="w-8 h-8 text-white" />
+            <div className="w-16 h-16 rounded-2xl bg-primary text-white flex items-center justify-center font-black text-2xl shadow-md border border-[#c88a23]/40 shrink-0">
+              <Store className="w-8 h-8 text-[#c88a23]" />
             </div>
             <div>
               <div className="flex items-center gap-2 flex-wrap">
-                <h1 className="text-xl sm:text-2xl font-black text-foreground tracking-tight">
+                <h1 className="text-xl sm:text-2xl font-black text-primary tracking-tight">
                   {storeName}
                 </h1>
                 <span className="px-2.5 py-0.5 rounded-full bg-success-bg text-emerald-800 text-[10px] font-black uppercase tracking-wider flex items-center gap-1">
@@ -608,7 +608,7 @@ export default function SellerDashboardPage() {
                 </span>
               </div>
               <p className="text-xs text-foreground-muted mt-1">
-                Category: <strong className="text-foreground">{storeCategory}</strong> • Region: <strong className="text-foreground">{storeState}</strong> • Commission: <span className="capitalize font-bold text-primary">{storeCommission}% Platform Fee</span>
+                Category: <strong className="text-foreground">{storeCategory}</strong> • Region: <strong className="text-foreground">{storeState}</strong> • Commission: <span className="capitalize font-bold text-[#c88a23]">{storeCommission}% Platform Fee</span>
               </p>
             </div>
           </div>
@@ -627,8 +627,6 @@ export default function SellerDashboardPage() {
               <RefreshCw className={`w-3.5 h-3.5 ${isLoadingProducts ? 'animate-spin text-primary' : ''}`} />
             </button>
 
-            {/* Sellers run this dashboard all day; give them the theme
-                switch here rather than making them go to the storefront. */}
             <ThemeToggle />
 
             <Link
@@ -648,7 +646,7 @@ export default function SellerDashboardPage() {
 
             <button
               onClick={handleOpenAddProduct}
-              className="px-5 py-2.5 rounded-xl bg-primary text-white text-xs font-bold hover:bg-primary-hover flex items-center gap-1.5 shadow-xs transition-all cursor-pointer active:scale-95"
+              className="px-5 py-2.5 rounded-xl bg-primary text-white text-xs font-bold hover:bg-primary-hover flex items-center gap-1.5 shadow-sm transition-all cursor-pointer active:scale-95"
             >
               <Plus className="w-4 h-4" strokeWidth={2.5} />
               <span>Add New Product</span>
@@ -860,7 +858,7 @@ export default function SellerDashboardPage() {
                     value={productSearch}
                     onChange={e => setProductSearch(e.target.value)}
                     placeholder="Search by name, SKU..."
-                    className="w-full pl-9 pr-3 py-2 text-xs rounded-xl border border-border bg-surface focus:outline-none focus:ring-2 focus:ring-primary/20"
+                    className="w-full pl-9 pr-3 py-2 text-xs rounded-xl border border-border bg-surface focus:outline-none focus:ring-2 focus:ring-[var(--primary)]/20"
                   />
                 </div>
 
@@ -1540,7 +1538,7 @@ export default function SellerDashboardPage() {
                     setIsSubmittingReactivation(false);
                   }
                 }}
-                className="px-5 py-2.5 rounded-xl bg-primary hover:bg-primary-hover text-white font-bold text-xs shadow-xs transition-all flex items-center gap-2 cursor-pointer disabled:opacity-50"
+                className="px-5 py-2.5 rounded-xl bg-primary hover:bg-primary-hover text-white font-bold text-xs shadow-sm transition-all flex items-center gap-2 cursor-pointer disabled:opacity-50"
               >
                 {isSubmittingReactivation ? 'Submitting...' : 'Submit Appeal'}
               </button>

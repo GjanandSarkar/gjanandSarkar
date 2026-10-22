@@ -52,10 +52,10 @@ export function Sidebar() {
               }}
             />
             <div className="flex flex-col">
-              <span className="text-xl md:text-2xl font-bold tracking-tight leading-none text-foreground">
+              <span className="text-xl md:text-2xl font-black tracking-tight leading-none">
                 <span className="text-primary">Gjanand</span>
               </span>
-              <span className="text-[10px] md:text-[11px] tracking-[0.2em] font-bold text-muted-foreground uppercase text-right leading-none mt-0.5">
+              <span className="text-[10px] md:text-[11px] tracking-[0.2em] font-black text-[#c88a23] uppercase text-right leading-none mt-0.5">
                 SARKAR
               </span>
             </div>
@@ -121,7 +121,7 @@ export function Sidebar() {
               )}
               <div className={cn(
                 "w-8 h-8 rounded-[8px] flex items-center justify-center shrink-0 transition-all",
-                isActive ? "shadow-sm" : "group-hover:bg-white/70"
+                isActive ? "shadow-sm" : "group-hover:bg-surface/70"
               )}
                 style={isActive ? {
                   background: 'var(--color-primary-fixed)',
@@ -151,13 +151,13 @@ export function Sidebar() {
 
         <button
           onClick={handleLogout}
-          className="flex items-center gap-3.5 px-3.5 py-3 rounded-[12px] w-full transition-all duration-200 hover:bg-red-50 group"
+          className="flex items-center gap-3.5 px-3.5 py-3 rounded-[12px] w-full transition-all duration-200 hover:bg-error-bg group"
           style={{ color: 'var(--color-on-surface-variant)' }}
         >
-          <div className="w-8 h-8 rounded-[8px] flex items-center justify-center group-hover:bg-red-100 transition-colors">
+          <div className="w-8 h-8 rounded-[8px] flex items-center justify-center group-hover:bg-error-bg transition-colors">
             <LogOut className="w-[17px] h-[17px]" strokeWidth={2} />
           </div>
-          <span className="text-[14px] font-medium group-hover:text-red-600">Logout</span>
+          <span className="text-[14px] font-medium group-hover:text-error">Logout</span>
         </button>
       </div>
     </aside>

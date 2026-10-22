@@ -276,29 +276,29 @@ function ReturnsContent() {
   };
 
   return (
-    <div className="w-full bg-[#fafaf8] min-h-screen py-10 px-4 sm:px-6 lg:px-8">
+    <div className="w-full bg-background min-h-screen py-10 px-4 sm:px-6 lg:px-8">
       <div className="max-w-4xl mx-auto space-y-8 pt-12 md:pt-16">
         {/* Header */}
         <div className="flex items-center gap-4">
           <Link
             href="/orders"
-            className="p-2.5 rounded-2xl bg-white border border-gray-200 text-gray-700 hover:bg-gray-50 transition-colors shadow-2xs"
+            className="p-2.5 rounded-2xl bg-surface border border-border text-foreground hover:bg-surface-muted transition-colors shadow-2xs"
           >
             <ArrowLeft className="w-5 h-5" />
           </Link>
           <div>
-            <h1 className="text-2xl md:text-3xl font-black text-gray-900 tracking-tight">
+            <h1 className="text-2xl md:text-3xl font-black text-foreground tracking-tight">
               Returns & Replacements
             </h1>
-            <p className="text-xs md:text-sm text-gray-500 mt-1">
+            <p className="text-xs md:text-sm text-foreground-muted mt-1">
               Hassle-free, auto-approved returns and replacements for delivered items
             </p>
           </div>
         </div>
 
         {/* Freshness Promise Banner */}
-        <div className="p-4 rounded-2xl bg-emerald-50 border border-emerald-200/80 flex items-start gap-3">
-          <ShieldCheck className="w-5 h-5 text-emerald-700 shrink-0 mt-0.5" />
+        <div className="p-4 rounded-2xl bg-success-bg border border-success/20/80 flex items-start gap-3">
+          <ShieldCheck className="w-5 h-5 text-success shrink-0 mt-0.5" />
           <div className="text-xs text-emerald-950">
             <span className="font-extrabold">DairyDirect Quality Commitment: </span>
             <span className="text-emerald-800">
@@ -308,14 +308,14 @@ function ReturnsContent() {
         </div>
 
         {/* Create Request Form */}
-        <div className="bg-white rounded-3xl border border-gray-200/80 shadow-2xs p-6 md:p-8">
-          <h2 className="text-lg font-black text-gray-900 mb-6 flex items-center gap-2">
-            <RotateCcw className="w-5 h-5 text-emerald-700" />
+        <div className="bg-surface rounded-3xl border border-border/80 shadow-2xs p-6 md:p-8">
+          <h2 className="text-lg font-black text-foreground mb-6 flex items-center gap-2">
+            <RotateCcw className="w-5 h-5 text-success" />
             <span>Submit a New Request</span>
           </h2>
 
           {error && (
-            <div className="mb-6 p-4 rounded-2xl bg-rose-50 border border-rose-200 text-rose-800 text-xs font-semibold flex items-center gap-2">
+            <div className="mb-6 p-4 rounded-2xl bg-error-bg border border-error/20 text-rose-800 text-xs font-semibold flex items-center gap-2">
               <AlertCircle className="w-4 h-4 shrink-0" />
               <span>{error}</span>
             </div>
@@ -324,7 +324,7 @@ function ReturnsContent() {
           <form onSubmit={handleSubmit} className="space-y-6">
             {/* Request Type Toggle */}
             <div>
-              <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-2">
+              <label className="block text-xs font-bold text-foreground uppercase tracking-wider mb-2">
                 Action Type
               </label>
               <div className="grid grid-cols-2 gap-3">
@@ -333,11 +333,11 @@ function ReturnsContent() {
                   onClick={() => setRequestType('return')}
                   className={`p-3.5 rounded-2xl border text-center font-bold text-xs flex items-center justify-center gap-2 transition-all ${
                     requestType === 'return'
-                      ? 'border-emerald-700 bg-emerald-50 text-emerald-900 ring-2 ring-emerald-700/20'
-                      : 'border-gray-200 hover:bg-gray-50 text-gray-600'
+                      ? 'border-emerald-700 bg-success-bg text-emerald-900 ring-2 ring-emerald-700/20'
+                      : 'border-border hover:bg-surface-muted text-foreground-muted'
                   }`}
                 >
-                  <RotateCcw className="w-4 h-4 text-emerald-700" />
+                  <RotateCcw className="w-4 h-4 text-success" />
                   <span>Return & Full Refund</span>
                 </button>
 
@@ -346,11 +346,11 @@ function ReturnsContent() {
                   onClick={() => setRequestType('replacement')}
                   className={`p-3.5 rounded-2xl border text-center font-bold text-xs flex items-center justify-center gap-2 transition-all ${
                     requestType === 'replacement'
-                      ? 'border-emerald-700 bg-emerald-50 text-emerald-900 ring-2 ring-emerald-700/20'
-                      : 'border-gray-200 hover:bg-gray-50 text-gray-600'
+                      ? 'border-emerald-700 bg-success-bg text-emerald-900 ring-2 ring-emerald-700/20'
+                      : 'border-border hover:bg-surface-muted text-foreground-muted'
                   }`}
                 >
-                  <RefreshCw className="w-4 h-4 text-emerald-700" />
+                  <RefreshCw className="w-4 h-4 text-success" />
                   <span>Request Replacement</span>
                 </button>
               </div>
@@ -359,17 +359,17 @@ function ReturnsContent() {
             {/* Item Selector */}
             <div>
               <div className="flex items-center justify-between mb-2">
-                <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider">
+                <label className="block text-xs font-bold text-foreground uppercase tracking-wider">
                   Select Delivered Item
                 </label>
                 {deliveredItems.length > 0 && (
-                  <span className="text-[11px] font-semibold text-emerald-700">
+                  <span className="text-[11px] font-semibold text-success">
                     {deliveredItems.length} eligible item(s)
                   </span>
                 )}
               </div>
               {deliveredItems.length === 0 ? (
-                <div className="p-4 rounded-2xl bg-gray-50 border border-gray-200 text-center text-xs text-gray-500">
+                <div className="p-4 rounded-2xl bg-surface-muted border border-border text-center text-xs text-foreground-muted">
                   No delivered orders eligible for return found.
                 </div>
               ) : (
@@ -377,7 +377,7 @@ function ReturnsContent() {
                   <select
                     value={orderItemId}
                     onChange={(e) => setOrderItemId(e.target.value)}
-                    className="w-full p-3 rounded-2xl border border-gray-200 bg-white text-xs font-semibold text-gray-800 focus:outline-none focus:ring-2 focus:ring-emerald-700/20 shadow-2xs"
+                    className="w-full p-3 rounded-2xl border border-border bg-surface text-xs font-semibold text-foreground focus:outline-none focus:ring-2 focus:ring-emerald-700/20 shadow-2xs"
                   >
                     {deliveredItems.map((item) => (
                       <option key={item.id} value={item.id}>
@@ -388,8 +388,8 @@ function ReturnsContent() {
 
                   {/* Selected Item Preview Card */}
                   {selectedItem && (
-                    <div className="p-3.5 rounded-2xl bg-emerald-50/50 border border-emerald-100 flex items-center gap-3.5">
-                      <div className="w-14 h-14 rounded-xl bg-white border border-emerald-200/60 overflow-hidden shrink-0 shadow-2xs flex items-center justify-center">
+                    <div className="p-3.5 rounded-2xl bg-success-bg/50 border border-emerald-100 flex items-center gap-3.5">
+                      <div className="w-14 h-14 rounded-xl bg-surface border border-success/20/60 overflow-hidden shrink-0 shadow-2xs flex items-center justify-center">
                         {selectedItem.image_url || selectedItem.product_image || selectedItem.products?.image_url ? (
                           <img
                             src={selectedItem.image_url || selectedItem.product_image || selectedItem.products?.image_url}
@@ -397,18 +397,18 @@ function ReturnsContent() {
                             className="w-full h-full object-cover"
                           />
                         ) : (
-                          <Package className="w-6 h-6 text-emerald-700/40" />
+                          <Package className="w-6 h-6 text-success/40" />
                         )}
                       </div>
                       <div className="min-w-0 flex-1">
                         <div className="flex items-center gap-2">
-                          <p className="text-xs font-bold text-gray-900 truncate">{selectedItem.product_name}</p>
-                          <span className="px-1.5 py-0.5 rounded text-[10px] font-extrabold bg-emerald-100 text-emerald-800 shrink-0">
+                          <p className="text-xs font-bold text-foreground truncate">{selectedItem.product_name}</p>
+                          <span className="px-1.5 py-0.5 rounded text-[10px] font-extrabold bg-success-bg text-emerald-800 shrink-0">
                             Delivered
                           </span>
                         </div>
-                        <p className="text-[11px] text-gray-500 mt-0.5">
-                          Qty: <span className="font-semibold text-gray-700">{selectedItem.quantity}</span>
+                        <p className="text-[11px] text-foreground-muted mt-0.5">
+                          Qty: <span className="font-semibold text-foreground">{selectedItem.quantity}</span>
                           {selectedItem.variant_name ? ` • ${selectedItem.variant_name}` : ''}
                           {' • '}Order #{selectedItem.order_number || selectedItem.order_id?.slice(0, 8)}
                         </p>
@@ -424,13 +424,13 @@ function ReturnsContent() {
 
             {/* Reason Selector */}
             <div>
-              <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-2">
+              <label className="block text-xs font-bold text-foreground uppercase tracking-wider mb-2">
                 Reason
               </label>
               <select
                 value={reason}
                 onChange={(e) => setReason(e.target.value)}
-                className="w-full p-3 rounded-2xl border border-gray-200 bg-white text-xs font-semibold text-gray-800 focus:outline-none focus:ring-2 focus:ring-emerald-700/20"
+                className="w-full p-3 rounded-2xl border border-border bg-surface text-xs font-semibold text-foreground focus:outline-none focus:ring-2 focus:ring-emerald-700/20"
               >
                 {REASON_OPTIONS.map((r) => (
                   <option key={r} value={r}>
@@ -442,7 +442,7 @@ function ReturnsContent() {
 
             {/* Description */}
             <div>
-              <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-2">
+              <label className="block text-xs font-bold text-foreground uppercase tracking-wider mb-2">
                 Details & Description
               </label>
               <textarea
@@ -450,24 +450,24 @@ function ReturnsContent() {
                 onChange={(e) => setDescription(e.target.value)}
                 placeholder="Please describe the issue in detail..."
                 rows={3}
-                className="w-full p-3.5 rounded-2xl border border-gray-200 text-xs text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-emerald-700/20"
+                className="w-full p-3.5 rounded-2xl border border-border text-xs text-foreground placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-emerald-700/20"
               />
             </div>
 
             {/* Multiple Photo Upload */}
             <div>
               <div className="flex items-center justify-between mb-2">
-                <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider">
-                  Upload Proof Photos {requiresImage && <span className="text-rose-600 normal-case font-bold">(Required for this claim)</span>}
+                <label className="block text-xs font-bold text-foreground uppercase tracking-wider">
+                  Upload Proof Photos {requiresImage && <span className="text-error normal-case font-bold">(Required for this claim)</span>}
                 </label>
-                <span className="text-[11px] font-bold text-gray-500">
+                <span className="text-[11px] font-bold text-foreground-muted">
                   {images.length} / 6 photos uploaded
                 </span>
               </div>
 
               {requiresImage && (
-                <div className="mb-3 p-2.5 rounded-xl bg-amber-50/80 border border-amber-200/80 text-[11px] text-amber-900 flex items-center gap-2">
-                  <AlertCircle className="w-4 h-4 text-amber-700 shrink-0" />
+                <div className="mb-3 p-2.5 rounded-xl bg-warning-bg/80 border border-warning/20/80 text-[11px] text-amber-900 flex items-center gap-2">
+                  <AlertCircle className="w-4 h-4 text-warning shrink-0" />
                   <span>
                     Clear photos of the packaging, defect, leakage, or expiry date stamp are required for speedy verification.
                   </span>
@@ -483,8 +483,8 @@ function ReturnsContent() {
                     onDragLeave={handleDragLeave}
                     className={`w-full p-6 rounded-2xl border-2 border-dashed transition-all flex flex-col items-center justify-center cursor-pointer text-center ${
                       isDragging
-                        ? 'border-emerald-600 bg-emerald-50/70 scale-[0.99]'
-                        : 'border-gray-300 hover:border-emerald-600 bg-gray-50/60 hover:bg-emerald-50/20'
+                        ? 'border-emerald-600 bg-success-bg/70 scale-[0.99]'
+                        : 'border-border-hover hover:border-emerald-600 bg-surface-muted/60 hover:bg-success-bg/20'
                     }`}
                   >
                     <input
@@ -498,19 +498,19 @@ function ReturnsContent() {
 
                     {isUploading ? (
                       <div className="flex flex-col items-center py-2">
-                        <Loader2 className="w-7 h-7 text-emerald-700 animate-spin mb-2" />
-                        <span className="text-xs font-bold text-gray-800">Uploading & processing photo(s)...</span>
-                        <span className="text-[11px] text-gray-500 mt-0.5">Please wait a moment</span>
+                        <Loader2 className="w-7 h-7 text-success animate-spin mb-2" />
+                        <span className="text-xs font-bold text-foreground">Uploading & processing photo(s)...</span>
+                        <span className="text-[11px] text-foreground-muted mt-0.5">Please wait a moment</span>
                       </div>
                     ) : (
                       <>
-                        <div className="w-12 h-12 rounded-2xl bg-emerald-100/70 text-emerald-800 flex items-center justify-center mb-2.5 shadow-2xs">
+                        <div className="w-12 h-12 rounded-2xl bg-success-bg/70 text-emerald-800 flex items-center justify-center mb-2.5 shadow-2xs">
                           <Upload className="w-6 h-6" />
                         </div>
-                        <p className="text-xs font-bold text-gray-800">
+                        <p className="text-xs font-bold text-foreground">
                           Click to select multiple photos or drag and drop here
                         </p>
-                        <p className="text-[11px] text-gray-500 mt-1">
+                        <p className="text-[11px] text-foreground-muted mt-1">
                           PNG, JPG, or WebP up to 10MB each (up to 6 photos)
                         </p>
                       </>
@@ -524,7 +524,7 @@ function ReturnsContent() {
                     {images.map((url, i) => (
                       <div
                         key={i}
-                        className="group relative aspect-square rounded-2xl overflow-hidden border border-gray-200 bg-gray-100 shadow-2xs"
+                        className="group relative aspect-square rounded-2xl overflow-hidden border border-border bg-surface-muted shadow-2xs"
                       >
                         <img src={url} alt={`Proof ${i + 1}`} className="w-full h-full object-cover" />
 
@@ -534,7 +534,7 @@ function ReturnsContent() {
                             type="button"
                             onClick={() => setSelectedPreviewImage(url)}
                             title="Preview full size"
-                            className="p-1.5 rounded-full bg-white/90 text-gray-800 hover:bg-white hover:scale-110 transition-transform shadow-xs"
+                            className="p-1.5 rounded-full bg-surface/90 text-foreground hover:bg-surface hover:scale-110 transition-transform shadow-xs"
                           >
                             <Eye className="w-3.5 h-3.5" />
                           </button>
@@ -562,13 +562,13 @@ function ReturnsContent() {
             {/* Pickup Address Selector */}
             {addresses.length > 0 && (
               <div>
-                <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-2">
+                <label className="block text-xs font-bold text-foreground uppercase tracking-wider mb-2">
                   Select Pickup Address
                 </label>
                 <select
                   value={pickupAddressId}
                   onChange={(e) => setPickupAddressId(e.target.value)}
-                  className="w-full p-3 rounded-2xl border border-gray-200 bg-white text-xs font-semibold text-gray-800 focus:outline-none focus:ring-2 focus:ring-emerald-700/20"
+                  className="w-full p-3 rounded-2xl border border-border bg-surface text-xs font-semibold text-foreground focus:outline-none focus:ring-2 focus:ring-emerald-700/20"
                 >
                   {addresses.map((a) => (
                     <option key={a.id} value={a.id}>
@@ -581,7 +581,7 @@ function ReturnsContent() {
 
             {/* COD UPI ID Input */}
             {isCodOrder && requestType === 'return' && (
-              <div className="p-4 rounded-2xl bg-amber-50/70 border border-amber-200">
+              <div className="p-4 rounded-2xl bg-warning-bg/70 border border-warning/20">
                 <label className="block text-xs font-bold text-amber-950 uppercase tracking-wider mb-1">
                   UPI ID for Direct Refund Payout
                 </label>
@@ -593,7 +593,7 @@ function ReturnsContent() {
                   value={upiId}
                   onChange={(e) => setUpiId(e.target.value)}
                   placeholder="e.g. mobile@upi or username@okhdfcbank"
-                  className="w-full p-2.5 rounded-xl border border-amber-300 bg-white text-xs text-gray-900 focus:outline-none focus:ring-2 focus:ring-amber-500/20"
+                  className="w-full p-2.5 rounded-xl border border-amber-300 bg-surface text-xs text-foreground focus:outline-none focus:ring-2 focus:ring-amber-500/20"
                 />
               </div>
             )}
@@ -602,7 +602,7 @@ function ReturnsContent() {
             <button
               type="submit"
               disabled={isSubmitting || deliveredItems.length === 0}
-              className="w-full py-3.5 bg-[#0f3e26] hover:bg-[#165a37] text-white text-xs font-extrabold uppercase tracking-wider rounded-2xl shadow-sm transition-all disabled:opacity-50 flex items-center justify-center gap-2"
+              className="w-full py-3.5 bg-primary hover:bg-[#165a37] text-white text-xs font-extrabold uppercase tracking-wider rounded-2xl shadow-sm transition-all disabled:opacity-50 flex items-center justify-center gap-2"
             >
               {isSubmitting ? (
                 <>
@@ -617,67 +617,67 @@ function ReturnsContent() {
         </div>
 
         {/* Existing Requests Section */}
-        <div className="bg-white rounded-3xl border border-gray-200/80 shadow-2xs overflow-hidden">
-          <div className="p-6 border-b border-gray-100 flex items-center justify-between">
-            <h2 className="text-base font-bold text-gray-900 flex items-center gap-2">
+        <div className="bg-surface rounded-3xl border border-border/80 shadow-2xs overflow-hidden">
+          <div className="p-6 border-b border-border flex items-center justify-between">
+            <h2 className="text-base font-bold text-foreground flex items-center gap-2">
               <Package className="w-5 h-5 text-[#c88a23]" />
               <span>My Return & Replacement Requests</span>
             </h2>
-            <span className="text-xs font-bold text-gray-400">{requests.length} Requests</span>
+            <span className="text-xs font-bold text-foreground-muted">{requests.length} Requests</span>
           </div>
 
           {isLoading ? (
             <div className="p-10 flex justify-center">
-              <Loader2 className="w-6 h-6 animate-spin text-emerald-700" />
+              <Loader2 className="w-6 h-6 animate-spin text-success" />
             </div>
           ) : requests.length === 0 ? (
-            <div className="p-8 text-center text-xs text-gray-500">
+            <div className="p-8 text-center text-xs text-foreground-muted">
               You have not submitted any return or replacement requests.
             </div>
           ) : (
-            <div className="divide-y divide-gray-100">
+            <div className="divide-y divide-border">
               {requests.map((r) => (
                 <Link
                   key={r.id}
                   href={`/returns/${r.id}`}
-                  className="p-5 flex items-center justify-between hover:bg-gray-50/70 transition-colors"
+                  className="p-5 flex items-center justify-between hover:bg-surface-muted/70 transition-colors"
                 >
                   <div className="flex items-center gap-4">
-                    <div className="w-12 h-12 rounded-xl bg-gray-100 flex items-center justify-center shrink-0 border border-gray-200 overflow-hidden">
+                    <div className="w-12 h-12 rounded-xl bg-surface-muted flex items-center justify-center shrink-0 border border-border overflow-hidden">
                       {r.order_items?.image_url ? (
                         <img src={r.order_items.image_url} alt="" className="w-full h-full object-cover" />
                       ) : (
-                        <Package className="w-6 h-6 text-gray-400" />
+                        <Package className="w-6 h-6 text-foreground-muted" />
                       )}
                     </div>
                     <div>
                       <div className="flex items-center gap-2">
-                        <span className="text-xs font-bold text-gray-900">
+                        <span className="text-xs font-bold text-foreground">
                           {r.order_items?.product_name || 'Product'}
                         </span>
                         <span
                           className={`px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider ${
                             r.request_type === 'replacement'
-                              ? 'bg-blue-100 text-blue-800'
-                              : 'bg-emerald-100 text-emerald-800'
+                              ? 'bg-info-bg text-blue-800'
+                              : 'bg-success-bg text-emerald-800'
                           }`}
                         >
                           {r.request_type}
                         </span>
                       </div>
-                      <p className="text-[11px] text-gray-500 mt-0.5">
-                        Status: <span className="font-semibold text-gray-700 capitalize">{r.status.replace(/_/g, ' ')}</span> · Submitted on {new Date(r.created_at).toLocaleDateString('en-IN')}
+                      <p className="text-[11px] text-foreground-muted mt-0.5">
+                        Status: <span className="font-semibold text-foreground capitalize">{r.status.replace(/_/g, ' ')}</span> · Submitted on {new Date(r.created_at).toLocaleDateString('en-IN')}
                       </p>
                     </div>
                   </div>
 
                   <div className="flex items-center gap-3">
                     {r.request_type === 'return' && r.refund_amount > 0 && (
-                      <span className="text-xs font-black text-emerald-700">
+                      <span className="text-xs font-black text-success">
                         ₹{Number(r.refund_amount).toFixed(2)}
                       </span>
                     )}
-                    <ChevronRight className="w-4 h-4 text-gray-400" />
+                    <ChevronRight className="w-4 h-4 text-foreground-muted" />
                   </div>
                 </Link>
               ))}
@@ -692,7 +692,7 @@ function ReturnsContent() {
             onClick={() => setSelectedPreviewImage(null)}
           >
             <div
-              className="relative max-w-2xl max-h-[85vh] bg-white rounded-3xl overflow-hidden p-3 shadow-2xl"
+              className="relative max-w-2xl max-h-[85vh] bg-surface rounded-3xl overflow-hidden p-3 shadow-2xl"
               onClick={(e) => e.stopPropagation()}
             >
               <button
@@ -717,7 +717,7 @@ function ReturnsContent() {
 
 export default function ReturnsPage() {
   return (
-    <Suspense fallback={<div className="min-h-screen bg-[#fafaf8]" />}>
+    <Suspense fallback={<div className="min-h-screen bg-background" />}>
       <ReturnsContent />
     </Suspense>
   );

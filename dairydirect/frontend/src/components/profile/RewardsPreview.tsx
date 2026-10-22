@@ -23,7 +23,7 @@ export function RewardsPreview() {
 
   return (
     <div 
-      className="bg-white rounded-[24px] p-5 mb-6 border border-sand shadow-sm cursor-pointer hover:shadow-md transition-shadow group"
+      className="bg-surface rounded-[24px] p-5 mb-6 border border-sand shadow-sm cursor-pointer hover:shadow-md transition-shadow group"
       onClick={() => router.push('/profile')}
     >
       <div className="flex items-center justify-between mb-4">

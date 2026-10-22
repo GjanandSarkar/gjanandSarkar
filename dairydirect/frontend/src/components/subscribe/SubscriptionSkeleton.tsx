@@ -19,7 +19,7 @@ export function SubscriptionSkeleton() {
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
             {[1, 2, 3].map(i => (
-              <div key={i} className="h-24 bg-white/50 rounded-[16px] border border-sand/50" />
+              <div key={i} className="h-24 bg-surface/50 rounded-[16px] border border-sand/50" />
             ))}
           </div>
         </div>
@@ -27,7 +27,7 @@ export function SubscriptionSkeleton() {
         {/* Subscription Cards Skeletons */}
         <div className="space-y-4">
           {[1, 2].map((i) => (
-            <div key={i} className="bg-white rounded-[24px] overflow-hidden border border-sand/50 p-5">
+            <div key={i} className="bg-surface rounded-[24px] overflow-hidden border border-sand/50 p-5">
               <div className="flex justify-between items-start mb-5">
                 <div className="h-5 w-16 bg-sand/30 rounded-full" />
                 <div className="h-8 w-8 bg-sand/30 rounded-full" />

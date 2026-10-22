@@ -94,7 +94,7 @@ export default async function ProductPage({ params }: Props) {
       <JsonLd data={breadcrumbData} />
       <ProductClient product={product} />
 
-      {/* Seeded with the product on screen, so content similarity and
+      {/* Seeded with the product on screen, so content-based similarity and
           co-purchase patterns both have something concrete to work from. */}
       <RecommendationRail placement="product" productId={product.id} limit={8} />
       <AdSlot placement="product" category={product.category ?? undefined} />
