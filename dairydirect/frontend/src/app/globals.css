@@ -555,3 +555,28 @@
     }
   }
 }
+
+@layer components {
+  /* Fixed mobile bottom stack.
+     These live in real CSS rather than inline style props because an inline
+     style cannot be overridden at a breakpoint, and because a calc() that
+     fails to resolve silently invalidates `bottom` -- which drops a fixed
+     element to the top of the viewport instead of the bottom. */
+  .floating-cart-bar {
+    position: fixed;
+    bottom: calc(var(--bottom-nav-h, 64px) + 12px + env(safe-area-inset-bottom, 0px));
+  }
+
+  .support-fab {
+    position: fixed;
+    bottom: calc(var(--bottom-nav-h, 64px) + 88px + env(safe-area-inset-bottom, 0px));
+  }
+
+  /* No bottom nav on desktop, so both sit on the viewport edge. */
+  @media (min-width: 768px) {
+    .floating-cart-bar,
+    .support-fab {
+      bottom: 1.5rem;
+    }
+  }
+}

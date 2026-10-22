@@ -272,7 +272,7 @@ export default function CartScreen() {
 
       {/* Mobile Sticky Checkout */}
       <div className="md:hidden fixed left-0 right-0 z-40 px-4 pb-safe bg-surface/90 backdrop-blur-md pt-3 pb-[max(env(safe-area-inset-bottom,0px),12px)]"
-        style={{ bottom: 'calc(64px + env(safe-area-inset-bottom, 0px))' }}>
+        style={{ bottom: 'calc(var(--bottom-nav-h, 64px) + env(safe-area-inset-bottom, 0px))' }}>
         {canProceedToCheckout ? (
           <Link href="/checkout"
             className="flex items-center justify-between w-full px-5 py-4 rounded-[14px] font-bold text-[15px] transition-all active:scale-[0.97]"
