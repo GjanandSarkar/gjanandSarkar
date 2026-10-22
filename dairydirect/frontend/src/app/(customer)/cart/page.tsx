@@ -1,6 +1,8 @@
 "use client";
 
 import { useRouter } from 'next/navigation';
+import { RecommendationRail } from '@/components/discovery/RecommendationRail';
+import { AdSlot } from '@/components/discovery/AdSlot';
 import { useTranslation } from '@/lib/i18n';
 import { useStore } from '@/store/useStore';
 import { useCartDetails } from '@/hooks/useCartDetails';
@@ -311,6 +313,12 @@ export default function CartScreen() {
           </button>
         )}
       </div>
+
+      {/* Cart is the highest-intent surface on the site, which is why the
+          conversions objective peaks here in ad serving. Seeded from cart
+          contents rather than browsing history. */}
+      <RecommendationRail placement="cart" limit={8} />
+      <AdSlot placement="cart" />
     </div>
   );
 }

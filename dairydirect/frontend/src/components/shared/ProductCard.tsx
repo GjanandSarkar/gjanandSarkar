@@ -24,6 +24,7 @@ const ProductEditModal = dynamic(
 );
 import Image from 'next/image';
 import { PLACEHOLDER_PRODUCT_IMAGE } from '@/lib/constants/brand';
+import { trackProductEvent } from '@/lib/analytics/session';
 
 interface ProductCardProps {
   product: CatalogProduct;
@@ -115,6 +116,9 @@ export function ProductCard({
       }
 
       setBusy(true);
+      // A cart add is weighted well above a view in popularity scoring, so it
+      // has to be recorded wherever it can happen.
+      trackProductEvent(product.id, 'add_to_cart', { source: 'product_card' });
       addToCartLocal(product.id, vid, 1);
       if (user) {
         await addToCart(user.id, product.id, vid, 1);
@@ -184,9 +188,9 @@ export function ProductCard({
 
   return (
     <>
-      <div className="flex flex-col h-full bg-surface rounded-xl border border-border hover:border-gray-300 p-2.5 sm:p-3 shadow-2xs hover:shadow-sm group relative transition-all duration-150">
+      <div className="card-surface press flex flex-col h-full p-2.5 sm:p-3 group relative">
         {/* Product Image Container */}
-        <div className="relative w-full aspect-square bg-surface-muted/40 rounded-lg overflow-hidden mb-2.5 flex items-center justify-center border border-border/50">
+        <div className="relative w-full aspect-square bg-surface-muted rounded-lg overflow-hidden mb-2.5 flex items-center justify-center">
           <Link
             href={`/products/${product.id}`}
             className="absolute inset-0 z-0"
@@ -209,7 +213,7 @@ export function ProductCard({
 
           {/* Genuine discount badge */}
           {hasRealDiscount && discountPct >= 1 && (
-            <span className="absolute top-1.5 left-1.5 bg-primary text-white text-[10px] font-bold px-1.5 py-0.5 rounded shadow-2xs tabular-nums">
+            <span className="absolute top-1.5 left-1.5 bg-accent text-on-accent text-[10px] font-extrabold px-1.5 py-0.5 rounded-md shadow-2xs tabular-nums tracking-tight">
               {discountPct}% OFF
             </span>
           )}

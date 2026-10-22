@@ -5,6 +5,8 @@ import { JsonLd } from '@/components/seo/JsonLd';
 import { ChevronLeft, Sparkles, ArrowRight, PackageOpen, Search } from 'lucide-react';
 import Link from 'next/link';
 import { CATEGORIES } from '@/lib/constants/categories';
+import { RecommendationRail } from '@/components/discovery/RecommendationRail';
+import { AdSlot } from '@/components/discovery/AdSlot';
 
 interface Props {
   params: Promise<{ category: string }>;
@@ -186,6 +188,11 @@ export default async function CategoryPage({ params }: Props) {
           </div>
         )}
       </main>
+
+      {/* Scoped to this category: suggesting an unrelated department on a
+          category page is noise rather than discovery. */}
+      <RecommendationRail placement="category" category={categoryTitle} limit={8} />
+      <AdSlot placement="category" category={categoryTitle} />
     </div>
   );
 }

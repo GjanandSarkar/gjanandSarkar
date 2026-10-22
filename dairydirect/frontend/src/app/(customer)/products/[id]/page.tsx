@@ -3,6 +3,8 @@ import { notFound } from 'next/navigation';
 import { getProductByIdServer } from '@/lib/api/products.server';
 import { ProductClient } from './ProductClient';
 import { JsonLd } from '@/components/seo/JsonLd';
+import { RecommendationRail } from '@/components/discovery/RecommendationRail';
+import { AdSlot } from '@/components/discovery/AdSlot';
 
 interface Props {
   params: Promise<{ id: string }>;
@@ -91,6 +93,11 @@ export default async function ProductPage({ params }: Props) {
       <JsonLd data={structuredData} />
       <JsonLd data={breadcrumbData} />
       <ProductClient product={product} />
+
+      {/* Seeded with the product on screen, so content similarity and
+          co-purchase patterns both have something concrete to work from. */}
+      <RecommendationRail placement="product" productId={product.id} limit={8} />
+      <AdSlot placement="product" category={product.category ?? undefined} />
     </>
   );
 }

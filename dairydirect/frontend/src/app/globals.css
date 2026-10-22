@@ -42,6 +42,17 @@
   --color-border-hover: var(--border-hover);
   --color-ring: var(--ring);
 
+  /* === Accent (saffron) ===
+     Green alone reads as "grocery app". A warm saffron second colour is what
+     makes the palette feel Indian-marketplace rather than a Blinkit clone,
+     and it gives deals and CTAs somewhere to shout without devaluing the
+     brand green, which stays reserved for trust and confirmation. */
+  --color-accent: var(--accent);
+  --color-accent-hover: var(--accent-hover);
+  --color-accent-bg: var(--accent-bg);
+  --color-accent-fixed: var(--accent-fixed);
+  --color-on-accent: var(--on-accent);
+
   /* === Semantic Colors === */
   --color-success: var(--success);
   --color-success-bg: var(--success-bg);
@@ -120,6 +131,19 @@
     --error-bg: #fef2f2;
     --info: #2563eb;
     --info-bg: #eff6ff;
+
+    --accent: #e8590c;
+    --accent-hover: #c94a06;
+    --accent-bg: #fff4ed;
+    --accent-fixed: #ffe8d9;
+    --on-accent: #ffffff;
+
+    /* Elevation. Soft and tight rather than large and blurry: dense product
+       grids need cards to separate from the page without the whole screen
+       looking foggy. */
+    --shadow-card: 0 1px 2px rgba(15, 23, 42, 0.04), 0 1px 3px rgba(15, 23, 42, 0.06);
+    --shadow-card-hover: 0 4px 12px rgba(15, 23, 42, 0.10);
+    --shadow-pop: 0 8px 28px rgba(15, 23, 42, 0.14);
   }
 
   .dark {
@@ -161,6 +185,18 @@
     --error-bg: #450a0a;
     --info: #3b82f6;
     --info-bg: #172554;
+
+    /* Saffron is lightened for dark surfaces; the light-mode tone fails
+       contrast against a near-black background. */
+    --accent: #ff8744;
+    --accent-hover: #ffa06b;
+    --accent-bg: #3b1606;
+    --accent-fixed: #4d1d08;
+    --on-accent: #1a0b02;
+
+    --shadow-card: 0 1px 2px rgba(0, 0, 0, 0.40), 0 1px 3px rgba(0, 0, 0, 0.30);
+    --shadow-card-hover: 0 4px 14px rgba(0, 0, 0, 0.50);
+    --shadow-pop: 0 8px 28px rgba(0, 0, 0, 0.60);
   }
 
   /* Universal Dark Mode Overrides for surfaces, borders, and typography */
@@ -677,4 +713,119 @@
   .page-narrow { width: 100%; max-width: 48rem; margin-inline: auto; }  /* 768px  - single-column detail/reading pages */
   .page-medium { width: 100%; max-width: 64rem; margin-inline: auto; }  /* 1024px - forms, lists */
   .page-wide   { width: 100%; max-width: 90rem; margin-inline: auto; }  /* 1440px - dashboards, product grids */
+}
+
+/* ============================================================================
+ * Interaction and motion layer
+ *
+ * What actually makes a storefront feel alive is not decoration, it is instant
+ * feedback: a tile that physically presses when tapped, a skeleton that looks
+ * like the content it is replacing, a cart badge that reacts. All of it is
+ * CSS-only (no JS animation library) so it costs nothing on the mid-range
+ * Android phones most customers are using, and all of it is disabled under
+ * prefers-reduced-motion.
+ * ========================================================================= */
+
+@layer components {
+  /* Tap/press feedback. The 60ms-out / 120ms-in asymmetry matters: the press
+     must register instantly, the release can relax. Equal timings feel mushy. */
+  .press {
+    transition: transform 120ms cubic-bezier(0.2, 0, 0.2, 1),
+                box-shadow 120ms cubic-bezier(0.2, 0, 0.2, 1);
+    will-change: transform;
+  }
+  .press:active {
+    transform: scale(0.97);
+    transition-duration: 60ms;
+  }
+
+  /* Product/content card lift. Hover only — never bind lift to :active or it
+     fights the press state above. */
+  .card-surface {
+    background-color: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-xl);
+    box-shadow: var(--shadow-card);
+    transition: box-shadow 160ms ease, border-color 160ms ease, transform 160ms ease;
+  }
+  @media (hover: hover) {
+    .card-surface:hover {
+      box-shadow: var(--shadow-card-hover);
+      border-color: var(--border-hover);
+      transform: translateY(-2px);
+    }
+  }
+
+  /* Shimmer skeleton. A moving highlight reads as "loading"; a flat grey block
+     reads as "broken". */
+  .shimmer {
+    position: relative;
+    overflow: hidden;
+    background-color: var(--surface-muted);
+  }
+  .shimmer::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    transform: translateX(-100%);
+    background: linear-gradient(
+      90deg,
+      transparent,
+      color-mix(in srgb, var(--foreground) 6%, transparent),
+      transparent
+    );
+    animation: shimmer-sweep 1.4s infinite;
+  }
+  @keyframes shimmer-sweep {
+    100% { transform: translateX(100%); }
+  }
+
+  /* Entrance animation for grids and rails. Staggered via --i on each child so
+     content resolves in a wave rather than snapping in all at once. */
+  .rise-in {
+    animation: rise-in 420ms cubic-bezier(0.16, 1, 0.3, 1) both;
+    animation-delay: calc(var(--i, 0) * 45ms);
+  }
+  @keyframes rise-in {
+    from { opacity: 0; transform: translateY(10px); }
+    to   { opacity: 1; transform: none; }
+  }
+
+  /* Attention pulse for the cart badge when an item is added. */
+  .pop-in { animation: pop-in 320ms cubic-bezier(0.34, 1.56, 0.64, 1) both; }
+  @keyframes pop-in {
+    from { transform: scale(0.6); opacity: 0; }
+    60%  { transform: scale(1.12); }
+    to   { transform: scale(1); opacity: 1; }
+  }
+
+  /* Horizontal rails: snap scrolling with the scrollbar hidden. */
+  .rail {
+    display: flex;
+    gap: 0.75rem;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior-x: contain;
+  }
+  .rail::-webkit-scrollbar { display: none; }
+  .rail > * { scroll-snap-align: start; flex: 0 0 auto; }
+
+  /* Focus ring, applied consistently so keyboard users can actually navigate. */
+  .focus-ring:focus-visible {
+    outline: 2px solid var(--primary);
+    outline-offset: 2px;
+    border-radius: var(--radius-md);
+  }
+}
+
+/* Honour the OS "reduce motion" setting. Vestibular disorders are real and
+   this is a one-line obligation, not a nice-to-have. */
+@media (prefers-reduced-motion: reduce) {
+  .press, .card-surface, .rise-in, .pop-in, .shimmer::after {
+    animation: none !important;
+    transition: none !important;
+    transform: none !important;
+  }
 }

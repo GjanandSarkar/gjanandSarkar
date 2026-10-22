@@ -4,6 +4,7 @@ import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { useTranslation } from '@/lib/i18n';
 import { Analytics } from '@/lib/analytics';
+import { trackProductEvent } from '@/lib/analytics/session';
 import { useStore } from '@/store/useStore';
 import { updateCartItem, addToCart, removeFromCart } from '@/lib/api/cart';
 import { toggleWishlist } from '@/lib/api/wishlist';
@@ -97,6 +98,9 @@ export function ProductClient({ product: initialProduct }: ProductClientProps) {
       productName: product.name,
       category: product.category 
     });
+    // First-party record for the recommender; the Analytics call above
+    // goes to a different sink and is not queryable for scoring.
+    trackProductEvent(product.id, 'view', { source: 'product_page' });
   }, [product.id, product.name, product.category]);
 
   useRealtimeInventory({
