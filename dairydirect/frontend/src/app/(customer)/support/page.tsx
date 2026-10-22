@@ -142,14 +142,14 @@ export default function SupportPage() {
   const getStatusBadge = (status: string) => {
     switch (status) {
       case 'resolved':
-        return <span className="px-2.5 py-1 rounded-full text-[11px] font-bold bg-success-bg text-emerald-800">Resolved</span>;
+        return <span className="px-2.5 py-1 rounded-full text-[11px] font-bold bg-success-bg text-success">Resolved</span>;
       case 'in_progress':
         return <span className="px-2.5 py-1 rounded-full text-[11px] font-bold bg-info-bg text-blue-800">In Progress</span>;
       case 'closed':
         return <span className="px-2.5 py-1 rounded-full text-[11px] font-bold bg-surface-muted text-foreground">Closed</span>;
       case 'open':
       default:
-        return <span className="px-2.5 py-1 rounded-full text-[11px] font-bold bg-warning-bg text-amber-800">Open</span>;
+        return <span className="px-2.5 py-1 rounded-full text-[11px] font-bold bg-warning-bg text-warning">Open</span>;
     }
   };
 
@@ -200,7 +200,7 @@ export default function SupportPage() {
 
         {/* Success Alert */}
         {success && (
-          <div className="mb-6 p-4 bg-success-bg border border-success/20 rounded-2xl flex items-center justify-between gap-3 text-emerald-800 text-xs font-bold animate-in fade-in">
+          <div className="mb-6 p-4 bg-success-bg border border-success/20 rounded-2xl flex items-center justify-between gap-3 text-success text-xs font-bold animate-in fade-in">
             <div className="flex items-center gap-2">
               <CheckCircle2 className="w-4 h-4 text-success flex-shrink-0" />
               <span>{success}</span>
@@ -228,7 +228,7 @@ export default function SupportPage() {
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="sm:col-span-2">
                   <label className="block text-xs font-bold text-foreground mb-1.5">
-                    Subject <span className="text-rose-500">*</span>
+                    Subject <span className="text-error">*</span>
                   </label>
                   <input 
                     type="text" 
@@ -272,7 +272,7 @@ export default function SupportPage() {
 
                 <div className="sm:col-span-2">
                   <label className="block text-xs font-bold text-foreground mb-1.5">
-                    Message Description <span className="text-rose-500">*</span>
+                    Message Description <span className="text-error">*</span>
                   </label>
                   <textarea 
                     required 

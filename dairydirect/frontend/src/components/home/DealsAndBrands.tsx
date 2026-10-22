@@ -98,7 +98,7 @@ export function DealsAndBrands({ products }: DealsAndBrandsProps) {
               </h2>
               {/* Reserve the pill's space before the client clock resolves so
                   the header does not shift on hydration. */}
-              <div className="flex items-center gap-1.5 bg-success-bg/80 text-emerald-900 text-xs font-bold px-3 py-1 rounded-full min-h-[26px]">
+              <div className="flex items-center gap-1.5 bg-success-bg/80 text-success text-xs font-bold px-3 py-1 rounded-full min-h-[26px]">
                 <Clock className="w-3.5 h-3.5 text-success" />
                 {timeLeft ? (
                   <span className="tabular-nums">
@@ -168,8 +168,8 @@ export function DealsAndBrands({ products }: DealsAndBrandsProps) {
                     </div>
 
                     {/* Rating */}
-                    <div className="flex items-center gap-1 text-[10px] text-amber-500 font-bold mb-2">
-                      <Star className="w-3 h-3 fill-amber-400 text-amber-400" />
+                    <div className="flex items-center gap-1 text-[10px] text-warning font-bold mb-2">
+                      <Star className="w-3 h-3 fill-amber-400 text-warning" />
                       <span className="text-foreground">4.{7 - idx}</span>
                       <span className="text-foreground-muted font-normal">({85 + idx * 42})</span>
                     </div>

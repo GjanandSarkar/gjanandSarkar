@@ -101,7 +101,7 @@ export default function QualityReportsScreen() {
 
         {/* Info Card */}
         <div className="bg-surface rounded-[24px] p-5 border border-sand shadow-sm flex gap-4">
-           <div className="w-10 h-10 shrink-0 rounded-full bg-warning-bg flex items-center justify-center text-amber-500">
+           <div className="w-10 h-10 shrink-0 rounded-full bg-warning-bg flex items-center justify-center text-warning">
              <Info className="w-5 h-5" />
            </div>
            <p className="text-[12px] text-muted font-medium leading-relaxed">

@@ -34,7 +34,7 @@ export default function SellerOrdersDedicatedPage() {
 
             <div className="space-y-0.5">
               <div className="flex items-center gap-2">
-                <span className="px-2 py-0.5 rounded-full bg-success-bg text-emerald-800 text-[10px] font-black uppercase tracking-wider">
+                <span className="px-2 py-0.5 rounded-full bg-success-bg text-success text-[10px] font-black uppercase tracking-wider">
                   Seller Orders Portal
                 </span>
               </div>
@@ -51,7 +51,7 @@ export default function SellerOrdersDedicatedPage() {
           <div className="flex items-center gap-3">
             <Link
               href="/seller/returns"
-              className="px-4 py-2.5 bg-warning-bg hover:bg-warning-bg text-amber-900 border border-warning/20 text-xs font-bold rounded-xl flex items-center gap-1.5 transition-colors"
+              className="px-4 py-2.5 bg-warning-bg hover:bg-warning-bg text-warning border border-warning/20 text-xs font-bold rounded-xl flex items-center gap-1.5 transition-colors"
             >
               <RotateCcw className="w-4 h-4 text-warning" />
               <span>Returns & Replacements</span>

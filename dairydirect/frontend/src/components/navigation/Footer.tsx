@@ -55,7 +55,7 @@ export function Footer() {
               </div>
             </Link>
 
-            <p className="text-xs text-emerald-100/80 leading-relaxed max-w-sm">
+            <p className="text-xs text-success-bg/80 leading-relaxed max-w-sm">
               Proudly Indian. Purely Authentic. One verified partner brand per
               category — across dairy, groceries, wellness, home, fashion and more.
             </p>
@@ -130,10 +130,10 @@ export function Footer() {
 
           {/* Column 2: Company */}
           <div className="space-y-3">
-            <h4 className="text-xs font-bold uppercase tracking-wider text-amber-300">
+            <h4 className="text-xs font-bold uppercase tracking-wider text-warning">
               Company
             </h4>
-            <ul className="space-y-2 text-xs text-emerald-100/80">
+            <ul className="space-y-2 text-xs text-success-bg/80">
               <li><Link href="/about" className="hover:text-white transition-colors">About Us</Link></li>
               <li><Link href="/contact" className="hover:text-white transition-colors">Contact Us</Link></li>
               <li><Link href="/faq" className="hover:text-white transition-colors">FAQs & Help</Link></li>
@@ -144,10 +144,10 @@ export function Footer() {
 
           {/* Column 3: Help & Support */}
           <div className="space-y-3">
-            <h4 className="text-xs font-bold uppercase tracking-wider text-amber-300">
+            <h4 className="text-xs font-bold uppercase tracking-wider text-warning">
               Help & Orders
             </h4>
-            <ul className="space-y-2 text-xs text-emerald-100/80">
+            <ul className="space-y-2 text-xs text-success-bg/80">
               <li><Link href="/orders" className="hover:text-white transition-colors">Track Orders</Link></li>
               <li><Link href="/returns" className="hover:text-white transition-colors">Returns & Refunds</Link></li>
               <li><Link href="/tracking" className="hover:text-white transition-colors">Delivery Timings (5:30 AM)</Link></li>
@@ -158,10 +158,10 @@ export function Footer() {
 
           {/* Column 4: Sell on Gjanand Sarkar */}
           <div className="space-y-3">
-            <h4 className="text-xs font-bold uppercase tracking-wider text-amber-300">
+            <h4 className="text-xs font-bold uppercase tracking-wider text-warning">
               Partnerships
             </h4>
-            <ul className="space-y-2 text-xs text-emerald-100/80">
+            <ul className="space-y-2 text-xs text-success-bg/80">
               <li><Link href="/become-seller" className="hover:text-white transition-colors">Become a Seller</Link></li>
               <li><Link href="/seller/dashboard" className="hover:text-white transition-colors">Seller Portal Login</Link></li>
               <li><Link href="/become-seller" className="hover:text-white transition-colors">Partner Guidelines</Link></li>
@@ -172,10 +172,10 @@ export function Footer() {
 
           {/* Column 5: Newsletter & Subscribe */}
           <div className="space-y-3">
-            <h4 className="text-xs font-bold uppercase tracking-wider text-amber-300">
+            <h4 className="text-xs font-bold uppercase tracking-wider text-warning">
               Stay Connected
             </h4>
-            <p className="text-xs text-emerald-100/80 leading-relaxed">
+            <p className="text-xs text-success-bg/80 leading-relaxed">
               Get updates on new partner brands, category launches and festive offers.
             </p>
 
@@ -203,7 +203,7 @@ export function Footer() {
         </div>
 
         {/* Bottom Copyright Bar */}
-        <div className="pt-6 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-emerald-100/60">
+        <div className="pt-6 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-success-bg/60">
           <div>
             © {new Date().getFullYear()} Gjanand Sarkar. All Rights Reserved.
           </div>
@@ -216,7 +216,7 @@ export function Footer() {
             <Link href="/about#verification" className="hover:text-white transition-colors">Verified Partners</Link>
           </div>
 
-          <div className="flex items-center gap-1 text-emerald-200">
+          <div className="flex items-center gap-1 text-success-bg">
             <span>Made with</span>
             <Heart className="w-3.5 h-3.5 fill-red-500 text-red-500" />
             <span>in Bharat 🇮🇳</span>

@@ -59,17 +59,17 @@ export function StatusBar({ steps, current, times = {}, failed }: Props) {
                 className={
                   i === 0
                     ? 'flex-1 invisible'
-                    : `h-1 flex-1 ${i <= idx ? (bad ? 'bg-rose-500' : 'bg-emerald-600') : 'bg-border'}`
+                    : `h-1 flex-1 ${i <= idx ? (bad ? 'bg-error' : 'bg-success') : 'bg-border'}`
                 }
               />
               <span
                 className={`relative z-10 flex h-6 w-6 items-center justify-center rounded-full text-[11px] font-bold transition-all shadow-sm ${
                   bad
-                    ? 'bg-rose-600 text-white ring-4 ring-rose-100'
+                    ? 'bg-error text-white ring-4 ring-rose-100'
                     : done
-                    ? 'bg-emerald-600 text-white'
+                    ? 'bg-success text-white'
                     : active
-                    ? 'bg-emerald-600 text-white ring-4 ring-emerald-100 ring-offset-1'
+                    ? 'bg-success text-white ring-4 ring-emerald-100 ring-offset-1'
                     : 'bg-border text-foreground-muted'
                 }`}
               >
@@ -79,7 +79,7 @@ export function StatusBar({ steps, current, times = {}, failed }: Props) {
                 className={
                   last
                     ? 'flex-1 invisible'
-                    : `h-1 flex-1 ${i < idx ? (bad ? 'bg-rose-500' : 'bg-emerald-600') : 'bg-border'}`
+                    : `h-1 flex-1 ${i < idx ? (bad ? 'bg-error' : 'bg-success') : 'bg-border'}`
                 }
               />
             </div>

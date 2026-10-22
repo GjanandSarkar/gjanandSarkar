@@ -183,12 +183,12 @@ export function CategoryNavBar() {
 
         {/* Right: Trust Highlights */}
         <div className="ml-auto hidden xl:flex items-center gap-6 shrink-0 text-xs font-semibold text-foreground-muted">
-          <div className="flex items-center gap-1.5 text-emerald-800 bg-success-bg/90 px-3 py-1 rounded-full border border-success/20/60">
+          <div className="flex items-center gap-1.5 text-success bg-success-bg/90 px-3 py-1 rounded-full border border-success/20/60">
             <Truck className="w-3.5 h-3.5 text-success animate-pulse" />
             <span className="text-[11px] font-bold">Doorstep by 7:00 AM</span>
           </div>
 
-          <div className="flex items-center gap-1.5 text-amber-900 bg-warning-bg/90 px-3 py-1 rounded-full border border-warning/20/60">
+          <div className="flex items-center gap-1.5 text-warning bg-warning-bg/90 px-3 py-1 rounded-full border border-warning/20/60">
             <ShieldCheck className="w-3.5 h-3.5 text-warning" />
             <span className="text-[11px] font-bold">100% Lab Tested Purity</span>
           </div>

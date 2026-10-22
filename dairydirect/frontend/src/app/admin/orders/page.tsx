@@ -191,7 +191,7 @@ export default function AdminOrdersPage() {
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-4">
             <div>
               <div className="flex items-center gap-2">
-                <span className="px-2.5 py-0.5 rounded-full bg-success-bg text-emerald-800 text-[10px] font-black uppercase tracking-wider">
+                <span className="px-2.5 py-0.5 rounded-full bg-success-bg text-success text-[10px] font-black uppercase tracking-wider">
                   Admin Platform Inventory
                 </span>
               </div>
@@ -307,7 +307,7 @@ export default function AdminOrdersPage() {
 
                             {/* Payment Status */}
                             <span className={`px-2 py-0.5 rounded-md text-[10px] font-bold uppercase tracking-wider ${
-                              order.payment_status === 'paid' ? 'bg-success-bg text-emerald-800' : 'bg-warning-bg text-amber-800'
+                              order.payment_status === 'paid' ? 'bg-success-bg text-success' : 'bg-warning-bg text-warning'
                             }`}>
                               {order.payment_status === 'paid' ? 'Paid' : `Payment: ${order.payment_status || 'Pending'}`} ({order.payment_method || 'COD'})
                             </span>
@@ -436,7 +436,7 @@ export default function AdminOrdersPage() {
                               <div className="p-4 rounded-2xl border border-border/90 bg-surface-muted/80 space-y-3">
                                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-2 border-b border-border/60">
                                   <div className="flex items-center gap-2">
-                                    <div className="w-8 h-8 rounded-xl bg-warning-bg text-amber-800 flex items-center justify-center shrink-0">
+                                    <div className="w-8 h-8 rounded-xl bg-warning-bg text-warning flex items-center justify-center shrink-0">
                                       <IndianRupee className="w-4 h-4" />
                                     </div>
                                     <div>
@@ -448,7 +448,7 @@ export default function AdminOrdersPage() {
                                   <div className="flex items-center gap-2">
                                     <span className="text-xs text-foreground-muted">Collection Status:</span>
                                     <span className={`px-2.5 py-0.5 rounded-full text-xs font-black uppercase tracking-wider ${
-                                      order.payment_status === 'paid' ? 'bg-success-bg text-emerald-800 border border-success/20' : 'bg-warning-bg text-amber-900 border border-warning/20'
+                                      order.payment_status === 'paid' ? 'bg-success-bg text-success border border-success/20' : 'bg-warning-bg text-warning border border-warning/20'
                                     }`}>
                                       {order.payment_status === 'paid' ? '✓ Paid (Cash Collected)' : 'Pending Cash Collection'}
                                     </span>
@@ -485,7 +485,7 @@ export default function AdminOrdersPage() {
                                     <button
                                       type="button"
                                       onClick={() => setCodConfirmOrder(order)}
-                                      className="px-4 py-2 rounded-xl text-xs font-bold text-white bg-emerald-700 hover:bg-emerald-800 transition-all flex items-center gap-1.5 shadow-sm cursor-pointer"
+                                      className="px-4 py-2 rounded-xl text-xs font-bold text-white bg-success hover:bg-success transition-all flex items-center gap-1.5 shadow-sm cursor-pointer"
                                     >
                                       <IndianRupee className="w-3.5 h-3.5" />
                                       <span>Confirm Cash Collected (₹{order.total_amount})</span>

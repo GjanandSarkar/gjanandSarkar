@@ -32,8 +32,8 @@ export function TrustSection() {
       icon: <Clock className="w-6 h-6" />,
       title: 'Reliable Delivery',
       description: 'Before 7 AM every day',
-      color: 'text-amber-500',
-      bg: 'bg-amber-500/10'
+      color: 'text-warning',
+      bg: 'bg-warning/10'
     }
   ];
 

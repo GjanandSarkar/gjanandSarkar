@@ -241,11 +241,11 @@ export function ProductCard({
 
           {/* Stock Badges */}
           {isAllOutOfStock ? (
-            <span className="absolute bottom-2 left-2 bg-rose-600 text-white text-[10px] font-extrabold px-2 py-0.5 rounded-md shadow-xs">
+            <span className="absolute bottom-2 left-2 bg-error text-white text-[10px] font-extrabold px-2 py-0.5 rounded-md shadow-xs">
               Out of Stock
             </span>
           ) : isLowStock ? (
-            <span className="absolute bottom-2 left-2 bg-amber-600 text-white text-[10px] font-extrabold px-2 py-0.5 rounded-md shadow-xs">
+            <span className="absolute bottom-2 left-2 bg-warning text-white text-[10px] font-extrabold px-2 py-0.5 rounded-md shadow-xs">
               Only {availableStock} left
             </span>
           ) : null}
@@ -255,7 +255,7 @@ export function ProductCard({
             type="button"
             onClick={handleToggleWishlist}
             className={`absolute top-2 right-2 w-7 h-7 rounded-full bg-surface/95 backdrop-blur-xs shadow-sm border border-border flex items-center justify-center transition-all hover:scale-110 active:scale-95 z-20 ${
-              isSaved ? 'text-error' : 'text-foreground-muted hover:text-rose-500'
+              isSaved ? 'text-error' : 'text-foreground-muted hover:text-error'
             }`}
             title={isSaved ? 'Remove from Wishlist' : 'Add to Wishlist'}
           >
@@ -308,7 +308,7 @@ export function ProductCard({
             <div className="flex items-center gap-1 text-[10px] font-bold mt-1 mb-2">
               {showRating && (
                 <>
-                  <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded bg-emerald-600 text-white">
+                  <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded bg-success text-white">
                     <Star className="w-2.5 h-2.5 fill-white text-white" />
                     {rating!.toFixed(1)}
                   </span>
@@ -475,7 +475,7 @@ export function ProductCard({
                           Add
                         </button>
                       ) : (
-                        <div className="flex items-center gap-2 bg-surface rounded-lg border border-emerald-300 p-1 shadow-2xs">
+                        <div className="flex items-center gap-2 bg-surface rounded-lg border border-success p-1 shadow-2xs">
                           <button
                             onClick={(e) => handleUpdate(e, 'dec', v.id)}
                             disabled={busy}

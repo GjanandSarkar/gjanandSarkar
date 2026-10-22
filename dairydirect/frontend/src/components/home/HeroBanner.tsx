@@ -234,7 +234,7 @@ export function HeroBanner({ products }: HeroBannerProps) {
               </div>
 
               {/* Glowing Aura behind center */}
-              <div className="absolute w-48 h-48 rounded-full bg-amber-400/20 blur-3xl pointer-events-none" />
+              <div className="absolute w-48 h-48 rounded-full bg-warning/20 blur-3xl pointer-events-none" />
 
               {/* 3D Orbit Container with Rotating Cards */}
               <div className="relative w-full h-full flex items-center justify-center preserve-3d">
@@ -267,7 +267,7 @@ export function HeroBanner({ products }: HeroBannerProps) {
                             className="absolute -top-3.5 left-1/2 -translate-x-1/2 text-white text-[9px] sm:text-[10px] font-black px-4 py-1 rounded-full uppercase tracking-wider shadow-md whitespace-nowrap flex items-center gap-1.5 animate-pulse-gentle z-30"
                             style={{ backgroundColor: product.badgeBg }}
                           >
-                            <Sparkles className="w-3 h-3 text-amber-200" />
+                            <Sparkles className="w-3 h-3 text-warning-bg" />
                             <span>{product.badge}</span>
                           </div>
                         )}
@@ -293,7 +293,7 @@ export function HeroBanner({ products }: HeroBannerProps) {
                             {product.name}
                           </h3>
                           <p className={`font-bold truncate ${
-                            isCenter ? 'text-[10px] sm:text-xs text-amber-800' : 'text-[9px] sm:text-[10px] text-warning'
+                            isCenter ? 'text-[10px] sm:text-xs text-warning' : 'text-[9px] sm:text-[10px] text-warning'
                           }`}>
                             {product.subtitle}
                           </p>
@@ -335,7 +335,7 @@ export function HeroBanner({ products }: HeroBannerProps) {
                     className={`transition-all duration-300 rounded-full cursor-pointer ${
                       currentIndex === idx 
                         ? 'w-7 h-2.5 bg-[#c88a23] shadow-xs' 
-                        : 'w-2.5 h-2.5 bg-amber-300/80 hover:bg-amber-400'
+                        : 'w-2.5 h-2.5 bg-warning/80 hover:bg-warning'
                     }`}
                   />
                 ))}
@@ -345,7 +345,7 @@ export function HeroBanner({ products }: HeroBannerProps) {
           </div>
         ) : (
           /* Empty Database State Card */
-          <div className="flex-1 w-full max-w-md relative flex flex-col items-center justify-center p-8 bg-surface/80 backdrop-blur-md rounded-3xl border-2 border-dashed border-amber-300/80 text-center shadow-lg my-4">
+          <div className="flex-1 w-full max-w-md relative flex flex-col items-center justify-center p-8 bg-surface/80 backdrop-blur-md rounded-3xl border-2 border-dashed border-warning/80 text-center shadow-lg my-4">
             <div className="w-16 h-16 rounded-full bg-warning-bg/80 flex items-center justify-center mb-4 text-primary shadow-xs">
               <PackageOpen className="w-8 h-8 text-[#c88a23]" />
             </div>

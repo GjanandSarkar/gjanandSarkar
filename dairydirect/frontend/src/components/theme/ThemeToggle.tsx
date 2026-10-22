@@ -39,7 +39,7 @@ export function ThemeToggle({
       >
         <span className="flex items-center gap-2">
           {isDark ? (
-            <Sun className="w-4 h-4 text-amber-400" />
+            <Sun className="w-4 h-4 text-warning" />
           ) : (
             <Moon className="w-4 h-4 text-primary" />
           )}
@@ -69,7 +69,7 @@ export function ThemeToggle({
       <div className="relative w-4.5 h-4.5 flex items-center justify-center">
         <Sun
           className={cn(
-            "w-4.5 h-4.5 text-amber-500 transition-all duration-300 absolute",
+            "w-4.5 h-4.5 text-warning transition-all duration-300 absolute",
             isDark
               ? "rotate-90 scale-0 opacity-0"
               : "rotate-0 scale-100 opacity-100"
@@ -77,7 +77,7 @@ export function ThemeToggle({
         />
         <Moon
           className={cn(
-            "w-4.5 h-4.5 text-emerald-400 transition-all duration-300 absolute",
+            "w-4.5 h-4.5 text-success transition-all duration-300 absolute",
             isDark
               ? "rotate-0 scale-100 opacity-100"
               : "-rotate-90 scale-0 opacity-0"

@@ -89,7 +89,7 @@ export default function WishlistPage() {
         {/* Wishlist Items List */}
         {wishlistProducts.length === 0 ? (
           <div className="bg-surface rounded-2xl border border-border/90 shadow-sm p-12 text-center max-w-lg mx-auto space-y-4">
-            <div className="w-16 h-16 rounded-full bg-error-bg text-rose-500 flex items-center justify-center mx-auto shadow-2xs">
+            <div className="w-16 h-16 rounded-full bg-error-bg text-error flex items-center justify-center mx-auto shadow-2xs">
               <Heart className="w-8 h-8" />
             </div>
             <h3 className="text-base font-black text-foreground">
@@ -128,7 +128,7 @@ export default function WishlistPage() {
                       />
                     ) : (
                       <div className="w-full h-full flex items-center justify-center bg-warning-bg/50">
-                        <svg className="w-10 h-10 text-amber-300" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" /></svg>
+                        <svg className="w-10 h-10 text-warning" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" /></svg>
                       </div>
                     )}
 

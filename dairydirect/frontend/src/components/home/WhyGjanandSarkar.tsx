@@ -88,7 +88,7 @@ export function WhyGjanandSarkar() {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 reveal">
           {pillars.map(({ icon: Icon, title, body }) => (
             <div key={title} className="flex flex-col gap-2.5">
-              <div className="w-10 h-10 rounded-2xl bg-success-bg text-primary flex items-center justify-center border border-emerald-100">
+              <div className="w-10 h-10 rounded-2xl bg-success-bg text-primary flex items-center justify-center border border-success-bg">
                 <Icon className="w-5 h-5" />
               </div>
               <h3 className="text-sm font-black text-foreground leading-snug">{title}</h3>

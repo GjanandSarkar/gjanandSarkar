@@ -205,7 +205,7 @@ export function SellerReturnsManager() {
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
             <div className="flex items-center gap-2">
-              <span className="px-2.5 py-0.5 rounded-full bg-success-bg text-emerald-800 text-[10px] font-black uppercase tracking-wider">
+              <span className="px-2.5 py-0.5 rounded-full bg-success-bg text-success text-[10px] font-black uppercase tracking-wider">
                 Store Claims Desk
               </span>
             </div>
@@ -237,7 +237,7 @@ export function SellerReturnsManager() {
 
           <div className="p-3.5 rounded-2xl border border-warning/20 bg-warning-bg/50">
             <span className="text-[10px] font-black uppercase tracking-wider text-warning block">Action Needed</span>
-            <span className="text-xl font-black text-amber-900 mt-1 block">{pendingCount}</span>
+            <span className="text-xl font-black text-warning mt-1 block">{pendingCount}</span>
           </div>
 
           <div className="p-3.5 rounded-2xl border border-orange-200 bg-orange-50/50">
@@ -252,7 +252,7 @@ export function SellerReturnsManager() {
 
           <div className="p-3.5 rounded-2xl border border-success/20 bg-success-bg/50">
             <span className="text-[10px] font-black uppercase tracking-wider text-success block">Resolved</span>
-            <span className="text-xl font-black text-emerald-900 mt-1 block">{resolvedCount}</span>
+            <span className="text-xl font-black text-success mt-1 block">{resolvedCount}</span>
           </div>
         </div>
       </div>
@@ -264,8 +264,8 @@ export function SellerReturnsManager() {
           animate={{ opacity: 1, y: 0 }}
           className={`p-4 rounded-2xl flex items-center gap-3 text-xs font-bold shadow-md ${
             toast.type === 'success' 
-              ? 'bg-success-bg text-emerald-800 border border-success/20' 
-              : 'bg-error-bg text-rose-800 border border-error/20'
+              ? 'bg-success-bg text-success border border-success/20' 
+              : 'bg-error-bg text-error border border-error/20'
           }`}
         >
           {toast.type === 'success' ? <CheckCircle2 className="w-5 h-5 text-success shrink-0" /> : <AlertTriangle className="w-5 h-5 text-error shrink-0" />}
@@ -378,7 +378,7 @@ export function SellerReturnsManager() {
                     </span>
 
                     <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider flex items-center gap-1 ${
-                      isCancellation ? 'bg-warning-bg text-amber-900' : 'bg-info-bg text-blue-900'
+                      isCancellation ? 'bg-warning-bg text-warning' : 'bg-info-bg text-blue-900'
                     }`}>
                       {isCancellation ? <Ban className="w-3 h-3" /> : <RotateCcw className="w-3 h-3" />}
                       <span>{req.request_type}</span>
@@ -562,7 +562,7 @@ export function SellerReturnsManager() {
                             setActionType('approve');
                             setActionNotes('');
                           }}
-                          className="px-3.5 py-1.5 rounded-xl bg-emerald-700 hover:bg-emerald-800 text-white text-xs font-bold flex items-center gap-1.5 shadow-xs transition-colors cursor-pointer"
+                          className="px-3.5 py-1.5 rounded-xl bg-success hover:bg-success text-white text-xs font-bold flex items-center gap-1.5 shadow-xs transition-colors cursor-pointer"
                         >
                           <CheckCircle2 className="w-3.5 h-3.5" />
                           <span>Approve {req.request_type === 'cancellation' ? 'Cancellation' : 'Return'}</span>
@@ -590,7 +590,7 @@ export function SellerReturnsManager() {
                           setActionType('return_in_progress');
                           setActionNotes('Return pickup/shipment in transit to store warehouse');
                         }}
-                        className="px-3 py-1.5 rounded-xl bg-indigo-50 hover:bg-indigo-100 text-indigo-800 border border-indigo-200 text-xs font-bold transition-colors cursor-pointer"
+                        className="px-3 py-1.5 rounded-xl bg-info-bg hover:bg-info-bg text-info border border-info-bg text-xs font-bold transition-colors cursor-pointer"
                       >
                         Mark Return In Progress
                       </button>
@@ -603,7 +603,7 @@ export function SellerReturnsManager() {
                           setActionType('item_received');
                           setActionNotes('Return parcel received at seller facility');
                         }}
-                        className="px-3 py-1.5 rounded-xl bg-indigo-50 hover:bg-indigo-100 text-indigo-800 border border-indigo-200 text-xs font-bold transition-colors cursor-pointer"
+                        className="px-3 py-1.5 rounded-xl bg-info-bg hover:bg-info-bg text-info border border-info-bg text-xs font-bold transition-colors cursor-pointer"
                       >
                         Mark Item Received
                       </button>
@@ -616,7 +616,7 @@ export function SellerReturnsManager() {
                           setActionType('inspection_completed');
                           setActionNotes('Physical return condition verified & approved for refund');
                         }}
-                        className="px-3 py-1.5 rounded-xl bg-indigo-50 hover:bg-indigo-100 text-indigo-800 border border-indigo-200 text-xs font-bold transition-colors cursor-pointer"
+                        className="px-3 py-1.5 rounded-xl bg-info-bg hover:bg-info-bg text-info border border-info-bg text-xs font-bold transition-colors cursor-pointer"
                       >
                         Complete Inspection
                       </button>
@@ -661,7 +661,7 @@ export function SellerReturnsManager() {
 
             <div className="space-y-3 text-xs">
               {actionType === 'approve' && (
-                <div className="p-3 rounded-xl bg-success-bg border border-success/20 text-emerald-900 leading-relaxed">
+                <div className="p-3 rounded-xl bg-success-bg border border-success/20 text-success leading-relaxed">
                   <p className="font-bold">Approval Notice:</p>
                   <p className="mt-0.5">
                     {selectedRequest.request_type === 'cancellation'
@@ -672,7 +672,7 @@ export function SellerReturnsManager() {
               )}
 
               {actionType === 'reject' && (
-                <div className="p-3 rounded-xl bg-error-bg border border-error/20 text-rose-900 leading-relaxed">
+                <div className="p-3 rounded-xl bg-error-bg border border-error/20 text-error leading-relaxed">
                   <p className="font-bold">Rejection Warning:</p>
                   <p className="mt-0.5">
                     Please provide an honest and clear reason explaining why this return or cancellation is not eligible under store policy.

@@ -195,7 +195,7 @@ function AddProductPage() {
             <div>
               <label className="text-[13px] font-semibold mb-2 flex items-center"
                 style={{ color: 'var(--color-foreground, var(--foreground))' }}>
-                Product Name <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 ml-1.5"></span>
+                Product Name <span className="w-1.5 h-1.5 rounded-full bg-success ml-1.5"></span>
               </label>
               <div className="relative flex items-center">
                 <Tag className="absolute left-3.5 w-4.5 h-4.5 pointer-events-none" style={{ color: 'var(--color-foreground-muted, var(--foreground-muted))' }} />
@@ -248,7 +248,7 @@ function AddProductPage() {
               <div className="flex items-center justify-between mb-2">
                 <label className="text-[13px] font-semibold flex items-center"
                   style={{ color: 'var(--color-foreground, var(--foreground))' }}>
-                  Category <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 ml-1.5"></span>
+                  Category <span className="w-1.5 h-1.5 rounded-full bg-success ml-1.5"></span>
                 </label>
                 {categories.length > 0 && (
                   <button

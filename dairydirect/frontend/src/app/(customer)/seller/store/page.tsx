@@ -137,7 +137,7 @@ export default function SellerStoreSettings() {
                 <label className="block text-xs font-bold text-foreground mb-1">Store Name *</label>
                 <input 
                   type="text" required value={form.store_name} onChange={e => setForm({...form, store_name: e.target.value})}
-                  className="w-full px-4 py-2.5 rounded-xl border border-border text-sm focus:ring-emerald-500 focus:border-emerald-500"
+                  className="w-full px-4 py-2.5 rounded-xl border border-border text-sm focus:ring-emerald-500 focus:border-success"
                 />
               </div>
 
@@ -145,7 +145,7 @@ export default function SellerStoreSettings() {
                 <label className="block text-xs font-bold text-foreground mb-1">Store Category *</label>
                 <input 
                   type="text" required value={form.category} onChange={e => setForm({...form, category: e.target.value})}
-                  className="w-full px-4 py-2.5 rounded-xl border border-border text-sm focus:ring-emerald-500 focus:border-emerald-500"
+                  className="w-full px-4 py-2.5 rounded-xl border border-border text-sm focus:ring-emerald-500 focus:border-success"
                   placeholder="e.g. A2 Organic Dairy, Sweets, Pure Ghee"
                 />
               </div>
@@ -155,7 +155,7 @@ export default function SellerStoreSettings() {
               <label className="block text-xs font-bold text-foreground mb-1">Operating State *</label>
               <input 
                 type="text" required value={form.state} onChange={e => setForm({...form, state: e.target.value})}
-                className="w-full px-4 py-2.5 rounded-xl border border-border text-sm focus:ring-emerald-500 focus:border-emerald-500"
+                className="w-full px-4 py-2.5 rounded-xl border border-border text-sm focus:ring-emerald-500 focus:border-success"
               />
             </div>
             
@@ -163,7 +163,7 @@ export default function SellerStoreSettings() {
               <label className="block text-xs font-bold text-foreground mb-1">Store Description</label>
               <textarea 
                 rows={3} value={form.description} onChange={e => setForm({...form, description: e.target.value})}
-                className="w-full px-4 py-2.5 rounded-xl border border-border text-sm focus:ring-emerald-500 focus:border-emerald-500"
+                className="w-full px-4 py-2.5 rounded-xl border border-border text-sm focus:ring-emerald-500 focus:border-success"
                 placeholder="Tell customers about your farm, purity standards, and products..."
               ></textarea>
             </div>
@@ -174,7 +174,7 @@ export default function SellerStoreSettings() {
                 <div className="flex gap-3 items-center">
                   <input 
                     type="url" value={form.logo_url} onChange={e => setForm({...form, logo_url: e.target.value})}
-                    className="flex-1 px-4 py-2.5 rounded-xl border border-border text-sm focus:ring-emerald-500 focus:border-emerald-500"
+                    className="flex-1 px-4 py-2.5 rounded-xl border border-border text-sm focus:ring-emerald-500 focus:border-success"
                     placeholder="https://..."
                   />
                   {form.logo_url ? (
@@ -192,7 +192,7 @@ export default function SellerStoreSettings() {
                 <div className="flex gap-3 items-center">
                   <input 
                     type="url" value={form.banner_url} onChange={e => setForm({...form, banner_url: e.target.value})}
-                    className="flex-1 px-4 py-2.5 rounded-xl border border-border text-sm focus:ring-emerald-500 focus:border-emerald-500"
+                    className="flex-1 px-4 py-2.5 rounded-xl border border-border text-sm focus:ring-emerald-500 focus:border-success"
                     placeholder="https://..."
                   />
                   {form.banner_url ? (
@@ -219,7 +219,7 @@ export default function SellerStoreSettings() {
                 <label className="block text-xs font-bold text-foreground mb-1">GSTIN Number</label>
                 <input 
                   type="text" value={form.gstin} onChange={e => setForm({...form, gstin: e.target.value.toUpperCase()})}
-                  className="w-full px-4 py-2.5 rounded-xl border border-border text-sm focus:ring-emerald-500 focus:border-emerald-500 font-mono"
+                  className="w-full px-4 py-2.5 rounded-xl border border-border text-sm focus:ring-emerald-500 focus:border-success font-mono"
                   placeholder="e.g. 24AAAAA0000A1Z5"
                 />
               </div>
@@ -228,7 +228,7 @@ export default function SellerStoreSettings() {
                 <label className="block text-xs font-bold text-foreground mb-1">FSSAI License Number</label>
                 <input 
                   type="text" value={form.fssai_number} onChange={e => setForm({...form, fssai_number: e.target.value})}
-                  className="w-full px-4 py-2.5 rounded-xl border border-border text-sm focus:ring-emerald-500 focus:border-emerald-500 font-mono"
+                  className="w-full px-4 py-2.5 rounded-xl border border-border text-sm focus:ring-emerald-500 focus:border-success font-mono"
                   placeholder="14-digit FSSAI Number"
                 />
               </div>
@@ -247,7 +247,7 @@ export default function SellerStoreSettings() {
                 <label className="block text-xs font-bold text-foreground mb-1">Bank Account Number</label>
                 <input 
                   type="text" value={form.bank_account} onChange={e => setForm({...form, bank_account: e.target.value})}
-                  className="w-full px-4 py-2.5 rounded-xl border border-border text-sm focus:ring-emerald-500 focus:border-emerald-500 font-mono"
+                  className="w-full px-4 py-2.5 rounded-xl border border-border text-sm focus:ring-emerald-500 focus:border-success font-mono"
                   placeholder="Account number for NEFT"
                 />
               </div>
@@ -256,7 +256,7 @@ export default function SellerStoreSettings() {
                 <label className="block text-xs font-bold text-foreground mb-1">Bank IFSC Code</label>
                 <input 
                   type="text" value={form.ifsc_code} onChange={e => setForm({...form, ifsc_code: e.target.value.toUpperCase()})}
-                  className="w-full px-4 py-2.5 rounded-xl border border-border text-sm focus:ring-emerald-500 focus:border-emerald-500 font-mono"
+                  className="w-full px-4 py-2.5 rounded-xl border border-border text-sm focus:ring-emerald-500 focus:border-success font-mono"
                   placeholder="e.g. SBIN0001234"
                 />
               </div>

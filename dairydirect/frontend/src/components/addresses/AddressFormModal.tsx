@@ -369,14 +369,14 @@ export function AddressFormModal({
       role="dialog"
       aria-modal="true"
       aria-labelledby="address-modal-title"
-      className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-slate-900/60 backdrop-blur-sm overflow-y-auto animate-in fade-in duration-200"
+      className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-foreground/60 backdrop-blur-sm overflow-y-auto animate-in fade-in duration-200"
     >
       <div
         ref={modalRef}
         className="bg-surface w-full max-w-xl rounded-3xl shadow-2xl border border-border overflow-hidden my-6 animate-in zoom-in-95 duration-200"
       >
         {/* Modal Header */}
-        <div className="px-6 py-4 border-b border-slate-100 flex items-center justify-between bg-surface-muted/70">
+        <div className="px-6 py-4 border-b border-border flex items-center justify-between bg-surface-muted/70">
           <div>
             <h2 id="address-modal-title" className="text-base sm:text-lg font-bold text-foreground">
               {isEditMode ? 'Edit Delivery Address' : 'Add New Delivery Address'}
@@ -389,7 +389,7 @@ export function AddressFormModal({
             type="button"
             onClick={onClose}
             aria-label="Close address form"
-            className="p-2 text-slate-400 hover:text-foreground hover:bg-slate-200/60 rounded-full transition-colors"
+            className="p-2 text-foreground-muted hover:text-foreground hover:bg-border/60 rounded-full transition-colors"
           >
             <X className="w-5 h-5" />
           </button>
@@ -402,9 +402,9 @@ export function AddressFormModal({
             <div
               className={`p-3.5 rounded-xl text-xs font-medium flex items-start gap-2.5 transition-all ${
                 locationNotice.type === 'error'
-                  ? 'bg-error-bg text-rose-800 border border-error/20'
+                  ? 'bg-error-bg text-error border border-error/20'
                   : locationNotice.type === 'success'
-                  ? 'bg-success-bg text-emerald-800 border border-success/20'
+                  ? 'bg-success-bg text-success border border-success/20'
                   : 'bg-info-bg text-blue-800 border border-info/20'
               }`}
             >
@@ -421,9 +421,9 @@ export function AddressFormModal({
 
           {/* Overwrite Confirmation Dialog */}
           {showOverwriteConfirm && (
-            <div className="p-4 bg-warning-bg border border-warning/20 rounded-2xl text-xs text-amber-900 space-y-2">
+            <div className="p-4 bg-warning-bg border border-warning/20 rounded-2xl text-xs text-warning space-y-2">
               <p className="font-semibold">Update existing address fields with detected GPS location?</p>
-              <p className="text-amber-800 leading-relaxed">
+              <p className="text-warning leading-relaxed">
                 This will fill Area, City, State, and Pincode. Your Flat/House number will remain untouched.
               </p>
               <div className="flex gap-2 pt-1">
@@ -433,14 +433,14 @@ export function AddressFormModal({
                     if (pendingLocationRef.current) applyLocationData(pendingLocationRef.current);
                     setShowOverwriteConfirm(false);
                   }}
-                  className="px-3 py-1.5 bg-amber-700 hover:bg-amber-800 text-white font-semibold rounded-lg text-xs transition-colors"
+                  className="px-3 py-1.5 bg-warning hover:bg-warning text-white font-semibold rounded-lg text-xs transition-colors"
                 >
                   Yes, Update Fields
                 </button>
                 <button
                   type="button"
                   onClick={() => setShowOverwriteConfirm(false)}
-                  className="px-3 py-1.5 bg-surface border border-amber-300 text-amber-800 font-semibold rounded-lg text-xs hover:bg-warning-bg transition-colors"
+                  className="px-3 py-1.5 bg-surface border border-warning text-warning font-semibold rounded-lg text-xs hover:bg-warning-bg transition-colors"
                 >
                   Cancel
                 </button>
@@ -449,13 +449,13 @@ export function AddressFormModal({
           )}
 
           {/* Quick Action: Use My Location */}
-          <div className="flex items-center justify-between gap-3 bg-success-bg/60 border border-emerald-100 p-3.5 rounded-2xl">
+          <div className="flex items-center justify-between gap-3 bg-success-bg/60 border border-success-bg p-3.5 rounded-2xl">
             <div className="flex items-center gap-2.5">
               <div className="w-8 h-8 rounded-xl bg-success-bg text-success flex items-center justify-center shrink-0">
                 <Navigation className="w-4 h-4" />
               </div>
               <div>
-                <p className="text-xs font-bold text-slate-800">Quick Fill via Geolocation</p>
+                <p className="text-xs font-bold text-foreground">Quick Fill via Geolocation</p>
                 <p className="text-[11px] text-foreground-muted">Auto-fills city, area & pincode from your device</p>
               </div>
             </div>
@@ -464,7 +464,7 @@ export function AddressFormModal({
               type="button"
               onClick={handleUseMyLocation}
               disabled={isLocating}
-              className="flex items-center gap-1.5 px-3.5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold text-xs rounded-xl shadow-sm transition-all active:scale-95 disabled:opacity-50 shrink-0"
+              className="flex items-center gap-1.5 px-3.5 py-2 bg-success hover:bg-success text-white font-semibold text-xs rounded-xl shadow-sm transition-all active:scale-95 disabled:opacity-50 shrink-0"
             >
               {isLocating ? (
                 <>
@@ -495,8 +495,8 @@ export function AddressFormModal({
                     onClick={() => setAddressType(type)}
                     className={`flex items-center justify-center gap-2 py-2.5 px-3 rounded-xl border text-xs font-semibold transition-all ${
                       isSelected
-                        ? 'border-emerald-600 bg-success-bg text-emerald-800 shadow-sm ring-1 ring-emerald-500'
-                        : 'border-border bg-surface text-foreground hover:border-slate-300 hover:bg-surface-muted'
+                        ? 'border-success bg-success-bg text-success shadow-sm ring-1 ring-emerald-500'
+                        : 'border-border bg-surface text-foreground hover:border-border hover:bg-surface-muted'
                     }`}
                   >
                     <Icon className={`w-4 h-4 ${isSelected ? 'text-success' : 'text-foreground-muted'}`} />
@@ -538,10 +538,10 @@ export function AddressFormModal({
                 value={fullName}
                 onChange={(e) => setFullName(e.target.value)}
                 placeholder="e.g. Rahul Sharma"
-                className={`w-full h-11 px-3.5 bg-surface border rounded-xl text-xs font-medium text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 transition-all ${
+                className={`w-full h-11 px-3.5 bg-surface border rounded-xl text-xs font-medium text-foreground placeholder-slate-400 focus:outline-none focus:ring-2 transition-all ${
                   validationErrors.fullName
-                    ? 'border-rose-300 focus:ring-rose-500/20 focus:border-rose-600'
-                    : 'border-border focus:ring-emerald-500/20 focus:border-emerald-600'
+                    ? 'border-error focus:ring-rose-500/20 focus:border-error'
+                    : 'border-border focus:ring-emerald-500/20 focus:border-success'
                 }`}
               />
               {validationErrors.fullName && (
@@ -554,7 +554,7 @@ export function AddressFormModal({
                 Mobile number *
               </label>
               <div className="relative flex items-center">
-                <span className="absolute left-3 text-xs font-semibold text-slate-400 select-none">
+                <span className="absolute left-3 text-xs font-semibold text-foreground-muted select-none">
                   +91
                 </span>
                 <input
@@ -564,10 +564,10 @@ export function AddressFormModal({
                   value={mobileNumber}
                   onChange={(e) => setMobileNumber(e.target.value.replace(/\D/g, ''))}
                   placeholder="10-digit number"
-                  className={`w-full h-11 pl-12 pr-3.5 bg-surface border rounded-xl text-xs font-medium text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 transition-all ${
+                  className={`w-full h-11 pl-12 pr-3.5 bg-surface border rounded-xl text-xs font-medium text-foreground placeholder-slate-400 focus:outline-none focus:ring-2 transition-all ${
                     validationErrors.mobileNumber
-                      ? 'border-rose-300 focus:ring-rose-500/20 focus:border-rose-600'
-                      : 'border-border focus:ring-emerald-500/20 focus:border-emerald-600'
+                      ? 'border-error focus:ring-rose-500/20 focus:border-error'
+                      : 'border-border focus:ring-emerald-500/20 focus:border-success'
                   }`}
                 />
               </div>
@@ -590,10 +590,10 @@ export function AddressFormModal({
                 value={pincode}
                 onChange={(e) => setPincode(e.target.value.replace(/\D/g, ''))}
                 placeholder="6 digits"
-                className={`w-full h-11 px-3.5 bg-surface border rounded-xl text-xs font-medium text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 transition-all ${
+                className={`w-full h-11 px-3.5 bg-surface border rounded-xl text-xs font-medium text-foreground placeholder-slate-400 focus:outline-none focus:ring-2 transition-all ${
                   validationErrors.pincode
-                    ? 'border-rose-300 focus:ring-rose-500/20 focus:border-rose-600'
-                    : 'border-border focus:ring-emerald-500/20 focus:border-emerald-600'
+                    ? 'border-error focus:ring-rose-500/20 focus:border-error'
+                    : 'border-border focus:ring-emerald-500/20 focus:border-success'
                 }`}
               />
               {validationErrors.pincode && (
@@ -611,10 +611,10 @@ export function AddressFormModal({
                 value={flatHouseBuilding}
                 onChange={(e) => setFlatHouseBuilding(e.target.value)}
                 placeholder="e.g. Flat 402, Royal Residency"
-                className={`w-full h-11 px-3.5 bg-surface border rounded-xl text-xs font-medium text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 transition-all ${
+                className={`w-full h-11 px-3.5 bg-surface border rounded-xl text-xs font-medium text-foreground placeholder-slate-400 focus:outline-none focus:ring-2 transition-all ${
                   validationErrors.flatHouseBuilding
-                    ? 'border-rose-300 focus:ring-rose-500/20 focus:border-rose-600'
-                    : 'border-border focus:ring-emerald-500/20 focus:border-emerald-600'
+                    ? 'border-error focus:ring-rose-500/20 focus:border-error'
+                    : 'border-border focus:ring-emerald-500/20 focus:border-success'
                 }`}
               />
               {validationErrors.flatHouseBuilding && (
@@ -634,10 +634,10 @@ export function AddressFormModal({
               value={areaStreet}
               onChange={(e) => setAreaStreet(e.target.value)}
               placeholder="e.g. S.G. Highway, Opp. City Mall"
-              className={`w-full h-11 px-3.5 bg-surface border rounded-xl text-xs font-medium text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 transition-all ${
+              className={`w-full h-11 px-3.5 bg-surface border rounded-xl text-xs font-medium text-foreground placeholder-slate-400 focus:outline-none focus:ring-2 transition-all ${
                 validationErrors.areaStreet
-                  ? 'border-rose-300 focus:ring-rose-500/20 focus:border-rose-600'
-                  : 'border-border focus:ring-emerald-500/20 focus:border-emerald-600'
+                  ? 'border-error focus:ring-rose-500/20 focus:border-error'
+                  : 'border-border focus:ring-emerald-500/20 focus:border-success'
               }`}
             />
             {validationErrors.areaStreet && (
@@ -648,7 +648,7 @@ export function AddressFormModal({
           {/* Landmark */}
           <div>
             <label htmlFor="landmark" className="block text-xs font-bold text-foreground mb-1">
-              Landmark <span className="text-slate-400 font-normal">(Optional)</span>
+              Landmark <span className="text-foreground-muted font-normal">(Optional)</span>
             </label>
             <input
               id="landmark"
@@ -656,7 +656,7 @@ export function AddressFormModal({
               value={landmark}
               onChange={(e) => setLandmark(e.target.value)}
               placeholder="e.g. Near Apollo Hospital or Behind Bus Stop"
-              className="w-full h-11 px-3.5 bg-surface border border-border rounded-xl text-xs font-medium text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-600 transition-all"
+              className="w-full h-11 px-3.5 bg-surface border border-border rounded-xl text-xs font-medium text-foreground placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-success transition-all"
             />
           </div>
 
@@ -672,10 +672,10 @@ export function AddressFormModal({
                 value={townCity}
                 onChange={(e) => setTownCity(e.target.value)}
                 placeholder="e.g. Ahmedabad"
-                className={`w-full h-11 px-3.5 bg-surface border rounded-xl text-xs font-medium text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 transition-all ${
+                className={`w-full h-11 px-3.5 bg-surface border rounded-xl text-xs font-medium text-foreground placeholder-slate-400 focus:outline-none focus:ring-2 transition-all ${
                   validationErrors.townCity
-                    ? 'border-rose-300 focus:ring-rose-500/20 focus:border-rose-600'
-                    : 'border-border focus:ring-emerald-500/20 focus:border-emerald-600'
+                    ? 'border-error focus:ring-rose-500/20 focus:border-error'
+                    : 'border-border focus:ring-emerald-500/20 focus:border-success'
                 }`}
               />
               {validationErrors.townCity && (
@@ -705,7 +705,7 @@ export function AddressFormModal({
           {/* Weekend Delivery Availability */}
           <div className="p-4 bg-surface-muted border border-border/80 rounded-2xl space-y-3">
             <div>
-              <p className="text-xs font-bold text-slate-800">Weekend Delivery Availability</p>
+              <p className="text-xs font-bold text-foreground">Weekend Delivery Availability</p>
               <p className="text-[11px] text-foreground-muted mt-0.5 leading-relaxed">
                 Indicate if you are available to receive packages on weekends. (Deliveries remain subject to store operating hours).
               </p>
@@ -721,7 +721,7 @@ export function AddressFormModal({
                     onClick={() => setSaturdayDelivery(false)}
                     className={`px-3 py-1 rounded-lg text-xs font-semibold transition-all ${
                       !saturdayDelivery
-                        ? 'bg-error-bg text-rose-800 border border-error/20'
+                        ? 'bg-error-bg text-error border border-error/20'
                         : 'text-foreground-muted hover:bg-surface-muted'
                     }`}
                   >
@@ -732,7 +732,7 @@ export function AddressFormModal({
                     onClick={() => setSaturdayDelivery(true)}
                     className={`px-3 py-1 rounded-lg text-xs font-semibold transition-all ${
                       saturdayDelivery
-                        ? 'bg-success-bg text-emerald-800 border border-success/20'
+                        ? 'bg-success-bg text-success border border-success/20'
                         : 'text-foreground-muted hover:bg-surface-muted'
                     }`}
                   >
@@ -750,7 +750,7 @@ export function AddressFormModal({
                     onClick={() => setSundayDelivery(false)}
                     className={`px-3 py-1 rounded-lg text-xs font-semibold transition-all ${
                       !sundayDelivery
-                        ? 'bg-error-bg text-rose-800 border border-error/20'
+                        ? 'bg-error-bg text-error border border-error/20'
                         : 'text-foreground-muted hover:bg-surface-muted'
                     }`}
                   >
@@ -761,7 +761,7 @@ export function AddressFormModal({
                     onClick={() => setSundayDelivery(true)}
                     className={`px-3 py-1 rounded-lg text-xs font-semibold transition-all ${
                       sundayDelivery
-                        ? 'bg-success-bg text-emerald-800 border border-success/20'
+                        ? 'bg-success-bg text-success border border-success/20'
                         : 'text-foreground-muted hover:bg-surface-muted'
                     }`}
                   >
@@ -778,7 +778,7 @@ export function AddressFormModal({
               type="button"
               onClick={() => setShowInstructions(!showInstructions)}
               aria-expanded={showInstructions}
-              className="w-full flex items-center justify-between px-4 py-3 bg-surface-muted/70 hover:bg-surface-muted text-left text-xs font-bold text-slate-800 transition-colors"
+              className="w-full flex items-center justify-between px-4 py-3 bg-surface-muted/70 hover:bg-surface-muted text-left text-xs font-bold text-foreground transition-colors"
             >
               <span>Do we need additional instructions to deliver to this address?</span>
               {showInstructions ? (
@@ -789,7 +789,7 @@ export function AddressFormModal({
             </button>
 
             {showInstructions && (
-              <div className="p-4 bg-surface border-t border-slate-100 space-y-2">
+              <div className="p-4 bg-surface border-t border-border space-y-2">
                 <label htmlFor="deliveryInstructions" className="block text-xs font-semibold text-foreground-muted">
                   Delivery instructions
                 </label>
@@ -800,9 +800,9 @@ export function AddressFormModal({
                   value={deliveryInstructions}
                   onChange={(e) => setDeliveryInstructions(e.target.value)}
                   placeholder="Provide details such as building description, a nearby landmark, security gate code, or other navigation instructions."
-                  className="w-full p-3 bg-surface-muted border border-border rounded-xl text-xs font-medium text-slate-800 placeholder-slate-400 focus:bg-surface focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-600 transition-all resize-none"
+                  className="w-full p-3 bg-surface-muted border border-border rounded-xl text-xs font-medium text-foreground placeholder-slate-400 focus:bg-surface focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-success transition-all resize-none"
                 />
-                <div className="flex justify-between text-[11px] text-slate-400">
+                <div className="flex justify-between text-[11px] text-foreground-muted">
                   <span>e.g. Leave package with guard, ring bell twice</span>
                   <span>{deliveryInstructions.length}/500</span>
                 </div>
@@ -817,7 +817,7 @@ export function AddressFormModal({
               type="checkbox"
               checked={isDefault}
               onChange={(e) => setIsDefault(e.target.checked)}
-              className="w-4 h-4 rounded border-slate-300 text-success focus:ring-emerald-500 cursor-pointer"
+              className="w-4 h-4 rounded border-border text-success focus:ring-emerald-500 cursor-pointer"
             />
             <label htmlFor="isDefaultAddress" className="text-xs font-semibold text-foreground select-none cursor-pointer">
               Make this my default address
@@ -825,12 +825,12 @@ export function AddressFormModal({
           </div>
 
           {/* Action Buttons */}
-          <div className="pt-4 border-t border-slate-100 flex items-center justify-end gap-3">
+          <div className="pt-4 border-t border-border flex items-center justify-end gap-3">
             <button
               type="button"
               onClick={onClose}
               disabled={isSaving}
-              className="px-5 py-2.5 rounded-xl border border-slate-300 text-foreground hover:bg-surface-muted font-semibold text-xs transition-colors cursor-pointer"
+              className="px-5 py-2.5 rounded-xl border border-border text-foreground hover:bg-surface-muted font-semibold text-xs transition-colors cursor-pointer"
             >
               Cancel
             </button>
@@ -838,7 +838,7 @@ export function AddressFormModal({
             <button
               type="submit"
               disabled={isSaving}
-              className="flex items-center gap-2 px-6 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-semibold text-xs shadow-sm shadow-emerald-700/20 transition-all active:scale-95 disabled:opacity-50 cursor-pointer"
+              className="flex items-center gap-2 px-6 py-2.5 rounded-xl bg-success hover:bg-success text-white font-semibold text-xs shadow-sm shadow-emerald-700/20 transition-all active:scale-95 disabled:opacity-50 cursor-pointer"
             >
               {isSaving && <Loader2 className="w-4 h-4 animate-spin" />}
               {isEditMode ? 'Update Address' : 'Save Address'}

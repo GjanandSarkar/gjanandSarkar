@@ -386,7 +386,7 @@ export default function AllSellerOrdersListPage() {
 
                             {/* Payment Status */}
                             <span className={`px-2 py-0.5 rounded-md text-[10px] font-bold uppercase tracking-wider ${
-                              order.payment_status === 'paid' ? 'bg-success-bg text-emerald-800' : 'bg-warning-bg text-amber-800'
+                              order.payment_status === 'paid' ? 'bg-success-bg text-success' : 'bg-warning-bg text-warning'
                             }`}>
                               {order.payment_status === 'paid' ? 'Paid' : `Payment: ${order.payment_status || 'Pending'}`} ({order.payment_method || 'COD'})
                             </span>
@@ -502,7 +502,7 @@ export default function AllSellerOrdersListPage() {
                               style={{ borderColor: order.payment_status === 'paid' ? 'rgba(16, 185, 129, 0.3)' : 'rgba(245, 158, 11, 0.3)' }}>
                               <div className="flex items-center justify-between flex-wrap gap-2">
                                 <div className="flex items-center gap-2">
-                                  <span className="p-1.5 rounded-lg bg-warning-bg text-amber-800">
+                                  <span className="p-1.5 rounded-lg bg-warning-bg text-warning">
                                     <IndianRupee className="w-4 h-4" />
                                   </span>
                                   <div>
@@ -523,20 +523,20 @@ export default function AllSellerOrdersListPage() {
                               </div>
 
                               {order.payment_status === 'paid' && (
-                                <div className="p-2.5 rounded-lg bg-success-bg/70 border border-success/20/80 text-[11px] text-emerald-900 space-y-0.5">
+                                <div className="p-2.5 rounded-lg bg-success-bg/70 border border-success/20/80 text-[11px] text-success space-y-0.5">
                                   <div className="flex items-center justify-between">
                                     <span className="font-semibold">Confirmed Amount:</span>
                                     <span className="font-bold font-mono">₹{order.cod_collected_amount || order.total_amount}</span>
                                   </div>
                                   {order.payment_confirmed_at && (
                                     <div className="flex items-center justify-between">
-                                      <span className="text-emerald-800/80">Confirmed At:</span>
+                                      <span className="text-success/80">Confirmed At:</span>
                                       <span>{format(new Date(order.payment_confirmed_at), 'MMM d, yyyy · hh:mm a')}</span>
                                     </div>
                                   )}
                                   {order.payment_confirmed_by && (
                                     <div className="flex items-center justify-between">
-                                      <span className="text-emerald-800/80">Confirmed By (ID):</span>
+                                      <span className="text-success/80">Confirmed By (ID):</span>
                                       <span className="font-mono text-[10px]">{order.payment_confirmed_by.slice(0, 8)}...</span>
                                     </div>
                                   )}

@@ -126,7 +126,7 @@ export function ConfirmCodPaymentModal({
         </p>
 
         {error && (
-          <div role="alert" className="p-3 rounded-xl bg-error-bg border border-error/20 text-rose-800 text-xs font-medium flex items-center gap-2">
+          <div role="alert" className="p-3 rounded-xl bg-error-bg border border-error/20 text-error text-xs font-medium flex items-center gap-2">
             <AlertCircle className="w-4 h-4 shrink-0 text-error" />
             <span>{error}</span>
           </div>
@@ -146,7 +146,7 @@ export function ConfirmCodPaymentModal({
             type="button"
             disabled={busy}
             onClick={handleConfirm}
-            className="px-4 py-2.5 rounded-xl text-xs font-bold text-white bg-emerald-700 hover:bg-emerald-800 transition-colors flex items-center gap-1.5 shadow-sm disabled:opacity-50"
+            className="px-4 py-2.5 rounded-xl text-xs font-bold text-white bg-success hover:bg-success transition-colors flex items-center gap-1.5 shadow-sm disabled:opacity-50"
           >
             {busy && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
             <CheckCircle2 className="w-4 h-4" />

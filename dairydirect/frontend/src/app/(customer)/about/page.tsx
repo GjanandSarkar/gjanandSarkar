@@ -90,7 +90,7 @@ export default function AboutPage() {
             <span className="text-[#c88a23]">One Trusted Brand Per Category.</span>
           </h1>
 
-          <p className="text-sm sm:text-base md:text-lg text-emerald-100/90 max-w-2xl mx-auto leading-relaxed mb-8">
+          <p className="text-sm sm:text-base md:text-lg text-success-bg/90 max-w-2xl mx-auto leading-relaxed mb-8">
             Gjanand Sarkar was founded on a simple promise: make it effortless to
             buy genuine Indian products. We partner with exactly one verified company
             in every category, so what you see is what you get — every time.
@@ -143,8 +143,8 @@ export default function AboutPage() {
 
           <div className="bg-gradient-to-br from-[var(--primary)] to-[#082615] rounded-3xl p-8 text-white shadow-xl relative overflow-hidden">
             <div className="relative z-10 space-y-6">
-              <h3 className="text-xl font-black text-amber-300">The Gjanand Sarkar Standard</h3>
-              <ul className="space-y-3.5 text-xs sm:text-sm text-emerald-100">
+              <h3 className="text-xl font-black text-warning">The Gjanand Sarkar Standard</h3>
+              <ul className="space-y-3.5 text-xs sm:text-sm text-success-bg">
                 <li className="flex items-start gap-3">
                   <CheckCircle2 className="w-5 h-5 text-[#c88a23] shrink-0 mt-0.5" />
                   <span><strong>Verified before listing:</strong> Business registration, GST and every licence a category requires.</span>
@@ -168,7 +168,7 @@ export default function AboutPage() {
       </section>
 
       {/* 4 Pillars */}
-      <section className="bg-success-bg/60 py-16 border-y border-emerald-100">
+      <section className="bg-success-bg/60 py-16 border-y border-success-bg">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 md:px-8">
           <div className="text-center max-w-2xl mx-auto mb-12">
             <span className="text-xs font-black uppercase tracking-widest text-[#c88a23]">Our Pillars</span>
@@ -215,14 +215,14 @@ export default function AboutPage() {
 
       {/* Partner verification & certifications */}
       <section id="verification" className="max-w-4xl mx-auto px-4 sm:px-6 md:px-8 pt-4 pb-8">
-        <div className="bg-surface border border-amber-300/80 rounded-2xl p-6 sm:p-8 flex flex-col sm:flex-row items-center gap-6 shadow-sm">
+        <div className="bg-surface border border-warning/80 rounded-2xl p-6 sm:p-8 flex flex-col sm:flex-row items-center gap-6 shadow-sm">
           <div className="w-16 h-16 rounded-2xl bg-warning-bg/80 text-[#c88a23] flex items-center justify-center shrink-0">
             <ShieldCheck className="w-9 h-9" />
           </div>
           <div>
             <h3 className="text-sm font-black text-foreground uppercase tracking-wide mb-1 flex items-center gap-2">
               <span>Partner Verification &amp; Certifications</span>
-              <span className="text-[10px] px-2 py-0.5 rounded-full bg-success-bg text-emerald-800 font-bold">Verified</span>
+              <span className="text-[10px] px-2 py-0.5 rounded-full bg-success-bg text-success font-bold">Verified</span>
             </h3>
             <p className="text-xs text-foreground-muted leading-relaxed">
               Every partner brand is verified for business registration, GST and the

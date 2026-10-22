@@ -29,8 +29,8 @@ export async function TopBar() {
         </div>
 
         {/* Right Notice */}
-        <div className="flex items-center gap-1.5 text-emerald-200/90 font-medium">
-          <Truck className="w-3.5 h-3.5 text-amber-400" aria-hidden="true" />
+        <div className="flex items-center gap-1.5 text-success-bg/90 font-medium">
+          <Truck className="w-3.5 h-3.5 text-warning" aria-hidden="true" />
           <span>
             Free delivery over{' '}
             <strong className="text-white tabular-nums">

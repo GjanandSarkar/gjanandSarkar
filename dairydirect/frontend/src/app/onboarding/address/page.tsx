@@ -274,7 +274,7 @@ function AddressOnboardingInner() {
           </div>
 
           {locationNotice && (
-            <div className="flex items-center gap-2 px-3 py-2 bg-success-bg text-emerald-800 rounded-xl text-xs font-medium border border-success/20">
+            <div className="flex items-center gap-2 px-3 py-2 bg-success-bg text-success rounded-xl text-xs font-medium border border-success/20">
               <Info className="w-4 h-4 shrink-0 text-success" />
               <span>{locationNotice}</span>
             </div>
@@ -378,7 +378,7 @@ function AddressOnboardingInner() {
             disabled={!address.trim() || !name.trim() || isSaving || isSuccess}
             className={`w-full h-12 sm:h-14 rounded-2xl font-bold flex items-center justify-center gap-2 transition-all active:scale-95 shadow-xl ${
               isSuccess 
-                ? 'bg-emerald-600 text-white shadow-emerald-200'
+                ? 'bg-success text-white shadow-emerald-200'
                 : isSaving
                   ? 'bg-primary/70 text-white cursor-wait'
                   : 'bg-primary text-white shadow-primary/20 disabled:opacity-50'

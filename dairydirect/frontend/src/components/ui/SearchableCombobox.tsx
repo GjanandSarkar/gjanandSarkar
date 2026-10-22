@@ -153,10 +153,10 @@ export function SearchableCombobox({
       <div
         className={`relative flex items-center w-full h-11 bg-surface border rounded-xl transition-all ${
           error
-            ? 'border-rose-300 focus-within:ring-2 focus-within:ring-rose-500/20 focus-within:border-rose-600'
+            ? 'border-error focus-within:ring-2 focus-within:ring-rose-500/20 focus-within:border-error'
             : isOpen
-            ? 'border-emerald-600 ring-2 ring-emerald-500/20 shadow-sm'
-            : 'border-border hover:border-slate-300 focus-within:ring-2 focus-within:ring-emerald-500/20 focus-within:border-emerald-600'
+            ? 'border-success ring-2 ring-emerald-500/20 shadow-sm'
+            : 'border-border hover:border-border focus-within:ring-2 focus-within:ring-emerald-500/20 focus-within:border-success'
         } ${disabled ? 'opacity-60 bg-surface-muted cursor-not-allowed' : ''}`}
       >
         <input
@@ -172,7 +172,7 @@ export function SearchableCombobox({
           placeholder={placeholder}
           disabled={disabled}
           autoComplete="off"
-          className="w-full h-full pl-3.5 pr-10 bg-transparent text-xs font-medium text-slate-800 placeholder-slate-400 focus:outline-none"
+          className="w-full h-full pl-3.5 pr-10 bg-transparent text-xs font-medium text-foreground placeholder-slate-400 focus:outline-none"
         />
 
         <button
@@ -185,7 +185,7 @@ export function SearchableCombobox({
               inputRef.current?.focus();
             }
           }}
-          className="absolute right-0 top-0 bottom-0 px-3 flex items-center justify-center text-slate-400 hover:text-foreground-muted transition-colors"
+          className="absolute right-0 top-0 bottom-0 px-3 flex items-center justify-center text-foreground-muted hover:text-foreground-muted transition-colors"
           aria-label="Toggle dropdown"
         >
           <ChevronDown
@@ -215,10 +215,10 @@ export function SearchableCombobox({
                   onClick={() => handleSelect(opt.value)}
                   className={`px-3.5 py-2.5 text-xs font-medium cursor-pointer flex items-center justify-between transition-colors ${
                     isHighlighted
-                      ? 'bg-success-bg text-emerald-950'
+                      ? 'bg-success-bg text-success'
                       : isSelected
-                      ? 'bg-success-bg/50 text-emerald-900 font-semibold'
-                      : 'text-slate-800 hover:bg-surface-muted'
+                      ? 'bg-success-bg/50 text-success font-semibold'
+                      : 'text-foreground hover:bg-surface-muted'
                   }`}
                 >
                   <div className="flex items-center gap-2 truncate">
@@ -246,7 +246,7 @@ export function SearchableCombobox({
               role="option"
               onMouseEnter={() => setHighlightedIndex(filteredOptions.length)}
               onClick={() => handleSelect(query.trim())}
-              className={`px-3.5 py-2.5 text-xs cursor-pointer border-t border-slate-100 flex items-center gap-2 text-success bg-success-bg/60 hover:bg-success-bg font-semibold transition-colors`}
+              className={`px-3.5 py-2.5 text-xs cursor-pointer border-t border-border flex items-center gap-2 text-success bg-success-bg/60 hover:bg-success-bg font-semibold transition-colors`}
             >
               <Plus className="w-3.5 h-3.5 shrink-0" />
               <span className="truncate">Use custom: &quot;{query.trim()}&quot;</span>

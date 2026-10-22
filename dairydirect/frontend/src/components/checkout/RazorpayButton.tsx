@@ -99,10 +99,10 @@ export function RazorpayButton({
           </>
         ) : (
           <>
-            <CreditCard className="w-4 h-4 text-emerald-300" />
+            <CreditCard className="w-4 h-4 text-success" />
             <span>{buttonText || `Pay ₹${amountInRupees.toFixed(2)} with Razorpay`}</span>
             <div className="flex items-center gap-1 ml-auto text-[10px] bg-surface/15 backdrop-blur-sm px-2 py-0.5 rounded-full uppercase tracking-wider font-semibold">
-              <ShieldCheck className="w-3 h-3 text-emerald-300" />
+              <ShieldCheck className="w-3 h-3 text-success" />
               <span>Razorpay</span>
             </div>
           </>

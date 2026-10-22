@@ -55,13 +55,13 @@ export function AddressCard({
     <div
       onClick={selectable && onSelect ? onSelect : undefined}
       className={`relative bg-surface rounded-2xl border transition-all duration-200 p-5 flex flex-col justify-between group ${
-        selectable ? 'cursor-pointer hover:border-emerald-500' : ''
+        selectable ? 'cursor-pointer hover:border-success' : ''
       } ${
         isSelected
-          ? 'border-emerald-600 bg-success-bg/20 shadow-sm ring-2 ring-emerald-600/30'
+          ? 'border-success bg-success-bg/20 shadow-sm ring-2 ring-emerald-600/30'
           : isDefault
-          ? 'border-emerald-500 shadow-sm ring-1 ring-emerald-500/20'
-          : 'border-border hover:border-slate-300 shadow-sm'
+          ? 'border-success shadow-sm ring-1 ring-emerald-500/20'
+          : 'border-border hover:border-border shadow-sm'
       }`}
     >
       <div>
@@ -84,7 +84,7 @@ export function AddressCard({
 
           <div className="flex items-center gap-2">
             {isDefault ? (
-              <span className="inline-flex items-center gap-1 px-2.5 py-0.5 bg-success-bg text-emerald-800 border border-emerald-300 rounded-full text-[11px] font-black uppercase tracking-wider">
+              <span className="inline-flex items-center gap-1 px-2.5 py-0.5 bg-success-bg text-success border border-success rounded-full text-[11px] font-black uppercase tracking-wider">
                 <ShieldCheck className="w-3 h-3 text-success" />
                 Default
               </span>
@@ -96,7 +96,7 @@ export function AddressCard({
                   onSetDefault();
                 }}
                 disabled={isActionLoading}
-                className="text-[11px] font-semibold text-slate-400 hover:text-success hover:bg-success-bg px-2 py-0.5 rounded-md transition-colors"
+                className="text-[11px] font-semibold text-foreground-muted hover:text-success hover:bg-success-bg px-2 py-0.5 rounded-md transition-colors"
               >
                 Set as Default
               </button>
@@ -105,7 +105,7 @@ export function AddressCard({
             {selectable && (
               <div
                 className={`w-5 h-5 rounded-full border-2 flex items-center justify-center transition-all ${
-                  isSelected ? 'border-emerald-600 bg-emerald-600 text-white' : 'border-slate-300 bg-surface'
+                  isSelected ? 'border-success bg-success text-white' : 'border-border bg-surface'
                 }`}
               >
                 {isSelected && <CheckCircle2 className="w-4 h-4" />}
@@ -118,14 +118,14 @@ export function AddressCard({
         <div className="space-y-1 mb-3">
           {address.full_name && (
             <div className="flex items-center gap-1.5 text-sm font-bold text-foreground">
-              <User className="w-3.5 h-3.5 text-slate-400" />
+              <User className="w-3.5 h-3.5 text-foreground-muted" />
               <span>{address.full_name}</span>
             </div>
           )}
 
           {address.mobile_number && (
             <div className="flex items-center gap-1.5 text-xs font-semibold text-foreground-muted">
-              <Phone className="w-3.5 h-3.5 text-slate-400" />
+              <Phone className="w-3.5 h-3.5 text-foreground-muted" />
               <span>+91 {address.mobile_number}</span>
             </div>
           )}
@@ -145,7 +145,7 @@ export function AddressCard({
             <p className="text-foreground-muted">Near {address.landmark}</p>
           )}
 
-          <p className="font-medium text-slate-800">
+          <p className="font-medium text-foreground">
             {[address.town_city, address.state].filter(Boolean).join(', ')}
             {address.pincode ? ` - ${address.pincode}` : ''}
           </p>
@@ -154,7 +154,7 @@ export function AddressCard({
         </div>
 
         {/* Weekend Delivery Availability Badges */}
-        <div className="flex flex-wrap gap-2 pt-1 border-t border-slate-100/80 mb-3 text-[11px]">
+        <div className="flex flex-wrap gap-2 pt-1 border-t border-border/80 mb-3 text-[11px]">
           <span
             className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-md font-medium ${
               address.saturday_delivery
@@ -165,7 +165,7 @@ export function AddressCard({
             {address.saturday_delivery ? (
               <CalendarCheck className="w-3 h-3 text-success" />
             ) : (
-              <CalendarX className="w-3 h-3 text-rose-500" />
+              <CalendarX className="w-3 h-3 text-error" />
             )}
             Sat Delivery: {address.saturday_delivery ? 'Yes' : 'No'}
           </span>
@@ -180,7 +180,7 @@ export function AddressCard({
             {address.sunday_delivery ? (
               <CalendarCheck className="w-3 h-3 text-success" />
             ) : (
-              <CalendarX className="w-3 h-3 text-rose-500" />
+              <CalendarX className="w-3 h-3 text-error" />
             )}
             Sun Delivery: {address.sunday_delivery ? 'Yes' : 'No'}
           </span>
@@ -196,7 +196,7 @@ export function AddressCard({
 
       {/* Action Buttons: Edit & Delete */}
       {(onEdit || onDelete) && (
-        <div className="pt-3 border-t border-slate-100 flex items-center justify-between gap-2 mt-auto">
+        <div className="pt-3 border-t border-border flex items-center justify-between gap-2 mt-auto">
           <div className="flex items-center gap-2">
             {onEdit && (
               <button
@@ -206,7 +206,7 @@ export function AddressCard({
                   onEdit();
                 }}
                 disabled={isActionLoading}
-                className="flex items-center gap-1 text-xs font-semibold text-foreground-muted hover:text-foreground bg-surface-muted hover:bg-slate-200/80 px-2.5 py-1.5 rounded-lg transition-colors cursor-pointer"
+                className="flex items-center gap-1 text-xs font-semibold text-foreground-muted hover:text-foreground bg-surface-muted hover:bg-border/80 px-2.5 py-1.5 rounded-lg transition-colors cursor-pointer"
               >
                 <Edit3 className="w-3.5 h-3.5" />
                 Edit

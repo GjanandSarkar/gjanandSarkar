@@ -48,7 +48,7 @@ export default function ReturnRequestDetailPage() {
   if (isLoading) {
     return (
       <div className="w-full min-h-screen bg-background flex items-center justify-center">
-        <div className="w-8 h-8 border-4 border-emerald-600 border-t-transparent rounded-full animate-spin" />
+        <div className="w-8 h-8 border-4 border-success border-t-transparent rounded-full animate-spin" />
       </div>
     );
   }
@@ -56,7 +56,7 @@ export default function ReturnRequestDetailPage() {
   if (error || !data) {
     return (
       <div className="w-full min-h-screen bg-background flex flex-col items-center justify-center p-6 text-center">
-        <AlertCircle className="w-12 h-12 text-rose-500 mb-4" />
+        <AlertCircle className="w-12 h-12 text-error mb-4" />
         <h1 className="text-xl font-bold text-foreground mb-2">Request Not Found</h1>
         <p className="text-sm text-foreground-muted mb-6">{error || 'Could not find this return request'}</p>
         <Link
@@ -92,7 +92,7 @@ export default function ReturnRequestDetailPage() {
               <span className="text-xs font-bold text-foreground-muted uppercase tracking-wider">Request Reference</span>
               <span
                 className={`px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider ${
-                  isReturn ? 'bg-success-bg text-emerald-800' : 'bg-info-bg text-blue-800'
+                  isReturn ? 'bg-success-bg text-success' : 'bg-info-bg text-blue-800'
                 }`}
               >
                 {request.request_type}
@@ -151,13 +151,13 @@ export default function ReturnRequestDetailPage() {
               )}
               {request.status === 'refunded' && (
                 <p>
-                  <span className="font-bold text-emerald-900">Refund Processed: </span>
+                  <span className="font-bold text-success">Refund Processed: </span>
                   Your refund has been approved and sent to your bank account. Depending on your bank, it may take 5 to 7 working days to reflect on your statement.
                 </p>
               )}
               {request.status === 'completed' && request.request_type === 'replacement' && (
                 <p>
-                  <span className="font-bold text-emerald-900">Replacement Dispatched: </span>
+                  <span className="font-bold text-success">Replacement Dispatched: </span>
                   Your fresh replacement product has been sent! Tracking: <span className="font-semibold text-foreground">{request.replacement_tracking_no || 'Standard Farm Courier'}</span>
                 </p>
               )}
@@ -236,8 +236,8 @@ export default function ReturnRequestDetailPage() {
 
             {isReturn ? (
               <div className="space-y-3">
-                <div className="p-4 rounded-2xl bg-success-bg/60 border border-emerald-100 flex items-center justify-between">
-                  <span className="text-xs font-semibold text-emerald-950">Refund Amount</span>
+                <div className="p-4 rounded-2xl bg-success-bg/60 border border-success-bg flex items-center justify-between">
+                  <span className="text-xs font-semibold text-success">Refund Amount</span>
                   <span className="text-lg font-black text-success">
                     ₹{Number(request.refund_amount).toFixed(2)}
                   </span>

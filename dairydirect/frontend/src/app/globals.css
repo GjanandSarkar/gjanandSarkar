@@ -82,6 +82,18 @@
 
 @layer base {
   :root {
+    /* Height of the fixed mobile bottom nav. Single source of truth: the
+       floating cart bar, the support chat button and the page bottom padding
+       all offset from this. They used to each hardcode their own guess, which
+       is why they overlapped each other. */
+    --bottom-nav-h: 64px;
+
+    /* Translucent surface for blurred bars. Cannot be a plain rgba() literal
+       because it has to invert in dark mode -- the bottom nav was pinned to
+       rgba(255,255,255,0.92) and so stayed white on a dark page. */
+    --surface-translucent: rgba(255, 255, 255, 0.92);
+    --scrim: rgba(0, 0, 0, 0.5);
+
     --primary: #0c3c26;
     --primary-hover: #114e32;
     --primary-active: #072617;
@@ -128,6 +140,9 @@
   }
 
   .dark {
+    --surface-translucent: rgba(23, 28, 25, 0.92);
+    --scrim: rgba(0, 0, 0, 0.65);
+
     --primary: #cce6d9;
     --primary-hover: #e6f2ec;
     --primary-active: #b3d9c4;
@@ -524,4 +539,19 @@
   .page-narrow { width: 100%; max-width: 48rem; margin-inline: auto; }  /* 768px  - single-column detail/reading pages */
   .page-medium { width: 100%; max-width: 64rem; margin-inline: auto; }  /* 1024px - forms, lists */
   .page-wide   { width: 100%; max-width: 90rem; margin-inline: auto; }  /* 1440px - dashboards, product grids */
+}
+
+@layer components {
+  /* Clears the fixed mobile bottom stack (nav + floating cart bar).
+     Deliberately a class and not an inline style: an inline style cannot be
+     undone at a breakpoint, and the desktop layout has no bottom nav. */
+  .pb-bottom-stack {
+    padding-bottom: calc(var(--bottom-nav-h) + 16px + env(safe-area-inset-bottom, 0px));
+  }
+
+  @media (min-width: 768px) {
+    .pb-bottom-stack {
+      padding-bottom: 0;
+    }
+  }
 }

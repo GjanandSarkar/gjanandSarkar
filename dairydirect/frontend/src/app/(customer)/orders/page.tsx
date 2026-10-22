@@ -149,7 +149,7 @@ export default function OrdersScreen() {
                         <div className="flex items-center gap-2 flex-wrap">
                           <p className="font-bold text-[14px]" style={{ color: 'var(--color-primary)' }}>{order.id}</p>
                           <span className={`px-2 py-0.5 rounded-md text-[10px] font-bold uppercase tracking-wider ${
-                            order.payment_status === 'paid' ? 'bg-success-bg text-emerald-800' : 'bg-warning-bg text-amber-800'
+                            order.payment_status === 'paid' ? 'bg-success-bg text-success' : 'bg-warning-bg text-warning'
                           }`}>
                             {order.payment_status === 'paid'
                               ? 'Paid'
@@ -221,7 +221,7 @@ export default function OrdersScreen() {
                               <div className="flex items-center justify-between">
                                 <span className="text-foreground-muted">Payment Status:</span>
                                 <span className={`font-black uppercase text-[10px] px-2 py-0.5 rounded-md ${
-                                  order.payment_status === 'paid' ? 'bg-success-bg text-emerald-800' : 'bg-warning-bg text-amber-800'
+                                  order.payment_status === 'paid' ? 'bg-success-bg text-success' : 'bg-warning-bg text-warning'
                                 }`}>
                                   {order.payment_status === 'paid'
                                     ? 'Paid'
@@ -232,7 +232,7 @@ export default function OrdersScreen() {
                               </div>
                               <div className="flex items-center justify-between pt-1 border-t border-border">
                                 <span className="text-foreground-muted font-semibold">Total Amount:</span>
-                                <span className="font-extrabold text-emerald-900 font-mono text-[13px]">
+                                <span className="font-extrabold text-success font-mono text-[13px]">
                                   {t('currency')}{order.total_amount}
                                 </span>
                               </div>

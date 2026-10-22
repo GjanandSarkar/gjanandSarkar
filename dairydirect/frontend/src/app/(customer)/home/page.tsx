@@ -1,14 +1,13 @@
 import { getHomeFeed } from '@/lib/api/home';
 import { HeroBanner } from '@/components/home/HeroBanner';
 import { TrustBar } from '@/components/home/TrustBar';
-
 import { DealsAndBrands } from '@/components/home/DealsAndBrands';
 import { HeritageBanner } from '@/components/home/HeritageBanner';
 import { TrendingProducts } from '@/components/home/TrendingProducts';
-
 import { WhyGjanandSarkar } from '@/components/home/WhyGjanandSarkar';
 import { RecommendationRail } from '@/components/discovery/RecommendationRail';
 import { AdSlot } from '@/components/discovery/AdSlot';
+import { isSectionEnabled } from '@/lib/config/launch';
 
 // Previously `force-dynamic` + `revalidate = 0`: every visitor triggered a
 // full-catalogue database query and a fresh server render, so the homepage
@@ -23,32 +22,33 @@ export default async function HomeScreen() {
 
   return (
     <div className="flex flex-col w-full overflow-x-hidden bg-background">
-      {/* 1. Hero Banner (Palace Arch & Heritage Showcase) */}
+      {/* 1. Hero. */}
       <HeroBanner products={prods} />
 
-      {/* 2. Trust Proposition Strip (5 Pillars) */}
+      {/* 2. Trust strip. */}
       <TrustBar />
 
-
-      {/* 4. Deal of the Day (Countdown) + Trusted Indian Brands (Grid) */}
+      {/* 3. Live discounts. */}
       <DealsAndBrands products={prods} />
 
-      {/* 5. Explore India's Rich Heritage & Culture Banner */}
-      <HeritageBanner />
-
-      {/* 6. Trending Products (Live Store Catalog) */}
+      {/* 4. Real products, as high up the page as possible. On a phone every
+          decorative section above this is a screen the customer has to scroll
+          past before seeing anything buyable. */}
       <TrendingProducts products={prods} />
 
-      {/* 7. Personalised rail. Client-rendered on purpose: the page itself is
+      {/* 5. Personalised rail. Client-rendered on purpose: the page itself is
           statically generated and revalidated every 5 minutes, and a
           per-visitor rail baked into that cache would be served to everyone. */}
       <RecommendationRail placement="home" limit={8} />
 
-      {/* 8. House promotion slot. */}
+      {/* 6. House promotion slot. */}
       <AdSlot placement="home" />
 
-      {/* 8. How the marketplace works (replaced invented stats + testimonials) */}
-      <WhyGjanandSarkar />
+      {/* Gated below. Heritage describes crafts we do not sell yet, and the
+          marketing explainer duplicates TrustBar. Both return automatically
+          once the catalogue justifies them — see lib/config/launch.ts. */}
+      {isSectionEnabled('heritageBanner') && <HeritageBanner />}
+      {isSectionEnabled('whyGjanandSarkar') && <WhyGjanandSarkar />}
     </div>
   );
 }

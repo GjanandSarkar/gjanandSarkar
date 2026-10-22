@@ -339,7 +339,7 @@ export default function BecomeSellerPage() {
 
         {/* Success Alert Banner when just submitted */}
         {submissionSuccessMsg && (
-          <div className="bg-success-bg border-2 border-emerald-500/40 rounded-2xl p-5 flex items-center gap-3 text-emerald-900 text-sm font-bold shadow-sm animate-in fade-in">
+          <div className="bg-success-bg border-2 border-success/40 rounded-2xl p-5 flex items-center gap-3 text-success text-sm font-bold shadow-sm animate-in fade-in">
             <CheckCircle2 className="w-6 h-6 text-success shrink-0" />
             <div className="flex-1">
               <p>{submissionSuccessMsg}</p>
@@ -364,13 +364,13 @@ export default function BecomeSellerPage() {
           <>
             {/* ─── 1. PENDING / CONTACTED SCREEN ───────────────────────────── */}
             {(existingInquiry.status === 'pending' || existingInquiry.status === 'contacted') && (
-              <div className="bg-surface rounded-3xl border-2 border-amber-500/30 p-8 sm:p-12 shadow-xl text-center max-w-2xl mx-auto space-y-6 animate-in fade-in zoom-in-95">
-                <div className="w-20 h-20 rounded-full bg-warning-bg text-amber-800 flex items-center justify-center mx-auto shadow-inner">
+              <div className="bg-surface rounded-3xl border-2 border-warning/30 p-8 sm:p-12 shadow-xl text-center max-w-2xl mx-auto space-y-6 animate-in fade-in zoom-in-95">
+                <div className="w-20 h-20 rounded-full bg-warning-bg text-warning flex items-center justify-center mx-auto shadow-inner">
                   <Clock className="w-12 h-12 text-warning animate-pulse" />
                 </div>
 
                 <div className="space-y-3">
-                  <span className="px-3.5 py-1 rounded-full bg-warning-bg border border-warning/20 text-amber-800 text-xs font-black uppercase tracking-wider">
+                  <span className="px-3.5 py-1 rounded-full bg-warning-bg border border-warning/20 text-warning text-xs font-black uppercase tracking-wider">
                     Application Pending Review
                   </span>
                   <h2 className="text-2xl sm:text-3xl font-black text-foreground">
@@ -428,11 +428,11 @@ export default function BecomeSellerPage() {
 
                 {/* What Happens Next Card */}
                 <div className="bg-warning-bg/70 border border-warning/20/80 rounded-2xl p-5 text-left space-y-3">
-                  <h4 className="text-xs font-black text-amber-950 uppercase tracking-wider flex items-center gap-2">
+                  <h4 className="text-xs font-black text-warning uppercase tracking-wider flex items-center gap-2">
                     <Clock className="w-4 h-4 text-[#c88a23]" />
                     <span>What Happens Next?</span>
                   </h4>
-                  <ul className="text-xs text-amber-900 space-y-2">
+                  <ul className="text-xs text-warning space-y-2">
                     <li className="flex items-start gap-2">
                       <span className="font-bold text-[#c88a23]">•</span>
                       <span>The admin team verifies your business details, PAN, and applicable GSTIN.</span>
@@ -472,19 +472,19 @@ export default function BecomeSellerPage() {
 
             {/* ─── 2. APPROVED SCREEN ───────────────────────────────────────── */}
             {existingInquiry.status === 'approved' && (
-              <div className="bg-surface rounded-3xl border-2 border-emerald-500/40 p-8 sm:p-12 shadow-xl text-center max-w-2xl mx-auto space-y-6 animate-in fade-in zoom-in-95">
+              <div className="bg-surface rounded-3xl border-2 border-success/40 p-8 sm:p-12 shadow-xl text-center max-w-2xl mx-auto space-y-6 animate-in fade-in zoom-in-95">
                 <div className="w-20 h-20 rounded-full bg-success-bg text-primary flex items-center justify-center mx-auto shadow-inner">
                   <CheckCircle2 className="w-12 h-12 text-success" />
                 </div>
 
                 <div className="space-y-3">
-                  <span className="px-3.5 py-1 rounded-full bg-success-bg border border-success/20 text-emerald-800 text-xs font-black uppercase tracking-wider">
+                  <span className="px-3.5 py-1 rounded-full bg-success-bg border border-success/20 text-success text-xs font-black uppercase tracking-wider">
                     Application Approved
                   </span>
                   <h2 className="text-2xl sm:text-3xl font-black text-foreground">
                     Welcome to Gjanand Sarkar!
                   </h2>
-                  <p className="text-sm font-semibold text-emerald-950 leading-relaxed max-w-lg mx-auto bg-success-bg/70 p-4 rounded-2xl border border-success/20">
+                  <p className="text-sm font-semibold text-success leading-relaxed max-w-lg mx-auto bg-success-bg/70 p-4 rounded-2xl border border-success/20">
                     Congratulations! Your seller registration application has been approved by admin. Your seller dashboard is active and ready for product submissions.
                   </p>
                 </div>
@@ -496,7 +496,7 @@ export default function BecomeSellerPage() {
                     <p className="text-base font-black text-primary">{existingInquiry.business_name}</p>
                     <p className="text-xs text-foreground-muted font-medium">Category: {existingInquiry.category}</p>
                   </div>
-                  <div className="inline-flex items-center gap-1.5 px-3 py-1 bg-success-bg text-emerald-800 rounded-lg text-xs font-black">
+                  <div className="inline-flex items-center gap-1.5 px-3 py-1 bg-success-bg text-success rounded-lg text-xs font-black">
                     <ShieldCheck className="w-4 h-4 text-success" />
                     <span>Active Seller</span>
                   </div>
@@ -525,13 +525,13 @@ export default function BecomeSellerPage() {
 
             {/* ─── 3. REJECTED SCREEN ───────────────────────────────────────── */}
             {existingInquiry.status === 'rejected' && (
-              <div className="bg-surface rounded-3xl border-2 border-rose-500/30 p-8 sm:p-12 shadow-xl text-center max-w-2xl mx-auto space-y-6 animate-in fade-in zoom-in-95">
-                <div className="w-20 h-20 rounded-full bg-error-bg text-rose-800 flex items-center justify-center mx-auto shadow-inner">
+              <div className="bg-surface rounded-3xl border-2 border-error/30 p-8 sm:p-12 shadow-xl text-center max-w-2xl mx-auto space-y-6 animate-in fade-in zoom-in-95">
+                <div className="w-20 h-20 rounded-full bg-error-bg text-error flex items-center justify-center mx-auto shadow-inner">
                   <XCircle className="w-12 h-12 text-error" />
                 </div>
 
                 <div className="space-y-3">
-                  <span className="px-3.5 py-1 rounded-full bg-error-bg border border-error/20 text-rose-800 text-xs font-black uppercase tracking-wider">
+                  <span className="px-3.5 py-1 rounded-full bg-error-bg border border-error/20 text-error text-xs font-black uppercase tracking-wider">
                     Application Rejected
                   </span>
                   <h2 className="text-2xl sm:text-3xl font-black text-foreground">
@@ -544,11 +544,11 @@ export default function BecomeSellerPage() {
 
                 {/* Admin Feedback Box */}
                 <div className="bg-error-bg/80 border border-error/20 rounded-2xl p-5 text-left space-y-2 max-w-lg mx-auto">
-                  <h4 className="text-xs font-black text-rose-950 uppercase tracking-wider flex items-center gap-2">
+                  <h4 className="text-xs font-black text-error uppercase tracking-wider flex items-center gap-2">
                     <AlertCircle className="w-4 h-4 text-error" />
                     <span>Admin Rejection Reason</span>
                   </h4>
-                  <p className="text-xs text-rose-900 leading-relaxed font-semibold">
+                  <p className="text-xs text-error leading-relaxed font-semibold">
                     {existingInquiry.admin_notes?.trim() 
                       ? existingInquiry.admin_notes 
                       : 'Business verification could not be completed with the provided information. Please verify your business registration, PAN, and contact details.'}
@@ -636,7 +636,7 @@ export default function BecomeSellerPage() {
             {isEditing && (
               <div className="mb-6 p-4 bg-warning-bg border border-warning/20 rounded-2xl flex items-center justify-between gap-4">
                 <div className="text-left">
-                  <p className="text-xs font-black text-amber-900">Editing Your Application</p>
+                  <p className="text-xs font-black text-warning">Editing Your Application</p>
                   <p className="text-[11px] text-warning">
                     Update any requested details or verification documents below. Submitting will send your updated application for admin review.
                   </p>
@@ -644,7 +644,7 @@ export default function BecomeSellerPage() {
                 <button
                   type="button"
                   onClick={() => setIsEditing(false)}
-                  className="px-3 py-1.5 bg-surface border border-amber-300 rounded-xl text-xs font-bold text-foreground hover:bg-warning-bg transition-colors"
+                  className="px-3 py-1.5 bg-surface border border-warning rounded-xl text-xs font-bold text-foreground hover:bg-warning-bg transition-colors"
                 >
                   Cancel Edit
                 </button>
@@ -655,7 +655,7 @@ export default function BecomeSellerPage() {
               
               {error && (
                 <div className="p-4 bg-error-bg border border-error/20 rounded-2xl text-error text-xs font-bold flex items-center gap-2">
-                  <AlertCircle className="w-4 h-4 shrink-0 text-rose-500" />
+                  <AlertCircle className="w-4 h-4 shrink-0 text-error" />
                   <span>{error}</span>
                 </div>
               )}
@@ -670,7 +670,7 @@ export default function BecomeSellerPage() {
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
                     <label className="block text-xs font-bold text-foreground mb-1.5">
-                      Seller or Business Name <span className="text-rose-500">*</span>
+                      Seller or Business Name <span className="text-error">*</span>
                     </label>
                     <input
                       type="text"
@@ -684,7 +684,7 @@ export default function BecomeSellerPage() {
 
                   <div>
                     <label className="block text-xs font-bold text-foreground mb-1.5">
-                      Business Entity Type <span className="text-rose-500">*</span>
+                      Business Entity Type <span className="text-error">*</span>
                     </label>
                     <select
                       value={businessType}
@@ -699,7 +699,7 @@ export default function BecomeSellerPage() {
 
                   <div>
                     <label className="block text-xs font-bold text-foreground mb-1.5">
-                      Primary Product Category <span className="text-rose-500">*</span>
+                      Primary Product Category <span className="text-error">*</span>
                     </label>
                     <select
                       value={category}
@@ -739,7 +739,7 @@ export default function BecomeSellerPage() {
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                   <div>
                     <label className="block text-xs font-bold text-foreground mb-1.5">
-                      Contact Person's Full Name <span className="text-rose-500">*</span>
+                      Contact Person's Full Name <span className="text-error">*</span>
                     </label>
                     <input
                       type="text"
@@ -753,7 +753,7 @@ export default function BecomeSellerPage() {
 
                   <div>
                     <label className="block text-xs font-bold text-foreground mb-1.5">
-                      Mobile Number <span className="text-rose-500">*</span>
+                      Mobile Number <span className="text-error">*</span>
                     </label>
                     <div className="relative flex items-center">
                       <div className="absolute left-3.5 flex items-center gap-1.5 pointer-events-none text-xs font-bold text-foreground-muted select-none">
@@ -782,7 +782,7 @@ export default function BecomeSellerPage() {
 
                   <div>
                     <label className="block text-xs font-bold text-foreground mb-1.5">
-                      Business Email Address <span className="text-rose-500">*</span>
+                      Business Email Address <span className="text-error">*</span>
                     </label>
                     <input
                       type="email"
@@ -806,7 +806,7 @@ export default function BecomeSellerPage() {
                 <div className="space-y-4">
                   <div>
                     <label className="block text-xs font-bold text-foreground mb-1.5">
-                      Address (Shop / Survey No / Building / Street) <span className="text-rose-500">*</span>
+                      Address (Shop / Survey No / Building / Street) <span className="text-error">*</span>
                     </label>
                     <input
                       type="text"
@@ -821,7 +821,7 @@ export default function BecomeSellerPage() {
                   <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                     <div>
                       <label className="block text-xs font-bold text-foreground mb-1.5">
-                        City / Town <span className="text-rose-500">*</span>
+                        City / Town <span className="text-error">*</span>
                       </label>
                       <input
                         type="text"
@@ -835,7 +835,7 @@ export default function BecomeSellerPage() {
 
                     <div>
                       <label className="block text-xs font-bold text-foreground mb-1.5">
-                        State <span className="text-rose-500">*</span>
+                        State <span className="text-error">*</span>
                       </label>
                       <select
                         value={stateOrigin}
@@ -850,7 +850,7 @@ export default function BecomeSellerPage() {
 
                     <div>
                       <label className="block text-xs font-bold text-foreground mb-1.5">
-                        Postal Pincode <span className="text-rose-500">*</span>
+                        Postal Pincode <span className="text-error">*</span>
                       </label>
                       <input
                         type="text"

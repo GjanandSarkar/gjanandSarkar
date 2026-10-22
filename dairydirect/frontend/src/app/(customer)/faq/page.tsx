@@ -156,10 +156,10 @@ export default function FAQPage() {
         {/* Still Have Questions Box */}
         <div className="mt-12 bg-gradient-to-r from-[var(--primary)] to-[#175c3a] rounded-3xl p-6 sm:p-8 text-white flex flex-col sm:flex-row items-center justify-between gap-6 shadow-lg">
           <div>
-            <h3 className="text-lg font-black text-amber-300 mb-1">
+            <h3 className="text-lg font-black text-warning mb-1">
               Still have questions?
             </h3>
-            <p className="text-xs text-emerald-100/90 leading-relaxed max-w-md">
+            <p className="text-xs text-success-bg/90 leading-relaxed max-w-md">
               Our customer success team is here to help with order changes, returns
               or any other question.
             </p>

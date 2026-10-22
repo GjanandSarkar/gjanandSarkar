@@ -12,7 +12,7 @@ const states = [
     badge: 'Gir & Saurashtra',
     abbr: 'GJ',
     color: 'from-amber-500/10 to-orange-500/10 border-warning/20',
-    abbrColor: 'bg-warning-bg text-amber-800',
+    abbrColor: 'bg-warning-bg text-warning',
   },
   {
     name: 'Rajasthan',
@@ -20,7 +20,7 @@ const states = [
     badge: 'Royal Heritage',
     abbr: 'RJ',
     color: 'from-rose-500/10 to-amber-500/10 border-error/20',
-    abbrColor: 'bg-error-bg text-rose-800',
+    abbrColor: 'bg-error-bg text-error',
   },
   {
     name: 'Kerala',
@@ -28,7 +28,7 @@ const states = [
     badge: "God's Own Country",
     abbr: 'KL',
     color: 'from-emerald-500/10 to-teal-500/10 border-success/20',
-    abbrColor: 'bg-success-bg text-emerald-800',
+    abbrColor: 'bg-success-bg text-success',
   },
   {
     name: 'Tamil Nadu',
@@ -100,7 +100,7 @@ export function ShopByState() {
             </svg>
           </div>
 
-          <div className="w-20 h-20 rounded-full bg-surface shadow-md border-2 border-amber-300 flex items-center justify-center mb-4 relative z-10">
+          <div className="w-20 h-20 rounded-full bg-surface shadow-md border-2 border-warning flex items-center justify-center mb-4 relative z-10">
             <Globe className="w-9 h-9 text-primary" />
           </div>
 
@@ -112,7 +112,7 @@ export function ShopByState() {
           </p>
 
           <div className="inline-flex items-center gap-2 bg-primary text-white text-xs font-bold px-4 py-2 rounded-full relative z-10 shadow-xs">
-            <MapPin className="w-3.5 h-3.5 text-amber-300" />
+            <MapPin className="w-3.5 h-3.5 text-warning" />
             <span>Discover State Specialties</span>
           </div>
         </div>

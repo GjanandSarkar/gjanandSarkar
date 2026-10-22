@@ -61,7 +61,7 @@ export function CancelOrderButton({
     }
   }
 
-  const defaultButtonClass = "px-3.5 py-2 border border-rose-300 text-error hover:bg-error-bg text-xs font-bold rounded-xl flex items-center justify-center gap-1.5 transition-colors shadow-2xs";
+  const defaultButtonClass = "px-3.5 py-2 border border-error text-error hover:bg-error-bg text-xs font-bold rounded-xl flex items-center justify-center gap-1.5 transition-colors shadow-2xs";
 
   return (
     <>
@@ -110,7 +110,7 @@ export function CancelOrderButton({
                 rows={3}
                 maxLength={255}
                 disabled={busy}
-                className="w-full text-xs p-3 rounded-xl border border-border focus:outline-none focus:ring-2 focus:ring-rose-500/20 focus:border-rose-500 resize-none transition-all placeholder:text-foreground-muted disabled:bg-surface-muted"
+                className="w-full text-xs p-3 rounded-xl border border-border focus:outline-none focus:ring-2 focus:ring-rose-500/20 focus:border-error resize-none transition-all placeholder:text-foreground-muted disabled:bg-surface-muted"
               />
             </div>
 
@@ -119,7 +119,7 @@ export function CancelOrderButton({
             </p>
 
             {error && (
-              <div role="alert" className="p-3 rounded-xl bg-error-bg border border-error/20 text-rose-800 text-xs font-medium">
+              <div role="alert" className="p-3 rounded-xl bg-error-bg border border-error/20 text-error text-xs font-medium">
                 {error}
               </div>
             )}
@@ -137,7 +137,7 @@ export function CancelOrderButton({
                 type="button" 
                 disabled={busy} 
                 onClick={confirmCancel}
-                className="px-4 py-2 rounded-xl text-xs font-bold text-white bg-rose-600 hover:bg-rose-700 transition-colors flex items-center gap-1.5 shadow-sm disabled:opacity-50"
+                className="px-4 py-2 rounded-xl text-xs font-bold text-white bg-error hover:bg-error transition-colors flex items-center gap-1.5 shadow-sm disabled:opacity-50"
               >
                 {busy && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
                 <span>{busy ? 'Cancelling...' : 'Yes, cancel order'}</span>

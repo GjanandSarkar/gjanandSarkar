@@ -380,7 +380,7 @@ export default function SellerDashboardPage() {
             </div>
 
             <div className="space-y-2">
-              <span className="px-3 py-1 rounded-full bg-warning-bg border border-warning/20 text-amber-800 text-xs font-black uppercase tracking-wider">
+              <span className="px-3 py-1 rounded-full bg-warning-bg border border-warning/20 text-warning text-xs font-black uppercase tracking-wider">
                 {inquiry.status === 'contacted' ? 'Contacted & Under Review' : 'Application Under Manual Review'}
               </span>
               <h1 className="text-2xl sm:text-3xl font-black text-foreground">
@@ -392,7 +392,7 @@ export default function SellerDashboardPage() {
             </div>
 
             {inquiry.admin_notes && (
-              <div className="bg-warning-bg/80 border border-warning/20 rounded-2xl p-4 text-left max-w-lg mx-auto text-xs text-amber-900">
+              <div className="bg-warning-bg/80 border border-warning/20 rounded-2xl p-4 text-left max-w-lg mx-auto text-xs text-warning">
                 <span className="font-bold block mb-1">Admin Note:</span>
                 <p>{inquiry.admin_notes}</p>
               </div>
@@ -418,14 +418,14 @@ export default function SellerDashboardPage() {
               </div>
               <div className="flex justify-between py-1">
                 <span className="text-foreground-muted">Current Status:</span>
-                <span className="font-black uppercase px-2 py-0.5 rounded-full bg-warning-bg text-amber-800 text-[10px]">
+                <span className="font-black uppercase px-2 py-0.5 rounded-full bg-warning-bg text-warning text-[10px]">
                   Pending Admin Approval
                 </span>
               </div>
             </div>
 
             {/* Verification Checklist */}
-            <div className="bg-success-bg/70 border border-success/20/80 rounded-2xl p-5 text-left space-y-2 max-w-lg mx-auto text-xs text-emerald-900">
+            <div className="bg-success-bg/70 border border-success/20/80 rounded-2xl p-5 text-left space-y-2 max-w-lg mx-auto text-xs text-success">
               <h4 className="font-black uppercase tracking-wider flex items-center gap-1.5 text-primary">
                 <FileCheck2 className="w-4 h-4 text-primary" />
                 <span>What Happens Next</span>
@@ -572,19 +572,19 @@ export default function SellerDashboardPage() {
 
         {/* ─── LIFECYCLE BANNER: Under Review ─── */}
         {sellerStatus === 'under_review' && (
-          <div className="bg-warning-bg border-2 border-amber-300 rounded-2xl p-5 shadow-2xs space-y-2">
+          <div className="bg-warning-bg border-2 border-warning rounded-2xl p-5 shadow-2xs space-y-2">
             <div className="flex items-center justify-between flex-wrap gap-2">
-              <div className="flex items-center gap-2 text-amber-900 font-black text-sm">
+              <div className="flex items-center gap-2 text-warning font-black text-sm">
                 <Clock className="w-5 h-5 text-warning animate-pulse" />
                 <span>Seller Account Under Review</span>
               </div>
               {reviewExpiresAt && (
-                <span className="px-3 py-1 rounded-full bg-amber-200 text-amber-900 text-xs font-bold font-mono border border-amber-300">
+                <span className="px-3 py-1 rounded-full bg-warning-bg text-warning text-xs font-bold font-mono border border-warning">
                   Review Expiry: {new Date(reviewExpiresAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}
                 </span>
               )}
             </div>
-            <p className="text-xs text-amber-800">
+            <p className="text-xs text-warning">
               Your store is currently under review by our quality and compliance team.
               {reviewReason ? ` Reason: "${reviewReason}".` : ''} Existing orders continue to be fulfilled normally.
             </p>
@@ -602,7 +602,7 @@ export default function SellerDashboardPage() {
                 <h1 className="text-xl sm:text-2xl font-black text-primary tracking-tight">
                   {storeName}
                 </h1>
-                <span className="px-2.5 py-0.5 rounded-full bg-success-bg text-emerald-800 text-[10px] font-black uppercase tracking-wider flex items-center gap-1">
+                <span className="px-2.5 py-0.5 rounded-full bg-success-bg text-success text-[10px] font-black uppercase tracking-wider flex items-center gap-1">
                   <ShieldCheck className="w-3.5 h-3.5" />
                   <span>Approved Seller</span>
                 </span>
@@ -682,7 +682,7 @@ export default function SellerDashboardPage() {
                 <Icon className="w-3.5 h-3.5" />
                 <span>{tab.label}</span>
                 {tab.badge && tab.badge > 0 && !isActive ? (
-                  <span className="px-1.5 py-0.2 rounded-full text-[10px] font-black bg-rose-500 text-white">
+                  <span className="px-1.5 py-0.2 rounded-full text-[10px] font-black bg-error text-white">
                     {tab.badge}
                   </span>
                 ) : null}
@@ -737,7 +737,7 @@ export default function SellerDashboardPage() {
                 <div className="text-2xl font-black text-warning">
                   {pendingProducts.length}
                 </div>
-                <div className="text-[11px] text-amber-800 font-semibold mt-1">
+                <div className="text-[11px] text-warning font-semibold mt-1">
                   Awaiting admin review
                 </div>
               </div>
@@ -906,19 +906,19 @@ export default function SellerDashboardPage() {
                           {/* Approval Status Badge */}
                           <div className="absolute top-3 left-3">
                             {isApproved && (
-                              <span className="px-2.5 py-1 rounded-full text-[10px] font-black uppercase tracking-wider bg-success-bg text-emerald-800 border border-success/20 flex items-center gap-1 shadow-xs">
+                              <span className="px-2.5 py-1 rounded-full text-[10px] font-black uppercase tracking-wider bg-success-bg text-success border border-success/20 flex items-center gap-1 shadow-xs">
                                 <CheckCircle2 className="w-3.5 h-3.5 text-success" />
                                 <span>Approved & Live</span>
                               </span>
                             )}
                             {isPending && (
-                              <span className="px-2.5 py-1 rounded-full text-[10px] font-black uppercase tracking-wider bg-warning-bg text-amber-800 border border-warning/20 flex items-center gap-1 shadow-xs animate-pulse">
+                              <span className="px-2.5 py-1 rounded-full text-[10px] font-black uppercase tracking-wider bg-warning-bg text-warning border border-warning/20 flex items-center gap-1 shadow-xs animate-pulse">
                                 <Clock className="w-3.5 h-3.5 text-warning" />
                                 <span>Awaiting Review</span>
                               </span>
                             )}
                             {isRejected && (
-                              <span className="px-2.5 py-1 rounded-full text-[10px] font-black uppercase tracking-wider bg-error-bg text-rose-800 border border-error/20 flex items-center gap-1 shadow-xs">
+                              <span className="px-2.5 py-1 rounded-full text-[10px] font-black uppercase tracking-wider bg-error-bg text-error border border-error/20 flex items-center gap-1 shadow-xs">
                                 <AlertTriangle className="w-3.5 h-3.5 text-error" />
                                 <span>Rejected by Admin</span>
                               </span>
@@ -959,7 +959,7 @@ export default function SellerDashboardPage() {
                               </div>
                             </div>
                             <span className={`px-2.5 py-1 rounded-lg text-xs font-bold ${
-                              totalStock > 0 ? 'bg-success-bg text-emerald-800' : 'bg-error-bg text-rose-800'
+                              totalStock > 0 ? 'bg-success-bg text-success' : 'bg-error-bg text-error'
                             }`}>
                               {totalStock} in stock
                             </span>
@@ -975,11 +975,11 @@ export default function SellerDashboardPage() {
 
                           {/* Rejection Notice if rejected */}
                           {isRejected && p.rejection_reason && (
-                            <div className="p-3 bg-error-bg border border-error/20 rounded-xl text-xs text-rose-900 space-y-1">
-                              <span className="font-bold flex items-center gap-1 text-rose-800">
+                            <div className="p-3 bg-error-bg border border-error/20 rounded-xl text-xs text-error space-y-1">
+                              <span className="font-bold flex items-center gap-1 text-error">
                                 <AlertCircle className="w-3.5 h-3.5" /> Rejection Feedback:
                               </span>
-                              <p className="text-[11px] text-rose-800/90 leading-relaxed">{p.rejection_reason}</p>
+                              <p className="text-[11px] text-error/90 leading-relaxed">{p.rejection_reason}</p>
                             </div>
                           )}
                         </div>
@@ -1006,7 +1006,7 @@ export default function SellerDashboardPage() {
                         ) : isRejected ? (
                           <button
                             onClick={() => handleOpenEditProduct(p)}
-                            className="w-full py-2.5 bg-rose-600 hover:bg-rose-700 text-white rounded-xl text-xs font-bold transition-all shadow-xs flex items-center justify-center gap-1.5 cursor-pointer"
+                            className="w-full py-2.5 bg-error hover:bg-error text-white rounded-xl text-xs font-bold transition-all shadow-xs flex items-center justify-center gap-1.5 cursor-pointer"
                           >
                             <RotateCcw className="w-3.5 h-3.5" />
                             <span>Edit & Resubmit for Review</span>
@@ -1014,7 +1014,7 @@ export default function SellerDashboardPage() {
                         ) : (
                           <button
                             onClick={() => handleOpenEditProduct(p)}
-                            className="w-full py-2 bg-warning-bg hover:bg-warning-bg text-amber-800 border border-warning/20 rounded-xl text-xs font-bold transition-colors cursor-pointer flex items-center justify-center gap-1.5"
+                            className="w-full py-2 bg-warning-bg hover:bg-warning-bg text-warning border border-warning/20 rounded-xl text-xs font-bold transition-colors cursor-pointer flex items-center justify-center gap-1.5"
                           >
                             <Edit className="w-3.5 h-3.5" />
                             <span>Modify Pending Request</span>
@@ -1065,7 +1065,7 @@ export default function SellerDashboardPage() {
 
             {rejectedProducts.length === 0 ? (
               <div className="py-12 text-center text-foreground-muted text-xs font-medium space-y-2">
-                <CheckCircle2 className="w-12 h-12 text-emerald-500 mx-auto" />
+                <CheckCircle2 className="w-12 h-12 text-success mx-auto" />
                 <p className="font-bold text-foreground text-sm">No Rejected Products</p>
                 <p>All your submitted products are either approved or in review!</p>
               </div>
@@ -1087,7 +1087,7 @@ export default function SellerDashboardPage() {
                           />
                           <div>
                             <div className="flex items-center gap-2">
-                              <span className="font-mono text-[10px] bg-error-bg text-rose-800 px-1.5 py-0.5 rounded font-bold">
+                              <span className="font-mono text-[10px] bg-error-bg text-error px-1.5 py-0.5 rounded font-bold">
                                 SKU: {p.sku || 'N/A'}
                               </span>
                               <span className="text-[11px] text-foreground-muted">{p.category}</span>
@@ -1101,7 +1101,7 @@ export default function SellerDashboardPage() {
 
                         <button
                           onClick={() => handleOpenEditProduct(p)}
-                          className="px-5 py-2.5 bg-rose-600 hover:bg-rose-700 text-white rounded-xl text-xs font-bold transition-all shadow-xs flex items-center justify-center gap-2 cursor-pointer self-start sm:self-center"
+                          className="px-5 py-2.5 bg-error hover:bg-error text-white rounded-xl text-xs font-bold transition-all shadow-xs flex items-center justify-center gap-2 cursor-pointer self-start sm:self-center"
                         >
                           <RotateCcw className="w-4 h-4" />
                           <span>Edit & Resubmit</span>
@@ -1109,9 +1109,9 @@ export default function SellerDashboardPage() {
                       </div>
 
                       {/* Admin Reason Box */}
-                      <div className="p-4 rounded-xl bg-surface border border-error/20 text-xs text-rose-900 space-y-1">
+                      <div className="p-4 rounded-xl bg-surface border border-error/20 text-xs text-error space-y-1">
                         <div className="flex items-center justify-between">
-                          <span className="font-black text-rose-800 uppercase tracking-wider text-[11px]">
+                          <span className="font-black text-error uppercase tracking-wider text-[11px]">
                             Admin Feedback / Required Correction:
                           </span>
                           {p.reviewed_at && (
@@ -1184,13 +1184,13 @@ export default function SellerDashboardPage() {
                           <td className="py-3 px-4 font-black text-primary">₹{variant?.price || 0}</td>
                           <td className="py-3 px-4">
                             <span className={`px-2 py-0.5 rounded-md font-bold text-[11px] ${
-                              (variant?.stock || 0) < 10 ? 'bg-warning-bg text-amber-800' : 'bg-success-bg text-emerald-800'
+                              (variant?.stock || 0) < 10 ? 'bg-warning-bg text-warning' : 'bg-success-bg text-success'
                             }`}>
                               {variant?.stock || 0} units
                             </span>
                           </td>
                           <td className="py-3 px-4">
-                            <span className="px-2 py-0.5 rounded-full text-[10px] font-black uppercase bg-success-bg text-emerald-800">
+                            <span className="px-2 py-0.5 rounded-full text-[10px] font-black uppercase bg-success-bg text-success">
                               Live
                             </span>
                           </td>
@@ -1392,13 +1392,13 @@ export default function SellerDashboardPage() {
             </div>
 
             {quickUpdateModal.error && (
-              <div className="p-3 rounded-xl bg-error-bg text-rose-800 text-xs font-bold">
+              <div className="p-3 rounded-xl bg-error-bg text-error text-xs font-bold">
                 {quickUpdateModal.error}
               </div>
             )}
 
             {quickUpdateModal.success && (
-              <div className="p-3 rounded-xl bg-success-bg text-emerald-800 text-xs font-bold">
+              <div className="p-3 rounded-xl bg-success-bg text-success text-xs font-bold">
                 {quickUpdateModal.success}
               </div>
             )}
@@ -1472,7 +1472,7 @@ export default function SellerDashboardPage() {
             {reactivationMsg && (
               <div className={`p-3 rounded-xl text-xs font-bold flex items-center gap-2 ${
                 reactivationMsg.type === 'success'
-                  ? 'bg-success-bg text-emerald-800 border border-success/20'
+                  ? 'bg-success-bg text-success border border-success/20'
                   : 'bg-error-bg text-error border border-error/20'
               }`}>
                 {reactivationMsg.type === 'success' ? (

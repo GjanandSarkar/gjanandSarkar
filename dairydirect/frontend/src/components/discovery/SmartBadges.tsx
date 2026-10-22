@@ -28,7 +28,7 @@ export function SmartBadge({ type, className }: SmartBadgeProps) {
     trending: {
       icon: TrendingUp,
       label: 'Trending',
-      styles: 'bg-info-bg text-info border-sky-200'
+      styles: 'bg-info-bg text-info border-info-bg'
     }
   };
 

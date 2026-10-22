@@ -31,7 +31,7 @@ export default async function OffersPage() {
           <div className="bg-surface rounded-xl shadow-sm border border-border p-12 text-center">
             <h2 className="text-xl font-medium text-foreground mb-2">No active offers right now</h2>
             <p className="text-foreground-muted mb-6">Check back later for new discounts and deals.</p>
-            <Link href="/" className="px-6 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition">
+            <Link href="/" className="px-6 py-2 bg-success text-white rounded-lg hover:bg-success transition">
               Continue Shopping
             </Link>
           </div>
@@ -39,11 +39,11 @@ export default async function OffersPage() {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {coupons.map((coupon: any) => (
               <div key={coupon.id} className="bg-surface border border-border rounded-xl shadow-sm overflow-hidden flex flex-col">
-                <div className="bg-success-bg border-b border-emerald-100 p-6 flex flex-col items-center justify-center text-center">
-                  <span className="inline-block px-4 py-1.5 bg-surface text-success font-bold tracking-widest text-lg md:text-xl border-2 border-dashed border-emerald-300 rounded uppercase">
+                <div className="bg-success-bg border-b border-success-bg p-6 flex flex-col items-center justify-center text-center">
+                  <span className="inline-block px-4 py-1.5 bg-surface text-success font-bold tracking-widest text-lg md:text-xl border-2 border-dashed border-success rounded uppercase">
                     {coupon.code}
                   </span>
-                  <div className="mt-4 font-bold text-2xl text-emerald-900">
+                  <div className="mt-4 font-bold text-2xl text-success">
                     {coupon.type === 'percentage' 
                       ? `${coupon.value || coupon.discount_amount}% OFF` 
                       : `₹${coupon.value || coupon.discount_amount} OFF`}

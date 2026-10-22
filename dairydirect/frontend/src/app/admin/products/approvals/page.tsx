@@ -190,13 +190,13 @@ function ProductApprovalsContent() {
     switch (status) {
       case 'approved':
         return (
-          <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-bold bg-success-bg text-emerald-800 border border-success/20">
+          <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-bold bg-success-bg text-success border border-success/20">
             <CheckCircle className="w-3.5 h-3.5 text-success" /> Approved
           </span>
         );
       case 'rejected':
         return (
-          <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-bold bg-error-bg text-rose-800 border border-error/20">
+          <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-bold bg-error-bg text-error border border-error/20">
             <XCircle className="w-3.5 h-3.5 text-error" /> Rejected
           </span>
         );
@@ -209,7 +209,7 @@ function ProductApprovalsContent() {
       case 'pending':
       default:
         return (
-          <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-bold bg-warning-bg text-amber-800 border border-warning/20 animate-pulse">
+          <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-bold bg-warning-bg text-warning border border-warning/20 animate-pulse">
             <Clock className="w-3.5 h-3.5 text-warning" /> Awaiting Review
           </span>
         );
@@ -260,11 +260,11 @@ function ProductApprovalsContent() {
         {/* Status Metrics Cards */}
         <div className="grid grid-cols-2 sm:grid-cols-5 gap-3 mt-5">
           {[
-            { id: 'pending', label: 'Pending Review', count: counts.pending, color: 'text-warning', bg: 'bg-warning-bg/70 border-warning/20', activeBg: 'border-amber-500 bg-warning-bg' },
-            { id: 'approved', label: 'Approved Live', count: counts.approved, color: 'text-success', bg: 'bg-success-bg/70 border-success/20', activeBg: 'border-emerald-500 bg-success-bg' },
-            { id: 'rejected', label: 'Rejected', count: counts.rejected, color: 'text-error', bg: 'bg-error-bg/70 border-error/20', activeBg: 'border-rose-500 bg-error-bg' },
+            { id: 'pending', label: 'Pending Review', count: counts.pending, color: 'text-warning', bg: 'bg-warning-bg/70 border-warning/20', activeBg: 'border-warning bg-warning-bg' },
+            { id: 'approved', label: 'Approved Live', count: counts.approved, color: 'text-success', bg: 'bg-success-bg/70 border-success/20', activeBg: 'border-success bg-success-bg' },
+            { id: 'rejected', label: 'Rejected', count: counts.rejected, color: 'text-error', bg: 'bg-error-bg/70 border-error/20', activeBg: 'border-error bg-error-bg' },
             { id: 'suspended', label: 'Suspended', count: counts.suspended, color: 'text-foreground', bg: 'bg-surface-muted/70 border-border', activeBg: 'border-gray-500 bg-surface-muted' },
-            { id: 'all', label: 'Total Products', count: counts.all, color: 'text-slate-800', bg: 'bg-surface border-border', activeBg: 'border-primary bg-success-bg/30' },
+            { id: 'all', label: 'Total Products', count: counts.all, color: 'text-foreground', bg: 'bg-surface border-border', activeBg: 'border-primary bg-success-bg/30' },
           ].map(tab => {
             const isSelected = selectedStatus === tab.id;
             return (
@@ -306,7 +306,7 @@ function ProductApprovalsContent() {
         {/* Notification Banner */}
         {notification && (
           <div className={`mb-5 p-4 rounded-xl flex items-center justify-between ${
-            notification.type === 'success' ? 'bg-success-bg border border-success/20 text-emerald-900' : 'bg-error-bg border border-error/20 text-rose-900'
+            notification.type === 'success' ? 'bg-success-bg border border-success/20 text-success' : 'bg-error-bg border border-error/20 text-error'
           }`}>
             <span className="text-sm font-semibold">{notification.message}</span>
             <button onClick={() => setNotification(null)} className="p-1 hover:bg-black/5 rounded-lg">
@@ -317,12 +317,12 @@ function ProductApprovalsContent() {
 
         {/* Error Alert */}
         {errorMessage && (
-          <div className="mb-5 p-4 rounded-xl bg-warning-bg border border-amber-300 text-amber-900 flex items-start justify-between gap-3 shadow-xs">
+          <div className="mb-5 p-4 rounded-xl bg-warning-bg border border-warning text-warning flex items-start justify-between gap-3 shadow-xs">
             <div className="flex items-start gap-2.5">
               <AlertTriangle className="w-5 h-5 text-warning shrink-0 mt-0.5" />
               <div>
                 <p className="text-sm font-bold">Unable to load approval queue</p>
-                <p className="text-xs text-amber-800 mt-0.5">{errorMessage}</p>
+                <p className="text-xs text-warning mt-0.5">{errorMessage}</p>
                 {errorMessage.toLowerCase().includes('admin') && (
                   <p className="text-xs text-warning mt-1 font-semibold">
                     Tip: Ensure you are logged in with your Admin email (<code className="bg-warning-bg px-1 py-0.5 rounded">gjanandsarkar09@gmail.com</code>).
@@ -432,7 +432,7 @@ function ProductApprovalsContent() {
 
                       <div className="text-right">
                         <span className={`inline-block px-2.5 py-1 rounded-lg text-xs font-bold ${
-                          stock > 0 ? 'bg-success-bg text-emerald-800' : 'bg-error-bg text-rose-800'
+                          stock > 0 ? 'bg-success-bg text-success' : 'bg-error-bg text-error'
                         }`}>
                           {stock > 0 ? `${stock} in stock` : 'Out of stock'}
                         </span>
@@ -444,9 +444,9 @@ function ProductApprovalsContent() {
 
                     {/* Rejection notice if present */}
                     {product.approval_status === 'rejected' && product.rejection_reason && (
-                      <div className="mt-3 p-2.5 rounded-xl bg-error-bg border border-rose-100 text-rose-900 text-xs">
+                      <div className="mt-3 p-2.5 rounded-xl bg-error-bg border border-error-bg text-error text-xs">
                         <span className="font-bold block">Rejection Feedback:</span>
-                        <p className="mt-0.5 text-rose-800">{product.rejection_reason}</p>
+                        <p className="mt-0.5 text-error">{product.rejection_reason}</p>
                       </div>
                     )}
 
@@ -492,7 +492,7 @@ function ProductApprovalsContent() {
                             {product.approval_status !== 'approved' && (
                               <button
                                 onClick={() => handleOpenDecisionModal(product, 'approved')}
-                                className="px-3 py-1.5 rounded-lg bg-success-bg hover:bg-success-bg text-emerald-800 text-xs font-bold border border-success/20 transition-colors"
+                                className="px-3 py-1.5 rounded-lg bg-success-bg hover:bg-success-bg text-success text-xs font-bold border border-success/20 transition-colors"
                               >
                                 Approve
                               </button>
@@ -500,7 +500,7 @@ function ProductApprovalsContent() {
                             {product.approval_status !== 'rejected' && (
                               <button
                                 onClick={() => handleOpenDecisionModal(product, 'rejected')}
-                                className="px-3 py-1.5 rounded-lg bg-error-bg hover:bg-error-bg text-rose-800 text-xs font-bold border border-error/20 transition-colors"
+                                className="px-3 py-1.5 rounded-lg bg-error-bg hover:bg-error-bg text-error text-xs font-bold border border-error/20 transition-colors"
                               >
                                 Reject
                               </button>
@@ -883,7 +883,7 @@ function ProductApprovalsContent() {
                     decisionModal.action === 'approved'
                       ? 'bg-primary hover:bg-primary-hover'
                       : decisionModal.action === 'rejected'
-                      ? 'bg-rose-600 hover:bg-rose-700'
+                      ? 'bg-error hover:bg-error'
                       : 'bg-gray-800 hover:bg-black'
                   }`}
                 >

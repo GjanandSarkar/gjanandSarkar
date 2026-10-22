@@ -102,7 +102,7 @@ function AdminProductsContent() {
         <div className="flex items-center gap-2.5">
           <button 
             onClick={() => router.push('/admin/products/approvals')}
-            className="flex items-center gap-2 px-4 py-2.5 rounded-[12px] font-bold text-[13px] transition-all border border-emerald-700/30 text-emerald-800 bg-success-bg hover:bg-success-bg cursor-pointer"
+            className="flex items-center gap-2 px-4 py-2.5 rounded-[12px] font-bold text-[13px] transition-all border border-success/30 text-success bg-success-bg hover:bg-success-bg cursor-pointer"
           >
             Review Approvals
           </button>

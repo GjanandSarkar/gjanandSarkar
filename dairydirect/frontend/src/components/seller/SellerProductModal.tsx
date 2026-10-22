@@ -523,14 +523,14 @@ export function SellerProductModal({
               <div className="w-20 h-20 rounded-full bg-success-bg text-success flex items-center justify-center ring-8 ring-emerald-50 shadow-inner">
                 <CheckCircle2 className="w-10 h-10" strokeWidth={2.2} />
               </div>
-              <span className="absolute -bottom-1 -right-1 bg-amber-500 text-white p-1 rounded-full shadow-xs">
+              <span className="absolute -bottom-1 -right-1 bg-warning text-white p-1 rounded-full shadow-xs">
                 <Clock className="w-4 h-4" />
               </span>
             </div>
 
             {/* Header Text */}
             <div className="space-y-2 max-w-lg">
-              <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-warning-bg text-amber-800 border border-warning/20">
+              <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-warning-bg text-warning border border-warning/20">
                 <Clock className="w-3.5 h-3.5 text-warning" />
                 <span>Product Approval Status: Pending Review</span>
               </div>
@@ -566,11 +566,11 @@ export function SellerProductModal({
 
             {/* Steps & Next Timeline */}
             <div className="w-full max-w-lg bg-success-bg/70 border border-success/20/70 rounded-2xl p-4 text-left space-y-2">
-              <div className="flex items-center gap-2 text-xs font-bold text-emerald-900">
+              <div className="flex items-center gap-2 text-xs font-bold text-success">
                 <ShieldCheck className="w-4 h-4 text-success shrink-0" />
                 <span>What happens next?</span>
               </div>
-              <ul className="text-[11px] text-emerald-800 space-y-1 list-disc list-inside">
+              <ul className="text-[11px] text-success space-y-1 list-disc list-inside">
                 <li>Quality review turnaround: Usually completed within <strong>24 to 48 business hours</strong>.</li>
                 <li>Once approved, this product automatically goes live in the customer marketplace catalogue.</li>
                 <li>You can track the live status anytime in your <strong>"My Products"</strong> tab.</li>
@@ -630,14 +630,14 @@ export function SellerProductModal({
             <form onSubmit={handleSubmit} className="p-6 sm:p-8 space-y-6">
           {/* Notification / Error / Success Alert */}
           {error && (
-            <div className="p-4 rounded-2xl bg-error-bg border border-error/20 text-rose-800 text-xs font-bold flex items-center gap-2.5">
+            <div className="p-4 rounded-2xl bg-error-bg border border-error/20 text-error text-xs font-bold flex items-center gap-2.5">
               <AlertCircle className="w-4 h-4 text-error shrink-0" />
               <span>{error}</span>
             </div>
           )}
 
           {successInfo?.show && (
-            <div className="p-4 rounded-2xl bg-success-bg border border-success/20 text-emerald-900 text-xs font-bold flex items-center gap-2.5 animate-pulse">
+            <div className="p-4 rounded-2xl bg-success-bg border border-success/20 text-success text-xs font-bold flex items-center gap-2.5 animate-pulse">
               <CheckCircle2 className="w-5 h-5 text-success shrink-0" />
               <span>{successInfo.message}</span>
             </div>
@@ -653,7 +653,7 @@ export function SellerProductModal({
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="sm:col-span-2">
                 <label className="block text-xs font-bold text-foreground mb-1.5">
-                  Product Name <span className="text-rose-500">*</span>
+                  Product Name <span className="text-error">*</span>
                 </label>
                 <input
                   type="text"
@@ -667,7 +667,7 @@ export function SellerProductModal({
 
               <div>
                 <label className="block text-xs font-bold text-foreground mb-1.5">
-                  Category <span className="text-rose-500">*</span>
+                  Category <span className="text-error">*</span>
                 </label>
                 <select
                   value={category}
@@ -752,7 +752,7 @@ export function SellerProductModal({
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
               <div>
                 <label className="block text-xs font-bold text-foreground mb-1.5">
-                  Selling Price (₹) <span className="text-rose-500">*</span>
+                  Selling Price (₹) <span className="text-error">*</span>
                 </label>
                 <div className="relative">
                   <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-foreground-muted font-bold text-sm">₹</span>
@@ -804,7 +804,7 @@ export function SellerProductModal({
 
               <div>
                 <label className="block text-xs font-bold text-foreground mb-1.5">
-                  Available Stock Qty <span className="text-rose-500">*</span>
+                  Available Stock Qty <span className="text-error">*</span>
                 </label>
                 <input
                   type="number"
@@ -819,7 +819,7 @@ export function SellerProductModal({
 
               <div>
                 <label className="block text-xs font-bold text-foreground mb-1.5">
-                  Unit Weight / Volume <span className="text-rose-500">*</span>
+                  Unit Weight / Volume <span className="text-error">*</span>
                 </label>
                 <input
                   type="text"
@@ -896,14 +896,14 @@ export function SellerProductModal({
             {/* PRIMARY IMAGE UPLOAD CONTAINER */}
             <div className="space-y-3">
               <label className="block text-xs font-bold text-foreground">
-                Primary Product Photo <span className="text-rose-500">*</span>
+                Primary Product Photo <span className="text-error">*</span>
               </label>
 
               {primaryUploadMode === 'device' ? (
                 <div>
                   {primaryPreview ? (
                     /* Preview Box with Change/Remove */
-                    <div className="relative p-4 rounded-2xl border-2 border-dashed border-emerald-300 bg-success-bg/40 flex items-center gap-4">
+                    <div className="relative p-4 rounded-2xl border-2 border-dashed border-success bg-success-bg/40 flex items-center gap-4">
                       <div className="w-24 h-24 rounded-xl border border-success/20 overflow-hidden bg-surface shrink-0 shadow-xs relative flex items-center justify-center">
                         <img
                           src={primaryPreview}
@@ -924,7 +924,7 @@ export function SellerProductModal({
                             {primaryFile?.name || 'Selected Product Photo'}
                           </span>
                           {primaryUploadSuccess && (
-                            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-success-bg text-emerald-800">
+                            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-success-bg text-success">
                               <Check className="w-3 h-3" /> Uploaded to CDN
                             </span>
                           )}
@@ -1071,7 +1071,7 @@ export function SellerProductModal({
                         className="absolute inset-0 bg-black/60 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer"
                         title="Remove photo"
                       >
-                        <Trash2 className="w-4 h-4 text-rose-300" />
+                        <Trash2 className="w-4 h-4 text-error" />
                       </button>
                       <span className="absolute bottom-1 right-1 px-1 rounded bg-black/60 text-[9px] text-white font-mono">
                         #{i + 1}

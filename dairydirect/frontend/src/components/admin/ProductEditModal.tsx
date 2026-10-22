@@ -401,7 +401,7 @@ export function ProductEditModal({
               <motion.div
                 initial={{ opacity: 0, y: -8 }}
                 animate={{ opacity: 1, y: 0 }}
-                className="p-3.5 rounded-[12px] flex items-center gap-3 bg-success-bg text-emerald-800 text-[13px] font-medium border border-success/20"
+                className="p-3.5 rounded-[12px] flex items-center gap-3 bg-success-bg text-success text-[13px] font-medium border border-success/20"
               >
                 <CheckCircle2 className="w-4 h-4 shrink-0 text-success" />
                 <span>{successMessage}</span>
@@ -595,8 +595,8 @@ export function ProductEditModal({
                             <span
                               className={`text-[11px] font-black px-2 py-0.5 rounded-full flex items-center gap-0.5 ${
                                 isMarginLow
-                                  ? 'bg-warning-bg text-amber-800'
-                                  : 'bg-success-bg text-emerald-800'
+                                  ? 'bg-warning-bg text-warning'
+                                  : 'bg-success-bg text-success'
                               }`}
                             >
                               <Percent className="w-3 h-3" />

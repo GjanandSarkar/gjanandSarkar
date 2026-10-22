@@ -148,6 +148,13 @@ export function ProductClient({ product: initialProduct }: ProductClientProps) {
   const isOutOfStock = availableStock <= 0;
   const isLowStock = availableStock > 0 && availableStock <= (selectedVariant.low_stock_threshold || 10);
 
+  // Only a genuine, seller-entered original_price counts as a discount.
+  const originalPrice = selectedVariant.original_price ?? null;
+  const hasRealDiscount = originalPrice != null && originalPrice > selectedVariant.price;
+  const discountPercent = hasRealDiscount
+    ? Math.round(((originalPrice - selectedVariant.price) / originalPrice) * 100)
+    : 0;
+
   const cartItem = cart.find(item => item.productId === product.id && item.variantId === selectedVariant.id);
   const quantity = cartItem?.quantity || 0;
 
@@ -231,7 +238,7 @@ export function ProductClient({ product: initialProduct }: ProductClientProps) {
             <button
               onClick={handleToggleWishlist}
               className={`w-8.5 h-8.5 rounded-full flex items-center justify-center transition-all bg-surface border border-border shadow-2xs cursor-pointer ${
-                isSaved ? 'text-error' : 'text-foreground hover:text-rose-500'
+                isSaved ? 'text-error' : 'text-foreground hover:text-error'
               }`}
             >
               <Heart className={`w-4 h-4 ${isSaved ? 'fill-rose-600' : ''}`} />
@@ -264,7 +271,7 @@ export function ProductClient({ product: initialProduct }: ProductClientProps) {
                     onClick={() => setActiveImageIdx(idx)}
                     className={`relative w-16 h-16 rounded-xl border-2 overflow-hidden flex-shrink-0 transition-all cursor-pointer bg-surface ${
                       activeImageIdx === idx
-                        ? 'border-emerald-600 ring-2 ring-emerald-600/20 shadow-xs scale-105'
+                        ? 'border-success ring-2 ring-emerald-600/20 shadow-xs scale-105'
                         : 'border-border hover:border-gray-400 opacity-70 hover:opacity-100'
                     }`}
                   >
@@ -285,13 +292,13 @@ export function ProductClient({ product: initialProduct }: ProductClientProps) {
           <div className="col-span-1 md:col-span-6 space-y-6">
             <div>
               <div className="flex items-center justify-between gap-4 mb-2">
-                <span className="text-[10px] font-black uppercase tracking-wider text-[#c88a23] bg-warning-bg border border-amber-100 px-2.5 py-0.5 rounded-full">
+                <span className="text-[11px] font-black uppercase tracking-wider text-secondary bg-warning-bg border border-secondary/20 px-2.5 py-1 rounded-full">
                   {product.category}
                 </span>
                 
                 {averageRating !== null ? (
-                  <div className="flex items-center gap-1 text-xs font-bold">
-                    <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded bg-emerald-600 text-white">
+                  <div className="flex items-center gap-1.5 text-sm font-bold">
+                    <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded bg-success text-on-primary">
                       <Star className="w-3 h-3 fill-white text-white" />
                       {averageRating.toFixed(1)}
                     </span>
@@ -301,7 +308,7 @@ export function ProductClient({ product: initialProduct }: ProductClientProps) {
                     </span>
                   </div>
                 ) : (
-                  <span className="text-xs font-semibold text-foreground-muted">
+                  <span className="text-sm font-semibold text-foreground-muted">
                     No ratings yet
                   </span>
                 )}
@@ -310,30 +317,56 @@ export function ProductClient({ product: initialProduct }: ProductClientProps) {
               <h1 className="text-2xl sm:text-3xl font-black text-foreground tracking-tight leading-tight">
                 {product.name}
               </h1>
-              <p className="text-xs sm:text-sm text-foreground-muted mt-2 leading-relaxed">
+              <p className="text-sm sm:text-base text-foreground-muted mt-2.5 leading-relaxed">
                 {product.description}
+              </p>
+
+              {/* Price. This page previously showed no price at all outside the
+                  variant chips, so the most important number on a shopping
+                  page was also the smallest. The strikethrough appears only
+                  when a real original_price exists and genuinely exceeds the
+                  selling price: inventing one (e.g. price * 1.25) is a
+                  misleading-pricing offence under the Consumer Protection Act
+                  2019 and the Legal Metrology (Packaged Commodities) Rules. */}
+              <div className="mt-4 flex flex-wrap items-baseline gap-x-3 gap-y-1">
+                <span className="text-3xl sm:text-[2rem] font-black text-foreground tabular-nums leading-none">
+                  ₹{selectedVariant.price}
+                </span>
+                {hasRealDiscount && (
+                  <>
+                    <span className="text-base text-foreground-muted line-through tabular-nums">
+                      MRP ₹{selectedVariant.original_price}
+                    </span>
+                    <span className="px-2 py-0.5 rounded-md bg-secondary text-on-secondary text-xs font-black">
+                      {discountPercent}% OFF
+                    </span>
+                  </>
+                )}
+              </div>
+              <p className="text-xs text-foreground-muted mt-1">
+                Inclusive of all taxes · {selectedVariant.weight}
               </p>
             </div>
 
             {/* Variant Selector & Authoritative Realtime Stock Status */}
             <div className="bg-surface rounded-2xl border border-border/90 p-5 shadow-2xs space-y-3">
               <div className="flex items-center justify-between">
-                <h3 className="text-xs font-bold uppercase tracking-wider text-foreground-muted">
+                <h3 className="text-sm font-bold uppercase tracking-wider text-foreground-muted">
                   Pack Size
                 </h3>
                 {isOutOfStock ? (
-                  <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-error-bg text-error border border-error/20">
-                    <span className="w-1.5 h-1.5 rounded-full bg-rose-500" />
+                  <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-bold bg-error-bg text-error border border-error/20">
+                    <span className="w-1.5 h-1.5 rounded-full bg-error" />
                     Out of Stock
                   </span>
                 ) : isLowStock ? (
-                  <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-warning-bg text-amber-800 border border-warning/20 animate-pulse">
-                    <span className="w-1.5 h-1.5 rounded-full bg-amber-500" />
+                  <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-bold bg-warning-bg text-warning border border-warning/20 animate-pulse">
+                    <span className="w-1.5 h-1.5 rounded-full bg-warning" />
                     Only {availableStock} left in stock — order soon
                   </span>
                 ) : (
-                  <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-success-bg text-emerald-800 border border-success/20">
-                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+                  <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-bold bg-success-bg text-success border border-success/20">
+                    <span className="w-1.5 h-1.5 rounded-full bg-success" />
                     In Stock ({availableStock} units)
                   </span>
                 )}
@@ -345,7 +378,7 @@ export function ProductClient({ product: initialProduct }: ProductClientProps) {
                     <button
                       key={v.id}
                       onClick={() => setSelectedVariantIdx(idx)}
-                      className={`px-4 py-2.5 rounded-xl border transition-all font-bold text-xs cursor-pointer flex items-center gap-1.5 ${
+                      className={`px-4 py-3 rounded-xl border transition-all font-bold text-sm cursor-pointer flex items-center gap-1.5 min-h-[44px] ${
                         selectedVariantIdx === idx
                           ? 'border-primary bg-primary text-white shadow-sm'
                           : 'border-border bg-surface text-foreground hover:border-border-hover'
@@ -353,7 +386,7 @@ export function ProductClient({ product: initialProduct }: ProductClientProps) {
                     >
                       <span>{v.weight} — ₹{v.price}</span>
                       {vAvail <= 0 && (
-                        <span className="text-[10px] opacity-75 font-normal text-rose-500">(Sold out)</span>
+                        <span className="text-[10px] opacity-75 font-normal text-error">(Sold out)</span>
                       )}
                     </button>
                   );
@@ -373,11 +406,11 @@ export function ProductClient({ product: initialProduct }: ProductClientProps) {
             <div className="bg-surface rounded-2xl border border-border/90 p-5 shadow-2xs space-y-6">
               <div className="flex items-center justify-between border-b border-border pb-3">
                 <h3 className="text-sm font-black text-foreground flex items-center gap-2">
-                  <MessageSquare className="w-4 h-4 text-[#c88a23]" />
+                  <MessageSquare className="w-4 h-4 text-secondary" />
                   <span>Reviews</span>
                 </h3>
                 <div className="flex items-center gap-1 text-xs font-bold text-foreground">
-                  <Star className="w-3.5 h-3.5 fill-amber-400 text-amber-400" />
+                  <Star className="w-3.5 h-3.5 fill-amber-400 text-warning" />
                   <span>
                     {averageRating !== null
                       ? `${averageRating.toFixed(1)} / 5.0`
@@ -388,10 +421,10 @@ export function ProductClient({ product: initialProduct }: ProductClientProps) {
 
               {/* Review Input Box */}
               <form onSubmit={handleReviewSubmit} className="bg-surface-muted rounded-xl p-4 space-y-3">
-                <h4 className="text-xs font-bold text-foreground">Write Review</h4>
+                <h4 className="text-sm font-bold text-foreground">Write a review</h4>
                 
                 <div className="flex items-center gap-2">
-                  <span className="text-[11px] text-foreground-muted font-medium">Rating:</span>
+                  <span className="text-sm text-foreground-muted font-medium">Rating:</span>
                   <div className="flex gap-0.5">
                     {[1, 2, 3, 4, 5].map((star) => (
                       <button
@@ -403,7 +436,7 @@ export function ProductClient({ product: initialProduct }: ProductClientProps) {
                         <Star
                           className={`w-4.5 h-4.5 ${
                             star <= newRating
-                              ? 'fill-amber-400 text-amber-400'
+                              ? 'fill-amber-400 text-warning'
                               : 'text-foreground-muted'
                           }`}
                         />
@@ -418,7 +451,7 @@ export function ProductClient({ product: initialProduct }: ProductClientProps) {
                   value={newComment}
                   onChange={(e) => setNewComment(e.target.value)}
                   placeholder="Share your thoughts about quality, freshness or taste..."
-                  className="w-full px-3 py-2 text-xs rounded-lg border border-border-hover text-foreground bg-surface focus:border-primary outline-none resize-none"
+                  className="w-full px-3 py-2.5 text-sm rounded-lg border border-border-hover text-foreground bg-surface focus:border-primary outline-none resize-none"
                 />
 
                 <div className="flex items-center justify-between pt-1">
@@ -446,11 +479,11 @@ export function ProductClient({ product: initialProduct }: ProductClientProps) {
                     <div key={rev.id} className="pt-4 first:pt-0 space-y-1.5">
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-1.5">
-                          <span className="text-xs font-bold text-foreground">
+                          <span className="text-sm font-bold text-foreground">
                             {rev.user_name}
                           </span>
                           {rev.is_verified_buyer && (
-                            <span className="px-1.5 py-0.2 rounded bg-success-bg text-emerald-800 text-[9px] font-bold uppercase tracking-wider flex items-center gap-0.5 border border-emerald-100">
+                            <span className="px-1.5 py-0.2 rounded bg-success-bg text-success text-[9px] font-bold uppercase tracking-wider flex items-center gap-0.5 border border-success-bg">
                               <CheckCircle2 className="w-2.5 h-2.5" />
                               <span>Verified</span>
                             </span>
@@ -468,7 +501,7 @@ export function ProductClient({ product: initialProduct }: ProductClientProps) {
                             review with a missing rating. Clamp to the real
                             value and show nothing when there isn't one. */}
                         {[...Array(Math.min(5, Math.max(0, rev.rating ?? 0)))].map((_, i) => (
-                          <Star key={i} className="w-3 h-3 fill-amber-400 text-amber-400" />
+                          <Star key={i} className="w-3 h-3 fill-amber-400 text-warning" />
                         ))}
                       </div>
 

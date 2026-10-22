@@ -224,14 +224,14 @@ export default function AdminSellersPage() {
     switch (status) {
       case 'active':
         return (
-          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-black uppercase tracking-wider bg-success-bg text-emerald-800 border border-success/20">
+          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-black uppercase tracking-wider bg-success-bg text-success border border-success/20">
             <CheckCircle2 className="w-3.5 h-3.5 text-success" />
             Active
           </span>
         );
       case 'under_review':
         return (
-          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-black uppercase tracking-wider bg-warning-bg text-amber-900 border border-amber-300 animate-pulse">
+          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-black uppercase tracking-wider bg-warning-bg text-warning border border-warning animate-pulse">
             <Clock className="w-3.5 h-3.5 text-warning" />
             Under Review
           </span>
@@ -301,7 +301,7 @@ export default function AdminSellersPage() {
         <div>
           <div className="flex items-center gap-2">
             <h1 className="text-2xl font-black text-foreground tracking-tight">Seller Lifecycle Management</h1>
-            <span className="px-2.5 py-0.5 rounded-full text-[10px] font-extrabold uppercase bg-success-bg text-emerald-800">
+            <span className="px-2.5 py-0.5 rounded-full text-[10px] font-extrabold uppercase bg-success-bg text-success">
               Admin Control
             </span>
           </div>
@@ -467,17 +467,17 @@ export default function AdminSellersPage() {
               {/* Status Specific Alerts */}
               {selectedSeller.status === 'under_review' && (
                 <div className="bg-warning-bg border border-warning/20 rounded-xl p-4 space-y-2 text-xs">
-                  <div className="flex items-center gap-2 text-amber-900 font-bold">
+                  <div className="flex items-center gap-2 text-warning font-bold">
                     <AlertTriangle className="w-4 h-4 text-warning" />
                     <span>Account Is Currently Under Review</span>
                   </div>
                   {selectedSeller.review_reason && (
-                    <p className="text-amber-800">
+                    <p className="text-warning">
                       <strong>Reason:</strong> {selectedSeller.review_reason}
                     </p>
                   )}
                   {selectedSeller.review_expires_at && (
-                    <div className="pt-1 flex items-center justify-between text-amber-900 font-bold border-t border-warning/20/60">
+                    <div className="pt-1 flex items-center justify-between text-warning font-bold border-t border-warning/20/60">
                       <span>Temporary Review Expiry:</span>
                       <span className="font-mono">
                         {new Date(selectedSeller.review_expires_at).toLocaleDateString('en-IN', {
@@ -546,7 +546,7 @@ export default function AdminSellersPage() {
                 {(selectedSeller.status === 'active' || selectedSeller.status === 'suspended') && (
                   <button
                     onClick={() => openActionModal('put_under_review')}
-                    className="w-full px-4 py-2.5 bg-warning-bg hover:bg-warning-bg border border-amber-300 text-amber-900 text-xs font-bold rounded-xl flex items-center justify-center gap-2 transition-colors cursor-pointer"
+                    className="w-full px-4 py-2.5 bg-warning-bg hover:bg-warning-bg border border-warning text-warning text-xs font-bold rounded-xl flex items-center justify-center gap-2 transition-colors cursor-pointer"
                   >
                     <Clock className="w-4 h-4 text-warning" />
                     <span>Place Under Review</span>
@@ -558,7 +558,7 @@ export default function AdminSellersPage() {
                   <div className="space-y-2">
                     <button
                       onClick={() => openActionModal('keep_active')}
-                      className="w-full px-4 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-xl flex items-center justify-center gap-2 shadow-sm transition-colors cursor-pointer"
+                      className="w-full px-4 py-2.5 bg-success hover:bg-success text-white text-xs font-bold rounded-xl flex items-center justify-center gap-2 shadow-sm transition-colors cursor-pointer"
                     >
                       <Check className="w-4 h-4" />
                       <span>Keep Active / Complete Review (Restore)</span>
@@ -566,7 +566,7 @@ export default function AdminSellersPage() {
 
                     <button
                       onClick={() => openActionModal('start_temporary_review')}
-                      className="w-full px-4 py-2.5 bg-warning-bg hover:bg-warning-bg border border-amber-300 text-amber-900 text-xs font-bold rounded-xl flex items-center justify-center gap-2 transition-colors cursor-pointer"
+                      className="w-full px-4 py-2.5 bg-warning-bg hover:bg-warning-bg border border-warning text-warning text-xs font-bold rounded-xl flex items-center justify-center gap-2 transition-colors cursor-pointer"
                     >
                       <Calendar className="w-4 h-4 text-warning" />
                       <span>{selectedSeller.review_expires_at ? 'Set / Update Temporary Review Period' : 'Start Temporary Review Period'}</span>
@@ -606,7 +606,7 @@ export default function AdminSellersPage() {
                   <div className="space-y-2">
                     <button
                       onClick={() => openActionModal('approve_reactivation')}
-                      className="w-full px-4 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-xl flex items-center justify-center gap-2 shadow-sm transition-colors cursor-pointer"
+                      className="w-full px-4 py-2.5 bg-success hover:bg-success text-white text-xs font-bold rounded-xl flex items-center justify-center gap-2 shadow-sm transition-colors cursor-pointer"
                     >
                       <CheckCircle2 className="w-4 h-4" />
                       <span>Approve Reactivation (Restore to Active)</span>
@@ -741,7 +741,7 @@ export default function AdminSellersPage() {
               <div
                 className={`p-3 rounded-xl text-xs font-bold flex items-center gap-2 ${
                   actionMessage.type === 'success'
-                    ? 'bg-success-bg text-emerald-800 border border-success/20'
+                    ? 'bg-success-bg text-success border border-success/20'
                     : 'bg-error-bg text-error border border-error/20'
                 }`}
               >

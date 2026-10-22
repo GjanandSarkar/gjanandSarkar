@@ -1,6 +1,7 @@
 "use client";
 
 import { useRouter } from 'next/navigation';
+import { SmartImage } from '@/components/ui/SmartImage';
 import { useTranslation } from '@/lib/i18n';
 import { useStore } from '@/store/useStore';
 import { useCartDetails } from '@/hooks/useCartDetails';
@@ -119,11 +120,11 @@ export default function CartScreen() {
       </div>
 
       {hasStockIssue && (
-        <div className="mx-5 md:mx-10 mb-4 p-4 rounded-xl bg-warning-bg border border-amber-300 text-amber-900 flex items-start gap-3 shadow-xs">
+        <div className="mx-5 md:mx-10 mb-4 p-4 rounded-xl bg-warning-bg border border-warning text-warning flex items-start gap-3 shadow-xs">
           <AlertCircle className="w-5 h-5 text-warning shrink-0 mt-0.5" />
           <div className="text-sm">
             <p className="font-bold">Important: Inventory availability changed</p>
-            <p className="text-xs text-amber-800 mt-0.5">
+            <p className="text-xs text-warning mt-0.5">
               One or more items in your cart exceed currently available stock. Please adjust quantities or remove out-of-stock items to proceed to checkout.
             </p>
           </div>
@@ -143,9 +144,9 @@ export default function CartScreen() {
                 exit={{ opacity: 0, height: 0, scale: 0.96, transition: { duration: 0.25 } }}
                 className={`flex items-center gap-4 rounded-[16px] p-4 overflow-hidden group bg-surface-container-lowest border ${
                   item.isOutOfStock
-                    ? 'border-rose-300 bg-error-bg/20'
+                    ? 'border-error bg-error-bg/20'
                     : item.isInsufficientStock
-                    ? 'border-amber-300 bg-warning-bg/20'
+                    ? 'border-warning bg-warning-bg/20'
                     : 'border-outline-variant/30'
                 }`}
               >
@@ -154,7 +155,7 @@ export default function CartScreen() {
                   item.isOutOfStock ? 'grayscale opacity-75' : ''
                 }`}
                   style={{ background: getCategoryBg(item.product.category) }}>
-                  <img src={item.product.image_url ?? PLACEHOLDER_PRODUCT_IMAGE} alt={item.product.name} className="w-full h-full object-cover" />
+                  <SmartImage src={item.product.image_url} alt={item.product.name} width={96} height={96} className="w-full h-full object-cover" />
                 </div>
 
                 {/* Details */}
@@ -182,13 +183,13 @@ export default function CartScreen() {
                       </span>
                     ) : item.isInsufficientStock ? (
                       <div className="flex items-center gap-1.5">
-                        <span className="inline-block px-2 py-0.5 rounded-md text-[10px] font-black bg-warning-bg text-amber-800">
+                        <span className="inline-block px-2 py-0.5 rounded-md text-[10px] font-black bg-warning-bg text-warning">
                           Only {item.availableStock} in stock
                         </span>
                         <button
                           type="button"
                           onClick={() => handleUpdateQuantity(item.productId, item.variantId, item.availableStock)}
-                          className="text-[10px] font-bold text-success hover:text-emerald-900 underline"
+                          className="text-[10px] font-bold text-success hover:text-success underline"
                         >
                           Set to {item.availableStock}
                         </button>

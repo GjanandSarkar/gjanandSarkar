@@ -49,7 +49,7 @@ export function SubscriptionCard({ subscription, onPauseToggle, onCancel }: Subs
     <div className="bg-surface rounded-[24px] overflow-hidden border border-sand/50 shadow-sm relative">
       {/* Pending Review Banner */}
       {isPending && (
-        <div className="bg-amber-500 text-white text-[10px] font-black uppercase tracking-widest text-center py-1.5 flex items-center justify-center gap-1.5">
+        <div className="bg-warning text-white text-[10px] font-black uppercase tracking-widest text-center py-1.5 flex items-center justify-center gap-1.5">
           <AlertTriangle className="w-3 h-3" /> Modification Pending Approval
         </div>
       )}

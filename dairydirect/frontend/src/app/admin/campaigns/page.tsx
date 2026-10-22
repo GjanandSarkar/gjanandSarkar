@@ -152,7 +152,7 @@ export default function AdminCampaignsPage() {
       </div>
 
       {!analyticsConfigured && (
-        <div className="mb-4 flex items-start gap-2 rounded-xl border border-warning/20 bg-warning-bg px-3 py-2.5 text-[13px] text-amber-900">
+        <div className="mb-4 flex items-start gap-2 rounded-xl border border-warning/20 bg-warning-bg px-3 py-2.5 text-[13px] text-warning">
           <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />
           <span>
             External analytics is not configured, so A/B results are not being forwarded for

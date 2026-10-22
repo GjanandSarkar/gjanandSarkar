@@ -277,7 +277,7 @@ export default function AdminVendorInquiriesPage() {
       </div>
 
       {actionSuccess && (
-        <div className="p-4 bg-success-bg border border-success/20 rounded-2xl text-emerald-800 text-xs font-bold flex items-center gap-2 animate-in fade-in">
+        <div className="p-4 bg-success-bg border border-success/20 rounded-2xl text-success text-xs font-bold flex items-center gap-2 animate-in fade-in">
           <CheckCircle2 className="w-4 h-4 text-success shrink-0" />
           <span>{actionSuccess}</span>
         </div>
@@ -327,12 +327,12 @@ export default function AdminVendorInquiriesPage() {
                     {/* Status Badge */}
                     <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider shrink-0 ${
                       inq.status === 'approved' 
-                        ? 'bg-success-bg text-emerald-800 border border-success/20'
+                        ? 'bg-success-bg text-success border border-success/20'
                         : inq.status === 'rejected'
-                        ? 'bg-error-bg text-rose-800 border border-error/20'
+                        ? 'bg-error-bg text-error border border-error/20'
                         : inq.status === 'suspended'
                         ? 'bg-error-bg text-error border border-error/20'
-                        : 'bg-warning-bg text-amber-800 border border-warning/20'
+                        : 'bg-warning-bg text-warning border border-warning/20'
                     }`}>
                       {inq.status}
                     </span>
@@ -368,12 +368,12 @@ export default function AdminVendorInquiriesPage() {
                     </h3>
                     <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider ${
                       selectedInquiry.status === 'approved' 
-                        ? 'bg-success-bg text-emerald-800'
+                        ? 'bg-success-bg text-success'
                         : selectedInquiry.status === 'rejected'
-                        ? 'bg-error-bg text-rose-800'
+                        ? 'bg-error-bg text-error'
                         : selectedInquiry.status === 'suspended'
                         ? 'bg-error-bg text-error'
-                        : 'bg-warning-bg text-amber-800'
+                        : 'bg-warning-bg text-warning'
                     }`}>
                       {selectedInquiry.status}
                     </span>
@@ -485,7 +485,7 @@ export default function AdminVendorInquiriesPage() {
                 {/* Documents link */}
                 {selectedInquiry.business_documents && selectedInquiry.business_documents.length > 0 && (
                   <div className="bg-success-bg/70 p-3.5 rounded-2xl border border-success/20/80 text-xs flex items-center justify-between">
-                    <div className="flex items-center gap-2 text-emerald-950 font-bold">
+                    <div className="flex items-center gap-2 text-success font-bold">
                       <FileCheck className="w-4 h-4 text-success" />
                       <span>Submitted Business Verification Document</span>
                     </div>
@@ -493,7 +493,7 @@ export default function AdminVendorInquiriesPage() {
                       href={selectedInquiry.business_documents[0]?.url}
                       target="_blank"
                       rel="noreferrer"
-                      className="px-3 py-1 bg-surface text-emerald-800 rounded-lg text-xs font-bold border border-emerald-300 hover:bg-success-bg flex items-center gap-1"
+                      className="px-3 py-1 bg-surface text-success rounded-lg text-xs font-bold border border-success hover:bg-success-bg flex items-center gap-1"
                     >
                       <span>View Document</span>
                       <ExternalLink className="w-3 h-3" />
@@ -546,7 +546,7 @@ export default function AdminVendorInquiriesPage() {
                     type="button"
                     onClick={() => handleTriggerConfirm('rejected')}
                     disabled={isUpdating}
-                    className="px-5 py-2.5 bg-error-bg hover:bg-error-bg border border-rose-300 text-rose-800 text-xs font-bold rounded-xl flex items-center gap-1.5 transition-colors cursor-pointer"
+                    className="px-5 py-2.5 bg-error-bg hover:bg-error-bg border border-error text-error text-xs font-bold rounded-xl flex items-center gap-1.5 transition-colors cursor-pointer"
                   >
                     <XCircle className="w-4 h-4 text-error" />
                     <span>Reject Application</span>
@@ -623,7 +623,7 @@ export default function AdminVendorInquiriesPage() {
                 className={`px-6 py-2.5 text-white text-xs font-black rounded-xl shadow-md flex items-center gap-2 cursor-pointer ${
                   confirmModal.action === 'approved'
                     ? 'bg-primary hover:bg-primary-hover'
-                    : 'bg-rose-600 hover:bg-rose-700'
+                    : 'bg-error hover:bg-error'
                 }`}
               >
                 {isUpdating ? (

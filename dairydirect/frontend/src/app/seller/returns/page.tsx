@@ -141,8 +141,8 @@ export default function SellerReturnsPage() {
           <div
             className={`p-4 rounded-2xl flex items-center gap-2 text-xs font-semibold shadow-md ${
               toast.type === 'success'
-                ? 'bg-success-bg text-emerald-800 border border-success/20'
-                : 'bg-error-bg text-rose-800 border border-error/20'
+                ? 'bg-success-bg text-success border border-success/20'
+                : 'bg-error-bg text-error border border-error/20'
             }`}
           >
             {toast.type === 'success' ? (
@@ -244,7 +244,7 @@ export default function SellerReturnsPage() {
                             className={`inline-block px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider mb-1 ${
                               r.request_type === 'replacement'
                                 ? 'bg-info-bg text-blue-800'
-                                : 'bg-success-bg text-emerald-800'
+                                : 'bg-success-bg text-success'
                             }`}
                           >
                             {r.request_type}
@@ -306,7 +306,7 @@ export default function SellerReturnsPage() {
                             <button
                               onClick={() => handleAction(r.id, 'picked_up')}
                               disabled={isBusy}
-                              className="px-3 py-1.5 rounded-xl bg-amber-600 hover:bg-amber-700 text-white font-bold text-xs shadow-2xs transition-colors disabled:opacity-50"
+                              className="px-3 py-1.5 rounded-xl bg-warning hover:bg-warning text-white font-bold text-xs shadow-2xs transition-colors disabled:opacity-50"
                             >
                               {isBusy ? 'Saving...' : 'Mark Picked Up'}
                             </button>
@@ -316,7 +316,7 @@ export default function SellerReturnsPage() {
                             <button
                               onClick={() => handleAction(r.id, 'received')}
                               disabled={isBusy}
-                              className="px-3 py-1.5 rounded-xl bg-emerald-700 hover:bg-emerald-800 text-white font-bold text-xs shadow-2xs transition-colors disabled:opacity-50"
+                              className="px-3 py-1.5 rounded-xl bg-success hover:bg-success text-white font-bold text-xs shadow-2xs transition-colors disabled:opacity-50"
                             >
                               {isBusy ? 'Saving...' : 'Mark Received'}
                             </button>

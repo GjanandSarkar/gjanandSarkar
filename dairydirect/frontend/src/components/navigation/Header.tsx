@@ -239,7 +239,7 @@ function HeaderContent() {
                 className="flex items-center gap-2 px-2.5 py-1.5 rounded-xl hover:bg-surface-muted/80 transition-colors text-left group cursor-pointer border border-transparent hover:border-border"
                 aria-label="Select delivery address"
               >
-                <div className="w-8 h-8 rounded-full bg-success-bg text-primary flex items-center justify-center shrink-0 border border-emerald-100 group-hover:scale-105 transition-transform">
+                <div className="w-8 h-8 rounded-full bg-success-bg text-primary flex items-center justify-center shrink-0 border border-success-bg group-hover:scale-105 transition-transform">
                   <MapPin className="w-4 h-4 text-primary" />
                 </div>
                 <div className="flex flex-col max-w-[130px] lg:max-w-[170px]">
@@ -490,7 +490,7 @@ function HeaderContent() {
                         onClick={handleLogout}
                         className="w-full flex items-center gap-3 px-4 py-2 text-xs font-bold text-error hover:bg-error-bg transition-colors cursor-pointer text-left"
                       >
-                        <LogOut className="w-4 h-4 text-rose-500" />
+                        <LogOut className="w-4 h-4 text-error" />
                         <span>Logout</span>
                       </button>
                     </div>

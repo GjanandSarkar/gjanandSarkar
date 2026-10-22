@@ -23,9 +23,9 @@ export function HeritageBanner() {
     {
       title: 'Handloom',
       subtitle: 'Woven with Pride',
-      icon: <Shirt className="w-7 h-7 text-indigo-600" />,
+      icon: <Shirt className="w-7 h-7 text-info" />,
       href: '/categories/fashion',
-      bg: 'bg-indigo-50',
+      bg: 'bg-info-bg',
     },
     {
       title: 'Organic',
@@ -58,8 +58,8 @@ export function HeritageBanner() {
           
           {/* Left: Title & CTA */}
           <div className="max-w-md text-left">
-            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-surface/10 text-emerald-200 text-xs font-bold uppercase tracking-wider mb-3">
-              <BadgeCheck className="w-3.5 h-3.5 text-amber-300" />
+            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-surface/10 text-success-bg text-xs font-bold uppercase tracking-wider mb-3">
+              <BadgeCheck className="w-3.5 h-3.5 text-warning" />
               <span>Authentic Bharat Heritage</span>
             </div>
 
@@ -68,7 +68,7 @@ export function HeritageBanner() {
               Heritage &amp; Culture
             </h2>
 
-            <p className="text-emerald-100/90 text-sm mb-6 leading-relaxed">
+            <p className="text-success-bg/90 text-sm mb-6 leading-relaxed">
               Handpicked collections from every corner of India, crafted by master artisans and local organic cultivators.
             </p>
 

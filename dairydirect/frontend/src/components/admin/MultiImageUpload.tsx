@@ -207,7 +207,7 @@ export function MultiImageUpload({
                 key={item.id}
                 className={`group relative aspect-square rounded-[12px] overflow-hidden border-2 bg-surface shadow-sm transition-all ${
                   item.isPrimary
-                    ? 'border-emerald-600 ring-2 ring-emerald-600/20'
+                    ? 'border-success ring-2 ring-emerald-600/20'
                     : 'border-border hover:border-gray-400'
                 }`}
               >
@@ -220,7 +220,7 @@ export function MultiImageUpload({
 
                 {/* Primary Badge */}
                 {item.isPrimary ? (
-                  <div className="absolute top-1.5 left-1.5 z-10 flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-700 text-white text-[10px] font-black tracking-wide shadow-md">
+                  <div className="absolute top-1.5 left-1.5 z-10 flex items-center gap-1 px-2 py-0.5 rounded-full bg-success text-white text-[10px] font-black tracking-wide shadow-md">
                     <Star className="w-3 h-3 fill-current" />
                     <span>COVER</span>
                   </div>

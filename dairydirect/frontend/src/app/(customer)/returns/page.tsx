@@ -299,9 +299,9 @@ function ReturnsContent() {
         {/* Freshness Promise Banner */}
         <div className="p-4 rounded-2xl bg-success-bg border border-success/20/80 flex items-start gap-3">
           <ShieldCheck className="w-5 h-5 text-success shrink-0 mt-0.5" />
-          <div className="text-xs text-emerald-950">
+          <div className="text-xs text-success">
             <span className="font-extrabold">DairyDirect Quality Commitment: </span>
-            <span className="text-emerald-800">
+            <span className="text-success">
               Perishables (Milk, Curd, Paneer, Butter, Sweets) are covered within 24 hours of delivery. Non-perishable items enjoy a 7-day window. All requests are auto-approved!
             </span>
           </div>
@@ -315,7 +315,7 @@ function ReturnsContent() {
           </h2>
 
           {error && (
-            <div className="mb-6 p-4 rounded-2xl bg-error-bg border border-error/20 text-rose-800 text-xs font-semibold flex items-center gap-2">
+            <div className="mb-6 p-4 rounded-2xl bg-error-bg border border-error/20 text-error text-xs font-semibold flex items-center gap-2">
               <AlertCircle className="w-4 h-4 shrink-0" />
               <span>{error}</span>
             </div>
@@ -333,7 +333,7 @@ function ReturnsContent() {
                   onClick={() => setRequestType('return')}
                   className={`p-3.5 rounded-2xl border text-center font-bold text-xs flex items-center justify-center gap-2 transition-all ${
                     requestType === 'return'
-                      ? 'border-emerald-700 bg-success-bg text-emerald-900 ring-2 ring-emerald-700/20'
+                      ? 'border-success bg-success-bg text-success ring-2 ring-emerald-700/20'
                       : 'border-border hover:bg-surface-muted text-foreground-muted'
                   }`}
                 >
@@ -346,7 +346,7 @@ function ReturnsContent() {
                   onClick={() => setRequestType('replacement')}
                   className={`p-3.5 rounded-2xl border text-center font-bold text-xs flex items-center justify-center gap-2 transition-all ${
                     requestType === 'replacement'
-                      ? 'border-emerald-700 bg-success-bg text-emerald-900 ring-2 ring-emerald-700/20'
+                      ? 'border-success bg-success-bg text-success ring-2 ring-emerald-700/20'
                       : 'border-border hover:bg-surface-muted text-foreground-muted'
                   }`}
                 >
@@ -388,7 +388,7 @@ function ReturnsContent() {
 
                   {/* Selected Item Preview Card */}
                   {selectedItem && (
-                    <div className="p-3.5 rounded-2xl bg-success-bg/50 border border-emerald-100 flex items-center gap-3.5">
+                    <div className="p-3.5 rounded-2xl bg-success-bg/50 border border-success-bg flex items-center gap-3.5">
                       <div className="w-14 h-14 rounded-xl bg-surface border border-success/20/60 overflow-hidden shrink-0 shadow-2xs flex items-center justify-center">
                         {selectedItem.image_url || selectedItem.product_image || selectedItem.products?.image_url ? (
                           <img
@@ -403,7 +403,7 @@ function ReturnsContent() {
                       <div className="min-w-0 flex-1">
                         <div className="flex items-center gap-2">
                           <p className="text-xs font-bold text-foreground truncate">{selectedItem.product_name}</p>
-                          <span className="px-1.5 py-0.5 rounded text-[10px] font-extrabold bg-success-bg text-emerald-800 shrink-0">
+                          <span className="px-1.5 py-0.5 rounded text-[10px] font-extrabold bg-success-bg text-success shrink-0">
                             Delivered
                           </span>
                         </div>
@@ -412,7 +412,7 @@ function ReturnsContent() {
                           {selectedItem.variant_name ? ` • ${selectedItem.variant_name}` : ''}
                           {' • '}Order #{selectedItem.order_number || selectedItem.order_id?.slice(0, 8)}
                         </p>
-                        <p className="text-xs font-black text-emerald-900 mt-0.5">
+                        <p className="text-xs font-black text-success mt-0.5">
                           ₹{Number(selectedItem.unit_price || selectedItem.price || selectedItem.total_price || 0) * (selectedItem.quantity || 1)}
                         </p>
                       </div>
@@ -466,7 +466,7 @@ function ReturnsContent() {
               </div>
 
               {requiresImage && (
-                <div className="mb-3 p-2.5 rounded-xl bg-warning-bg/80 border border-warning/20/80 text-[11px] text-amber-900 flex items-center gap-2">
+                <div className="mb-3 p-2.5 rounded-xl bg-warning-bg/80 border border-warning/20/80 text-[11px] text-warning flex items-center gap-2">
                   <AlertCircle className="w-4 h-4 text-warning shrink-0" />
                   <span>
                     Clear photos of the packaging, defect, leakage, or expiry date stamp are required for speedy verification.
@@ -483,8 +483,8 @@ function ReturnsContent() {
                     onDragLeave={handleDragLeave}
                     className={`w-full p-6 rounded-2xl border-2 border-dashed transition-all flex flex-col items-center justify-center cursor-pointer text-center ${
                       isDragging
-                        ? 'border-emerald-600 bg-success-bg/70 scale-[0.99]'
-                        : 'border-border-hover hover:border-emerald-600 bg-surface-muted/60 hover:bg-success-bg/20'
+                        ? 'border-success bg-success-bg/70 scale-[0.99]'
+                        : 'border-border-hover hover:border-success bg-surface-muted/60 hover:bg-success-bg/20'
                     }`}
                   >
                     <input
@@ -504,7 +504,7 @@ function ReturnsContent() {
                       </div>
                     ) : (
                       <>
-                        <div className="w-12 h-12 rounded-2xl bg-success-bg/70 text-emerald-800 flex items-center justify-center mb-2.5 shadow-2xs">
+                        <div className="w-12 h-12 rounded-2xl bg-success-bg/70 text-success flex items-center justify-center mb-2.5 shadow-2xs">
                           <Upload className="w-6 h-6" />
                         </div>
                         <p className="text-xs font-bold text-foreground">
@@ -542,7 +542,7 @@ function ReturnsContent() {
                             type="button"
                             onClick={() => setImages(images.filter((_, idx) => idx !== i))}
                             title="Remove photo"
-                            className="p-1.5 rounded-full bg-rose-600 text-white hover:bg-rose-700 hover:scale-110 transition-transform shadow-xs"
+                            className="p-1.5 rounded-full bg-error text-white hover:bg-error hover:scale-110 transition-transform shadow-xs"
                           >
                             <Trash2 className="w-3.5 h-3.5" />
                           </button>
@@ -582,10 +582,10 @@ function ReturnsContent() {
             {/* COD UPI ID Input */}
             {isCodOrder && requestType === 'return' && (
               <div className="p-4 rounded-2xl bg-warning-bg/70 border border-warning/20">
-                <label className="block text-xs font-bold text-amber-950 uppercase tracking-wider mb-1">
+                <label className="block text-xs font-bold text-warning uppercase tracking-wider mb-1">
                   UPI ID for Direct Refund Payout
                 </label>
-                <p className="text-[11px] text-amber-800 mb-2">
+                <p className="text-[11px] text-warning mb-2">
                   Since this order was paid via Cash on Delivery, your refund will be transferred directly to your UPI ID upon seller receipt.
                 </p>
                 <input
@@ -593,7 +593,7 @@ function ReturnsContent() {
                   value={upiId}
                   onChange={(e) => setUpiId(e.target.value)}
                   placeholder="e.g. mobile@upi or username@okhdfcbank"
-                  className="w-full p-2.5 rounded-xl border border-amber-300 bg-surface text-xs text-foreground focus:outline-none focus:ring-2 focus:ring-amber-500/20"
+                  className="w-full p-2.5 rounded-xl border border-warning bg-surface text-xs text-foreground focus:outline-none focus:ring-2 focus:ring-amber-500/20"
                 />
               </div>
             )}
@@ -659,7 +659,7 @@ function ReturnsContent() {
                           className={`px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider ${
                             r.request_type === 'replacement'
                               ? 'bg-info-bg text-blue-800'
-                              : 'bg-success-bg text-emerald-800'
+                              : 'bg-success-bg text-success'
                           }`}
                         >
                           {r.request_type}

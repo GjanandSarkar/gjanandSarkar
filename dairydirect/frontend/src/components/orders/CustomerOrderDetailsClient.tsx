@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from 'react';
+import { SmartImage } from '@/components/ui/SmartImage';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { 
@@ -292,7 +293,7 @@ export function CustomerOrderDetailsClient({ initialOrder }: CustomerOrderDetail
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0 }}
             className={`p-4 rounded-2xl flex items-center gap-3 text-sm font-semibold shadow-md ${
-              toast.type === 'success' ? 'bg-success-bg text-emerald-800 border border-success/20' : 'bg-error-bg text-error border border-error/20'
+              toast.type === 'success' ? 'bg-success-bg text-success border border-success/20' : 'bg-error-bg text-error border border-error/20'
             }`}
           >
             {toast.type === 'success' ? <CheckCircle2 className="w-5 h-5 text-success shrink-0" /> : <AlertCircle className="w-5 h-5 text-error shrink-0" />}
@@ -315,9 +316,9 @@ export function CustomerOrderDetailsClient({ initialOrder }: CustomerOrderDetail
               <div className="flex items-center gap-2">
                 <span className="text-xs font-bold text-foreground-muted uppercase tracking-wider">Order Reference</span>
                 <span className={`px-2.5 py-0.5 rounded-full text-xs font-black uppercase tracking-wider ${
-                  order.status === 'delivered' ? 'bg-success-bg text-emerald-800' :
+                  order.status === 'delivered' ? 'bg-success-bg text-success' :
                   order.status === 'cancelled' ? 'bg-surface-muted text-foreground' :
-                  order.status === 'out_for_delivery' ? 'bg-warning-bg text-amber-800' : 'bg-info-bg text-blue-800'
+                  order.status === 'out_for_delivery' ? 'bg-warning-bg text-warning' : 'bg-info-bg text-blue-800'
                 }`}>
                   {order.status.replace(/_/g, ' ')}
                 </span>
@@ -335,7 +336,7 @@ export function CustomerOrderDetailsClient({ initialOrder }: CustomerOrderDetail
             {canCancelEntireOrder && (
               <button
                 onClick={() => setIsCancelOrderModalOpen(true)}
-                className="px-4 py-2.5 border border-rose-300 text-error hover:bg-error-bg text-xs font-bold rounded-xl flex items-center gap-1.5 transition-colors shadow-2xs"
+                className="px-4 py-2.5 border border-error text-error hover:bg-error-bg text-xs font-bold rounded-xl flex items-center gap-1.5 transition-colors shadow-2xs"
               >
                 <Ban className="w-3.5 h-3.5 text-error" />
                 <span>Cancel Order</span>
@@ -375,11 +376,11 @@ export function CustomerOrderDetailsClient({ initialOrder }: CustomerOrderDetail
         </div>
 
         {/* 100% Freshness Promise Notice */}
-        <div className="p-4 rounded-2xl bg-success-bg/70 border border-success/20/80 flex items-start sm:items-center gap-3 text-xs text-emerald-900">
+        <div className="p-4 rounded-2xl bg-success-bg/70 border border-success/20/80 flex items-start sm:items-center gap-3 text-xs text-success">
           <ShieldCheck className="w-6 h-6 text-success shrink-0 mt-0.5 sm:mt-0" />
           <div className="flex-1">
-            <span className="font-extrabold text-emerald-950">Gjanand Sarkar Freshness & Quality Guarantee:</span>
-            <span className="ml-1 text-emerald-800">
+            <span className="font-extrabold text-success">Gjanand Sarkar Freshness & Quality Guarantee:</span>
+            <span className="ml-1 text-success">
               Orders can be cancelled before fulfillment. Delivered items are backed by our 7-day hassle-free replacement or return warranty.
             </span>
           </div>
@@ -472,7 +473,7 @@ export function CustomerOrderDetailsClient({ initialOrder }: CustomerOrderDetail
                         <div className="p-3 rounded-xl bg-warning-bg border border-warning/20 text-right space-y-0.5">
                           <div className="flex items-center gap-1.5 justify-end">
                             <Clock className="w-3.5 h-3.5 text-warning" />
-                            <span className="text-xs font-black text-amber-900">
+                            <span className="text-xs font-black text-warning">
                               Cancellation: {REQUEST_STATUS_BADGES[activeCancelReq.status]?.label || activeCancelReq.status}
                             </span>
                           </div>
@@ -517,7 +518,7 @@ export function CustomerOrderDetailsClient({ initialOrder }: CustomerOrderDetail
                         {activeReturnReq ? (
                           <Link
                             href={`/returns/${activeReturnReq.id}`}
-                            className="px-3.5 py-2 rounded-xl bg-success-bg hover:bg-success-bg text-emerald-800 text-xs font-bold flex items-center gap-1.5 border border-success/20 transition-colors shadow-2xs"
+                            className="px-3.5 py-2 rounded-xl bg-success-bg hover:bg-success-bg text-success text-xs font-bold flex items-center gap-1.5 border border-success/20 transition-colors shadow-2xs"
                           >
                             <RotateCcw className="w-3.5 h-3.5 text-success" />
                             <span>View Request</span>
@@ -526,7 +527,7 @@ export function CustomerOrderDetailsClient({ initialOrder }: CustomerOrderDetail
                           <>
                             <Link
                               href={`/returns?orderItemId=${item.id}&type=return`}
-                              className="px-3 py-1.5 rounded-xl border border-emerald-700 text-emerald-800 hover:bg-success-bg text-xs font-bold flex items-center gap-1 transition-colors"
+                              className="px-3 py-1.5 rounded-xl border border-success text-success hover:bg-success-bg text-xs font-bold flex items-center gap-1 transition-colors"
                             >
                               <RotateCcw className="w-3.5 h-3.5 text-success" />
                               <span>Return</span>
@@ -601,10 +602,10 @@ export function CustomerOrderDetailsClient({ initialOrder }: CustomerOrderDetail
                 <span className="text-foreground-muted">Payment Status:</span>
                 <span className={`font-bold uppercase px-2.5 py-0.5 rounded-full text-[10px] ${
                   order.payment_status === 'paid'
-                    ? 'bg-success-bg text-emerald-800 border border-success/20'
+                    ? 'bg-success-bg text-success border border-success/20'
                     : order.payment_status === 'refunded'
                     ? 'bg-info-bg text-blue-800 border border-info/20'
-                    : 'bg-warning-bg text-amber-800 border border-warning/20'
+                    : 'bg-warning-bg text-warning border border-warning/20'
                 }`}>
                   {order.payment_status === 'paid'
                     ? 'Paid'
@@ -618,7 +619,7 @@ export function CustomerOrderDetailsClient({ initialOrder }: CustomerOrderDetail
                 <span className="font-extrabold text-foreground font-mono">₹{order.total_amount}</span>
               </div>
               {order.payment_status === 'paid' && order.payment_confirmed_at && (
-                <div className="flex justify-between items-center pt-1 text-[11px] text-emerald-800">
+                <div className="flex justify-between items-center pt-1 text-[11px] text-success">
                   <span className="text-foreground-muted">Cash Confirmed At:</span>
                   <span>{format(new Date(order.payment_confirmed_at), 'dd MMM yyyy, hh:mm a')}</span>
                 </div>
@@ -663,9 +664,11 @@ export function CustomerOrderDetailsClient({ initialOrder }: CustomerOrderDetail
             <form onSubmit={handleSubmitCancellation} className="p-6 space-y-4">
               <div className="p-3 rounded-2xl bg-surface-muted border border-border flex items-center gap-3">
                 <div className="w-12 h-12 rounded-xl bg-border overflow-hidden shrink-0">
-                  <img
-                    src={cancelModalItem.product_image || cancelModalItem.products?.image_url || PLACEHOLDER_PRODUCT_IMAGE}
+                  <SmartImage
+                    src={cancelModalItem.product_image || cancelModalItem.products?.image_url}
                     alt={cancelModalItem.product_name}
+                    width={80}
+                    height={80}
                     className="w-full h-full object-cover"
                   />
                 </div>
@@ -705,7 +708,7 @@ export function CustomerOrderDetailsClient({ initialOrder }: CustomerOrderDetail
                 />
               </div>
 
-              <div className="p-3 rounded-xl bg-warning-bg text-amber-800 text-[11px] leading-relaxed">
+              <div className="p-3 rounded-xl bg-warning-bg text-warning text-[11px] leading-relaxed">
                 <strong>Policy note:</strong> Cancellation requests are sent directly to the seller for approval. If approved, reserved inventory is restored and eligible payments are refunded.
               </div>
 
@@ -740,7 +743,7 @@ export function CustomerOrderDetailsClient({ initialOrder }: CustomerOrderDetail
           >
             <div className="p-6 border-b border-border flex items-center justify-between bg-surface-muted/50">
               <div className="flex items-center gap-2.5">
-                <div className="p-2 rounded-xl bg-success-bg text-emerald-800">
+                <div className="p-2 rounded-xl bg-success-bg text-success">
                   <RotateCcw className="w-5 h-5 text-primary" />
                 </div>
                 <div>
@@ -759,9 +762,11 @@ export function CustomerOrderDetailsClient({ initialOrder }: CustomerOrderDetail
             <form onSubmit={handleSubmitReturn} className="p-6 space-y-4">
               <div className="p-3 rounded-2xl bg-surface-muted border border-border flex items-center gap-3">
                 <div className="w-12 h-12 rounded-xl bg-border overflow-hidden shrink-0">
-                  <img
-                    src={returnModalItem.product_image || returnModalItem.products?.image_url || PLACEHOLDER_PRODUCT_IMAGE}
+                  <SmartImage
+                    src={returnModalItem.product_image || returnModalItem.products?.image_url}
                     alt={returnModalItem.product_name}
+                    width={80}
+                    height={80}
                     className="w-full h-full object-cover"
                   />
                 </div>
@@ -770,7 +775,7 @@ export function CustomerOrderDetailsClient({ initialOrder }: CustomerOrderDetail
                   <p className="text-[11px] text-foreground-muted">
                     Seller: {returnModalItem.products?.sellers?.store_name || 'Direct Seller'} • Qty: {returnModalItem.quantity}
                   </p>
-                  <p className="text-xs font-black text-emerald-800 mt-0.5">
+                  <p className="text-xs font-black text-success mt-0.5">
                     Refund Value: ₹{Number(returnModalItem.price) * Number(returnModalItem.quantity)}
                   </p>
                 </div>
@@ -937,7 +942,7 @@ export function CustomerOrderDetailsClient({ initialOrder }: CustomerOrderDetail
                   type="button"
                   onClick={handleCancelEntireOrder}
                   disabled={isCancellingOrder}
-                  className="flex-1 py-2.5 rounded-xl bg-rose-600 hover:bg-rose-700 text-white text-xs font-bold shadow-sm flex items-center justify-center gap-1.5 transition-colors disabled:opacity-50"
+                  className="flex-1 py-2.5 rounded-xl bg-error hover:bg-error text-white text-xs font-bold shadow-sm flex items-center justify-center gap-1.5 transition-colors disabled:opacity-50"
                 >
                   {isCancellingOrder ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Yes, Cancel Order'}
                 </button>

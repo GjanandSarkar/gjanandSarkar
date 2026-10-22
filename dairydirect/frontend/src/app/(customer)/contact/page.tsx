@@ -101,7 +101,7 @@ export default function ContactPage() {
             <div className="bg-success-bg border border-success/20/80 rounded-2xl p-5 shadow-xs">
               <div className="flex items-center gap-3 mb-2">
                 <div className="w-10 h-10 rounded-xl bg-primary text-white flex items-center justify-center">
-                  <MessageCircle className="w-5 h-5 text-emerald-400" />
+                  <MessageCircle className="w-5 h-5 text-success" />
                 </div>
                 <div>
                   <h3 className="text-xs font-bold text-foreground">WhatsApp Instant Support</h3>

@@ -307,7 +307,7 @@ export default function AdminReturnsPage() {
 
             <div>
               <div className="flex items-center gap-2">
-                <span className="px-2 py-0.5 rounded-full bg-success-bg text-emerald-800 text-[10px] font-black uppercase tracking-wider">
+                <span className="px-2 py-0.5 rounded-full bg-success-bg text-success text-[10px] font-black uppercase tracking-wider">
                   Admin Global Operations
                 </span>
                 {stuckCount > 0 && (
@@ -364,11 +364,11 @@ export default function AdminReturnsPage() {
           <button
             onClick={() => setTabFilter('replacements')}
             className={`p-3.5 rounded-2xl border text-left transition-all ${
-              tabFilter === 'replacements' ? 'bg-amber-900 text-white border-amber-900 shadow-sm' : 'bg-warning-bg/50 border-amber-100 text-amber-900 hover:bg-warning-bg'
+              tabFilter === 'replacements' ? 'bg-warning text-white border-warning shadow-sm' : 'bg-warning-bg/50 border-warning-bg text-warning hover:bg-warning-bg'
             }`}
           >
             <p className="text-[10px] font-bold uppercase tracking-wider opacity-80">Open Replacements</p>
-            <p className="text-xl font-black text-amber-800">{openReplacementsCount}</p>
+            <p className="text-xl font-black text-warning">{openReplacementsCount}</p>
           </button>
 
           <button
@@ -397,11 +397,11 @@ export default function AdminReturnsPage() {
           <button
             onClick={() => setTabFilter('cod_awaiting')}
             className={`p-3.5 rounded-2xl border text-left transition-all ${
-              tabFilter === 'cod_awaiting' ? 'bg-emerald-900 text-white border-emerald-900 shadow-sm' : 'bg-success-bg/50 border-emerald-100 text-emerald-900 hover:bg-success-bg'
+              tabFilter === 'cod_awaiting' ? 'bg-success text-white border-success shadow-sm' : 'bg-success-bg/50 border-success-bg text-success hover:bg-success-bg'
             }`}
           >
             <p className="text-[10px] font-bold uppercase tracking-wider opacity-80">COD Awaiting Payout</p>
-            <p className="text-xl font-black text-emerald-800">{codAwaitingCount}</p>
+            <p className="text-xl font-black text-success">{codAwaitingCount}</p>
           </button>
         </div>
       </div>
@@ -478,7 +478,7 @@ export default function AdminReturnsPage() {
                 <div
                   key={req.id}
                   className={`bg-surface rounded-3xl border p-6 space-y-5 transition-all shadow-2xs ${
-                    stuck ? 'border-amber-400/80 ring-2 ring-amber-100' : 'border-border/90 hover:border-border-hover'
+                    stuck ? 'border-warning/80 ring-2 ring-amber-100' : 'border-border/90 hover:border-border-hover'
                   }`}
                 >
                   {/* Top Bar: ID, Type, Status, Stuck Warning, Dates */}
@@ -503,7 +503,7 @@ export default function AdminReturnsPage() {
                       </span>
 
                       {stuck && (
-                        <span className="px-2 py-0.5 rounded-full bg-warning-bg text-amber-900 text-[10px] font-black uppercase tracking-wider flex items-center gap-1">
+                        <span className="px-2 py-0.5 rounded-full bg-warning-bg text-warning text-[10px] font-black uppercase tracking-wider flex items-center gap-1">
                           <Clock className="w-3 h-3 text-warning" />
                           <span>Stuck &gt; 3 Days</span>
                         </span>
@@ -607,7 +607,7 @@ export default function AdminReturnsPage() {
                             req.refund.status === 'failed'
                               ? 'bg-error-bg border-error/20 text-red-900'
                               : req.refund.status === 'completed'
-                              ? 'bg-success-bg border-success/20 text-emerald-900'
+                              ? 'bg-success-bg border-success/20 text-success'
                               : 'bg-orange-50 border-orange-200 text-orange-900'
                           }`}>
                             <div className="flex justify-between items-center font-bold">
@@ -716,7 +716,7 @@ export default function AdminReturnsPage() {
                             action: 'mark_cod_paid',
                             note: `COD refund of ₹${req.refund_amount} paid via manual UPI`,
                           })}
-                          className="px-3.5 py-1.5 rounded-xl bg-emerald-700 hover:bg-emerald-800 text-white text-xs font-bold flex items-center gap-1.5 shadow-xs transition-colors"
+                          className="px-3.5 py-1.5 rounded-xl bg-success hover:bg-success text-white text-xs font-bold flex items-center gap-1.5 shadow-xs transition-colors"
                         >
                           <CheckCircle2 className="w-3.5 h-3.5" />
                           <span>Mark COD Refund Paid</span>
@@ -875,7 +875,7 @@ export default function AdminReturnsPage() {
               <button
                 disabled={isProcessing || !refundActionModal.note.trim()}
                 onClick={handleConfirmRefundAction}
-                className="px-4 py-2 rounded-xl bg-emerald-700 hover:bg-emerald-800 text-white text-xs font-bold disabled:opacity-50 flex items-center gap-1.5"
+                className="px-4 py-2 rounded-xl bg-success hover:bg-success text-white text-xs font-bold disabled:opacity-50 flex items-center gap-1.5"
               >
                 {isProcessing && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
                 <span>Execute Action</span>

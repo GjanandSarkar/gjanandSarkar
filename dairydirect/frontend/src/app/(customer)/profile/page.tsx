@@ -255,19 +255,19 @@ export default function ProfileScreen() {
               </div>
 
               {sellerInquiry.status === 'approved' && (
-                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-success-bg text-emerald-800 text-[11px] font-black uppercase tracking-wider">
+                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-success-bg text-success text-[11px] font-black uppercase tracking-wider">
                   <ShieldCheck className="w-3.5 h-3.5" />
                   <span>Approved</span>
                 </span>
               )}
               {sellerInquiry.status === 'pending' && (
-                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-warning-bg text-amber-800 text-[11px] font-black uppercase tracking-wider">
+                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-warning-bg text-warning text-[11px] font-black uppercase tracking-wider">
                   <Clock className="w-3.5 h-3.5" />
                   <span>Pending Approval</span>
                 </span>
               )}
               {sellerInquiry.status === 'rejected' && (
-                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-error-bg text-rose-800 text-[11px] font-black uppercase tracking-wider">
+                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-error-bg text-error text-[11px] font-black uppercase tracking-wider">
                   <XCircle className="w-3.5 h-3.5" />
                   <span>Rejected</span>
                 </span>
@@ -287,7 +287,7 @@ export default function ProfileScreen() {
             )}
 
             {sellerInquiry.status === 'rejected' && (
-              <div className="bg-error-bg/60 p-3 rounded-xl border border-error/20/60 text-xs text-rose-900 space-y-1">
+              <div className="bg-error-bg/60 p-3 rounded-xl border border-error/20/60 text-xs text-error space-y-1">
                 <p className="font-bold">Rejection Reason:</p>
                 <p>{sellerInquiry.admin_notes || 'Application did not satisfy verification criteria. You may edit and resubmit.'}</p>
               </div>

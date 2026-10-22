@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from 'react';
+import { SmartImage } from '@/components/ui/SmartImage';
 import { Sparkles, Plus } from 'lucide-react';
 import { getProducts } from '@/lib/api/products';
 import type { ProductWithVariants } from '@/lib/api/products';
@@ -108,7 +109,7 @@ export function CartCrossSells() {
             {suggestions.map(product => (
               <div key={product.id} className="w-[120px] shrink-0 bg-surface border border-sand/50 rounded-[16px] p-2.5 flex flex-col items-center text-center shadow-sm relative">
                 <div className="w-16 h-16 bg-info-bg rounded-full mb-2 flex items-center justify-center p-1.5 overflow-hidden border border-sand/30">
-                  <img src={product.image_url || PLACEHOLDER_PRODUCT_IMAGE} alt={product.name} className="w-full h-full object-contain" />
+                  <SmartImage src={product.image_url} alt={product.name} width={128} height={128} className="w-full h-full object-contain" />
                 </div>
                 <p className="text-[11px] font-bold text-dark leading-tight mb-1 line-clamp-2">{product.name}</p>
                 <p className="text-[12px] font-black text-primary mb-2 mt-auto">₹{product.product_variants[0]?.price}</p>

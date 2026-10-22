@@ -1,3 +1,4 @@
+import { isCategoryLive } from '@/lib/config/launch';
 /**
  * The canonical Gjanand Sarkar category taxonomy.
  *
@@ -151,6 +152,23 @@ export const CATEGORIES: Category[] = [
 
 /** Category names only — for selects, filter chips and admin forms. */
 export const CATEGORY_NAMES: string[] = CATEGORIES.map((c) => c.name);
+
+/**
+ * Categories to show anywhere a CUSTOMER can see them.
+ *
+ * At launch only the dairy partner is onboarded, so the other eleven
+ * categories would open onto empty grids. An empty category reads as a broken
+ * store, so they are hidden until a partner exists. See lib/config/launch.ts.
+ *
+ * Admin and seller surfaces must keep using CATEGORIES: staff still need to
+ * classify products into categories that are not yet publicly live.
+ */
+export const VISIBLE_CATEGORIES: Category[] = CATEGORIES.filter((c) =>
+  isCategoryLive(c.key),
+);
+
+export const VISIBLE_CATEGORY_NAMES: string[] = VISIBLE_CATEGORIES.map((c) => c.name);
+
 
 /** Categories shown in the condensed top navigation strip. */
 export const FEATURED_CATEGORIES: Category[] = CATEGORIES.filter((c) => c.featured);

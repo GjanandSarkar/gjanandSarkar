@@ -41,7 +41,7 @@ export function TrustBar() {
             key={item.title} 
             className={`flex items-center gap-3 ${idx !== 0 ? 'pt-3 sm:pt-0 sm:pl-4' : ''} group`}
           >
-            <div className="w-10 h-10 rounded-xl bg-warning-bg/80 border border-amber-100 flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform">
+            <div className="w-10 h-10 rounded-xl bg-warning-bg/80 border border-warning-bg flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform">
               {item.flag ? (
                 <span className="text-xl leading-none">{item.flag}</span>
               ) : (
