@@ -91,6 +91,8 @@
        all offset from this. They used to each hardcode their own guess, which
        is why they overlapped each other. */
     --bottom-nav-h: 64px;
+    /* Height of the floating cart bar, so the support button can clear it. */
+    --cart-bar-h: 72px;
 
     /* Translucent surface for blurred bars. Cannot be a plain rgba() literal
        because it has to invert in dark mode -- the bottom nav was pinned to
@@ -571,26 +573,46 @@
 }
 
 @layer components {
-  /* Fixed mobile bottom stack.
-     These live in real CSS rather than inline style props because an inline
-     style cannot be overridden at a breakpoint, and because a calc() that
-     fails to resolve silently invalidates `bottom` -- which drops a fixed
-     element to the top of the viewport instead of the bottom. */
+  /* Fixed bottom stack: floating cart bar + support button.
+
+     ALL positioning for these two lives here, not in Tailwind utilities.
+     Mixing them was the bug: the bar carried `left-3 right-3` plus
+     `md:left-auto md:right-8 md:w-[320px]`, and when a box has both a left
+     and a right AND an explicit width it is over-constrained -- CSS resolves
+     that by ignoring `right` in LTR, which pinned the bar to the left edge.
+     Owning every offset in one block makes the result deterministic.
+
+     --cart-bar-h reserves the bar's height so the support button sits above
+     it rather than on top of it; previously both got bottom:1.5rem on
+     desktop and overlapped exactly. */
   .floating-cart-bar {
     position: fixed;
+    z-index: 50;
+    left: 0.75rem;
+    right: 0.75rem;
     bottom: calc(var(--bottom-nav-h, 64px) + 12px + env(safe-area-inset-bottom, 0px));
   }
 
   .support-fab {
     position: fixed;
-    bottom: calc(var(--bottom-nav-h, 64px) + 88px + env(safe-area-inset-bottom, 0px));
+    z-index: 40;
+    left: auto;
+    right: 1rem;
+    bottom: calc(var(--bottom-nav-h, 64px) + var(--cart-bar-h, 72px) + 24px + env(safe-area-inset-bottom, 0px));
   }
 
-  /* No bottom nav on desktop, so both sit on the viewport edge. */
   @media (min-width: 768px) {
-    .floating-cart-bar,
-    .support-fab {
+    /* No bottom nav on desktop: the bar becomes a right-aligned card. */
+    .floating-cart-bar {
+      left: auto;
+      right: 1.5rem;
+      width: 320px;
       bottom: 1.5rem;
+    }
+
+    .support-fab {
+      right: 1.5rem;
+      bottom: calc(1.5rem + var(--cart-bar-h, 72px) + 12px);
     }
   }
 }

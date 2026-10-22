@@ -28,7 +28,7 @@ export function FloatingCartBar({ onOpen }: FloatingCartBarProps) {
           animate={{ y: 0, opacity: 1 }}
           exit={{ y: 80, opacity: 0 }}
           transition={{ type: 'spring', stiffness: 400, damping: 35 }}
-          className="floating-cart-bar z-50 left-3 right-3 md:left-auto md:right-8 md:w-[320px]"
+          className="floating-cart-bar"
         >
           <button 
             onClick={onOpen}

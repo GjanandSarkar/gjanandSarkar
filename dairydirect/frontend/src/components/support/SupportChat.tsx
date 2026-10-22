@@ -286,7 +286,7 @@ export function SupportChat() {
         <button
           onClick={() => setIsOpen(true)}
           aria-label="Open help and support"
-          className="support-fab z-40 right-4 md:right-6 h-14 w-14 rounded-full bg-primary text-foreground-inverse shadow-lg flex items-center justify-center transition-transform active:scale-95 hover:scale-105"
+          className="support-fab h-14 w-14 rounded-full bg-primary text-foreground-inverse shadow-lg flex items-center justify-center transition-transform active:scale-95 hover:scale-105"
         >
           <MessageCircle className="w-6 h-6" />
         </button>
