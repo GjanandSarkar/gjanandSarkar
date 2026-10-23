@@ -2,6 +2,7 @@
 
 import { useEffect, useRef } from 'react';
 import { useStore } from '@/store/useStore';
+import { mergeCarts } from '@/lib/cart/merge';
 import { fetchTranslations } from '@/lib/api/translations';
 import { mergeLocalCart, getCart } from '@/lib/api/cart';
 import { getWishlist } from '@/lib/api/wishlist';
@@ -171,15 +172,21 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             getUserAddresses(userProfile.id),
           ]);
 
-          // Apply cart
-          if (dbCart.status === 'fulfilled' && dbCart.value && dbCart.value.length > 0) {
-            setCart(
-              dbCart.value.map((item) => ({
-                productId: item.product_id,
-                variantId: item.variant_id,
-                quantity: item.quantity,
-              }))
-            );
+          /* Apply cart by MERGING, never replacing.
+
+             This used to be setCart(savedCart), which discarded whatever was
+             on screen. A guest who filled a cart and then logged in lost all
+             of it, and any item whose server write had silently failed was
+             wiped by the next hydration. mergeCarts keeps the higher
+             quantity per variant and is idempotent, so hydration can run
+             repeatedly without inflating or destroying the cart. */
+          if (dbCart.status === 'fulfilled' && Array.isArray(dbCart.value)) {
+            const savedCart = dbCart.value.map((item) => ({
+              productId: item.product_id,
+              variantId: item.variant_id,
+              quantity: item.quantity,
+            }));
+            setCart(mergeCarts(useStore.getState().cart, savedCart));
           }
 
           // Apply wishlist
@@ -241,14 +248,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         }).catch(() => {});
 
         getCart(sbUser.id).then((dbCart) => {
-          if (dbCart && dbCart.length > 0) {
-            setCart(
-              dbCart.map((item) => ({
-                productId: item.product_id,
-                variantId: item.variant_id,
-                quantity: item.quantity,
-              }))
-            );
+          if (Array.isArray(dbCart)) {
+            const savedCart = dbCart.map((item) => ({
+              productId: item.product_id,
+              variantId: item.variant_id,
+              quantity: item.quantity,
+            }));
+            // Merge, never replace -- see the note on the hydration path above.
+            setCart(mergeCarts(useStore.getState().cart, savedCart));
           }
         }).catch(() => {});
       }

@@ -19,12 +19,16 @@ export function useCartDetails() {
   const cart = useStore(state => state.cart);
   const [products, setProducts] = useState<ProductWithVariants[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  /* If the catalogue fetch fails, every cart line becomes unresolvable.
+     That used to render as "your cart is empty" with no error anywhere. */
+  const [loadError, setLoadError] = useState<string | null>(null);
 
   // Settings
   const settings = { free_delivery_threshold: 299, delivery_cost: 25 };
 
   const refreshInventory = useCallback(async () => {
     try {
+      setLoadError(null);
       const prods = await getProducts({ activeOnly: true });
       if (cart.length > 0) {
         const vids = cart.map(c => c.variantId).filter(Boolean);
@@ -54,8 +58,9 @@ export function useCartDetails() {
         }
       }
       setProducts(prods);
-    } catch (err) {
+    } catch (err: any) {
       console.error('Error refreshing cart inventory:', err);
+      setLoadError(err?.message || 'Could not load cart items');
     } finally {
       setIsLoading(false);
     }
@@ -128,8 +133,17 @@ export function useCartDetails() {
     deliveryProgress,
     neededForFree,
     isLoading,
-    isEmpty: cartItemsData.length === 0,
+    /* Emptiness is a property of the CART, not of whether a background
+       catalogue fetch happened to succeed. Deriving it from cartItemsData
+       meant one failed /api/products request -- or a single product the
+       endpoint filtered out -- hid the cart bar entirely and told the
+       customer their cart was empty while their items were still in it. */
+    isEmpty: cart.length === 0,
+    /* Lines we could resolve against the catalogue. Checkout still requires
+       every line to resolve; only visibility was wrong. */
+    hasResolvedItems: cartItemsData.length > 0,
     unresolvedCount,
+    loadError,
     hasStockIssue,
     itemsWithStockIssues,
     canProceedToCheckout,

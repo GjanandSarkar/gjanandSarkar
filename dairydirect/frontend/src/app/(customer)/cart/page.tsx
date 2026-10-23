@@ -34,6 +34,10 @@ export default function CartScreen() {
     neededForFree,
     isLoading,
     isEmpty,
+    hasResolvedItems,
+    loadError,
+    unresolvedCount,
+    refreshInventory,
     hasStockIssue,
     canProceedToCheckout,
   } = useCartDetails();
@@ -85,6 +89,44 @@ export default function CartScreen() {
           </h1>
         </div>
         <EmptyCart />
+      </div>
+    );
+  }
+
+  /* The cart holds items but none of them could be resolved against the
+     catalogue -- a failed /api/products call, or products that were
+     unpublished. Previously this rendered the normal cart with no rows and
+     a zero total, which looked broken and gave no way to recover. Say what
+     happened and offer a retry instead. */
+  if (!isLoading && !hasResolvedItems) {
+    return (
+      <div className="flex flex-col min-h-screen" style={{ background: 'var(--color-surface)' }}>
+        <div className="flex items-center gap-3 px-5 py-4 md:px-10 md:py-6">
+          <button onClick={() => router.back()}
+            className="w-9 h-9 rounded-[10px] flex items-center justify-center md:hidden transition-all active:scale-95 bg-surface-container-low text-on-surface">
+            <ArrowLeft className="w-4.5 h-4.5" />
+          </button>
+          <h1 className="font-extrabold text-[24px] tracking-tight text-on-surface">
+            {t('myCart')}
+          </h1>
+        </div>
+
+        <div className="flex flex-col items-center justify-center text-center gap-3 px-6 py-16">
+          <p className="text-base font-bold text-foreground">
+            We couldn&apos;t load your cart items
+          </p>
+          <p className="text-sm text-foreground-muted max-w-sm">
+            {loadError
+              ? 'There was a problem reaching our catalogue. Your items are still saved.'
+              : `${unresolvedCount} item(s) in your cart are no longer available to buy.`}
+          </p>
+          <button
+            onClick={() => refreshInventory()}
+            className="mt-2 px-5 py-2.5 rounded-xl bg-primary text-on-primary text-sm font-bold active:scale-95 transition-transform"
+          >
+            Try again
+          </button>
+        </div>
       </div>
     );
   }
