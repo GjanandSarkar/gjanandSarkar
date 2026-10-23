@@ -70,7 +70,21 @@ export function useCartDetails() {
       .map(item => {
         const product = products.find(p => p.id === item.productId);
         const variant = product?.product_variants?.find(v => v.id === item.variantId);
-        if (!product || !variant) return null;
+        if (!product || !variant) {
+          /* A cart line we cannot resolve against the catalogue. This used to
+             disappear in silence, which is how the Deal of the Day bug stayed
+             invisible: the homepage listed unapproved products, /api/products
+             filtered them out, the line vanished and the cart reported itself
+             empty with no error anywhere. Never fail silently here again. */
+          if (process.env.NODE_ENV !== 'production') {
+            console.warn(
+              `[cart] dropping unresolvable line product=${item.productId} variant=${item.variantId}. ` +
+                'The product is in the cart but not returned by /api/products ' +
+                '(inactive, unapproved, or deleted).'
+            );
+          }
+          return null;
+        }
 
         const availableStock = Math.max(0, variant.available_quantity ?? variant.stock ?? 0);
         const isOutOfStock = availableStock <= 0;
@@ -90,6 +104,7 @@ export function useCartDetails() {
       .filter(Boolean) as CartItemWithStock[];
   }, [cart, products]);
 
+  const unresolvedCount = cart.length - cartItemsData.length;
   const hasStockIssue = cartItemsData.some(item => item.hasStockIssue);
   const itemsWithStockIssues = cartItemsData.filter(item => item.hasStockIssue);
 
@@ -114,6 +129,7 @@ export function useCartDetails() {
     neededForFree,
     isLoading,
     isEmpty: cartItemsData.length === 0,
+    unresolvedCount,
     hasStockIssue,
     itemsWithStockIssues,
     canProceedToCheckout,

@@ -47,7 +47,13 @@ export async function GET(request: NextRequest) {
         const select =
           'id, name, category, image_url, brand, product_variants(id, weight, price, original_price, stock)';
 
-        let query = sb.from('products').select(select).eq('is_active', true).limit(4);
+        let query = sb
+          .from('products')
+          .select(select)
+          .eq('is_active', true)
+          // An ad must never promote a product the cart cannot resolve.
+          .eq('approval_status', 'approved')
+          .limit(4);
 
         if (ad.productIds.length) {
           query = query.in('id', ad.productIds);

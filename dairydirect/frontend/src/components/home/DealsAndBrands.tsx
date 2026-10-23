@@ -9,6 +9,7 @@ import {
   ShoppingCart
 } from 'lucide-react';
 import type { CatalogProduct } from '@/lib/types/catalog';
+import { SmartImage } from '@/components/ui/SmartImage';
 import { useStore } from '@/store/useStore';
 import { addToCart } from '@/lib/api/cart';
 import { PLACEHOLDER_PRODUCT_IMAGE } from '@/lib/constants/brand';
@@ -125,8 +126,17 @@ export function DealsAndBrands({ products }: DealsAndBrandsProps) {
             {displayProducts.map((prod, idx) => {
               const variant = prod.product_variants?.[0];
               const price = variant?.price ?? 199;
-              const originalPrice = variant?.original_price ?? Math.round(price * 1.25);
-              const discountPercent = Math.round(((originalPrice - price) / originalPrice) * 100);
+              /* Honest pricing: a strikethrough is only legal when a real
+                 higher price exists. This used to fall back to price * 1.25,
+                 which fabricated a 25% discount on every product that had no
+                 original_price (Consumer Protection Act 2019 / Legal
+                 Metrology Rules). Same rule as ProductCard and the PDP. */
+              const originalPrice = variant?.original_price ?? null;
+              const hasRealDiscount =
+                typeof originalPrice === 'number' && originalPrice > price;
+              const discountPercent = hasRealDiscount
+                ? Math.round(((originalPrice - price) / originalPrice) * 100)
+                : 0;
 
               return (
                 <div
@@ -135,15 +145,19 @@ export function DealsAndBrands({ products }: DealsAndBrandsProps) {
                 >
                   <div className="relative">
                     {/* Discount Badge */}
-                    <span className="absolute top-1 left-1 bg-red-600 text-white text-[9px] font-black px-1.5 py-0.5 rounded shadow-xs z-10">
-                      {discountPercent}% OFF
-                    </span>
+                    {hasRealDiscount && (
+                      <span className="absolute top-1 left-1 bg-error text-on-error text-[9px] font-black px-1.5 py-0.5 rounded shadow-xs z-10">
+                        {discountPercent}% OFF
+                      </span>
+                    )}
 
                     {/* Image */}
                     <div className="w-full aspect-square bg-surface rounded-lg p-2 flex items-center justify-center overflow-hidden mb-2">
-                      <img
+                      <SmartImage
                         src={prod.image_url || PLACEHOLDER_PRODUCT_IMAGE}
                         alt={prod.name}
+                        width={160}
+                        height={160}
                         className="w-full h-full object-contain group-hover:scale-105 transition-transform"
                       />
                     </div>
@@ -162,17 +176,25 @@ export function DealsAndBrands({ products }: DealsAndBrandsProps) {
                       <span className="text-sm font-black text-primary">
                         ₹{price}
                       </span>
-                      <span className="text-[10px] text-foreground-muted line-through">
-                        ₹{originalPrice}
-                      </span>
+                      {hasRealDiscount && (
+                        <span className="text-[10px] text-foreground-muted line-through">
+                          ₹{originalPrice}
+                        </span>
+                      )}
                     </div>
 
                     {/* Rating */}
-                    <div className="flex items-center gap-1 text-[10px] text-warning font-bold mb-2">
-                      <Star className="w-3 h-3 fill-amber-400 text-warning" />
-                      <span className="text-foreground">4.{7 - idx}</span>
-                      <span className="text-foreground-muted font-normal">({85 + idx * 42})</span>
-                    </div>
+                    {(prod.reviews_count ?? 0) > 0 && prod.rating ? (
+                      <div className="flex items-center gap-1 text-[10px] text-warning font-bold mb-2">
+                        <Star className="w-3 h-3 fill-current text-warning" />
+                        <span className="text-foreground">{Number(prod.rating).toFixed(1)}</span>
+                        <span className="text-foreground-muted font-normal">
+                          ({prod.reviews_count})
+                        </span>
+                      </div>
+                    ) : (
+                      <div className="mb-2 h-[18px]" aria-hidden="true" />
+                    )}
 
                     {/* Quick Add */}
                     <button

@@ -117,6 +117,38 @@ export async function DELETE(
 
     const sb = getAdminSupabase();
     const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id);
+
+    /* Refuse to delete a category that still has products.
+
+       Deleting one used to orphan every product referencing it, and because
+       GET re-seeded category names from products.category the row would then
+       reappear -- so the delete looked like it had silently failed. Report
+       the conflict instead of destroying the link. */
+    const { data: catRow } = await sb
+      .from('categories')
+      .select('id, name')
+      .eq(isUuid ? 'id' : 'name', id)
+      .maybeSingle();
+
+    if (!catRow) {
+      return NextResponse.json({ error: 'Category not found' }, { status: 404 });
+    }
+
+    const { count: linkedCount } = await sb
+      .from('products')
+      .select('id', { count: 'exact', head: true })
+      .or(`category_id.eq.${catRow.id},category.eq.${catRow.name}`);
+
+    if ((linkedCount ?? 0) > 0) {
+      return NextResponse.json(
+        {
+          error: `Cannot delete "${catRow.name}": ${linkedCount} product(s) still use this category. Reassign or remove them first.`,
+          product_count: linkedCount,
+        },
+        { status: 409 }
+      );
+    }
+
     const deleteQuery = isUuid
       ? sb.from('categories').delete().eq('id', id)
       : sb.from('categories').delete().eq('name', id);
