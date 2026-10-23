@@ -37,7 +37,8 @@ export async function getProductsServer(
     }
 
     if (options.activeOnly !== false) {
-      query = query.eq('is_active', true);
+      query = query.eq('is_active', true)
+      .eq('approval_status', 'approved');
     }
 
     if (options.q) {

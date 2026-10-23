@@ -33,6 +33,7 @@ async function fetchHomeFeed(): Promise<HomeProduct[]> {
         'id, name, category, image_url, brand, rating, reviews_count, product_variants(id, weight, price, original_price, stock, available_quantity)'
       )
       .eq('is_active', true)
+      .eq('approval_status', 'approved')
       .order('created_at', { ascending: false })
       .limit(HOME_FEED_LIMIT);
 
@@ -83,6 +84,7 @@ async function fetchCatalog(): Promise<HomeProduct[]> {
         'id, name, category, image_url, description, brand, rating, reviews_count, product_variants(id, weight, price, original_price, stock, available_quantity)'
       )
       .eq('is_active', true)
+      .eq('approval_status', 'approved')
       .order('created_at', { ascending: false })
       .limit(500);
 
@@ -119,6 +121,7 @@ export function getCategoryProducts(category?: string): Promise<HomeProduct[]> {
             'id, name, category, image_url, description, brand, rating, reviews_count, product_variants(id, weight, price, original_price, stock, available_quantity)'
           )
           .eq('is_active', true)
+      .eq('approval_status', 'approved')
           .order('created_at', { ascending: false })
           .limit(200);
 

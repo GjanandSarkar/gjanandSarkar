@@ -70,36 +70,42 @@ export async function GET(request: NextRequest) {
     // Fetch products to count items per category
     const { data: productsData } = await sb.from('products').select('id, category, category_id');
 
-    // Auto-sync missing categories from products table into categories table
-    const existingNames = new Set((catData || []).map((c: any) => (c.name || '').toLowerCase()));
-    const missingFromProducts: string[] = [];
+    /* Bootstrap seeding ONLY when the categories table is completely empty.
 
-    (productsData || []).forEach((p: any) => {
-      if (p.category && !existingNames.has(p.category.toLowerCase()) && !missingFromProducts.includes(p.category)) {
-        missingFromProducts.push(p.category);
-      }
-    });
+       This used to run on EVERY GET: it scanned products.category and
+       re-inserted any name missing from the categories table. That silently
+       broke all admin CRUD, because the page refetches straight after a
+       write -- delete a category and the very next GET resurrected it from
+       the product rows; rename one and the old name came back as a
+       duplicate. Both looked like "the save did not work".
 
-    if (missingFromProducts.length > 0) {
-      try {
-        const newCategoryInserts = missingFromProducts.map((catName, i) => ({
-          name: catName,
-          slug: catName.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, ''),
-          sort_order: (catData?.length || 0) + i + 1,
-          is_active: true,
-        }));
-        await sb.from('categories').insert(newCategoryInserts);
+       A GET must never mutate state. Seeding is kept only as a first-run
+       bootstrap so a fresh install is not stuck with an empty screen. */
+    if ((catData || []).length === 0) {
+      const seedNames: string[] = [];
+      (productsData || []).forEach((p: any) => {
+        if (p.category && !seedNames.includes(p.category)) seedNames.push(p.category);
+      });
 
-        // Re-query categories table
-        const { data: refreshedCatData } = await sb
-          .from('categories')
-          .select('*')
-          .order('sort_order', { ascending: true });
-
-        if (refreshedCatData) {
-          catData = refreshedCatData;
+      if (seedNames.length > 0) {
+        try {
+          await sb.from('categories').insert(
+            seedNames.map((catName, i) => ({
+              name: catName,
+              slug: catName.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, ''),
+              sort_order: i + 1,
+              is_active: true,
+            }))
+          );
+          const { data: refreshedCatData } = await sb
+            .from('categories')
+            .select('*')
+            .order('sort_order', { ascending: true });
+          if (refreshedCatData) catData = refreshedCatData;
+        } catch (err: any) {
+          console.warn('[Categories GET] bootstrap seed failed:', err?.message);
         }
-      } catch {}
+      }
     }
 
     const categories = (catData || []).map((c: any) => {
