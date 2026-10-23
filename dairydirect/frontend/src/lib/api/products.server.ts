@@ -1,3 +1,4 @@
+import { filterSellable } from '@/lib/catalog/sellable';
 import 'server-only';
 
 import { getAdminSupabase } from '@/lib/supabase/admin';
@@ -51,7 +52,8 @@ export async function getProductsServer(
 
     const { data, error } = await query;
     if (error) throw error;
-    return data as ProductWithVariants[];
+    // Storefront must not list products it cannot price.
+    return filterSellable(data as ProductWithVariants[]);
   } catch (error) {
     console.error('getProductsServer error:', error);
     return [];
