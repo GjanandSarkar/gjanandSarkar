@@ -32,8 +32,8 @@ export function BottomNav() {
         WebkitBackdropFilter: 'blur(20px)',
         paddingBottom: 'max(env(safe-area-inset-bottom, 0px), 8px)',
         paddingTop: '8px',
-        minHeight: 'var(--bottom-nav-h)',
-        boxSizing: 'content-box',
+        minHeight: 'calc(var(--bottom-nav-h) + env(safe-area-inset-bottom, 0px))',
+        boxSizing: 'border-box',
       }}>
       
       {/* Top tonal line */}

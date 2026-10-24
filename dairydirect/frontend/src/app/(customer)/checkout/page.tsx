@@ -483,7 +483,7 @@ export default function CheckoutScreen() {
           </div>
         </div>
 
-        <div className="lg:hidden fixed bottom-0 left-0 right-0 md:left-[260px] p-4 bg-surface border-t border-sand z-40 pb-safe shadow-[0_-10px_20px_rgba(0,0,0,0.05)]">
+        <div className="lg:hidden checkout-action-bar p-4 bg-surface border-t border-border shadow-[0_-10px_20px_rgba(0,0,0,0.05)]">
           <div className="max-w-[800px] mx-auto flex items-center justify-between gap-4">
             <div className="flex flex-col">
               <span className="text-[11px] font-bold text-muted uppercase">Total Pay</span>

@@ -584,6 +584,25 @@
   }
 }
 
+/* Checkout action bar. It was pinned to bottom:0 underneath the bottom
+   navigation, which hid the Place Order button on phones entirely -- only a
+   sliver showed above the nav. Offsets live here, in one place. */
+.checkout-action-bar {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: calc(var(--bottom-nav-h, 64px) + env(safe-area-inset-bottom, 0px));
+  z-index: 40;
+}
+
+/* No bottom nav from md up; the sidebar starts at 260px. */
+@media (min-width: 768px) {
+  .checkout-action-bar {
+    left: 260px;
+    bottom: 0;
+  }
+}
+
 .pb-bottom-stack {
     padding-bottom: calc(var(--bottom-nav-h) + 16px + env(safe-area-inset-bottom, 0px));
   }
