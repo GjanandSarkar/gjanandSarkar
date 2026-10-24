@@ -7,7 +7,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { query, withTransaction, isPgConfigured } from '@/lib/aws/rds';
 import { calculateOrderPricing } from '@/lib/pricing';
 import { getAuthUser, getClientIP } from '@/lib/api/auth-middleware';
-import { checkRateLimit, invalidateProductsCache, invalidateUserProfileCache, invalidateAdminCaches } from '@/lib/aws/redis';
+import { checkRateLimit, invalidateProductsCache, invalidateUserProfileCache, invalidateAdminCaches, invalidateSellerProfileCache, invalidateSellerAnalyticsCache } from '@/lib/aws/redis';
 import { sendOrderConfirmationEmail, sendAdminNewOrderAlert } from '@/lib/aws/ses';
 import { sendSMS } from '@/lib/aws/sns';
 import { PlaceOrderSchema } from '@/lib/security/sanitize';
@@ -405,6 +405,60 @@ export async function POST(request: NextRequest) {
       try {
         await invalidateUserProfileCache(auth.userId);
         await invalidateAdminCaches();
+
+        /* Refresh the seller's dashboard too.
+
+           The seller overview (GET /api/sellers?userId=...) is served from a
+           5-minute Redis cache keyed by the seller's user id, and nothing
+           invalidated it when an order arrived. So "Recent Store Orders"
+           kept showing the pre-order snapshot ("No customer orders received
+           yet") while the Orders tab, which queries live, already listed the
+           order -- the two disagreed for up to five minutes.
+
+           Products are matched the same way the dashboard resolves them:
+           by sellers.seller_id and by products.created_by. */
+        if (productIds.length > 0) {
+          const sbCache = getAdminSupabase();
+          const { data: orderedProducts, error: orderedErr } = await sbCache
+            .from('products')
+            .select('seller_id, created_by')
+            .in('id', productIds);
+
+          if (orderedErr) {
+            console.error('[PlaceOrder] seller cache invalidation lookup failed:', orderedErr.message);
+          }
+
+          const sellerIds = new Set<string>();
+          const ownerUserIds = new Set<string>();
+
+          (orderedProducts ?? []).forEach((row: any) => {
+            if (row.seller_id) sellerIds.add(row.seller_id);
+            if (row.created_by) ownerUserIds.add(row.created_by);
+          });
+
+          if (sellerIds.size > 0) {
+            const { data: sellerRows } = await sbCache
+              .from('sellers')
+              .select('id, user_id')
+              .in('id', Array.from(sellerIds));
+
+            (sellerRows ?? []).forEach((row: any) => {
+              if (row.user_id) ownerUserIds.add(row.user_id);
+            });
+
+            await Promise.all(
+              Array.from(sellerIds).map((id) =>
+                invalidateSellerAnalyticsCache(id).catch(() => {})
+              )
+            );
+          }
+
+          await Promise.all(
+            Array.from(ownerUserIds).map((uid) =>
+              invalidateSellerProfileCache(uid).catch(() => {})
+            )
+          );
+        }
       } catch (e) {
         // non-blocking
       }
