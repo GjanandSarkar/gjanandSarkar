@@ -529,9 +529,14 @@ export function ProductClient({ product: initialProduct }: ProductClientProps) {
         </div>
       </div>
 
-      {/* Floating Bottom Action Bar */}
-      <div className="fixed bottom-0 left-0 right-0 p-4 bg-surface/95 backdrop-blur-md border-t border-border z-30 shadow-lg">
-        <div className="flex items-center justify-between gap-4 max-w-xl mx-auto">
+      {/* Floating action bar.
+
+          This was pinned edge to edge as a full-width slab, which on a wide
+          screen stretched a single Add to Cart button across the whole
+          viewport. It is now a centred, self-contained pill that clears the
+          bottom navigation and the home indicator. */}
+      <div className="pdp-action-bar px-4 py-3 bg-surface/95 backdrop-blur-md border border-border rounded-2xl shadow-xl">
+        <div className="flex items-center justify-between gap-4">
           <div>
             <p className="text-[10px] font-bold uppercase tracking-wider text-foreground-muted">Price</p>
             <p className="text-xl sm:text-2xl font-black text-primary">₹{selectedVariant.price}</p>

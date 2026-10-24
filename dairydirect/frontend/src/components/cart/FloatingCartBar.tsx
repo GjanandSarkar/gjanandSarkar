@@ -15,9 +15,14 @@ export function FloatingCartBar({ onOpen }: FloatingCartBarProps) {
   const pathname = usePathname();
   const { totalItems, subtotal, isEmpty, isLoading } = useCartDetails();
 
-  // Hide on checkout, auth, or if empty
+  // Hide on checkout, auth, or if empty.
   const hideOn = ['/checkout', '/order-confirmed', '/login', '/onboarding'];
-  const isHidden = hideOn.some(p => pathname.startsWith(p)) || isEmpty || isLoading;
+  // Also hide on a product DETAIL page (/products/<id>), which has its own
+  // bottom action bar -- two stacked bars otherwise. The /products listing
+  // keeps the bar, hence the exact-segment match rather than a prefix.
+  const isProductDetail = /^\/products\/[^/]+\/?$/.test(pathname);
+  const isHidden =
+    hideOn.some(p => pathname.startsWith(p)) || isProductDetail || isEmpty || isLoading;
 
   return (
     <AnimatePresence>

@@ -6,7 +6,6 @@ import { CategoryIcon } from '@/components/shared/CategoryIcon';
 import {
   Menu,
   ChevronDown,
-  Truck,
   ShieldCheck,
   Milk,
   Flame,
@@ -131,12 +130,19 @@ export function CategoryNavBar() {
         <div className="h-5 w-px bg-border/80 shrink-0 hidden sm:block" />
 
         {/* Category Nav Links */}
-        <nav className="hidden md:flex items-center gap-8 lg:gap-12 xl:gap-14 overflow-x-auto no-scrollbar py-1">
-          {reducedCategories.map((item) => (
+        <nav className="hidden md:flex items-center gap-6 lg:gap-9 xl:gap-12 py-1 min-w-0">
+          {/* The row used to scroll sideways, which hides navigation behind a
+              gesture most people never try on desktop. It now shows only as
+              many categories as genuinely fit and reveals more as the viewport
+              grows; everything stays reachable through the "All Categories"
+              menu on the left, which always lists the full set. */}
+          {reducedCategories.map((item, idx) => (
             <Link
               key={item.name}
               href={item.href}
-              className="text-foreground hover:text-primary font-bold text-xs lg:text-[13px] tracking-tight hover:underline underline-offset-8 decoration-2 decoration-secondary transition-all whitespace-nowrap py-1 px-1 group flex items-center gap-1.5"
+              className={`text-foreground hover:text-primary font-bold text-xs lg:text-[13px] tracking-tight hover:underline underline-offset-8 decoration-2 decoration-secondary transition-all whitespace-nowrap py-1 px-1 group items-center gap-1.5 shrink-0 ${
+                idx < 3 ? 'flex' : idx === 3 ? 'hidden lg:flex' : 'hidden xl:flex'
+              }`}
             >
               <span>{item.name}</span>
             </Link>
@@ -183,12 +189,7 @@ export function CategoryNavBar() {
 
         {/* Right: Trust Highlights */}
         <div className="ml-auto hidden xl:flex items-center gap-6 shrink-0 text-xs font-semibold text-foreground-muted">
-          <div className="flex items-center gap-1.5 text-success bg-success-bg/90 px-3 py-1 rounded-full border border-success/20/60">
-            <Truck className="w-3.5 h-3.5 text-success animate-pulse" />
-            <span className="text-[11px] font-bold">Doorstep by 7:00 AM</span>
-          </div>
-
-          <div className="flex items-center gap-1.5 text-warning bg-warning-bg/90 px-3 py-1 rounded-full border border-warning/20/60">
+          <div className="flex items-center gap-1.5 text-warning bg-warning-bg/90 px-3 py-1 rounded-full border border-warning/30">
             <ShieldCheck className="w-3.5 h-3.5 text-warning" />
             <span className="text-[11px] font-bold">100% Lab Tested Purity</span>
           </div>

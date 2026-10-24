@@ -17,11 +17,11 @@ export function Footer() {
   };
 
   return (
-    <footer className="w-full bg-primary-fixed-dim text-white pt-14 pb-8 border-t border-primary relative overflow-hidden">
+    <footer className="w-full bg-surface-muted text-foreground pt-14 pb-8 border-t border-border relative overflow-hidden">
       
       {/* Decorative Peacock Watermark Background */}
       <div className="absolute right-0 bottom-0 w-96 h-96 opacity-5 pointer-events-none">
-        <svg viewBox="0 0 100 100" className="w-full h-full fill-white">
+        <svg viewBox="0 0 100 100" className="w-full h-full fill-primary">
           <path d="M50 10 C65 25 80 45 70 70 C60 90 40 95 30 75 C20 55 35 25 50 10 Z" />
         </svg>
       </div>
@@ -29,7 +29,7 @@ export function Footer() {
       <div className="max-w-[1440px] mx-auto px-4 md:px-8 relative z-10">
         
         {/* Main Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-8 pb-12 border-b border-white/10">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-8 pb-12 border-b border-border">
           
           {/* Column 1: Brand & Bio (2 cols on lg) */}
           <div className="lg:col-span-2 space-y-4">
@@ -46,7 +46,7 @@ export function Footer() {
                 />
                 <div className="flex flex-col">
                   <span className="text-xl md:text-2xl font-black tracking-tight leading-none">
-                    <span className="text-white">Gjanand</span>
+                    <span className="text-foreground">Gjanand</span>
                   </span>
                   <span className="text-[10px] md:text-[11px] tracking-[0.2em] font-black text-secondary uppercase text-right leading-none mt-0.5">
                     SARKAR
@@ -55,7 +55,7 @@ export function Footer() {
               </div>
             </Link>
 
-            <p className="text-xs text-success-bg/80 leading-relaxed max-w-sm">
+            <p className="text-xs text-foreground-muted leading-relaxed max-w-sm">
               Proudly Indian. Purely Authentic. One verified partner brand per
               category — across dairy, groceries, wellness, home, fashion and more.
             </p>
@@ -66,7 +66,7 @@ export function Footer() {
                 href="https://instagram.com" 
                 target="_blank" 
                 rel="noreferrer" 
-                className="w-8 h-8 rounded-full bg-surface/10 hover:bg-secondary flex items-center justify-center text-white transition-colors cursor-pointer" 
+                className="w-8 h-8 rounded-full bg-primary/10 hover:bg-secondary flex items-center justify-center text-foreground hover:text-on-secondary transition-colors cursor-pointer" 
                 aria-label="Instagram"
               >
                 <svg className="w-4 h-4 fill-current" viewBox="0 0 24 24">
@@ -79,7 +79,7 @@ export function Footer() {
                 href="https://facebook.com" 
                 target="_blank" 
                 rel="noreferrer" 
-                className="w-8 h-8 rounded-full bg-surface/10 hover:bg-secondary flex items-center justify-center text-white transition-colors cursor-pointer" 
+                className="w-8 h-8 rounded-full bg-primary/10 hover:bg-secondary flex items-center justify-center text-foreground hover:text-on-secondary transition-colors cursor-pointer" 
                 aria-label="Facebook"
               >
                 <svg className="w-4 h-4 fill-current" viewBox="0 0 24 24">
@@ -92,7 +92,7 @@ export function Footer() {
                 href="https://youtube.com" 
                 target="_blank" 
                 rel="noreferrer" 
-                className="w-8 h-8 rounded-full bg-surface/10 hover:bg-secondary flex items-center justify-center text-white transition-colors cursor-pointer" 
+                className="w-8 h-8 rounded-full bg-primary/10 hover:bg-secondary flex items-center justify-center text-foreground hover:text-on-secondary transition-colors cursor-pointer" 
                 aria-label="YouTube"
               >
                 <svg className="w-4 h-4 fill-current" viewBox="0 0 24 24">
@@ -105,7 +105,7 @@ export function Footer() {
                 href="https://linkedin.com" 
                 target="_blank" 
                 rel="noreferrer" 
-                className="w-8 h-8 rounded-full bg-surface/10 hover:bg-secondary flex items-center justify-center text-white transition-colors cursor-pointer" 
+                className="w-8 h-8 rounded-full bg-primary/10 hover:bg-secondary flex items-center justify-center text-foreground hover:text-on-secondary transition-colors cursor-pointer" 
                 aria-label="LinkedIn"
               >
                 <svg className="w-4 h-4 fill-current" viewBox="0 0 24 24">
@@ -118,7 +118,7 @@ export function Footer() {
                 href="https://twitter.com" 
                 target="_blank" 
                 rel="noreferrer" 
-                className="w-8 h-8 rounded-full bg-surface/10 hover:bg-secondary flex items-center justify-center text-white transition-colors cursor-pointer" 
+                className="w-8 h-8 rounded-full bg-primary/10 hover:bg-secondary flex items-center justify-center text-foreground hover:text-on-secondary transition-colors cursor-pointer" 
                 aria-label="Twitter"
               >
                 <svg className="w-4 h-4 fill-current" viewBox="0 0 24 24">
@@ -133,12 +133,12 @@ export function Footer() {
             <h4 className="text-xs font-bold uppercase tracking-wider text-warning">
               Company
             </h4>
-            <ul className="space-y-2 text-xs text-success-bg/80">
-              <li><Link href="/about" className="hover:text-white transition-colors">About Us</Link></li>
-              <li><Link href="/contact" className="hover:text-white transition-colors">Contact Us</Link></li>
-              <li><Link href="/faq" className="hover:text-white transition-colors">FAQs & Help</Link></li>
-              <li><Link href="/become-seller" className="hover:text-white transition-colors">Partner With Us</Link></li>
-              <li><Link href="/about#verification" className="hover:text-white transition-colors">Brand Verification</Link></li>
+            <ul className="space-y-2 text-xs text-foreground-muted">
+              <li><Link href="/about" className="hover:text-primary transition-colors">About Us</Link></li>
+              <li><Link href="/contact" className="hover:text-primary transition-colors">Contact Us</Link></li>
+              <li><Link href="/faq" className="hover:text-primary transition-colors">FAQs & Help</Link></li>
+              <li><Link href="/become-seller" className="hover:text-primary transition-colors">Partner With Us</Link></li>
+              <li><Link href="/about#verification" className="hover:text-primary transition-colors">Brand Verification</Link></li>
             </ul>
           </div>
 
@@ -147,12 +147,12 @@ export function Footer() {
             <h4 className="text-xs font-bold uppercase tracking-wider text-warning">
               Help & Orders
             </h4>
-            <ul className="space-y-2 text-xs text-success-bg/80">
-              <li><Link href="/orders" className="hover:text-white transition-colors">Track Orders</Link></li>
-              <li><Link href="/returns" className="hover:text-white transition-colors">Returns & Refunds</Link></li>
-              <li><Link href="/tracking" className="hover:text-white transition-colors">Delivery Timings (5:30 AM)</Link></li>
-              <li><Link href="/subscribe" className="hover:text-white transition-colors">Manage Subscriptions</Link></li>
-              <li><Link href="/contact" className="hover:text-white transition-colors">Customer Care (24/7)</Link></li>
+            <ul className="space-y-2 text-xs text-foreground-muted">
+              <li><Link href="/orders" className="hover:text-primary transition-colors">Track Orders</Link></li>
+              <li><Link href="/returns" className="hover:text-primary transition-colors">Returns & Refunds</Link></li>
+              <li><Link href="/tracking" className="hover:text-primary transition-colors">Delivery Timings (5:30 AM)</Link></li>
+              <li><Link href="/subscribe" className="hover:text-primary transition-colors">Manage Subscriptions</Link></li>
+              <li><Link href="/contact" className="hover:text-primary transition-colors">Customer Care (24/7)</Link></li>
             </ul>
           </div>
 
@@ -161,12 +161,12 @@ export function Footer() {
             <h4 className="text-xs font-bold uppercase tracking-wider text-warning">
               Partnerships
             </h4>
-            <ul className="space-y-2 text-xs text-success-bg/80">
-              <li><Link href="/become-seller" className="hover:text-white transition-colors">Become a Seller</Link></li>
-              <li><Link href="/seller/dashboard" className="hover:text-white transition-colors">Seller Portal Login</Link></li>
-              <li><Link href="/become-seller" className="hover:text-white transition-colors">Partner Guidelines</Link></li>
-              <li><Link href="/about" className="hover:text-white transition-colors">Quality Standards</Link></li>
-              <li><Link href="/contact" className="hover:text-white transition-colors">Bulk & Corporate Supply</Link></li>
+            <ul className="space-y-2 text-xs text-foreground-muted">
+              <li><Link href="/become-seller" className="hover:text-primary transition-colors">Become a Seller</Link></li>
+              <li><Link href="/seller/dashboard" className="hover:text-primary transition-colors">Seller Portal Login</Link></li>
+              <li><Link href="/become-seller" className="hover:text-primary transition-colors">Partner Guidelines</Link></li>
+              <li><Link href="/about" className="hover:text-primary transition-colors">Quality Standards</Link></li>
+              <li><Link href="/contact" className="hover:text-primary transition-colors">Bulk & Corporate Supply</Link></li>
             </ul>
           </div>
 
@@ -175,7 +175,7 @@ export function Footer() {
             <h4 className="text-xs font-bold uppercase tracking-wider text-warning">
               Stay Connected
             </h4>
-            <p className="text-xs text-success-bg/80 leading-relaxed">
+            <p className="text-xs text-foreground-muted leading-relaxed">
               Get updates on new partner brands, category launches and festive offers.
             </p>
 
@@ -186,13 +186,13 @@ export function Footer() {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="Enter your email"
-                  className="w-full px-3.5 py-2 text-xs rounded-lg bg-surface/10 border border-white/20 text-white placeholder-emerald-200/50 outline-none focus:border-secondary"
+                  className="w-full px-3.5 py-2 text-xs rounded-lg bg-surface border border-border text-foreground placeholder-foreground-muted outline-none focus:border-secondary"
                   required
                 />
               </div>
               <button
                 type="submit"
-                className="w-full py-2 bg-secondary hover:bg-secondary-hover text-white font-bold text-xs rounded-lg transition-colors flex items-center justify-center gap-1.5 shadow-xs cursor-pointer"
+                className="w-full py-2 bg-secondary hover:bg-secondary-hover text-on-secondary font-bold text-xs rounded-lg transition-colors flex items-center justify-center gap-1.5 shadow-xs cursor-pointer"
               >
                 <Send className="w-3.5 h-3.5" />
                 <span>{subscribed ? 'Subscribed!' : 'Subscribe'}</span>
@@ -203,20 +203,20 @@ export function Footer() {
         </div>
 
         {/* Bottom Copyright Bar */}
-        <div className="pt-6 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-success-bg/60">
+        <div className="pt-6 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-foreground-muted">
           <div>
             © {new Date().getFullYear()} Gjanand Sarkar. All Rights Reserved.
           </div>
 
           <div className="flex items-center gap-4 text-[11px]">
-            <Link href="/privacy" className="hover:text-white transition-colors">Privacy Policy</Link>
+            <Link href="/privacy" className="hover:text-primary transition-colors">Privacy Policy</Link>
             <span>•</span>
-            <Link href="/terms" className="hover:text-white transition-colors">Terms of Service</Link>
+            <Link href="/terms" className="hover:text-primary transition-colors">Terms of Service</Link>
             <span>•</span>
-            <Link href="/about#verification" className="hover:text-white transition-colors">Verified Partners</Link>
+            <Link href="/about#verification" className="hover:text-primary transition-colors">Verified Partners</Link>
           </div>
 
-          <div className="flex items-center gap-1 text-success-bg">
+          <div className="flex items-center gap-1 text-foreground-muted">
             <span>Made with</span>
             <Heart className="w-3.5 h-3.5 fill-red-500 text-red-500" />
             <span>in Bharat 🇮🇳</span>

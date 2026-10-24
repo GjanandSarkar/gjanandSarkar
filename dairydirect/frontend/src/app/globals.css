@@ -564,7 +564,27 @@
   /* Clears the fixed mobile bottom stack (nav + floating cart bar).
      Deliberately a class and not an inline style: an inline style cannot be
      undone at a breakpoint, and the desktop layout has no bottom nav. */
-  .pb-bottom-stack {
+  /* Product page action bar: a centred pill, not a full-width slab. All of
+   its positioning lives here so it cannot be split between a class and
+   utilities, which is what broke the cart bar three times. */
+.pdp-action-bar {
+  position: fixed;
+  left: 50%;
+  transform: translateX(-50%);
+  bottom: calc(var(--bottom-nav-h, 64px) + 12px + env(safe-area-inset-bottom, 0px));
+  z-index: 30;
+  width: calc(100% - 1.5rem);
+  max-width: 36rem;
+}
+
+/* No bottom navigation from md up, so the bar drops to the viewport edge. */
+@media (min-width: 768px) {
+  .pdp-action-bar {
+    bottom: 1.5rem;
+  }
+}
+
+.pb-bottom-stack {
     padding-bottom: calc(var(--bottom-nav-h) + 16px + env(safe-area-inset-bottom, 0px));
   }
 
