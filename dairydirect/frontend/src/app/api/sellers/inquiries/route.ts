@@ -441,6 +441,150 @@ export async function PATCH(request: Request) {
       return NextResponse.json({ error: 'Seller application not found' }, { status: 404 });
     }
 
+    /* Approving a seller used to mark the application APPROVED first and
+       create the seller store afterwards, discarding any error from that
+       second step. When the store creation failed the admin still saw
+       "APPROVED" while no seller account existed, so the seller hit
+       "You do not have an active seller account" with nothing to diagnose.
+
+       The store is now provisioned FIRST. If it cannot be created the
+       application stays in its current state and the real reason is
+       returned, so approval and provisioning can never disagree. */
+    let provisionedStore: any = null;
+
+    if (status === 'approved') {
+      // The application must belong to a real account before we can grant it.
+      let approveUserId = existingInquiry.user_id;
+      if (!approveUserId && existingInquiry.email) {
+        const { data: uByEmail } = await sb
+          .from('profiles')
+          .select('id')
+          .eq('email', existingInquiry.email)
+          .maybeSingle();
+        if (uByEmail?.id) approveUserId = uByEmail.id;
+      }
+
+      if (!approveUserId) {
+        return NextResponse.json(
+          {
+            error:
+              `This application is not linked to any user account (no match for ${existingInquiry.email || 'the submitted details'}). ` +
+              'Ask the applicant to sign in with the email they applied with, then approve again.',
+            code: 'NO_LINKED_ACCOUNT',
+          },
+          { status: 409 }
+        );
+      }
+
+      const category = String(existingInquiry.category || 'General').trim();
+
+      /* One company per category is the platform's defining rule, but the
+         admin can override it deliberately. Compared case-insensitively and
+         trimmed so 'Dairy', 'dairy' and ' Dairy ' count as the same. */
+      const { data: activeSellers, error: holdersErr } = await sb
+        .from('sellers')
+        .select('id, store_name, user_id, category')
+        .eq('status', 'active');
+
+      if (holdersErr) {
+        return NextResponse.json({ error: holdersErr.message }, { status: 500 });
+      }
+
+      const clash = (activeSellers ?? []).find(
+        (row: { id: string; store_name: string; user_id: string | null; category: string | null }) =>
+          row.user_id !== approveUserId &&
+          String(row.category ?? '').trim().toLowerCase() === category.toLowerCase()
+      );
+
+      if (clash && !body.confirmCategoryConflict) {
+        return NextResponse.json(
+          {
+            error:
+              `"${category}" already has an active partner: ${clash.store_name}. ` +
+              'Gjanand Sarkar works with one company per category. Deactivate that ' +
+              'seller or assign a different category — or confirm to approve anyway.',
+            code: 'CATEGORY_CONFLICT',
+            conflict: { category, sellerId: clash.id, storeName: clash.store_name },
+          },
+          { status: 409 }
+        );
+      }
+
+      /* Provision the store with an explicit read-then-write.
+         The previous code used .upsert(..., { onConflict: 'user_id' }), but
+         sellers.user_id carries only a plain index -- there is no unique
+         constraint for ON CONFLICT to arbitrate on, so Postgres rejected
+         every one of those statements (42P10) and no seller row was ever
+         created on approval. */
+      const storePayload: Record<string, any> = {
+        user_id: approveUserId,
+        store_name: existingInquiry.business_name,
+        phone: existingInquiry.phone || undefined,
+        state: existingInquiry.state || 'Gujarat',
+        category,
+        description: existingInquiry.notes || existingInquiry.product_range,
+        plan: 'growth',
+        commission_rate: 5.0,
+        status: 'active',
+        gstin: existingInquiry.gstin,
+        pan: existingInquiry.pan,
+        fssai_number: existingInquiry.fssai_number,
+        updated_at: new Date().toISOString(),
+      };
+
+      const { data: existingStore, error: storeReadErr } = await sb
+        .from('sellers')
+        .select('*')
+        .eq('user_id', approveUserId)
+        .maybeSingle();
+
+      if (storeReadErr) {
+        return NextResponse.json({ error: storeReadErr.message }, { status: 500 });
+      }
+
+      if (existingStore) {
+        const { data: updatedStore, error: storeUpdateErr } = await sb
+          .from('sellers')
+          .update(storePayload)
+          .eq('id', existingStore.id)
+          .select()
+          .single();
+
+        if (storeUpdateErr || !updatedStore) {
+          return NextResponse.json(
+            {
+              error: `Could not activate the seller store: ${storeUpdateErr?.message || 'unknown error'}. The application was left unchanged.`,
+              code: 'STORE_PROVISION_FAILED',
+            },
+            { status: 500 }
+          );
+        }
+        provisionedStore = updatedStore;
+      } else {
+        const slugBase = String(existingInquiry.business_name || 'seller')
+          .toLowerCase()
+          .replace(/[^a-z0-9]+/g, '-')
+          .replace(/(^-|-$)/g, '');
+
+        const { data: newStore, error: storeInsertErr } = await sb
+          .from('sellers')
+          .insert({ ...storePayload, slug: `${slugBase}-${approveUserId.slice(0, 4)}` })
+          .select()
+          .single();
+
+        if (storeInsertErr || !newStore) {
+          return NextResponse.json(
+            {
+              error: `Could not create the seller store: ${storeInsertErr?.message || 'unknown error'}. The application was left unchanged.`,
+              code: 'STORE_PROVISION_FAILED',
+            },
+            { status: 500 }
+          );
+        }
+        provisionedStore = newStore;
+      }
+    }
+
     // Update seller_inquiries
     const { data: updated, error: updateErr } = await sb
       .from('seller_inquiries')
@@ -477,35 +621,9 @@ export async function PATCH(request: Request) {
           })
           .eq('id', targetUserId);
 
-        // 2. Set seller store to active
-        const slug = (updated.business_name || 'seller')
-          .toLowerCase()
-          .replace(/[^a-z0-9]+/g, '-')
-          .replace(/(^-|-$)/g, '');
-
-        const { data: store } = await sb
-          .from('sellers')
-          .upsert(
-            {
-              user_id: targetUserId,
-              store_name: updated.business_name,
-              phone: updated.phone || undefined,
-              slug: `${slug}-${targetUserId.slice(0, 4)}`,
-              state: updated.state || 'Gujarat',
-              category: updated.category || 'General',
-              description: updated.notes || updated.product_range,
-              plan: 'growth',
-              commission_rate: 5.0,
-              status: 'active',
-              gstin: updated.gstin,
-              pan: updated.pan,
-              fssai_number: updated.fssai_number,
-              updated_at: new Date().toISOString(),
-            },
-            { onConflict: 'user_id' }
-          )
-          .select()
-          .single();
+        // 2. The store was already created above, before the application was
+        //    marked approved, so the two can never disagree.
+        const store = provisionedStore;
 
         if (store?.id) {
           await sb.from('seller_status_history').insert({

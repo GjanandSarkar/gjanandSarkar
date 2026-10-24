@@ -64,6 +64,7 @@ type DashboardTab =
 export default function SellerDashboardPage() {
   const router = useRouter();
   const user = useStore((s) => s.user);
+  const isAuthLoading = useStore((s) => s.isAuthLoading);
   const sellerStore = useStore((s) => s.sellerStore);
 
   const [activeTab, setActiveTab] = useState<DashboardTab>('overview');
@@ -207,12 +208,23 @@ export default function SellerDashboardPage() {
     }
   }, [user?.id]);
 
-  // Auth redirect check
+  /* Auth redirect.
+
+     This used to key off `isLoading`, which is the DATA loading flag. With
+     no user yet, the effect above takes its `else` branch and immediately
+     sets isLoading = false, so this fired while the session was still being
+     hydrated and bounced a perfectly valid seller to /login. AuthGuard then
+     saw a logged-in seller sitting on /login and sent them back here --
+     producing the endless reload loop after signing in.
+
+     The only correct signal is the auth hydration flag: until it settles we
+     genuinely do not know whether anyone is logged in. */
   useEffect(() => {
-    if (!isLoading && !user) {
+    if (isAuthLoading) return;
+    if (!user) {
       router.replace('/login?redirect=/seller/dashboard');
     }
-  }, [isLoading, user, router]);
+  }, [isAuthLoading, user, router]);
 
   const handleOpenAddProduct = () => {
     setEditingProduct(null);

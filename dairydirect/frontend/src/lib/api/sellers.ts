@@ -178,7 +178,12 @@ export async function getSellerInquiries(status?: string): Promise<SellerInquiry
 /**
  * Update seller inquiry status & internal notes (for Admin)
  */
-export async function updateSellerInquiryStatus(id: string, status: string, adminNotes?: string) {
+export async function updateSellerInquiryStatus(
+  id: string,
+  status: string,
+  adminNotes?: string,
+  options?: { confirmCategoryConflict?: boolean }
+) {
   const token = await getAuthToken();
   const headers: Record<string, string> = { 'Content-Type': 'application/json' };
   if (token) headers['Authorization'] = `Bearer ${token}`;
@@ -187,12 +192,25 @@ export async function updateSellerInquiryStatus(id: string, status: string, admi
     method: 'PATCH',
     headers,
     credentials: 'include',
-    body: JSON.stringify({ id, status, adminNotes }),
+    body: JSON.stringify({
+      id,
+      status,
+      adminNotes,
+      confirmCategoryConflict: options?.confirmCategoryConflict ?? false,
+    }),
   });
 
   if (!res.ok) {
     const data = await res.json().catch(() => ({}));
-    throw new Error(data.error || 'Failed to update inquiry status');
+    // Keep the machine-readable code so the caller can offer an override
+    // instead of showing a dead end.
+    const error = new Error(data.error || 'Failed to update inquiry status') as Error & {
+      code?: string;
+      conflict?: unknown;
+    };
+    error.code = data.code;
+    error.conflict = data.conflict;
+    throw error;
   }
 
   return await res.json();

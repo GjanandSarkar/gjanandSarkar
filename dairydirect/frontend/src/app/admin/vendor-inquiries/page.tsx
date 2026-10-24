@@ -134,7 +134,24 @@ export default function AdminVendorInquiriesPage() {
 
     try {
       const targetStatus = confirmModal.action;
-      const res = await updateSellerInquiryStatus(selectedInquiry.id, targetStatus, adminNotes);
+
+      /* One company per category is a rule the admin may knowingly override.
+         The API refuses the first attempt with CATEGORY_CONFLICT and names
+         the existing partner; approving again with the confirmation flag
+         goes through. */
+      let res;
+      try {
+        res = await updateSellerInquiryStatus(selectedInquiry.id, targetStatus, adminNotes);
+      } catch (err: any) {
+        if (err?.code !== 'CATEGORY_CONFLICT') throw err;
+        if (!window.confirm(`${err.message}\n\nApprove anyway?`)) {
+          setIsUpdating(false);
+          return;
+        }
+        res = await updateSellerInquiryStatus(selectedInquiry.id, targetStatus, adminNotes, {
+          confirmCategoryConflict: true,
+        });
+      }
       
       const updatedInquiry: SellerInquiry = {
         ...selectedInquiry,

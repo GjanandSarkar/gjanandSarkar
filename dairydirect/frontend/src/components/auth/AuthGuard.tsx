@@ -13,6 +13,14 @@ export function AuthGuard() {
   useEffect(() => {
     if (isAuthLoading) return;
 
+    /* Redirecting to the page we are already on re-runs this effect and
+       re-fetches the route, which is half of any redirect loop. Guard every
+       redirect centrally so no individual branch has to remember. */
+    const go = (target: string) => {
+      if (target.split('?')[0] === pathname) return;
+      router.replace(target);
+    };
+
     const isAuthRoute = 
       pathname === '/login' || 
       pathname === '/auth/login' ||
@@ -30,13 +38,13 @@ export function AuthGuard() {
     // moved to their console — but only AFTER the storefront has already
     // painted, which is the opposite of the old blocking blank-page redirect.
     if (user && user.role === 'admin' && pathname === '/') {
-      router.replace('/admin');
+      go('/admin');
       return;
     }
 
     // Not logged in -> go to login if on protected route
     if (!user && isProtectedRoute) {
-      router.replace('/auth/login?redirect=' + encodeURIComponent(pathname));
+      go('/auth/login?redirect=' + encodeURIComponent(pathname));
       return;
     }
 
@@ -49,7 +57,7 @@ export function AuthGuard() {
         pathname === '/profile';
 
       if (!isSellerAllowedPage) {
-        router.replace('/seller/dashboard');
+        go('/seller/dashboard');
         return;
       }
     }
@@ -57,11 +65,11 @@ export function AuthGuard() {
     // Already logged in -> leave login page
     if (user && (pathname === '/login' || pathname === '/auth/login')) {
       if (user.role === 'admin') {
-        router.replace('/admin');
+        go('/admin');
       } else if (user.role === 'seller') {
-        router.replace('/seller/dashboard');
+        go('/seller/dashboard');
       } else {
-        router.replace('/home');
+        go('/home');
       }
     }
   }, [user, pathname, router, isAuthLoading]);
