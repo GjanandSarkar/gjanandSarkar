@@ -130,9 +130,8 @@ tell the maintainers — that combination should now be impossible (see the
 readiness note in `src/lib/aws/redis.ts`).
 
 **Free tier limits**
-Upstash's free tier allows 10,000 commands/day. The caches here are
-deliberately short-lived (products 2 min, seller profile 5 min), so normal
-traffic sits far below that, but watch the Upstash dashboard after launch.
+The Upstash free tier allows **500,000 commands/month**, 10 GB bandwidth and
+250 MB storage. See "Staying inside the free tier" below.
 
 ---
 
@@ -147,3 +146,59 @@ traffic sits far below that, but watch the Upstash dashboard after launch.
   above `cacheSellerProfile` in `src/lib/aws/redis.ts`.
 - To rotate credentials, reset the password in the Upstash console, update the
   variable in Vercel and locally, then redeploy.
+
+---
+
+## Staying inside the free tier
+
+Free tier: **500,000 commands/month**, 10 GB bandwidth, 250 MB storage.
+
+### Where the commands actually go
+
+The first thing to check is not your cache logic. On a first look at a live
+dashboard, roughly **62% of all commands were `CLIENT`** — not `GET`, not
+`SETEX`. That is ioredis announcing itself with `CLIENT SETINFO LIB-NAME` and
+`CLIENT SETINFO LIB-VER` on *every single connection*. It is now disabled via
+`disableClientInfo: true`.
+
+This matters far more on serverless than it looks, because the cost is **per
+connection, not per request**: every cold start, and locally every hot reload,
+paid two commands before doing any work.
+
+### What the code does to stay cheap
+
+| Technique | Effect |
+|---|---|
+| `disableClientInfo: true` | Removes 2 commands per connection. |
+| Singleton client on `globalThis` | One connection per instance, not per module. |
+| Rate limiter short-circuits | 1 command instead of 3 on the common path. `EXPIRE` only on the first request of a window; `TTL` only when actually blocking someone. |
+| TTL jitter | Spreads expiry so popular keys do not all miss at once. |
+| `SCAN` not `KEYS` | Non-blocking invalidation. |
+| Circuit breaker | After 5 consecutive failures, stops calling Redis for 30s. A struggling Redis cannot burn quota on doomed retries. |
+
+### Keep development off the production quota
+
+A dev server restarts constantly, and each restart reconnects and refills the
+cache. Two good options:
+
+1. **A second free Upstash database for local dev** (recommended). Point
+   `.env.local` at it. Production quota and production cache both stay clean,
+   and you still exercise the real Redis code path.
+2. **Leave `REDIS_URL` unset locally.** Zero commands from dev; the in-memory
+   fallback handles everything. The tradeoff is that Redis-specific issues
+   will only ever appear in production.
+
+Never let a preview deployment share a database with production: a stale cache
+written by a preview build is served to real customers.
+
+### Watch for
+
+- **A cache in a loop.** A `useEffect` without a stable dependency array can
+  call a cached endpoint hundreds of times a minute. Commands graphs make this
+  obvious — a flat line that suddenly becomes a cliff.
+- **Caching things that are never read twice.** A per-user key with a 2-minute
+  TTL on a page each user visits once costs one write and zero hits. That is
+  strictly worse than not caching.
+- **`cacheDelPattern` on a hot write path.** Each call is at least one `SCAN`
+  plus a `DEL`. It is the right tool for invalidation, but do not put it inside
+  a loop — invalidate once after the loop.

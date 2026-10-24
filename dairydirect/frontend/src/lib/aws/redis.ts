@@ -94,6 +94,17 @@ function createRedisClient(): Redis {
     lazyConnect: true,
     connectTimeout: 5000,
     commandTimeout: 3000,
+    /* ioredis announces itself with CLIENT SETINFO LIB-NAME and
+       CLIENT SETINFO LIB-VER on EVERY connection. Upstash bills per command,
+       so on a serverless host - where connections are created constantly by
+       cold starts and, locally, by every hot reload - this handshake can
+       easily outweigh the application's real traffic. It buys us nothing but
+       a label in CLIENT LIST. */
+    disableClientInfo: true,
+    /* Fail fast instead of queueing commands while disconnected. A queued
+       command would hold the request open until it times out; we would rather
+       miss the cache immediately and let PostgreSQL answer. */
+    enableOfflineQueue: false,
     retryStrategy(times) {
       if (times > 3) return null;
       return Math.min(times * 300, 2000);
@@ -144,15 +155,56 @@ globalForRedis._redis = redis;
 
    client.status is owned by ioredis and is always accurate. */
 function isRedisReady(): boolean {
+  if (isCircuitOpen()) return false;
   return redis.status === 'ready';
 }
 
+// ─── Circuit Breaker ─────────────────────────────────────────
+
+/* When Redis starts failing, retrying it on every request is the worst of
+   both worlds: each request still pays the timeout, and each failed attempt
+   still counts against the command quota. After a run of consecutive
+   failures we stop asking for a cooldown period and serve straight from the
+   in-memory fallback, then let a single request probe it again. */
+
+const CIRCUIT_FAILURE_THRESHOLD = 5;
+const CIRCUIT_COOLDOWN_MS = 30_000;
+
+let consecutiveFailures = 0;
+let circuitOpenUntil = 0;
+
+function isCircuitOpen(): boolean {
+  return Date.now() < circuitOpenUntil;
+}
+
+function noteRedisSuccess(): void {
+  consecutiveFailures = 0;
+}
+
+function noteRedisFailure(): void {
+  consecutiveFailures += 1;
+  if (consecutiveFailures >= CIRCUIT_FAILURE_THRESHOLD) {
+    circuitOpenUntil = Date.now() + CIRCUIT_COOLDOWN_MS;
+    consecutiveFailures = 0;
+    console.warn(
+      `[REDIS] Circuit opened after ${CIRCUIT_FAILURE_THRESHOLD} consecutive ` +
+      `failures. Using the in-memory fallback for ${CIRCUIT_COOLDOWN_MS / 1000}s.`
+    );
+  }
+}
+
 /** Connection state for the health endpoint. */
-export function getRedisStatus(): { configured: boolean; status: string; ready: boolean } {
+export function getRedisStatus(): {
+  configured: boolean;
+  status: string;
+  ready: boolean;
+  circuitOpen: boolean;
+} {
   return {
     configured: Boolean(process.env.REDIS_URL),
     status: redis.status,
     ready: isRedisReady(),
+    circuitOpen: isCircuitOpen(),
   };
 }
 
@@ -190,10 +242,13 @@ function logRedis(
   event: 'HIT' | 'MISS' | 'SET' | 'DEL' | 'SCAN-DEL' | 'ERROR',
   detail: string
 ): void {
+  if (event === 'ERROR') {
+    noteRedisFailure();
+    console.error(`[REDIS] ERROR ${detail}`);
+    return;
+  }
   if (process.env.NODE_ENV !== 'production') {
     console.log(`[REDIS] ${event} ${detail}`);
-  } else if (event === 'ERROR') {
-    console.error(`[REDIS] ERROR ${detail}`);
   }
 }
 
@@ -207,6 +262,7 @@ export async function cacheGet<T = unknown>(key: string): Promise<T | null> {
   try {
     if (isRedisReady()) {
       const raw = await redis.get(key);
+      noteRedisSuccess();
       if (raw !== null) {
         logRedis('HIT', key);
         return JSON.parse(raw) as T;
@@ -245,6 +301,7 @@ export async function cacheSet(
   try {
     if (isRedisReady()) {
       await redis.setex(key, finalTtl, serialised);
+      noteRedisSuccess();
       logRedis('SET', `${key} TTL=${finalTtl}s`);
     }
   } catch (err: unknown) {
@@ -418,16 +475,33 @@ export async function checkRateLimit(
 
   try {
     if (isRedisReady()) {
+      /* Command budget matters here: this runs on every rate-limited
+         request. INCR is unavoidable. EXPIRE is only needed on the first
+         request of a window. TTL is only needed when we actually block
+         someone, because resetIn is only acted upon in that case - callers
+         use it to tell the user when to retry. So the overwhelmingly common
+         path (allowed, mid-window) costs ONE command instead of three. */
       const current = await redis.incr(key);
-      if (current === 1) await redis.expire(key, windowSeconds);
-      const ttl = await redis.ttl(key);
+      noteRedisSuccess();
+
+      if (current === 1) {
+        await redis.expire(key, windowSeconds);
+        return { allowed: true, remaining: maxRequests - 1, resetIn: windowSeconds };
+      }
+
       if (current > maxRequests) {
+        const ttl = await redis.ttl(key);
         return { allowed: false, remaining: 0, resetIn: Math.max(0, ttl) };
       }
-      return { allowed: true, remaining: maxRequests - current, resetIn: Math.max(0, ttl) };
+
+      /* resetIn is an upper bound here rather than the exact remaining
+         window. Reading the exact value would cost a command on every
+         allowed request, and nothing consumes it unless the request was
+         blocked. */
+      return { allowed: true, remaining: maxRequests - current, resetIn: windowSeconds };
     }
   } catch {
-    // Fall through
+    noteRedisFailure();
   }
 
   /* Falling back here means limits are counted per server instance, so the
