@@ -212,7 +212,7 @@ export async function POST(request: NextRequest) {
             .toLowerCase()
             .replace(/[^a-z0-9]+/g, '-') + '-' + auth.userId.slice(0, 4);
 
-          const { data: newStore } = await sb
+          const { data: newStore, error: newStoreErr } = await sb
             .from('sellers')
             .insert({
               user_id: auth.userId,
@@ -225,6 +225,11 @@ export async function POST(request: NextRequest) {
             .select('*')
             .maybeSingle();
 
+          if (newStoreErr) {
+            // Swallowing this is how the original bug stayed invisible: the
+            // caller just saw "no active seller account".
+            console.error('[SellerProducts] auto-provision from approved inquiry failed:', newStoreErr.message);
+          }
           if (newStore) store = newStore;
         }
       }
@@ -256,7 +261,7 @@ export async function POST(request: NextRequest) {
         const storeName = profile?.full_name ? `${profile.full_name}'s Store` : 'Gjanand Seller Store';
         const autoSlug = `store-${auth.userId.slice(0, 8)}`;
 
-        const { data: autoStore } = await sb
+        const { data: autoStore, error: autoStoreErr } = await sb
           .from('sellers')
           .insert({
             user_id: auth.userId,
@@ -269,6 +274,9 @@ export async function POST(request: NextRequest) {
           .select('*')
           .maybeSingle();
 
+        if (autoStoreErr) {
+          console.error('[SellerProducts] auto-provision from seller role failed:', autoStoreErr.message);
+        }
         if (autoStore) store = autoStore;
       }
 

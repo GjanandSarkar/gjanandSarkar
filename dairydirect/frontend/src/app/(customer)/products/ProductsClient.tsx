@@ -354,14 +354,14 @@ function ProductsScreenContent({ initialProducts }: { initialProducts: CatalogPr
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               onClick={() => setFiltersOpen(false)}
-              className="fixed inset-0 bg-black/50 z-40 lg:hidden"
+              className="fixed inset-0 bg-black/50 z-[60] lg:hidden"
             />
             <motion.div
               initial={{ y: '100%' }}
               animate={{ y: 0 }}
               exit={{ y: '100%' }}
               transition={{ type: 'tween', duration: 0.22 }}
-              className="fixed inset-x-0 bottom-0 z-50 lg:hidden bg-background rounded-t-2xl max-h-[80vh] flex flex-col"
+              className="fixed inset-x-0 bottom-0 z-[70] lg:hidden bg-background rounded-t-2xl max-h-[85dvh] flex flex-col"
               role="dialog"
               aria-modal="true"
               aria-label="Filters"
@@ -386,7 +386,7 @@ function ProductsScreenContent({ initialProducts }: { initialProducts: CatalogPr
                   </button>
                 </div>
               </div>
-              <div className="overflow-y-auto p-4 pb-[max(1rem,env(safe-area-inset-bottom))]">
+              <div className="flex-1 min-h-0 overflow-y-auto overscroll-contain p-4 pb-[max(1rem,env(safe-area-inset-bottom))]">
                 {filterControls}
               </div>
             </motion.div>
