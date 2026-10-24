@@ -9,6 +9,7 @@ import { useStore } from '@/store/useStore';
 import { getUserSubscriptions, createSubscription, submitModificationReport } from '@/lib/api/subscriptions';
 import { getProducts } from '@/lib/api/products';
 import { format, addDays } from 'date-fns';
+import { PLACEHOLDER_PRODUCT_IMAGE } from '@/lib/constants/brand';
 
 function NewSubscriptionContent() {
   const router = useRouter();
@@ -19,22 +20,26 @@ function NewSubscriptionContent() {
 
   const [volume, setVolume] = useState(1);
   const [isProcessing, setIsProcessing] = useState(false);
-  const [plan, setPlan] = useState<'weekly' | 'monthly'>('monthly');
+  const [plan, setPlan] = useState<'daily' | 'alternate' | 'weekly'>('daily');
   const [isSuccess, setIsSuccess] = useState(false);
-  const [milkProductId, setMilkProductId] = useState<string>('');
-  const [milkProductName, setMilkProductName] = useState('Farm Fresh Cow Milk');
-  const [milkProductImage, setMilkProductImage] = useState('/milk.png');
+  const [subscriptionProductId, setSubscriptionProductId] = useState<string>('');
+  const [subscriptionVariantId, setSubscriptionVariantId] = useState<string>('');
+  const [subscriptionProductName, setSubscriptionProductName] = useState('');
+  const [subscriptionProductImage, setSubscriptionProductImage] = useState(PLACEHOLDER_PRODUCT_IMAGE);
   const [startDate, setStartDate] = useState(format(addDays(new Date(), 1), 'yyyy-MM-dd'));
   const [deliveryTime, setDeliveryTime] = useState('07:00');
 
   useEffect(() => {
     async function loadData() {
       const products = await getProducts({ activeOnly: true });
-      const milkObj = products.find(p => p.category === 'Milk') || products[0];
-      if (milkObj) {
-        setMilkProductId(milkObj.id);
-        setMilkProductName(milkObj.name);
-        if (milkObj.image_url) setMilkProductImage(milkObj.image_url);
+      const defaultProduct = products[0];
+      if (defaultProduct) {
+        setSubscriptionProductId(defaultProduct.id);
+        setSubscriptionProductName(defaultProduct.name);
+        if (defaultProduct.image_url) setSubscriptionProductImage(defaultProduct.image_url);
+        if (defaultProduct.product_variants && defaultProduct.product_variants.length > 0) {
+          setSubscriptionVariantId(defaultProduct.product_variants[0].id);
+        }
       }
 
       if (user && editId) {
@@ -42,7 +47,7 @@ function NewSubscriptionContent() {
         const existingSub = subs.find(s => s.id === editId);
         if (existingSub) {
           setVolume(existingSub.volume);
-          setPlan(existingSub.plan as 'weekly' | 'monthly');
+          setPlan((existingSub.plan as any) || 'daily');
         }
       }
     }
@@ -51,7 +56,7 @@ function NewSubscriptionContent() {
 
   const PRICE_PER_LITER = 68;
   const dailyCost = volume * PRICE_PER_LITER;
-  const total = plan === 'weekly' ? dailyCost * 7 : dailyCost * 30 * 0.95;
+  const total = plan === 'weekly' ? dailyCost * 7 : plan === 'alternate' ? dailyCost * 15 : dailyCost * 30 * 0.95;
 
   const handleAction = async () => {
     if (!user) return;
@@ -64,13 +69,14 @@ function NewSubscriptionContent() {
           subscriptionId: editId,
           userId: user.id,
           newVolume: volume,
-          newPlan: plan,
+          newPlan: plan as any,
         });
       } else {
         const combinedDateTime = new Date(`${startDate}T${deliveryTime}:00`).toISOString();
         result = await createSubscription({
           userId: user.id,
-          productId: milkProductId,
+          productId: subscriptionProductId,
+          variantId: subscriptionVariantId,
           volume,
           plan,
           startDate: combinedDateTime,
@@ -101,7 +107,7 @@ function NewSubscriptionContent() {
 
   if (isSuccess) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-screen bg-white p-6 text-center">
+      <div className="flex flex-col items-center justify-center min-h-screen bg-surface p-6 text-center">
         <div className="w-24 h-24 bg-mint/30 rounded-full flex items-center justify-center mb-6 text-primary shadow-inner">
           <CheckCircle2 className="w-12 h-12" />
         </div>
@@ -133,20 +139,20 @@ function NewSubscriptionContent() {
 
       <div className="p-4 flex-1 max-w-[800px] mx-auto w-full">
         {/* Product Hero */}
-        <div className="bg-white rounded-[24px] shadow-sm p-6 mb-6 flex flex-col items-center border border-sand/50 relative overflow-hidden">
+        <div className="bg-surface rounded-[24px] shadow-sm p-6 mb-6 flex flex-col items-center border border-sand/50 relative overflow-hidden">
           <div className="absolute top-0 right-0 w-48 h-48 bg-primary/5 rounded-full -mr-24 -mt-24 blur-3xl" />
           <div className="absolute bottom-0 left-0 w-32 h-32 bg-primary/5 rounded-full -ml-16 -mb-16 blur-2xl" />
           
-          <div className="w-24 h-24 relative mb-4 overflow-hidden rounded-[20px] bg-sky-50 flex items-center justify-center p-2 shadow-inner border border-sand/30">
-            <img src={milkProductImage} alt={milkProductName} className="w-full h-full object-contain" />
+          <div className="w-24 h-24 relative mb-4 overflow-hidden rounded-[20px] bg-info-bg flex items-center justify-center p-2 shadow-inner border border-sand/30">
+            <img src={subscriptionProductImage} alt={subscriptionProductName} className="w-full h-full object-contain" />
           </div>
-          <h2 className="font-black text-dark text-xl mb-1 text-center">{milkProductName}</h2>
+          <h2 className="font-black text-dark text-xl mb-1 text-center">{subscriptionProductName}</h2>
           <p className="text-[11px] text-primary font-bold uppercase tracking-widest mb-6 bg-primary/10 px-3 py-1 rounded-full">A2 Quality • Pure Harvest</p>
           
           <div className="w-full space-y-6">
             <div className="flex flex-col gap-3">
               <label className="text-[10px] font-black text-muted uppercase tracking-[0.2em] ml-1">Daily Requirement</label>
-              <div className="grid grid-cols-4 gap-2">
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
                 {volumePresets.map(preset => (
                   <button
                     key={preset.label}
@@ -154,7 +160,7 @@ function NewSubscriptionContent() {
                     className={cn(
                       "py-3 rounded-[16px] text-sm font-black transition-all border-2",
                       volume === preset.value 
-                        ? "bg-primary border-primary text-white shadow-active" 
+                        ? "bg-primary border-primary text-on-primary shadow-active" 
                         : "bg-surface-container border-transparent text-muted hover:border-sand"
                     )}
                   >
@@ -175,7 +181,7 @@ function NewSubscriptionContent() {
                   step="0.1"
                   value={volume}
                   onChange={(e) => setVolume(Math.max(0.1, parseFloat(e.target.value) || 0.1))}
-                  className="w-24 h-12 text-right pr-10 font-black text-xl bg-white border-2 border-sand rounded-[14px] outline-none focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all appearance-none"
+                  className="w-24 h-12 text-right pr-10 font-black text-xl bg-surface border-2 border-sand rounded-[14px] outline-none focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all appearance-none"
                 />
                 <span className="absolute right-4 top-1/2 -translate-y-1/2 font-black text-muted text-sm pointer-events-none">L</span>
               </div>
@@ -185,48 +191,47 @@ function NewSubscriptionContent() {
 
         {/* Plan Selection */}
         <h3 className="font-bold text-dark mb-3 text-lg px-1">Delivery Plan</h3>
-        <div className="flex gap-3 mb-6">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-6">
           <div 
-            onClick={() => setPlan('weekly')}
+            onClick={() => setPlan('daily')}
             className={cn(
-              "flex-1 p-5 rounded-[20px] border-2 cursor-pointer transition-all bg-white",
-              plan === 'weekly' ? "border-primary shadow-[0_0_0_4px_rgba(63,101,48,0.1)]" : "border-sand/50 text-dark hover:border-sand"
+              "p-4 rounded-[20px] border-2 cursor-pointer transition-all relative overflow-hidden bg-surface text-center",
+              plan === 'daily' ? "border-primary shadow-[0_0_0_4px_rgba(63,101,48,0.1)]" : "border-sand/50 text-dark hover:border-sand"
             )}
           >
-            <div className="flex justify-between items-start mb-2">
-              <div className="font-black text-sm">Weekly</div>
-              <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${plan === 'weekly' ? 'border-primary bg-primary' : 'border-sand'}`}>
-                {plan === 'weekly' && <div className="w-2 h-2 bg-white rounded-full" />}
-              </div>
-            </div>
-            <div className="text-xs text-muted font-medium mb-4">7 Days Delivery</div>
-            <div className="font-black text-xl text-dark">₹{Math.round(dailyCost * 7)}</div>
+            <div className="absolute top-0 right-0 bg-mint text-primary text-[9px] font-black px-2 py-0.5 rounded-bl-[10px]">SAVE 5%</div>
+            <div className="font-black text-sm mb-1 mt-1">Daily</div>
+            <div className="text-[11px] text-muted font-medium mb-3">Everyday</div>
+            <div className="font-black text-base text-dark">₹{Math.round(dailyCost * 30 * 0.95)}<span className="text-[10px] text-muted font-normal">/mo</span></div>
           </div>
 
           <div 
-            onClick={() => setPlan('monthly')}
+            onClick={() => setPlan('alternate')}
             className={cn(
-              "flex-1 p-5 rounded-[20px] border-2 cursor-pointer transition-all relative overflow-hidden bg-white",
-              plan === 'monthly' ? "border-primary shadow-[0_0_0_4px_rgba(63,101,48,0.1)]" : "border-sand/50 text-dark hover:border-sand"
+              "p-4 rounded-[20px] border-2 cursor-pointer transition-all bg-surface text-center",
+              plan === 'alternate' ? "border-primary shadow-[0_0_0_4px_rgba(63,101,48,0.1)]" : "border-sand/50 text-dark hover:border-sand"
             )}
           >
-            <div className="absolute top-0 right-0 bg-mint text-primary text-[10px] font-black px-3 py-1 rounded-bl-[12px]">SAVE 5%</div>
-            <div className="flex justify-between items-start mb-2 mt-1">
-              <div className="font-black text-sm">Monthly</div>
-              <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${plan === 'monthly' ? 'border-primary bg-primary' : 'border-sand'}`}>
-                {plan === 'monthly' && <div className="w-2 h-2 bg-white rounded-full" />}
-              </div>
-            </div>
-            <div className="text-xs text-muted font-medium mb-4">30 Days Delivery</div>
-            <div className="font-black text-xl text-dark flex items-baseline gap-2">
-              ₹{Math.round(dailyCost * 30 * 0.95)}
-              <span className="text-[10px] text-muted line-through">₹{Math.round(dailyCost * 30)}</span>
-            </div>
+            <div className="font-black text-sm mb-1">Alternate</div>
+            <div className="text-[11px] text-muted font-medium mb-3">Every 2 Days</div>
+            <div className="font-black text-base text-dark">₹{Math.round(dailyCost * 15)}<span className="text-[10px] text-muted font-normal">/mo</span></div>
+          </div>
+
+          <div 
+            onClick={() => setPlan('weekly')}
+            className={cn(
+              "p-4 rounded-[20px] border-2 cursor-pointer transition-all bg-surface text-center",
+              plan === 'weekly' ? "border-primary shadow-[0_0_0_4px_rgba(63,101,48,0.1)]" : "border-sand/50 text-dark hover:border-sand"
+            )}
+          >
+            <div className="font-black text-sm mb-1">Weekly</div>
+            <div className="text-[11px] text-muted font-medium mb-3">7 Days</div>
+            <div className="font-black text-base text-dark">₹{Math.round(dailyCost * 7)}<span className="text-[10px] text-muted font-normal">/wk</span></div>
           </div>
         </div>
 
         {/* Start Date & Time */}
-        <div className="bg-white rounded-[16px] p-4 border border-sand/50 shadow-sm flex flex-col gap-4">
+        <div className="bg-surface rounded-[16px] p-4 border border-sand/50 shadow-sm flex flex-col gap-4">
           <div className="flex items-center gap-4 border-b border-sand/30 pb-4">
             <div className="w-10 h-10 rounded-full bg-mint/30 flex items-center justify-center text-primary shrink-0">
               <Calendar className="w-5 h-5" />
@@ -263,7 +268,7 @@ function NewSubscriptionContent() {
       </div>
 
       {/* Checkout Bar */}
-      <div className="fixed bottom-0 left-0 right-0 p-4 bg-white border-t border-sand/50 z-40 pb-safe shadow-[0_-10px_20px_rgba(0,0,0,0.03)]">
+      <div className="fixed bottom-0 left-0 right-0 p-4 bg-surface border-t border-sand/50 z-40 pb-safe shadow-[0_-10px_20px_rgba(0,0,0,0.03)]">
         <div className="max-w-[800px] mx-auto w-full flex flex-col md:flex-row items-center gap-4">
           <div className="hidden md:flex flex-col flex-1">
             <p className="text-xs text-muted font-medium mb-1">

@@ -55,7 +55,7 @@ export default function OnboardingScreen() {
       </div>
 
       {/* Visual Section */}
-      <div className="flex-1 flex flex-col items-center justify-center relative overflow-hidden px-6 bg-white/40 md:bg-mint/10 md:h-screen">
+      <div className="flex-1 flex flex-col items-center justify-center relative overflow-hidden px-6 bg-surface/40 md:bg-mint/10 md:h-screen">
         <AnimatePresence mode='wait'>
           <motion.div
             key={currentSlide}
@@ -65,7 +65,7 @@ export default function OnboardingScreen() {
             transition={{ duration: 0.4 }}
             className="flex flex-col items-center text-center w-full"
           >
-            <div className="w-64 h-64 bg-white/80 backdrop-blur-3xl rounded-full mb-10 flex items-center justify-center shadow-[0_20px_40px_-15px_rgba(160,205,175,0.4)]">
+            <div className="w-64 h-64 bg-surface/80 backdrop-blur-3xl rounded-full mb-10 flex items-center justify-center shadow-[0_20px_40px_-15px_rgba(160,205,175,0.4)]">
               {slides[currentSlide].illustration}
             </div>
             
@@ -78,7 +78,7 @@ export default function OnboardingScreen() {
       </div>
 
       {/* Content Section (Desktop handles differently) */}
-      <div className="px-6 pb-12 w-full flex flex-col items-center justify-center gap-8 md:h-screen md:bg-white md:px-16">
+      <div className="px-6 pb-12 w-full flex flex-col items-center justify-center gap-8 md:h-screen md:bg-surface md:px-16">
         
         <div className="hidden md:flex justify-end w-full absolute top-8 right-8">
           <button onClick={handleSkip} className="text-sm font-medium text-muted hover:text-dark px-4 py-2 rounded-full border border-sand">

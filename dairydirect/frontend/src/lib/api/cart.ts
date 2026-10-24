@@ -28,6 +28,15 @@ export async function addToCart(
     const res = await api.cart.add(userId, productId, variantId, quantity);
     return { success: res.success ?? true };
   } catch (error: any) {
+    /* No caller checks this return value, so a failed server write used to
+       vanish completely: the item sat in the local cart, never reached the
+       server, and was then overwritten on the next auth hydration. The
+       merge in AuthProvider now stops the item being lost, but the sync
+       failure itself still needs to be visible. */
+    console.error(
+      `[cart] server sync failed for product=${productId} variant=${variantId}:`,
+      error?.message || error
+    );
     return { success: false, error: error.message };
   }
 }

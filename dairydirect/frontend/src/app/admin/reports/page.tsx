@@ -49,7 +49,7 @@ export default function AdminReportsPage() {
             </Link>
             <div>
               <h1 className="font-extrabold text-[24px]" style={{ color: 'var(--color-on-surface)' }}>Business Reports & Analytics</h1>
-              <p className="text-[12px]" style={{ color: 'var(--color-outline)' }}>Financial analytics, revenue trends, and product performance</p>
+              <p className="text-[12px]" style={{ color: 'var(--color-on-surface-variant)' }}>Financial analytics, revenue trends, and product performance</p>
             </div>
           </div>
 
@@ -92,7 +92,7 @@ export default function AdminReportsPage() {
                 { label: 'Gross Revenue', val: `₹${parseFloat(data?.overview?.gross_revenue || '0').toLocaleString('en-IN', { maximumFractionDigits: 0 })}`, sub: `${data?.overview?.total_orders || 0} orders`, bg: '#c2efac', text: '#2d5a27' },
                 { label: 'Net Delivered', val: `₹${parseFloat(data?.overview?.net_revenue || '0').toLocaleString('en-IN', { maximumFractionDigits: 0 })}`, sub: `${data?.overview?.delivered_orders || 0} fulfilled`, bg: '#dce8ff', text: '#4a6fa5' },
                 { label: 'Avg Order Value', val: `₹${parseFloat(data?.overview?.avg_order_value || '0').toFixed(0)}`, sub: 'Per transaction', bg: '#f3e8ff', text: '#6b21a8' },
-                { label: 'Discounts Given', val: `₹${parseFloat(data?.overview?.total_discounts || '0').toLocaleString('en-IN', { maximumFractionDigits: 0 })}`, sub: 'Coupons applied', bg: '#ffdcc7', text: '#774117' },
+                { label: 'Discounts Given', val: `₹${parseFloat(data?.overview?.total_discounts || '0').toLocaleString('en-IN', { maximumFractionDigits: 0 })}`, sub: 'Coupons applied', bg: '#ffdcc7', text: 'var(--warning)' },
               ].map(kpi => (
                 <div key={kpi.label} className="rounded-[16px] p-4 flex flex-col gap-1" style={{ background: kpi.bg }}>
                   <p className="font-extrabold text-[22px]" style={{ color: kpi.text }}>{kpi.val}</p>
@@ -136,7 +136,7 @@ export default function AdminReportsPage() {
                       <div className="flex items-center gap-2">
                         <div className="w-3 h-3 rounded-full" style={{ background: COLORS[i % COLORS.length] }} />
                         <span className="text-[13px] font-semibold capitalize" style={{ color: 'var(--color-on-surface)' }}>{cat.category}</span>
-                        <span className="text-[11px]" style={{ color: 'var(--color-outline)' }}>({cat.units_sold} units)</span>
+                        <span className="text-[11px]" style={{ color: 'var(--color-on-surface-variant)' }}>({cat.units_sold} units)</span>
                       </div>
                       <span className="font-bold text-[13px]" style={{ color: 'var(--color-primary)' }}>
                         ₹{parseFloat(cat.revenue).toLocaleString('en-IN', { maximumFractionDigits: 0 })}
@@ -155,7 +155,7 @@ export default function AdminReportsPage() {
                       <div className="flex items-center gap-2">
                         <div className="w-3 h-3 rounded-full" style={{ background: COLORS[(i + 2) % COLORS.length] }} />
                         <span className="text-[13px] font-semibold uppercase" style={{ color: 'var(--color-on-surface)' }}>{pm.payment_method}</span>
-                        <span className="text-[11px]" style={{ color: 'var(--color-outline)' }}>({pm.count} orders)</span>
+                        <span className="text-[11px]" style={{ color: 'var(--color-on-surface-variant)' }}>({pm.count} orders)</span>
                       </div>
                       <span className="font-bold text-[13px]" style={{ color: 'var(--color-on-surface)' }}>
                         ₹{parseFloat(pm.total || '0').toLocaleString('en-IN', { maximumFractionDigits: 0 })}
@@ -176,7 +176,7 @@ export default function AdminReportsPage() {
                   <thead>
                     <tr style={{ background: 'var(--color-surface-container-low)' }}>
                       {['Product', 'Units Sold', 'Revenue', 'Cost', 'Est. Profit'].map(h => (
-                        <th key={h} className="text-left px-5 py-3 text-[11px] font-bold uppercase tracking-wider" style={{ color: 'var(--color-outline)' }}>{h}</th>
+                        <th key={h} className="text-left px-5 py-3 text-[11px] font-bold uppercase tracking-wider" style={{ color: 'var(--color-on-surface-variant)' }}>{h}</th>
                       ))}
                     </tr>
                   </thead>
@@ -190,10 +190,10 @@ export default function AdminReportsPage() {
                         <td className="px-5 py-3 font-bold text-[13px]" style={{ color: 'var(--color-primary)' }}>
                           ₹{parseFloat(p.revenue).toLocaleString('en-IN', { maximumFractionDigits: 0 })}
                         </td>
-                        <td className="px-5 py-3 text-[12px]" style={{ color: 'var(--color-outline)' }}>
+                        <td className="px-5 py-3 text-[12px]" style={{ color: 'var(--color-on-surface-variant)' }}>
                           ₹{parseFloat(p.cost || '0').toLocaleString('en-IN', { maximumFractionDigits: 0 })}
                         </td>
-                        <td className="px-5 py-3 font-bold text-[13px]" style={{ color: '#2d5a27' }}>
+                        <td className="px-5 py-3 font-bold text-[13px]" style={{ color: 'var(--primary)' }}>
                           ₹{parseFloat(p.profit || '0').toLocaleString('en-IN', { maximumFractionDigits: 0 })}
                         </td>
                       </tr>

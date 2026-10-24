@@ -58,6 +58,26 @@ const nextConfig: NextConfig = {
     imageSizes: [16, 32, 48, 64, 96, 128, 256, 384],
   },
 
+  /* Rewrites */
+  async rewrites() {
+    return {
+      beforeFiles: [
+        // The landing URL used to be a client component that rendered an empty
+        // div, waited for React to hydrate, waited for the Supabase auth
+        // session to resolve, and only then client-side navigated to /home.
+        // Every first-time visitor therefore stared at a blank page for the
+        // length of: JS download + hydration + auth round-trip + a second
+        // route transition — before any content existed.
+        //
+        // A rewrite serves the real (statically rendered) storefront HTML at
+        // `/` immediately, with no redirect hop and no JS required to paint.
+        { source: '/', destination: '/home' },
+      ],
+      afterFiles: [],
+      fallback: [],
+    };
+  },
+
   /* Security + caching headers */
   async headers() {
     return [
@@ -68,7 +88,15 @@ const nextConfig: NextConfig = {
           { key: 'X-Frame-Options', value: 'DENY' },
           { key: 'X-XSS-Protection', value: '1; mode=block' },
           { key: 'Referrer-Policy', value: 'strict-origin-when-cross-origin' },
-          { key: 'Permissions-Policy', value: 'camera=(), microphone=(), geolocation=()' },
+          // geolocation=(self) allows OUR OWN origin to ask for location, and
+          // nobody else. The previous value was `geolocation=()`, an EMPTY
+          // allowlist, which disables the API for every origin including this
+          // one: the browser rejected getCurrentPosition() instantly with
+          // PERMISSION_DENIED and never showed a permission prompt. That is
+          // why "Use My Location" always failed and why telling the user to
+          // click the lock icon could never help -- the site itself was
+          // forbidding it. Camera and microphone stay fully disabled.
+          { key: 'Permissions-Policy', value: 'camera=(), microphone=(), geolocation=(self)' },
         ],
       },
       {
@@ -76,13 +104,6 @@ const nextConfig: NextConfig = {
         source: '/api/products',
         headers: [
           { key: 'Cache-Control', value: 'public, s-maxage=60, stale-while-revalidate=300' },
-        ],
-      },
-      {
-        // Cache static assets aggressively (images, fonts, js chunks)
-        source: '/_next/static/:path*',
-        headers: [
-          { key: 'Cache-Control', value: 'public, max-age=31536000, immutable' },
         ],
       },
     ];

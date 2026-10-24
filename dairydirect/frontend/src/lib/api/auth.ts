@@ -5,8 +5,13 @@ export async function logout(): Promise<void> {
   try {
     const { supabase } = await import('@/lib/supabase');
     await supabase.auth.signOut();
-    // Clear cookies
-    document.cookie = 'gs_access_token=; path=/; max-age=0';
+
+    // The session cookie is httpOnly, so JavaScript can no longer clear it.
+    // Ask the server to expire both the access and refresh cookies.
+    await fetch('/api/auth/session', {
+      method: 'DELETE',
+      credentials: 'include',
+    }).catch(() => {});
   } catch (err) {
     console.error('Logout error:', err);
   }

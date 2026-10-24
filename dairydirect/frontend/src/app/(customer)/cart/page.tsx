@@ -1,6 +1,7 @@
 "use client";
 
 import { useRouter } from 'next/navigation';
+import { SmartImage } from '@/components/ui/SmartImage';
 import { useTranslation } from '@/lib/i18n';
 import { useStore } from '@/store/useStore';
 import { useCartDetails } from '@/hooks/useCartDetails';
@@ -10,6 +11,9 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { OrderSummary } from '@/components/cart/OrderSummary';
 import { EmptyCart } from '@/components/cart/EmptyCart';
 import Link from 'next/link';
+import { PLACEHOLDER_PRODUCT_IMAGE } from '@/lib/constants/brand';
+import { categoryBg } from '@/lib/constants/categories';
+import { ListSkeleton } from '@/components/shared/Skeletons';
 
 export default function CartScreen() {
   const { t } = useTranslation();
@@ -30,6 +34,10 @@ export default function CartScreen() {
     neededForFree,
     isLoading,
     isEmpty,
+    hasResolvedItems,
+    loadError,
+    unresolvedCount,
+    refreshInventory,
     hasStockIssue,
     canProceedToCheckout,
   } = useCartDetails();
@@ -54,25 +62,15 @@ export default function CartScreen() {
     if (user) await apiClearCart(user.id);
   };
 
-  const getCategoryBg = (category: string) => {
-    const bgs: Record<string, string> = {
-      'Milk': '#e8f4fd',
-      'Paneer': '#fff8e6',
-      'Ghee': '#fef5ec',
-      'Buttermilk': '#eaf6ef',
-      'Curd': '#fff8e6',
-      'Lassi': '#e8f4fd',
-    };
-    return bgs[category] || '#eaf6ef';
-  };
+  const getCategoryBg = (category: string) => categoryBg(category);
 
   if (isLoading) {
     return (
       <div className="flex flex-col min-h-screen pt-20 px-6" style={{ background: 'var(--color-surface)' }}>
         <div className="flex flex-col gap-4 max-w-4xl mx-auto w-full">
-          {[1, 2, 3].map(i => (
-            <div key={i} className="h-24 rounded-[16px] animate-pulse" style={{ background: 'var(--color-surface-container-low)' }} />
-          ))}
+          {/* Was three flat grey bars that matched neither the row height nor
+              the row layout, so the cart still jumped when items arrived. */}
+          <ListSkeleton rows={3} />
         </div>
       </div>
     );
@@ -95,6 +93,44 @@ export default function CartScreen() {
     );
   }
 
+  /* The cart holds items but none of them could be resolved against the
+     catalogue -- a failed /api/products call, or products that were
+     unpublished. Previously this rendered the normal cart with no rows and
+     a zero total, which looked broken and gave no way to recover. Say what
+     happened and offer a retry instead. */
+  if (!isLoading && !hasResolvedItems) {
+    return (
+      <div className="flex flex-col min-h-screen" style={{ background: 'var(--color-surface)' }}>
+        <div className="flex items-center gap-3 px-5 py-4 md:px-10 md:py-6">
+          <button onClick={() => router.back()}
+            className="w-9 h-9 rounded-[10px] flex items-center justify-center md:hidden transition-all active:scale-95 bg-surface-container-low text-on-surface">
+            <ArrowLeft className="w-4.5 h-4.5" />
+          </button>
+          <h1 className="font-extrabold text-[24px] tracking-tight text-on-surface">
+            {t('myCart')}
+          </h1>
+        </div>
+
+        <div className="flex flex-col items-center justify-center text-center gap-3 px-6 py-16">
+          <p className="text-base font-bold text-foreground">
+            We couldn&apos;t load your cart items
+          </p>
+          <p className="text-sm text-foreground-muted max-w-sm">
+            {loadError
+              ? 'There was a problem reaching our catalogue. Your items are still saved.'
+              : `${unresolvedCount} item(s) in your cart are no longer available to buy.`}
+          </p>
+          <button
+            onClick={() => refreshInventory()}
+            className="mt-2 px-5 py-2.5 rounded-xl bg-primary text-on-primary text-sm font-bold active:scale-95 transition-transform"
+          >
+            Try again
+          </button>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="flex flex-col pb-36 md:pb-0" style={{ background: 'var(--color-surface)' }}>
       {/* Header */}
@@ -113,7 +149,7 @@ export default function CartScreen() {
             </div>
             <h1 className="font-extrabold text-[22px] md:text-[28px] tracking-tight text-on-surface">
               {t('myCart')}
-              <span className="ml-2 text-[14px] font-normal text-outline">
+              <span className="ml-2 text-[14px] font-normal text-on-surface-variant">
                 ({cartItemsData.length})
               </span>
             </h1>
@@ -126,11 +162,11 @@ export default function CartScreen() {
       </div>
 
       {hasStockIssue && (
-        <div className="mx-5 md:mx-10 mb-4 p-4 rounded-xl bg-amber-50 border border-amber-300 text-amber-900 flex items-start gap-3 shadow-xs">
-          <AlertCircle className="w-5 h-5 text-amber-600 shrink-0 mt-0.5" />
+        <div className="mx-5 md:mx-10 mb-4 p-4 rounded-xl bg-warning-bg border border-warning text-warning flex items-start gap-3 shadow-xs">
+          <AlertCircle className="w-5 h-5 text-warning shrink-0 mt-0.5" />
           <div className="text-sm">
             <p className="font-bold">Important: Inventory availability changed</p>
-            <p className="text-xs text-amber-800 mt-0.5">
+            <p className="text-xs text-warning mt-0.5">
               One or more items in your cart exceed currently available stock. Please adjust quantities or remove out-of-stock items to proceed to checkout.
             </p>
           </div>
@@ -150,9 +186,9 @@ export default function CartScreen() {
                 exit={{ opacity: 0, height: 0, scale: 0.96, transition: { duration: 0.25 } }}
                 className={`flex items-center gap-4 rounded-[16px] p-4 overflow-hidden group bg-surface-container-lowest border ${
                   item.isOutOfStock
-                    ? 'border-rose-300 bg-rose-50/20'
+                    ? 'border-error bg-error-bg/20'
                     : item.isInsufficientStock
-                    ? 'border-amber-300 bg-amber-50/20'
+                    ? 'border-warning bg-warning-bg/20'
                     : 'border-outline-variant/30'
                 }`}
               >
@@ -161,7 +197,7 @@ export default function CartScreen() {
                   item.isOutOfStock ? 'grayscale opacity-75' : ''
                 }`}
                   style={{ background: getCategoryBg(item.product.category) }}>
-                  <img src={item.product.image_url ?? '/milk.png'} alt={item.product.name} className="w-full h-full object-cover" />
+                  <SmartImage src={item.product.image_url} alt={item.product.name} width={96} height={96} className="w-full h-full object-cover" />
                 </div>
 
                 {/* Details */}
@@ -184,24 +220,24 @@ export default function CartScreen() {
                     </span>
 
                     {item.isOutOfStock ? (
-                      <span className="inline-block px-2 py-0.5 rounded-md text-[10px] font-black bg-rose-100 text-rose-700">
+                      <span className="inline-block px-2 py-0.5 rounded-md text-[10px] font-black bg-error-bg text-error">
                         Out of Stock
                       </span>
                     ) : item.isInsufficientStock ? (
                       <div className="flex items-center gap-1.5">
-                        <span className="inline-block px-2 py-0.5 rounded-md text-[10px] font-black bg-amber-100 text-amber-800">
+                        <span className="inline-block px-2 py-0.5 rounded-md text-[10px] font-black bg-warning-bg text-warning">
                           Only {item.availableStock} in stock
                         </span>
                         <button
                           type="button"
                           onClick={() => handleUpdateQuantity(item.productId, item.variantId, item.availableStock)}
-                          className="text-[10px] font-bold text-emerald-700 hover:text-emerald-900 underline"
+                          className="text-[10px] font-bold text-success hover:text-success underline"
                         >
                           Set to {item.availableStock}
                         </button>
                       </div>
                     ) : item.availableStock <= 10 ? (
-                      <span className="inline-block px-2 py-0.5 rounded-md text-[10px] font-semibold bg-amber-50 text-amber-700">
+                      <span className="inline-block px-2 py-0.5 rounded-md text-[10px] font-semibold bg-warning-bg text-warning">
                         Only {item.availableStock} left
                       </span>
                     ) : null}
@@ -254,9 +290,9 @@ export default function CartScreen() {
               <Link href="/checkout"
                 className="flex items-center justify-between w-full px-6 py-4 rounded-[14px] font-bold text-[16px] transition-all active:scale-[0.98] hover:brightness-105"
                 style={{
-                  background: 'linear-gradient(135deg, #3f6530, #577f46)',
+                  background: 'var(--cta-gradient)',
                   color: 'white',
-                  boxShadow: '0 6px 20px rgba(63, 101, 48, 0.30)',
+                  boxShadow: 'var(--cta-shadow)',
                 }}>
                 <span>{t('proceedToCheckout')}</span>
                 <div className="flex items-center gap-2">
@@ -267,7 +303,7 @@ export default function CartScreen() {
             ) : (
               <button
                 disabled
-                className="flex items-center justify-center w-full px-6 py-4 rounded-[14px] font-bold text-[15px] bg-gray-200 text-gray-500 cursor-not-allowed opacity-80"
+                className="flex items-center justify-center w-full px-6 py-4 rounded-[14px] font-bold text-[15px] bg-border text-foreground-muted cursor-not-allowed opacity-80"
               >
                 Resolve Stock Issues to Checkout
               </button>
@@ -278,14 +314,14 @@ export default function CartScreen() {
 
       {/* Mobile Sticky Checkout */}
       <div className="md:hidden fixed left-0 right-0 z-40 px-4 pb-safe bg-surface/90 backdrop-blur-md pt-3 pb-[max(env(safe-area-inset-bottom,0px),12px)]"
-        style={{ bottom: 'calc(64px + env(safe-area-inset-bottom, 0px))' }}>
+        style={{ bottom: 'calc(var(--bottom-nav-h, 64px) + env(safe-area-inset-bottom, 0px))' }}>
         {canProceedToCheckout ? (
           <Link href="/checkout"
             className="flex items-center justify-between w-full px-5 py-4 rounded-[14px] font-bold text-[15px] transition-all active:scale-[0.97]"
             style={{
-              background: 'linear-gradient(135deg, #3f6530, #577f46)',
+              background: 'var(--cta-gradient)',
               color: 'white',
-              boxShadow: '0 6px 20px rgba(63, 101, 48, 0.30)',
+              boxShadow: 'var(--cta-shadow)',
             }}>
             <span>{t('checkout')}</span>
             <div className="flex items-center gap-1.5">
@@ -296,7 +332,7 @@ export default function CartScreen() {
         ) : (
           <button
             disabled
-            className="flex items-center justify-center w-full px-5 py-4 rounded-[14px] font-bold text-[14px] bg-gray-200 text-gray-500 cursor-not-allowed"
+            className="flex items-center justify-center w-full px-5 py-4 rounded-[14px] font-bold text-[14px] bg-border text-foreground-muted cursor-not-allowed"
           >
             Resolve Stock Issues to Checkout
           </button>

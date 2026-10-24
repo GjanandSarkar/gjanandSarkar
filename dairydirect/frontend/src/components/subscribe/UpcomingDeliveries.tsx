@@ -22,7 +22,7 @@ export function UpcomingDeliveries({ activeSubscriptions }: UpcomingDeliveriesPr
     <div className="bg-primary/5 rounded-[24px] p-5 border border-primary/10 mb-6 shadow-sm">
       <div className="flex items-start justify-between mb-4">
         <div className="flex items-center gap-2">
-          <div className="w-8 h-8 rounded-full bg-white flex items-center justify-center text-primary shadow-sm">
+          <div className="w-8 h-8 rounded-full bg-surface flex items-center justify-center text-primary shadow-sm">
             <CalendarCheck className="w-4 h-4" />
           </div>
           <div>
@@ -33,7 +33,7 @@ export function UpcomingDeliveries({ activeSubscriptions }: UpcomingDeliveriesPr
           </div>
         </div>
         
-        <div className="flex items-center gap-1.5 px-2 py-1 rounded-full bg-amber-100 text-amber-700">
+        <div className="flex items-center gap-1.5 px-2 py-1 rounded-full bg-warning-bg text-warning">
           <Info className="w-3 h-3" />
           <span className="text-[9px] font-black uppercase tracking-widest">Demo View</span>
         </div>
@@ -47,7 +47,7 @@ export function UpcomingDeliveries({ activeSubscriptions }: UpcomingDeliveriesPr
         {nextDays.map((date, idx) => (
           <div 
             key={idx}
-            className="bg-white rounded-[16px] p-3 border border-sand/50 shadow-sm flex flex-col items-center justify-center text-center relative overflow-hidden"
+            className="bg-surface rounded-[16px] p-3 border border-sand/50 shadow-sm flex flex-col items-center justify-center text-center relative overflow-hidden"
           >
             {idx === 0 && (
               <div className="absolute top-0 left-0 right-0 h-1 bg-mint" />

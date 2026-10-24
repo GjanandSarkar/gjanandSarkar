@@ -6,6 +6,7 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { getAdminSupabase } from '@/lib/supabase/admin';
+import { writeAuditLog } from '@/lib/security/audit';
 import { getAuthUser } from '@/lib/api/auth-middleware';
 
 export const dynamic = 'force-dynamic';
@@ -106,7 +107,21 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    // Only admins or sellers (for requesting payout) can execute this
+    /* Recording a payout asserts that money was sent to a seller. The old
+       rule was `!auth.isAdmin && seller.user_id !== auth.userId`, which let
+       a seller POST a payout for their OWN store with an arbitrary amount,
+       a self-chosen reference number and status defaulting to 'completed'
+       -- i.e. a seller could fabricate a financial record saying they had
+       been paid. Payout creation is now admin-only. No UI called this as a
+       seller, so nothing legitimate is lost; a genuine seller-initiated
+       payout REQUEST needs its own endpoint that cannot set amount/status. */
+    if (!auth.isAdmin) {
+      return NextResponse.json(
+        { error: 'Admin access required to record a payout' },
+        { status: 403 }
+      );
+    }
+
     const body = await request.json();
     const {
       sellerId,
@@ -138,9 +153,14 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Seller store not found' }, { status: 404 });
     }
 
-    // If caller is not admin, they can only request/record for their own store
-    if (!auth.isAdmin && seller.user_id !== auth.userId) {
-      return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+    /* Reject unknown statuses up front. seller_payouts has a CHECK
+       constraint, so an unexpected value surfaced as an opaque 500. */
+    const ALLOWED_PAYOUT_STATUS = ['pending', 'processing', 'completed', 'paid', 'failed'];
+    if (!ALLOWED_PAYOUT_STATUS.includes(status)) {
+      return NextResponse.json(
+        { error: `Invalid payout status. Expected one of: ${ALLOWED_PAYOUT_STATUS.join(', ')}` },
+        { status: 400 }
+      );
     }
 
     const numAmount = Number(amount);
@@ -167,6 +187,24 @@ export async function POST(request: NextRequest) {
       console.error('[SellerPayouts POST] Error:', insertErr.message);
       return NextResponse.json({ error: insertErr.message }, { status: 500 });
     }
+
+    // Money leaving the business must be attributable to a named admin.
+    await writeAuditLog({
+      adminId: auth.userId,
+      action: 'seller.payout.record',
+      resourceType: 'seller_payout',
+      resourceId: payout.id,
+      details: {
+        sellerId: seller.id,
+        storeName: seller.store_name,
+        amount: numAmount,
+        feeDeducted: numFee,
+        netAmount: numNet,
+        status,
+        referenceNo: payout.reference_no,
+      },
+      ipAddress: request.headers.get('x-forwarded-for') || undefined,
+    });
 
     // Send in-app notification to the seller user
     if (seller.user_id) {

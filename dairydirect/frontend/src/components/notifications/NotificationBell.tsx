@@ -1,8 +1,9 @@
 "use client";
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Bell } from 'lucide-react';
 import { useMediaQuery } from '@/hooks/useMediaQuery';
+import { api } from '@/lib/api/client';
 import dynamic from 'next/dynamic';
 
 const NotificationCenter = dynamic(() => import('./NotificationCenter').then(mod => mod.NotificationCenter), {
@@ -14,8 +15,31 @@ export function NotificationBell() {
   const [hasOpened, setHasOpened] = useState(false);
   const isMobile = useMediaQuery('(max-width: 768px)');
   
-  // Dummy unread count to simulate engagement
-  const unreadCount = 2;
+  /**
+   * Was `const unreadCount = 2;` — a permanent phantom badge that no user
+   * could ever clear, on every page of the site. Now reflects the real
+   * unread count from /api/notifications.
+   */
+  const [unreadCount, setUnreadCount] = useState(0);
+
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        const res = await api.notifications.get();
+        if (cancelled) return;
+        const rows = Array.isArray(res?.notifications) ? res.notifications : [];
+        setUnreadCount(
+          rows.filter((n: Record<string, unknown>) => !(n.is_read ?? n.isRead)).length,
+        );
+      } catch {
+        if (!cancelled) setUnreadCount(0);
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [hasOpened]);
 
   return (
     <>

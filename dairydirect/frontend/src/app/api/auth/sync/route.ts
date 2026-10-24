@@ -12,7 +12,7 @@ import { verifyAccessToken, extractTokenFromRequest, signAccessToken, signRefres
 import { cacheUserProfile, checkRateLimit } from '@/lib/aws/redis';
 import { getClientIP } from '@/lib/api/auth-middleware';
 import { getAdminSupabase } from '@/lib/supabase/admin';
-import { syncUserToUsersTable, backfillUsersTable } from '@/lib/supabase/sync-users';
+import { syncUserToUsersTable } from '@/lib/supabase/sync-users';
 
 const ADMIN_EMAILS = (process.env.ADMIN_EMAILS || 'gjanandsarkar09@gmail.com')
   .toLowerCase()
@@ -289,19 +289,14 @@ export async function POST(request: NextRequest) {
       avatar_url: profile?.avatar_url || userAvatar || null,
       saved_addresses: savedAddresses,
     };
-
     // Sync users table in Supabase and RDS
     await syncUserToUsersTable({
       id: profile.id,
       phone: profile.phone || cleanPhone,
       name: profileWithAddresses.name,
-      first_name: profile.first_name,
-      last_name: profile.last_name,
       email: profile.email || cleanEmail,
-      country: profile.country,
       created_at: profile.created_at,
     });
-    backfillUsersTable().catch(() => {});
 
     // Cache profile in Redis / Memory
     await cacheUserProfile(profile.id, profileWithAddresses);
@@ -328,8 +323,13 @@ export async function POST(request: NextRequest) {
     });
 
     // Set auth cookie for Edge Middleware
+    // The session cookie is httpOnly: it exists so the server and middleware
+    // can authenticate a request, and must never be readable by page scripts
+    // (an XSS payload could otherwise exfiltrate a 7-day session token).
+    // The browser gets its bearer token from the Supabase session instead,
+    // so nothing client-side needs to read this.
     response.cookies.set('gs_access_token', accessToken, {
-      httpOnly: false,
+      httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'lax',
       path: '/',

@@ -36,6 +36,8 @@ export type User = {
   country?: string;
   saved_addresses?: { label: string; address: string }[];
   role: 'customer' | 'admin' | 'seller';
+  /** Real balance from `profiles.loyalty_points`; orders accrue into it. */
+  loyalty_points?: number;
 };
 
 // ─── Seller Store shape ──────────────────────────────────────

@@ -1,9 +1,12 @@
 import { Metadata } from 'next';
-import { getProductsServer } from '@/lib/api/products';
+import { getCategoryProducts } from '@/lib/api/home';
 import { ProductCard } from '@/components/shared/ProductCard';
 import { JsonLd } from '@/components/seo/JsonLd';
 import { ChevronLeft, Sparkles, ArrowRight, PackageOpen } from 'lucide-react';
 import Link from 'next/link';
+import { CATEGORIES } from '@/lib/constants/categories';
+import { RecommendationRail } from '@/components/discovery/RecommendationRail';
+import { AdSlot } from '@/components/discovery/AdSlot';
 
 interface Props {
   params: Promise<{ category: string }>;
@@ -28,18 +31,19 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   };
 }
 
-export const dynamic = 'force-dynamic';
-export const revalidate = 0;
+// Was force-dynamic + revalidate 0: a full, unbounded category query on every
+// single page view. Category listings change when the catalogue changes, not
+// per visitor, so they are cached and tag-invalidated like the homepage.
+export const revalidate = 300;
 
 export default async function CategoryPage({ params }: Props) {
   const { category: rawCategory } = await params;
   const categoryTitle = formatCategoryTitle(rawCategory);
   
   // Fetch products matching category
-  const products = await getProductsServer({ 
-    category: rawCategory.toLowerCase() === 'all' ? undefined : categoryTitle, 
-    activeOnly: true 
-  });
+  const products = await getCategoryProducts(
+    rawCategory.toLowerCase() === 'all' ? undefined : categoryTitle
+  );
 
   const breadcrumbData = {
     "@context": "https://schema.org",
@@ -60,37 +64,42 @@ export default async function CategoryPage({ params }: Props) {
     ]
   };
 
-  const popularCategories = [
-    { name: 'A2 Gir Milk', category: 'Milk' },
-    { name: 'Bilona Ghee', category: 'Ghee' },
-    { name: 'Fresh Paneer', category: 'Paneer' },
-    { name: 'Curd & Lassi', category: 'Curd' },
-    { name: 'Handicrafts', category: 'Handicrafts' },
-    { name: 'Ayurveda', category: 'Ayurveda' },
-  ];
+  // Cross-links to other categories. Previously four of the six were dairy
+  // sub-products that are not categories at all, so they linked to pages with
+  // no results. Now drawn from the taxonomy, excluding the current category.
+  const popularCategories = CATEGORIES.filter(
+    (c) => c.name.toLowerCase() !== rawCategory.toLowerCase(),
+  )
+    .slice(0, 6)
+    .map((c) => ({ name: c.name, category: c.name }));
+
+  // "all" is a browsing pseudo-category with no matching products.category
+  // value, so scoping the rail to it would filter everything out.
+  const railCategory =
+    rawCategory.toLowerCase() === 'all' ? undefined : categoryTitle;
 
   return (
-    <div className="min-h-screen bg-[#fafaf8] pb-24">
+    <div className="min-h-screen bg-background pb-24">
       <JsonLd data={breadcrumbData} />
       
       {/* Header */}
-      <header className="sticky top-0 z-30 bg-white/90 backdrop-blur-md border-b border-gray-200 px-4 sm:px-6 lg:px-8 py-4 flex items-center justify-between">
+      <header className="sticky top-0 z-30 bg-surface/90 backdrop-blur-md border-b border-border px-4 sm:px-6 lg:px-8 py-4 flex items-center justify-between">
         <div className="flex items-center gap-4">
           <Link 
             href="/home" 
-            className="w-9 h-9 rounded-full bg-gray-100 flex items-center justify-center text-gray-700 hover:bg-gray-200 transition-colors"
+            className="w-9 h-9 rounded-full bg-surface-muted flex items-center justify-center text-foreground hover:bg-border transition-colors"
           >
             <ChevronLeft className="w-5 h-5" />
           </Link>
           <div>
-            <h1 className="text-lg sm:text-xl font-black text-gray-900">{categoryTitle}</h1>
-            <p className="text-xs text-gray-500 font-medium">{products.length} products available</p>
+            <h1 className="text-lg sm:text-xl font-black text-foreground">{categoryTitle}</h1>
+            <p className="text-xs text-foreground-muted font-medium">{products.length} products available</p>
           </div>
         </div>
 
         <Link
           href="/products"
-          className="text-xs font-bold text-[#0f3e26] hover:text-[#c88a23] flex items-center gap-1 transition-colors"
+          className="text-xs font-bold text-primary hover:text-secondary flex items-center gap-1 transition-colors"
         >
           <span>All Products</span>
           <ArrowRight className="w-3.5 h-3.5" />
@@ -108,14 +117,14 @@ export default async function CategoryPage({ params }: Props) {
             ))}
           </div>
         ) : (
-          <div className="bg-white rounded-3xl border border-gray-200/90 p-8 sm:p-12 text-center max-w-2xl mx-auto my-8 shadow-xs">
-            <div className="w-16 h-16 rounded-2xl bg-amber-50 border border-amber-200 text-[#c88a23] flex items-center justify-center mx-auto mb-4">
+          <div className="bg-surface rounded-3xl border border-border/90 p-8 sm:p-12 text-center max-w-2xl mx-auto my-8 shadow-xs">
+            <div className="w-16 h-16 rounded-2xl bg-warning-bg border border-warning/20 text-secondary flex items-center justify-center mx-auto mb-4">
               <PackageOpen className="w-8 h-8" />
             </div>
-            <h2 className="text-xl font-bold text-gray-900 mb-2">
+            <h2 className="text-xl font-bold text-foreground mb-2">
               No products found in &ldquo;{categoryTitle}&rdquo;
             </h2>
-            <p className="text-xs text-gray-500 max-w-md mx-auto mb-6">
+            <p className="text-xs text-foreground-muted max-w-md mx-auto mb-6">
               Our artisans and verified farm vendors are stocking fresh batches. Check out our active heritage categories below!
             </p>
 
@@ -125,7 +134,7 @@ export default async function CategoryPage({ params }: Props) {
                 <Link
                   key={c.name}
                   href={`/products?category=${encodeURIComponent(c.category)}`}
-                  className="px-3.5 py-1.5 rounded-full bg-gray-100 hover:bg-emerald-50 hover:text-[#0f3e26] text-xs font-semibold text-gray-700 transition-colors"
+                  className="px-3.5 py-1.5 rounded-full bg-surface-muted hover:bg-success-bg hover:text-primary text-xs font-semibold text-foreground transition-colors"
                 >
                   {c.name}
                 </Link>
@@ -134,14 +143,19 @@ export default async function CategoryPage({ params }: Props) {
 
             <Link
               href="/products"
-              className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-[#0f3e26] hover:bg-[#144f31] text-white text-xs font-bold shadow-md transition-all active:scale-95"
+              className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-primary hover:bg-primary-hover text-on-primary text-xs font-bold shadow-md transition-all active:scale-95"
             >
-              <Sparkles className="w-4 h-4 text-[#c88a23]" />
+              <Sparkles className="w-4 h-4 text-secondary" />
               <span>Browse All Available Products</span>
             </Link>
           </div>
         )}
       </main>
+
+      {/* Scoped to this category: on a category page, suggesting an unrelated
+          department is noise rather than discovery. */}
+      <RecommendationRail placement="category" category={railCategory} limit={8} />
+      <AdSlot placement="category" category={railCategory} />
     </div>
   );
 }

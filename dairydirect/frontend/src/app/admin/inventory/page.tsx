@@ -125,8 +125,8 @@ export default function AdminInventoryPage() {
 
   const statusStyle = {
     in_stock: { bg: '#c2efac', text: '#2d5a27', label: 'In Stock' },
-    low_stock: { bg: '#fff8e6', text: '#7d5200', label: 'Low Stock' },
-    out_of_stock: { bg: '#ffdcc7', text: '#774117', label: 'Out of Stock' },
+    low_stock: { bg: '#fff8e6', text: 'var(--warning)', label: 'Low Stock' },
+    out_of_stock: { bg: '#ffdcc7', text: 'var(--warning)', label: 'Out of Stock' },
   };
 
   return (
@@ -142,7 +142,7 @@ export default function AdminInventoryPage() {
           </Link>
           <div>
             <h1 className="font-extrabold text-[24px]" style={{ color: 'var(--color-on-surface)' }}>Inventory Management</h1>
-            <p className="text-[12px]" style={{ color: 'var(--color-outline)' }}>Monitor and update stock levels for all products</p>
+            <p className="text-[12px]" style={{ color: 'var(--color-on-surface-variant)' }}>Monitor and update stock levels for all products</p>
           </div>
         </div>
 
@@ -150,8 +150,8 @@ export default function AdminInventoryPage() {
         {stats && (
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
             {[
-              { label: 'Out of Stock', value: stats.out_of_stock, bg: '#ffdcc7', text: '#774117', icon: X },
-              { label: 'Low Stock', value: stats.low_stock, bg: '#fff8e6', text: '#7d5200', icon: AlertTriangle },
+              { label: 'Out of Stock', value: stats.out_of_stock, bg: '#ffdcc7', text: 'var(--warning)', icon: X },
+              { label: 'Low Stock', value: stats.low_stock, bg: '#fff8e6', text: 'var(--warning)', icon: AlertTriangle },
               { label: 'In Stock', value: stats.in_stock, bg: '#c2efac', text: '#2d5a27', icon: CheckCircle2 },
               { label: 'Inventory Value', value: `₹${parseFloat(stats.total_inventory_value || '0').toLocaleString('en-IN', { maximumFractionDigits: 0 })}`, bg: '#dce8ff', text: '#4a6fa5', icon: Package },
             ].map((s) => {
@@ -175,7 +175,7 @@ export default function AdminInventoryPage() {
         <div className="flex flex-wrap gap-3 mb-5">
           {/* Search */}
           <div className="flex-1 min-w-[200px] relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4" style={{ color: 'var(--color-outline)' }} />
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4" style={{ color: 'var(--color-on-surface-variant)' }} />
             <input
               type="text"
               placeholder="Search products..."
@@ -216,7 +216,7 @@ export default function AdminInventoryPage() {
 
         {error && (
           <div className="mb-4 px-4 py-3 rounded-[10px] flex items-center gap-2 text-[13px]"
-            style={{ background: '#ffdcc7', color: '#774117' }}>
+            style={{ background: 'var(--warning-bg)', color: 'var(--warning)' }}>
             <AlertTriangle className="w-4 h-4" />
             {error}
             <button onClick={() => setError('')} className="ml-auto"><X className="w-4 h-4" /></button>
@@ -233,7 +233,7 @@ export default function AdminInventoryPage() {
                   <tr style={{ background: 'var(--color-surface-container-low)' }}>
                     {['Product', 'Category', 'Weight', 'Price', 'Stock', 'Status', 'Batch / Expiry', ''].map(h => (
                       <th key={h} className="text-left px-4 py-3 text-[10px] font-bold uppercase tracking-wider whitespace-nowrap"
-                        style={{ color: 'var(--color-outline)' }}>{h}</th>
+                        style={{ color: 'var(--color-on-surface-variant)' }}>{h}</th>
                     ))}
                   </tr>
                 </thead>
@@ -278,7 +278,7 @@ export default function AdminInventoryPage() {
                               style={{ background: 'var(--color-surface-container)', border: '1.5px solid var(--color-primary)', color: 'var(--color-on-surface)' }}
                             />
                           ) : (
-                            <span className="font-bold text-[14px]" style={{ color: variant.stock === 0 ? '#774117' : variant.stock <= variant.low_stock_threshold ? '#7d5200' : 'var(--color-on-surface)' }}>
+                            <span className="font-bold text-[14px]" style={{ color: variant.stock === 0 ? 'var(--warning)' : variant.stock <= variant.low_stock_threshold ? 'var(--warning)' : 'var(--color-on-surface)' }}>
                               {variant.stock}
                             </span>
                           )}
@@ -299,7 +299,7 @@ export default function AdminInventoryPage() {
                               style={{ background: 'var(--color-surface-container)', border: '1px solid rgba(195,201,187,0.4)', color: 'var(--color-on-surface)' }}
                             />
                           ) : (
-                            <p className="text-[11px]" style={{ color: 'var(--color-outline)' }}>
+                            <p className="text-[11px]" style={{ color: 'var(--color-on-surface-variant)' }}>
                               {variant.batch_number || '—'}
                               {variant.expiry_date && <span className="block">{format(new Date(variant.expiry_date), 'dd MMM yy')}</span>}
                             </p>
@@ -316,8 +316,8 @@ export default function AdminInventoryPage() {
                               >
                                 {isSaving ? <Loader2 className="w-3.5 h-3.5 animate-spin text-white" /> : <Save className="w-3.5 h-3.5 text-white" />}
                               </button>
-                              <button onClick={() => handleCancel(variant.variant_id)} className="p-1.5 rounded-[6px]" style={{ background: '#e3e3dc' }}>
-                                <X className="w-3.5 h-3.5" style={{ color: '#43493e' }} />
+                              <button onClick={() => handleCancel(variant.variant_id)} className="p-1.5 rounded-[6px]" style={{ background: 'var(--surface-muted)' }}>
+                                <X className="w-3.5 h-3.5" style={{ color: 'var(--foreground-muted)' }} />
                               </button>
                             </div>
                           ) : (
@@ -333,7 +333,7 @@ export default function AdminInventoryPage() {
               </table>
               {filtered.length === 0 && (
                 <div className="text-center py-16">
-                  <Package className="w-8 h-8 mx-auto mb-3" style={{ color: 'var(--color-outline)' }} strokeWidth={1.5} />
+                  <Package className="w-8 h-8 mx-auto mb-3" style={{ color: 'var(--color-on-surface-variant)' }} strokeWidth={1.5} />
                   <p className="font-semibold" style={{ color: 'var(--color-on-surface)' }}>
                     {search ? 'No products match your search' : 'No inventory data'}
                   </p>

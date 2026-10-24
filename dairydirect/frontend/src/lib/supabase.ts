@@ -3,7 +3,10 @@ import { getAdminSupabase } from './supabase/admin';
 
 export { getSupabaseBrowserClient, getAdminSupabase };
 export const supabase = getSupabaseBrowserClient();
-export const adminSupabase = typeof window === 'undefined' ? getAdminSupabase() : null;
+// `adminSupabase` used to be constructed here at module scope. Nothing
+// imported it, and building a Supabase client during module evaluation is the
+// pattern that broke the production build from src/lib/db.ts. Use
+// getAdminSupabase() at the point of use instead.
 
 // ─── Shared Database Types ─────────────────────────────────────
 
@@ -24,7 +27,10 @@ export type DBProfile = {
 export type DBProduct = {
   id: string;
   name: string;
-  category: 'Milk' | 'Paneer' | 'Ghee' | 'Buttermilk' | 'Curd' | 'Lassi';
+  // Was a closed union of six dairy values, which the UI had already
+  // outgrown (it offers Electronics, Fashion, Books...). Categories are data,
+  // defined in src/lib/constants/categories.ts, not a compile-time constant.
+  category: string;
   description: string | null;
   image_url: string | null;
   is_freshness_guarantee: boolean;
@@ -67,6 +73,9 @@ export type DBOrder = {
   delivery_slot?: string | null;
   shipping_address?: string | null;
   notes?: string | null;
+  payment_confirmed_at?: string | null;
+  payment_confirmed_by?: string | null;
+  cod_collected_amount?: number | null;
   created_at: string;
   profiles?: { name: string | null; phone: string | null; email?: string | null };
   order_items?: DBOrderItem[];
@@ -82,6 +91,44 @@ export type DBOrderItem = {
   cost_price?: number;
   product_name?: string;
   variant_weight?: string;
+  status?: 'pending' | 'confirmed' | 'out_for_delivery' | 'delivered' | 'cancelled' | 'returned';
+  cancelled_at?: string | null;
+  delivered_at?: string | null;
+  seller_id?: string | null;
+  return_requests?: DBReturnRequest[];
+};
+
+export type DBReturnRequest = {
+  id: string;
+  order_id: string;
+  order_item_id?: string | null;
+  product_id?: string | null;
+  seller_id?: string | null;
+  user_id: string;
+  request_type: 'cancellation' | 'return';
+  reason: string;
+  description?: string | null;
+  images?: string[];
+  status: 'submitted' | 'under_review' | 'approved' | 'rejected' | 'return_in_progress' | 'item_received' | 'inspection_completed' | 'refund_pending' | 'refunded';
+  refund_amount?: number | null;
+  seller_notes?: string | null;
+  seller_status?: 'pending' | 'approved' | 'rejected';
+  admin_notes?: string | null;
+  rejection_reason?: string | null;
+  history?: Array<{
+    action: string;
+    actor_id: string;
+    actor_type: 'customer' | 'seller' | 'admin';
+    timestamp: string;
+    notes?: string;
+  }>;
+  orders?: DBOrder;
+  profiles?: DBProfile;
+  order_items?: DBOrderItem;
+  products?: DBProduct;
+  created_at: string;
+  updated_at?: string;
+  resolved_at?: string | null;
 };
 
 export type DBSubscription = {
@@ -98,22 +145,6 @@ export type DBSubscription = {
   created_at: string;
   products?: DBProduct;
   product_variants?: DBProductVariant;
-};
-
-export type DBReturnRequest = {
-  id: string;
-  order_id: string;
-  user_id: string;
-  reason: string;
-  description?: string | null;
-  images?: string[];
-  status: 'pending' | 'approved' | 'rejected' | 'refunded';
-  refund_amount: number;
-  admin_notes?: string | null;
-  created_at: string;
-  resolved_at?: string | null;
-  orders?: DBOrder;
-  profiles?: DBProfile;
 };
 
 export type DBDeliverySlot = {

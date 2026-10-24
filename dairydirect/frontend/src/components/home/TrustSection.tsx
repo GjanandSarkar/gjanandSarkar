@@ -18,7 +18,7 @@ export function TrustSection() {
       icon: <ShieldCheck className="w-6 h-6" />,
       title: 'Quality Checked',
       description: 'Rigorous 24-step testing',
-      color: 'text-green-600',
+      color: 'text-success',
       bg: 'bg-green-600/10'
     },
     {
@@ -32,8 +32,8 @@ export function TrustSection() {
       icon: <Clock className="w-6 h-6" />,
       title: 'Reliable Delivery',
       description: 'Before 7 AM every day',
-      color: 'text-amber-500',
-      bg: 'bg-amber-500/10'
+      color: 'text-warning',
+      bg: 'bg-warning/10'
     }
   ];
 
@@ -49,7 +49,7 @@ export function TrustSection() {
                 {item.icon}
               </div>
               <span className="text-[13px] font-bold text-on-surface mb-1 leading-tight">{item.title}</span>
-              <span className="text-[11px] font-medium text-outline">{item.description}</span>
+              <span className="text-[11px] font-medium text-on-surface-variant">{item.description}</span>
             </div>
           ))}
         </div>

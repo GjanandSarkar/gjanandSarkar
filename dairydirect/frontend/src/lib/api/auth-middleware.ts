@@ -8,6 +8,7 @@ import { verifyAccessToken, extractTokenFromRequest } from '@/lib/auth/jwt';
 import { getCachedUserProfile, cacheUserProfile } from '@/lib/aws/redis';
 import { query } from '@/lib/aws/rds';
 import { getAdminSupabase } from '@/lib/supabase/admin';
+import { NextResponse } from 'next/server';
 
 // ─── Short-lived in-process auth cache ────────────────────────────────────────
 // Keyed by a truncated token (last 32 chars) → AuthUser result
@@ -44,7 +45,58 @@ export type AuthUser = {
   isAdmin: boolean;
 };
 
-const ADMIN_EMAILS = (process.env.ADMIN_EMAILS || 'gjanandsarkar09@gmail.com')
+/**
+ * A seller's contracted position on the platform.
+ *
+ * Gjanand Sarkar collaborates with exactly one company per category, so a
+ * seller's `category` is not a preference — it is the boundary of everything
+ * they are allowed to write. `status` must be 'active' before they can
+ * publish anything.
+ */
+export type SellerContext = {
+  sellerId: string;
+  userId: string | null;
+  category: string;
+  status: string;
+  storeName: string | null;
+};
+
+/** Seller states that are permitted to create or modify catalogue entries. */
+const SELLER_WRITE_ALLOWED_STATUSES = new Set(['active']);
+
+/**
+ * Resolve the seller record attached to a user, if any.
+ * Always reads from the database — never trusts a client-supplied seller id.
+ */
+export async function getSellerForUser(userId: string): Promise<SellerContext | null> {
+  try {
+    const sb = getAdminSupabase();
+    const { data } = await sb
+      .from('sellers')
+      .select('id, user_id, category, status, store_name')
+      .eq('user_id', userId)
+      .maybeSingle();
+
+    if (!data) return null;
+
+    return {
+      sellerId: data.id,
+      userId: data.user_id ?? null,
+      category: data.category ?? '',
+      status: data.status ?? 'pending',
+      storeName: data.store_name ?? null,
+    };
+  } catch (err) {
+    console.warn('[AuthMiddleware] getSellerForUser failed:', err);
+    return null;
+  }
+}
+
+export function sellerCanWrite(seller: SellerContext | null): boolean {
+  return Boolean(seller && SELLER_WRITE_ALLOWED_STATUSES.has(seller.status));
+}
+
+const ADMIN_EMAILS = (process.env.ADMIN_EMAILS || 'gjanandsarkar09@gmail.com,bestjavacoding444@gmail.com')
   .toLowerCase()
   .split(',')
   .map((e) => e.trim());
@@ -110,10 +162,13 @@ export async function getAuthUser(request: Request): Promise<AuthUser | null> {
   const cached = await getCachedUserProfile(userId);
   if (cached) {
     const cachedProfile = cached as { role?: string; phone?: string | null; email?: string | null };
-    const isAdmin = isEnvAdmin || (cachedProfile.role ?? userRole) === 'admin';
+    const effectiveRole = (cachedProfile.role ?? userRole) as AuthUser['role'];
+    const isAdmin = isEnvAdmin || effectiveRole === 'admin';
     return {
       userId,
-      role: isAdmin ? 'admin' : 'customer',
+      // Previously this collapsed every non-admin to 'customer', silently
+      // destroying the 'seller' role for any request that hit the cache.
+      role: isAdmin ? 'admin' : effectiveRole === 'seller' ? 'seller' : 'customer',
       phone: cachedProfile.phone ?? userPhone,
       email: cachedProfile.email ?? userEmail,
       isAdmin,
@@ -132,7 +187,7 @@ export async function getAuthUser(request: Request): Promise<AuthUser | null> {
       const isAdmin = isEnvAdmin || row.role === 'admin';
       const authUser: AuthUser = {
         userId,
-        role: isAdmin ? 'admin' : (row.role as 'customer' | 'admin'),
+        role: isAdmin ? 'admin' : (row.role as AuthUser['role']),
         phone: row.phone || userPhone,
         email: row.email || userEmail,
         isAdmin,
@@ -145,12 +200,36 @@ export async function getAuthUser(request: Request): Promise<AuthUser | null> {
     console.warn('[AuthMiddleware] PostgreSQL not configured, using Supabase auth.');
   }
 
+  // Supabase-only deployments never reach the RDS branch above, so without
+  // this lookup the user's real role in `profiles` was never consulted: every
+  // seller and every database-assigned admin silently degraded to 'customer'
+  // unless their role happened to be baked into a custom JWT.
+  if (userRole !== 'admin') {
+    try {
+      const sb = getAdminSupabase();
+      const { data: profile } = await sb
+        .from('profiles')
+        .select('role, phone, email')
+        .eq('id', userId)
+        .maybeSingle();
+
+      if (profile?.role) {
+        userRole = profile.role as AuthUser['role'];
+        userPhone = profile.phone ?? userPhone;
+        userEmail = profile.email ?? userEmail;
+      }
+    } catch (err) {
+      console.warn('[AuthMiddleware] Supabase profile lookup failed:', err);
+    }
+  }
+
+  const isAdmin = isEnvAdmin || userRole === 'admin';
   const result: AuthUser = {
     userId,
-    role: isEnvAdmin || userRole === 'admin' ? 'admin' : 'customer',
+    role: isAdmin ? 'admin' : userRole === 'seller' ? 'seller' : 'customer',
     phone: userPhone,
     email: userEmail,
-    isAdmin: isEnvAdmin || userRole === 'admin',
+    isAdmin,
   };
 
   // Cache the resolved auth user to avoid repeated DB/Supabase lookups
@@ -160,13 +239,71 @@ export async function getAuthUser(request: Request): Promise<AuthUser | null> {
   return result;
 }
 
+export type CustomerAuthResult =
+  | { ok: true; user: AuthUser & { id: string } }
+  | { ok: false; response: NextResponse };
+
+export type SellerAuthResult =
+  | { ok: true; user: AuthUser & { id: string }; seller: SellerContext & { id: string } }
+  | { ok: false; response: NextResponse };
+
+export type AdminAuthResult =
+  | { ok: true; user: AuthUser & { id: string } }
+  | { ok: false; response: NextResponse };
+
 /**
- * Require admin role. Returns user if admin, null otherwise.
+ * Require customer (authenticated user). Returns { ok: true, user } or { ok: false, response }.
  */
-export async function requireAdmin(request: Request): Promise<AuthUser | null> {
+export async function requireCustomer(request: Request): Promise<CustomerAuthResult> {
+  const user = await getAuthUser(request);
+  if (!user) {
+    return {
+      ok: false,
+      response: NextResponse.json({ error: 'Unauthorized: Authentication required' }, { status: 401 }),
+    };
+  }
+  return { ok: true, user: { ...user, id: user.userId } };
+}
+
+/**
+ * Require seller role. Returns { ok: true, user, seller } or { ok: false, response }.
+ */
+export async function requireSeller(request: Request): Promise<SellerAuthResult> {
+  const user = await getAuthUser(request);
+  if (!user) {
+    return {
+      ok: false,
+      response: NextResponse.json({ error: 'Unauthorized: Authentication required' }, { status: 401 }),
+    };
+  }
+  const seller = await getSellerForUser(user.userId);
+  if (!seller && !user.isAdmin) {
+    return {
+      ok: false,
+      response: NextResponse.json({ error: 'Forbidden: Seller profile required' }, { status: 403 }),
+    };
+  }
+  return {
+    ok: true,
+    user: { ...user, id: user.userId },
+    seller: seller
+      ? { ...seller, id: seller.sellerId }
+      : { sellerId: '', id: '', userId: user.userId, category: '', status: 'active', storeName: 'Admin Override' },
+  };
+}
+
+/**
+ * Require admin role. Returns { ok: true, user } or { ok: false, response }.
+ */
+export async function requireAdmin(request: Request): Promise<AdminAuthResult> {
   const auth = await getAuthUser(request);
-  if (!auth || !auth.isAdmin) return null;
-  return auth;
+  if (!auth || !auth.isAdmin) {
+    return {
+      ok: false,
+      response: NextResponse.json({ error: 'Forbidden: Admin access required' }, { status: 403 }),
+    };
+  }
+  return { ok: true, user: { ...auth, id: auth.userId } };
 }
 
 /**

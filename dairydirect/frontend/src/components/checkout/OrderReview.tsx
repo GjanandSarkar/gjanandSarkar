@@ -28,7 +28,7 @@ export function OrderReview({ items }: OrderReviewProps) {
   if (items.length === 0) return null;
 
   return (
-    <div className="bg-white rounded-[20px] p-4 border border-sand shadow-sm">
+    <div className="bg-surface rounded-[20px] p-4 border border-sand shadow-sm">
       <div className="flex items-center gap-2 mb-4">
         <ShoppingBag className="w-4 h-4 text-primary" />
         <h3 className="text-sm font-bold text-dark uppercase tracking-wider">Order Items</h3>

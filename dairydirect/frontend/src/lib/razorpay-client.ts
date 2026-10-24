@@ -130,7 +130,7 @@ export async function initiateRazorpayPayment({
   currency = 'INR',
   receipt,
   name = 'Gjanand Sarkar',
-  description = 'Farm Fresh Dairy Order',
+  description = 'Gjanand Sarkar Order',
   prefill,
   notes,
   onSuccess,

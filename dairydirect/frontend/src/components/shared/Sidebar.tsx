@@ -53,9 +53,9 @@ export function Sidebar() {
             />
             <div className="flex flex-col">
               <span className="text-xl md:text-2xl font-black tracking-tight leading-none">
-                <span className="text-[#0f3e26]">Gjanand</span>
+                <span className="text-primary">Gjanand</span>
               </span>
-              <span className="text-[10px] md:text-[11px] tracking-[0.2em] font-black text-[#c88a23] uppercase text-right leading-none mt-0.5">
+              <span className="text-[10px] md:text-[11px] tracking-[0.2em] font-black text-secondary uppercase text-right leading-none mt-0.5">
                 SARKAR
               </span>
             </div>
@@ -67,7 +67,7 @@ export function Sidebar() {
       {user && (
         <div className="mx-4 mb-2 px-4 py-3 rounded-[14px] flex items-center gap-3"
           style={{ background: 'var(--color-surface-container-low)' }}>
-          <div className="w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm text-white shrink-0 bg-[#0f3e26] border border-[#0f3e26]/10 relative overflow-hidden">
+          <div className="w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm text-on-primary shrink-0 bg-primary border border-primary/10 relative overflow-hidden">
             <img 
               src={user.avatar_url || '/profile/profile.jpg'} 
               alt="Profile" 
@@ -80,7 +80,7 @@ export function Sidebar() {
           </div>
           <div className="flex-1 min-w-0">
             <p className="text-[11px] font-semibold uppercase tracking-wider"
-              style={{ color: 'var(--color-outline)' }}>Good morning</p>
+              style={{ color: 'var(--color-on-surface-variant)' }}>Good morning</p>
             <p className="font-bold text-[15px] leading-tight mt-0.5 truncate"
               style={{ color: 'var(--color-on-surface)' }}>
               {user.name?.split(' ')[0] || 'Guest'}
@@ -92,7 +92,7 @@ export function Sidebar() {
       {/* Nav Items */}
       <nav className="flex-1 px-3 py-3 flex flex-col gap-0.5 overflow-y-auto no-scrollbar">
         <p className="px-3 py-2 text-[10px] font-bold uppercase tracking-[0.1em]"
-          style={{ color: 'var(--color-outline)' }}>Navigation</p>
+          style={{ color: 'var(--color-on-surface-variant)' }}>Navigation</p>
 
         {navItems.map((item) => {
           const isActive = pathname.startsWith(item.href);
@@ -106,7 +106,7 @@ export function Sidebar() {
                 "flex items-center gap-3.5 px-3.5 py-3 rounded-[12px] transition-all duration-200 group relative",
                 isActive
                   ? "font-bold"
-                  : "font-medium hover:bg-[#f0f4ec]"
+                  : "font-medium hover:bg-primary-fixed"
               )}
               style={isActive ? {
                 background: 'linear-gradient(135deg, #eaf4e2, #ddf2d0)',
@@ -121,7 +121,7 @@ export function Sidebar() {
               )}
               <div className={cn(
                 "w-8 h-8 rounded-[8px] flex items-center justify-center shrink-0 transition-all",
-                isActive ? "shadow-sm" : "group-hover:bg-white/70"
+                isActive ? "shadow-sm" : "group-hover:bg-surface/70"
               )}
                 style={isActive ? {
                   background: 'var(--color-primary-fixed)',
@@ -151,13 +151,13 @@ export function Sidebar() {
 
         <button
           onClick={handleLogout}
-          className="flex items-center gap-3.5 px-3.5 py-3 rounded-[12px] w-full transition-all duration-200 hover:bg-red-50 group"
+          className="flex items-center gap-3.5 px-3.5 py-3 rounded-[12px] w-full transition-all duration-200 hover:bg-error-bg group"
           style={{ color: 'var(--color-on-surface-variant)' }}
         >
-          <div className="w-8 h-8 rounded-[8px] flex items-center justify-center group-hover:bg-red-100 transition-colors">
+          <div className="w-8 h-8 rounded-[8px] flex items-center justify-center group-hover:bg-error-bg transition-colors">
             <LogOut className="w-[17px] h-[17px]" strokeWidth={2} />
           </div>
-          <span className="text-[14px] font-medium group-hover:text-red-600">Logout</span>
+          <span className="text-[14px] font-medium group-hover:text-error">Logout</span>
         </button>
       </div>
     </aside>

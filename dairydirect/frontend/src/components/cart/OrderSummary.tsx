@@ -38,7 +38,7 @@ export function OrderSummary({
             <div className="flex items-center gap-3">
               <div className={cn(
                 "w-9 h-9 rounded-full flex items-center justify-center transition-all",
-                isFreeDelivery ? "bg-green-100 text-green-600" : "bg-primary-fixed text-primary"
+                isFreeDelivery ? "bg-success-bg text-success" : "bg-primary-fixed text-primary"
               )}>
                 {isFreeDelivery ? <ShieldCheck className="w-5 h-5" /> : <Package className="w-4.5 h-4.5" />}
               </div>

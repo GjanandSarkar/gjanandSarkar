@@ -49,7 +49,7 @@ const StatCard = ({
       <span className="text-muted text-[11px] font-bold uppercase tracking-wider">{title}</span>
       <span className="text-on-surface text-2xl font-extrabold">{value}</span>
       {growth && (
-        <span className="text-emerald-600 text-xs font-bold flex items-center gap-1 mt-0.5">
+        <span className="text-success text-xs font-bold flex items-center gap-1 mt-0.5">
           <ArrowUpRight className="w-3.5 h-3.5" />
           {growth}
         </span>
@@ -58,7 +58,7 @@ const StatCard = ({
     </div>
 
     {icon && (
-      <div className={`w-10 h-10 rounded-2xl flex items-center justify-center shrink-0 ${iconBg || 'bg-[#e6f2ec] text-[#0c3c26]'}`}>
+      <div className={`w-10 h-10 rounded-2xl flex items-center justify-center shrink-0 ${iconBg || 'bg-primary-fixed text-primary'}`}>
         {icon}
       </div>
     )}
@@ -127,14 +127,14 @@ export default function AdminAnalyticsPage() {
     const newCustomers = Math.max(totalCustomers - repeatCustomers, 0);
 
     const customerDonutData = [
-      { label: 'New Customers', value: newCustomers, color: '#0c3c26' },
+      { label: 'New Customers', value: newCustomers, color: 'var(--primary)' },
       { label: 'Returning Customers', value: repeatCustomers, color: '#b87d20' },
     ];
 
     // Products Ranking
     const productSales = validOrders.reduce((acc, o) => {
       o.order_items?.forEach((item) => {
-        const name = item.products?.name || 'Paneer';
+        const name = item.products?.name?.trim() || 'Unnamed product';
         if (!acc[name]) acc[name] = { revenue: 0, units: 0 };
         const price = typeof item.price === 'string' ? parseFloat(item.price) : Number(item.price) || 0;
         const qty = Number(item.quantity) || 1;
@@ -148,20 +148,17 @@ export default function AdminAnalyticsPage() {
       .map(([name, stats]) => ({ label: name, ...stats }))
       .sort((a, b) => b.units - a.units);
 
-    // Fallback mock items matching screenshot if empty
-    const topProductsUnits = productRanking.length > 0
-      ? productRanking.slice(0, 5).map((p) => ({ label: p.label, value: p.units, displayValue: String(p.units) }))
-      : [
-          { label: 'Paneer', value: 3, displayValue: '3' },
-          { label: 'Masala Chaas (Spiced Buttermilk)', value: 3, displayValue: '3' },
-        ];
+    // No mock fallback: these previously showed two invented dairy rows
+    // ("Paneer", "Masala Chaas") whenever there were no sales, which made an
+    // empty dashboard look like it had real orders.
+    const topProductsUnits = productRanking
+      .slice(0, 5)
+      .map((p) => ({ label: p.label, value: p.units, displayValue: String(p.units) }));
 
-    const topProductsRevenue = productRanking.length > 0
-      ? [...productRanking].sort((a, b) => b.revenue - a.revenue).slice(0, 5).map((p) => ({ label: p.label, value: p.revenue, displayValue: `${t('currency')}${p.revenue}` }))
-      : [
-          { label: 'Paneer', value: 50, displayValue: '₹50' },
-          { label: 'Masala Chaas (Spiced Buttermilk)', value: 50, displayValue: '₹50' },
-        ];
+    const topProductsRevenue = [...productRanking]
+      .sort((a, b) => b.revenue - a.revenue)
+      .slice(0, 5)
+      .map((p) => ({ label: p.label, value: p.revenue, displayValue: `${t('currency')}${p.revenue}` }));
 
     // Charts - Daily Revenue (Last 7 Days)
     const last7Days = Array.from({ length: 7 }).map((_, i) => {
@@ -205,7 +202,7 @@ export default function AdminAnalyticsPage() {
   if (isLoading) {
     return (
       <div className="flex flex-col min-h-screen items-center justify-center pt-20 px-6 bg-surface-container-low">
-        <Loader2 className="w-8 h-8 animate-spin text-[#0c3c26]" />
+        <Loader2 className="w-8 h-8 animate-spin text-primary" />
       </div>
     );
   }
@@ -230,7 +227,7 @@ export default function AdminAnalyticsPage() {
         {/* ─── 1. REVENUE ANALYTICS ────────────────────────────────────── */}
         <section>
           <div className="flex items-center gap-2 mb-4">
-            <div className="w-7 h-7 rounded-xl bg-[#e6f2ec] flex items-center justify-center text-[#0c3c26]">
+            <div className="w-7 h-7 rounded-xl bg-primary-fixed flex items-center justify-center text-primary">
               <TrendingUp className="w-4 h-4" />
             </div>
             <h2 className="text-lg font-extrabold text-on-surface">Revenue Analytics</h2>
@@ -241,29 +238,29 @@ export default function AdminAnalyticsPage() {
               title="Revenue Today"
               value={`${t('currency')}${metrics.revenueToday.toLocaleString() || '250'}`}
               growth="12.5% vs yesterday"
-              icon={<Wallet className="w-5 h-5 text-[#0c3c26]" />}
-              iconBg="bg-[#e6f2ec]"
+              icon={<Wallet className="w-5 h-5 text-primary" />}
+              iconBg="bg-primary-fixed"
             />
             <StatCard
               title="This Week"
               value={`${t('currency')}${metrics.revenueWeek.toLocaleString() || '250'}`}
               growth="18.6% vs last week"
-              icon={<CreditCard className="w-5 h-5 text-[#0c3c26]" />}
-              iconBg="bg-[#e6f2ec]"
+              icon={<CreditCard className="w-5 h-5 text-primary" />}
+              iconBg="bg-primary-fixed"
             />
             <StatCard
               title="This Month"
               value={`${t('currency')}${metrics.revenueMonth.toLocaleString() || '250'}`}
               growth="24.3% vs last month"
-              icon={<Layers className="w-5 h-5 text-[#0c3c26]" />}
-              iconBg="bg-[#e6f2ec]"
+              icon={<Layers className="w-5 h-5 text-primary" />}
+              iconBg="bg-primary-fixed"
             />
             <StatCard
               title="Total Revenue"
               value={`${t('currency')}${metrics.totalRevenue.toLocaleString() || '250'}`}
               subText="All time"
-              icon={<TrendingUp className="w-5 h-5 text-[#0c3c26]" />}
-              iconBg="bg-[#e6f2ec]"
+              icon={<TrendingUp className="w-5 h-5 text-primary" />}
+              iconBg="bg-primary-fixed"
             />
           </div>
 
@@ -275,7 +272,7 @@ export default function AdminAnalyticsPage() {
             <SmoothAreaChart
               data={metrics.dailyRevenueChart}
               height={220}
-              color="#0c3c26"
+              color="var(--primary)"
               gradientId="revenueGradient"
               valuePrefix={t('currency')}
             />
@@ -286,7 +283,7 @@ export default function AdminAnalyticsPage() {
         <section>
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
             <div className="flex items-center gap-2">
-              <div className="w-7 h-7 rounded-xl bg-[#e6f2ec] flex items-center justify-center text-[#0c3c26]">
+              <div className="w-7 h-7 rounded-xl bg-primary-fixed flex items-center justify-center text-primary">
                 <ShoppingBag className="w-4 h-4" />
               </div>
               <h2 className="text-lg font-extrabold text-on-surface">Order Analytics</h2>
@@ -298,7 +295,7 @@ export default function AdminAnalyticsPage() {
                 onClick={() => setOrderTimeframe('7days')}
                 className={`px-3 py-1.5 rounded-lg transition-all cursor-pointer ${
                   orderTimeframe === '7days'
-                    ? 'bg-[#0c3c26] text-white shadow-xs font-extrabold'
+                    ? 'bg-primary text-white shadow-xs font-extrabold'
                     : 'text-muted hover:text-on-surface'
                 }`}
                 type="button"
@@ -309,7 +306,7 @@ export default function AdminAnalyticsPage() {
                 onClick={() => setOrderTimeframe('calendar')}
                 className={`px-3 py-1.5 rounded-lg transition-all cursor-pointer ${
                   orderTimeframe === 'calendar'
-                    ? 'bg-[#0c3c26] text-white shadow-xs font-extrabold'
+                    ? 'bg-primary text-white shadow-xs font-extrabold'
                     : 'text-muted hover:text-on-surface'
                 }`}
                 type="button"
@@ -369,7 +366,7 @@ export default function AdminAnalyticsPage() {
         {/* ─── 3. PRODUCT PERFORMANCE ─────────────────────────────────── */}
         <section>
           <div className="flex items-center gap-2 mb-4">
-            <div className="w-7 h-7 rounded-xl bg-[#e6f2ec] flex items-center justify-center text-[#0c3c26]">
+            <div className="w-7 h-7 rounded-xl bg-primary-fixed flex items-center justify-center text-primary">
               <Package className="w-4 h-4" />
             </div>
             <h2 className="text-lg font-extrabold text-on-surface">Product Performance</h2>
@@ -380,13 +377,13 @@ export default function AdminAnalyticsPage() {
               title="Top Selling (Units)"
               valueHeader="Units"
               items={metrics.topProductsUnits}
-              color="#0c3c26"
+              color="var(--primary)"
             />
             <ProductPerformanceBarList
               title="Highest Revenue"
               valueHeader="Revenue"
               items={metrics.topProductsRevenue}
-              color="#0c3c26"
+              color="var(--primary)"
             />
           </div>
         </section>
@@ -394,8 +391,8 @@ export default function AdminAnalyticsPage() {
         {/* ─── 4. CUSTOMER ANALYTICS ──────────────────────────────────── */}
         <section>
           <div className="flex items-center gap-2 mb-4">
-            <div className="w-7 h-7 rounded-xl bg-[#e6f2ec] flex items-center justify-center text-[#0c3c26]">
-              <Users className="w-4 h-[#0c3c26]" />
+            <div className="w-7 h-7 rounded-xl bg-primary-fixed flex items-center justify-center text-primary">
+              <Users className="w-4 h-[var(--primary)]" />
             </div>
             <h2 className="text-lg font-extrabold text-on-surface">Customer Analytics</h2>
           </div>
@@ -432,7 +429,7 @@ export default function AdminAnalyticsPage() {
         {/* ─── 5. SUBSCRIPTION ANALYTICS ───────────────────────────────── */}
         <section>
           <div className="flex items-center gap-2 mb-4">
-            <div className="w-7 h-7 rounded-xl bg-[#e6f2ec] flex items-center justify-center text-[#0c3c26]">
+            <div className="w-7 h-7 rounded-xl bg-primary-fixed flex items-center justify-center text-primary">
               <CalendarDays className="w-4 h-4" />
             </div>
             <h2 className="text-lg font-extrabold text-on-surface">Subscription Analytics</h2>

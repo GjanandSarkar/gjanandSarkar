@@ -111,6 +111,7 @@ export const PlaceOrderSchema = z.object({
   razorpayOrderId: z.string().min(1).optional(),
   razorpayPaymentId: z.string().min(1).optional(),
   razorpaySignature: z.string().min(1).optional(),
+  reservationId: z.string().optional(),
 });
 
 export const ProductSchema = z.object({

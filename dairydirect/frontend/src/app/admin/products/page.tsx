@@ -9,15 +9,9 @@ import { ProductEditModal } from '@/components/admin/ProductEditModal';
 import { Search, Plus, Pencil, Droplets, Package, Cylinder, CupSoda, GlassWater, Loader2 } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { api } from '@/lib/api/client';
+import { PLACEHOLDER_PRODUCT_IMAGE } from '@/lib/constants/brand';
 
-const categoryColors: Record<string, { bg: string; color: string }> = {
-  'Milk':       { bg: '#e8f4fd', color: '#4a90d9' },
-  'Paneer':     { bg: '#fff8e6', color: '#c78c2e' },
-  'Ghee':       { bg: '#fef5ec', color: '#d4712a' },
-  'Buttermilk': { bg: '#eaf6ef', color: '#3b8a55' },
-  'Curd':       { bg: '#fff8e6', color: '#c78c2e' },
-  'Lassi':      { bg: '#e8f4fd', color: '#4a90d9' },
-};
+import { categoryColors } from '@/lib/constants/categories';
 
 function AdminProductsContent() {
   const router = useRouter();
@@ -101,18 +95,26 @@ function AdminProductsContent() {
           <h1 className="font-extrabold text-[24px] tracking-tight" style={{ color: 'var(--color-on-surface)' }}>
             Products
           </h1>
-          <p className="text-[13px] mt-0.5" style={{ color: 'var(--color-outline)' }}>
+          <p className="text-[13px] mt-0.5" style={{ color: 'var(--color-on-surface-variant)' }}>
             {filtered.length} products shown {category !== 'All' ? `in "${category}"` : 'in catalogue'}
           </p>
         </div>
-        <button onClick={() => router.push('/admin/products/add')} className="flex items-center gap-2 px-4 py-2.5 rounded-[12px] font-bold text-[13px] text-white transition-all active:scale-95 cursor-pointer"
-          style={{
-            background: 'linear-gradient(135deg, #0c3c26, #114e32)',
-            boxShadow: '0 4px 12px rgba(12, 60, 38, 0.25)',
-          }}>
-          <Plus className="w-4 h-4" strokeWidth={2.5} />
-          Add Product
-        </button>
+        <div className="flex items-center gap-2.5">
+          <button 
+            onClick={() => router.push('/admin/products/approvals')}
+            className="flex items-center gap-2 px-4 py-2.5 rounded-[12px] font-bold text-[13px] transition-all border border-success/30 text-success bg-success-bg hover:bg-success-bg cursor-pointer"
+          >
+            Review Approvals
+          </button>
+          <button onClick={() => router.push('/admin/products/add')} className="flex items-center gap-2 px-4 py-2.5 rounded-[12px] font-bold text-[13px] text-white transition-all active:scale-95 cursor-pointer"
+            style={{
+              background: 'linear-gradient(135deg, var(--primary), var(--primary-hover))',
+              boxShadow: '0 4px 12px rgba(12, 60, 38, 0.25)',
+            }}>
+            <Plus className="w-4 h-4" strokeWidth={2.5} />
+            Add Product
+          </button>
+        </div>
       </div>
 
       <div className="px-6 md:px-10 py-5 flex flex-col gap-5">
@@ -120,7 +122,7 @@ function AdminProductsContent() {
         <div className="flex flex-col sm:flex-row gap-3 items-center">
           <div className="relative flex-1 w-full">
             <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 pointer-events-none"
-              style={{ color: 'var(--color-outline)' }} strokeWidth={2} />
+              style={{ color: 'var(--color-on-surface-variant)' }} strokeWidth={2} />
             <input
               value={search}
               onChange={e => setSearch(e.target.value)}
@@ -136,7 +138,7 @@ function AdminProductsContent() {
             <select
               value={status}
               onChange={e => setStatus(e.target.value)}
-              className="px-4 py-2.5 rounded-[12px] text-[13px] font-semibold outline-none border border-gray-200 cursor-pointer"
+              className="px-4 py-2.5 rounded-[12px] text-[13px] font-semibold outline-none border border-border cursor-pointer"
               style={{ background: 'var(--color-surface-container)', color: 'var(--color-on-surface)' }}
             >
               <option value="All">All Status</option>
@@ -147,7 +149,7 @@ function AdminProductsContent() {
             <select
               value={sortBy}
               onChange={e => setSortBy(e.target.value)}
-              className="px-4 py-2.5 rounded-[12px] text-[13px] font-semibold outline-none border border-gray-200 cursor-pointer"
+              className="px-4 py-2.5 rounded-[12px] text-[13px] font-semibold outline-none border border-border cursor-pointer"
               style={{ background: 'var(--color-surface-container)', color: 'var(--color-on-surface)' }}
             >
               <option value="Name A-Z">Name A-Z</option>
@@ -163,8 +165,8 @@ function AdminProductsContent() {
             <button key={cat} onClick={() => handleCategorySelect(cat)}
               className={`whitespace-nowrap px-4 py-2 rounded-full text-[12px] font-bold transition-all shrink-0 cursor-pointer ${
                 category === cat
-                  ? 'bg-[#0c3c26] text-white shadow-xs'
-                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                  ? 'bg-primary text-white shadow-xs'
+                  : 'bg-surface-muted text-foreground hover:bg-border'
               }`}
             >
               {cat === 'All' ? 'All Categories' : cat}
@@ -182,16 +184,16 @@ function AdminProductsContent() {
           </div>
         ) : filtered.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-20 text-center">
-            <Package className="w-12 h-12 text-gray-300 mb-3" />
-            <p className="font-bold text-[16px] text-gray-800">No products found</p>
-            <p className="text-xs text-gray-500 mt-1">
+            <Package className="w-12 h-12 text-foreground-muted mb-3" />
+            <p className="font-bold text-[16px] text-foreground">No products found</p>
+            <p className="text-xs text-foreground-muted mt-1">
               {category !== 'All' ? `No products matching category "${category}".` : 'No products in catalogue.'}
             </p>
           </div>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
             {filtered.map((product, i) => {
-              const catStyle = categoryColors[product.category] || { bg: '#eaf6ef', color: '#0c3c26' };
+              const catStyle = categoryColors(product.category);
               return (
                 <motion.div key={product.id}
                   initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }}
@@ -202,7 +204,7 @@ function AdminProductsContent() {
                   {/* Image area */}
                   <div className="h-36 relative flex items-center justify-center overflow-hidden"
                     style={{ background: catStyle.bg }}>
-                    <img src={product.image_url || '/milk.png'} alt={product.name} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500 opacity-90" />
+                    <img src={product.image_url || PLACEHOLDER_PRODUCT_IMAGE} alt={product.name} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500 opacity-90" />
                     <div className="absolute inset-0 bg-black/5" />
                     
                     {product.is_freshness_guarantee && (
@@ -217,7 +219,7 @@ function AdminProductsContent() {
                         setEditingProduct(product);
                         setIsEditModalOpen(true);
                       }}
-                      className="absolute top-2.5 right-2.5 w-8 h-8 rounded-full bg-white/95 shadow-md flex items-center justify-center opacity-90 group-hover:opacity-100 transition-all hover:scale-110 active:scale-95 z-10 hover:bg-white text-primary cursor-pointer"
+                      className="absolute top-2.5 right-2.5 w-8 h-8 rounded-full bg-surface/95 shadow-md flex items-center justify-center opacity-90 group-hover:opacity-100 transition-all hover:scale-110 active:scale-95 z-10 hover:bg-surface text-primary cursor-pointer"
                       title="Edit Product"
                     >
                       <Pencil className="w-3.5 h-3.5" strokeWidth={2.5} />
@@ -237,7 +239,7 @@ function AdminProductsContent() {
                         style={{ background: 'var(--color-surface-container)', color: catStyle.color }}>
                         {product.category}
                       </span>
-                      <span className={`text-[10px] font-bold uppercase ${product.is_active ? 'text-emerald-700' : 'text-gray-400'}`}>
+                      <span className={`text-[10px] font-bold uppercase ${product.is_active ? 'text-success' : 'text-foreground-muted'}`}>
                         {product.is_active ? 'Active' : 'Draft'}
                       </span>
                     </div>
@@ -248,7 +250,7 @@ function AdminProductsContent() {
                     </h3>
 
                     <p className="text-[12px] line-clamp-1 mt-0.5"
-                      style={{ color: 'var(--color-outline)' }}>
+                      style={{ color: 'var(--color-on-surface-variant)' }}>
                       {product.description || 'Fresh daily dairy product'}
                     </p>
 
@@ -259,7 +261,7 @@ function AdminProductsContent() {
                           {t('currency')}{product.product_variants?.[0]?.price || 0}
                         </span>
                         {product.product_variants?.[0]?.weight && (
-                          <span className="text-[11px] ml-1 font-medium" style={{ color: 'var(--color-outline)' }}>
+                          <span className="text-[11px] ml-1 font-medium" style={{ color: 'var(--color-on-surface-variant)' }}>
                             / {product.product_variants[0].weight}
                           </span>
                         )}
@@ -267,7 +269,7 @@ function AdminProductsContent() {
                       <span className="text-[11px] font-bold px-2 py-1 rounded-md"
                         style={{
                           background: (product.product_variants?.[0]?.stock || 0) < 10 ? '#ffdcc7' : 'var(--color-surface-container)',
-                          color: (product.product_variants?.[0]?.stock || 0) < 10 ? '#774117' : 'var(--color-on-surface-variant)',
+                          color: (product.product_variants?.[0]?.stock || 0) < 10 ? 'var(--warning)' : 'var(--color-on-surface-variant)',
                         }}>
                         {product.product_variants?.[0]?.stock || 0} in stock
                       </span>
@@ -302,7 +304,7 @@ export default function AdminProductsPage() {
   return (
     <Suspense fallback={
       <div className="flex flex-col min-h-screen items-center justify-center pt-20 px-6" style={{ background: 'var(--color-surface)' }}>
-        <Loader2 className="w-8 h-8 animate-spin text-[#0c3c26]" />
+        <Loader2 className="w-8 h-8 animate-spin text-primary" />
       </div>
     }>
       <AdminProductsContent />

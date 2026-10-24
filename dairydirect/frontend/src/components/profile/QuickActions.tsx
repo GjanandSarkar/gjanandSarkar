@@ -17,8 +17,8 @@ export function QuickActions({ onLanguageClick, hideHeader = false }: QuickActio
       label: t('qualityReports') || 'Quality Reports',
       icon: HeartHandshake,
       href: '/profile/quality-reports',
-      color: 'text-blue-600',
-      bg: 'bg-blue-50',
+      color: 'text-info',
+      bg: 'bg-info-bg',
     },
     {
       label: t('helpCentre') || 'Support',
@@ -38,8 +38,8 @@ export function QuickActions({ onLanguageClick, hideHeader = false }: QuickActio
       label: t('languageSettings') || 'Language',
       icon: Globe,
       onClick: onLanguageClick,
-      color: 'text-emerald-600',
-      bg: 'bg-emerald-50',
+      color: 'text-success',
+      bg: 'bg-success-bg',
     },
   ];
 
@@ -53,7 +53,7 @@ export function QuickActions({ onLanguageClick, hideHeader = false }: QuickActio
           const Icon = action.icon;
           
           const Content = (
-            <div className="bg-white rounded-[20px] p-4 border border-sand/50 shadow-sm flex flex-col items-center justify-center text-center h-full hover:border-primary/50 transition-colors active:scale-95 cursor-pointer">
+            <div className="bg-surface rounded-[20px] p-4 border border-sand/50 shadow-sm flex flex-col items-center justify-center text-center h-full hover:border-primary/50 transition-colors active:scale-95 cursor-pointer">
               <div className={`w-10 h-10 rounded-full ${action.bg} ${action.color} flex items-center justify-center mb-3`}>
                 <Icon className="w-5 h-5" />
               </div>

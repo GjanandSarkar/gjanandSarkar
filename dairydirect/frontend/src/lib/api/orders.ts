@@ -5,8 +5,17 @@ import { api } from './client';
 
 export type OrderWithItems = Omit<DBOrder, 'order_items'> & {
   order_items: (DBOrderItem & {
-    products?: { name: string; image_url: string | null };
-    product_variants?: { weight: string };
+    products?: { 
+      name: string; 
+      image_url: string | null;
+      seller_id?: string | null;
+      sellers?: {
+        id: string;
+        store_name: string;
+        slug: string;
+      } | null;
+    };
+    product_variants?: { weight: string; price?: number };
     product_name?: string;
     product_image?: string | null;
     weight?: string;
@@ -74,10 +83,27 @@ export async function getUserBuyAgainHistory(): Promise<string[]> {
 }
 
 // ─── Get All Orders (Admin) ───────────────────────────────────
-export async function getAllOrders(status?: string): Promise<OrderWithItems[]> {
+export async function getAllOrders(
+  options?: string | { status?: string; type?: 'admin' | 'seller'; sellerId?: string }
+): Promise<OrderWithItems[]> {
   try {
-    const url = status ? `/api/orders?status=${status}` : '/api/orders';
-    const res = await fetch(url);
+    let url = '/api/orders';
+    const params = new URLSearchParams();
+
+    if (typeof options === 'string') {
+      if (options && options !== 'all') params.set('status', options);
+    } else if (options && typeof options === 'object') {
+      if (options.status && options.status !== 'all') params.set('status', options.status);
+      if (options.type) params.set('type', options.type);
+      if (options.sellerId && options.sellerId !== 'all') params.set('sellerId', options.sellerId);
+    }
+
+    const queryStr = params.toString();
+    if (queryStr) {
+      url += `?${queryStr}`;
+    }
+
+    const res = await fetch(url, { credentials: 'include', cache: 'no-store' });
     const data = await res.json();
     return data.orders || [];
   } catch (error) {
@@ -149,17 +175,35 @@ export async function validateCoupon(
   }
 }
 
-// ─── Admin / User: Update / Cancel Order ───────────────────────
+// ─── Get Seller Orders ────────────────────────────────────────
+export async function getSellerOrders(status?: string): Promise<OrderWithItems[]> {
+  try {
+    const url = status && status !== 'all' ? `/api/orders?status=${status}` : '/api/orders';
+    const res = await fetch(url, { credentials: 'include', cache: 'no-store' });
+    const data = await res.json();
+    return data.orders || [];
+  } catch (error) {
+    console.error('getSellerOrders error:', error);
+    return [];
+  }
+}
+
+export type { DBReturnRequest } from '@/lib/supabase';
+
+// ─── Admin / User / Seller: Update / Cancel Order ─────────────
 export async function updateOrderStatus(
   orderId: string,
   status: OrderStatus,
-  userId?: string
+  userId?: string,
+  notes?: string,
+  orderItemId?: string
 ): Promise<{ success: boolean; error?: string }> {
   try {
     const res = await fetch('/api/orders', {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ orderId, status })
+      credentials: 'include',
+      body: JSON.stringify({ orderId, status, notes, orderItemId })
     });
 
     const data = await res.json();
@@ -167,6 +211,55 @@ export async function updateOrderStatus(
     return { success: true };
   } catch (error: any) {
     console.error('updateOrderStatus error:', error);
+    return { success: false, error: error.message };
+  }
+}
+
+// ─── Customer: Submit Order Item Request (Cancellation or Return) ─
+export async function submitOrderRequest(input: {
+  orderId: string;
+  orderItemId: string;
+  requestType: 'cancellation' | 'return';
+  reason: string;
+  description?: string;
+  images?: string[];
+}): Promise<{ success: boolean; requestId?: string; error?: string; message?: string }> {
+  try {
+    const res = await fetch('/api/admin/returns', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      credentials: 'include',
+      body: JSON.stringify(input)
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'Failed to submit request');
+    return { success: true, requestId: data.requestId || data.returnId, message: data.message };
+  } catch (error: any) {
+    console.error('submitOrderRequest error:', error);
+    return { success: false, error: error.message };
+  }
+}
+
+// ─── Seller / Admin: Process Request (Approve / Reject / Operational) ─
+export async function processOrderRequest(input: {
+  requestId: string;
+  action: 'approve' | 'reject' | 'override' | 'return_in_progress' | 'item_received' | 'inspection_completed' | 'refund_pending' | 'refunded';
+  reason?: string;
+  notes?: string;
+  refundAmount?: number;
+}): Promise<{ success: boolean; error?: string; message?: string }> {
+  try {
+    const res = await fetch('/api/admin/returns', {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      credentials: 'include',
+      body: JSON.stringify(input)
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'Failed to process request');
+    return { success: true, message: data.message };
+  } catch (error: any) {
+    console.error('processOrderRequest error:', error);
     return { success: false, error: error.message };
   }
 }

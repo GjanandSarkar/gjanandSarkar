@@ -5,6 +5,7 @@ import { useRouter, usePathname } from 'next/navigation';
 import { useStore } from '@/store/useStore';
 import { AdminSidebar } from '@/components/admin/AdminSidebar';
 import { Loader2, Menu } from 'lucide-react';
+import { ThemeToggle } from '@/components/theme/ThemeToggle';
 import Link from 'next/link';
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
@@ -38,14 +39,17 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       <AdminSidebar />
       <main className="flex-1 md:ml-[260px] min-h-screen overflow-x-hidden flex flex-col">
         {/* Mobile Header */}
-        <header className="md:hidden flex items-center justify-between p-4 bg-white border-b border-sand z-40 sticky top-0">
+        <header className="md:hidden flex items-center justify-between p-4 bg-surface border-b border-sand z-40 sticky top-0">
           <div className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded-lg flex items-center justify-center bg-primary text-white">
+            <div className="w-8 h-8 rounded-lg flex items-center justify-center bg-primary text-on-primary">
               <span className="font-bold text-xs">GS</span>
             </div>
             <h1 className="font-bold text-sm">Operations</h1>
           </div>
-          <Link href="/home" className="text-xs font-semibold text-primary">Exit</Link>
+          <div className="flex items-center gap-2">
+            <ThemeToggle />
+            <Link href="/home" className="text-xs font-semibold text-primary">Exit</Link>
+          </div>
         </header>
 
         <div className="max-w-[1400px] mx-auto w-full flex-1">

@@ -33,11 +33,17 @@ export async function uploadImageToImageKit(
     });
 
     // 2. Post to backend upload endpoint
+    const { getAuthToken } = await import('@/lib/api/client');
+    const token = await getAuthToken();
+    const headers: Record<string, string> = {
+      'Content-Type': 'application/json',
+    };
+    if (token) headers['Authorization'] = `Bearer ${token}`;
+
     const response = await fetch('/api/upload/imagekit', {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
+      headers,
+      credentials: 'include',
       body: JSON.stringify({
         file: base64Data,
         fileName: file.name,

@@ -7,18 +7,19 @@ import { getUserOrders } from '@/lib/api/orders';
 import { supabase } from '@/lib/supabase';
 import type { OrderWithItems } from '@/lib/api/orders';
 import { format } from 'date-fns';
-import { ShoppingBag, ChevronDown, ArrowRight, Package, Truck, CheckCircle2, Clock, AlertCircle } from 'lucide-react';
+import { ShoppingBag, ChevronDown, ArrowRight, Package, Truck, CheckCircle2, Clock, AlertCircle, RotateCcw } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import Link from 'next/link';
 import { BuyAgainCarousel } from '@/components/discovery/BuyAgainCarousel';
 import { EmptyState } from '@/components/discovery/EmptyState';
+import { CancelOrderButton } from '@/components/orders/CancelOrderButton';
 
 const STATUS_STYLES: Record<string, { bg: string; color: string; dot: string; icon: typeof Clock }> = {
-  'pending':          { bg: '#ffdcc7', color: '#774117', dot: '#d4712a', icon: Clock },
+  'pending':          { bg: '#ffdcc7', color: 'var(--warning)', dot: '#d4712a', icon: Clock },
   'confirmed':        { bg: '#c2efac', color: '#042100', dot: '#3f6530', icon: CheckCircle2 },
-  'out_for_delivery': { bg: '#fff8e6', color: '#7d5200', dot: '#c78c2e', icon: Truck },
+  'out_for_delivery': { bg: '#fff8e6', color: 'var(--warning)', dot: '#c78c2e', icon: Truck },
   'delivered':        { bg: '#eaf4e2', color: '#2a4f1d', dot: '#3f6530', icon: CheckCircle2 },
-  'cancelled':        { bg: '#e3e3dc', color: '#43493e', dot: '#73796d', icon: AlertCircle },
+  'cancelled':        { bg: '#e3e3dc', color: 'var(--foreground-muted)', dot: '#73796d', icon: AlertCircle },
 };
 
 const TABS = ['All', 'Active', 'Delivered', 'Cancelled'];
@@ -80,11 +81,11 @@ export default function OrdersScreen() {
     <div className="flex flex-col min-h-screen">
       {/* Sticky Header + Tabs */}
       <div className="sticky top-0 z-30 glass-surface">
-        <div className="px-5 md:px-10 pt-6 pb-0">
+        <div className="page-medium px-5 md:px-10 pt-6 pb-0">
           <h1 className="font-extrabold text-[24px] tracking-tight mb-4"
             style={{ color: 'var(--color-on-surface)' }}>
             {t('myOrders')}
-            <span className="ml-2 text-[15px] font-normal" style={{ color: 'var(--color-outline)' }}>
+            <span className="ml-2 text-[15px] font-normal" style={{ color: 'var(--color-on-surface-variant)' }}>
               ({filteredOrders.length})
             </span>
           </h1>
@@ -93,9 +94,9 @@ export default function OrdersScreen() {
               <button key={tab} onClick={() => setActiveTab(tab)}
                 className="whitespace-nowrap px-4 py-2 rounded-full text-[12px] font-semibold transition-all duration-200 shrink-0"
                 style={activeTab === tab ? {
-                  background: 'linear-gradient(135deg, #3f6530, #577f46)',
+                  background: 'var(--cta-gradient)',
                   color: 'white',
-                  boxShadow: '0 3px 10px rgba(63, 101, 48, 0.25)',
+                  boxShadow: '0 3px 10px rgba(12, 60, 38, 0.25)',
                 } : {
                   background: 'var(--color-surface-container-low)',
                   color: 'var(--color-on-surface-variant)',
@@ -108,7 +109,7 @@ export default function OrdersScreen() {
         <div className="h-px mt-2 opacity-25" style={{ background: 'var(--color-outline-variant)' }} />
       </div>
 
-      <div className="px-5 md:px-10 py-5 flex flex-col gap-3">
+      <div className="page-medium px-5 md:px-10 py-5 flex flex-col gap-3">
         {filteredOrders.length > 0 && activeTab === 'All' && (
           <div className="mb-6 -mx-5 px-5 md:mx-0 md:px-0">
             <BuyAgainCarousel />
@@ -145,8 +146,19 @@ export default function OrdersScreen() {
                     <div className="flex items-center justify-between px-5 py-4 cursor-pointer"
                       onClick={() => setExpandedId(isExpanded ? null : order.id)}>
                       <div>
-                        <p className="font-bold text-[14px]" style={{ color: 'var(--color-primary)' }}>{order.id}</p>
-                        <p className="text-[11px]" style={{ color: 'var(--color-outline)' }}>
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <p className="font-bold text-[14px]" style={{ color: 'var(--color-primary)' }}>{order.id}</p>
+                          <span className={`px-2 py-0.5 rounded-md text-[10px] font-bold uppercase tracking-wider ${
+                            order.payment_status === 'paid' ? 'bg-success-bg text-success' : 'bg-warning-bg text-warning'
+                          }`}>
+                            {order.payment_status === 'paid'
+                              ? 'Paid'
+                              : (order.payment_method || '').toUpperCase() === 'COD'
+                              ? 'Payment Pending'
+                              : (order.payment_status || 'Pending')} ({(order.payment_method || 'COD').toUpperCase()})
+                          </span>
+                        </div>
+                        <p className="text-[11px]" style={{ color: 'var(--color-on-surface-variant)' }}>
                           {format(new Date(order.created_at), 'MMM d, hh:mm a')}
                         </p>
                       </div>
@@ -163,7 +175,7 @@ export default function OrdersScreen() {
                         </div>
                         <ChevronDown className="w-4 h-4 shrink-0 transition-transform duration-200"
                           style={{
-                            color: 'var(--color-outline)',
+                            color: 'var(--color-on-surface-variant)',
                             transform: isExpanded ? 'rotate(180deg)' : 'rotate(0deg)',
                           }} />
                       </div>
@@ -198,13 +210,60 @@ export default function OrdersScreen() {
                               })}
                             </div>
 
+                            {/* Payment Status & Details */}
+                            <div className="p-3 mb-4 rounded-xl bg-surface border border-border/80 text-xs space-y-1.5">
+                              <div className="flex items-center justify-between">
+                                <span className="text-foreground-muted">Payment Method:</span>
+                                <span className="font-bold text-foreground">
+                                  {(order.payment_method || '').toUpperCase() === 'COD' ? 'Cash on Delivery (COD)' : (order.payment_method || 'Online')}
+                                </span>
+                              </div>
+                              <div className="flex items-center justify-between">
+                                <span className="text-foreground-muted">Payment Status:</span>
+                                <span className={`font-black uppercase text-[10px] px-2 py-0.5 rounded-md ${
+                                  order.payment_status === 'paid' ? 'bg-success-bg text-success' : 'bg-warning-bg text-warning'
+                                }`}>
+                                  {order.payment_status === 'paid'
+                                    ? 'Paid'
+                                    : (order.payment_method || '').toUpperCase() === 'COD'
+                                    ? 'Payment Pending'
+                                    : (order.payment_status || 'Pending')}
+                                </span>
+                              </div>
+                              <div className="flex items-center justify-between pt-1 border-t border-border">
+                                <span className="text-foreground-muted font-semibold">Total Amount:</span>
+                                <span className="font-extrabold text-success font-mono text-[13px]">
+                                  {t('currency')}{order.total_amount}
+                                </span>
+                              </div>
+                            </div>
+
                             {/* Track button */}
                             {(order.status === 'out_for_delivery' || order.status === 'confirmed') && (
                               <Link href={`/tracking/${order.id}`}
                                 className="flex items-center justify-center gap-2 w-full py-3 rounded-[12px] font-bold text-sm text-white"
-                                style={{ background: 'linear-gradient(135deg, #3f6530, #577f46)' }}>
+                                style={{ background: 'var(--cta-gradient)' }}>
                                 <Truck className="w-4 h-4" />
                                 {t('trackLive')}
+                              </Link>
+                            )}
+
+                            {/* Cancel Order button */}
+                            <CancelOrderButton
+                              orderId={order.id}
+                              status={order.status}
+                              paymentMethod={order.payment_method}
+                              totalAmount={order.total_amount}
+                              onChanged={() => loadOrders()}
+                              className="flex items-center justify-center gap-2 w-full py-2.5 mt-2 rounded-[12px] font-bold text-xs text-error bg-error-bg hover:bg-error-bg border border-error/20/60 transition-colors cursor-pointer"
+                            />
+
+                            {/* Return / Freshness Guarantee claim button */}
+                            {order.status === 'delivered' && (
+                              <Link href={`/returns?orderId=${order.id}`}
+                                className="flex items-center justify-center gap-2 w-full py-2.5 rounded-[12px] font-bold text-xs text-primary bg-primary/10 hover:bg-primary/20 transition-colors">
+                                <RotateCcw className="w-3.5 h-3.5" />
+                                Freshness Guarantee / Report Issue
                               </Link>
                             )}
                           </div>

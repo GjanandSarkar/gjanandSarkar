@@ -1,10 +1,13 @@
-import { Loader2 } from 'lucide-react';
+import { PageSkeleton } from '@/components/shared/Skeletons';
 
+/**
+ * Route-level loading UI for the whole customer storefront.
+ *
+ * This was a centred spinner with "Loading..." underneath. It told the user
+ * nothing about what was coming, reserved no space, and let the page jump
+ * when content arrived. A layout-matched skeleton reads as faster at the same
+ * actual latency, and removes the layout shift.
+ */
 export default function Loading() {
-  return (
-    <div className="flex flex-col min-h-[60vh] items-center justify-center bg-cream w-full">
-      <Loader2 className="w-8 h-8 animate-spin text-primary" />
-      <p className="mt-4 text-sm font-medium text-outline">Loading...</p>
-    </div>
-  );
+  return <PageSkeleton />;
 }

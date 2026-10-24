@@ -94,6 +94,24 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Valid product ID is required' }, { status: 400 });
     }
 
+    // Resolve variantId if not explicitly provided
+    let finalVariantId = variantId;
+    if (!finalVariantId) {
+      if (isPgConfigured) {
+        try {
+          const varRes = await query<{ id: string }>('SELECT id FROM product_variants WHERE product_id = $1 LIMIT 1', [productId]);
+          finalVariantId = varRes.rows[0]?.id;
+        } catch (e) {}
+      }
+      if (!finalVariantId) {
+        const { data: vData } = await getAdminSupabase().from('product_variants').select('id').eq('product_id', productId).limit(1).maybeSingle();
+        finalVariantId = vData?.id;
+      }
+    }
+
+    const validPlans = ['daily', 'alternate', 'weekly', 'custom'];
+    const finalPlan = validPlans.includes(plan) ? plan : 'daily';
+
     const nextDeliveryDate = new Date(Date.now() + 86400000).toISOString().split('T')[0];
 
     if (isPgConfigured) {
@@ -108,10 +126,10 @@ export async function POST(request: NextRequest) {
             [
               targetUserId,
               productId,
-              variantId || null,
+              finalVariantId,
               addressId || null,
               volume || 1,
-              plan || 'daily',
+              finalPlan,
               deliverySlot || 'morning_6_8',
               startDate || new Date().toISOString().split('T')[0],
               nextDeliveryDate,
@@ -141,10 +159,10 @@ export async function POST(request: NextRequest) {
       .insert({
         user_id: targetUserId,
         product_id: productId,
-        variant_id: variantId || null,
+        variant_id: finalVariantId,
         address_id: addressId || null,
         volume: volume || 1,
-        plan: plan || 'daily',
+        plan: finalPlan,
         delivery_slot: deliverySlot || 'morning_6_8',
         status: 'active',
         start_date: startDate || new Date().toISOString().split('T')[0],

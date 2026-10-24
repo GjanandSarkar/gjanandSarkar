@@ -10,6 +10,7 @@ import { useTranslation } from '@/lib/i18n';
 import { getOrderById } from '@/lib/api/orders';
 import type { OrderWithItems } from '@/lib/api/orders';
 import { useStore } from '@/store/useStore';
+import { trackProductEvent } from '@/lib/analytics/session';
 
 export default function OrderConfirmedScreen() {
   const router = useRouter();
@@ -30,6 +31,29 @@ export default function OrderConfirmedScreen() {
     getOrderById(id).then(res => {
       setOrder(res);
       setIsLoading(false);
+
+      // Purchase is the strongest recommendation signal there is, and the
+      // only place it can be captured client-side is here, once the order is
+      // known to exist. Guarded by a per-order key so a refresh of this page
+      // cannot inflate the same purchase into several events.
+      if (res) {
+        const key = `gj_purchase_tracked_${id}`;
+        try {
+          if (!window.sessionStorage.getItem(key)) {
+            window.sessionStorage.setItem(key, '1');
+            for (const item of res.order_items ?? []) {
+              if (item.product_id) {
+                trackProductEvent(item.product_id, 'purchase', {
+                  source: 'order_confirmed',
+                  quantity: item.quantity ?? 1,
+                });
+              }
+            }
+          }
+        } catch {
+          // Storage unavailable: skip tracking rather than risk duplicates.
+        }
+      }
     });
   }, [id, setCheckoutAddressId, setCheckoutPaymentMethod]);
 
@@ -65,7 +89,7 @@ export default function OrderConfirmedScreen() {
           initial={{ scale: 0.5, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
           transition={{ type: "spring", damping: 15, stiffness: 200 }}
-          className="w-24 h-24 bg-primary rounded-full flex items-center justify-center mx-auto mb-6 shadow-active"
+          className="w-24 h-24 bg-primary text-on-primary rounded-full flex items-center justify-center mx-auto mb-6 shadow-active"
         >
           <Check className="w-12 h-12 text-white" strokeWidth={3} />
         </motion.div>
@@ -89,7 +113,7 @@ export default function OrderConfirmedScreen() {
           transition={{ delay: 0.3 }}
           className="bg-mint/20 border border-mint/50 rounded-[20px] p-5 flex items-start gap-4 mb-4 shadow-sm"
         >
-          <div className="bg-white rounded-full p-2.5 shrink-0 shadow-sm text-primary">
+          <div className="bg-surface rounded-full p-2.5 shrink-0 shadow-sm text-primary">
             <Package className="w-6 h-6" />
           </div>
           <div>
@@ -102,7 +126,7 @@ export default function OrderConfirmedScreen() {
           initial={{ y: 20, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
           transition={{ delay: 0.4 }}
-          className="bg-white border border-sand rounded-[20px] p-5 shadow-sm mb-8"
+          className="bg-surface border border-sand rounded-[20px] p-5 shadow-sm mb-8"
         >
           <h3 className="font-bold text-dark text-sm flex items-center mb-3 uppercase tracking-wider">
             <MapPin className="w-4 h-4 mr-2 text-primary" /> {addressLabel}

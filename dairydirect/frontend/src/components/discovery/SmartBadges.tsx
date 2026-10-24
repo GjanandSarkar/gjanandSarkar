@@ -13,12 +13,12 @@ export function SmartBadge({ type, className }: SmartBadgeProps) {
     bestseller: {
       icon: Star,
       label: 'Best Seller',
-      styles: 'bg-amber-100 text-amber-700 border-amber-200'
+      styles: 'bg-warning-bg text-warning border-warning/20'
     },
     popular: {
       icon: Flame,
       label: 'Popular',
-      styles: 'bg-red-100 text-red-600 border-red-200'
+      styles: 'bg-error-bg text-error border-error/20'
     },
     reordered: {
       icon: Repeat,
@@ -28,7 +28,7 @@ export function SmartBadge({ type, className }: SmartBadgeProps) {
     trending: {
       icon: TrendingUp,
       label: 'Trending',
-      styles: 'bg-sky-100 text-sky-600 border-sky-200'
+      styles: 'bg-info-bg text-info border-info-bg'
     }
   };
 

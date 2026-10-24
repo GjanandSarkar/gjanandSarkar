@@ -27,10 +27,10 @@ const item: Variants = {
 
 const STATUS_CONFIG: Record<string, { bg: string; color: string; dot: string; icon: any }> = {
   confirmed:        { bg: '#c2efac', color: '#042100', dot: '#3f6530', icon: CheckCircle2 },
-  out_for_delivery: { bg: '#fff8e6', color: '#7d5200', dot: '#c78c2e', icon: Truck },
+  out_for_delivery: { bg: '#fff8e6', color: 'var(--warning)', dot: '#c78c2e', icon: Truck },
   delivered:        { bg: '#eaf4e2', color: '#2a4f1d', dot: '#3f6530', icon: CheckCircle2 },
-  pending:          { bg: '#ffdcc7', color: '#774117', dot: '#d4712a', icon: Clock },
-  cancelled:        { bg: '#e3e3dc', color: '#43493e', dot: '#73796d', icon: AlertCircle },
+  pending:          { bg: '#ffdcc7', color: 'var(--warning)', dot: '#d4712a', icon: Clock },
+  cancelled:        { bg: '#e3e3dc', color: 'var(--foreground-muted)', dot: '#73796d', icon: AlertCircle },
 };
 
 type DashboardData = {
@@ -104,7 +104,7 @@ export default function AdminDashboard() {
       value: `₹${parseFloat(data.overview.gross_revenue || '0').toLocaleString('en-IN', { maximumFractionDigits: 0 })}`,
       sub: `${period === '7d' ? 'Last 7 days' : 'Last 30 days'}`,
       icon: IndianRupee,
-      color: '#2d5a27',
+      color: 'var(--primary)',
       bg: '#c2efac',
       trend: '+',
     },
@@ -122,7 +122,7 @@ export default function AdminDashboard() {
       value: data.overview.pending_orders || '0',
       sub: 'Needs attention',
       icon: Clock,
-      color: '#774117',
+      color: 'var(--warning)',
       bg: '#ffdcc7',
       trend: 'Alert',
     },
@@ -166,7 +166,7 @@ export default function AdminDashboard() {
     return (
       <div className="flex flex-col min-h-screen items-center justify-center gap-3">
         <Loader2 className="w-8 h-8 animate-spin" style={{ color: 'var(--color-primary)' }} />
-        <p className="text-sm font-medium" style={{ color: 'var(--color-outline)' }}>Loading dashboard...</p>
+        <p className="text-sm font-medium" style={{ color: 'var(--color-on-surface-variant)' }}>Loading dashboard...</p>
       </div>
     );
   }
@@ -189,7 +189,7 @@ export default function AdminDashboard() {
             <h1 className="font-extrabold text-[28px] tracking-tight" style={{ color: 'var(--color-on-surface)' }}>
               {greeting()}, {user?.name?.split(' ')[0] || 'Admin'}
             </h1>
-            <p className="text-[13px] mt-1" style={{ color: 'var(--color-outline)' }}>
+            <p className="text-[13px] mt-1" style={{ color: 'var(--color-on-surface-variant)' }}>
               {format(new Date(), 'EEEE, MMMM d, yyyy')} · Last updated {format(lastRefreshed, 'h:mm a')}
             </p>
           </div>
@@ -223,7 +223,7 @@ export default function AdminDashboard() {
             <Link
               href="/admin/reports"
               className="hidden md:flex items-center gap-2 px-4 py-2 rounded-[10px] transition-opacity hover:opacity-90 text-[13px] font-semibold"
-              style={{ background: 'var(--color-primary)', color: '#fff' }}
+              style={{ background: 'var(--color-primary)', color: 'var(--on-primary)' }}
             >
               <BarChart3 className="w-4 h-4" />
               Full Reports
@@ -265,7 +265,7 @@ export default function AdminDashboard() {
                   <p className="text-[11px] font-semibold mt-0.5" style={{ color: 'var(--color-on-surface)' }}>
                     {stat.label}
                   </p>
-                  <p className="text-[10px] mt-0.5" style={{ color: 'var(--color-outline)' }}>
+                  <p className="text-[10px] mt-0.5" style={{ color: 'var(--color-on-surface-variant)' }}>
                     {stat.sub}
                   </p>
                 </div>
@@ -289,7 +289,7 @@ export default function AdminDashboard() {
               <h2 className="font-bold text-[15px]" style={{ color: 'var(--color-on-surface)' }}>
                 Revenue Trend
               </h2>
-              <span className="text-[11px] font-medium px-2 py-1 rounded-full" style={{ background: '#eaf4e2', color: '#3f6530' }}>
+              <span className="text-[11px] font-medium px-2 py-1 rounded-full" style={{ background: 'var(--success-bg)', color: 'var(--success)' }}>
                 Last {period === '7d' ? '7' : '14'} days
               </span>
             </div>
@@ -327,7 +327,7 @@ export default function AdminDashboard() {
             {[
               { label: 'Manage Orders', href: '/admin/orders', color: '#c2efac', text: '#2d5a27' },
               { label: 'Inventory & Stock', href: '/admin/inventory', color: '#dce8ff', text: '#4a6fa5' },
-              { label: 'Return Requests', href: '/admin/returns', color: '#ffdcc7', text: '#774117' },
+              { label: 'Return Requests', href: '/admin/returns', color: '#ffdcc7', text: 'var(--warning)' },
               { label: 'All Products', href: '/admin/products', color: '#f3e8ff', text: '#6b21a8' },
               { label: 'Customers', href: '/admin/customers', color: '#d1fae5', text: '#065f46' },
               { label: 'Business Settings', href: '/admin/settings', color: '#fef3c7', text: '#92400e' },
@@ -363,7 +363,7 @@ export default function AdminDashboard() {
 
           {!data?.recentOrders?.length ? (
             <div className="flex flex-col items-center justify-center py-16">
-              <ShoppingBag className="w-8 h-8 mb-3" style={{ color: 'var(--color-outline)' }} strokeWidth={1.5} />
+              <ShoppingBag className="w-8 h-8 mb-3" style={{ color: 'var(--color-on-surface-variant)' }} strokeWidth={1.5} />
               <p className="font-semibold" style={{ color: 'var(--color-on-surface)' }}>No orders yet</p>
             </div>
           ) : (
@@ -372,7 +372,7 @@ export default function AdminDashboard() {
                 <thead>
                   <tr style={{ background: 'var(--color-surface-container-low)' }}>
                     {['Order #', 'Customer', 'Total', 'Status', 'Date'].map((h) => (
-                      <th key={h} className="text-left px-5 py-3 text-[11px] font-bold uppercase tracking-wider" style={{ color: 'var(--color-outline)' }}>{h}</th>
+                      <th key={h} className="text-left px-5 py-3 text-[11px] font-bold uppercase tracking-wider" style={{ color: 'var(--color-on-surface-variant)' }}>{h}</th>
                     ))}
                   </tr>
                 </thead>
@@ -406,7 +406,7 @@ export default function AdminDashboard() {
                             </span>
                           </div>
                         </td>
-                        <td className="px-5 py-3.5 text-[11px]" style={{ color: 'var(--color-outline)' }}>
+                        <td className="px-5 py-3.5 text-[11px]" style={{ color: 'var(--color-on-surface-variant)' }}>
                           {format(new Date(order.created_at), 'MMM d, h:mm a')}
                         </td>
                       </tr>
@@ -446,7 +446,7 @@ export default function AdminDashboard() {
                       <p className="text-[13px] font-semibold" style={{ color: 'var(--color-on-surface)' }}>
                         {product.name} ({product.weight})
                       </p>
-                      <p className="text-[11px]" style={{ color: 'var(--color-outline)' }}>
+                      <p className="text-[11px]" style={{ color: 'var(--color-on-surface-variant)' }}>
                         {product.total_sold} units sold
                       </p>
                     </div>
