@@ -210,7 +210,7 @@ export function SellerReturnsManager() {
               </span>
             </div>
             <h3 className="text-lg md:text-xl font-black text-foreground tracking-tight flex items-center gap-2 mt-1">
-              <RotateCcw className="w-5 h-5 text-[#c88a23]" />
+              <RotateCcw className="w-5 h-5 text-secondary" />
               <span>Customer Returns & Cancellations</span>
             </h3>
             <p className="text-xs text-foreground-muted mt-0.5">
@@ -285,7 +285,7 @@ export function SellerReturnsManager() {
               placeholder="Search by Request ID, Order #, Customer, Product, or Address..."
               value={searchQuery}
               onChange={e => setSearchQuery(e.target.value)}
-              className="w-full pl-10 pr-4 py-2.5 bg-surface-muted border border-border rounded-xl text-xs font-medium placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[var(--primary)]/20 focus:bg-surface"
+              className="w-full pl-10 pr-4 py-2.5 bg-surface-muted border border-border rounded-xl text-xs font-medium placeholder-foreground-muted focus:outline-none focus:ring-2 focus:ring-[var(--primary)]/20 focus:bg-surface"
             />
             {searchQuery && (
               <button
@@ -637,7 +637,7 @@ export function SellerReturnsManager() {
             <div className="flex items-center justify-between border-b border-border pb-3">
               <div className="flex items-center gap-2">
                 <div className="p-2 rounded-xl bg-surface-muted text-primary">
-                  <RotateCcw className="w-5 h-5 text-[#c88a23]" />
+                  <RotateCcw className="w-5 h-5 text-secondary" />
                 </div>
                 <div>
                   <h3 className="font-extrabold text-base text-foreground capitalize">
@@ -710,7 +710,7 @@ export function SellerReturnsManager() {
                 type="button"
                 disabled={isProcessing || (actionType === 'reject' && !actionNotes.trim())}
                 onClick={handleConfirmAction}
-                className="px-5 py-2 text-xs font-bold bg-primary hover:bg-[#165a37] text-on-primary rounded-xl shadow-xs disabled:opacity-50 flex items-center gap-1.5 cursor-pointer"
+                className="px-5 py-2 text-xs font-bold bg-primary hover:bg-primary-light text-on-primary rounded-xl shadow-xs disabled:opacity-50 flex items-center gap-1.5 cursor-pointer"
               >
                 {isProcessing && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
                 <span>Confirm {actionType.replace(/_/g, ' ')}</span>

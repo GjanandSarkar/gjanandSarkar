@@ -6,7 +6,7 @@ import { ShieldCheck, RotateCcw, Building2, Users, Award } from 'lucide-react';
 export function TrustBar() {
   const values = [
     {
-      icon: <Award className="w-5 h-5 text-[#c88a23]" />,
+      icon: <Award className="w-5 h-5 text-secondary" />,
       flag: "🇮🇳",
       title: "100% Made in India",
       desc: "Authentic & Original Products",
@@ -22,7 +22,7 @@ export function TrustBar() {
       desc: "100% Safe & Reliable",
     },
     {
-      icon: <RotateCcw className="w-5 h-5 text-[#c88a23]" />,
+      icon: <RotateCcw className="w-5 h-5 text-secondary" />,
       title: "Easy Returns",
       desc: "Hassle Free Returns",
     },

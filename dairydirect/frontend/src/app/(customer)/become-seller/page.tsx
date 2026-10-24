@@ -273,7 +273,7 @@ export default function BecomeSellerPage() {
             href="/login?redirect=/become-seller"
             className="w-full py-3.5 px-6 bg-primary hover:bg-primary-hover text-on-primary text-xs font-black rounded-xl shadow-md flex items-center justify-center gap-2 transition-all active:scale-95"
           >
-            <LogIn className="w-4 h-4 text-[#c88a23]" />
+            <LogIn className="w-4 h-4 text-secondary" />
             <span>Sign In to Continue</span>
           </Link>
           <div className="pt-2">
@@ -293,7 +293,7 @@ export default function BecomeSellerPage() {
         {/* Top Hero Banner */}
         <div className="text-center max-w-3xl mx-auto space-y-3">
           <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-primary/10 border border-primary/20 text-primary text-xs font-black uppercase tracking-wider">
-            <Sparkles className="w-4 h-4 text-[#c88a23]" />
+            <Sparkles className="w-4 h-4 text-secondary" />
             <span>Marketplace Seller Onboarding</span>
           </div>
           <h1 className="text-3xl sm:text-4xl lg:text-5xl font-black text-primary tracking-tight leading-tight">
@@ -316,8 +316,8 @@ export default function BecomeSellerPage() {
             </p>
           </div>
 
-          <div className="bg-surface p-5 rounded-2xl border border-[#c88a23]/30 shadow-2xs relative">
-            <div className="w-10 h-10 rounded-xl bg-warning-bg text-[#c88a23] flex items-center justify-center font-black text-sm mb-3">
+          <div className="bg-surface p-5 rounded-2xl border border-secondary/30 shadow-2xs relative">
+            <div className="w-10 h-10 rounded-xl bg-warning-bg text-secondary flex items-center justify-center font-black text-sm mb-3">
               02
             </div>
             <h3 className="text-sm font-black text-foreground mb-1">Admin Verification</h3>
@@ -429,20 +429,20 @@ export default function BecomeSellerPage() {
                 {/* What Happens Next Card */}
                 <div className="bg-warning-bg/70 border border-warning/20/80 rounded-2xl p-5 text-left space-y-3">
                   <h4 className="text-xs font-black text-warning uppercase tracking-wider flex items-center gap-2">
-                    <Clock className="w-4 h-4 text-[#c88a23]" />
+                    <Clock className="w-4 h-4 text-secondary" />
                     <span>What Happens Next?</span>
                   </h4>
                   <ul className="text-xs text-warning space-y-2">
                     <li className="flex items-start gap-2">
-                      <span className="font-bold text-[#c88a23]">•</span>
+                      <span className="font-bold text-secondary">•</span>
                       <span>The admin team verifies your business details, PAN, and applicable GSTIN.</span>
                     </li>
                     <li className="flex items-start gap-2">
-                      <span className="font-bold text-[#c88a23]">•</span>
+                      <span className="font-bold text-secondary">•</span>
                       <span>Upon approval, your seller account is activated and your seller dashboard is unlocked automatically.</span>
                     </li>
                     <li className="flex items-start gap-2">
-                      <span className="font-bold text-[#c88a23]">•</span>
+                      <span className="font-bold text-secondary">•</span>
                       <span>You will receive an in-app notification and email once a decision is made.</span>
                     </li>
                   </ul>
@@ -508,7 +508,7 @@ export default function BecomeSellerPage() {
                     href="/seller/dashboard"
                     className="w-full sm:w-auto px-8 py-3.5 bg-primary hover:bg-primary-hover text-on-primary text-xs font-black rounded-xl shadow-md flex items-center justify-center gap-2 transition-all active:scale-95"
                   >
-                    <Store className="w-4 h-4 text-[#c88a23]" />
+                    <Store className="w-4 h-4 text-secondary" />
                     <span>Go to Seller Dashboard</span>
                     <ArrowRight className="w-4 h-4 text-white" />
                   </Link>
@@ -566,7 +566,7 @@ export default function BecomeSellerPage() {
                     }}
                     className="w-full sm:w-auto px-6 py-3.5 bg-primary hover:bg-primary-hover text-on-primary text-xs font-black rounded-xl shadow-md flex items-center justify-center gap-2 transition-all active:scale-95 cursor-pointer"
                   >
-                    <Edit3 className="w-4 h-4 text-[#c88a23]" />
+                    <Edit3 className="w-4 h-4 text-secondary" />
                     <span>Edit & Resubmit Application</span>
                   </button>
 
@@ -616,7 +616,7 @@ export default function BecomeSellerPage() {
                     }}
                     className="w-full sm:w-auto px-6 py-3.5 bg-primary hover:bg-primary-hover text-on-primary text-xs font-black rounded-xl shadow-md flex items-center justify-center gap-2 transition-all active:scale-95 cursor-pointer"
                   >
-                    <Edit3 className="w-4 h-4 text-[#c88a23]" />
+                    <Edit3 className="w-4 h-4 text-secondary" />
                     <span>Update Business Details</span>
                   </button>
 
@@ -663,7 +663,7 @@ export default function BecomeSellerPage() {
               {/* Section 1: Business Identity */}
               <div>
                 <h3 className="text-sm font-black text-primary uppercase tracking-wider mb-4 flex items-center gap-2 pb-2 border-b border-border">
-                  <Building2 className="w-4 h-4 text-[#c88a23]" />
+                  <Building2 className="w-4 h-4 text-secondary" />
                   <span>1. Business & Store Identity</span>
                 </h3>
 
@@ -732,7 +732,7 @@ export default function BecomeSellerPage() {
               {/* Section 2: Contact Person */}
               <div>
                 <h3 className="text-sm font-black text-primary uppercase tracking-wider mb-4 flex items-center gap-2 pb-2 border-b border-border">
-                  <Phone className="w-4 h-4 text-[#c88a23]" />
+                  <Phone className="w-4 h-4 text-secondary" />
                   <span>2. Contact Person Information</span>
                 </h3>
 
@@ -799,7 +799,7 @@ export default function BecomeSellerPage() {
               {/* Section 3: Business Address */}
               <div>
                 <h3 className="text-sm font-black text-primary uppercase tracking-wider mb-4 flex items-center gap-2 pb-2 border-b border-border">
-                  <MapPin className="w-4 h-4 text-[#c88a23]" />
+                  <MapPin className="w-4 h-4 text-secondary" />
                   <span>3. Registered Business Address</span>
                 </h3>
 
@@ -869,7 +869,7 @@ export default function BecomeSellerPage() {
               {/* Section 4: Tax & Regulatory Verification */}
               <div>
                 <h3 className="text-sm font-black text-primary uppercase tracking-wider mb-4 flex items-center gap-2 pb-2 border-b border-border">
-                  <CreditCard className="w-4 h-4 text-[#c88a23]" />
+                  <CreditCard className="w-4 h-4 text-secondary" />
                   <span>4. Tax & Business Verification Details</span>
                 </h3>
 
@@ -939,7 +939,7 @@ export default function BecomeSellerPage() {
               {/* Section 5: Products & Notes */}
               <div>
                 <h3 className="text-sm font-black text-primary uppercase tracking-wider mb-4 flex items-center gap-2 pb-2 border-b border-border">
-                  <FileText className="w-4 h-4 text-[#c88a23]" />
+                  <FileText className="w-4 h-4 text-secondary" />
                   <span>5. Products Overview & Remarks</span>
                 </h3>
 
@@ -988,13 +988,13 @@ export default function BecomeSellerPage() {
                 >
                   {isLoading ? (
                     <>
-                      <Loader2 className="w-4 h-4 animate-spin text-[#c88a23]" />
+                      <Loader2 className="w-4 h-4 animate-spin text-secondary" />
                       <span>Submitting Application...</span>
                     </>
                   ) : (
                     <>
                       <span>Submit Seller Application</span>
-                      <ArrowRight className="w-4 h-4 text-[#c88a23]" />
+                      <ArrowRight className="w-4 h-4 text-secondary" />
                     </>
                   )}
                 </button>

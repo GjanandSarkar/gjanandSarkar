@@ -79,7 +79,10 @@ export function RecommendationRail({
     });
     if (productId) params.set('productId', productId);
     if (category) params.set('category', category);
+    // Cart ids are always sent: they seed the recommendations. Only the
+    // cart placement also asks for them to be filtered OUT of the results.
     if (cartKey) params.set('cart', cartKey);
+    if (placement === 'cart') params.set('excludeCart', '1');
 
     setIsLoading(true);
     fetch(`/api/recommendations?${params}`, { credentials: 'include' })
@@ -141,8 +144,8 @@ export function RecommendationRail({
       >
         <div>
           <div className="flex items-center gap-1.5 mb-1">
-            <Sparkles className="w-4 h-4 text-[#c88a23]" />
-            <span className="text-xs font-bold text-[#c88a23] uppercase tracking-wider">
+            <Sparkles className="w-4 h-4 text-secondary" />
+            <span className="text-xs font-bold text-secondary uppercase tracking-wider">
               {heading.eyebrow}
             </span>
           </div>

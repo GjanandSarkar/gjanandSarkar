@@ -125,8 +125,8 @@ export default function AdminInventoryPage() {
 
   const statusStyle = {
     in_stock: { bg: '#c2efac', text: '#2d5a27', label: 'In Stock' },
-    low_stock: { bg: '#fff8e6', text: '#7d5200', label: 'Low Stock' },
-    out_of_stock: { bg: '#ffdcc7', text: '#774117', label: 'Out of Stock' },
+    low_stock: { bg: '#fff8e6', text: 'var(--warning)', label: 'Low Stock' },
+    out_of_stock: { bg: '#ffdcc7', text: 'var(--warning)', label: 'Out of Stock' },
   };
 
   return (
@@ -150,8 +150,8 @@ export default function AdminInventoryPage() {
         {stats && (
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
             {[
-              { label: 'Out of Stock', value: stats.out_of_stock, bg: '#ffdcc7', text: '#774117', icon: X },
-              { label: 'Low Stock', value: stats.low_stock, bg: '#fff8e6', text: '#7d5200', icon: AlertTriangle },
+              { label: 'Out of Stock', value: stats.out_of_stock, bg: '#ffdcc7', text: 'var(--warning)', icon: X },
+              { label: 'Low Stock', value: stats.low_stock, bg: '#fff8e6', text: 'var(--warning)', icon: AlertTriangle },
               { label: 'In Stock', value: stats.in_stock, bg: '#c2efac', text: '#2d5a27', icon: CheckCircle2 },
               { label: 'Inventory Value', value: `₹${parseFloat(stats.total_inventory_value || '0').toLocaleString('en-IN', { maximumFractionDigits: 0 })}`, bg: '#dce8ff', text: '#4a6fa5', icon: Package },
             ].map((s) => {
@@ -216,7 +216,7 @@ export default function AdminInventoryPage() {
 
         {error && (
           <div className="mb-4 px-4 py-3 rounded-[10px] flex items-center gap-2 text-[13px]"
-            style={{ background: '#ffdcc7', color: '#774117' }}>
+            style={{ background: 'var(--warning-bg)', color: 'var(--warning)' }}>
             <AlertTriangle className="w-4 h-4" />
             {error}
             <button onClick={() => setError('')} className="ml-auto"><X className="w-4 h-4" /></button>
@@ -278,7 +278,7 @@ export default function AdminInventoryPage() {
                               style={{ background: 'var(--color-surface-container)', border: '1.5px solid var(--color-primary)', color: 'var(--color-on-surface)' }}
                             />
                           ) : (
-                            <span className="font-bold text-[14px]" style={{ color: variant.stock === 0 ? '#774117' : variant.stock <= variant.low_stock_threshold ? '#7d5200' : 'var(--color-on-surface)' }}>
+                            <span className="font-bold text-[14px]" style={{ color: variant.stock === 0 ? 'var(--warning)' : variant.stock <= variant.low_stock_threshold ? 'var(--warning)' : 'var(--color-on-surface)' }}>
                               {variant.stock}
                             </span>
                           )}
@@ -316,8 +316,8 @@ export default function AdminInventoryPage() {
                               >
                                 {isSaving ? <Loader2 className="w-3.5 h-3.5 animate-spin text-white" /> : <Save className="w-3.5 h-3.5 text-white" />}
                               </button>
-                              <button onClick={() => handleCancel(variant.variant_id)} className="p-1.5 rounded-[6px]" style={{ background: '#e3e3dc' }}>
-                                <X className="w-3.5 h-3.5" style={{ color: '#43493e' }} />
+                              <button onClick={() => handleCancel(variant.variant_id)} className="p-1.5 rounded-[6px]" style={{ background: 'var(--surface-muted)' }}>
+                                <X className="w-3.5 h-3.5" style={{ color: 'var(--foreground-muted)' }} />
                               </button>
                             </div>
                           ) : (

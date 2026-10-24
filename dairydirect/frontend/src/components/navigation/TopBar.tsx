@@ -16,7 +16,7 @@ export async function TopBar() {
   const freeDeliveryThreshold = await getFreeDeliveryThreshold();
 
   return (
-    <div className="w-full bg-[#0d3b24] text-white text-[11px] md:text-xs py-1.5 px-4 md:px-8 border-b border-[var(--primary-hover)]">
+    <div className="w-full bg-primary text-white text-[11px] md:text-xs py-1.5 px-4 md:px-8 border-b border-[var(--primary-hover)]">
       <div className="max-w-[1440px] mx-auto flex items-center justify-between font-medium">
         {/* Left Notice */}
         <div className="flex items-center gap-2">

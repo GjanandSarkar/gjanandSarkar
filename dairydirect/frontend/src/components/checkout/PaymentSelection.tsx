@@ -73,7 +73,7 @@ export function PaymentSelection({
                   <div className="flex items-center gap-2 mb-0.5">
                     <span className="font-bold text-dark text-sm leading-tight">{method.name}</span>
                     {method.badge && (
-                      <span className="text-[9px] font-extrabold uppercase px-1.5 py-0.5 rounded-md bg-[#1b4332]/10 text-[#1b4332] tracking-wider">
+                      <span className="text-[9px] font-extrabold uppercase px-1.5 py-0.5 rounded-md bg-primary/10 text-primary tracking-wider">
                         {method.badge}
                       </span>
                     )}

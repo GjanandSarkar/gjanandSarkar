@@ -91,7 +91,7 @@ export default function ProfileOnboardingScreen() {
       <div className="flex-1 px-6 py-8 space-y-6">
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
-            <label className="block text-[11px] font-extrabold uppercase tracking-wider text-[#4a5c43] px-2 mb-1">
+            <label className="block text-[11px] font-extrabold uppercase tracking-wider text-foreground-muted px-2 mb-1">
               FIRST NAME
             </label>
             <input
@@ -99,11 +99,11 @@ export default function ProfileOnboardingScreen() {
               value={firstName}
               onChange={(e) => setFirstName(e.target.value)}
               placeholder="First Name"
-              className="w-full bg-[#f3f5f0] text-dark font-bold text-base px-4 py-3 rounded-full outline-none border-2 border-transparent focus:border-[#4b6a41] transition-all"
+              className="w-full bg-surface-muted text-dark font-bold text-base px-4 py-3 rounded-full outline-none border-2 border-transparent focus:border-primary-light transition-all"
             />
           </div>
           <div>
-            <label className="block text-[11px] font-extrabold uppercase tracking-wider text-[#4a5c43] px-2 mb-1">
+            <label className="block text-[11px] font-extrabold uppercase tracking-wider text-foreground-muted px-2 mb-1">
               LAST NAME
             </label>
             <input
@@ -111,7 +111,7 @@ export default function ProfileOnboardingScreen() {
               value={lastName}
               onChange={(e) => setLastName(e.target.value)}
               placeholder="Last Name"
-              className="w-full bg-[#f3f5f0] text-dark font-bold text-base px-4 py-3 rounded-full outline-none border-2 border-transparent focus:border-[#4b6a41] transition-all"
+              className="w-full bg-surface-muted text-dark font-bold text-base px-4 py-3 rounded-full outline-none border-2 border-transparent focus:border-primary-light transition-all"
             />
           </div>
         </div>

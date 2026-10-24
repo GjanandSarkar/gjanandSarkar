@@ -69,7 +69,7 @@ export function CartBar() {
                 <div className="relative">
                   <ShoppingCart className="w-6 h-6 text-white" strokeWidth={2.2} />
                   <div 
-                    className="absolute -top-2 -right-2 flex items-center justify-center min-w-[20px] h-[20px] px-1 rounded-full bg-surface text-[#3f6530] text-[10px] font-black border-2 border-[#3f6530]"
+                    className="absolute -top-2 -right-2 flex items-center justify-center min-w-[20px] h-[20px] px-1 rounded-full bg-surface text-primary-light text-[10px] font-black border-2 border-primary-light"
                   >
                     {totalItems}
                   </div>

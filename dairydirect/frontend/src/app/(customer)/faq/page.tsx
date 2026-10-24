@@ -138,13 +138,13 @@ export default function FAQPage() {
                   </span>
                   <ChevronDown
                     className={`w-4 h-4 text-foreground-muted shrink-0 transition-transform duration-200 ${
-                      isOpen ? 'rotate-180 text-[#c88a23]' : ''
+                      isOpen ? 'rotate-180 text-secondary' : ''
                     }`}
                   />
                 </button>
 
                 {isOpen && (
-                  <div className="px-5 pb-5 pt-1 text-xs sm:text-[13px] text-foreground-muted leading-relaxed border-t border-border bg-[#fdfdfc]">
+                  <div className="px-5 pb-5 pt-1 text-xs sm:text-[13px] text-foreground-muted leading-relaxed border-t border-border bg-surface">
                     {faq.answer}
                   </div>
                 )}
@@ -154,7 +154,7 @@ export default function FAQPage() {
         </div>
 
         {/* Still Have Questions Box */}
-        <div className="mt-12 bg-gradient-to-r from-[var(--primary)] to-[#175c3a] rounded-3xl p-6 sm:p-8 text-white flex flex-col sm:flex-row items-center justify-between gap-6 shadow-lg">
+        <div className="mt-12 bg-gradient-to-r from-[var(--primary)] to-primary-light rounded-3xl p-6 sm:p-8 text-white flex flex-col sm:flex-row items-center justify-between gap-6 shadow-lg">
           <div>
             <h3 className="text-lg font-black text-warning mb-1">
               Still have questions?
@@ -166,7 +166,7 @@ export default function FAQPage() {
           </div>
           <Link
             href="/contact"
-            className="px-6 py-3 bg-[#c88a23] hover:bg-[#b0781c] text-white text-xs font-extrabold rounded-xl transition-all shadow-md shrink-0 flex items-center gap-2"
+            className="px-6 py-3 bg-secondary hover:bg-secondary-hover text-white text-xs font-extrabold rounded-xl transition-all shadow-md shrink-0 flex items-center gap-2"
           >
             <PhoneCall className="w-4 h-4" />
             <span>Contact Support</span>

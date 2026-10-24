@@ -329,7 +329,7 @@ export default function ProfileScreen() {
               className="px-4 py-2.5 bg-primary hover:bg-primary-hover text-on-primary text-xs font-black rounded-xl shrink-0 transition-all shadow-2xs flex items-center gap-1"
             >
               <span>Apply Now</span>
-              <ArrowRight className="w-3.5 h-3.5 text-[#c88a23]" />
+              <ArrowRight className="w-3.5 h-3.5 text-secondary" />
             </Link>
           </div>
         )}

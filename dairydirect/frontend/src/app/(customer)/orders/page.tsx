@@ -15,11 +15,11 @@ import { EmptyState } from '@/components/discovery/EmptyState';
 import { CancelOrderButton } from '@/components/orders/CancelOrderButton';
 
 const STATUS_STYLES: Record<string, { bg: string; color: string; dot: string; icon: typeof Clock }> = {
-  'pending':          { bg: '#ffdcc7', color: '#774117', dot: '#d4712a', icon: Clock },
+  'pending':          { bg: '#ffdcc7', color: 'var(--warning)', dot: '#d4712a', icon: Clock },
   'confirmed':        { bg: '#c2efac', color: '#042100', dot: '#3f6530', icon: CheckCircle2 },
-  'out_for_delivery': { bg: '#fff8e6', color: '#7d5200', dot: '#c78c2e', icon: Truck },
+  'out_for_delivery': { bg: '#fff8e6', color: 'var(--warning)', dot: '#c78c2e', icon: Truck },
   'delivered':        { bg: '#eaf4e2', color: '#2a4f1d', dot: '#3f6530', icon: CheckCircle2 },
-  'cancelled':        { bg: '#e3e3dc', color: '#43493e', dot: '#73796d', icon: AlertCircle },
+  'cancelled':        { bg: '#e3e3dc', color: 'var(--foreground-muted)', dot: '#73796d', icon: AlertCircle },
 };
 
 const TABS = ['All', 'Active', 'Delivered', 'Cancelled'];

@@ -182,7 +182,7 @@ function LoginScreenInner() {
       
       {/* Decorative Palace Glow Background */}
       <div className="absolute -top-32 -right-32 w-96 h-96 rounded-full bg-primary/10 blur-[100px] pointer-events-none" />
-      <div className="absolute -bottom-32 -left-32 w-96 h-96 rounded-full bg-[#c88a23]/15 blur-[100px] pointer-events-none" />
+      <div className="absolute -bottom-32 -left-32 w-96 h-96 rounded-full bg-secondary/15 blur-[100px] pointer-events-none" />
 
       <div className="w-full max-w-[440px] relative z-10">
         
@@ -202,7 +202,7 @@ function LoginScreenInner() {
                 <span className="text-2xl font-black tracking-tight leading-none">
                   <span className="text-primary">Gjanand</span>
                 </span>
-                <span className="text-[11px] tracking-[0.2em] font-black text-[#c88a23] uppercase text-right leading-none mt-0.5">
+                <span className="text-[11px] tracking-[0.2em] font-black text-secondary uppercase text-right leading-none mt-0.5">
                   SARKAR
                 </span>
               </div>
@@ -234,11 +234,11 @@ function LoginScreenInner() {
               onClick={() => { setMode('quick'); setError(''); }}
               className={`py-2 rounded-lg transition-all flex items-center justify-center gap-1 ${
                 mode === 'quick'
-                  ? 'bg-surface text-[#c88a23] shadow-2xs font-extrabold'
+                  ? 'bg-surface text-secondary shadow-2xs font-extrabold'
                   : 'text-foreground-muted hover:text-foreground'
               }`}
             >
-              <Sparkles className="w-3.5 h-3.5 text-[#c88a23]" />
+              <Sparkles className="w-3.5 h-3.5 text-secondary" />
               <span>Instant Access</span>
             </button>
           </div>
@@ -351,7 +351,7 @@ function LoginScreenInner() {
                 <button
                   type="button"
                   onClick={() => { setIsSignUp(!isSignUp); setError(''); }}
-                  className="text-xs font-bold text-[#c88a23] hover:underline cursor-pointer"
+                  className="text-xs font-bold text-secondary hover:underline cursor-pointer"
                 >
                   {isSignUp ? 'Already have an account? Sign In' : "Don't have an account? Create One"}
                 </button>
@@ -389,14 +389,14 @@ function LoginScreenInner() {
               <button
                 type="button"
                 onClick={() => handleQuickLogin('seller')}
-                className="w-full p-3.5 rounded-xl border border-border hover:border-[#c88a23] bg-warning-bg/40 hover:bg-warning-bg flex items-center justify-between text-left transition-all group cursor-pointer"
+                className="w-full p-3.5 rounded-xl border border-border hover:border-secondary bg-warning-bg/40 hover:bg-warning-bg flex items-center justify-between text-left transition-all group cursor-pointer"
               >
                 <div className="flex items-center gap-3">
-                  <div className="w-9 h-9 rounded-lg bg-[#c88a23] text-white flex items-center justify-center font-bold text-sm">
+                  <div className="w-9 h-9 rounded-lg bg-secondary text-white flex items-center justify-center font-bold text-sm">
                     🏪
                   </div>
                   <div>
-                    <h4 className="text-xs font-bold text-foreground group-hover:text-[#c88a23]">
+                    <h4 className="text-xs font-bold text-foreground group-hover:text-secondary">
                       Verified Seller / Vendor
                     </h4>
                     <p className="text-[10px] text-foreground-muted">
@@ -404,7 +404,7 @@ function LoginScreenInner() {
                     </p>
                   </div>
                 </div>
-                <ArrowRight className="w-4 h-4 text-foreground-muted group-hover:text-[#c88a23] group-hover:translate-x-0.5 transition-transform" />
+                <ArrowRight className="w-4 h-4 text-foreground-muted group-hover:text-secondary group-hover:translate-x-0.5 transition-transform" />
               </button>
 
               {/* 3. Admin Demo */}

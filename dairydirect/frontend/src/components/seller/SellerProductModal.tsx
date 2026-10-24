@@ -594,7 +594,7 @@ export function SellerProductModal({
                 onClick={() => {
                   onClose();
                 }}
-                className="w-full sm:w-1/2 py-3 px-4 rounded-xl bg-primary hover:bg-[#092b1b] text-on-primary text-xs font-bold transition-all shadow-md cursor-pointer flex items-center justify-center gap-1.5"
+                className="w-full sm:w-1/2 py-3 px-4 rounded-xl bg-primary hover:bg-primary-fixed-dim text-on-primary text-xs font-bold transition-all shadow-md cursor-pointer flex items-center justify-center gap-1.5"
               >
                 <Package className="w-4 h-4" />
                 <span>Done & View Products</span>

@@ -4,6 +4,7 @@ import React, { useState, useCallback, useEffect } from 'react';
 import Link from 'next/link';
 import { Plus, Minus, Pencil, Star, ShoppingCart, Heart } from 'lucide-react';
 import { useTranslation } from '@/lib/i18n';
+import { createPortal } from 'react-dom';
 import { useStore } from '@/store/useStore';
 import { addToCart, updateCartItem } from '@/lib/api/cart';
 import { toggleWishlist } from '@/lib/api/wishlist';
@@ -82,6 +83,18 @@ export function ProductCard({
   }, [variants, selectedVariant]);
 
   const [showDrawer, setShowDrawer] = useState(false);
+
+  /* Lock the page behind the size picker. Without this the list underneath
+     scrolls while the sheet is open, which on mobile reads as the sheet
+     drifting off-screen. */
+  useEffect(() => {
+    if (!showDrawer) return;
+    const previous = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    return () => {
+      document.body.style.overflow = previous;
+    };
+  }, [showDrawer]);
   const [busy, setBusy] = useState(false);
 
   const isSaved = mounted && wishlist.includes(product.id);
@@ -203,7 +216,7 @@ export function ProductCard({
         controls in z-order. The whole card is clickable, the link is properly
         announced and focusable, and the buttons stay genuinely separate.
       */}
-      <div className="flex flex-col h-full bg-surface rounded-2xl border border-border/90 p-3.5 shadow-2xs hover:border-[#c88a23] group relative lift pressable focus-within:ring-2 focus-within:ring-[var(--primary)]/40">
+      <div className="flex flex-col h-full bg-surface rounded-2xl border border-border/90 p-3.5 shadow-2xs hover:border-secondary group relative lift pressable focus-within:ring-2 focus-within:ring-[var(--primary)]/40">
         <Link
           href={`/products/${product.id}`}
           className="absolute inset-0 z-10 rounded-2xl"
@@ -234,7 +247,7 @@ export function ProductCard({
               This is the single strongest scanning cue on a listing grid and
               the card had none. */}
           {hasRealDiscount && discountPct >= 1 && (
-            <span className="absolute top-2 left-2 bg-[#c88a23] text-white text-[10px] font-black px-1.5 py-0.5 rounded-md shadow-sm tabular-nums">
+            <span className="absolute top-2 left-2 bg-secondary text-white text-[10px] font-black px-1.5 py-0.5 rounded-md shadow-sm tabular-nums">
               {discountPct}% OFF
             </span>
           )}
@@ -281,7 +294,7 @@ export function ProductCard({
           {/* Cart Quantity Badge */}
           {isInCart && (
             <div
-              className={`absolute bottom-2 right-2 w-5 h-5 rounded-full bg-[#c88a23] text-white text-[10px] font-black flex items-center justify-center shadow-md z-10`}
+              className={`absolute bottom-2 right-2 w-5 h-5 rounded-full bg-secondary text-white text-[10px] font-black flex items-center justify-center shadow-md z-10`}
             >
               {totalQuantity}
             </div>
@@ -383,21 +396,43 @@ export function ProductCard({
         </div>
       </div>
 
-      {/* Variant Drawer */}
-      <AnimatePresence>
-        {showDrawer && (
-          <>
-            <motion.div
-              initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-              className="fixed inset-0 bg-black/60 z-[60] backdrop-blur-xs"
-              onClick={() => setShowDrawer(false)}
-            />
-            <motion.div
-              initial={{ y: '100%' }} animate={{ y: 0 }} exit={{ y: '100%' }}
-              transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-              className="fixed bottom-0 left-0 right-0 rounded-t-3xl z-[70] p-6 max-w-lg mx-auto bg-surface shadow-2xl"
-            >
-              <div className="w-12 h-1.5 rounded-full mx-auto mb-6 bg-gray-300" />
+      {/* Size picker.
+
+          Rendered through a portal into document.body. It used to live
+          inside the card, and `position: fixed` resolves against the
+          nearest ancestor with a transform -- which the animated product
+          rails provide. The sheet was therefore trapped at the card's width
+          and position instead of the viewport, and the "full screen"
+          backdrop only covered the card, so the page never dimmed.
+
+          A flex wrapper does the positioning (bottom sheet on mobile,
+          centred dialog from sm up) so the sheet's own transform stays free
+          for the open/close animation. It scrolls internally and clears the
+          home indicator, instead of overflowing off-screen when a product
+          has several sizes. */}
+      {mounted &&
+        createPortal(
+          <AnimatePresence>
+            {showDrawer && (
+              <>
+                <motion.div
+                  initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+                  className="fixed inset-0 z-[60] backdrop-blur-xs"
+                  style={{ background: 'var(--scrim)' }}
+                  onClick={() => setShowDrawer(false)}
+                />
+                <div className="fixed inset-0 z-[70] flex items-end justify-center sm:items-center sm:p-6 pointer-events-none">
+                  <motion.div
+                    initial={{ y: '100%', opacity: 0.6 }}
+                    animate={{ y: 0, opacity: 1 }}
+                    exit={{ y: '100%', opacity: 0.6 }}
+                    transition={{ type: 'spring', damping: 28, stiffness: 320 }}
+                    role="dialog"
+                    aria-modal="true"
+                    aria-label={`Choose a size for ${product.name}`}
+                    className="pointer-events-auto w-full sm:w-auto sm:min-w-[22rem] sm:max-w-md bg-surface shadow-2xl rounded-t-3xl sm:rounded-3xl max-h-[85dvh] sm:max-h-[80dvh] overflow-y-auto overscroll-contain px-5 pt-3 pb-[calc(1.25rem+env(safe-area-inset-bottom,0px))] sm:px-6 sm:pt-5 sm:pb-6"
+                  >
+                    <div className="w-12 h-1.5 rounded-full mx-auto mb-5 bg-border sm:hidden" />
               <div className="flex items-start gap-4 mb-6">
                 <img
                   src={product.image_url ?? PLACEHOLDER_PRODUCT_IMAGE}
@@ -501,14 +536,17 @@ export function ProductCard({
 
               <button
                 onClick={() => setShowDrawer(false)}
-                className="w-full py-3 bg-primary hover:bg-primary-hover rounded-xl font-bold text-on-primary text-sm active:scale-95 shadow-md"
+                className="w-full py-3 bg-primary hover:bg-primary-hover rounded-xl font-bold text-on-primary text-sm active:scale-95 shadow-md sticky bottom-0"
               >
                 Done
               </button>
-            </motion.div>
-          </>
+                  </motion.div>
+                </div>
+              </>
+            )}
+          </AnimatePresence>,
+          document.body
         )}
-      </AnimatePresence>
 
       {/* Admin Edit / Delete Modal */}
       {user?.role === 'admin' && isEditModalOpen && (

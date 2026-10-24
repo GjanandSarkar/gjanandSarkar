@@ -174,7 +174,7 @@ export default function SupportPage() {
         {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8 border-b border-border pb-4">
           <div>
-            <span className="text-[10px] font-black uppercase tracking-widest text-[#c88a23]">Customer Care</span>
+            <span className="text-[10px] font-black uppercase tracking-widest text-secondary">Customer Care</span>
             <h1 className="text-2xl md:text-3xl font-black text-primary">Support Tickets</h1>
           </div>
           <div className="flex items-center gap-2">
@@ -193,7 +193,7 @@ export default function SupportPage() {
               }}
               className="flex items-center gap-2 px-5 py-2.5 bg-primary text-on-primary text-xs font-bold rounded-xl hover:bg-primary-hover transition shadow-sm active:scale-95"
             >
-              {showNew ? 'Cancel' : <><Plus className="w-4 h-4 text-[#c88a23]" /> New Ticket</>}
+              {showNew ? 'Cancel' : <><Plus className="w-4 h-4 text-secondary" /> New Ticket</>}
             </button>
           </div>
         </div>
@@ -305,7 +305,7 @@ export default function SupportPage() {
                     </>
                   ) : (
                     <>
-                      <Send className="w-3.5 h-3.5 text-[#c88a23]" />
+                      <Send className="w-3.5 h-3.5 text-secondary" />
                       <span>Submit Ticket</span>
                     </>
                   )}

@@ -101,7 +101,7 @@ export function CategoryNavBar() {
 
           {isMenuOpen && (
             <div className="absolute left-0 top-full mt-2 w-72 max-h-[420px] overflow-y-auto bg-surface rounded-2xl shadow-2xl border border-border py-2 z-50 animate-in fade-in slide-in-from-top-1">
-              <div className="px-4 py-2 text-[10px] font-black text-[#c88a23] uppercase tracking-wider border-b border-border flex items-center justify-between">
+              <div className="px-4 py-2 text-[10px] font-black text-secondary uppercase tracking-wider border-b border-border flex items-center justify-between">
                 <span className="flex items-center gap-1.5">
                   <Sparkles className="w-3.5 h-3.5" />
                   Explore Departments
@@ -128,7 +128,7 @@ export function CategoryNavBar() {
         </div>
 
         {/* Vertical Divider */}
-        <div className="h-5 w-px bg-gray-300/80 shrink-0 hidden sm:block" />
+        <div className="h-5 w-px bg-border/80 shrink-0 hidden sm:block" />
 
         {/* Category Nav Links */}
         <nav className="hidden md:flex items-center gap-8 lg:gap-12 xl:gap-14 overflow-x-auto no-scrollbar py-1">
@@ -136,7 +136,7 @@ export function CategoryNavBar() {
             <Link
               key={item.name}
               href={item.href}
-              className="text-foreground hover:text-primary font-bold text-xs lg:text-[13px] tracking-tight hover:underline underline-offset-8 decoration-2 decoration-[#c88a23] transition-all whitespace-nowrap py-1 px-1 group flex items-center gap-1.5"
+              className="text-foreground hover:text-primary font-bold text-xs lg:text-[13px] tracking-tight hover:underline underline-offset-8 decoration-2 decoration-secondary transition-all whitespace-nowrap py-1 px-1 group flex items-center gap-1.5"
             >
               <span>{item.name}</span>
             </Link>
@@ -155,7 +155,7 @@ export function CategoryNavBar() {
 
             {isMoreOpen && (
               <div className="absolute left-0 top-full mt-2 w-64 bg-surface rounded-2xl shadow-xl border border-border py-2 z-50 animate-in fade-in slide-in-from-top-1">
-                <div className="px-3.5 py-1.5 text-[10px] font-black text-[#c88a23] uppercase tracking-wider border-b border-border">
+                <div className="px-3.5 py-1.5 text-[10px] font-black text-secondary uppercase tracking-wider border-b border-border">
                   More Categories
                 </div>
                 <div className="py-1">

@@ -24,11 +24,11 @@ import { PLACEHOLDER_PRODUCT_IMAGE } from '@/lib/constants/brand';
 import { ConfirmCodPaymentModal } from '@/components/admin/ConfirmCodPaymentModal';
 
 const STATUS_STYLES: Record<string, { bg: string; color: string; dot: string }> = {
-  'pending':          { bg: '#ffdcc7', color: '#774117', dot: '#d4712a' },
+  'pending':          { bg: '#ffdcc7', color: 'var(--warning)', dot: '#d4712a' },
   'confirmed':        { bg: '#c2efac', color: '#042100', dot: '#3f6530' },
-  'out_for_delivery': { bg: '#fff8e6', color: '#7d5200', dot: '#c78c2e' },
+  'out_for_delivery': { bg: '#fff8e6', color: 'var(--warning)', dot: '#c78c2e' },
   'delivered':        { bg: '#eaf4e2', color: '#2a4f1d', dot: '#3f6530' },
-  'cancelled':        { bg: '#e3e3dc', color: '#43493e', dot: '#73796d' },
+  'cancelled':        { bg: '#e3e3dc', color: 'var(--foreground-muted)', dot: '#73796d' },
 };
 
 const ORDER_STATUSES: OrderWithItems['status'][] = ['confirmed', 'out_for_delivery', 'delivered', 'cancelled'];
@@ -568,7 +568,7 @@ export default function AdminOrdersPage() {
                               {updateError?.orderId === order.id && (
                                 <div role="alert"
                                   className="mt-3 flex items-start gap-2 rounded-xl px-3 py-2 text-[12px]"
-                                  style={{ background: '#ffdad6', color: '#410002' }}>
+                                  style={{ background: 'var(--error-bg)', color: 'var(--error)' }}>
                                   <AlertCircle className="w-4 h-4 shrink-0 mt-[1px]" />
                                   <span>{updateError.message}</span>
                                 </div>

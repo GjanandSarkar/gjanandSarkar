@@ -23,11 +23,11 @@ import type { SellerLifecycleRecord } from '@/lib/api/sellers';
 import { PLACEHOLDER_PRODUCT_IMAGE } from '@/lib/constants/brand';
 
 const STATUS_STYLES: Record<string, { bg: string; color: string; dot: string; label: string }> = {
-  'pending':          { bg: '#ffdcc7', color: '#774117', dot: '#d4712a', label: 'Pending' },
+  'pending':          { bg: '#ffdcc7', color: 'var(--warning)', dot: '#d4712a', label: 'Pending' },
   'confirmed':        { bg: '#c2efac', color: '#042100', dot: '#3f6530', label: 'Confirmed' },
-  'out_for_delivery': { bg: '#fff8e6', color: '#7d5200', dot: '#c78c2e', label: 'Out for Delivery' },
+  'out_for_delivery': { bg: '#fff8e6', color: 'var(--warning)', dot: '#c78c2e', label: 'Out for Delivery' },
   'delivered':        { bg: '#eaf4e2', color: '#2a4f1d', dot: '#3f6530', label: 'Delivered' },
-  'cancelled':        { bg: '#e3e3dc', color: '#43493e', dot: '#73796d', label: 'Cancelled' },
+  'cancelled':        { bg: '#e3e3dc', color: 'var(--foreground-muted)', dot: '#73796d', label: 'Cancelled' },
 };
 
 export default function AllSellerOrdersListPage() {
@@ -266,7 +266,7 @@ export default function AllSellerOrdersListPage() {
                 placeholder="Search order ID, store, customer, product..."
                 value={searchQuery}
                 onChange={e => setSearchQuery(e.target.value)}
-                className="w-full pl-9 pr-3 py-1.5 bg-surface-muted border border-border rounded-xl text-xs font-medium placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[var(--primary)]/20 focus:bg-surface"
+                className="w-full pl-9 pr-3 py-1.5 bg-surface-muted border border-border rounded-xl text-xs font-medium placeholder-foreground-muted focus:outline-none focus:ring-2 focus:ring-[var(--primary)]/20 focus:bg-surface"
               />
               {searchQuery && (
                 <button

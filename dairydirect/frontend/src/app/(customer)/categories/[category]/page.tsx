@@ -99,7 +99,7 @@ export default async function CategoryPage({ params }: Props) {
 
         <Link
           href="/products"
-          className="text-xs font-bold text-primary hover:text-[#c88a23] flex items-center gap-1 transition-colors"
+          className="text-xs font-bold text-primary hover:text-secondary flex items-center gap-1 transition-colors"
         >
           <span>All Products</span>
           <ArrowRight className="w-3.5 h-3.5" />
@@ -118,7 +118,7 @@ export default async function CategoryPage({ params }: Props) {
           </div>
         ) : (
           <div className="bg-surface rounded-3xl border border-border/90 p-8 sm:p-12 text-center max-w-2xl mx-auto my-8 shadow-xs">
-            <div className="w-16 h-16 rounded-2xl bg-warning-bg border border-warning/20 text-[#c88a23] flex items-center justify-center mx-auto mb-4">
+            <div className="w-16 h-16 rounded-2xl bg-warning-bg border border-warning/20 text-secondary flex items-center justify-center mx-auto mb-4">
               <PackageOpen className="w-8 h-8" />
             </div>
             <h2 className="text-xl font-bold text-foreground mb-2">
@@ -145,7 +145,7 @@ export default async function CategoryPage({ params }: Props) {
               href="/products"
               className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-primary hover:bg-primary-hover text-on-primary text-xs font-bold shadow-md transition-all active:scale-95"
             >
-              <Sparkles className="w-4 h-4 text-[#c88a23]" />
+              <Sparkles className="w-4 h-4 text-secondary" />
               <span>Browse All Available Products</span>
             </Link>
           </div>

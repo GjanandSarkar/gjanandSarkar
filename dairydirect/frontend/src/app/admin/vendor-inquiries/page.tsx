@@ -182,7 +182,7 @@ export default function AdminVendorInquiriesPage() {
       {/* Top Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-warning-bg text-[#c88a23] text-xs font-black uppercase tracking-wider mb-1">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-warning-bg text-secondary text-xs font-black uppercase tracking-wider mb-1">
             <Clock className="w-3.5 h-3.5" />
             <span>Marketplace Onboarding</span>
           </div>
@@ -412,7 +412,7 @@ export default function AdminVendorInquiriesPage() {
               {/* 1. Owner & Contact Information */}
               <div className="space-y-3">
                 <h4 className="text-xs font-black text-primary uppercase tracking-wider flex items-center gap-2">
-                  <PhoneCall className="w-3.5 h-3.5 text-[#c88a23]" />
+                  <PhoneCall className="w-3.5 h-3.5 text-secondary" />
                   <span>Applicant & Contact Details</span>
                 </h4>
                 
@@ -435,7 +435,7 @@ export default function AdminVendorInquiriesPage() {
               {/* 2. Business Address & Structure */}
               <div className="space-y-3">
                 <h4 className="text-xs font-black text-primary uppercase tracking-wider flex items-center gap-2">
-                  <Building2 className="w-3.5 h-3.5 text-[#c88a23]" />
+                  <Building2 className="w-3.5 h-3.5 text-secondary" />
                   <span>Business Address & Structure</span>
                 </h4>
                 
@@ -463,7 +463,7 @@ export default function AdminVendorInquiriesPage() {
               {/* 3. Verification Details (PAN, GSTIN, FSSAI, Docs) */}
               <div className="space-y-3">
                 <h4 className="text-xs font-black text-primary uppercase tracking-wider flex items-center gap-2">
-                  <CreditCard className="w-3.5 h-3.5 text-[#c88a23]" />
+                  <CreditCard className="w-3.5 h-3.5 text-secondary" />
                   <span>Tax & Compliance Verification</span>
                 </h4>
                 
@@ -560,7 +560,7 @@ export default function AdminVendorInquiriesPage() {
                     disabled={isUpdating}
                     className="px-6 py-2.5 bg-primary hover:bg-primary-hover text-on-primary text-xs font-black rounded-xl shadow-md flex items-center gap-1.5 transition-all active:scale-95 cursor-pointer"
                   >
-                    <ShieldCheck className="w-4 h-4 text-[#c88a23]" />
+                    <ShieldCheck className="w-4 h-4 text-secondary" />
                     <span>Approve Seller Account</span>
                   </button>
                 )}

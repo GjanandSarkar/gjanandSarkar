@@ -269,7 +269,7 @@ function AdminProductsContent() {
                       <span className="text-[11px] font-bold px-2 py-1 rounded-md"
                         style={{
                           background: (product.product_variants?.[0]?.stock || 0) < 10 ? '#ffdcc7' : 'var(--color-surface-container)',
-                          color: (product.product_variants?.[0]?.stock || 0) < 10 ? '#774117' : 'var(--color-on-surface-variant)',
+                          color: (product.product_variants?.[0]?.stock || 0) < 10 ? 'var(--warning)' : 'var(--color-on-surface-variant)',
                         }}>
                         {product.product_variants?.[0]?.stock || 0} in stock
                       </span>

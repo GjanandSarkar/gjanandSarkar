@@ -31,7 +31,7 @@ export default function PrivacyPolicyPage() {
           
           <section>
             <h2 className="text-base font-bold text-primary mb-2 flex items-center gap-2">
-              <ShieldCheck className="w-4 h-4 text-[#c88a23]" />
+              <ShieldCheck className="w-4 h-4 text-secondary" />
               1. Information We Collect
             </h2>
             <p>
@@ -47,7 +47,7 @@ export default function PrivacyPolicyPage() {
 
           <section>
             <h2 className="text-base font-bold text-primary mb-2 flex items-center gap-2">
-              <Eye className="w-4 h-4 text-[#c88a23]" />
+              <Eye className="w-4 h-4 text-secondary" />
               2. How We Use Your Information
             </h2>
             <p>We utilize the collected information strictly for:</p>
@@ -61,7 +61,7 @@ export default function PrivacyPolicyPage() {
 
           <section>
             <h2 className="text-base font-bold text-primary mb-2 flex items-center gap-2">
-              <FileText className="w-4 h-4 text-[#c88a23]" />
+              <FileText className="w-4 h-4 text-secondary" />
               3. Data Protection & Sharing
             </h2>
             <p>
@@ -76,18 +76,18 @@ export default function PrivacyPolicyPage() {
 
           <section>
             <h2 className="text-base font-bold text-primary mb-2 flex items-center gap-2">
-              <CheckCircle2 className="w-4 h-4 text-[#c88a23]" />
+              <CheckCircle2 className="w-4 h-4 text-secondary" />
               4. Your Rights & Account Controls
             </h2>
             <p>
-              You have the right to review, modify, or request deletion of your saved addresses, account details, and subscription history at any time. Simply visit your Profile settings or email us at <a href="mailto:care@gjanandsarkar.com" className="text-[#c88a23] font-bold hover:underline">care@gjanandsarkar.com</a>.
+              You have the right to review, modify, or request deletion of your saved addresses, account details, and subscription history at any time. Simply visit your Profile settings or email us at <a href="mailto:care@gjanandsarkar.com" className="text-secondary font-bold hover:underline">care@gjanandsarkar.com</a>.
             </p>
           </section>
 
         </div>
 
         <div className="mt-8 pt-6 border-t border-border flex items-center justify-between text-xs text-foreground-muted">
-          <Link href="/terms" className="text-[#c88a23] font-bold hover:underline">
+          <Link href="/terms" className="text-secondary font-bold hover:underline">
             Read Terms of Service →
           </Link>
           <Link href="/contact" className="hover:text-foreground transition-colors">

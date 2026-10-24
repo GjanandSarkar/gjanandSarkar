@@ -59,7 +59,7 @@ export function AdminSidebar() {
 
       {/* Ambient glow */}
       <div className="absolute top-0 left-0 w-full h-48 opacity-10 pointer-events-none"
-        style={{ background: 'linear-gradient(180deg, #3f6530 0%, transparent 100%)' }} />
+        style={{ background: 'linear-gradient(180deg, var(--primary-light) 0%, transparent 100%)' }} />
 
       {/* ── Brand Logo ── */}
       <div className="px-6 py-5 relative z-10">
@@ -77,7 +77,7 @@ export function AdminSidebar() {
               <span className="text-xl md:text-2xl font-black tracking-tight leading-none">
                 <span className="text-primary">Gjanand</span>
               </span>
-              <span className="text-[10px] md:text-[11px] tracking-[0.2em] font-black text-[#c88a23] uppercase text-right leading-none mt-0.5">
+              <span className="text-[10px] md:text-[11px] tracking-[0.2em] font-black text-secondary uppercase text-right leading-none mt-0.5">
                 SARKAR
               </span>
             </div>

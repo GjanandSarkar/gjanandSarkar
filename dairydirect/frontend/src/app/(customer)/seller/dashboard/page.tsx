@@ -346,7 +346,7 @@ export default function SellerDashboardPage() {
             <div className="flex flex-col sm:flex-row items-center justify-center gap-3 pt-2">
               <Link
                 href="/become-seller?resubmit=true"
-                className="w-full sm:w-auto px-6 py-3 bg-primary hover:bg-[#0c331f] text-on-primary text-xs font-bold rounded-xl flex items-center justify-center gap-2 shadow-sm transition-all"
+                className="w-full sm:w-auto px-6 py-3 bg-primary hover:bg-primary text-on-primary text-xs font-bold rounded-xl flex items-center justify-center gap-2 shadow-sm transition-all"
               >
                 <RotateCcw className="w-4 h-4" />
                 <span>Edit & Resubmit Application</span>
@@ -375,7 +375,7 @@ export default function SellerDashboardPage() {
         <div className="max-w-3xl mx-auto space-y-8 animate-in fade-in">
           
           <div className="bg-surface rounded-3xl border border-warning/20 shadow-sm p-8 sm:p-10 text-center space-y-6">
-            <div className="w-16 h-16 rounded-2xl bg-warning-bg text-[#c88a23] flex items-center justify-center mx-auto shadow-inner">
+            <div className="w-16 h-16 rounded-2xl bg-warning-bg text-secondary flex items-center justify-center mx-auto shadow-inner">
               <Clock className="w-8 h-8" />
             </div>
 
@@ -475,7 +475,7 @@ export default function SellerDashboardPage() {
       <div className="min-h-screen bg-background py-12 px-4 sm:px-6 lg:px-8">
         <div className="max-w-2xl mx-auto space-y-6">
           <div className="bg-surface rounded-3xl border border-red-300 p-8 sm:p-10 text-center space-y-6 shadow-sm">
-            <div className="w-16 h-16 rounded-2xl bg-gray-900 text-red-400 flex items-center justify-center mx-auto shadow-inner">
+            <div className="w-16 h-16 rounded-2xl bg-primary text-red-400 flex items-center justify-center mx-auto shadow-inner">
               <Lock className="w-8 h-8" />
             </div>
             <div className="space-y-2">
@@ -498,7 +498,7 @@ export default function SellerDashboardPage() {
             <div className="pt-2 flex items-center justify-center gap-3">
               <Link
                 href="/home"
-                className="px-6 py-2.5 bg-primary hover:bg-[#0c331f] text-on-primary text-xs font-bold rounded-xl transition-all"
+                className="px-6 py-2.5 bg-primary hover:bg-primary text-on-primary text-xs font-bold rounded-xl transition-all"
               >
                 Return to Storefront
               </Link>
@@ -528,7 +528,7 @@ export default function SellerDashboardPage() {
           <div className="pt-2">
             <Link
               href="/become-seller"
-              className="w-full px-6 py-3 bg-primary hover:bg-[#0c331f] text-on-primary text-xs font-bold rounded-xl flex items-center justify-center gap-2 shadow-sm transition-all"
+              className="w-full px-6 py-3 bg-primary hover:bg-primary text-on-primary text-xs font-bold rounded-xl flex items-center justify-center gap-2 shadow-sm transition-all"
             >
               <Building2 className="w-4 h-4" />
               <span>Become a Seller</span>
@@ -594,8 +594,8 @@ export default function SellerDashboardPage() {
         {/* ─── Top Banner & Store Header ─── */}
         <div className="bg-surface rounded-3xl border border-border/90 shadow-2xs p-6 sm:p-8 flex flex-col md:flex-row md:items-center justify-between gap-6">
           <div className="flex items-center gap-4">
-            <div className="w-16 h-16 rounded-2xl bg-primary text-on-primary flex items-center justify-center font-black text-2xl shadow-md border border-[#c88a23]/40 shrink-0">
-              <Store className="w-8 h-8 text-[#c88a23]" />
+            <div className="w-16 h-16 rounded-2xl bg-primary text-on-primary flex items-center justify-center font-black text-2xl shadow-md border border-secondary/40 shrink-0">
+              <Store className="w-8 h-8 text-secondary" />
             </div>
             <div>
               <div className="flex items-center gap-2 flex-wrap">
@@ -608,7 +608,7 @@ export default function SellerDashboardPage() {
                 </span>
               </div>
               <p className="text-xs text-foreground-muted mt-1">
-                Category: <strong className="text-foreground">{storeCategory}</strong> • Region: <strong className="text-foreground">{storeState}</strong> • Commission: <span className="capitalize font-bold text-[#c88a23]">{storeCommission}% Platform Fee</span>
+                Category: <strong className="text-foreground">{storeCategory}</strong> • Region: <strong className="text-foreground">{storeState}</strong> • Commission: <span className="capitalize font-bold text-secondary">{storeCommission}% Platform Fee</span>
               </p>
             </div>
           </div>
@@ -759,7 +759,7 @@ export default function SellerDashboardPage() {
             </div>
 
             {/* Quick Action Banner */}
-            <div className="bg-gradient-to-r from-[var(--primary)] to-[#165b3b] rounded-3xl p-6 sm:p-8 text-white flex flex-col sm:flex-row sm:items-center justify-between gap-6 shadow-md">
+            <div className="bg-gradient-to-r from-[var(--primary)] to-primary-light rounded-3xl p-6 sm:p-8 text-white flex flex-col sm:flex-row sm:items-center justify-between gap-6 shadow-md">
               <div className="space-y-1.5 max-w-xl">
                 <span className="px-2.5 py-0.5 rounded-full bg-surface/20 text-white text-[10px] font-black uppercase tracking-wider">
                   Product Approval Pipeline

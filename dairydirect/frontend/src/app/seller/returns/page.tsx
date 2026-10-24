@@ -163,7 +163,7 @@ export default function SellerReturnsPage() {
               placeholder="Search by order # or product name..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-border text-xs text-foreground placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-emerald-700/20"
+              className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-border text-xs text-foreground placeholder-foreground-muted focus:outline-none focus:ring-2 focus:ring-emerald-700/20"
             />
           </div>
 
@@ -326,7 +326,7 @@ export default function SellerReturnsPage() {
                             <button
                               onClick={() => setDispatchModalReq(r)}
                               disabled={isBusy}
-                              className="px-3 py-1.5 rounded-xl bg-primary hover:bg-[#165a37] text-on-primary font-bold text-xs shadow-2xs transition-colors disabled:opacity-50"
+                              className="px-3 py-1.5 rounded-xl bg-primary hover:bg-primary-light text-on-primary font-bold text-xs shadow-2xs transition-colors disabled:opacity-50"
                             >
                               Dispatch Replacement
                             </button>
@@ -419,7 +419,7 @@ export default function SellerReturnsPage() {
                 <button
                   type="submit"
                   disabled={isSubmittingDispatch || !trackingNo.trim()}
-                  className="flex-1 py-2.5 rounded-xl bg-primary hover:bg-[#165a37] text-on-primary text-xs font-bold shadow-sm flex items-center justify-center gap-1.5 disabled:opacity-50"
+                  className="flex-1 py-2.5 rounded-xl bg-primary hover:bg-primary-light text-on-primary text-xs font-bold shadow-sm flex items-center justify-center gap-1.5 disabled:opacity-50"
                 >
                   {isSubmittingDispatch ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Confirm Dispatch'}
                 </button>

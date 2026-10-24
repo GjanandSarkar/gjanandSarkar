@@ -170,7 +170,7 @@ export default function ReturnRequestDetailPage() {
           {/* Item details */}
           <div className="bg-surface rounded-3xl border border-border/80 shadow-2xs p-6 space-y-4">
             <h3 className="text-xs font-bold text-foreground-muted uppercase tracking-wider flex items-center gap-2">
-              <Package className="w-4 h-4 text-[#c88a23]" />
+              <Package className="w-4 h-4 text-secondary" />
               <span>Requested Item</span>
             </h3>
 

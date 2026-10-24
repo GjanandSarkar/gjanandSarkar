@@ -86,7 +86,7 @@ export function RazorpayButton({
         disabled={disabled || isLoading || amountInRupees <= 0}
         className={cn(
           "w-full relative flex items-center justify-center gap-2.5 py-3.5 px-6 rounded-2xl font-bold text-sm text-white",
-          "bg-gradient-to-r from-[#1b4332] to-[#2d6a4f] hover:from-[#143427] hover:to-[#22533e]",
+          "bg-gradient-to-r from-primary to-primary-light hover:from-primary hover:to-primary",
           "shadow-[0_4px_14px_rgba(27,67,50,0.35)] hover:shadow-[0_6px_20px_rgba(27,67,50,0.45)]",
           "transition-all duration-200 active:scale-[0.99] disabled:opacity-50 disabled:cursor-not-allowed disabled:shadow-none",
           className

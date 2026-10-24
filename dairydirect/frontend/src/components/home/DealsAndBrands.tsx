@@ -2,26 +2,15 @@
 
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
-import {
-  Clock,
-  Star,
-  ArrowRight,
-  ShoppingCart
-} from 'lucide-react';
+import { Clock, ArrowRight } from 'lucide-react';
 import type { CatalogProduct } from '@/lib/types/catalog';
-import { SmartImage } from '@/components/ui/SmartImage';
-import { useStore } from '@/store/useStore';
-import { addToCart } from '@/lib/api/cart';
-import { PLACEHOLDER_PRODUCT_IMAGE } from '@/lib/constants/brand';
+import { ProductCard } from '@/components/shared/ProductCard';
 
 interface DealsAndBrandsProps {
   products: CatalogProduct[];
 }
 
 export function DealsAndBrands({ products }: DealsAndBrandsProps) {
-  const user = useStore((s) => s.user);
-  const addToCartLocal = useStore((s) => s.addToCartLocal);
-
   /**
    * Countdown to the actual end of the deal window.
    *
@@ -115,103 +104,29 @@ export function DealsAndBrands({ products }: DealsAndBrandsProps) {
               </div>
             </div>
 
-            <Link href="/offers" className="text-xs font-bold text-[#c88a23] hover:text-primary flex items-center gap-1">
+            <Link href="/offers" className="text-xs font-bold text-secondary hover:text-primary flex items-center gap-1">
               <span>View Offers</span>
               <ArrowRight className="w-3.5 h-3.5" />
             </Link>
           </div>
 
-          {/* 4 Deal Cards Grid */}
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 md:gap-4">
-            {displayProducts.map((prod, idx) => {
-              const variant = prod.product_variants?.[0];
-              const price = variant?.price ?? 199;
-              /* Honest pricing: a strikethrough is only legal when a real
-                 higher price exists. This used to fall back to price * 1.25,
-                 which fabricated a 25% discount on every product that had no
-                 original_price (Consumer Protection Act 2019 / Legal
-                 Metrology Rules). Same rule as ProductCard and the PDP. */
-              const originalPrice = variant?.original_price ?? null;
-              const hasRealDiscount =
-                typeof originalPrice === 'number' && originalPrice > price;
-              const discountPercent = hasRealDiscount
-                ? Math.round(((originalPrice - price) / originalPrice) * 100)
-                : 0;
+          {/* Deal cards.
 
-              return (
-                <div
-                  key={prod.id}
-                  className="bg-surface-muted/60 rounded-xl p-2.5 border border-border/60 flex flex-col justify-between group hover:border-[#c88a23] hover:shadow-md transition-all"
-                >
-                  <div className="relative">
-                    {/* Discount Badge */}
-                    {hasRealDiscount && (
-                      <span className="absolute top-1 left-1 bg-error text-on-error text-[9px] font-black px-1.5 py-0.5 rounded shadow-xs z-10">
-                        {discountPercent}% OFF
-                      </span>
-                    )}
+              This grid used to hand-roll its own card: a plain "Add" button
+              that never read the cart, so it could not show how many units
+              were already added, and it added variant[0] blindly even for a
+              product with several sizes. It also duplicated the pricing and
+              rating rules, which is how fabricated discounts and ratings
+              survived here after being fixed everywhere else.
 
-                    {/* Image */}
-                    <div className="w-full aspect-square bg-surface rounded-lg p-2 flex items-center justify-center overflow-hidden mb-2">
-                      <SmartImage
-                        src={prod.image_url || PLACEHOLDER_PRODUCT_IMAGE}
-                        alt={prod.name}
-                        width={160}
-                        height={160}
-                        className="w-full h-full object-contain group-hover:scale-105 transition-transform"
-                      />
-                    </div>
-                  </div>
-
-                  <div>
-                    <h3 className="text-xs font-bold text-foreground line-clamp-1 leading-snug">
-                      {prod.name}
-                    </h3>
-                    <p className="text-[10px] text-foreground-muted line-clamp-1 mb-1.5">
-                      {variant?.weight || 'Standard Pack'}
-                    </p>
-
-                    {/* Pricing */}
-                    <div className="flex items-baseline gap-1.5 mb-2">
-                      <span className="text-sm font-black text-primary">
-                        ₹{price}
-                      </span>
-                      {hasRealDiscount && (
-                        <span className="text-[10px] text-foreground-muted line-through">
-                          ₹{originalPrice}
-                        </span>
-                      )}
-                    </div>
-
-                    {/* Rating */}
-                    {(prod.reviews_count ?? 0) > 0 && prod.rating ? (
-                      <div className="flex items-center gap-1 text-[10px] text-warning font-bold mb-2">
-                        <Star className="w-3 h-3 fill-current text-warning" />
-                        <span className="text-foreground">{Number(prod.rating).toFixed(1)}</span>
-                        <span className="text-foreground-muted font-normal">
-                          ({prod.reviews_count})
-                        </span>
-                      </div>
-                    ) : (
-                      <div className="mb-2 h-[18px]" aria-hidden="true" />
-                    )}
-
-                    {/* Quick Add */}
-                    <button
-                      onClick={async () => {
-                        if (!variant) return;
-                        addToCartLocal(prod.id, variant.id, 1);
-                        if (user) await addToCart(user.id, prod.id, variant.id, 1);
-                      }}
-                      className="w-full py-1.5 bg-primary hover:bg-primary-hover text-on-primary text-[11px] font-bold rounded-lg transition-colors flex items-center justify-center gap-1 shadow-xs active:scale-95 cursor-pointer"
-                    >
-                      <ShoppingCart className="w-3 h-3" />
-                      <span>Add</span>
-                    </button>
-                  </div>
-                </div>
-              );
-            })}
+              Reusing ProductCard removes the duplicate entirely: the
+              quantity stepper, the size picker for multi-variant products,
+              honest pricing, optimised images and the theme tokens all come
+              from one implementation. */}
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 md:gap-4 items-stretch">
+            {displayProducts.map((prod) => (
+              <ProductCard key={prod.id} product={prod as any} />
+            ))}
           </div>
 
         </div>

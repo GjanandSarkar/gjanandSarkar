@@ -155,7 +155,7 @@ export function HeroBanner({ products }: HeroBannerProps) {
   };
 
   return (
-    <div className="w-full relative overflow-hidden bg-gradient-to-r from-[#fbf8f2] via-[#f7f1e5] to-[#f4ebe0] border-b border-[#e9dfd0]">
+    <div className="w-full relative overflow-hidden bg-gradient-to-r from-background via-surface-muted to-surface-muted border-b border-border">
       
       {/* Decorative Dot Grid Pattern */}
       <div 
@@ -179,7 +179,7 @@ export function HeroBanner({ products }: HeroBannerProps) {
 
           <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-[52px] font-extrabold text-primary leading-[1.12] tracking-tight mb-4">
             Proudly Indian. <br />
-            <span className="text-[#1b5e39]">Purely Authentic.</span>
+            <span className="text-primary-light">Purely Authentic.</span>
           </h1>
 
           <p className="text-sm sm:text-base text-foreground font-normal leading-relaxed mb-8 max-w-lg">
@@ -193,12 +193,12 @@ export function HeroBanner({ products }: HeroBannerProps) {
               className="px-7 py-3.5 bg-primary hover:bg-primary-hover text-on-primary font-black text-sm rounded-xl shadow-lg shadow-[var(--primary)]/20 active:scale-95 transition-all flex items-center gap-2"
             >
               <span>Shop Now</span>
-              <ArrowRight className="w-4 h-4 text-[#c88a23]" />
+              <ArrowRight className="w-4 h-4 text-secondary" />
             </Link>
 
             <Link
               href="/become-seller"
-              className="px-7 py-3.5 bg-surface/70 hover:bg-surface text-[#925f0e] border border-[#c88a23] font-bold text-sm rounded-xl active:scale-95 transition-all shadow-2xs"
+              className="px-7 py-3.5 bg-surface/70 hover:bg-surface text-secondary-hover border border-secondary font-bold text-sm rounded-xl active:scale-95 transition-all shadow-2xs"
             >
               Become a Seller
             </Link>
@@ -220,7 +220,7 @@ export function HeroBanner({ products }: HeroBannerProps) {
               <div className="absolute inset-0 flex items-center justify-center pointer-events-none opacity-40">
                 <svg 
                   viewBox="0 0 600 450" 
-                  className="w-full h-full stroke-[#c88a23]/35 fill-none animate-spin-slow" 
+                  className="w-full h-full stroke-secondary/35 fill-none animate-spin-slow" 
                   strokeWidth="1"
                 >
                   <circle cx="300" cy="225" r="210" strokeDasharray="6 6" />
@@ -257,7 +257,7 @@ export function HeroBanner({ products }: HeroBannerProps) {
                         href={product.href}
                         className={`block w-40 sm:w-52 md:w-60 h-52 sm:h-68 md:h-76 rounded-3xl p-3 sm:p-4 backdrop-blur-xl border transition-all duration-500 cursor-pointer overflow-visible group ${
                           isCenter 
-                            ? 'bg-surface/95 border-2 border-[#c88a23] shadow-2xl' 
+                            ? 'bg-surface/95 border-2 border-secondary shadow-2xl' 
                             : 'bg-surface/80 border-warning/20/70 shadow-lg hover:bg-surface/90'
                         }`}
                       >
@@ -334,7 +334,7 @@ export function HeroBanner({ products }: HeroBannerProps) {
                     aria-label={`Slide to ${p.name}`}
                     className={`transition-all duration-300 rounded-full cursor-pointer ${
                       currentIndex === idx 
-                        ? 'w-7 h-2.5 bg-[#c88a23] shadow-xs' 
+                        ? 'w-7 h-2.5 bg-secondary shadow-xs' 
                         : 'w-2.5 h-2.5 bg-warning/80 hover:bg-warning'
                     }`}
                   />
@@ -347,7 +347,7 @@ export function HeroBanner({ products }: HeroBannerProps) {
           /* Empty Database State Card */
           <div className="flex-1 w-full max-w-md relative flex flex-col items-center justify-center p-8 bg-surface/80 backdrop-blur-md rounded-3xl border-2 border-dashed border-warning/80 text-center shadow-lg my-4">
             <div className="w-16 h-16 rounded-full bg-warning-bg/80 flex items-center justify-center mb-4 text-primary shadow-xs">
-              <PackageOpen className="w-8 h-8 text-[#c88a23]" />
+              <PackageOpen className="w-8 h-8 text-secondary" />
             </div>
             <h3 className="text-xl font-extrabold text-primary mb-2">
               No Products Available

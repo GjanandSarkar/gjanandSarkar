@@ -334,7 +334,7 @@ export function ProfileSummary({ user, onUpdateProfile }: ProfileSummaryProps) {
                         value={firstName}
                         onChange={(e) => setFirstName(e.target.value)}
                         placeholder="First Name"
-                        className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-border text-sm font-medium text-foreground outline-none focus:border-gray-900 transition-all bg-surface"
+                        className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-border text-sm font-medium text-foreground outline-none focus:border-primary transition-all bg-surface"
                         autoFocus
                       />
                     </div>
@@ -351,7 +351,7 @@ export function ProfileSummary({ user, onUpdateProfile }: ProfileSummaryProps) {
                         value={lastName}
                         onChange={(e) => setLastName(e.target.value)}
                         placeholder="Last Name"
-                        className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-border text-sm font-medium text-foreground outline-none focus:border-gray-900 transition-all bg-surface"
+                        className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-border text-sm font-medium text-foreground outline-none focus:border-primary transition-all bg-surface"
                       />
                     </div>
                   </div>
@@ -369,7 +369,7 @@ export function ProfileSummary({ user, onUpdateProfile }: ProfileSummaryProps) {
                       value={profileEmail}
                       onChange={(e) => setProfileEmail(e.target.value)}
                       placeholder="amul.sureja@example.com"
-                      className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-border text-sm font-medium text-foreground outline-none focus:border-gray-900 transition-all bg-surface"
+                      className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-border text-sm font-medium text-foreground outline-none focus:border-primary transition-all bg-surface"
                     />
                   </div>
                 </div>
@@ -413,7 +413,7 @@ export function ProfileSummary({ user, onUpdateProfile }: ProfileSummaryProps) {
                                   }}
                                   className={`w-full text-left px-3.5 py-2.5 rounded-xl text-xs font-medium flex items-center justify-between transition-all cursor-pointer ${
                                     isSelected
-                                      ? 'bg-success-bg/70 text-[#065f46] font-bold shadow-2xs'
+                                      ? 'bg-success-bg/70 text-primary-light font-bold shadow-2xs'
                                       : 'text-foreground hover:bg-surface-muted'
                                   }`}
                                 >
@@ -443,7 +443,7 @@ export function ProfileSummary({ user, onUpdateProfile }: ProfileSummaryProps) {
                         }}
                         placeholder="98765 43210"
                         maxLength={selectedCountry.maxLength}
-                        className="w-full pl-10 pr-4 py-2.5 rounded-r-xl border border-border text-sm font-medium text-foreground outline-none focus:border-gray-900 transition-all bg-surface"
+                        className="w-full pl-10 pr-4 py-2.5 rounded-r-xl border border-border text-sm font-medium text-foreground outline-none focus:border-primary transition-all bg-surface"
                       />
                     </div>
                   </div>
@@ -521,13 +521,13 @@ export function ProfileSummary({ user, onUpdateProfile }: ProfileSummaryProps) {
                     {user?.name || t('name')}
                   </h2>
                   {user?.role === 'admin' && (
-                    <span className="bg-gray-900 text-white text-[10px] uppercase font-bold px-2 py-0.5 rounded-md tracking-wider shrink-0 ml-1">
+                    <span className="bg-primary text-white text-[10px] uppercase font-bold px-2 py-0.5 rounded-md tracking-wider shrink-0 ml-1">
                       Admin
                     </span>
                   )}
                 </div>
 
-                <p className="text-sm font-medium text-[#606f7b] truncate mb-2">
+                <p className="text-sm font-medium text-foreground-muted truncate mb-2">
                   {user?.phone ? (() => {
                     const currentCountry = COUNTRY_LIST.find(c => 
                       c.name.toLowerCase() === user?.country?.toLowerCase() || 
@@ -544,7 +544,7 @@ export function ProfileSummary({ user, onUpdateProfile }: ProfileSummaryProps) {
                     <Calendar className="w-3.5 h-3.5 text-foreground-muted" />
                     <span>Joined May 2024</span>
                   </div>
-                  <span className="w-px h-3 bg-gray-300/70" />
+                  <span className="w-px h-3 bg-border/70" />
                   <div className="flex items-center gap-1.5">
                     <MapPin className="w-3.5 h-3.5 text-foreground-muted" />
                     <span>{user?.country || selectedCountry?.name || 'India'}</span>

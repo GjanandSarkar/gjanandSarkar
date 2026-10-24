@@ -29,6 +29,7 @@
   --color-on-warning: var(--on-warning);
   --color-on-error: var(--on-error);
   --color-on-info: var(--on-info);
+  --color-secondary-bg: var(--secondary-bg);
 
   /* === Backgrounds and Surfaces === */
   --color-background: var(--background);
@@ -120,6 +121,7 @@
     --secondary-hover: #855615;
     
     --on-primary: #ffffff;
+    --secondary-bg: #fdf4e3;
     --on-success: #ffffff;
     --on-warning: #ffffff;
     --on-error: #ffffff;
@@ -164,6 +166,7 @@
     --secondary-hover: #f3cc8f;
     
     --on-primary: #1c201e;
+    --secondary-bg: #3a2a0a;
     --on-success: #06220f;
     --on-warning: #2b1600;
     --on-error: #3c0708;

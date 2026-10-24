@@ -155,7 +155,7 @@ function HeaderContent() {
   const searchForm = (
     <form
       onSubmit={handleSearch}
-      className="w-full relative flex items-center bg-surface-muted/80 border border-border-hover rounded-lg overflow-visible focus-within:border-[#c88a23] focus-within:ring-1 focus-within:ring-[#c88a23] transition-all"
+      className="w-full relative flex items-center bg-surface-muted/80 border border-border-hover rounded-lg overflow-visible focus-within:border-secondary focus-within:ring-1 focus-within:ring-secondary transition-all"
     >
       <input
         type="text"
@@ -163,11 +163,11 @@ function HeaderContent() {
         onChange={(e) => setSearchTerm(e.target.value)}
         placeholder="Search products, brands and more"
         aria-label="Search products"
-        className="flex-1 min-w-0 px-3 md:px-4 py-2.5 text-sm bg-transparent text-foreground placeholder-gray-400 outline-none rounded-l-lg"
+        className="flex-1 min-w-0 px-3 md:px-4 py-2.5 text-sm bg-transparent text-foreground placeholder-foreground-muted outline-none rounded-l-lg"
       />
       <button
         type="submit"
-        className="bg-[#c88a23] hover:bg-[#b0781c] text-white px-4 h-11 min-w-[48px] flex items-center justify-center transition-colors shrink-0 rounded-r-lg"
+        className="bg-secondary hover:bg-secondary-hover text-white px-4 h-11 min-w-[48px] flex items-center justify-center transition-colors shrink-0 rounded-r-lg"
         aria-label="Search"
       >
         <Search className="w-4 h-4 stroke-[2.5]" />
@@ -194,7 +194,7 @@ function HeaderContent() {
               <span className="text-xl md:text-2xl font-black tracking-tight leading-none">
                 <span className="text-primary">Gjanand</span>
               </span>
-              <span className="text-[10px] md:text-[11px] tracking-[0.2em] font-black text-[#c88a23] uppercase text-right leading-none mt-0.5">
+              <span className="text-[10px] md:text-[11px] tracking-[0.2em] font-black text-secondary uppercase text-right leading-none mt-0.5">
                 SARKAR
               </span>
             </div>
@@ -264,7 +264,7 @@ function HeaderContent() {
                     <Link
                       href="/profile/saved-addresses"
                       onClick={() => setIsAddressOpen(false)}
-                      className="text-[11px] font-bold text-[#c88a23] hover:underline"
+                      className="text-[11px] font-bold text-secondary hover:underline"
                     >
                       Manage
                     </Link>
@@ -343,7 +343,7 @@ function HeaderContent() {
             <div className="relative">
               <ShoppingCart className="w-5 h-5 text-foreground group-hover:text-primary transition-colors" />
               {totalItems > 0 && (
-                <span className="absolute -top-2 -right-2.5 bg-[#c88a23] text-white text-[10px] font-black w-4.5 h-4.5 rounded-full flex items-center justify-center shadow-xs">
+                <span className="absolute -top-2 -right-2.5 bg-secondary text-white text-[10px] font-black w-4.5 h-4.5 rounded-full flex items-center justify-center shadow-xs">
                   {totalItems}
                 </span>
               )}
@@ -456,7 +456,7 @@ function HeaderContent() {
                         onClick={() => setIsProfileOpen(false)}
                         className="flex items-center gap-3 px-4 py-2 text-xs font-semibold text-foreground hover:bg-success-bg hover:text-primary transition-colors group"
                       >
-                        <Sparkles className="w-4 h-4 text-[#c88a23]" />
+                        <Sparkles className="w-4 h-4 text-secondary" />
                         <span>Subscriptions</span>
                       </Link>
 
@@ -502,7 +502,7 @@ function HeaderContent() {
                     <Link
                       href="/login"
                       onClick={() => setIsProfileOpen(false)}
-                      className="block w-full py-2 bg-primary hover:bg-[#0a2c1b] text-on-primary text-xs font-bold rounded-xl transition-colors text-center"
+                      className="block w-full py-2 bg-primary hover:bg-primary-fixed-dim text-on-primary text-xs font-bold rounded-xl transition-colors text-center"
                     >
                       Login / Sign Up
                     </Link>

@@ -450,7 +450,7 @@ function ReturnsContent() {
                 onChange={(e) => setDescription(e.target.value)}
                 placeholder="Please describe the issue in detail..."
                 rows={3}
-                className="w-full p-3.5 rounded-2xl border border-border text-xs text-foreground placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-emerald-700/20"
+                className="w-full p-3.5 rounded-2xl border border-border text-xs text-foreground placeholder-foreground-muted focus:outline-none focus:ring-2 focus:ring-emerald-700/20"
               />
             </div>
 
@@ -602,7 +602,7 @@ function ReturnsContent() {
             <button
               type="submit"
               disabled={isSubmitting || deliveredItems.length === 0}
-              className="w-full py-3.5 bg-primary hover:bg-[#165a37] text-on-primary text-xs font-extrabold uppercase tracking-wider rounded-2xl shadow-sm transition-all disabled:opacity-50 flex items-center justify-center gap-2"
+              className="w-full py-3.5 bg-primary hover:bg-primary-light text-on-primary text-xs font-extrabold uppercase tracking-wider rounded-2xl shadow-sm transition-all disabled:opacity-50 flex items-center justify-center gap-2"
             >
               {isSubmitting ? (
                 <>
@@ -620,7 +620,7 @@ function ReturnsContent() {
         <div className="bg-surface rounded-3xl border border-border/80 shadow-2xs overflow-hidden">
           <div className="p-6 border-b border-border flex items-center justify-between">
             <h2 className="text-base font-bold text-foreground flex items-center gap-2">
-              <Package className="w-5 h-5 text-[#c88a23]" />
+              <Package className="w-5 h-5 text-secondary" />
               <span>My Return & Replacement Requests</span>
             </h2>
             <span className="text-xs font-bold text-foreground-muted">{requests.length} Requests</span>

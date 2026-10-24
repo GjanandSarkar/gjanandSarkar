@@ -263,7 +263,7 @@ function ProductApprovalsContent() {
             { id: 'pending', label: 'Pending Review', count: counts.pending, color: 'text-warning', bg: 'bg-warning-bg/70 border-warning/20', activeBg: 'border-warning bg-warning-bg' },
             { id: 'approved', label: 'Approved Live', count: counts.approved, color: 'text-success', bg: 'bg-success-bg/70 border-success/20', activeBg: 'border-success bg-success-bg' },
             { id: 'rejected', label: 'Rejected', count: counts.rejected, color: 'text-error', bg: 'bg-error-bg/70 border-error/20', activeBg: 'border-error bg-error-bg' },
-            { id: 'suspended', label: 'Suspended', count: counts.suspended, color: 'text-foreground', bg: 'bg-surface-muted/70 border-border', activeBg: 'border-gray-500 bg-surface-muted' },
+            { id: 'suspended', label: 'Suspended', count: counts.suspended, color: 'text-foreground', bg: 'bg-surface-muted/70 border-border', activeBg: 'border-border-hover bg-surface-muted' },
             { id: 'all', label: 'Total Products', count: counts.all, color: 'text-foreground', bg: 'bg-surface border-border', activeBg: 'border-primary bg-success-bg/30' },
           ].map(tab => {
             const isSelected = selectedStatus === tab.id;
@@ -745,7 +745,7 @@ function ProductApprovalsContent() {
                 <div className="flex items-center gap-2.5">
                   <button
                     onClick={() => setIsPreviewOpen(false)}
-                    className="px-4 py-2 rounded-xl text-xs font-bold bg-border hover:bg-gray-300 text-foreground transition-colors cursor-pointer"
+                    className="px-4 py-2 rounded-xl text-xs font-bold bg-border hover:bg-border text-foreground transition-colors cursor-pointer"
                   >
                     Close
                   </button>
@@ -884,7 +884,7 @@ function ProductApprovalsContent() {
                       ? 'bg-primary hover:bg-primary-hover'
                       : decisionModal.action === 'rejected'
                       ? 'bg-error hover:bg-error'
-                      : 'bg-gray-800 hover:bg-black'
+                      : 'bg-primary-hover hover:bg-black'
                   }`}
                 >
                   {decisionModal.isSubmitting ? (

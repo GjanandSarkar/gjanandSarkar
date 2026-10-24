@@ -131,10 +131,10 @@ export function MultiImageUpload({
           className={`w-full h-48 rounded-[14px] border-2 border-dashed flex flex-col items-center justify-center p-5 text-center cursor-pointer transition-all ${
             isDragging
               ? 'border-primary bg-primary/5 scale-[0.99]'
-              : 'border-[#d8d4c9] hover:border-primary/60 bg-surface'
+              : 'border-border hover:border-primary/60 bg-surface'
           } ${disabled ? 'opacity-50 cursor-not-allowed' : ''}`}
         >
-          <div className="p-3 rounded-full mb-2 bg-[#f2ede4] text-primary">
+          <div className="p-3 rounded-full mb-2 bg-surface-muted text-primary">
             <UploadCloud className="w-7 h-7" />
           </div>
           <span className="font-bold text-[14px] text-foreground mb-0.5">
@@ -198,7 +198,7 @@ export function MultiImageUpload({
             onDrop={handleDrop}
             onDragOver={handleDragOver}
             onDragLeave={handleDragLeave}
-            className={`grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3 p-3 rounded-[14px] border bg-[#faf9f6] ${
+            className={`grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3 p-3 rounded-[14px] border bg-background ${
               isDragging ? 'border-primary bg-primary/5' : 'border-border'
             }`}
           >
@@ -208,7 +208,7 @@ export function MultiImageUpload({
                 className={`group relative aspect-square rounded-[12px] overflow-hidden border-2 bg-surface shadow-sm transition-all ${
                   item.isPrimary
                     ? 'border-success ring-2 ring-emerald-600/20'
-                    : 'border-border hover:border-gray-400'
+                    : 'border-border hover:border-border-hover'
                 }`}
               >
                 {/* Thumbnail Image */}

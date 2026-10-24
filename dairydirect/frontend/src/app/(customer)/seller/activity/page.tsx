@@ -72,7 +72,7 @@ export default function SellerActivityPage() {
         <div
           role="alert"
           className="mb-4 flex items-start gap-2 rounded-xl px-3 py-2.5 text-[13px]"
-          style={{ background: '#ffdad6', color: '#410002' }}
+          style={{ background: 'var(--error-bg)', color: 'var(--error)' }}
         >
           <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />
           <span>{error}</span>

@@ -55,7 +55,7 @@ export function Sidebar() {
               <span className="text-xl md:text-2xl font-black tracking-tight leading-none">
                 <span className="text-primary">Gjanand</span>
               </span>
-              <span className="text-[10px] md:text-[11px] tracking-[0.2em] font-black text-[#c88a23] uppercase text-right leading-none mt-0.5">
+              <span className="text-[10px] md:text-[11px] tracking-[0.2em] font-black text-secondary uppercase text-right leading-none mt-0.5">
                 SARKAR
               </span>
             </div>
@@ -106,7 +106,7 @@ export function Sidebar() {
                 "flex items-center gap-3.5 px-3.5 py-3 rounded-[12px] transition-all duration-200 group relative",
                 isActive
                   ? "font-bold"
-                  : "font-medium hover:bg-[#f0f4ec]"
+                  : "font-medium hover:bg-primary-fixed"
               )}
               style={isActive ? {
                 background: 'linear-gradient(135deg, #eaf4e2, #ddf2d0)',

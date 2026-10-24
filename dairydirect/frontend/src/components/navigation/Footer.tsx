@@ -17,7 +17,7 @@ export function Footer() {
   };
 
   return (
-    <footer className="w-full bg-[#082615] text-white pt-14 pb-8 border-t border-[#124227] relative overflow-hidden">
+    <footer className="w-full bg-primary-fixed-dim text-white pt-14 pb-8 border-t border-primary relative overflow-hidden">
       
       {/* Decorative Peacock Watermark Background */}
       <div className="absolute right-0 bottom-0 w-96 h-96 opacity-5 pointer-events-none">
@@ -48,7 +48,7 @@ export function Footer() {
                   <span className="text-xl md:text-2xl font-black tracking-tight leading-none">
                     <span className="text-white">Gjanand</span>
                   </span>
-                  <span className="text-[10px] md:text-[11px] tracking-[0.2em] font-black text-[#c88a23] uppercase text-right leading-none mt-0.5">
+                  <span className="text-[10px] md:text-[11px] tracking-[0.2em] font-black text-secondary uppercase text-right leading-none mt-0.5">
                     SARKAR
                   </span>
                 </div>
@@ -66,7 +66,7 @@ export function Footer() {
                 href="https://instagram.com" 
                 target="_blank" 
                 rel="noreferrer" 
-                className="w-8 h-8 rounded-full bg-surface/10 hover:bg-[#c88a23] flex items-center justify-center text-white transition-colors cursor-pointer" 
+                className="w-8 h-8 rounded-full bg-surface/10 hover:bg-secondary flex items-center justify-center text-white transition-colors cursor-pointer" 
                 aria-label="Instagram"
               >
                 <svg className="w-4 h-4 fill-current" viewBox="0 0 24 24">
@@ -79,7 +79,7 @@ export function Footer() {
                 href="https://facebook.com" 
                 target="_blank" 
                 rel="noreferrer" 
-                className="w-8 h-8 rounded-full bg-surface/10 hover:bg-[#c88a23] flex items-center justify-center text-white transition-colors cursor-pointer" 
+                className="w-8 h-8 rounded-full bg-surface/10 hover:bg-secondary flex items-center justify-center text-white transition-colors cursor-pointer" 
                 aria-label="Facebook"
               >
                 <svg className="w-4 h-4 fill-current" viewBox="0 0 24 24">
@@ -92,7 +92,7 @@ export function Footer() {
                 href="https://youtube.com" 
                 target="_blank" 
                 rel="noreferrer" 
-                className="w-8 h-8 rounded-full bg-surface/10 hover:bg-[#c88a23] flex items-center justify-center text-white transition-colors cursor-pointer" 
+                className="w-8 h-8 rounded-full bg-surface/10 hover:bg-secondary flex items-center justify-center text-white transition-colors cursor-pointer" 
                 aria-label="YouTube"
               >
                 <svg className="w-4 h-4 fill-current" viewBox="0 0 24 24">
@@ -105,7 +105,7 @@ export function Footer() {
                 href="https://linkedin.com" 
                 target="_blank" 
                 rel="noreferrer" 
-                className="w-8 h-8 rounded-full bg-surface/10 hover:bg-[#c88a23] flex items-center justify-center text-white transition-colors cursor-pointer" 
+                className="w-8 h-8 rounded-full bg-surface/10 hover:bg-secondary flex items-center justify-center text-white transition-colors cursor-pointer" 
                 aria-label="LinkedIn"
               >
                 <svg className="w-4 h-4 fill-current" viewBox="0 0 24 24">
@@ -118,7 +118,7 @@ export function Footer() {
                 href="https://twitter.com" 
                 target="_blank" 
                 rel="noreferrer" 
-                className="w-8 h-8 rounded-full bg-surface/10 hover:bg-[#c88a23] flex items-center justify-center text-white transition-colors cursor-pointer" 
+                className="w-8 h-8 rounded-full bg-surface/10 hover:bg-secondary flex items-center justify-center text-white transition-colors cursor-pointer" 
                 aria-label="Twitter"
               >
                 <svg className="w-4 h-4 fill-current" viewBox="0 0 24 24">
@@ -186,13 +186,13 @@ export function Footer() {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="Enter your email"
-                  className="w-full px-3.5 py-2 text-xs rounded-lg bg-surface/10 border border-white/20 text-white placeholder-emerald-200/50 outline-none focus:border-[#c88a23]"
+                  className="w-full px-3.5 py-2 text-xs rounded-lg bg-surface/10 border border-white/20 text-white placeholder-emerald-200/50 outline-none focus:border-secondary"
                   required
                 />
               </div>
               <button
                 type="submit"
-                className="w-full py-2 bg-[#c88a23] hover:bg-[#b0781c] text-white font-bold text-xs rounded-lg transition-colors flex items-center justify-center gap-1.5 shadow-xs cursor-pointer"
+                className="w-full py-2 bg-secondary hover:bg-secondary-hover text-white font-bold text-xs rounded-lg transition-colors flex items-center justify-center gap-1.5 shadow-xs cursor-pointer"
               >
                 <Send className="w-3.5 h-3.5" />
                 <span>{subscribed ? 'Subscribed!' : 'Subscribe'}</span>

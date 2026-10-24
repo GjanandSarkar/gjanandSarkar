@@ -245,7 +245,7 @@ export default function AdminSellersPage() {
         );
       case 'permanently_deactivated':
         return (
-          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-black uppercase tracking-wider bg-gray-900 text-red-400 border border-gray-700">
+          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-black uppercase tracking-wider bg-primary text-red-400 border border-border-hover">
             <Lock className="w-3.5 h-3.5 text-red-400" />
             Permanently Deactivated
           </span>
@@ -338,7 +338,7 @@ export default function AdminSellersPage() {
           <p className="text-[10px] font-black uppercase tracking-wider text-error">Deactivated</p>
           <p className="text-2xl font-black text-error mt-1">{deactivatedCount}</p>
         </div>
-        <div className="bg-surface p-4 rounded-2xl border border-gray-700 shadow-2xs bg-gray-900 text-white">
+        <div className="bg-surface p-4 rounded-2xl border border-border-hover shadow-2xs bg-primary text-white">
           <p className="text-[10px] font-black uppercase tracking-wider text-foreground-muted">Permanently Banned</p>
           <p className="text-2xl font-black text-red-400 mt-1">{permanentCount}</p>
         </div>
@@ -522,7 +522,7 @@ export default function AdminSellersPage() {
               )}
 
               {selectedSeller.status === 'permanently_deactivated' && (
-                <div className="bg-gray-900 text-white rounded-xl p-4 space-y-2 text-xs border border-red-500/40">
+                <div className="bg-primary text-white rounded-xl p-4 space-y-2 text-xs border border-red-500/40">
                   <div className="flex items-center gap-2 font-bold text-red-400">
                     <Lock className="w-4 h-4 text-red-400" />
                     <span>Permanently Deactivated (Terminal)</span>
@@ -635,7 +635,7 @@ export default function AdminSellersPage() {
                 {selectedSeller.status !== 'permanently_deactivated' && (
                   <button
                     onClick={() => openActionModal('permanently_deactivate')}
-                    className="w-full px-4 py-2 bg-gray-900 hover:bg-black text-red-400 text-xs font-bold rounded-xl flex items-center justify-center gap-2 transition-colors cursor-pointer mt-2"
+                    className="w-full px-4 py-2 bg-primary hover:bg-black text-red-400 text-xs font-bold rounded-xl flex items-center justify-center gap-2 transition-colors cursor-pointer mt-2"
                   >
                     <Lock className="w-3.5 h-3.5 text-red-400" />
                     <span>Permanently Deactivate (Irreversible)</span>
@@ -660,7 +660,7 @@ export default function AdminSellersPage() {
                 ) : sellerHistory.length === 0 ? (
                   <p className="text-xs text-foreground-muted text-center py-4">No status transition history recorded yet.</p>
                 ) : (
-                  <div className="space-y-2.5 max-h-[300px] overflow-y-auto pr-1 divide-y divide-gray-50">
+                  <div className="space-y-2.5 max-h-[300px] overflow-y-auto pr-1 divide-y divide-border">
                     {sellerHistory.map((item) => (
                       <div key={item.id} className="pt-2 text-xs space-y-1">
                         <div className="flex items-center justify-between gap-2">

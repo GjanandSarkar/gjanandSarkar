@@ -47,6 +47,8 @@ export async function GET(request: NextRequest) {
       productId: searchParams.get('productId'),
       category: searchParams.get('category'),
       cartProductIds,
+      // Only the cart's own cross-sell rail hides what is already in the cart.
+      excludeCartItems: searchParams.get('excludeCart') === '1',
       limit,
     });
 

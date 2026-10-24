@@ -330,9 +330,9 @@ export function SupportChat() {
                       : [
                           'mr-auto max-w-[90%] rounded-2xl rounded-bl-sm px-3.5 py-2.5 text-sm border',
                           m.tone === 'warning'
-                            ? 'bg-[#fff8e6] border-[#f0d9a0] text-[#5b4300]'
+                            ? 'bg-secondary-bg border-secondary-bg text-secondary-hover'
                             : m.tone === 'success'
-                              ? 'bg-[#eaf6ef] border-[#bfe0cc] text-[#10351f]'
+                              ? 'bg-success-bg border-primary-fixed text-primary'
                               : 'bg-surface border-sand text-dark',
                         ].join(' ')
                   }

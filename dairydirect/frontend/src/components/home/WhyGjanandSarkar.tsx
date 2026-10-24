@@ -68,7 +68,7 @@ export function WhyGjanandSarkar() {
       <div className="bg-surface rounded-3xl border border-border/80 p-6 md:p-8">
         <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-3 mb-7">
           <div>
-            <span className="text-[10px] font-black uppercase tracking-[0.2em] text-[#c88a23]">
+            <span className="text-[10px] font-black uppercase tracking-[0.2em] text-secondary">
               How we work
             </span>
             <h2 className="text-xl md:text-2xl font-black text-primary tracking-tight mt-1">
@@ -105,7 +105,7 @@ export function WhyGjanandSarkar() {
 
           <Link
             href="/about#verification"
-            className="text-xs font-black text-[#c88a23] hover:text-primary inline-flex items-center gap-1 transition-colors"
+            className="text-xs font-black text-secondary hover:text-primary inline-flex items-center gap-1 transition-colors"
           >
             <span>How we verify partners</span>
             <ArrowRight className="w-3.5 h-3.5" />

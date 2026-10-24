@@ -66,8 +66,8 @@ export function ShopByState() {
       <div className="flex items-center justify-between pb-4 mb-6 border-b border-border/80">
         <div>
           <div className="flex items-center gap-2 mb-1">
-            <MapPin className="w-4 h-4 text-[#c88a23]" />
-            <span className="text-xs font-bold text-[#c88a23] uppercase tracking-wider">
+            <MapPin className="w-4 h-4 text-secondary" />
+            <span className="text-xs font-bold text-secondary uppercase tracking-wider">
               Geographical Indications &amp; Traditions
             </span>
           </div>
@@ -81,7 +81,7 @@ export function ShopByState() {
 
         <Link
           href="/products"
-          className="text-xs sm:text-sm font-bold text-[#c88a23] hover:text-primary flex items-center gap-1 transition-colors"
+          className="text-xs sm:text-sm font-bold text-secondary hover:text-primary flex items-center gap-1 transition-colors"
         >
           <span>View All States</span>
           <ArrowRight className="w-4 h-4" />
@@ -92,7 +92,7 @@ export function ShopByState() {
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-center">
         
         {/* Left: India Info Card */}
-        <div className="lg:col-span-4 bg-gradient-to-b from-[#fbf8f2] to-[#f4ebe0] rounded-2xl p-6 border border-[#e9dfd0] shadow-xs flex flex-col items-center justify-center text-center relative overflow-hidden min-h-[300px]">
+        <div className="lg:col-span-4 bg-gradient-to-b from-background to-surface-muted rounded-2xl p-6 border border-border shadow-xs flex flex-col items-center justify-center text-center relative overflow-hidden min-h-[300px]">
           
           <div className="absolute inset-0 opacity-10 pointer-events-none flex items-center justify-center">
             <svg viewBox="0 0 400 450" className="w-full h-full fill-[var(--primary)]">
@@ -125,7 +125,7 @@ export function ShopByState() {
               href={`/products?state=${encodeURIComponent(st.name.toLowerCase())}`}
               onClick={() => setSelectedState(st.name)}
               className={`bg-surface rounded-xl p-4 border transition-all group hover:scale-[1.02] hover:shadow-md ${
-                selectedState === st.name ? 'border-primary ring-1 ring-[var(--primary)]' : 'border-border hover:border-[#c88a23]'
+                selectedState === st.name ? 'border-primary ring-1 ring-[var(--primary)]' : 'border-border hover:border-secondary'
               }`}
             >
               <div className="flex items-start justify-between gap-2 mb-2">
@@ -133,7 +133,7 @@ export function ShopByState() {
                 <div className={`w-10 h-10 rounded-lg font-black text-sm flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform ${st.abbrColor}`}>
                   {st.abbr}
                 </div>
-                <span className="text-[10px] font-bold text-[#c88a23] bg-warning-bg px-2 py-0.5 rounded-full">
+                <span className="text-[10px] font-bold text-secondary bg-warning-bg px-2 py-0.5 rounded-full">
                   {st.badge}
                 </span>
               </div>

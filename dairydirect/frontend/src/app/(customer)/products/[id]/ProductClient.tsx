@@ -272,7 +272,7 @@ export function ProductClient({ product: initialProduct }: ProductClientProps) {
                     className={`relative w-16 h-16 rounded-xl border-2 overflow-hidden flex-shrink-0 transition-all cursor-pointer bg-surface ${
                       activeImageIdx === idx
                         ? 'border-success ring-2 ring-emerald-600/20 shadow-xs scale-105'
-                        : 'border-border hover:border-gray-400 opacity-70 hover:opacity-100'
+                        : 'border-border hover:border-border-hover opacity-70 hover:opacity-100'
                     }`}
                   >
                     <img

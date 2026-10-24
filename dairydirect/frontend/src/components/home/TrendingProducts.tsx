@@ -27,8 +27,8 @@ export function TrendingProducts({ products }: TrendingProductsProps) {
       <div className="flex items-center justify-between pb-4 mb-6 border-b border-border/80">
         <div>
           <div className="flex items-center gap-1.5 mb-1">
-            <Sparkles className="w-4 h-4 text-[#c88a23]" />
-            <span className="text-xs font-bold text-[#c88a23] uppercase tracking-wider">
+            <Sparkles className="w-4 h-4 text-secondary" />
+            <span className="text-xs font-bold text-secondary uppercase tracking-wider">
               Just Added
             </span>
           </div>
@@ -46,7 +46,7 @@ export function TrendingProducts({ products }: TrendingProductsProps) {
         <div className="flex items-center gap-4">
           <Link
             href="/products"
-            className="text-xs sm:text-sm font-bold text-[#c88a23] hover:text-primary flex items-center gap-1 transition-colors"
+            className="text-xs sm:text-sm font-bold text-secondary hover:text-primary flex items-center gap-1 transition-colors"
           >
             <span>View All Products</span>
             <ArrowRight className="w-4 h-4" />

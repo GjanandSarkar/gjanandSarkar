@@ -34,6 +34,9 @@ export interface RecommendationRequest {
   category?: string | null;
   /** Product ids currently in the cart. */
   cartProductIds?: string[];
+  /** Hide cart items from the results. Defaults to false; the cart
+   *  cross-sell rail opts in. */
+  excludeCartItems?: boolean;
   limit?: number;
 }
 
@@ -128,10 +131,16 @@ export async function getRecommendations(
   // ─── Blend, then apply safeguards ────────────────────────────────────────
   let ranked = hybridScore(lists);
 
-  // Never recommend what they are already buying, already own, or are
-  // currently looking at.
+  /* Exclude what they already own or are currently looking at.
+
+     Cart items are excluded only where that actually helps -- a cross-sell
+     rail beside the cart. On a popularity rail ("What other shoppers are
+     buying") excluding them was wrong: with a small catalogue, adding one
+     product emptied the rail and the entire section vanished mid-browse.
+     Cart items still SEED the recommendations either way; this only
+     controls whether they can also be shown. */
   const exclude = new Set<string>([
-    ...(req.cartProductIds ?? []),
+    ...(req.excludeCartItems ? (req.cartProductIds ?? []) : []),
     ...userHistory.purchasedProductIds,
   ]);
   if (req.productId) exclude.add(req.productId);

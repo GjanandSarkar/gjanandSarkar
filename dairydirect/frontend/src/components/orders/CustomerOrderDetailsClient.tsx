@@ -345,9 +345,9 @@ export function CustomerOrderDetailsClient({ initialOrder }: CustomerOrderDetail
 
             <Link
               href={`/tracking/${order.id}`}
-              className="px-5 py-2.5 bg-primary hover:bg-[#165a37] text-on-primary text-xs font-bold rounded-xl flex items-center gap-2 shadow-sm transition-all"
+              className="px-5 py-2.5 bg-primary hover:bg-primary-light text-on-primary text-xs font-bold rounded-xl flex items-center gap-2 shadow-sm transition-all"
             >
-              <Truck className="w-4 h-4 text-[#c88a23]" />
+              <Truck className="w-4 h-4 text-secondary" />
               <span>Track Live Delivery</span>
             </Link>
           </div>
@@ -390,7 +390,7 @@ export function CustomerOrderDetailsClient({ initialOrder }: CustomerOrderDetail
         <div className="bg-surface rounded-3xl border border-border/80 shadow-2xs overflow-hidden">
           <div className="p-6 border-b border-border flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <ShoppingBag className="w-5 h-5 text-[#c88a23]" />
+              <ShoppingBag className="w-5 h-5 text-secondary" />
               <h2 className="text-base font-bold text-foreground">Order Items & Return Actions</h2>
             </div>
             <span className="text-xs font-bold text-foreground-muted">
@@ -534,9 +534,9 @@ export function CustomerOrderDetailsClient({ initialOrder }: CustomerOrderDetail
                             </Link>
                             <Link
                               href={`/returns?orderItemId=${item.id}&type=replacement`}
-                              className="px-3 py-1.5 rounded-xl bg-primary hover:bg-[#165a37] text-on-primary text-xs font-bold flex items-center gap-1 transition-colors shadow-2xs"
+                              className="px-3 py-1.5 rounded-xl bg-primary hover:bg-primary-light text-on-primary text-xs font-bold flex items-center gap-1 transition-colors shadow-2xs"
                             >
-                              <RefreshCw className="w-3.5 h-3.5 text-[#c88a23]" />
+                              <RefreshCw className="w-3.5 h-3.5 text-secondary" />
                               <span>Replace</span>
                             </Link>
                           </>
@@ -704,7 +704,7 @@ export function CustomerOrderDetailsClient({ initialOrder }: CustomerOrderDetail
                   onChange={(e) => setCustomCancelNotes(e.target.value)}
                   placeholder="Share any additional details with the seller..."
                   rows={3}
-                  className="w-full px-3.5 py-2.5 rounded-xl border border-border-hover text-xs text-foreground placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[var(--primary)] resize-none"
+                  className="w-full px-3.5 py-2.5 rounded-xl border border-border-hover text-xs text-foreground placeholder-foreground-muted focus:outline-none focus:ring-2 focus:ring-[var(--primary)] resize-none"
                 />
               </div>
 
@@ -805,7 +805,7 @@ export function CustomerOrderDetailsClient({ initialOrder }: CustomerOrderDetail
                   onChange={(e) => setReturnDescription(e.target.value)}
                   placeholder="Explain the defect, spoilage, or discrepancy in detail..."
                   rows={3}
-                  className="w-full px-3.5 py-2.5 rounded-xl border border-border-hover text-xs text-foreground placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[var(--primary)] resize-none"
+                  className="w-full px-3.5 py-2.5 rounded-xl border border-border-hover text-xs text-foreground placeholder-foreground-muted focus:outline-none focus:ring-2 focus:ring-[var(--primary)] resize-none"
                   required
                 />
               </div>
@@ -855,7 +855,7 @@ export function CustomerOrderDetailsClient({ initialOrder }: CustomerOrderDetail
                         </div>
                       ) : (
                         <div className="flex items-center gap-2 text-xs font-semibold text-foreground-muted">
-                          <Upload className="w-4 h-4 text-[#c88a23]" />
+                          <Upload className="w-4 h-4 text-secondary" />
                           <span>Attach multiple photos of product defect / issue</span>
                         </div>
                       )}
@@ -876,7 +876,7 @@ export function CustomerOrderDetailsClient({ initialOrder }: CustomerOrderDetail
                 <button
                   type="submit"
                   disabled={isSubmittingReturn || !returnDescription.trim()}
-                  className="flex-1 py-2.5 rounded-xl bg-primary hover:bg-[#165a37] text-on-primary text-xs font-bold shadow-sm flex items-center justify-center gap-1.5 transition-colors disabled:opacity-50"
+                  className="flex-1 py-2.5 rounded-xl bg-primary hover:bg-primary-light text-on-primary text-xs font-bold shadow-sm flex items-center justify-center gap-1.5 transition-colors disabled:opacity-50"
                 >
                   {isSubmittingReturn ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Submit Return Request'}
                 </button>

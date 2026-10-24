@@ -371,15 +371,15 @@ export function SellerOrdersManager({ initialStatusFilter = 'all' }: SellerOrder
           onClick={() => setActiveTab('requests')}
           className={`p-4 rounded-2xl border text-left transition-all cursor-pointer ${
             activeTab === 'requests'
-              ? 'bg-[#c88a23] text-white border-[#c88a23] shadow-sm'
+              ? 'bg-secondary text-white border-secondary shadow-sm'
               : 'bg-surface hover:bg-warning-bg/40 border-border text-foreground'
           }`}
         >
           <div className="flex items-center justify-between">
-            <span className={`text-[11px] font-bold uppercase tracking-wider block ${activeTab === 'requests' ? 'text-warning-bg' : 'text-[#c88a23]'}`}>
+            <span className={`text-[11px] font-bold uppercase tracking-wider block ${activeTab === 'requests' ? 'text-warning-bg' : 'text-secondary'}`}>
               Requests
             </span>
-            <RotateCcw className={`w-3.5 h-3.5 ${activeTab === 'requests' ? 'text-white' : 'text-[#c88a23]'}`} />
+            <RotateCcw className={`w-3.5 h-3.5 ${activeTab === 'requests' ? 'text-white' : 'text-secondary'}`} />
           </div>
           <span className="text-2xl font-black mt-1 block">{requestsCount}</span>
         </button>
@@ -489,7 +489,7 @@ export function SellerOrdersManager({ initialStatusFilter = 'all' }: SellerOrder
               placeholder="Search order ID, product, phone..."
               value={searchQuery}
               onChange={e => setSearchQuery(e.target.value)}
-              className="w-full pl-9 pr-3 py-2 bg-surface-muted border border-border rounded-xl text-xs font-medium placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[var(--primary)]/20 focus:bg-surface"
+              className="w-full pl-9 pr-3 py-2 bg-surface-muted border border-border rounded-xl text-xs font-medium placeholder-foreground-muted focus:outline-none focus:ring-2 focus:ring-[var(--primary)]/20 focus:bg-surface"
             />
             {searchQuery && (
               <button
@@ -1123,7 +1123,7 @@ export function SellerOrdersManager({ initialStatusFilter = 'all' }: SellerOrder
                                     ? 'bg-warning-bg text-yellow-900 border-2 border-yellow-500 shadow-2xs cursor-default'
                                     : isBlocked
                                       ? 'bg-surface-muted text-foreground-muted border border-border cursor-not-allowed line-through opacity-50'
-                                      : 'bg-[#c88a23] hover:bg-[#ad7418] text-white shadow-xs active:scale-95'
+                                      : 'bg-secondary hover:bg-secondary-hover text-white shadow-xs active:scale-95'
                                 }`}
                               >
                                 {isBusy ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Truck className="w-3.5 h-3.5" />}
