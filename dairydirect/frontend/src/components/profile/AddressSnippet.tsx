@@ -28,7 +28,7 @@ export function AddressSnippet({ addresses, hideHeader = false }: AddressSnippet
       )}
 
       {!defaultAddress ? (
-        <div className="bg-white rounded-[24px] p-6 border border-sand/50 text-center shadow-sm">
+        <div className="bg-surface rounded-[24px] p-6 border border-sand/50 text-center shadow-sm">
           <MapPin className="w-10 h-10 text-muted mx-auto mb-3 opacity-50" />
           <h3 className="text-base font-bold text-dark mb-1">No Saved Addresses</h3>
           <p className="text-sm text-muted mb-4 font-medium">Add an address for faster checkout.</p>
@@ -40,7 +40,7 @@ export function AddressSnippet({ addresses, hideHeader = false }: AddressSnippet
         </div>
       ) : (
         <Link href="/profile/saved-addresses" className="block">
-          <div className="bg-white rounded-[20px] p-4 border border-sand/50 shadow-sm flex items-start gap-4 hover:border-primary/50 transition-colors">
+          <div className="bg-surface rounded-[20px] p-4 border border-sand/50 shadow-sm flex items-start gap-4 hover:border-primary/50 transition-colors">
             <div className="w-10 h-10 rounded-full bg-mint/30 text-primary flex items-center justify-center shrink-0">
               <MapPin className="w-5 h-5" />
             </div>

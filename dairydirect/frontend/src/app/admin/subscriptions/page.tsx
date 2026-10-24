@@ -9,8 +9,8 @@ import { getAllSubscriptions, pauseSubscription, cancelSubscription } from '@/li
 
 const STATUS_STYLES: Record<string, { bg: string; color: string; icon: any }> = {
   'active': { bg: '#eaf4e2', color: '#2a4f1d', icon: CheckCircle2 },
-  'paused': { bg: '#fff8e6', color: '#7d5200', icon: PauseCircle },
-  'cancelled': { bg: '#e3e3dc', color: '#43493e', icon: XCircle },
+  'paused': { bg: '#fff8e6', color: 'var(--warning)', icon: PauseCircle },
+  'cancelled': { bg: '#e3e3dc', color: 'var(--foreground-muted)', icon: XCircle },
 };
 
 export default function AdminSubscriptionsPage() {
@@ -171,7 +171,7 @@ export default function AdminSubscriptionsPage() {
                           <button 
                             onClick={() => handleCancel(sub.id)}
                             disabled={isUpdating === sub.id}
-                            className="flex-1 h-9 rounded-[10px] text-[13px] font-bold transition-all hover:bg-red-50 active:scale-95 disabled:opacity-50"
+                            className="flex-1 h-9 rounded-[10px] text-[13px] font-bold transition-all hover:bg-error-bg active:scale-95 disabled:opacity-50"
                             style={{ background: 'transparent', color: 'var(--color-error)', border: '1px solid var(--color-error)' }}>
                             Cancel
                           </button>

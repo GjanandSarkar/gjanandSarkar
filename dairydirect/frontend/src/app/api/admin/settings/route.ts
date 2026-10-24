@@ -44,6 +44,9 @@ const UpdateSettingsSchema = z.object({
   morning_cutoff_time: z.string().optional(),
   evening_cutoff_time: z.string().optional(),
   is_ordering_enabled: z.boolean().optional(),
+  freshness_guarantee_hours: z.number().min(1).optional(),
+  return_window_hours: z.number().min(1).optional(),
+  replacement_window_hours: z.number().min(1).optional(),
 });
 
 export async function PUT(request: NextRequest) {
@@ -94,6 +97,18 @@ export async function PUT(request: NextRequest) {
         if (data.is_ordering_enabled !== undefined) {
           setParts.push(`is_ordering_enabled = $${pIdx++}`);
           values.push(data.is_ordering_enabled);
+        }
+        if (data.freshness_guarantee_hours !== undefined) {
+          setParts.push(`freshness_guarantee_hours = $${pIdx++}`);
+          values.push(data.freshness_guarantee_hours);
+        }
+        if (data.return_window_hours !== undefined) {
+          setParts.push(`return_window_hours = $${pIdx++}`);
+          values.push(data.return_window_hours);
+        }
+        if (data.replacement_window_hours !== undefined) {
+          setParts.push(`replacement_window_hours = $${pIdx++}`);
+          values.push(data.replacement_window_hours);
         }
 
         await query(`UPDATE business_settings SET ${setParts.join(', ')}`, values);

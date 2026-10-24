@@ -504,7 +504,7 @@ export function SellerProductModal({
         initial={{ opacity: 0, scale: 0.96 }}
         animate={{ opacity: 1, scale: 1 }}
         exit={{ opacity: 0, scale: 0.96 }}
-        className="bg-white rounded-3xl max-w-3xl w-full max-h-[92vh] overflow-y-auto shadow-2xl flex flex-col border border-gray-100"
+        className="bg-surface rounded-3xl max-w-3xl w-full max-h-[92vh] overflow-y-auto shadow-2xl flex flex-col border border-border"
       >
         {submittedSuccessData ? (
           <div className="p-8 sm:p-10 flex flex-col items-center text-center space-y-6 animate-in fade-in zoom-in duration-300">
@@ -512,7 +512,7 @@ export function SellerProductModal({
             <div className="w-full flex justify-end">
               <button
                 onClick={onClose}
-                className="p-2 rounded-xl text-gray-400 hover:text-gray-700 hover:bg-gray-100 transition-colors cursor-pointer"
+                className="p-2 rounded-xl text-foreground-muted hover:text-foreground hover:bg-surface-muted transition-colors cursor-pointer"
               >
                 <X className="w-5 h-5" />
               </button>
@@ -520,57 +520,57 @@ export function SellerProductModal({
 
             {/* Glowing Icon */}
             <div className="relative">
-              <div className="w-20 h-20 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center ring-8 ring-emerald-50 shadow-inner">
+              <div className="w-20 h-20 rounded-full bg-success-bg text-success flex items-center justify-center ring-8 ring-emerald-50 shadow-inner">
                 <CheckCircle2 className="w-10 h-10" strokeWidth={2.2} />
               </div>
-              <span className="absolute -bottom-1 -right-1 bg-amber-500 text-white p-1 rounded-full shadow-xs">
+              <span className="absolute -bottom-1 -right-1 bg-warning text-on-warning p-1 rounded-full shadow-xs">
                 <Clock className="w-4 h-4" />
               </span>
             </div>
 
             {/* Header Text */}
             <div className="space-y-2 max-w-lg">
-              <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-amber-50 text-amber-800 border border-amber-200">
-                <Clock className="w-3.5 h-3.5 text-amber-600" />
+              <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-warning-bg text-warning border border-warning/20">
+                <Clock className="w-3.5 h-3.5 text-warning" />
                 <span>Product Approval Status: Pending Review</span>
               </div>
-              <h2 className="text-2xl font-black text-gray-900 tracking-tight">
+              <h2 className="text-2xl font-black text-foreground tracking-tight">
                 {submittedSuccessData.isEdit ? 'Product Resubmitted for Approval!' : 'Product Submitted for Approval!'}
               </h2>
-              <p className="text-xs sm:text-sm text-gray-600 leading-relaxed">
-                Your product <strong className="text-gray-900">"{submittedSuccessData.name}"</strong> has been successfully registered and queued for verification. It will go live once verified by our quality assurance team.
+              <p className="text-xs sm:text-sm text-foreground-muted leading-relaxed">
+                Your product <strong className="text-foreground">"{submittedSuccessData.name}"</strong> has been successfully registered and queued for verification. It will go live once verified by our quality assurance team.
               </p>
             </div>
 
             {/* Product Summary Card */}
-            <div className="w-full max-w-lg bg-gray-50 border border-gray-200 rounded-2xl p-4 text-left flex items-center gap-4 shadow-2xs">
+            <div className="w-full max-w-lg bg-surface-muted border border-border rounded-2xl p-4 text-left flex items-center gap-4 shadow-2xs">
               <img
                 src={submittedSuccessData.imageUrl || PLACEHOLDER_PRODUCT_IMAGE}
                 alt={submittedSuccessData.name}
-                className="w-16 h-16 rounded-xl object-cover border border-gray-200 bg-white shrink-0"
+                className="w-16 h-16 rounded-xl object-cover border border-border bg-surface shrink-0"
               />
               <div className="flex-1 min-w-0">
-                <h4 className="text-sm font-bold text-gray-900 truncate">{submittedSuccessData.name}</h4>
-                <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-[11px] text-gray-500 mt-0.5">
-                  <span>Category: <strong className="text-gray-700">{submittedSuccessData.category}</strong></span>
+                <h4 className="text-sm font-bold text-foreground truncate">{submittedSuccessData.name}</h4>
+                <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-[11px] text-foreground-muted mt-0.5">
+                  <span>Category: <strong className="text-foreground">{submittedSuccessData.category}</strong></span>
                   <span>•</span>
-                  <span>SKU: <code className="text-gray-700 bg-gray-200/70 px-1 py-0.2 rounded font-mono">{submittedSuccessData.sku}</code></span>
+                  <span>SKU: <code className="text-foreground bg-border/70 px-1 py-0.2 rounded font-mono">{submittedSuccessData.sku}</code></span>
                 </div>
                 <div className="flex items-center gap-2 mt-1">
-                  <span className="text-xs font-black text-emerald-700">₹{submittedSuccessData.price.toLocaleString('en-IN')}</span>
-                  <span className="text-[11px] text-gray-400">•</span>
-                  <span className="text-[11px] text-gray-600 font-medium">Initial Stock: {submittedSuccessData.stock} units</span>
+                  <span className="text-xs font-black text-success">₹{submittedSuccessData.price.toLocaleString('en-IN')}</span>
+                  <span className="text-[11px] text-foreground-muted">•</span>
+                  <span className="text-[11px] text-foreground-muted font-medium">Initial Stock: {submittedSuccessData.stock} units</span>
                 </div>
               </div>
             </div>
 
             {/* Steps & Next Timeline */}
-            <div className="w-full max-w-lg bg-emerald-50/70 border border-emerald-200/70 rounded-2xl p-4 text-left space-y-2">
-              <div className="flex items-center gap-2 text-xs font-bold text-emerald-900">
-                <ShieldCheck className="w-4 h-4 text-emerald-700 shrink-0" />
+            <div className="w-full max-w-lg bg-success-bg/70 border border-success/20/70 rounded-2xl p-4 text-left space-y-2">
+              <div className="flex items-center gap-2 text-xs font-bold text-success">
+                <ShieldCheck className="w-4 h-4 text-success shrink-0" />
                 <span>What happens next?</span>
               </div>
-              <ul className="text-[11px] text-emerald-800 space-y-1 list-disc list-inside">
+              <ul className="text-[11px] text-success space-y-1 list-disc list-inside">
                 <li>Quality review turnaround: Usually completed within <strong>24 to 48 business hours</strong>.</li>
                 <li>Once approved, this product automatically goes live in the customer marketplace catalogue.</li>
                 <li>You can track the live status anytime in your <strong>"My Products"</strong> tab.</li>
@@ -584,7 +584,7 @@ export function SellerProductModal({
                 onClick={() => {
                   handleResetNewForm();
                 }}
-                className="w-full sm:w-1/2 py-3 px-4 rounded-xl border border-gray-300 text-xs font-bold text-gray-700 hover:bg-gray-100 transition-colors cursor-pointer flex items-center justify-center gap-1.5"
+                className="w-full sm:w-1/2 py-3 px-4 rounded-xl border border-border-hover text-xs font-bold text-foreground hover:bg-surface-muted transition-colors cursor-pointer flex items-center justify-center gap-1.5"
               >
                 <Plus className="w-4 h-4" />
                 <span>Add Another Product</span>
@@ -594,7 +594,7 @@ export function SellerProductModal({
                 onClick={() => {
                   onClose();
                 }}
-                className="w-full sm:w-1/2 py-3 px-4 rounded-xl bg-[#0c3c26] hover:bg-[#092b1b] text-white text-xs font-bold transition-all shadow-md cursor-pointer flex items-center justify-center gap-1.5"
+                className="w-full sm:w-1/2 py-3 px-4 rounded-xl bg-primary hover:bg-primary-fixed-dim text-on-primary text-xs font-bold transition-all shadow-md cursor-pointer flex items-center justify-center gap-1.5"
               >
                 <Package className="w-4 h-4" />
                 <span>Done & View Products</span>
@@ -604,15 +604,15 @@ export function SellerProductModal({
         ) : (
           <>
             {/* Modal Header */}
-            <div className="px-6 sm:px-8 py-5 border-b border-gray-100 flex items-center justify-between sticky top-0 bg-white z-20">
+            <div className="px-6 sm:px-8 py-5 border-b border-border flex items-center justify-between sticky top-0 bg-surface z-20">
               <div>
                 <div className="flex items-center gap-2">
-                  <span className="w-2.5 h-2.5 rounded-full bg-[#0c3c26]" />
-                  <h2 className="text-xl font-black text-gray-900 tracking-tight">
+                  <span className="w-2.5 h-2.5 rounded-full bg-primary" />
+                  <h2 className="text-xl font-black text-foreground tracking-tight">
                     {isEdit ? 'Edit & Resubmit Product' : 'Add New Product for Approval'}
                   </h2>
                 </div>
-                <p className="text-xs text-gray-500 mt-0.5">
+                <p className="text-xs text-foreground-muted mt-0.5">
                   {isEdit
                     ? 'Update your product details. Price & stock updates remain live; core spec changes require reapproval.'
                     : 'All new marketplace products undergo admin verification before going live to customers.'}
@@ -620,7 +620,7 @@ export function SellerProductModal({
               </div>
               <button
                 onClick={onClose}
-                className="p-2 rounded-xl text-gray-400 hover:text-gray-700 hover:bg-gray-100 transition-colors cursor-pointer"
+                className="p-2 rounded-xl text-foreground-muted hover:text-foreground hover:bg-surface-muted transition-colors cursor-pointer"
               >
                 <X className="w-5 h-5" />
               </button>
@@ -630,30 +630,30 @@ export function SellerProductModal({
             <form onSubmit={handleSubmit} className="p-6 sm:p-8 space-y-6">
           {/* Notification / Error / Success Alert */}
           {error && (
-            <div className="p-4 rounded-2xl bg-rose-50 border border-rose-200 text-rose-800 text-xs font-bold flex items-center gap-2.5">
-              <AlertCircle className="w-4 h-4 text-rose-600 shrink-0" />
+            <div className="p-4 rounded-2xl bg-error-bg border border-error/20 text-error text-xs font-bold flex items-center gap-2.5">
+              <AlertCircle className="w-4 h-4 text-error shrink-0" />
               <span>{error}</span>
             </div>
           )}
 
           {successInfo?.show && (
-            <div className="p-4 rounded-2xl bg-emerald-50 border border-emerald-200 text-emerald-900 text-xs font-bold flex items-center gap-2.5 animate-pulse">
-              <CheckCircle2 className="w-5 h-5 text-emerald-600 shrink-0" />
+            <div className="p-4 rounded-2xl bg-success-bg border border-success/20 text-success text-xs font-bold flex items-center gap-2.5 animate-pulse">
+              <CheckCircle2 className="w-5 h-5 text-success shrink-0" />
               <span>{successInfo.message}</span>
             </div>
           )}
 
           {/* Section 1: Basic Product Information */}
           <div className="space-y-4">
-            <h3 className="text-xs font-black uppercase tracking-wider text-gray-400 flex items-center gap-1.5">
-              <Package className="w-3.5 h-3.5 text-[#0c3c26]" />
+            <h3 className="text-xs font-black uppercase tracking-wider text-foreground-muted flex items-center gap-1.5">
+              <Package className="w-3.5 h-3.5 text-primary" />
               <span>1. Basic Product Identity</span>
             </h3>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="sm:col-span-2">
-                <label className="block text-xs font-bold text-gray-700 mb-1.5">
-                  Product Name <span className="text-rose-500">*</span>
+                <label className="block text-xs font-bold text-foreground mb-1.5">
+                  Product Name <span className="text-error">*</span>
                 </label>
                 <input
                   type="text"
@@ -661,18 +661,18 @@ export function SellerProductModal({
                   value={name}
                   onChange={e => setName(e.target.value)}
                   placeholder="e.g. Pure Vedic A2 Gir Cow Desi Ghee"
-                  className="w-full px-3.5 py-2.5 text-sm rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#0c3c26]/20 focus:border-[#0c3c26] transition-all"
+                  className="w-full px-3.5 py-2.5 text-sm rounded-xl border border-border focus:outline-none focus:ring-2 focus:ring-[var(--primary)]/20 focus:border-primary transition-all"
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-gray-700 mb-1.5">
-                  Category <span className="text-rose-500">*</span>
+                <label className="block text-xs font-bold text-foreground mb-1.5">
+                  Category <span className="text-error">*</span>
                 </label>
                 <select
                   value={category}
                   onChange={e => handleCategoryChange(e.target.value)}
-                  className="w-full px-3.5 py-2.5 text-sm rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#0c3c26]/20 focus:border-[#0c3c26] bg-white cursor-pointer"
+                  className="w-full px-3.5 py-2.5 text-sm rounded-xl border border-border focus:outline-none focus:ring-2 focus:ring-[var(--primary)]/20 focus:border-primary bg-surface cursor-pointer"
                 >
                   {Object.keys(CATEGORIES_CONFIG).map(cat => (
                     <option key={cat} value={cat}>
@@ -683,11 +683,11 @@ export function SellerProductModal({
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-gray-700 mb-1.5">Subcategory</label>
+                <label className="block text-xs font-bold text-foreground mb-1.5">Subcategory</label>
                 <select
                   value={subcategory}
                   onChange={e => setSubcategory(e.target.value)}
-                  className="w-full px-3.5 py-2.5 text-sm rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#0c3c26]/20 focus:border-[#0c3c26] bg-white cursor-pointer"
+                  className="w-full px-3.5 py-2.5 text-sm rounded-xl border border-border focus:outline-none focus:ring-2 focus:ring-[var(--primary)]/20 focus:border-primary bg-surface cursor-pointer"
                 >
                   <option value="">Select subcategory (optional)</option>
                   {currentCategoryConfig.subcategories.map(sub => (
@@ -699,23 +699,23 @@ export function SellerProductModal({
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-gray-700 mb-1.5">Brand / Manufacturer</label>
+                <label className="block text-xs font-bold text-foreground mb-1.5">Brand / Manufacturer</label>
                 <input
                   type="text"
                   value={brand}
                   onChange={e => setBrand(e.target.value)}
                   placeholder="e.g. Gjanand Farm Organics"
-                  className="w-full px-3.5 py-2.5 text-sm rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#0c3c26]/20"
+                  className="w-full px-3.5 py-2.5 text-sm rounded-xl border border-border focus:outline-none focus:ring-2 focus:ring-[var(--primary)]/20"
                 />
               </div>
 
               <div>
                 <div className="flex items-center justify-between mb-1.5">
-                  <label className="block text-xs font-bold text-gray-700">SKU / Product Code</label>
+                  <label className="block text-xs font-bold text-foreground">SKU / Product Code</label>
                   <button
                     type="button"
                     onClick={handleGenerateSku}
-                    className="text-[11px] font-bold text-[#0c3c26] hover:underline cursor-pointer"
+                    className="text-[11px] font-bold text-primary hover:underline cursor-pointer"
                   >
                     Auto-Generate
                   </button>
@@ -725,37 +725,37 @@ export function SellerProductModal({
                   value={sku}
                   onChange={e => setSku(e.target.value)}
                   placeholder="e.g. SKU-DAI-8921"
-                  className="w-full px-3.5 py-2.5 text-sm font-mono rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#0c3c26]/20"
+                  className="w-full px-3.5 py-2.5 text-sm font-mono rounded-xl border border-border focus:outline-none focus:ring-2 focus:ring-[var(--primary)]/20"
                 />
               </div>
 
               <div className="sm:col-span-2">
-                <label className="block text-xs font-bold text-gray-700 mb-1.5">Detailed Description</label>
+                <label className="block text-xs font-bold text-foreground mb-1.5">Detailed Description</label>
                 <textarea
                   rows={3}
                   value={description}
                   onChange={e => setDescription(e.target.value)}
                   placeholder="Describe your product's purity, source farm, processing method, and benefits..."
-                  className="w-full p-3 text-sm rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#0c3c26]/20"
+                  className="w-full p-3 text-sm rounded-xl border border-border focus:outline-none focus:ring-2 focus:ring-[var(--primary)]/20"
                 />
               </div>
             </div>
           </div>
 
           {/* Section 2: Pricing & Inventory */}
-          <div className="space-y-4 pt-4 border-t border-gray-100">
-            <h3 className="text-xs font-black uppercase tracking-wider text-gray-400 flex items-center gap-1.5">
-              <Sparkles className="w-3.5 h-3.5 text-[#0c3c26]" />
+          <div className="space-y-4 pt-4 border-t border-border">
+            <h3 className="text-xs font-black uppercase tracking-wider text-foreground-muted flex items-center gap-1.5">
+              <Sparkles className="w-3.5 h-3.5 text-primary" />
               <span>2. Pricing & Inventory</span>
             </h3>
 
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
               <div>
-                <label className="block text-xs font-bold text-gray-700 mb-1.5">
-                  Selling Price (₹) <span className="text-rose-500">*</span>
+                <label className="block text-xs font-bold text-foreground mb-1.5">
+                  Selling Price (₹) <span className="text-error">*</span>
                 </label>
                 <div className="relative">
-                  <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400 font-bold text-sm">₹</span>
+                  <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-foreground-muted font-bold text-sm">₹</span>
                   <input
                     type="number"
                     step="0.01"
@@ -763,48 +763,48 @@ export function SellerProductModal({
                     value={price}
                     onChange={e => setPrice(e.target.value)}
                     placeholder="1450"
-                    className="w-full pl-8 pr-3.5 py-2.5 text-sm font-bold text-gray-900 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#0c3c26]/20"
+                    className="w-full pl-8 pr-3.5 py-2.5 text-sm font-bold text-foreground rounded-xl border border-border focus:outline-none focus:ring-2 focus:ring-[var(--primary)]/20"
                   />
                 </div>
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-gray-700 mb-1.5">
-                  MRP / Original Price (₹) <span className="text-gray-400 font-normal">(Optional)</span>
+                <label className="block text-xs font-bold text-foreground mb-1.5">
+                  MRP / Original Price (₹) <span className="text-foreground-muted font-normal">(Optional)</span>
                 </label>
                 <div className="relative">
-                  <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400 font-bold text-sm">₹</span>
+                  <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-foreground-muted font-bold text-sm">₹</span>
                   <input
                     type="number"
                     step="0.01"
                     value={originalPrice}
                     onChange={e => setOriginalPrice(e.target.value)}
                     placeholder="1650"
-                    className="w-full pl-8 pr-3.5 py-2.5 text-sm rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#0c3c26]/20"
+                    className="w-full pl-8 pr-3.5 py-2.5 text-sm rounded-xl border border-border focus:outline-none focus:ring-2 focus:ring-[var(--primary)]/20"
                   />
                 </div>
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-gray-700 mb-1.5">
-                  Cost / Purchase Price (₹) <span className="text-gray-400 font-normal">(Internal)</span>
+                <label className="block text-xs font-bold text-foreground mb-1.5">
+                  Cost / Purchase Price (₹) <span className="text-foreground-muted font-normal">(Internal)</span>
                 </label>
                 <div className="relative">
-                  <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400 font-bold text-sm">₹</span>
+                  <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-foreground-muted font-bold text-sm">₹</span>
                   <input
                     type="number"
                     step="0.01"
                     value={costPrice}
                     onChange={e => setCostPrice(e.target.value)}
                     placeholder="1100"
-                    className="w-full pl-8 pr-3.5 py-2.5 text-sm rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#0c3c26]/20"
+                    className="w-full pl-8 pr-3.5 py-2.5 text-sm rounded-xl border border-border focus:outline-none focus:ring-2 focus:ring-[var(--primary)]/20"
                   />
                 </div>
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-gray-700 mb-1.5">
-                  Available Stock Qty <span className="text-rose-500">*</span>
+                <label className="block text-xs font-bold text-foreground mb-1.5">
+                  Available Stock Qty <span className="text-error">*</span>
                 </label>
                 <input
                   type="number"
@@ -813,13 +813,13 @@ export function SellerProductModal({
                   value={stock}
                   onChange={e => setStock(e.target.value)}
                   placeholder="45"
-                  className="w-full px-3.5 py-2.5 text-sm rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#0c3c26]/20"
+                  className="w-full px-3.5 py-2.5 text-sm rounded-xl border border-border focus:outline-none focus:ring-2 focus:ring-[var(--primary)]/20"
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-gray-700 mb-1.5">
-                  Unit Weight / Volume <span className="text-rose-500">*</span>
+                <label className="block text-xs font-bold text-foreground mb-1.5">
+                  Unit Weight / Volume <span className="text-error">*</span>
                 </label>
                 <input
                   type="text"
@@ -827,16 +827,16 @@ export function SellerProductModal({
                   value={weight}
                   onChange={e => setWeight(e.target.value)}
                   placeholder="e.g. 1 Liter / 500g / 1 kg"
-                  className="w-full px-3.5 py-2.5 text-sm rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#0c3c26]/20"
+                  className="w-full px-3.5 py-2.5 text-sm rounded-xl border border-border focus:outline-none focus:ring-2 focus:ring-[var(--primary)]/20"
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-gray-700 mb-1.5">GST / Tax Rate (%)</label>
+                <label className="block text-xs font-bold text-foreground mb-1.5">GST / Tax Rate (%)</label>
                 <select
                   value={taxRate}
                   onChange={e => setTaxRate(e.target.value)}
-                  className="w-full px-3.5 py-2.5 text-sm rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#0c3c26]/20 bg-white cursor-pointer"
+                  className="w-full px-3.5 py-2.5 text-sm rounded-xl border border-border focus:outline-none focus:ring-2 focus:ring-[var(--primary)]/20 bg-surface cursor-pointer"
                 >
                   <option value="0">0% (Exempt / Fresh Milk)</option>
                   <option value="5">5% (Packaged Dairy / Fresh Food)</option>
@@ -848,22 +848,22 @@ export function SellerProductModal({
           </div>
 
           {/* ─── Section 3: Media & Images (Upload from Device) ─── */}
-          <div className="space-y-4 pt-4 border-t border-gray-100">
+          <div className="space-y-4 pt-4 border-t border-border">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-              <h3 className="text-xs font-black uppercase tracking-wider text-gray-400 flex items-center gap-1.5">
-                <UploadCloud className="w-3.5 h-3.5 text-[#0c3c26]" />
+              <h3 className="text-xs font-black uppercase tracking-wider text-foreground-muted flex items-center gap-1.5">
+                <UploadCloud className="w-3.5 h-3.5 text-primary" />
                 <span>3. Product Images (Upload from Device)</span>
               </h3>
 
               {/* Mode Switcher */}
-              <div className="flex items-center gap-1 bg-gray-100 p-1 rounded-xl self-start sm:self-auto">
+              <div className="flex items-center gap-1 bg-surface-muted p-1 rounded-xl self-start sm:self-auto">
                 <button
                   type="button"
                   onClick={() => setPrimaryUploadMode('device')}
                   className={`px-3 py-1 rounded-lg text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5 ${
                     primaryUploadMode === 'device'
-                      ? 'bg-white text-[#0c3c26] shadow-xs'
-                      : 'text-gray-500 hover:text-gray-900'
+                      ? 'bg-surface text-primary shadow-xs'
+                      : 'text-foreground-muted hover:text-foreground'
                   }`}
                 >
                   <Upload className="w-3 h-3" />
@@ -874,8 +874,8 @@ export function SellerProductModal({
                   onClick={() => setPrimaryUploadMode('url')}
                   className={`px-3 py-1 rounded-lg text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5 ${
                     primaryUploadMode === 'url'
-                      ? 'bg-white text-[#0c3c26] shadow-xs'
-                      : 'text-gray-500 hover:text-gray-900'
+                      ? 'bg-surface text-primary shadow-xs'
+                      : 'text-foreground-muted hover:text-foreground'
                   }`}
                 >
                   <LinkIcon className="w-3 h-3" />
@@ -895,16 +895,16 @@ export function SellerProductModal({
 
             {/* PRIMARY IMAGE UPLOAD CONTAINER */}
             <div className="space-y-3">
-              <label className="block text-xs font-bold text-gray-700">
-                Primary Product Photo <span className="text-rose-500">*</span>
+              <label className="block text-xs font-bold text-foreground">
+                Primary Product Photo <span className="text-error">*</span>
               </label>
 
               {primaryUploadMode === 'device' ? (
                 <div>
                   {primaryPreview ? (
                     /* Preview Box with Change/Remove */
-                    <div className="relative p-4 rounded-2xl border-2 border-dashed border-emerald-300 bg-emerald-50/40 flex items-center gap-4">
-                      <div className="w-24 h-24 rounded-xl border border-emerald-200 overflow-hidden bg-white shrink-0 shadow-xs relative flex items-center justify-center">
+                    <div className="relative p-4 rounded-2xl border-2 border-dashed border-success bg-success-bg/40 flex items-center gap-4">
+                      <div className="w-24 h-24 rounded-xl border border-success/20 overflow-hidden bg-surface shrink-0 shadow-xs relative flex items-center justify-center">
                         <img
                           src={primaryPreview}
                           alt="Primary Preview"
@@ -920,18 +920,18 @@ export function SellerProductModal({
 
                       <div className="flex-1 min-w-0 space-y-1">
                         <div className="flex items-center gap-2">
-                          <span className="text-xs font-bold text-gray-900 truncate">
+                          <span className="text-xs font-bold text-foreground truncate">
                             {primaryFile?.name || 'Selected Product Photo'}
                           </span>
                           {primaryUploadSuccess && (
-                            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-800">
+                            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-success-bg text-success">
                               <Check className="w-3 h-3" /> Uploaded to CDN
                             </span>
                           )}
                         </div>
 
                         {primaryFile && (
-                          <p className="text-[11px] text-gray-400">
+                          <p className="text-[11px] text-foreground-muted">
                             Size: {(primaryFile.size / (1024 * 1024)).toFixed(2)} MB
                           </p>
                         )}
@@ -940,14 +940,14 @@ export function SellerProductModal({
                           <button
                             type="button"
                             onClick={() => primaryFileInputRef.current?.click()}
-                            className="px-3 py-1 bg-white border border-gray-200 hover:bg-gray-50 text-gray-700 text-xs font-bold rounded-lg transition-colors cursor-pointer"
+                            className="px-3 py-1 bg-surface border border-border hover:bg-surface-muted text-foreground text-xs font-bold rounded-lg transition-colors cursor-pointer"
                           >
                             Change Photo
                           </button>
                           <button
                             type="button"
                             onClick={handleRemovePrimaryImage}
-                            className="px-3 py-1 text-rose-600 hover:bg-rose-50 text-xs font-bold rounded-lg transition-colors cursor-pointer"
+                            className="px-3 py-1 text-error hover:bg-error-bg text-xs font-bold rounded-lg transition-colors cursor-pointer"
                           >
                             Remove
                           </button>
@@ -966,22 +966,22 @@ export function SellerProductModal({
                       onClick={() => primaryFileInputRef.current?.click()}
                       className={`p-8 rounded-2xl border-2 border-dashed text-center transition-all cursor-pointer flex flex-col items-center justify-center gap-2 group ${
                         isDraggingPrimary
-                          ? 'border-[#0c3c26] bg-emerald-50/60'
-                          : 'border-gray-300 hover:border-[#0c3c26] bg-gray-50/50 hover:bg-emerald-50/20'
+                          ? 'border-primary bg-success-bg/60'
+                          : 'border-border-hover hover:border-primary bg-surface-muted/50 hover:bg-success-bg/20'
                       }`}
                     >
-                      <div className="w-12 h-12 rounded-2xl bg-white text-[#0c3c26] shadow-xs border border-gray-200 flex items-center justify-center group-hover:scale-105 transition-transform">
+                      <div className="w-12 h-12 rounded-2xl bg-surface text-primary shadow-xs border border-border flex items-center justify-center group-hover:scale-105 transition-transform">
                         {isUploadingPrimary ? (
-                          <Loader2 className="w-6 h-6 animate-spin text-[#0c3c26]" />
+                          <Loader2 className="w-6 h-6 animate-spin text-primary" />
                         ) : (
-                          <UploadCloud className="w-6 h-6 text-[#0c3c26]" />
+                          <UploadCloud className="w-6 h-6 text-primary" />
                         )}
                       </div>
                       <div>
-                        <p className="text-xs font-extrabold text-gray-800">
-                          Click to upload from device <span className="font-normal text-gray-500">or drag and drop</span>
+                        <p className="text-xs font-extrabold text-foreground">
+                          Click to upload from device <span className="font-normal text-foreground-muted">or drag and drop</span>
                         </p>
-                        <p className="text-[11px] text-gray-400 mt-0.5">
+                        <p className="text-[11px] text-foreground-muted mt-0.5">
                           PNG, JPG, JPEG, WEBP up to 10MB • High resolution product photos
                         </p>
                       </div>
@@ -1000,10 +1000,10 @@ export function SellerProductModal({
                       setPrimaryUploadSuccess(Boolean(e.target.value));
                     }}
                     placeholder="https://images.unsplash.com/... or hosted image link"
-                    className="flex-1 px-3.5 py-2.5 text-sm rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#0c3c26]/20"
+                    className="flex-1 px-3.5 py-2.5 text-sm rounded-xl border border-border focus:outline-none focus:ring-2 focus:ring-[var(--primary)]/20"
                   />
                   {imageUrl && (
-                    <div className="w-11 h-11 rounded-xl border border-gray-200 overflow-hidden shrink-0 bg-gray-50 flex items-center justify-center">
+                    <div className="w-11 h-11 rounded-xl border border-border overflow-hidden shrink-0 bg-surface-muted flex items-center justify-center">
                       <img
                         src={imageUrl}
                         alt="Preview"
@@ -1019,13 +1019,13 @@ export function SellerProductModal({
             </div>
 
             {/* ADDITIONAL GALLERY PHOTOS SECTION */}
-            <div className="pt-3 border-t border-gray-100 space-y-3">
+            <div className="pt-3 border-t border-border space-y-3">
               <div className="flex items-center justify-between">
                 <div>
-                  <label className="block text-xs font-bold text-gray-700">
+                  <label className="block text-xs font-bold text-foreground">
                     Additional Gallery Angles & Nutrition Labels
                   </label>
-                  <p className="text-[11px] text-gray-400">
+                  <p className="text-[11px] text-foreground-muted">
                     Upload side views, pack back, or certification photos
                   </p>
                 </div>
@@ -1044,7 +1044,7 @@ export function SellerProductModal({
                     type="button"
                     disabled={isUploadingGallery}
                     onClick={() => galleryFileInputRef.current?.click()}
-                    className="px-3.5 py-2 bg-gray-100 hover:bg-gray-200 text-gray-800 text-xs font-bold rounded-xl flex items-center gap-1.5 transition-colors cursor-pointer disabled:opacity-50"
+                    className="px-3.5 py-2 bg-surface-muted hover:bg-border text-foreground text-xs font-bold rounded-xl flex items-center gap-1.5 transition-colors cursor-pointer disabled:opacity-50"
                   >
                     {isUploadingGallery ? (
                       <Loader2 className="w-3.5 h-3.5 animate-spin" />
@@ -1058,11 +1058,11 @@ export function SellerProductModal({
 
               {/* Gallery Thumbnails List */}
               {galleryImages.length > 0 && (
-                <div className="flex flex-wrap gap-3 p-3 bg-gray-50 rounded-2xl border border-gray-200/80">
+                <div className="flex flex-wrap gap-3 p-3 bg-surface-muted rounded-2xl border border-border/80">
                   {galleryImages.map((img, i) => (
                     <div
                       key={i}
-                      className="relative group w-20 h-20 rounded-xl border border-gray-200 overflow-hidden bg-white shadow-2xs shrink-0"
+                      className="relative group w-20 h-20 rounded-xl border border-border overflow-hidden bg-surface shadow-2xs shrink-0"
                     >
                       <img src={img} alt={`Gallery ${i + 1}`} className="w-full h-full object-cover" />
                       <button
@@ -1071,7 +1071,7 @@ export function SellerProductModal({
                         className="absolute inset-0 bg-black/60 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer"
                         title="Remove photo"
                       >
-                        <Trash2 className="w-4 h-4 text-rose-300" />
+                        <Trash2 className="w-4 h-4 text-error" />
                       </button>
                       <span className="absolute bottom-1 right-1 px-1 rounded bg-black/60 text-[9px] text-white font-mono">
                         #{i + 1}
@@ -1088,12 +1088,12 @@ export function SellerProductModal({
                   value={newGalleryInput}
                   onChange={e => setNewGalleryInput(e.target.value)}
                   placeholder="Or paste an extra image URL..."
-                  className="flex-1 px-3.5 py-2 text-xs rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#0c3c26]/20"
+                  className="flex-1 px-3.5 py-2 text-xs rounded-xl border border-border focus:outline-none focus:ring-2 focus:ring-[var(--primary)]/20"
                 />
                 <button
                   type="button"
                   onClick={handleAddGalleryUrl}
-                  className="px-3.5 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold text-xs rounded-xl transition-colors cursor-pointer"
+                  className="px-3.5 py-2 bg-surface-muted hover:bg-border text-foreground font-bold text-xs rounded-xl transition-colors cursor-pointer"
                 >
                   Add URL
                 </button>
@@ -1103,22 +1103,22 @@ export function SellerProductModal({
 
           {/* Section 4: Category Specifications */}
           {currentCategoryConfig.attributes.length > 0 && (
-            <div className="space-y-4 pt-4 border-t border-gray-100">
-              <h3 className="text-xs font-black uppercase tracking-wider text-gray-400 flex items-center gap-1.5">
-                <Layers className="w-3.5 h-3.5 text-[#0c3c26]" />
+            <div className="space-y-4 pt-4 border-t border-border">
+              <h3 className="text-xs font-black uppercase tracking-wider text-foreground-muted flex items-center gap-1.5">
+                <Layers className="w-3.5 h-3.5 text-primary" />
                 <span>4. {category} Specifications</span>
               </h3>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 {currentCategoryConfig.attributes.map(attr => (
                   <div key={attr.key}>
-                    <label className="block text-xs font-bold text-gray-700 mb-1.5">{attr.label}</label>
+                    <label className="block text-xs font-bold text-foreground mb-1.5">{attr.label}</label>
                     <input
                       type="text"
                       value={attributes[attr.key] || ''}
                       onChange={e => setAttributes(prev => ({ ...prev, [attr.key]: e.target.value }))}
                       placeholder={attr.placeholder}
-                      className="w-full px-3.5 py-2.5 text-sm rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#0c3c26]/20"
+                      className="w-full px-3.5 py-2.5 text-sm rounded-xl border border-border focus:outline-none focus:ring-2 focus:ring-[var(--primary)]/20"
                     />
                   </div>
                 ))}
@@ -1127,47 +1127,47 @@ export function SellerProductModal({
           )}
 
           {/* Section 5: Shipping & Return Policy */}
-          <div className="space-y-4 pt-4 border-t border-gray-100">
-            <h3 className="text-xs font-black uppercase tracking-wider text-gray-400 flex items-center gap-1.5">
-              <ShieldCheck className="w-3.5 h-3.5 text-[#0c3c26]" />
+          <div className="space-y-4 pt-4 border-t border-border">
+            <h3 className="text-xs font-black uppercase tracking-wider text-foreground-muted flex items-center gap-1.5">
+              <ShieldCheck className="w-3.5 h-3.5 text-primary" />
               <span>5. Shipping & Return Policy</span>
             </h3>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
-                <label className="block text-xs font-bold text-gray-700 mb-1.5">Delivery / Shipping Info</label>
+                <label className="block text-xs font-bold text-foreground mb-1.5">Delivery / Shipping Info</label>
                 <input
                   type="text"
                   value={shippingDetails}
                   onChange={e => setShippingDetails(e.target.value)}
                   placeholder="e.g. Standard delivery within 24-48 hours. Safe protective bubble box."
-                  className="w-full px-3.5 py-2.5 text-sm rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#0c3c26]/20"
+                  className="w-full px-3.5 py-2.5 text-sm rounded-xl border border-border focus:outline-none focus:ring-2 focus:ring-[var(--primary)]/20"
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-gray-700 mb-1.5">Return & Replacement</label>
+                <label className="block text-xs font-bold text-foreground mb-1.5">Return & Replacement</label>
                 <input
                   type="text"
                   value={returnPolicy}
                   onChange={e => setReturnPolicy(e.target.value)}
                   placeholder="e.g. 24-hour replacement guarantee for damaged seal or broken jar."
-                  className="w-full px-3.5 py-2.5 text-sm rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#0c3c26]/20"
+                  className="w-full px-3.5 py-2.5 text-sm rounded-xl border border-border focus:outline-none focus:ring-2 focus:ring-[var(--primary)]/20"
                 />
               </div>
             </div>
           </div>
 
           {/* Section 6: Regulatory & Compliance */}
-          <div className="space-y-4 pt-4 border-t border-gray-100">
-            <h3 className="text-xs font-black uppercase tracking-wider text-gray-400 flex items-center gap-1.5">
-              <FileText className="w-3.5 h-3.5 text-[#0c3c26]" />
+          <div className="space-y-4 pt-4 border-t border-border">
+            <h3 className="text-xs font-black uppercase tracking-wider text-foreground-muted flex items-center gap-1.5">
+              <FileText className="w-3.5 h-3.5 text-primary" />
               <span>6. Regulatory & Compliance</span>
             </h3>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
-                <label className="block text-xs font-bold text-gray-700 mb-1.5">
+                <label className="block text-xs font-bold text-foreground mb-1.5">
                   FSSAI License / Reg No.
                 </label>
                 <input
@@ -1175,12 +1175,12 @@ export function SellerProductModal({
                   value={fssaiLicense}
                   onChange={e => setFssaiLicense(e.target.value)}
                   placeholder="e.g. 10022021000184"
-                  className="w-full px-3.5 py-2.5 text-sm rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#0c3c26]/20"
+                  className="w-full px-3.5 py-2.5 text-sm rounded-xl border border-border focus:outline-none focus:ring-2 focus:ring-[var(--primary)]/20"
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-gray-700 mb-1.5">
+                <label className="block text-xs font-bold text-foreground mb-1.5">
                   Lab Test Certificate Link (Optional)
                 </label>
                 <input
@@ -1188,15 +1188,15 @@ export function SellerProductModal({
                   value={labReportUrl}
                   onChange={e => setLabReportUrl(e.target.value)}
                   placeholder="e.g. https://drive.google.com/file/d/sample-lab-report"
-                  className="w-full px-3.5 py-2.5 text-sm rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#0c3c26]/20"
+                  className="w-full px-3.5 py-2.5 text-sm rounded-xl border border-border focus:outline-none focus:ring-2 focus:ring-[var(--primary)]/20"
                 />
               </div>
             </div>
           </div>
 
           {/* Sticky Modal Footer */}
-          <div className="pt-6 border-t border-gray-100 flex items-center justify-between sticky bottom-0 bg-white">
-            <span className="text-[11px] text-gray-400">
+          <div className="pt-6 border-t border-border flex items-center justify-between sticky bottom-0 bg-surface">
+            <span className="text-[11px] text-foreground-muted">
               * Required fields. Uploaded photos are stored on cloud CDN.
             </span>
 
@@ -1205,7 +1205,7 @@ export function SellerProductModal({
                 type="button"
                 disabled={isSubmitting || isUploadingPrimary || isUploadingGallery}
                 onClick={onClose}
-                className="px-4 py-2.5 rounded-xl text-xs font-bold text-gray-600 hover:bg-gray-100 transition-colors cursor-pointer"
+                className="px-4 py-2.5 rounded-xl text-xs font-bold text-foreground-muted hover:bg-surface-muted transition-colors cursor-pointer"
               >
                 Cancel
               </button>
@@ -1213,7 +1213,7 @@ export function SellerProductModal({
               <button
                 type="submit"
                 disabled={isSubmitting || isUploadingPrimary || isUploadingGallery}
-                className="px-6 py-2.5 rounded-xl text-xs font-bold bg-[#0c3c26] hover:bg-[#114e32] text-white shadow-xs transition-all flex items-center gap-2 cursor-pointer disabled:opacity-50"
+                className="px-6 py-2.5 rounded-xl text-xs font-bold bg-primary hover:bg-primary-hover text-on-primary shadow-xs transition-all flex items-center gap-2 cursor-pointer disabled:opacity-50"
               >
                 {isSubmitting || isUploadingPrimary || isUploadingGallery ? (
                   <>

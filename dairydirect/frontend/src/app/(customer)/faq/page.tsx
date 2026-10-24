@@ -84,19 +84,19 @@ export default function FAQPage() {
     : faqs.filter(f => f.category === selectedCategory);
 
   return (
-    <div className="min-h-screen bg-[#fafaf8] py-12 px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-background py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-4xl mx-auto">
         
         {/* Header */}
         <div className="text-center mb-10">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-100/80 text-[#0f3e26] text-xs font-bold uppercase tracking-wider mb-4">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-success-bg/80 text-primary text-xs font-bold uppercase tracking-wider mb-4">
             <HelpCircle className="w-3.5 h-3.5" />
             <span>Customer Knowledge Base</span>
           </div>
-          <h1 className="text-3xl sm:text-4xl font-black text-[#0f3e26] tracking-tight mb-3">
+          <h1 className="text-3xl sm:text-4xl font-black text-primary tracking-tight mb-3">
             Frequently Asked Questions
           </h1>
-          <p className="text-xs sm:text-sm text-gray-600 max-w-xl mx-auto leading-relaxed">
+          <p className="text-xs sm:text-sm text-foreground-muted max-w-xl mx-auto leading-relaxed">
             Everything you need to know about ordering, delivery, subscriptions
             and how we pick our partner brands.
           </p>
@@ -110,8 +110,8 @@ export default function FAQPage() {
               onClick={() => setSelectedCategory(cat)}
               className={`px-4 py-2 rounded-full text-xs font-bold transition-all shrink-0 cursor-pointer ${
                 selectedCategory === cat
-                  ? 'bg-[#0f3e26] text-white shadow-sm'
-                  : 'bg-white text-gray-700 border border-gray-200 hover:bg-gray-50'
+                  ? 'bg-primary text-white shadow-sm'
+                  : 'bg-surface text-foreground border border-border hover:bg-surface-muted'
               }`}
             >
               {cat}
@@ -126,25 +126,25 @@ export default function FAQPage() {
             return (
               <div
                 key={idx}
-                className="bg-white border border-gray-200 rounded-2xl overflow-hidden shadow-2xs transition-all"
+                className="bg-surface border border-border rounded-2xl overflow-hidden shadow-2xs transition-all"
               >
                 <button
                   type="button"
                   onClick={() => setOpenIndex(isOpen ? null : idx)}
-                  className="w-full p-5 text-left flex items-center justify-between gap-4 cursor-pointer hover:bg-gray-50/50 transition-colors"
+                  className="w-full p-5 text-left flex items-center justify-between gap-4 cursor-pointer hover:bg-surface-muted/50 transition-colors"
                 >
-                  <span className="text-xs sm:text-sm font-bold text-gray-900 leading-snug">
+                  <span className="text-xs sm:text-sm font-bold text-foreground leading-snug">
                     {faq.question}
                   </span>
                   <ChevronDown
-                    className={`w-4 h-4 text-gray-500 shrink-0 transition-transform duration-200 ${
-                      isOpen ? 'rotate-180 text-[#c88a23]' : ''
+                    className={`w-4 h-4 text-foreground-muted shrink-0 transition-transform duration-200 ${
+                      isOpen ? 'rotate-180 text-secondary' : ''
                     }`}
                   />
                 </button>
 
                 {isOpen && (
-                  <div className="px-5 pb-5 pt-1 text-xs sm:text-[13px] text-gray-600 leading-relaxed border-t border-gray-100 bg-[#fdfdfc]">
+                  <div className="px-5 pb-5 pt-1 text-xs sm:text-[13px] text-foreground-muted leading-relaxed border-t border-border bg-surface">
                     {faq.answer}
                   </div>
                 )}
@@ -154,19 +154,19 @@ export default function FAQPage() {
         </div>
 
         {/* Still Have Questions Box */}
-        <div className="mt-12 bg-gradient-to-r from-[#0f3e26] to-[#175c3a] rounded-3xl p-6 sm:p-8 text-white flex flex-col sm:flex-row items-center justify-between gap-6 shadow-lg">
+        <div className="mt-12 bg-gradient-to-r from-[var(--primary)] to-primary-light rounded-3xl p-6 sm:p-8 text-white flex flex-col sm:flex-row items-center justify-between gap-6 shadow-lg">
           <div>
-            <h3 className="text-lg font-black text-amber-300 mb-1">
+            <h3 className="text-lg font-black text-warning mb-1">
               Still have questions?
             </h3>
-            <p className="text-xs text-emerald-100/90 leading-relaxed max-w-md">
+            <p className="text-xs text-success-bg/90 leading-relaxed max-w-md">
               Our customer success team is here to help with order changes, returns
               or any other question.
             </p>
           </div>
           <Link
             href="/contact"
-            className="px-6 py-3 bg-[#c88a23] hover:bg-[#b0781c] text-white text-xs font-extrabold rounded-xl transition-all shadow-md shrink-0 flex items-center gap-2"
+            className="px-6 py-3 bg-secondary hover:bg-secondary-hover text-white text-xs font-extrabold rounded-xl transition-all shadow-md shrink-0 flex items-center gap-2"
           >
             <PhoneCall className="w-4 h-4" />
             <span>Contact Support</span>

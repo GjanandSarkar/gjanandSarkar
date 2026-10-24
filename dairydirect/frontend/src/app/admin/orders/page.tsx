@@ -14,19 +14,21 @@ import {
   CreditCard, 
   CheckCircle2, 
   Ban, 
-  RefreshCw 
+  RefreshCw,
+  IndianRupee 
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { getAllOrders, updateOrderStatus } from '@/lib/api/orders';
 import type { OrderWithItems } from '@/lib/api/orders';
 import { PLACEHOLDER_PRODUCT_IMAGE } from '@/lib/constants/brand';
+import { ConfirmCodPaymentModal } from '@/components/admin/ConfirmCodPaymentModal';
 
 const STATUS_STYLES: Record<string, { bg: string; color: string; dot: string }> = {
-  'pending':          { bg: '#ffdcc7', color: '#774117', dot: '#d4712a' },
+  'pending':          { bg: '#ffdcc7', color: 'var(--warning)', dot: '#d4712a' },
   'confirmed':        { bg: '#c2efac', color: '#042100', dot: '#3f6530' },
-  'out_for_delivery': { bg: '#fff8e6', color: '#7d5200', dot: '#c78c2e' },
+  'out_for_delivery': { bg: '#fff8e6', color: 'var(--warning)', dot: '#c78c2e' },
   'delivered':        { bg: '#eaf4e2', color: '#2a4f1d', dot: '#3f6530' },
-  'cancelled':        { bg: '#e3e3dc', color: '#43493e', dot: '#73796d' },
+  'cancelled':        { bg: '#e3e3dc', color: 'var(--foreground-muted)', dot: '#73796d' },
 };
 
 const ORDER_STATUSES: OrderWithItems['status'][] = ['confirmed', 'out_for_delivery', 'delivered', 'cancelled'];
@@ -64,6 +66,7 @@ export default function AdminOrdersPage() {
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [isUpdating, setIsUpdating] = useState<string | null>(null);
   const [updateError, setUpdateError] = useState<{ orderId: string; message: string } | null>(null);
+  const [codConfirmOrder, setCodConfirmOrder] = useState<OrderWithItems | null>(null);
 
   const fetchOrders = () => {
     getAllOrders({ type: 'admin' }).then(data => {
@@ -133,21 +136,45 @@ export default function AdminOrdersPage() {
     setUpdateError(null);
     setIsUpdating(orderId);
     try {
-      const result = await updateOrderStatus(orderId, status, userId || undefined);
-      if (result.success) {
+      let res: Response;
+      if (status === 'cancelled') {
+        res = await fetch(`/api/admin/orders/${orderId}/cancel`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ reason: 'Cancelled by administrator on behalf' }),
+        });
+      } else {
+        res = await fetch(`/api/admin/orders/${orderId}/status`, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ to: status }),
+        });
+      }
+
+      const json = await res.json().catch(() => ({}));
+      if (res.ok) {
         setOrders(prev => prev.map(o => (o.id === orderId ? { ...o, status } : o)));
       } else {
         setUpdateError({
           orderId,
-          message: result.error || 'Could not update this order. Please try again.',
+          message: json.error || 'Could not update this order status. Please try again.',
         });
       }
+    } catch (err: any) {
+      setUpdateError({
+        orderId,
+        message: err.message || 'Network error updating order status.',
+      });
     } finally {
       setIsUpdating(null);
     }
   };
 
-  const filtered = activeTab === 'all' ? orders : orders.filter(o => o.status === activeTab);
+  const filtered = activeTab === 'all'
+    ? orders
+    : activeTab === 'cod_pending'
+      ? orders.filter(o => o.payment_method?.toUpperCase() === 'COD' && o.payment_status !== 'paid')
+      : orders.filter(o => o.status === activeTab);
 
   if (isLoading) {
     return (
@@ -164,7 +191,7 @@ export default function AdminOrdersPage() {
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-4">
             <div>
               <div className="flex items-center gap-2">
-                <span className="px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-800 text-[10px] font-black uppercase tracking-wider">
+                <span className="px-2.5 py-0.5 rounded-full bg-success-bg text-success text-[10px] font-black uppercase tracking-wider">
                   Admin Platform Inventory
                 </span>
               </div>
@@ -175,7 +202,7 @@ export default function AdminOrdersPage() {
                   ({filtered.length})
                 </span>
               </h1>
-              <p className="text-[12px] text-gray-500 mt-0.5">
+              <p className="text-[12px] text-foreground-muted mt-0.5">
                 Orders containing direct platform & admin products. For external vendor products, manage under All Seller Orders List.
               </p>
             </div>
@@ -188,7 +215,7 @@ export default function AdminOrdersPage() {
                   fetchOrders();
                 }}
                 title="Refresh Orders"
-                className="p-2 rounded-xl border border-gray-200 hover:bg-gray-50 text-gray-600 transition-colors cursor-pointer shrink-0"
+                className="p-2 rounded-xl border border-border hover:bg-surface-muted text-foreground-muted transition-colors cursor-pointer shrink-0"
               >
                 <RefreshCw className="w-4 h-4" />
               </button>
@@ -196,7 +223,7 @@ export default function AdminOrdersPage() {
           </div>
 
           <div className="flex gap-2 overflow-x-auto no-scrollbar -mx-6 px-6 pb-1">
-            {['all', 'pending', 'confirmed', 'out_for_delivery', 'delivered', 'cancelled'].map(tab => (
+            {['all', 'cod_pending', 'confirmed', 'out_for_delivery', 'delivered', 'cancelled'].map(tab => (
               <button key={tab} onClick={() => setActiveTab(tab)}
                 className="whitespace-nowrap px-4 py-2 rounded-full text-[12px] font-semibold transition-all duration-200 shrink-0 capitalize"
                 style={activeTab === tab ? {
@@ -207,7 +234,7 @@ export default function AdminOrdersPage() {
                   background: 'var(--color-surface-container-low)',
                   color: 'var(--color-on-surface-variant)',
                 }}>
-                {tab.replace(/_/g, ' ')}
+                {tab === 'cod_pending' ? 'COD Payment Pending' : tab.replace(/_/g, ' ')}
               </button>
             ))}
           </div>
@@ -273,14 +300,14 @@ export default function AdminOrdersPage() {
                                 </span>
                               ))
                             ) : (
-                              <span className="px-2 py-0.5 rounded-md text-[10px] font-semibold bg-gray-100 text-gray-600">
+                              <span className="px-2 py-0.5 rounded-md text-[10px] font-semibold bg-surface-muted text-foreground-muted">
                                 Direct Platform
                               </span>
                             )}
 
                             {/* Payment Status */}
                             <span className={`px-2 py-0.5 rounded-md text-[10px] font-bold uppercase tracking-wider ${
-                              order.payment_status === 'paid' ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800'
+                              order.payment_status === 'paid' ? 'bg-success-bg text-success' : 'bg-warning-bg text-warning'
                             }`}>
                               {order.payment_status === 'paid' ? 'Paid' : `Payment: ${order.payment_status || 'Pending'}`} ({order.payment_method || 'COD'})
                             </span>
@@ -322,29 +349,29 @@ export default function AdminOrdersPage() {
                           <div className="px-5 py-4 space-y-4">
 
                             {/* Customer Delivery Details Box */}
-                            <div className="p-3.5 rounded-xl border border-gray-200/80 bg-gray-50/70 text-xs grid grid-cols-1 md:grid-cols-2 gap-3">
+                            <div className="p-3.5 rounded-xl border border-border/80 bg-surface-muted/70 text-xs grid grid-cols-1 md:grid-cols-2 gap-3">
                               <div>
-                                <span className="text-[10px] font-bold uppercase tracking-wider text-gray-400 block">Customer Information</span>
-                                <p className="font-bold text-gray-900 mt-0.5">{order.profiles?.name || 'Customer'}</p>
-                                <p className="text-gray-600">{order.profiles?.email || 'N/A'}</p>
+                                <span className="text-[10px] font-bold uppercase tracking-wider text-foreground-muted block">Customer Information</span>
+                                <p className="font-bold text-foreground mt-0.5">{order.profiles?.name || 'Customer'}</p>
+                                <p className="text-foreground-muted">{order.profiles?.email || 'N/A'}</p>
                                 {order.profiles?.phone && (
-                                  <p className="text-gray-700 flex items-center gap-1 mt-0.5 font-medium">
-                                    <Phone className="w-3 h-3 text-gray-400" />
+                                  <p className="text-foreground flex items-center gap-1 mt-0.5 font-medium">
+                                    <Phone className="w-3 h-3 text-foreground-muted" />
                                     <span>+91 {order.profiles.phone}</span>
                                   </p>
                                 )}
                               </div>
 
                               <div>
-                                <span className="text-[10px] font-bold uppercase tracking-wider text-gray-400 block">Shipping Address</span>
-                                <p className="text-gray-800 mt-0.5 leading-relaxed font-medium">
+                                <span className="text-[10px] font-bold uppercase tracking-wider text-foreground-muted block">Shipping Address</span>
+                                <p className="text-foreground mt-0.5 leading-relaxed font-medium">
                                   {order.user_addresses?.address || order.shipping_address || 'Address on file'}
                                 </p>
                                 {order.user_addresses?.apartment && (
-                                  <p className="text-gray-500 text-[11px]">Apt/Flat: {order.user_addresses.apartment}</p>
+                                  <p className="text-foreground-muted text-[11px]">Apt/Flat: {order.user_addresses.apartment}</p>
                                 )}
                                 {order.delivery_slot && (
-                                  <p className="text-emerald-700 font-semibold mt-1 text-[11px]">Slot: {order.delivery_slot}</p>
+                                  <p className="text-success font-semibold mt-1 text-[11px]">Slot: {order.delivery_slot}</p>
                                 )}
                               </div>
                             </div>
@@ -352,7 +379,7 @@ export default function AdminOrdersPage() {
                             {/* Ordered Items with Seller Attribution */}
                             <div className="rounded-[10px] p-3 mb-2"
                               style={{ background: 'var(--color-surface-container-low)' }}>
-                              <span className="text-[10px] font-bold uppercase tracking-wider text-gray-400 block mb-2">Order Products & Sellers</span>
+                              <span className="text-[10px] font-bold uppercase tracking-wider text-foreground-muted block mb-2">Order Products & Sellers</span>
                               {order.order_items?.map((item, j) => {
                                 const pName = item.product_name || item.products?.name || (item.product_id ? `Product #${item.product_id.slice(0, 6)}` : 'Dairy Product');
                                 const pWeight = item.weight || item.product_variants?.weight || '';
@@ -366,7 +393,7 @@ export default function AdminOrdersPage() {
                                       <img
                                         src={img}
                                         alt={pName}
-                                        className="w-9 h-9 rounded-lg object-cover bg-white border border-gray-200 shrink-0"
+                                        className="w-9 h-9 rounded-lg object-cover bg-surface border border-border shrink-0"
                                         onError={e => {
                                           (e.target as HTMLImageElement).src = PLACEHOLDER_PRODUCT_IMAGE;
                                         }}
@@ -393,20 +420,84 @@ export default function AdminOrdersPage() {
 
                             {/* Cancellation Reason / History Display */}
                             {order.status === 'cancelled' && (
-                              <div className="p-3 rounded-xl bg-gray-100 border border-gray-200 text-xs text-gray-700 space-y-1">
-                                <span className="font-bold text-gray-900 block flex items-center gap-1">
-                                  <Ban className="w-3.5 h-3.5 text-gray-500" />
+                              <div className="p-3 rounded-xl bg-surface-muted border border-border text-xs text-foreground space-y-1">
+                                <span className="font-bold text-foreground block flex items-center gap-1">
+                                  <Ban className="w-3.5 h-3.5 text-foreground-muted" />
                                   <span>Cancellation History & Audit Note:</span>
                                 </span>
-                                <p className="text-gray-600 font-mono text-[11px]">
+                                <p className="text-foreground-muted font-mono text-[11px]">
                                   {order.notes || 'Order cancelled and stock inventory restored.'}
                                 </p>
                               </div>
                             )}
 
+                            {/* COD Payment Tracking & Confirmation Card */}
+                            {order.payment_method?.toUpperCase() === 'COD' && (
+                              <div className="p-4 rounded-2xl border border-border/90 bg-surface-muted/80 space-y-3">
+                                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-2 border-b border-border/60">
+                                  <div className="flex items-center gap-2">
+                                    <div className="w-8 h-8 rounded-xl bg-warning-bg text-warning flex items-center justify-center shrink-0">
+                                      <IndianRupee className="w-4 h-4" />
+                                    </div>
+                                    <div>
+                                      <span className="text-[10px] font-bold uppercase tracking-wider text-foreground-muted block">Payment Method</span>
+                                      <span className="font-extrabold text-sm text-foreground">Cash on Delivery (COD)</span>
+                                    </div>
+                                  </div>
+
+                                  <div className="flex items-center gap-2">
+                                    <span className="text-xs text-foreground-muted">Collection Status:</span>
+                                    <span className={`px-2.5 py-0.5 rounded-full text-xs font-black uppercase tracking-wider ${
+                                      order.payment_status === 'paid' ? 'bg-success-bg text-success border border-success/20' : 'bg-warning-bg text-warning border border-warning/20'
+                                    }`}>
+                                      {order.payment_status === 'paid' ? '✓ Paid (Cash Collected)' : 'Pending Cash Collection'}
+                                    </span>
+                                  </div>
+                                </div>
+
+                                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs text-foreground-muted">
+                                  <div>
+                                    <span className="text-[10px] text-foreground-muted font-bold uppercase tracking-wider block">Order Amount</span>
+                                    <span className="font-extrabold text-sm text-primary">₹{order.total_amount}</span>
+                                  </div>
+                                  <div>
+                                    <span className="text-[10px] text-foreground-muted font-bold uppercase tracking-wider block">Order Status</span>
+                                    <span className="font-bold text-foreground uppercase">{order.status.replace(/_/g, ' ')}</span>
+                                  </div>
+                                  <div>
+                                    <span className="text-[10px] text-foreground-muted font-bold uppercase tracking-wider block">Cash Confirmed At</span>
+                                    <span className="font-medium text-foreground">
+                                      {order.payment_confirmed_at 
+                                        ? format(new Date(order.payment_confirmed_at), 'MMM d, hh:mm a') 
+                                        : 'Not yet recorded'}
+                                    </span>
+                                  </div>
+                                  <div>
+                                    <span className="text-[10px] text-foreground-muted font-bold uppercase tracking-wider block">Confirmed By</span>
+                                    <span className="font-medium text-foreground">
+                                      {order.payment_confirmed_at ? 'Authorized Admin' : 'Pending'}
+                                    </span>
+                                  </div>
+                                </div>
+
+                                {order.payment_status !== 'paid' && order.status !== 'cancelled' && (
+                                  <div className="pt-2 flex justify-end">
+                                    <button
+                                      type="button"
+                                      onClick={() => setCodConfirmOrder(order)}
+                                      className="px-4 py-2 rounded-xl text-xs font-bold text-on-success bg-success hover:bg-success transition-all flex items-center gap-1.5 shadow-sm cursor-pointer"
+                                    >
+                                      <IndianRupee className="w-3.5 h-3.5" />
+                                      <span>Confirm Cash Collected (₹{order.total_amount})</span>
+                                    </button>
+                                  </div>
+                                )}
+                              </div>
+                            )}
+
                             <div className="relative pt-2">
                               {isUpdating === order.id && (
-                                <div className="absolute inset-0 bg-white/50 flex items-center justify-center z-10">
+                                <div className="absolute inset-0 bg-surface/50 flex items-center justify-center z-10">
                                   <Loader2 className="w-5 h-5 animate-spin text-primary" />
                                 </div>
                               )}
@@ -432,7 +523,7 @@ export default function AdminOrdersPage() {
                               </div>
 
                               <div className="flex flex-wrap gap-2">
-                                <span className="text-xs font-bold text-gray-500 self-center mr-1">Actions:</span>
+                                <span className="text-xs font-bold text-foreground-muted self-center mr-1">Actions:</span>
                                 {ORDER_STATUSES.map(status => {
                                   const sStyle = STATUS_STYLES[status];
                                   const isCurrentStatus = order.status === status;
@@ -477,7 +568,7 @@ export default function AdminOrdersPage() {
                               {updateError?.orderId === order.id && (
                                 <div role="alert"
                                   className="mt-3 flex items-start gap-2 rounded-xl px-3 py-2 text-[12px]"
-                                  style={{ background: '#ffdad6', color: '#410002' }}>
+                                  style={{ background: 'var(--error-bg)', color: 'var(--error)' }}>
                                   <AlertCircle className="w-4 h-4 shrink-0 mt-[1px]" />
                                   <span>{updateError.message}</span>
                                 </div>
@@ -494,6 +585,17 @@ export default function AdminOrdersPage() {
           )}
         </AnimatePresence>
       </div>
+
+      {codConfirmOrder && (
+        <ConfirmCodPaymentModal
+          order={codConfirmOrder}
+          isOpen={!!codConfirmOrder}
+          onClose={() => setCodConfirmOrder(null)}
+          onSuccess={(updated) => {
+            setOrders(prev => prev.map(o => o.id === codConfirmOrder.id ? { ...o, ...updated } : o));
+          }}
+        />
+      )}
     </div>
   );
 }

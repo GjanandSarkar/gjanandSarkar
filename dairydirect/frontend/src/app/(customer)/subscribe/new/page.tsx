@@ -107,7 +107,7 @@ function NewSubscriptionContent() {
 
   if (isSuccess) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-screen bg-white p-6 text-center">
+      <div className="flex flex-col items-center justify-center min-h-screen bg-surface p-6 text-center">
         <div className="w-24 h-24 bg-mint/30 rounded-full flex items-center justify-center mb-6 text-primary shadow-inner">
           <CheckCircle2 className="w-12 h-12" />
         </div>
@@ -139,11 +139,11 @@ function NewSubscriptionContent() {
 
       <div className="p-4 flex-1 max-w-[800px] mx-auto w-full">
         {/* Product Hero */}
-        <div className="bg-white rounded-[24px] shadow-sm p-6 mb-6 flex flex-col items-center border border-sand/50 relative overflow-hidden">
+        <div className="bg-surface rounded-[24px] shadow-sm p-6 mb-6 flex flex-col items-center border border-sand/50 relative overflow-hidden">
           <div className="absolute top-0 right-0 w-48 h-48 bg-primary/5 rounded-full -mr-24 -mt-24 blur-3xl" />
           <div className="absolute bottom-0 left-0 w-32 h-32 bg-primary/5 rounded-full -ml-16 -mb-16 blur-2xl" />
           
-          <div className="w-24 h-24 relative mb-4 overflow-hidden rounded-[20px] bg-sky-50 flex items-center justify-center p-2 shadow-inner border border-sand/30">
+          <div className="w-24 h-24 relative mb-4 overflow-hidden rounded-[20px] bg-info-bg flex items-center justify-center p-2 shadow-inner border border-sand/30">
             <img src={subscriptionProductImage} alt={subscriptionProductName} className="w-full h-full object-contain" />
           </div>
           <h2 className="font-black text-dark text-xl mb-1 text-center">{subscriptionProductName}</h2>
@@ -160,7 +160,7 @@ function NewSubscriptionContent() {
                     className={cn(
                       "py-3 rounded-[16px] text-sm font-black transition-all border-2",
                       volume === preset.value 
-                        ? "bg-primary border-primary text-white shadow-active" 
+                        ? "bg-primary border-primary text-on-primary shadow-active" 
                         : "bg-surface-container border-transparent text-muted hover:border-sand"
                     )}
                   >
@@ -181,7 +181,7 @@ function NewSubscriptionContent() {
                   step="0.1"
                   value={volume}
                   onChange={(e) => setVolume(Math.max(0.1, parseFloat(e.target.value) || 0.1))}
-                  className="w-24 h-12 text-right pr-10 font-black text-xl bg-white border-2 border-sand rounded-[14px] outline-none focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all appearance-none"
+                  className="w-24 h-12 text-right pr-10 font-black text-xl bg-surface border-2 border-sand rounded-[14px] outline-none focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all appearance-none"
                 />
                 <span className="absolute right-4 top-1/2 -translate-y-1/2 font-black text-muted text-sm pointer-events-none">L</span>
               </div>
@@ -195,7 +195,7 @@ function NewSubscriptionContent() {
           <div 
             onClick={() => setPlan('daily')}
             className={cn(
-              "p-4 rounded-[20px] border-2 cursor-pointer transition-all relative overflow-hidden bg-white text-center",
+              "p-4 rounded-[20px] border-2 cursor-pointer transition-all relative overflow-hidden bg-surface text-center",
               plan === 'daily' ? "border-primary shadow-[0_0_0_4px_rgba(63,101,48,0.1)]" : "border-sand/50 text-dark hover:border-sand"
             )}
           >
@@ -208,7 +208,7 @@ function NewSubscriptionContent() {
           <div 
             onClick={() => setPlan('alternate')}
             className={cn(
-              "p-4 rounded-[20px] border-2 cursor-pointer transition-all bg-white text-center",
+              "p-4 rounded-[20px] border-2 cursor-pointer transition-all bg-surface text-center",
               plan === 'alternate' ? "border-primary shadow-[0_0_0_4px_rgba(63,101,48,0.1)]" : "border-sand/50 text-dark hover:border-sand"
             )}
           >
@@ -220,7 +220,7 @@ function NewSubscriptionContent() {
           <div 
             onClick={() => setPlan('weekly')}
             className={cn(
-              "p-4 rounded-[20px] border-2 cursor-pointer transition-all bg-white text-center",
+              "p-4 rounded-[20px] border-2 cursor-pointer transition-all bg-surface text-center",
               plan === 'weekly' ? "border-primary shadow-[0_0_0_4px_rgba(63,101,48,0.1)]" : "border-sand/50 text-dark hover:border-sand"
             )}
           >
@@ -231,7 +231,7 @@ function NewSubscriptionContent() {
         </div>
 
         {/* Start Date & Time */}
-        <div className="bg-white rounded-[16px] p-4 border border-sand/50 shadow-sm flex flex-col gap-4">
+        <div className="bg-surface rounded-[16px] p-4 border border-sand/50 shadow-sm flex flex-col gap-4">
           <div className="flex items-center gap-4 border-b border-sand/30 pb-4">
             <div className="w-10 h-10 rounded-full bg-mint/30 flex items-center justify-center text-primary shrink-0">
               <Calendar className="w-5 h-5" />
@@ -268,7 +268,7 @@ function NewSubscriptionContent() {
       </div>
 
       {/* Checkout Bar */}
-      <div className="fixed bottom-0 left-0 right-0 p-4 bg-white border-t border-sand/50 z-40 pb-safe shadow-[0_-10px_20px_rgba(0,0,0,0.03)]">
+      <div className="fixed bottom-0 left-0 right-0 p-4 bg-surface border-t border-sand/50 z-40 pb-safe shadow-[0_-10px_20px_rgba(0,0,0,0.03)]">
         <div className="max-w-[800px] mx-auto w-full flex flex-col md:flex-row items-center gap-4">
           <div className="hidden md:flex flex-col flex-1">
             <p className="text-xs text-muted font-medium mb-1">

@@ -27,9 +27,9 @@ export function TopAppBar() {
             />
             <div className="flex flex-col">
               <span className="text-lg md:text-2xl font-black tracking-tight leading-none">
-                <span className="text-[#0f3e26]">Gjanand</span>
+                <span className="text-primary">Gjanand</span>
               </span>
-              <span className="text-[9px] md:text-[11px] tracking-[0.2em] font-black text-[#c88a23] uppercase text-right leading-none mt-0.5">
+              <span className="text-[9px] md:text-[11px] tracking-[0.2em] font-black text-secondary uppercase text-right leading-none mt-0.5">
                 SARKAR
               </span>
             </div>

@@ -321,7 +321,7 @@ export default function CheckoutScreen() {
          the app: a blank page with a spinner is exactly where people leave.
          A skeleton of the real layout keeps the page feeling present. */
       <div className="flex flex-col min-h-screen bg-cream">
-        <div className="sticky top-0 z-30 bg-white border-b border-sand">
+        <div className="sticky top-0 z-30 bg-surface border-b border-sand">
           <div className="flex justify-between items-center p-4">
             <SkeletonBlock className="h-6 w-40" />
             <SkeletonBlock className="h-6 w-20 rounded-md" />
@@ -332,7 +332,7 @@ export default function CheckoutScreen() {
           <SkeletonBlock className="h-40 w-full rounded-2xl" />
           <SkeletonBlock className="h-48 w-full rounded-2xl" />
         </div>
-        <div className="sticky bottom-0 bg-white border-t border-sand p-4">
+        <div className="sticky bottom-0 bg-surface border-t border-sand p-4">
           <SkeletonBlock className="h-14 w-full rounded-2xl" />
         </div>
       </div>
@@ -356,7 +356,7 @@ export default function CheckoutScreen() {
   return (
     <>
       <div className="flex flex-col min-h-screen bg-cream pb-[140px] lg:pb-10 relative">
-        <div className="sticky top-0 z-30 bg-white border-b border-sand shadow-sm">
+        <div className="sticky top-0 z-30 bg-surface border-b border-sand shadow-sm">
           <div className="flex justify-between items-center p-4">
             <div className="flex items-center">
               <button onClick={() => !isProcessing && router.back()} className="p-2 -ml-2 mr-2 rounded-full hover:bg-sand/30" disabled={isProcessing}>
@@ -364,7 +364,7 @@ export default function CheckoutScreen() {
               </button>
               <h1 className="text-xl font-black text-dark">Secure Checkout</h1>
             </div>
-            <div className="flex items-center gap-1 text-green-600 bg-green-50 px-2 py-1 rounded-md border border-green-100">
+            <div className="flex items-center gap-1 text-success bg-success-bg px-2 py-1 rounded-md border border-green-100">
               <ShieldCheck className="w-4 h-4" />
               <span className="text-[10px] font-bold uppercase tracking-wider">100% Safe</span>
             </div>
@@ -406,7 +406,7 @@ export default function CheckoutScreen() {
           <OrderReview items={cartItemsData} />
 
           {/* Coupon Section */}
-          <div className="bg-white rounded-[20px] p-4 border border-sand shadow-sm">
+          <div className="bg-surface rounded-[20px] p-4 border border-sand shadow-sm">
             <div className="flex items-center gap-2 mb-3">
               <Tag className="w-4 h-4 text-primary" />
               <h3 className="text-sm font-bold text-dark uppercase tracking-wider">Offers</h3>
@@ -420,7 +420,7 @@ export default function CheckoutScreen() {
                   placeholder="Enter Coupon Code"
                   className={cn(
                     "w-full text-sm font-bold border rounded-[12px] px-3 py-2.5 outline-none transition-all uppercase placeholder:text-muted/50 placeholder:font-medium",
-                    couponError ? "border-red-400 bg-red-50 text-red-600" : "border-sand focus:border-primary"
+                    couponError ? "border-red-400 bg-error-bg text-error" : "border-sand focus:border-primary"
                   )}
                 />
                 {couponError && <p className="absolute -bottom-5 left-0 text-[10px] text-red-500 font-bold">{couponError}</p>}
@@ -428,7 +428,7 @@ export default function CheckoutScreen() {
               <button
                 onClick={handleApplyCoupon}
                 disabled={isApplyingCoupon || !couponCode}
-                className="bg-primary hover:bg-primary-dark disabled:opacity-50 text-white font-bold px-5 py-2.5 rounded-[12px] text-sm shadow-sm transition-all flex items-center justify-center gap-2 min-w-[80px]"
+                className="bg-primary hover:bg-primary-dark disabled:opacity-50 text-on-primary font-bold px-5 py-2.5 rounded-[12px] text-sm shadow-sm transition-all flex items-center justify-center gap-2 min-w-[80px]"
               >
                 {isApplyingCoupon ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Apply'}
               </button>
@@ -458,14 +458,14 @@ export default function CheckoutScreen() {
               />
 
               {pricing.discount > 0 && (
-                <div className="bg-green-50 border border-green-200 rounded-[12px] p-3 flex justify-between items-center">
-                  <span className="text-sm font-bold text-green-700">Coupon Discount</span>
-                  <span className="text-sm font-bold text-green-700">-₹{pricing.discount}</span>
+                <div className="bg-success-bg border border-success/20 rounded-[12px] p-3 flex justify-between items-center">
+                  <span className="text-sm font-bold text-success">Coupon Discount</span>
+                  <span className="text-sm font-bold text-success">-₹{pricing.discount}</span>
                 </div>
               )}
 
               {/* Desktop CTA. The fixed bottom bar is mobile-only. */}
-              <div className="hidden lg:block bg-white rounded-[20px] p-4 border border-sand shadow-sm space-y-3">
+              <div className="hidden lg:block bg-surface rounded-[20px] p-4 border border-sand shadow-sm space-y-3">
                 <div className="flex items-baseline justify-between">
                   <span className="text-[11px] font-bold text-muted uppercase tracking-wider">Total Pay</span>
                   <span className="text-2xl font-black text-dark">₹{pricing.total}</span>
@@ -483,7 +483,7 @@ export default function CheckoutScreen() {
           </div>
         </div>
 
-        <div className="lg:hidden fixed bottom-0 left-0 right-0 md:left-[260px] p-4 bg-white border-t border-sand z-40 pb-safe shadow-[0_-10px_20px_rgba(0,0,0,0.05)]">
+        <div className="lg:hidden checkout-action-bar p-4 bg-surface border-t border-border shadow-[0_-10px_20px_rgba(0,0,0,0.05)]">
           <div className="max-w-[800px] mx-auto flex items-center justify-between gap-4">
             <div className="flex flex-col">
               <span className="text-[11px] font-bold text-muted uppercase">Total Pay</span>
@@ -512,7 +512,7 @@ export default function CheckoutScreen() {
             <motion.div
               initial={{ scale: 0.9, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
-              className="bg-white rounded-[20px] p-8 w-full max-w-[280px] flex flex-col items-center justify-center shadow-xl"
+              className="bg-surface rounded-[20px] p-8 w-full max-w-[280px] flex flex-col items-center justify-center shadow-xl"
             >
               <div className="w-16 h-16 rounded-full border-4 border-sand border-t-primary animate-spin mb-6" />
               <h3 className="font-bold text-dark text-lg mb-2">Placing Order...</h3>
@@ -532,16 +532,16 @@ export default function CheckoutScreen() {
               initial={{ scale: 0.95, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.95, opacity: 0 }}
-              className="bg-white rounded-2xl p-6 w-full max-w-md shadow-2xl border border-rose-200"
+              className="bg-surface rounded-2xl p-6 w-full max-w-md shadow-2xl border border-error/20"
             >
-              <div className="flex items-center gap-3 text-rose-600 mb-3">
+              <div className="flex items-center gap-3 text-error mb-3">
                 <AlertCircle className="w-6 h-6 shrink-0" />
-                <h3 className="font-bold text-lg text-gray-900">Important: Inventory Update</h3>
+                <h3 className="font-bold text-lg text-foreground">Important: Inventory Update</h3>
               </div>
-              <p className="text-sm text-gray-700 leading-relaxed mb-4">
+              <p className="text-sm text-foreground leading-relaxed mb-4">
                 {stockError}
               </p>
-              <p className="text-xs text-gray-500 mb-6">
+              <p className="text-xs text-foreground-muted mb-6">
                 Items in your cart may have been purchased by other customers concurrently. Please return to your cart to review updated quantities.
               </p>
               <div className="flex justify-end gap-3">
@@ -550,7 +550,7 @@ export default function CheckoutScreen() {
                     setStockError(null);
                     router.push('/cart');
                   }}
-                  className="w-full bg-[#0f3e26] hover:bg-[#144f31] text-white font-bold py-2.5 rounded-xl shadow-md"
+                  className="w-full bg-primary hover:bg-primary-hover text-on-primary font-bold py-2.5 rounded-xl shadow-md"
                 >
                   Return to Cart & Adjust Items
                 </Button>

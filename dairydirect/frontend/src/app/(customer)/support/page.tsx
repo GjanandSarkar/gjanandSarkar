@@ -132,9 +132,9 @@ export default function SupportPage() {
 
   if (isAuthLoading || loading) {
     return (
-      <div className="min-h-screen bg-[#fafaf8] flex flex-col items-center justify-center gap-3">
-        <Loader2 className="w-8 h-8 animate-spin text-[#0f3e26]" />
-        <p className="text-xs font-bold text-gray-500">Loading support portal...</p>
+      <div className="min-h-screen bg-background flex flex-col items-center justify-center gap-3">
+        <Loader2 className="w-8 h-8 animate-spin text-primary" />
+        <p className="text-xs font-bold text-foreground-muted">Loading support portal...</p>
       </div>
     );
   }
@@ -142,83 +142,83 @@ export default function SupportPage() {
   const getStatusBadge = (status: string) => {
     switch (status) {
       case 'resolved':
-        return <span className="px-2.5 py-1 rounded-full text-[11px] font-bold bg-emerald-100 text-emerald-800">Resolved</span>;
+        return <span className="px-2.5 py-1 rounded-full text-[11px] font-bold bg-success-bg text-success">Resolved</span>;
       case 'in_progress':
-        return <span className="px-2.5 py-1 rounded-full text-[11px] font-bold bg-blue-100 text-blue-800">In Progress</span>;
+        return <span className="px-2.5 py-1 rounded-full text-[11px] font-bold bg-info-bg text-blue-800">In Progress</span>;
       case 'closed':
-        return <span className="px-2.5 py-1 rounded-full text-[11px] font-bold bg-gray-100 text-gray-700">Closed</span>;
+        return <span className="px-2.5 py-1 rounded-full text-[11px] font-bold bg-surface-muted text-foreground">Closed</span>;
       case 'open':
       default:
-        return <span className="px-2.5 py-1 rounded-full text-[11px] font-bold bg-amber-100 text-amber-800">Open</span>;
+        return <span className="px-2.5 py-1 rounded-full text-[11px] font-bold bg-warning-bg text-warning">Open</span>;
     }
   };
 
   const getPriorityBadge = (priority: string) => {
     switch (priority) {
       case 'urgent':
-        return <span className="text-[10px] font-black uppercase text-rose-600 bg-rose-50 px-2 py-0.5 rounded border border-rose-200">Urgent</span>;
+        return <span className="text-[10px] font-black uppercase text-error bg-error-bg px-2 py-0.5 rounded border border-error/20">Urgent</span>;
       case 'high':
-        return <span className="text-[10px] font-black uppercase text-amber-600 bg-amber-50 px-2 py-0.5 rounded border border-amber-200">High</span>;
+        return <span className="text-[10px] font-black uppercase text-warning bg-warning-bg px-2 py-0.5 rounded border border-warning/20">High</span>;
       case 'low':
-        return <span className="text-[10px] font-black uppercase text-gray-500 bg-gray-100 px-2 py-0.5 rounded">Low</span>;
+        return <span className="text-[10px] font-black uppercase text-foreground-muted bg-surface-muted px-2 py-0.5 rounded">Low</span>;
       case 'normal':
       default:
-        return <span className="text-[10px] font-black uppercase text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200">Normal</span>;
+        return <span className="text-[10px] font-black uppercase text-success bg-success-bg px-2 py-0.5 rounded border border-success/20">Normal</span>;
     }
   };
 
   return (
-    <div className="w-full bg-[#fafaf8] min-h-screen pb-16">
+    <div className="w-full bg-background min-h-screen pb-16">
       <div className="max-w-[1000px] mx-auto px-4 md:px-8 py-8 pt-24 md:pt-32">
         
         {/* Header */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8 border-b border-gray-200 pb-4">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8 border-b border-border pb-4">
           <div>
-            <span className="text-[10px] font-black uppercase tracking-widest text-[#c88a23]">Customer Care</span>
-            <h1 className="text-2xl md:text-3xl font-black text-[#0f3e26]">Support Tickets</h1>
+            <span className="text-[10px] font-black uppercase tracking-widest text-secondary">Customer Care</span>
+            <h1 className="text-2xl md:text-3xl font-black text-primary">Support Tickets</h1>
           </div>
           <div className="flex items-center gap-2">
             <button
               onClick={handleRefresh}
               disabled={isRefreshing}
-              className="p-2.5 bg-white border border-gray-200 rounded-xl text-gray-600 hover:bg-gray-50 transition shadow-2xs disabled:opacity-50"
+              className="p-2.5 bg-surface border border-border rounded-xl text-foreground-muted hover:bg-surface-muted transition shadow-2xs disabled:opacity-50"
               title="Refresh tickets"
             >
-              <RefreshCw className={`w-4 h-4 ${isRefreshing ? 'animate-spin text-emerald-600' : ''}`} />
+              <RefreshCw className={`w-4 h-4 ${isRefreshing ? 'animate-spin text-success' : ''}`} />
             </button>
             <button 
               onClick={() => {
                 setShowNew(!showNew);
                 setError('');
               }}
-              className="flex items-center gap-2 px-5 py-2.5 bg-[#0f3e26] text-white text-xs font-bold rounded-xl hover:bg-[#144f31] transition shadow-sm active:scale-95"
+              className="flex items-center gap-2 px-5 py-2.5 bg-primary text-on-primary text-xs font-bold rounded-xl hover:bg-primary-hover transition shadow-sm active:scale-95"
             >
-              {showNew ? 'Cancel' : <><Plus className="w-4 h-4 text-[#c88a23]" /> New Ticket</>}
+              {showNew ? 'Cancel' : <><Plus className="w-4 h-4 text-secondary" /> New Ticket</>}
             </button>
           </div>
         </div>
 
         {/* Success Alert */}
         {success && (
-          <div className="mb-6 p-4 bg-emerald-50 border border-emerald-200 rounded-2xl flex items-center justify-between gap-3 text-emerald-800 text-xs font-bold animate-in fade-in">
+          <div className="mb-6 p-4 bg-success-bg border border-success/20 rounded-2xl flex items-center justify-between gap-3 text-success text-xs font-bold animate-in fade-in">
             <div className="flex items-center gap-2">
-              <CheckCircle2 className="w-4 h-4 text-emerald-600 flex-shrink-0" />
+              <CheckCircle2 className="w-4 h-4 text-success flex-shrink-0" />
               <span>{success}</span>
             </div>
-            <button onClick={() => setSuccess('')} className="text-emerald-600 hover:underline">Dismiss</button>
+            <button onClick={() => setSuccess('')} className="text-success hover:underline">Dismiss</button>
           </div>
         )}
 
         {/* New Ticket Form Modal/Drawer */}
         {showNew && (
-          <div className="bg-white rounded-3xl shadow-md border border-gray-200/80 p-6 sm:p-8 mb-8 animate-in fade-in zoom-in-95">
-            <h2 className="text-base font-black text-[#0f3e26] mb-1">Create Support Ticket</h2>
-            <p className="text-xs text-gray-500 mb-6">
+          <div className="bg-surface rounded-3xl shadow-md border border-border/80 p-6 sm:p-8 mb-8 animate-in fade-in zoom-in-95">
+            <h2 className="text-base font-black text-primary mb-1">Create Support Ticket</h2>
+            <p className="text-xs text-foreground-muted mb-6">
               Our support team will review your inquiry and respond as soon as possible.
             </p>
 
             {error && (
-              <div className="mb-4 p-3 bg-rose-50 border border-rose-200 rounded-xl flex items-center gap-2 text-rose-700 text-xs font-bold">
+              <div className="mb-4 p-3 bg-error-bg border border-error/20 rounded-xl flex items-center gap-2 text-error text-xs font-bold">
                 <AlertCircle className="w-4 h-4 flex-shrink-0" />
                 <span>{error}</span>
               </div>
@@ -227,41 +227,41 @@ export default function SupportPage() {
             <form onSubmit={handleSubmit} className="space-y-4">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="sm:col-span-2">
-                  <label className="block text-xs font-bold text-gray-700 mb-1.5">
-                    Subject <span className="text-rose-500">*</span>
+                  <label className="block text-xs font-bold text-foreground mb-1.5">
+                    Subject <span className="text-error">*</span>
                   </label>
                   <input 
                     type="text" 
                     required 
                     value={form.subject} 
                     onChange={e => setForm({...form, subject: e.target.value})}
-                    className="w-full px-4 py-2.5 rounded-xl border border-gray-300 text-xs focus:ring-1 focus:ring-[#0f3e26] focus:border-[#0f3e26] outline-none"
+                    className="w-full px-4 py-2.5 rounded-xl border border-border-hover text-xs focus:ring-1 focus:ring-[var(--primary)] focus:border-primary outline-none"
                     placeholder="e.g. Question about order delivery or ghee purity"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-xs font-bold text-gray-700 mb-1.5">
+                  <label className="block text-xs font-bold text-foreground mb-1.5">
                     Order ID / Number (Optional)
                   </label>
                   <input 
                     type="text" 
                     value={form.orderId} 
                     onChange={e => setForm({...form, orderId: e.target.value})}
-                    className="w-full px-4 py-2.5 rounded-xl border border-gray-300 text-xs focus:ring-1 focus:ring-[#0f3e26] focus:border-[#0f3e26] outline-none font-mono"
+                    className="w-full px-4 py-2.5 rounded-xl border border-border-hover text-xs focus:ring-1 focus:ring-[var(--primary)] focus:border-primary outline-none font-mono"
                     placeholder="e.g. ORD-2026-1001 or order UUID"
                   />
-                  <p className="text-[10px] text-gray-400 mt-1">If your issue is related to an existing order, enter it here.</p>
+                  <p className="text-[10px] text-foreground-muted mt-1">If your issue is related to an existing order, enter it here.</p>
                 </div>
 
                 <div>
-                  <label className="block text-xs font-bold text-gray-700 mb-1.5">
+                  <label className="block text-xs font-bold text-foreground mb-1.5">
                     Priority
                   </label>
                   <select
                     value={form.priority}
                     onChange={e => setForm({...form, priority: e.target.value})}
-                    className="w-full px-4 py-2.5 rounded-xl border border-gray-300 text-xs bg-white focus:ring-1 focus:ring-[#0f3e26] outline-none font-medium"
+                    className="w-full px-4 py-2.5 rounded-xl border border-border-hover text-xs bg-surface focus:ring-1 focus:ring-[var(--primary)] outline-none font-medium"
                   >
                     <option value="low">Low (General Query)</option>
                     <option value="normal">Normal (Standard Assistance)</option>
@@ -271,15 +271,15 @@ export default function SupportPage() {
                 </div>
 
                 <div className="sm:col-span-2">
-                  <label className="block text-xs font-bold text-gray-700 mb-1.5">
-                    Message Description <span className="text-rose-500">*</span>
+                  <label className="block text-xs font-bold text-foreground mb-1.5">
+                    Message Description <span className="text-error">*</span>
                   </label>
                   <textarea 
                     required 
                     rows={4} 
                     value={form.message} 
                     onChange={e => setForm({...form, message: e.target.value})}
-                    className="w-full px-4 py-2.5 rounded-xl border border-gray-300 text-xs focus:ring-1 focus:ring-[#0f3e26] focus:border-[#0f3e26] outline-none resize-none"
+                    className="w-full px-4 py-2.5 rounded-xl border border-border-hover text-xs focus:ring-1 focus:ring-[var(--primary)] focus:border-primary outline-none resize-none"
                     placeholder="Describe your issue or question in detail..."
                   />
                 </div>
@@ -289,14 +289,14 @@ export default function SupportPage() {
                 <button
                   type="button"
                   onClick={() => setShowNew(false)}
-                  className="px-5 py-2.5 bg-gray-100 hover:bg-gray-200 text-gray-700 text-xs font-bold rounded-xl transition"
+                  className="px-5 py-2.5 bg-surface-muted hover:bg-border text-foreground text-xs font-bold rounded-xl transition"
                 >
                   Cancel
                 </button>
                 <button 
                   type="submit" 
                   disabled={submitting}
-                  className="px-6 py-2.5 bg-[#0f3e26] hover:bg-[#144f31] text-white text-xs font-bold rounded-xl shadow-md flex items-center gap-2 transition disabled:opacity-50 active:scale-95"
+                  className="px-6 py-2.5 bg-primary hover:bg-primary-hover text-on-primary text-xs font-bold rounded-xl shadow-md flex items-center gap-2 transition disabled:opacity-50 active:scale-95"
                 >
                   {submitting ? (
                     <>
@@ -305,7 +305,7 @@ export default function SupportPage() {
                     </>
                   ) : (
                     <>
-                      <Send className="w-3.5 h-3.5 text-[#c88a23]" />
+                      <Send className="w-3.5 h-3.5 text-secondary" />
                       <span>Submit Ticket</span>
                     </>
                   )}
@@ -318,21 +318,21 @@ export default function SupportPage() {
         {/* Tickets List */}
         <div className="space-y-4">
           {tickets.length === 0 ? (
-            <div className="bg-white rounded-3xl shadow-sm border border-gray-200 p-12 text-center space-y-3">
-              <div className="w-14 h-14 rounded-2xl bg-gray-50 flex items-center justify-center mx-auto text-gray-400">
+            <div className="bg-surface rounded-3xl shadow-sm border border-border p-12 text-center space-y-3">
+              <div className="w-14 h-14 rounded-2xl bg-surface-muted flex items-center justify-center mx-auto text-foreground-muted">
                 <MessageSquare className="w-7 h-7" />
               </div>
-              <h3 className="text-sm font-bold text-gray-900">No Support Tickets Yet</h3>
-              <p className="text-xs text-gray-500 max-w-sm mx-auto">
+              <h3 className="text-sm font-bold text-foreground">No Support Tickets Yet</h3>
+              <p className="text-xs text-foreground-muted max-w-sm mx-auto">
                 Need help with your orders, partner brands, or delivery? Click "New Ticket" above to reach our team.
               </p>
             </div>
           ) : (
             tickets.map(ticket => (
-              <div key={ticket.id} className="bg-white rounded-2xl shadow-sm border border-gray-200/80 p-5 sm:p-6 transition hover:border-gray-300 space-y-3">
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-gray-100 pb-3">
+              <div key={ticket.id} className="bg-surface rounded-2xl shadow-sm border border-border/80 p-5 sm:p-6 transition hover:border-border-hover space-y-3">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-border pb-3">
                   <div className="flex items-center gap-2.5">
-                    <h3 className="font-bold text-sm text-gray-900">{ticket.subject}</h3>
+                    <h3 className="font-bold text-sm text-foreground">{ticket.subject}</h3>
                     {getPriorityBadge(ticket.priority)}
                   </div>
                   <div className="flex items-center gap-2">
@@ -340,21 +340,21 @@ export default function SupportPage() {
                   </div>
                 </div>
 
-                <p className="text-gray-700 text-xs leading-relaxed whitespace-pre-wrap">{ticket.message}</p>
+                <p className="text-foreground text-xs leading-relaxed whitespace-pre-wrap">{ticket.message}</p>
 
-                <div className="flex flex-wrap items-center justify-between text-[11px] text-gray-400 gap-3 pt-2">
+                <div className="flex flex-wrap items-center justify-between text-[11px] text-foreground-muted gap-3 pt-2">
                   <div className="flex items-center gap-4">
                     <span className="flex items-center gap-1">
-                      <Clock className="w-3.5 h-3.5 text-gray-400" />
+                      <Clock className="w-3.5 h-3.5 text-foreground-muted" />
                       <span>{new Date(ticket.created_at).toLocaleDateString()}</span>
                     </span>
                     {ticket.order_id && (
-                      <span className="font-mono bg-gray-50 px-2 py-0.5 rounded border border-gray-200 text-gray-600">
+                      <span className="font-mono bg-surface-muted px-2 py-0.5 rounded border border-border text-foreground-muted">
                         Order: {ticket.order_id.slice(0, 8)}...
                       </span>
                     )}
                   </div>
-                  <span className="font-mono text-[10px] text-gray-400">
+                  <span className="font-mono text-[10px] text-foreground-muted">
                     ID: {ticket.id.slice(0, 8)}
                   </span>
                 </div>

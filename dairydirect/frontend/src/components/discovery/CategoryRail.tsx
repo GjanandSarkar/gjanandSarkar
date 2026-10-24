@@ -45,7 +45,7 @@ export function CategoryRail({ categories, activeCategory, onSelect, isLoading }
           >
             <div className={`
               flex items-center justify-center w-6 h-6 md:w-10 md:h-10 rounded-full
-              ${isActive ? 'bg-white/20' : 'bg-surface-container-highest'}
+              ${isActive ? 'bg-surface/20' : 'bg-surface-container-highest'}
             `}>
               <CategoryNameIcon category={cat} />
             </div>

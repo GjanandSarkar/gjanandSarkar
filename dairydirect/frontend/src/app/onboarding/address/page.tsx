@@ -215,7 +215,7 @@ function AddressOnboardingInner() {
   ];
 
   return (
-    <div className="min-h-screen flex flex-col bg-white">
+    <div className="min-h-screen flex flex-col bg-surface">
       {/* Header */}
       <div className="px-6 pt-10 pb-4 max-w-xl mx-auto w-full">
         <h1 className="text-2xl sm:text-3xl font-black text-on-surface tracking-tight mb-1">
@@ -274,8 +274,8 @@ function AddressOnboardingInner() {
           </div>
 
           {locationNotice && (
-            <div className="flex items-center gap-2 px-3 py-2 bg-emerald-50 text-emerald-800 rounded-xl text-xs font-medium border border-emerald-200">
-              <Info className="w-4 h-4 shrink-0 text-emerald-600" />
+            <div className="flex items-center gap-2 px-3 py-2 bg-success-bg text-success rounded-xl text-xs font-medium border border-success/20">
+              <Info className="w-4 h-4 shrink-0 text-success" />
               <span>{locationNotice}</span>
             </div>
           )}
@@ -289,7 +289,7 @@ function AddressOnboardingInner() {
               showCenterMarker={true}
               onLocationChange={handleLocationChange}
             />
-            <div className="absolute bottom-2 right-2 px-2.5 py-1 bg-white/90 backdrop-blur rounded-lg text-[10px] font-bold text-gray-700 shadow-sm pointer-events-none">
+            <div className="absolute bottom-2 right-2 px-2.5 py-1 bg-surface/90 backdrop-blur rounded-lg text-[10px] font-bold text-foreground shadow-sm pointer-events-none">
               📍 Drag map to adjust pin
             </div>
           </div>
@@ -338,7 +338,7 @@ function AddressOnboardingInner() {
                   className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold transition-all border-2 ${
                     isSelected 
                       ? 'bg-primary/10 border-primary text-primary shadow-sm' 
-                      : 'bg-white border-sand text-on-surface hover:bg-surface-container'
+                      : 'bg-surface border-sand text-on-surface hover:bg-surface-container'
                   }`}
                 >
                   <Icon className="w-3.5 h-3.5" />
@@ -352,16 +352,16 @@ function AddressOnboardingInner() {
         {/* Default Address Checkbox */}
         <div 
           onClick={() => setIsDefault(prev => !prev)}
-          className="flex items-center gap-3 p-3.5 bg-surface-container rounded-2xl cursor-pointer hover:bg-gray-100 transition-colors select-none"
+          className="flex items-center gap-3 p-3.5 bg-surface-container rounded-2xl cursor-pointer hover:bg-surface-muted transition-colors select-none"
         >
           {isDefault ? (
             <CheckSquare className="w-5 h-5 text-primary" />
           ) : (
-            <Square className="w-5 h-5 text-gray-400" />
+            <Square className="w-5 h-5 text-foreground-muted" />
           )}
           <div>
-            <p className="text-xs font-bold text-gray-900">Make this my default delivery address</p>
-            <p className="text-[11px] text-gray-500">
+            <p className="text-xs font-bold text-foreground">Make this my default delivery address</p>
+            <p className="text-[11px] text-foreground-muted">
               {hasExistingAddresses 
                 ? 'Will be used as your primary address for quick checkouts.' 
                 : 'Your primary delivery location.'}
@@ -371,14 +371,14 @@ function AddressOnboardingInner() {
       </div>
 
       {/* Footer Button */}
-      <div className="fixed bottom-0 left-0 right-0 p-4 bg-white/90 backdrop-blur-xl border-t border-sand z-50">
+      <div className="fixed bottom-0 left-0 right-0 p-4 bg-surface/90 backdrop-blur-xl border-t border-sand z-50">
         <div className="max-w-xl mx-auto w-full">
           <button
             onClick={handleSave}
             disabled={!address.trim() || !name.trim() || isSaving || isSuccess}
             className={`w-full h-12 sm:h-14 rounded-2xl font-bold flex items-center justify-center gap-2 transition-all active:scale-95 shadow-xl ${
               isSuccess 
-                ? 'bg-emerald-600 text-white shadow-emerald-200'
+                ? 'bg-success text-white shadow-emerald-200'
                 : isSaving
                   ? 'bg-primary/70 text-white cursor-wait'
                   : 'bg-primary text-white shadow-primary/20 disabled:opacity-50'

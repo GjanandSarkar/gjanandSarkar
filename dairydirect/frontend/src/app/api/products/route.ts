@@ -6,6 +6,7 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { query, withTransaction, isPgConfigured } from '@/lib/aws/rds';
+import { filterSellable, unsellableProducts } from '@/lib/catalog/sellable';
 import {
   getAuthUser,
   getSellerForUser,
@@ -139,7 +140,23 @@ export async function GET(request: NextRequest) {
         if (!error && data) {
           // If customer facing catalog, filter out any product whose seller is not active
           if (activeOnly && !sellerId) {
-            products = data.filter((p: any) => !p.seller_id || (p.sellers && p.sellers.status === 'active'));
+            const fromActiveSellers = data.filter(
+              (p: any) => !p.seller_id || (p.sellers && p.sellers.status === 'active')
+            );
+            /* Also drop anything with no priced variant. Price lives on
+               product_variants, so a product row can be valid yet have
+               nothing buyable -- it listed at ₹0 and put a ₹0 line in the
+               cart. Admin and seller views (activeOnly=false, or a
+               sellerId) deliberately skip this so staff can still see and
+               repair the broken row. */
+            const dropped = unsellableProducts(fromActiveSellers);
+            if (dropped.length > 0) {
+              console.warn(
+                `[Products GET] hiding ${dropped.length} unsellable product(s) with no priced variant:`,
+                dropped.map((p: any) => `${p.id} (${p.name})`).join(', ')
+              );
+            }
+            products = filterSellable(fromActiveSellers);
           } else {
             products = data;
           }

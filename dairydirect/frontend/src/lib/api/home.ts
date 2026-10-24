@@ -1,3 +1,4 @@
+import { filterSellable } from '@/lib/catalog/sellable';
 import { unstable_cache } from 'next/cache';
 import { getAdminSupabase } from '@/lib/supabase/admin';
 import type { CatalogProduct } from '@/lib/types/catalog';
@@ -33,11 +34,14 @@ async function fetchHomeFeed(): Promise<HomeProduct[]> {
         'id, name, category, image_url, brand, rating, reviews_count, product_variants(id, weight, price, original_price, stock, available_quantity)'
       )
       .eq('is_active', true)
+      .eq('approval_status', 'approved')
       .order('created_at', { ascending: false })
       .limit(HOME_FEED_LIMIT);
 
     if (error) throw error;
-    return (data ?? []) as HomeProduct[];
+    // Never list a product the storefront cannot price; it renders ₹0
+    // and puts a ₹0 line in the cart.
+    return filterSellable((data ?? []) as HomeProduct[]);
   } catch (error) {
     console.error('[home] getHomeFeed failed:', error);
     // The homepage must still render (hero, trust bar, banners) if the DB is
@@ -83,11 +87,14 @@ async function fetchCatalog(): Promise<HomeProduct[]> {
         'id, name, category, image_url, description, brand, rating, reviews_count, product_variants(id, weight, price, original_price, stock, available_quantity)'
       )
       .eq('is_active', true)
+      .eq('approval_status', 'approved')
       .order('created_at', { ascending: false })
       .limit(500);
 
     if (error) throw error;
-    return (data ?? []) as HomeProduct[];
+    // Never list a product the storefront cannot price; it renders ₹0
+    // and puts a ₹0 line in the cart.
+    return filterSellable((data ?? []) as HomeProduct[]);
   } catch (error) {
     console.error('[catalog] getCatalog failed:', error);
     return [];
@@ -119,6 +126,7 @@ export function getCategoryProducts(category?: string): Promise<HomeProduct[]> {
             'id, name, category, image_url, description, brand, rating, reviews_count, product_variants(id, weight, price, original_price, stock, available_quantity)'
           )
           .eq('is_active', true)
+      .eq('approval_status', 'approved')
           .order('created_at', { ascending: false })
           .limit(200);
 
@@ -134,7 +142,9 @@ export function getCategoryProducts(category?: string): Promise<HomeProduct[]> {
 
         const { data, error } = await query;
         if (error) throw error;
-        return (data ?? []) as HomeProduct[];
+        // Never list a product the storefront cannot price; it renders ₹0
+    // and puts a ₹0 line in the cart.
+    return filterSellable((data ?? []) as HomeProduct[]);
       } catch (error) {
         console.error('[catalog] getCategoryProducts failed:', error);
         return [];

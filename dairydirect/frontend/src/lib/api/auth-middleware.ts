@@ -8,6 +8,7 @@ import { verifyAccessToken, extractTokenFromRequest } from '@/lib/auth/jwt';
 import { getCachedUserProfile, cacheUserProfile } from '@/lib/aws/redis';
 import { query } from '@/lib/aws/rds';
 import { getAdminSupabase } from '@/lib/supabase/admin';
+import { NextResponse } from 'next/server';
 
 // ─── Short-lived in-process auth cache ────────────────────────────────────────
 // Keyed by a truncated token (last 32 chars) → AuthUser result
@@ -238,13 +239,71 @@ export async function getAuthUser(request: Request): Promise<AuthUser | null> {
   return result;
 }
 
+export type CustomerAuthResult =
+  | { ok: true; user: AuthUser & { id: string } }
+  | { ok: false; response: NextResponse };
+
+export type SellerAuthResult =
+  | { ok: true; user: AuthUser & { id: string }; seller: SellerContext & { id: string } }
+  | { ok: false; response: NextResponse };
+
+export type AdminAuthResult =
+  | { ok: true; user: AuthUser & { id: string } }
+  | { ok: false; response: NextResponse };
+
 /**
- * Require admin role. Returns user if admin, null otherwise.
+ * Require customer (authenticated user). Returns { ok: true, user } or { ok: false, response }.
  */
-export async function requireAdmin(request: Request): Promise<AuthUser | null> {
+export async function requireCustomer(request: Request): Promise<CustomerAuthResult> {
+  const user = await getAuthUser(request);
+  if (!user) {
+    return {
+      ok: false,
+      response: NextResponse.json({ error: 'Unauthorized: Authentication required' }, { status: 401 }),
+    };
+  }
+  return { ok: true, user: { ...user, id: user.userId } };
+}
+
+/**
+ * Require seller role. Returns { ok: true, user, seller } or { ok: false, response }.
+ */
+export async function requireSeller(request: Request): Promise<SellerAuthResult> {
+  const user = await getAuthUser(request);
+  if (!user) {
+    return {
+      ok: false,
+      response: NextResponse.json({ error: 'Unauthorized: Authentication required' }, { status: 401 }),
+    };
+  }
+  const seller = await getSellerForUser(user.userId);
+  if (!seller && !user.isAdmin) {
+    return {
+      ok: false,
+      response: NextResponse.json({ error: 'Forbidden: Seller profile required' }, { status: 403 }),
+    };
+  }
+  return {
+    ok: true,
+    user: { ...user, id: user.userId },
+    seller: seller
+      ? { ...seller, id: seller.sellerId }
+      : { sellerId: '', id: '', userId: user.userId, category: '', status: 'active', storeName: 'Admin Override' },
+  };
+}
+
+/**
+ * Require admin role. Returns { ok: true, user } or { ok: false, response }.
+ */
+export async function requireAdmin(request: Request): Promise<AdminAuthResult> {
   const auth = await getAuthUser(request);
-  if (!auth || !auth.isAdmin) return null;
-  return auth;
+  if (!auth || !auth.isAdmin) {
+    return {
+      ok: false,
+      response: NextResponse.json({ error: 'Forbidden: Admin access required' }, { status: 403 }),
+    };
+  }
+  return { ok: true, user: { ...auth, id: auth.userId } };
 }
 
 /**

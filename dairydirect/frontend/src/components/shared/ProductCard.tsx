@@ -4,6 +4,7 @@ import React, { useState, useCallback, useEffect } from 'react';
 import Link from 'next/link';
 import { Plus, Minus, Pencil, Star, ShoppingCart, Heart } from 'lucide-react';
 import { useTranslation } from '@/lib/i18n';
+import { createPortal } from 'react-dom';
 import { useStore } from '@/store/useStore';
 import { addToCart, updateCartItem } from '@/lib/api/cart';
 import { toggleWishlist } from '@/lib/api/wishlist';
@@ -24,6 +25,7 @@ const ProductEditModal = dynamic(
 );
 import Image from 'next/image';
 import { PLACEHOLDER_PRODUCT_IMAGE } from '@/lib/constants/brand';
+import { trackProductEvent } from '@/lib/analytics/session';
 
 interface ProductCardProps {
   product: CatalogProduct;
@@ -81,6 +83,18 @@ export function ProductCard({
   }, [variants, selectedVariant]);
 
   const [showDrawer, setShowDrawer] = useState(false);
+
+  /* Lock the page behind the size picker. Without this the list underneath
+     scrolls while the sheet is open, which on mobile reads as the sheet
+     drifting off-screen. */
+  useEffect(() => {
+    if (!showDrawer) return;
+    const previous = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    return () => {
+      document.body.style.overflow = previous;
+    };
+  }, [showDrawer]);
   const [busy, setBusy] = useState(false);
 
   const isSaved = mounted && wishlist.includes(product.id);
@@ -115,6 +129,9 @@ export function ProductCard({
       }
 
       setBusy(true);
+      // A cart add is weighted far above a view in popularity scoring, so it
+      // has to be recorded wherever it can happen.
+      trackProductEvent(product.id, 'add_to_cart', { source: 'product_card' });
       addToCartLocal(product.id, vid, 1);
       if (user) {
         await addToCart(user.id, product.id, vid, 1);
@@ -199,7 +216,7 @@ export function ProductCard({
         controls in z-order. The whole card is clickable, the link is properly
         announced and focusable, and the buttons stay genuinely separate.
       */}
-      <div className="flex flex-col h-full bg-white rounded-2xl border border-gray-200/90 p-3.5 shadow-2xs hover:border-[#c88a23] group relative lift pressable focus-within:ring-2 focus-within:ring-[#0f3e26]/40">
+      <div className="flex flex-col h-full bg-surface rounded-2xl border border-border/90 p-3.5 shadow-2xs hover:border-secondary group relative lift pressable focus-within:ring-2 focus-within:ring-[var(--primary)]/40">
         <Link
           href={`/products/${product.id}`}
           className="absolute inset-0 z-10 rounded-2xl"
@@ -210,7 +227,7 @@ export function ProductCard({
           </span>
         </Link>
         {/* Product Image Container */}
-        <div className="relative w-full aspect-square bg-gray-50/80 rounded-xl overflow-hidden mb-3 p-2 flex items-center justify-center">
+        <div className="relative w-full aspect-square bg-surface-muted/80 rounded-xl overflow-hidden mb-3 p-2 flex items-center justify-center">
           
           <Image
             src={product.image_url || PLACEHOLDER_PRODUCT_IMAGE}
@@ -230,18 +247,18 @@ export function ProductCard({
               This is the single strongest scanning cue on a listing grid and
               the card had none. */}
           {hasRealDiscount && discountPct >= 1 && (
-            <span className="absolute top-2 left-2 bg-[#c88a23] text-white text-[10px] font-black px-1.5 py-0.5 rounded-md shadow-sm tabular-nums">
+            <span className="absolute top-2 left-2 bg-secondary text-white text-[10px] font-black px-1.5 py-0.5 rounded-md shadow-sm tabular-nums">
               {discountPct}% OFF
             </span>
           )}
 
           {/* Stock Badges */}
           {isAllOutOfStock ? (
-            <span className="absolute bottom-2 left-2 bg-rose-600 text-white text-[10px] font-extrabold px-2 py-0.5 rounded-md shadow-xs">
+            <span className="absolute bottom-2 left-2 bg-error text-on-error text-[10px] font-extrabold px-2 py-0.5 rounded-md shadow-xs">
               Out of Stock
             </span>
           ) : isLowStock ? (
-            <span className="absolute bottom-2 left-2 bg-amber-600 text-white text-[10px] font-extrabold px-2 py-0.5 rounded-md shadow-xs">
+            <span className="absolute bottom-2 left-2 bg-warning text-on-warning text-[10px] font-extrabold px-2 py-0.5 rounded-md shadow-xs">
               Only {availableStock} left
             </span>
           ) : null}
@@ -250,8 +267,8 @@ export function ProductCard({
           <button
             type="button"
             onClick={handleToggleWishlist}
-            className={`absolute top-2 right-2 w-7 h-7 rounded-full bg-white/95 backdrop-blur-xs shadow-sm border border-gray-200 flex items-center justify-center transition-all hover:scale-110 active:scale-95 z-20 ${
-              isSaved ? 'text-rose-600' : 'text-gray-400 hover:text-rose-500'
+            className={`absolute top-2 right-2 w-7 h-7 rounded-full bg-surface/95 backdrop-blur-xs shadow-sm border border-border flex items-center justify-center transition-all hover:scale-110 active:scale-95 z-20 ${
+              isSaved ? 'text-error' : 'text-foreground-muted hover:text-error'
             }`}
             title={isSaved ? 'Remove from Wishlist' : 'Add to Wishlist'}
           >
@@ -267,7 +284,7 @@ export function ProductCard({
                 e.stopPropagation();
                 setIsEditModalOpen(true);
               }}
-              className="absolute top-2 right-10 w-7 h-7 rounded-full bg-white shadow-md border border-gray-200 flex items-center justify-center transition-all hover:scale-110 active:scale-95 z-20 text-[#0f3e26]"
+              className="absolute top-2 right-10 w-7 h-7 rounded-full bg-surface shadow-md border border-border flex items-center justify-center transition-all hover:scale-110 active:scale-95 z-20 text-primary"
               title="Admin: Quick Edit"
             >
               <Pencil className="w-3.5 h-3.5" strokeWidth={2.5} />
@@ -277,7 +294,7 @@ export function ProductCard({
           {/* Cart Quantity Badge */}
           {isInCart && (
             <div
-              className={`absolute bottom-2 right-2 w-5 h-5 rounded-full bg-[#c88a23] text-white text-[10px] font-black flex items-center justify-center shadow-md z-10`}
+              className={`absolute bottom-2 right-2 w-5 h-5 rounded-full bg-secondary text-white text-[10px] font-black flex items-center justify-center shadow-md z-10`}
             >
               {totalQuantity}
             </div>
@@ -292,27 +309,27 @@ export function ProductCard({
                 is one verified brand per category — and absurd on electronics
                 or books. */}
             {product.brand && (
-              <span className="text-[10px] text-gray-500 font-semibold block mb-0.5 truncate">
+              <span className="text-[10px] text-foreground-muted font-semibold block mb-0.5 truncate">
                 {product.brand}
               </span>
             )}
 
-            <h3 className="text-xs sm:text-sm font-bold text-gray-900 line-clamp-1 group-hover:text-[#0f3e26] transition-colors leading-snug">
+            <h3 className="text-xs sm:text-sm font-bold text-foreground line-clamp-1 group-hover:text-primary transition-colors leading-snug">
               {product.name}
             </h3>
 
             <div className="flex items-center gap-1 text-[10px] font-bold mt-1 mb-2">
               {showRating && (
                 <>
-                  <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded bg-emerald-600 text-white">
+                  <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded bg-success text-on-success">
                     <Star className="w-2.5 h-2.5 fill-white text-white" />
                     {rating!.toFixed(1)}
                   </span>
-                  <span className="text-gray-400 font-normal">({reviewCount})</span>
-                  <span className="text-gray-300">•</span>
+                  <span className="text-foreground-muted font-normal">({reviewCount})</span>
+                  <span className="text-foreground-muted">•</span>
                 </>
               )}
-              <span className="text-gray-500 font-medium">
+              <span className="text-foreground-muted font-medium">
                 {selectedVariant.weight}
                 {variants.length > 1 && ` (+${variants.length - 1})`}
               </span>
@@ -323,14 +340,14 @@ export function ProductCard({
               `relative z-20` lifts this row above the stretched link (z-10)
               so the add button and quantity stepper stay directly clickable
               instead of being covered by the card-wide anchor. */}
-          <div className="relative z-20 flex items-center justify-between gap-2 pt-2 border-t border-gray-100 mt-1">
+          <div className="relative z-20 flex items-center justify-between gap-2 pt-2 border-t border-border mt-1">
             <div className="flex flex-col">
               <div className="flex items-baseline gap-1">
-                <span className="text-base font-black text-[#0f3e26]">
+                <span className="text-base font-black text-primary">
                   ₹{selectedVariant.price}
                 </span>
                 {hasRealDiscount && (
-                  <span className="text-[11px] text-gray-400 line-through">
+                  <span className="text-[11px] text-foreground-muted line-through">
                     ₹{originalPrice}
                   </span>
                 )}
@@ -340,7 +357,7 @@ export function ProductCard({
             {variants.length === 1 && isOutOfStock ? (
               <button
                 disabled
-                className="px-3 py-1.5 bg-gray-100 text-gray-400 text-xs font-bold rounded-lg cursor-not-allowed border border-gray-200"
+                className="px-3 py-1.5 bg-surface-muted text-foreground-muted text-xs font-bold rounded-lg cursor-not-allowed border border-border"
               >
                 Sold Out
               </button>
@@ -348,27 +365,27 @@ export function ProductCard({
               <button
                 onClick={handleAdd}
                 disabled={busy || (variants.length === 1 && isOutOfStock)}
-                className="px-3.5 py-1.5 bg-[#0f3e26] hover:bg-[#144f31] text-white text-xs font-bold rounded-lg transition-colors flex items-center justify-center gap-1 shadow-xs active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="px-3.5 py-1.5 bg-primary hover:bg-primary-hover text-on-primary text-xs font-bold rounded-lg transition-colors flex items-center justify-center gap-1 shadow-xs active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 <ShoppingCart className="w-3.5 h-3.5" />
                 <span>{variants.length > 1 ? 'Select' : 'Add'}</span>
               </button>
             ) : (
-              <div className="flex items-center bg-gray-100 rounded-lg overflow-hidden border border-gray-300">
+              <div className="flex items-center bg-surface-muted rounded-lg overflow-hidden border border-border-hover">
                 <button
                   onClick={(e) => handleUpdate(e, 'dec')}
                   disabled={busy}
-                  className="w-7 h-7 flex items-center justify-center text-gray-700 hover:bg-gray-200 transition-colors active:scale-90"
+                  className="w-7 h-7 flex items-center justify-center text-foreground hover:bg-border transition-colors active:scale-90"
                 >
                   <Minus className="w-3 h-3 stroke-[3]" />
                 </button>
-                <span className="px-1.5 text-center text-xs font-black text-gray-900 min-w-[20px]">
+                <span className="px-1.5 text-center text-xs font-black text-foreground min-w-[20px]">
                   {variants.length > 1 ? totalQuantity : currentVariantQty}
                 </span>
                 <button
                   onClick={(e) => handleUpdate(e, 'inc')}
                   disabled={busy || (variants.length === 1 && currentVariantQty >= availableStock)}
-                  className="w-7 h-7 flex items-center justify-center bg-[#0f3e26] text-white hover:bg-[#144f31] transition-colors active:scale-90 disabled:opacity-40 disabled:cursor-not-allowed"
+                  className="w-7 h-7 flex items-center justify-center bg-primary text-on-primary hover:bg-primary-hover transition-colors active:scale-90 disabled:opacity-40 disabled:cursor-not-allowed"
                   title={currentVariantQty >= availableStock ? 'Max available stock reached' : undefined}
                 >
                   <Plus className="w-3 h-3 stroke-[3]" />
@@ -379,32 +396,54 @@ export function ProductCard({
         </div>
       </div>
 
-      {/* Variant Drawer */}
-      <AnimatePresence>
-        {showDrawer && (
-          <>
-            <motion.div
-              initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-              className="fixed inset-0 bg-black/60 z-[60] backdrop-blur-xs"
-              onClick={() => setShowDrawer(false)}
-            />
-            <motion.div
-              initial={{ y: '100%' }} animate={{ y: 0 }} exit={{ y: '100%' }}
-              transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-              className="fixed bottom-0 left-0 right-0 rounded-t-3xl z-[70] p-6 max-w-lg mx-auto bg-white shadow-2xl"
-            >
-              <div className="w-12 h-1.5 rounded-full mx-auto mb-6 bg-gray-300" />
+      {/* Size picker.
+
+          Rendered through a portal into document.body. It used to live
+          inside the card, and `position: fixed` resolves against the
+          nearest ancestor with a transform -- which the animated product
+          rails provide. The sheet was therefore trapped at the card's width
+          and position instead of the viewport, and the "full screen"
+          backdrop only covered the card, so the page never dimmed.
+
+          A flex wrapper does the positioning (bottom sheet on mobile,
+          centred dialog from sm up) so the sheet's own transform stays free
+          for the open/close animation. It scrolls internally and clears the
+          home indicator, instead of overflowing off-screen when a product
+          has several sizes. */}
+      {mounted &&
+        createPortal(
+          <AnimatePresence>
+            {showDrawer && (
+              <>
+                <motion.div
+                  initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+                  className="fixed inset-0 z-[60] backdrop-blur-xs"
+                  style={{ background: 'var(--scrim)' }}
+                  onClick={() => setShowDrawer(false)}
+                />
+                <div className="fixed inset-0 z-[70] flex items-end justify-center sm:items-center sm:p-6 pointer-events-none">
+                  <motion.div
+                    initial={{ y: '100%', opacity: 0.6 }}
+                    animate={{ y: 0, opacity: 1 }}
+                    exit={{ y: '100%', opacity: 0.6 }}
+                    transition={{ type: 'spring', damping: 28, stiffness: 320 }}
+                    role="dialog"
+                    aria-modal="true"
+                    aria-label={`Choose a size for ${product.name}`}
+                    className="pointer-events-auto w-full sm:w-auto sm:min-w-[22rem] sm:max-w-md bg-surface shadow-2xl rounded-t-3xl sm:rounded-3xl max-h-[85dvh] sm:max-h-[80dvh] overflow-y-auto overscroll-contain px-5 pt-3 pb-[calc(1.25rem+env(safe-area-inset-bottom,0px))] sm:px-6 sm:pt-5 sm:pb-6"
+                  >
+                    <div className="w-12 h-1.5 rounded-full mx-auto mb-5 bg-border sm:hidden" />
               <div className="flex items-start gap-4 mb-6">
                 <img
                   src={product.image_url ?? PLACEHOLDER_PRODUCT_IMAGE}
                   alt={product.name}
-                  className="w-16 h-16 rounded-xl object-contain bg-gray-50 border p-1"
+                  className="w-16 h-16 rounded-xl object-contain bg-surface-muted border p-1"
                 />
                 <div>
-                  <h2 className="text-base font-bold text-gray-900">
+                  <h2 className="text-base font-bold text-foreground">
                     {product.name}
                   </h2>
-                  <p className="text-xs text-gray-500">
+                  <p className="text-xs text-foreground-muted">
                     {t('selectSizeToAddToCart')}
                   </p>
                 </div>
@@ -424,31 +463,31 @@ export function ProductCard({
                       key={v.id}
                       className={`flex items-center justify-between p-3.5 rounded-xl border transition-colors ${
                         isVOutOfStock
-                          ? 'border-gray-200 bg-gray-50/70 opacity-60'
+                          ? 'border-border bg-surface-muted/70 opacity-60'
                           : qty > 0
-                          ? 'border-[#0f3e26] bg-emerald-50/40'
-                          : 'border-gray-200 bg-white'
+                          ? 'border-primary bg-success-bg/40'
+                          : 'border-border bg-surface'
                       }`}
                     >
                       <div className="flex flex-col">
                         <div className="flex items-center gap-2">
-                          <span className="font-bold text-xs text-gray-900">{v.weight}</span>
+                          <span className="font-bold text-xs text-foreground">{v.weight}</span>
                           {isVOutOfStock ? (
-                            <span className="text-[10px] font-bold text-rose-600 bg-rose-50 px-1.5 py-0.5 rounded">
+                            <span className="text-[10px] font-bold text-error bg-error-bg px-1.5 py-0.5 rounded">
                               Out of Stock
                             </span>
                           ) : isVLowStock ? (
-                            <span className="text-[10px] font-bold text-amber-600 bg-amber-50 px-1.5 py-0.5 rounded">
+                            <span className="text-[10px] font-bold text-warning bg-warning-bg px-1.5 py-0.5 rounded">
                               Only {vStock} left
                             </span>
                           ) : null}
                         </div>
                         <div className="flex items-baseline gap-1.5 mt-0.5">
-                          <span className="text-sm font-black text-[#0f3e26]">
+                          <span className="text-sm font-black text-primary">
                             ₹{v.price}
                           </span>
                           {v.original_price && (
-                            <span className="text-xs line-through text-gray-400">
+                            <span className="text-xs line-through text-foreground-muted">
                               ₹{v.original_price}
                             </span>
                           )}
@@ -458,7 +497,7 @@ export function ProductCard({
                       {isVOutOfStock ? (
                         <button
                           disabled
-                          className="px-4 py-1.5 rounded-lg font-bold text-xs bg-gray-100 text-gray-400 border border-gray-200 cursor-not-allowed"
+                          className="px-4 py-1.5 rounded-lg font-bold text-xs bg-surface-muted text-foreground-muted border border-border cursor-not-allowed"
                         >
                           Sold Out
                         </button>
@@ -466,24 +505,24 @@ export function ProductCard({
                         <button
                           onClick={(e) => handleAdd(e, v.id)}
                           disabled={busy}
-                          className="px-5 py-2 rounded-lg font-bold text-xs bg-[#0f3e26] hover:bg-[#144f31] text-white active:scale-95 disabled:opacity-50 shadow-xs"
+                          className="px-5 py-2 rounded-lg font-bold text-xs bg-primary hover:bg-primary-hover text-on-primary active:scale-95 disabled:opacity-50 shadow-xs"
                         >
                           Add
                         </button>
                       ) : (
-                        <div className="flex items-center gap-2 bg-white rounded-lg border border-emerald-300 p-1 shadow-2xs">
+                        <div className="flex items-center gap-2 bg-surface rounded-lg border border-success p-1 shadow-2xs">
                           <button
                             onClick={(e) => handleUpdate(e, 'dec', v.id)}
                             disabled={busy}
-                            className="w-7 h-7 rounded-md flex items-center justify-center bg-gray-100 text-gray-700 hover:bg-gray-200"
+                            className="w-7 h-7 rounded-md flex items-center justify-center bg-surface-muted text-foreground hover:bg-border"
                           >
                             <Minus className="w-3.5 h-3.5 stroke-[2.5]" />
                           </button>
-                          <span className="w-5 text-center text-xs font-bold text-gray-900">{qty}</span>
+                          <span className="w-5 text-center text-xs font-bold text-foreground">{qty}</span>
                           <button
                             onClick={(e) => handleUpdate(e, 'inc', v.id)}
                             disabled={busy || qty >= vStock}
-                            className="w-7 h-7 rounded-md flex items-center justify-center bg-[#0f3e26] text-white hover:bg-[#144f31] disabled:opacity-40 disabled:cursor-not-allowed"
+                            className="w-7 h-7 rounded-md flex items-center justify-center bg-primary text-on-primary hover:bg-primary-hover disabled:opacity-40 disabled:cursor-not-allowed"
                             title={qty >= vStock ? 'Max available stock reached' : undefined}
                           >
                             <Plus className="w-3.5 h-3.5 stroke-[2.5]" />
@@ -497,14 +536,17 @@ export function ProductCard({
 
               <button
                 onClick={() => setShowDrawer(false)}
-                className="w-full py-3 bg-[#0f3e26] hover:bg-[#144f31] rounded-xl font-bold text-white text-sm active:scale-95 shadow-md"
+                className="w-full py-3 bg-primary hover:bg-primary-hover rounded-xl font-bold text-on-primary text-sm active:scale-95 shadow-md sticky bottom-0"
               >
                 Done
               </button>
-            </motion.div>
-          </>
+                  </motion.div>
+                </div>
+              </>
+            )}
+          </AnimatePresence>,
+          document.body
         )}
-      </AnimatePresence>
 
       {/* Admin Edit / Delete Modal */}
       {user?.role === 'admin' && isEditModalOpen && (

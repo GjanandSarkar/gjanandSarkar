@@ -25,6 +25,11 @@
   
   --color-on-primary: var(--on-primary);
   --color-on-secondary: var(--on-secondary);
+  --color-on-success: var(--on-success);
+  --color-on-warning: var(--on-warning);
+  --color-on-error: var(--on-error);
+  --color-on-info: var(--on-info);
+  --color-secondary-bg: var(--secondary-bg);
 
   /* === Backgrounds and Surfaces === */
   --color-background: var(--background);
@@ -82,6 +87,20 @@
 
 @layer base {
   :root {
+    /* Height of the fixed mobile bottom nav. Single source of truth: the
+       floating cart bar, the support chat button and the page bottom padding
+       all offset from this. They used to each hardcode their own guess, which
+       is why they overlapped each other. */
+    --bottom-nav-h: 64px;
+    /* Height of the floating cart bar, so the support button can clear it. */
+    --cart-bar-h: 72px;
+
+    /* Translucent surface for blurred bars. Cannot be a plain rgba() literal
+       because it has to invert in dark mode -- the bottom nav was pinned to
+       rgba(255,255,255,0.92) and so stayed white on a dark page. */
+    --surface-translucent: rgba(255, 255, 255, 0.92);
+    --scrim: rgba(0, 0, 0, 0.5);
+
     --primary: #0c3c26;
     --primary-hover: #114e32;
     --primary-active: #072617;
@@ -98,10 +117,15 @@
     --cta-gradient: linear-gradient(135deg, #0c3c26, #1b6342);
     --cta-shadow: 0 6px 20px rgba(12, 60, 38, 0.28);
 
-    --secondary: #b87d20;
-    --secondary-hover: #9e6b18;
+    --secondary: #9c6819;
+    --secondary-hover: #855615;
     
     --on-primary: #ffffff;
+    --secondary-bg: #fdf4e3;
+    --on-success: #ffffff;
+    --on-warning: #ffffff;
+    --on-error: #ffffff;
+    --on-info: #ffffff;
     --on-secondary: #ffffff;
 
     --background: #fbfaf6;
@@ -119,7 +143,7 @@
 
     --success: #007600;
     --success-bg: #eaf6ef;
-    --warning: #c45500;
+    --warning: #b84f00;
     --warning-bg: #fff8f2;
     --error: #ba1a1a;
     --error-bg: #ffdad6;
@@ -128,6 +152,9 @@
   }
 
   .dark {
+    --surface-translucent: rgba(23, 28, 25, 0.92);
+    --scrim: rgba(0, 0, 0, 0.65);
+
     --primary: #cce6d9;
     --primary-hover: #e6f2ec;
     --primary-active: #b3d9c4;
@@ -139,6 +166,13 @@
     --secondary-hover: #f3cc8f;
     
     --on-primary: #1c201e;
+    --secondary-bg: #3a2a0a;
+    --on-success: #06220f;
+    --on-warning: #2b1600;
+    --on-error: #3c0708;
+    --on-info: #04203d;
+    --cta-gradient: linear-gradient(135deg, #16603f, #1f7a50);
+    --cta-shadow: 0 6px 20px rgba(0, 0, 0, 0.45);
     --on-secondary: #1c201e;
 
     --background: #0f1210;
@@ -524,4 +558,103 @@
   .page-narrow { width: 100%; max-width: 48rem; margin-inline: auto; }  /* 768px  - single-column detail/reading pages */
   .page-medium { width: 100%; max-width: 64rem; margin-inline: auto; }  /* 1024px - forms, lists */
   .page-wide   { width: 100%; max-width: 90rem; margin-inline: auto; }  /* 1440px - dashboards, product grids */
+}
+
+@layer components {
+  /* Clears the fixed mobile bottom stack (nav + floating cart bar).
+     Deliberately a class and not an inline style: an inline style cannot be
+     undone at a breakpoint, and the desktop layout has no bottom nav. */
+  /* Product page action bar: a centred pill, not a full-width slab. All of
+   its positioning lives here so it cannot be split between a class and
+   utilities, which is what broke the cart bar three times. */
+.pdp-action-bar {
+  position: fixed;
+  left: 50%;
+  transform: translateX(-50%);
+  bottom: calc(var(--bottom-nav-h, 64px) + 12px + env(safe-area-inset-bottom, 0px));
+  z-index: 30;
+  width: calc(100% - 1.5rem);
+  max-width: 36rem;
+}
+
+/* No bottom navigation from md up, so the bar drops to the viewport edge. */
+@media (min-width: 768px) {
+  .pdp-action-bar {
+    bottom: 1.5rem;
+  }
+}
+
+/* Checkout action bar. It was pinned to bottom:0 underneath the bottom
+   navigation, which hid the Place Order button on phones entirely -- only a
+   sliver showed above the nav. Offsets live here, in one place. */
+.checkout-action-bar {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: calc(var(--bottom-nav-h, 64px) + env(safe-area-inset-bottom, 0px));
+  z-index: 40;
+}
+
+/* No bottom nav from md up; the sidebar starts at 260px. */
+@media (min-width: 768px) {
+  .checkout-action-bar {
+    left: 260px;
+    bottom: 0;
+  }
+}
+
+.pb-bottom-stack {
+    padding-bottom: calc(var(--bottom-nav-h) + 16px + env(safe-area-inset-bottom, 0px));
+  }
+
+  @media (min-width: 768px) {
+    .pb-bottom-stack {
+      padding-bottom: 0;
+    }
+  }
+}
+
+@layer components {
+  /* Fixed bottom stack: floating cart bar + support button.
+
+     ALL positioning for these two lives here, not in Tailwind utilities.
+     Mixing them was the bug: the bar carried `left-3 right-3` plus
+     `md:left-auto md:right-8 md:w-[320px]`, and when a box has both a left
+     and a right AND an explicit width it is over-constrained -- CSS resolves
+     that by ignoring `right` in LTR, which pinned the bar to the left edge.
+     Owning every offset in one block makes the result deterministic.
+
+     --cart-bar-h reserves the bar's height so the support button sits above
+     it rather than on top of it; previously both got bottom:1.5rem on
+     desktop and overlapped exactly. */
+  .floating-cart-bar {
+    position: fixed;
+    z-index: 50;
+    left: 0.75rem;
+    right: 0.75rem;
+    bottom: calc(var(--bottom-nav-h, 64px) + 12px + env(safe-area-inset-bottom, 0px));
+  }
+
+  .support-fab {
+    position: fixed;
+    z-index: 40;
+    left: auto;
+    right: 1rem;
+    bottom: calc(var(--bottom-nav-h, 64px) + var(--cart-bar-h, 72px) + 24px + env(safe-area-inset-bottom, 0px));
+  }
+
+  @media (min-width: 768px) {
+    /* No bottom nav on desktop: the bar becomes a right-aligned card. */
+    .floating-cart-bar {
+      left: auto;
+      right: 1.5rem;
+      width: 320px;
+      bottom: 1.5rem;
+    }
+
+    .support-fab {
+      right: 1.5rem;
+      bottom: calc(1.5rem + var(--cart-bar-h, 72px) + 12px);
+    }
+  }
 }

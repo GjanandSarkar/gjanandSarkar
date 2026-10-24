@@ -19,11 +19,11 @@ interface NotificationItemProps {
 }
 
 const typeConfig = {
-  order: { icon: Package, color: 'text-blue-600', bg: 'bg-blue-50' },
-  delivery: { icon: Truck, color: 'text-green-600', bg: 'bg-green-50' },
+  order: { icon: Package, color: 'text-info', bg: 'bg-info-bg' },
+  delivery: { icon: Truck, color: 'text-success', bg: 'bg-success-bg' },
   offer: { icon: Tag, color: 'text-primary', bg: 'bg-primary/10' },
   payment: { icon: CreditCard, color: 'text-orange-600', bg: 'bg-orange-50' },
-  system: { icon: Bell, color: 'text-gray-600', bg: 'bg-gray-100' },
+  system: { icon: Bell, color: 'text-foreground-muted', bg: 'bg-surface-muted' },
 };
 
 export function NotificationItem({ notification, onClick }: NotificationItemProps) {

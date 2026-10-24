@@ -19,7 +19,7 @@ export default function GlobalError({
     <html lang="en">
       <body>
         <div className="flex flex-col min-h-screen items-center justify-center bg-cream px-6 py-20 text-center">
-          <div className="w-20 h-20 rounded-full flex items-center justify-center mb-5 bg-red-50 text-red-500 border border-red-100">
+          <div className="w-20 h-20 rounded-full flex items-center justify-center mb-5 bg-error-bg text-red-500 border border-red-100">
             <AlertTriangle className="w-8 h-8" />
           </div>
           <h1 className="font-bold text-[24px] mb-2 text-on-surface">
@@ -30,7 +30,7 @@ export default function GlobalError({
           </p>
           <button
             onClick={() => reset()}
-            className="flex items-center gap-2 px-6 py-3 rounded-full text-sm font-bold bg-primary text-white shadow-lg shadow-primary/20 transition-transform active:scale-95"
+            className="flex items-center gap-2 px-6 py-3 rounded-full text-sm font-bold bg-primary text-on-primary shadow-lg shadow-primary/20 transition-transform active:scale-95"
           >
             <RefreshCcw className="w-4 h-4" />
             Reload Application

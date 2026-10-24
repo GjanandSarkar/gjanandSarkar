@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef } from 'react';
+import { SmartImage } from '@/components/ui/SmartImage';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Trash2, Plus, Minus, ArrowRight } from 'lucide-react';
 import { useTranslation } from '@/lib/i18n';
@@ -10,7 +11,7 @@ import { OrderSummary } from './OrderSummary';
 import { EmptyCart } from './EmptyCart';
 import { updateCartItem, removeFromCart, clearCart as apiClearCart } from '@/lib/api/cart';
 import { useRouter, usePathname } from 'next/navigation';
-import { CartCrossSells } from '@/components/discovery/CartCrossSells';
+import { RecommendationRail } from '@/components/discovery/RecommendationRail';
 import { PLACEHOLDER_PRODUCT_IMAGE } from '@/lib/constants/brand';
 import { categoryBg } from '@/lib/constants/categories';
 
@@ -152,7 +153,7 @@ export function CartDrawer({ isOpen, onClose }: CartDrawerProps) {
           animate={{ y: 0, x: 0 }}
           exit={{ y: '100%', x: 0 }}
           transition={{ type: 'spring', stiffness: 300, damping: 30 }}
-          className="fixed z-[60] bottom-0 left-0 right-0 h-[85vh] bg-surface rounded-t-[24px] md:top-0 md:bottom-0 md:left-auto md:right-0 md:h-full md:w-[420px] md:rounded-none flex flex-col shadow-2xl"
+          className="fixed z-[60] bottom-0 left-0 right-0 h-[88vh] bg-surface rounded-t-[24px] md:top-4 md:bottom-4 md:left-auto md:right-4 md:h-auto md:w-[420px] md:rounded-[20px] flex flex-col shadow-2xl overflow-hidden"
         >
         {/* Header */}
         <div className="flex items-center justify-between p-5 border-b border-outline-variant/30 shrink-0">
@@ -215,7 +216,7 @@ export function CartDrawer({ isOpen, onClose }: CartDrawerProps) {
                         className="w-16 h-16 rounded-[12px] flex items-center justify-center shrink-0 overflow-hidden"
                         style={{ background: getCategoryBg(item.product.category) }}
                       >
-                        <img src={item.product.image_url ?? PLACEHOLDER_PRODUCT_IMAGE} alt={item.product.name} className="w-full h-full object-cover" />
+                        <SmartImage src={item.product.image_url} alt={item.product.name} width={64} height={64} className="w-full h-full object-cover" />
                       </div>
 
                       <div className="flex-1 flex flex-col justify-center">
@@ -283,18 +284,19 @@ export function CartDrawer({ isOpen, onClose }: CartDrawerProps) {
               />
             </div>
           )}
-        </div>
 
-        {/* Smart Commerce: Cart Cross Sells */}
-        {!isLoading && (
-          <div className="shrink-0 bg-surface">
-            <CartCrossSells />
-          </div>
-        )}
+          {/* Cross-sell lives in the scroll flow so it can never clip the
+              payment summary above it. */}
+          {!isLoading && !isEmpty && (
+            <div className="mt-6 -mx-5">
+              <RecommendationRail placement="cart" limit={6} compact />
+            </div>
+          )}
+        </div>
 
         {/* Footer CTA */}
         {!isEmpty && !isLoading && (
-          <div className="p-5 border-t border-outline-variant/30 bg-surface shrink-0 pb-safe">
+          <div className="px-5 pt-4 pb-[max(1.25rem,env(safe-area-inset-bottom))] border-t border-outline-variant/30 bg-surface shrink-0">
             <button
               onClick={() => {
                 onClose();

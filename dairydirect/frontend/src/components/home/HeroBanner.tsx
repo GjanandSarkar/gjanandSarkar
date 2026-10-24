@@ -22,7 +22,7 @@ interface HeroBannerProps {
   products?: CatalogProduct[];
 }
 
-const badgeColors = ['#d97706', '#0f3e26', '#15803d', '#c88a23', '#047857', '#b45309'];
+const badgeColors = ['#d97706', 'var(--primary)', '#15803d', '#c88a23', '#047857', '#b45309'];
 
 /**
  * The hero used to stamp a rotating list of dairy slogans onto whatever
@@ -65,7 +65,7 @@ export function HeroBanner({ products }: HeroBannerProps) {
     badgeBg: badgeColors[idx % badgeColors.length],
     image: p.image_url || PLACEHOLDER_PRODUCT_IMAGE,
     href: `/products/${p.id}`,
-    tagColor: 'text-[#0f3e26]'
+    tagColor: 'text-primary'
   }));
 
   let showcaseProducts = rawItems;
@@ -155,13 +155,13 @@ export function HeroBanner({ products }: HeroBannerProps) {
   };
 
   return (
-    <div className="w-full relative overflow-hidden bg-gradient-to-r from-[#fbf8f2] via-[#f7f1e5] to-[#f4ebe0] border-b border-[#e9dfd0]">
+    <div className="w-full relative overflow-hidden bg-gradient-to-r from-background via-surface-muted to-surface-muted border-b border-border">
       
       {/* Decorative Dot Grid Pattern */}
       <div 
         className="absolute inset-0 opacity-[0.045] pointer-events-none" 
         style={{
-          backgroundImage: `radial-gradient(#c88a23 1.2px, transparent 1.2px), radial-gradient(#0f3e26 1.2px, #fbf8f2 1.2px)`,
+          backgroundImage: `radial-gradient(#c88a23 1.2px, transparent 1.2px), radial-gradient(var(--primary) 1.2px, #fbf8f2 1.2px)`,
           backgroundSize: '24px 24px',
           backgroundPosition: '0 0, 12px 12px'
         }}
@@ -172,17 +172,17 @@ export function HeroBanner({ products }: HeroBannerProps) {
         {/* ── Left Hero Copy ── */}
         <div className="flex-1 max-w-xl text-left">
           
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#0f3e26]/10 text-[#0f3e26] text-xs font-black uppercase tracking-wider mb-4 border border-[#0f3e26]/15">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 text-primary text-xs font-black uppercase tracking-wider mb-4 border border-primary/15">
             <span className="text-sm">🦚</span>
             <span>Empowering Bharat</span>
           </div>
 
-          <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-[52px] font-extrabold text-[#0f3e26] leading-[1.12] tracking-tight mb-4">
+          <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-[52px] font-extrabold text-primary leading-[1.12] tracking-tight mb-4">
             Proudly Indian. <br />
-            <span className="text-[#1b5e39]">Purely Authentic.</span>
+            <span className="text-primary-light">Purely Authentic.</span>
           </h1>
 
-          <p className="text-sm sm:text-base text-gray-700 font-normal leading-relaxed mb-8 max-w-lg">
+          <p className="text-sm sm:text-base text-foreground font-normal leading-relaxed mb-8 max-w-lg">
             {BRAND.promise} We partner with a single verified company in every
             category — so you never have to guess which listing is the real one.
           </p>
@@ -190,15 +190,15 @@ export function HeroBanner({ products }: HeroBannerProps) {
           <div className="flex flex-wrap items-center gap-4">
             <Link
               href="/products"
-              className="px-7 py-3.5 bg-[#0f3e26] hover:bg-[#144f31] text-white font-black text-sm rounded-xl shadow-lg shadow-[#0f3e26]/20 active:scale-95 transition-all flex items-center gap-2"
+              className="px-7 py-3.5 bg-primary hover:bg-primary-hover text-on-primary font-black text-sm rounded-xl shadow-lg shadow-[var(--primary)]/20 active:scale-95 transition-all flex items-center gap-2"
             >
               <span>Shop Now</span>
-              <ArrowRight className="w-4 h-4 text-[#c88a23]" />
+              <ArrowRight className="w-4 h-4 text-secondary" />
             </Link>
 
             <Link
               href="/become-seller"
-              className="px-7 py-3.5 bg-white/70 hover:bg-white text-[#925f0e] border border-[#c88a23] font-bold text-sm rounded-xl active:scale-95 transition-all shadow-2xs"
+              className="px-7 py-3.5 bg-surface/70 hover:bg-surface text-secondary-hover border border-secondary font-bold text-sm rounded-xl active:scale-95 transition-all shadow-2xs"
             >
               Become a Seller
             </Link>
@@ -220,7 +220,7 @@ export function HeroBanner({ products }: HeroBannerProps) {
               <div className="absolute inset-0 flex items-center justify-center pointer-events-none opacity-40">
                 <svg 
                   viewBox="0 0 600 450" 
-                  className="w-full h-full stroke-[#c88a23]/35 fill-none animate-spin-slow" 
+                  className="w-full h-full stroke-secondary/35 fill-none animate-spin-slow" 
                   strokeWidth="1"
                 >
                   <circle cx="300" cy="225" r="210" strokeDasharray="6 6" />
@@ -234,7 +234,7 @@ export function HeroBanner({ products }: HeroBannerProps) {
               </div>
 
               {/* Glowing Aura behind center */}
-              <div className="absolute w-48 h-48 rounded-full bg-amber-400/20 blur-3xl pointer-events-none" />
+              <div className="absolute w-48 h-48 rounded-full bg-warning/20 blur-3xl pointer-events-none" />
 
               {/* 3D Orbit Container with Rotating Cards */}
               <div className="relative w-full h-full flex items-center justify-center preserve-3d">
@@ -257,8 +257,8 @@ export function HeroBanner({ products }: HeroBannerProps) {
                         href={product.href}
                         className={`block w-40 sm:w-52 md:w-60 h-52 sm:h-68 md:h-76 rounded-3xl p-3 sm:p-4 backdrop-blur-xl border transition-all duration-500 cursor-pointer overflow-visible group ${
                           isCenter 
-                            ? 'bg-white/95 border-2 border-[#c88a23] shadow-2xl' 
-                            : 'bg-white/80 border-amber-200/70 shadow-lg hover:bg-white/90'
+                            ? 'bg-surface/95 border-2 border-secondary shadow-2xl' 
+                            : 'bg-surface/80 border-warning/20/70 shadow-lg hover:bg-surface/90'
                         }`}
                       >
                         {/* Top Golden Pill Badge */}
@@ -267,7 +267,7 @@ export function HeroBanner({ products }: HeroBannerProps) {
                             className="absolute -top-3.5 left-1/2 -translate-x-1/2 text-white text-[9px] sm:text-[10px] font-black px-4 py-1 rounded-full uppercase tracking-wider shadow-md whitespace-nowrap flex items-center gap-1.5 animate-pulse-gentle z-30"
                             style={{ backgroundColor: product.badgeBg }}
                           >
-                            <Sparkles className="w-3 h-3 text-amber-200" />
+                            <Sparkles className="w-3 h-3 text-warning-bg" />
                             <span>{product.badge}</span>
                           </div>
                         )}
@@ -287,13 +287,13 @@ export function HeroBanner({ products }: HeroBannerProps) {
 
                         {/* Product Name & Subtitle */}
                         <div className="w-full text-center pt-2 pb-1">
-                          <h3 className={`font-black text-[#0f3e26] line-clamp-1 ${
+                          <h3 className={`font-black text-primary line-clamp-1 ${
                             isCenter ? 'text-xs sm:text-sm md:text-base' : 'text-[11px] sm:text-xs'
                           }`}>
                             {product.name}
                           </h3>
                           <p className={`font-bold truncate ${
-                            isCenter ? 'text-[10px] sm:text-xs text-amber-800' : 'text-[9px] sm:text-[10px] text-amber-700'
+                            isCenter ? 'text-[10px] sm:text-xs text-warning' : 'text-[9px] sm:text-[10px] text-warning'
                           }`}>
                             {product.subtitle}
                           </p>
@@ -308,7 +308,7 @@ export function HeroBanner({ products }: HeroBannerProps) {
               <button
                 onClick={handlePrev}
                 aria-label="Previous product"
-                className="absolute left-1 sm:left-3 top-1/2 -translate-y-1/2 z-40 w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-white/90 border border-amber-200 text-[#0f3e26] hover:bg-[#0f3e26] hover:text-white shadow-lg flex items-center justify-center transition-all cursor-pointer hover:scale-110 active:scale-95"
+                className="absolute left-1 sm:left-3 top-1/2 -translate-y-1/2 z-40 w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-surface/90 border border-warning/20 text-primary hover:bg-primary hover:text-on-primary shadow-lg flex items-center justify-center transition-all cursor-pointer hover:scale-110 active:scale-95"
               >
                 <ChevronLeft className="w-5 h-5" />
               </button>
@@ -317,7 +317,7 @@ export function HeroBanner({ products }: HeroBannerProps) {
               <button
                 onClick={handleNext}
                 aria-label="Next product"
-                className="absolute right-1 sm:right-3 top-1/2 -translate-y-1/2 z-40 w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-white/90 border border-amber-200 text-[#0f3e26] hover:bg-[#0f3e26] hover:text-white shadow-lg flex items-center justify-center transition-all cursor-pointer hover:scale-110 active:scale-95"
+                className="absolute right-1 sm:right-3 top-1/2 -translate-y-1/2 z-40 w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-surface/90 border border-warning/20 text-primary hover:bg-primary hover:text-on-primary shadow-lg flex items-center justify-center transition-all cursor-pointer hover:scale-110 active:scale-95"
               >
                 <ChevronRight className="w-5 h-5" />
               </button>
@@ -334,8 +334,8 @@ export function HeroBanner({ products }: HeroBannerProps) {
                     aria-label={`Slide to ${p.name}`}
                     className={`transition-all duration-300 rounded-full cursor-pointer ${
                       currentIndex === idx 
-                        ? 'w-7 h-2.5 bg-[#c88a23] shadow-xs' 
-                        : 'w-2.5 h-2.5 bg-amber-300/80 hover:bg-amber-400'
+                        ? 'w-7 h-2.5 bg-secondary shadow-xs' 
+                        : 'w-2.5 h-2.5 bg-warning/80 hover:bg-warning'
                     }`}
                   />
                 ))}
@@ -345,19 +345,19 @@ export function HeroBanner({ products }: HeroBannerProps) {
           </div>
         ) : (
           /* Empty Database State Card */
-          <div className="flex-1 w-full max-w-md relative flex flex-col items-center justify-center p-8 bg-white/80 backdrop-blur-md rounded-3xl border-2 border-dashed border-amber-300/80 text-center shadow-lg my-4">
-            <div className="w-16 h-16 rounded-full bg-amber-100/80 flex items-center justify-center mb-4 text-[#0f3e26] shadow-xs">
-              <PackageOpen className="w-8 h-8 text-[#c88a23]" />
+          <div className="flex-1 w-full max-w-md relative flex flex-col items-center justify-center p-8 bg-surface/80 backdrop-blur-md rounded-3xl border-2 border-dashed border-warning/80 text-center shadow-lg my-4">
+            <div className="w-16 h-16 rounded-full bg-warning-bg/80 flex items-center justify-center mb-4 text-primary shadow-xs">
+              <PackageOpen className="w-8 h-8 text-secondary" />
             </div>
-            <h3 className="text-xl font-extrabold text-[#0f3e26] mb-2">
+            <h3 className="text-xl font-extrabold text-primary mb-2">
               No Products Available
             </h3>
-            <p className="text-xs text-gray-600 mb-6 leading-relaxed">
+            <p className="text-xs text-foreground-muted mb-6 leading-relaxed">
               The product database is currently empty. New items will automatically appear here once sellers list their products.
             </p>
             <Link
               href="/become-seller"
-              className="px-6 py-3 bg-[#0f3e26] hover:bg-[#144f31] text-white text-xs font-bold rounded-xl transition-all shadow-md active:scale-95"
+              className="px-6 py-3 bg-primary hover:bg-primary-hover text-on-primary text-xs font-bold rounded-xl transition-all shadow-md active:scale-95"
             >
               List Products as Seller
             </Link>

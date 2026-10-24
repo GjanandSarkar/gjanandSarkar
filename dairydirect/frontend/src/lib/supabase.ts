@@ -73,6 +73,9 @@ export type DBOrder = {
   delivery_slot?: string | null;
   shipping_address?: string | null;
   notes?: string | null;
+  payment_confirmed_at?: string | null;
+  payment_confirmed_by?: string | null;
+  cod_collected_amount?: number | null;
   created_at: string;
   profiles?: { name: string | null; phone: string | null; email?: string | null };
   order_items?: DBOrderItem[];

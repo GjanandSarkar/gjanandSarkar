@@ -2,10 +2,11 @@ import { NextResponse } from 'next/server';
 import ImageKit from '@imagekit/nodejs';
 import { extractTokenFromRequest, verifyAccessToken } from '@/lib/auth/jwt';
 import { getAdminSupabase } from '@/lib/supabase/admin';
+import { getAuthUser } from '@/lib/api/auth-middleware';
 
 export async function POST(request: Request) {
   try {
-    // 1. Extract & verify user authentication
+    // 1. Extract & verify user authentication (supports JWT, Supabase bearer, cookies)
     const token = extractTokenFromRequest(request);
     let userId: string | null = null;
 
@@ -28,17 +29,54 @@ export async function POST(request: Request) {
       }
     }
 
+    // Universal auth user fallback
+    if (!userId) {
+      try {
+        const authUser = await getAuthUser(request);
+        if (authUser?.userId) userId = authUser.userId;
+      } catch (e) {
+        // Fallback failed
+      }
+    }
+
     if (!userId) {
       return NextResponse.json({ error: 'Unauthorized. Please log in.' }, { status: 401 });
     }
 
-    // 2. Parse request body
-    const body = await request.json().catch(() => null);
-    if (!body || !body.file) {
+    // 2. Parse request body (supports both multipart/form-data and JSON)
+    const contentType = request.headers.get('content-type') || '';
+    let filePayload: string | null = null;
+    let fileName: string | undefined;
+    let folder = '/returns_evidence';
+
+    if (contentType.includes('multipart/form-data')) {
+      const formData = await request.formData();
+      const fileEntry = formData.get('file');
+      fileName = (formData.get('fileName') as string) || undefined;
+      const folderParam = formData.get('folder');
+      if (folderParam) folder = String(folderParam);
+
+      if (fileEntry instanceof File) {
+        const arrayBuffer = await fileEntry.arrayBuffer();
+        filePayload = Buffer.from(arrayBuffer).toString('base64');
+        if (!fileName) fileName = fileEntry.name;
+      } else if (typeof fileEntry === 'string') {
+        filePayload = fileEntry;
+      }
+    } else {
+      const body = await request.json().catch(() => null);
+      if (body) {
+        filePayload = body.file || null;
+        fileName = body.fileName;
+        if (body.folder) folder = body.folder;
+      }
+    }
+
+    if (!filePayload) {
       return NextResponse.json({ error: 'Image file content is required.' }, { status: 400 });
     }
 
-    const { file, fileName, folder = '/profile_pictures' } = body;
+    const file = filePayload;
 
     // 3. Get ImageKit Private Key
     const privateKey = process.env.IMAGEKIT_PRIVATE_KEY;

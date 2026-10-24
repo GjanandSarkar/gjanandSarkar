@@ -33,7 +33,7 @@ export function ActiveSubscriptions({ subscriptions, hideHeader = false }: Activ
       )}
 
       {activeSubs.length === 0 ? (
-        <div className="bg-white rounded-[24px] p-6 border border-sand/50 text-center shadow-sm">
+        <div className="bg-surface rounded-[24px] p-6 border border-sand/50 text-center shadow-sm">
           <CalendarDays className="w-10 h-10 text-muted mx-auto mb-3 opacity-50" />
           <h3 className="text-base font-bold text-dark mb-1">No Active Subscriptions</h3>
           <p className="text-sm text-muted mb-4 font-medium">Get fresh milk delivered to your doorstep daily.</p>
@@ -46,7 +46,7 @@ export function ActiveSubscriptions({ subscriptions, hideHeader = false }: Activ
           {activeSubs.map(sub => {
             const isPaused = sub.status === 'paused';
             return (
-              <div key={sub.id} className="bg-white rounded-[20px] p-4 border border-sand/50 shadow-sm flex items-center gap-4">
+              <div key={sub.id} className="bg-surface rounded-[20px] p-4 border border-sand/50 shadow-sm flex items-center gap-4">
                 <div className={`w-12 h-12 rounded-2xl flex items-center justify-center shrink-0 ${isPaused ? 'bg-sand/50 text-muted' : 'bg-mint/30 text-primary'}`}>
                   {isPaused ? <PauseCircle className="w-6 h-6" /> : <CheckCircle2 className="w-6 h-6" />}
                 </div>

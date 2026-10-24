@@ -81,7 +81,7 @@ export function EmptyState({ type, onClear }: EmptyStateProps) {
               <Link 
                 key={cat}
                 href={`/categories/${cat}`}
-                className="px-4 py-2 bg-white border border-sand rounded-full text-sm font-medium hover:border-primary/30 transition-colors"
+                className="px-4 py-2 bg-surface border border-sand rounded-full text-sm font-medium hover:border-primary/30 transition-colors"
               >
                 {cat}
               </Link>

@@ -14,7 +14,7 @@ export function EmptyCart({ onActionClick }: EmptyCartProps) {
 
       {/* Brand Messaging */}
       <div className="p-4 bg-gradient-to-br from-green-50 to-emerald-50/30 rounded-2xl border border-green-100 flex items-start gap-3 text-left w-full max-w-[300px]">
-        <div className="w-8 h-8 rounded-full bg-white text-green-600 flex items-center justify-center shrink-0 shadow-sm border border-green-50">
+        <div className="w-8 h-8 rounded-full bg-surface text-success flex items-center justify-center shrink-0 shadow-sm border border-green-50">
           <Leaf className="w-4 h-4" />
         </div>
         <div>

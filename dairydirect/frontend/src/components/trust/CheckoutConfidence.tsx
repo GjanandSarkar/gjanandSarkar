@@ -6,7 +6,7 @@ export function CheckoutConfidence() {
       <h3 className="text-[12px] font-black text-dark uppercase tracking-widest mb-3">Why choose GjanandSarkar?</h3>
       <div className="flex flex-col gap-3">
         <div className="flex items-start gap-3">
-          <div className="w-8 h-8 rounded-full bg-green-50 text-green-600 flex items-center justify-center shrink-0">
+          <div className="w-8 h-8 rounded-full bg-success-bg text-success flex items-center justify-center shrink-0">
             <ShieldCheck className="w-4 h-4" />
           </div>
           <div>
@@ -16,7 +16,7 @@ export function CheckoutConfidence() {
         </div>
         
         <div className="flex items-start gap-3">
-          <div className="w-8 h-8 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center shrink-0">
+          <div className="w-8 h-8 rounded-full bg-info-bg text-info flex items-center justify-center shrink-0">
             <Clock className="w-4 h-4" />
           </div>
           <div>

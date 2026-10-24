@@ -24,14 +24,14 @@ export function SkeletonBlock({ className = '' }: { className?: string }) {
 export function ProductCardSkeleton() {
   return (
     <div
-      className="flex flex-col h-full bg-white rounded-2xl border border-gray-200/90 p-3.5"
+      className="flex flex-col h-full bg-surface rounded-2xl border border-border/90 p-3.5"
       aria-hidden="true"
     >
       <SkeletonBlock className="w-full aspect-square rounded-xl mb-3" />
       <SkeletonBlock className="h-2 w-1/3 mb-2" />
       <SkeletonBlock className="h-3 w-4/5 mb-2" />
       <SkeletonBlock className="h-2 w-1/2 mb-3" />
-      <div className="flex items-center justify-between gap-2 pt-2 border-t border-gray-100 mt-auto">
+      <div className="flex items-center justify-between gap-2 pt-2 border-t border-border mt-auto">
         <SkeletonBlock className="h-4 w-14" />
         <SkeletonBlock className="h-7 w-16 rounded-lg" />
       </div>
@@ -92,7 +92,7 @@ export function ListSkeleton({ rows = 4 }: { rows?: number }) {
       {Array.from({ length: rows }).map((_, i) => (
         <div
           key={i}
-          className="flex items-center gap-4 bg-white rounded-2xl border border-gray-200/90 p-4"
+          className="flex items-center gap-4 bg-surface rounded-2xl border border-border/90 p-4"
         >
           <SkeletonBlock className="w-12 h-12 rounded-xl shrink-0" />
           <div className="flex-1 min-w-0">

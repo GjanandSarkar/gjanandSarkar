@@ -88,11 +88,11 @@ export function NotificationCenter({ isOpen, onClose }: NotificationCenterProps)
   const content = (
     <div className="flex flex-col h-full bg-surface">
       {/* Header */}
-      <div className="flex items-center justify-between p-4 border-b border-sand bg-white z-10 sticky top-0">
+      <div className="flex items-center justify-between p-4 border-b border-sand bg-surface z-10 sticky top-0">
         <div className="flex items-center gap-2">
           <h2 className="text-lg font-black text-dark">Notifications</h2>
           {unreadCount > 0 && (
-            <span className="bg-primary text-white text-[10px] font-bold px-2 py-0.5 rounded-full">
+            <span className="bg-primary text-on-primary text-[10px] font-bold px-2 py-0.5 rounded-full">
               {unreadCount} New
             </span>
           )}
@@ -119,7 +119,7 @@ export function NotificationCenter({ isOpen, onClose }: NotificationCenterProps)
       {/* Body */}
       <div className="flex-1 overflow-y-auto">
         {notifications.length > 0 ? (
-          <div className="flex flex-col bg-white">
+          <div className="flex flex-col bg-surface">
             {notifications.map((notif) => (
               <NotificationItem 
                 key={notif.id} 

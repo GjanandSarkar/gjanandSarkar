@@ -24,11 +24,11 @@ export function TrendingProducts({ products }: TrendingProductsProps) {
   return (
     <section className="w-full max-w-[1440px] mx-auto px-4 md:px-8 py-8">
       {/* Header */}
-      <div className="flex items-center justify-between pb-4 mb-6 border-b border-gray-200/80">
+      <div className="flex items-center justify-between pb-4 mb-6 border-b border-border/80">
         <div>
           <div className="flex items-center gap-1.5 mb-1">
-            <Sparkles className="w-4 h-4 text-[#c88a23]" />
-            <span className="text-xs font-bold text-[#c88a23] uppercase tracking-wider">
+            <Sparkles className="w-4 h-4 text-secondary" />
+            <span className="text-xs font-bold text-secondary uppercase tracking-wider">
               Just Added
             </span>
           </div>
@@ -38,7 +38,7 @@ export function TrendingProducts({ products }: TrendingProductsProps) {
               reverse-chronological list as trending or top-picked is a claim
               the data does not support, so it says what it actually is.
               Rename this back once a real ranking signal exists. */}
-          <h2 className="text-2xl md:text-3xl font-black text-[#0f3e26] tracking-tight">
+          <h2 className="text-2xl md:text-3xl font-black text-primary tracking-tight">
             New Arrivals
           </h2>
         </div>
@@ -46,7 +46,7 @@ export function TrendingProducts({ products }: TrendingProductsProps) {
         <div className="flex items-center gap-4">
           <Link
             href="/products"
-            className="text-xs sm:text-sm font-bold text-[#c88a23] hover:text-[#0f3e26] flex items-center gap-1 transition-colors"
+            className="text-xs sm:text-sm font-bold text-secondary hover:text-primary flex items-center gap-1 transition-colors"
           >
             <span>View All Products</span>
             <ArrowRight className="w-4 h-4" />
@@ -56,14 +56,14 @@ export function TrendingProducts({ products }: TrendingProductsProps) {
           <div className="hidden sm:flex items-center gap-1.5">
             <button
               onClick={() => handleScroll('left')}
-              className="w-8 h-8 rounded-full border border-gray-300 bg-white hover:bg-gray-100 flex items-center justify-center text-gray-700 transition-colors shadow-2xs"
+              className="w-8 h-8 rounded-full border border-border-hover bg-surface hover:bg-surface-muted flex items-center justify-center text-foreground transition-colors shadow-2xs"
               aria-label="Scroll left"
             >
               <ChevronLeft className="w-4 h-4" />
             </button>
             <button
               onClick={() => handleScroll('right')}
-              className="w-8 h-8 rounded-full border border-gray-300 bg-white hover:bg-gray-100 flex items-center justify-center text-gray-700 transition-colors shadow-2xs"
+              className="w-8 h-8 rounded-full border border-border-hover bg-surface hover:bg-surface-muted flex items-center justify-center text-foreground transition-colors shadow-2xs"
               aria-label="Scroll right"
             >
               <ChevronRight className="w-4 h-4" />

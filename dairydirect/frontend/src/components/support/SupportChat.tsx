@@ -286,7 +286,7 @@ export function SupportChat() {
         <button
           onClick={() => setIsOpen(true)}
           aria-label="Open help and support"
-          className="fixed z-50 bottom-24 right-4 md:bottom-6 md:right-6 h-14 w-14 rounded-full bg-primary text-foreground-inverse shadow-lg flex items-center justify-center transition-transform active:scale-95 hover:scale-105"
+          className="support-fab h-14 w-14 rounded-full bg-primary text-foreground-inverse shadow-lg flex items-center justify-center transition-transform active:scale-95 hover:scale-105"
         >
           <MessageCircle className="w-6 h-6" />
         </button>
@@ -297,7 +297,7 @@ export function SupportChat() {
           ref={panelRef}
           role="dialog"
           aria-label="Help and support"
-          className="fixed z-50 inset-x-0 bottom-0 md:inset-auto md:bottom-6 md:right-6 md:w-[400px] h-[85vh] md:h-[600px] md:max-h-[80vh] bg-white md:rounded-2xl rounded-t-2xl shadow-2xl border border-sand flex flex-col overflow-hidden"
+          className="fixed z-50 inset-x-0 bottom-0 md:inset-auto md:bottom-6 md:right-6 md:w-[400px] h-[85vh] md:h-[600px] md:max-h-[80vh] bg-surface md:rounded-2xl rounded-t-2xl shadow-2xl border border-sand flex flex-col overflow-hidden"
         >
           {/* Header */}
           <div className="flex items-center justify-between px-4 py-3 bg-primary text-foreground-inverse shrink-0">
@@ -313,14 +313,14 @@ export function SupportChat() {
             <button
               onClick={() => setIsOpen(false)}
               aria-label="Close help and support"
-              className="p-2 -mr-2 rounded-full hover:bg-white/10 transition-colors"
+              className="p-2 -mr-2 rounded-full hover:bg-surface/10 transition-colors"
             >
               <X className="w-5 h-5" />
             </button>
           </div>
 
           {/* Messages */}
-          <div className="flex-1 overflow-y-auto px-3 py-4 space-y-3 bg-[#fafaf8]">
+          <div className="flex-1 overflow-y-auto px-3 py-4 space-y-3 bg-background">
             {messages.map((m) => (
               <div key={m.id} className="space-y-2">
                 <div
@@ -330,10 +330,10 @@ export function SupportChat() {
                       : [
                           'mr-auto max-w-[90%] rounded-2xl rounded-bl-sm px-3.5 py-2.5 text-sm border',
                           m.tone === 'warning'
-                            ? 'bg-[#fff8e6] border-[#f0d9a0] text-[#5b4300]'
+                            ? 'bg-secondary-bg border-secondary-bg text-secondary-hover'
                             : m.tone === 'success'
-                              ? 'bg-[#eaf6ef] border-[#bfe0cc] text-[#10351f]'
-                              : 'bg-white border-sand text-dark',
+                              ? 'bg-success-bg border-primary-fixed text-primary'
+                              : 'bg-surface border-sand text-dark',
                         ].join(' ')
                   }
                 >
@@ -347,7 +347,7 @@ export function SupportChat() {
                         key={`${m.id}-qr-${i}`}
                         onClick={() => runAction(qr.action, qr.payload)}
                         disabled={isBusy}
-                        className="text-left text-[12px] font-semibold px-3 py-2 rounded-full border border-primary/30 text-primary bg-white hover:bg-primary/5 transition-colors disabled:opacity-50 max-w-full"
+                        className="text-left text-[12px] font-semibold px-3 py-2 rounded-full border border-primary/30 text-primary bg-surface hover:bg-primary/5 transition-colors disabled:opacity-50 max-w-full"
                       >
                         {qr.action === 'root' && <ArrowLeft className="w-3 h-3 inline mr-1 -mt-0.5" />}
                         {qr.label}
@@ -368,7 +368,7 @@ export function SupportChat() {
 
           {/* Direct contact routes */}
           {(SUPPORT_CONTACT.phone || SUPPORT_CONTACT.email) && (
-            <div className="px-3 py-2 border-t border-sand bg-white flex items-center gap-3 text-[11px] shrink-0">
+            <div className="px-3 py-2 border-t border-sand bg-surface flex items-center gap-3 text-[11px] shrink-0">
               {SUPPORT_CONTACT.phone && (
                 <a href={`tel:${SUPPORT_CONTACT.phone}`} className="flex items-center gap-1 font-semibold text-primary">
                   <Phone className="w-3.5 h-3.5" /> {SUPPORT_CONTACT.phone}
@@ -386,7 +386,7 @@ export function SupportChat() {
           )}
 
           {/* Composer */}
-          <form onSubmit={handleSend} className="p-3 border-t border-sand bg-white flex items-center gap-2 shrink-0">
+          <form onSubmit={handleSend} className="p-3 border-t border-sand bg-surface flex items-center gap-2 shrink-0">
             <input
               value={input}
               onChange={(e) => setInput(e.target.value)}

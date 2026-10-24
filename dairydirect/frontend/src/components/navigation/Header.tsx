@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect, useRef, Suspense } from 'react';
 import Link from 'next/link';
+import { ThemeToggle } from '@/components/theme/ThemeToggle';
 import { useRouter, useSearchParams } from 'next/navigation';
 import {
   Search,
@@ -154,7 +155,7 @@ function HeaderContent() {
   const searchForm = (
     <form
       onSubmit={handleSearch}
-      className="w-full relative flex items-center bg-gray-50/80 border border-gray-300 rounded-lg overflow-visible focus-within:border-[#c88a23] focus-within:ring-1 focus-within:ring-[#c88a23] transition-all"
+      className="w-full relative flex items-center bg-surface-muted/80 border border-border-hover rounded-lg overflow-visible focus-within:border-secondary focus-within:ring-1 focus-within:ring-secondary transition-all"
     >
       <input
         type="text"
@@ -162,11 +163,11 @@ function HeaderContent() {
         onChange={(e) => setSearchTerm(e.target.value)}
         placeholder="Search products, brands and more"
         aria-label="Search products"
-        className="flex-1 min-w-0 px-3 md:px-4 py-2.5 text-sm bg-transparent text-gray-800 placeholder-gray-400 outline-none rounded-l-lg"
+        className="flex-1 min-w-0 px-3 md:px-4 py-2.5 text-sm bg-transparent text-foreground placeholder-foreground-muted outline-none rounded-l-lg"
       />
       <button
         type="submit"
-        className="bg-[#c88a23] hover:bg-[#b0781c] text-white px-4 h-11 min-w-[48px] flex items-center justify-center transition-colors shrink-0 rounded-r-lg"
+        className="bg-secondary hover:bg-secondary-hover text-white px-4 h-11 min-w-[48px] flex items-center justify-center transition-colors shrink-0 rounded-r-lg"
         aria-label="Search"
       >
         <Search className="w-4 h-4 stroke-[2.5]" />
@@ -175,7 +176,7 @@ function HeaderContent() {
   );
 
   return (
-    <header className="sticky top-0 w-full z-40 bg-white border-b border-gray-200/80 shadow-xs">
+    <header className="sticky top-0 w-full z-40 bg-surface border-b border-border/80 shadow-xs">
       <div className="max-w-[1440px] mx-auto px-4 md:px-8 h-18 md:h-20 flex items-center justify-between gap-3 md:gap-8">
 
         {/* ── Brand Logo ── */}
@@ -191,9 +192,9 @@ function HeaderContent() {
             />
             <div className="flex flex-col">
               <span className="text-xl md:text-2xl font-black tracking-tight leading-none">
-                <span className="text-[#0f3e26]">Gjanand</span>
+                <span className="text-primary">Gjanand</span>
               </span>
-              <span className="text-[10px] md:text-[11px] tracking-[0.2em] font-black text-[#c88a23] uppercase text-right leading-none mt-0.5">
+              <span className="text-[10px] md:text-[11px] tracking-[0.2em] font-black text-secondary uppercase text-right leading-none mt-0.5">
                 SARKAR
               </span>
             </div>
@@ -209,16 +210,18 @@ function HeaderContent() {
           {/* Become Seller / Seller Portal */}
           <Link
             href={user?.role === 'seller' ? "/seller/dashboard" : user?.role === 'admin' ? "/admin/products" : "/become-seller"}
-            className="hidden lg:flex flex-col items-center justify-center text-gray-700 hover:text-[#0f3e26] transition-colors group"
+            className="hidden lg:flex flex-col items-center justify-center text-foreground hover:text-primary transition-colors group"
           >
-            <Store className="w-5 h-5 text-gray-600 group-hover:text-[#0f3e26] transition-colors" />
+            <Store className="w-5 h-5 text-foreground-muted group-hover:text-primary transition-colors" />
             <span className="text-[11px] font-semibold mt-0.5 whitespace-nowrap">
               {user?.role === 'seller' ? 'Seller Hub' : user?.role === 'admin' ? 'Admin Panel' : 'Become Seller'}
             </span>
           </Link>
 
-          <Link href="/offers" className="hidden lg:flex flex-col items-center justify-center text-gray-700 hover:text-[#0f3e26] transition-colors group">
-            <Sparkles className="w-5 h-5 text-gray-600 group-hover:text-[#0f3e26] transition-colors" />
+          <ThemeToggle />
+
+          <Link href="/offers" className="hidden lg:flex flex-col items-center justify-center text-foreground hover:text-primary transition-colors group">
+            <Sparkles className="w-5 h-5 text-foreground-muted group-hover:text-primary transition-colors" />
             <span className="text-[11px] font-semibold mt-0.5 whitespace-nowrap">Offers</span>
           </Link>
 
@@ -233,18 +236,18 @@ function HeaderContent() {
               <button
                 type="button"
                 onClick={() => setIsAddressOpen(!isAddressOpen)}
-                className="flex items-center gap-2 px-2.5 py-1.5 rounded-xl hover:bg-gray-100/80 transition-colors text-left group cursor-pointer border border-transparent hover:border-gray-200"
+                className="flex items-center gap-2 px-2.5 py-1.5 rounded-xl hover:bg-surface-muted/80 transition-colors text-left group cursor-pointer border border-transparent hover:border-border"
                 aria-label="Select delivery address"
               >
-                <div className="w-8 h-8 rounded-full bg-emerald-50 text-[#0f3e26] flex items-center justify-center shrink-0 border border-emerald-100 group-hover:scale-105 transition-transform">
-                  <MapPin className="w-4 h-4 text-[#0f3e26]" />
+                <div className="w-8 h-8 rounded-full bg-success-bg text-primary flex items-center justify-center shrink-0 border border-success-bg group-hover:scale-105 transition-transform">
+                  <MapPin className="w-4 h-4 text-primary" />
                 </div>
                 <div className="flex flex-col max-w-[130px] lg:max-w-[170px]">
-                  <span className="text-[10px] font-extrabold uppercase tracking-wider text-gray-500 flex items-center gap-1">
+                  <span className="text-[10px] font-extrabold uppercase tracking-wider text-foreground-muted flex items-center gap-1">
                     Deliver to {user.name ? user.name.split(' ')[0] : 'You'}
-                    <ChevronDown className={`w-3 h-3 text-gray-400 transition-transform duration-200 ${isAddressOpen ? 'rotate-180' : ''}`} />
+                    <ChevronDown className={`w-3 h-3 text-foreground-muted transition-transform duration-200 ${isAddressOpen ? 'rotate-180' : ''}`} />
                   </span>
-                  <span className="text-xs font-bold text-gray-900 truncate">
+                  <span className="text-xs font-bold text-foreground truncate">
                     {activeAddress ? `${activeAddress.label}: ${activeAddress.address}` : 'Select Address'}
                   </span>
                 </div>
@@ -252,16 +255,16 @@ function HeaderContent() {
 
               {/* Address Selection Dropdown Menu */}
               {isAddressOpen && (
-                <div className="absolute right-0 top-full mt-2 w-80 bg-white rounded-2xl shadow-2xl border border-gray-200 py-2.5 z-50 animate-in fade-in slide-in-from-top-1">
-                  <div className="px-4 py-2 border-b border-gray-100 flex items-center justify-between">
-                    <span className="text-xs font-black text-gray-900 uppercase tracking-wider flex items-center gap-1.5">
-                      <MapPin className="w-3.5 h-3.5 text-[#0f3e26]" />
+                <div className="absolute right-0 top-full mt-2 w-80 bg-surface rounded-2xl shadow-2xl border border-border py-2.5 z-50 animate-in fade-in slide-in-from-top-1">
+                  <div className="px-4 py-2 border-b border-border flex items-center justify-between">
+                    <span className="text-xs font-black text-foreground uppercase tracking-wider flex items-center gap-1.5">
+                      <MapPin className="w-3.5 h-3.5 text-primary" />
                       Delivery Addresses
                     </span>
                     <Link
                       href="/profile/saved-addresses"
                       onClick={() => setIsAddressOpen(false)}
-                      className="text-[11px] font-bold text-[#c88a23] hover:underline"
+                      className="text-[11px] font-bold text-secondary hover:underline"
                     >
                       Manage
                     </Link>
@@ -280,34 +283,34 @@ function HeaderContent() {
                               setIsAddressOpen(false);
                             }}
                             className={`w-full flex items-start justify-between p-2.5 rounded-xl transition-all text-left cursor-pointer ${isSelected
-                                ? 'bg-emerald-50/90 border border-emerald-200 text-[#0f3e26]'
-                                : 'hover:bg-gray-50 text-gray-700'
+                                ? 'bg-success-bg/90 border border-success/20 text-primary'
+                                : 'hover:bg-surface-muted text-foreground'
                               }`}
                           >
                             <div className="min-w-0 pr-2">
                               <div className="flex items-center gap-2">
-                                <span className="text-xs font-bold text-gray-900">{addr.label}</span>
+                                <span className="text-xs font-bold text-foreground">{addr.label}</span>
                                 {addr.is_default && (
-                                  <span className="text-[9px] bg-emerald-100 text-[#0f3e26] px-1.5 py-0.2 rounded font-bold">
+                                  <span className="text-[9px] bg-success-bg text-primary px-1.5 py-0.2 rounded font-bold">
                                     Default
                                   </span>
                                 )}
                               </div>
-                              <p className="text-[11px] text-gray-500 line-clamp-2 mt-0.5">{addr.address}</p>
+                              <p className="text-[11px] text-foreground-muted line-clamp-2 mt-0.5">{addr.address}</p>
                             </div>
                             {isSelected && (
-                              <Check className="w-4 h-4 text-[#0f3e26] shrink-0 mt-1" />
+                              <Check className="w-4 h-4 text-primary shrink-0 mt-1" />
                             )}
                           </button>
                         );
                       })
                     ) : (
                       <div className="p-4 text-center">
-                        <p className="text-xs text-gray-500">No saved addresses found</p>
+                        <p className="text-xs text-foreground-muted">No saved addresses found</p>
                         <Link
                           href="/profile/saved-addresses"
                           onClick={() => setIsAddressOpen(false)}
-                          className="mt-2 inline-flex items-center gap-1 text-xs font-bold text-[#0f3e26] hover:underline"
+                          className="mt-2 inline-flex items-center gap-1 text-xs font-bold text-primary hover:underline"
                         >
                           <Plus className="w-3.5 h-3.5" />
                           Add Your First Address
@@ -316,11 +319,11 @@ function HeaderContent() {
                     )}
                   </div>
 
-                  <div className="px-3 pt-2 border-t border-gray-100">
+                  <div className="px-3 pt-2 border-t border-border">
                     <Link
                       href="/profile/saved-addresses"
                       onClick={() => setIsAddressOpen(false)}
-                      className="w-full flex items-center justify-center gap-1.5 py-2 text-xs font-bold text-[#0f3e26] bg-emerald-50 hover:bg-emerald-100/80 rounded-xl transition-colors"
+                      className="w-full flex items-center justify-center gap-1.5 py-2 text-xs font-bold text-primary bg-success-bg hover:bg-success-bg/80 rounded-xl transition-colors"
                     >
                       <Plus className="w-3.5 h-3.5" />
                       Add New Delivery Address
@@ -334,13 +337,13 @@ function HeaderContent() {
           {/* Cart */}
           <Link
             href="/cart"
-            className="flex flex-col items-center justify-center text-gray-700 hover:text-[#0f3e26] transition-colors relative group"
+            className="flex flex-col items-center justify-center text-foreground hover:text-primary transition-colors relative group"
             aria-label="View Cart"
           >
             <div className="relative">
-              <ShoppingCart className="w-5 h-5 text-gray-700 group-hover:text-[#0f3e26] transition-colors" />
+              <ShoppingCart className="w-5 h-5 text-foreground group-hover:text-primary transition-colors" />
               {totalItems > 0 && (
-                <span className="absolute -top-2 -right-2.5 bg-[#c88a23] text-white text-[10px] font-black w-4.5 h-4.5 rounded-full flex items-center justify-center shadow-xs">
+                <span className="absolute -top-2 -right-2.5 bg-secondary text-white text-[10px] font-black w-4.5 h-4.5 rounded-full flex items-center justify-center shadow-xs">
                   {totalItems}
                 </span>
               )}
@@ -357,9 +360,9 @@ function HeaderContent() {
           >
             <Link
               href={user ? "/profile" : "/login"}
-              className="flex flex-col items-center justify-center text-gray-700 hover:text-[#0f3e26] transition-colors group cursor-pointer"
+              className="flex flex-col items-center justify-center text-foreground hover:text-primary transition-colors group cursor-pointer"
             >
-              <div className="w-7 h-7 rounded-full bg-gray-100 flex items-center justify-center overflow-hidden border border-gray-200 group-hover:border-[#0f3e26] transition-colors shadow-2xs">
+              <div className="w-7 h-7 rounded-full bg-surface-muted flex items-center justify-center overflow-hidden border border-border group-hover:border-primary transition-colors shadow-2xs">
                 <img
                   src={user?.avatar_url || '/profile/profile.jpg'}
                   alt={user?.name || "Profile"}
@@ -371,30 +374,30 @@ function HeaderContent() {
                 />
               </div>
               <div className="flex items-center gap-0.5 mt-0.5">
-                <span className="text-[11px] font-semibold text-gray-800 group-hover:text-[#0f3e26] whitespace-nowrap">
+                <span className="text-[11px] font-semibold text-foreground group-hover:text-primary whitespace-nowrap">
                   {user ? (user.name ? user.name.split(' ')[0] : 'Account') : 'Login / Sign up'}
                 </span>
                 {user && (
-                  <ChevronDown className={`w-3 h-3 text-gray-400 transition-transform duration-200 ${isProfileOpen ? 'rotate-180' : ''}`} />
+                  <ChevronDown className={`w-3 h-3 text-foreground-muted transition-transform duration-200 ${isProfileOpen ? 'rotate-180' : ''}`} />
                 )}
               </div>
             </Link>
 
             {/* Profile Dropdown Menu (on hover / click) */}
             {isProfileOpen && (
-              <div className="absolute right-0 top-full mt-2 w-64 bg-white rounded-2xl shadow-2xl border border-gray-200 py-2 z-50 animate-in fade-in slide-in-from-top-1 divide-y divide-gray-100">
+              <div className="absolute right-0 top-full mt-2 w-64 bg-surface rounded-2xl shadow-2xl border border-border py-2 z-50 animate-in fade-in slide-in-from-top-1 divide-y divide-border">
                 {user ? (
                   <>
                     {/* User Profile Header */}
                     <div className="px-4 py-2.5 bg-gradient-to-r from-emerald-50/70 to-amber-50/40 rounded-t-xl">
-                      <p className="text-xs font-black text-gray-900 truncate">
+                      <p className="text-xs font-black text-foreground truncate">
                         {user.name || 'Gjanand Customer'}
                       </p>
-                      <p className="text-[11px] text-gray-500 truncate">
+                      <p className="text-[11px] text-foreground-muted truncate">
                         {user.phone || user.email || 'Logged In'}
                       </p>
                       {user.role && user.role !== 'customer' && (
-                        <span className="inline-block mt-1 text-[9px] font-black uppercase tracking-wider px-2 py-0.5 bg-[#0f3e26] text-white rounded-full">
+                        <span className="inline-block mt-1 text-[9px] font-black uppercase tracking-wider px-2 py-0.5 bg-primary text-on-primary rounded-full">
                           {user.role}
                         </span>
                       )}
@@ -405,34 +408,34 @@ function HeaderContent() {
                       <Link
                         href="/profile"
                         onClick={() => setIsProfileOpen(false)}
-                        className="flex items-center gap-3 px-4 py-2 text-xs font-semibold text-gray-700 hover:bg-emerald-50 hover:text-[#0f3e26] transition-colors group"
+                        className="flex items-center gap-3 px-4 py-2 text-xs font-semibold text-foreground hover:bg-success-bg hover:text-primary transition-colors group"
                       >
-                        <User className="w-4 h-4 text-gray-400 group-hover:text-[#0f3e26] transition-colors" />
+                        <User className="w-4 h-4 text-foreground-muted group-hover:text-primary transition-colors" />
                         <span>Profile</span>
                       </Link>
 
                       <Link
                         href="/orders"
                         onClick={() => setIsProfileOpen(false)}
-                        className="flex items-center gap-3 px-4 py-2 text-xs font-semibold text-gray-700 hover:bg-emerald-50 hover:text-[#0f3e26] transition-colors group"
+                        className="flex items-center gap-3 px-4 py-2 text-xs font-semibold text-foreground hover:bg-success-bg hover:text-primary transition-colors group"
                       >
-                        <Package className="w-4 h-4 text-gray-400 group-hover:text-[#0f3e26] transition-colors" />
+                        <Package className="w-4 h-4 text-foreground-muted group-hover:text-primary transition-colors" />
                         <div className="flex-1 flex items-center justify-between">
                           <span>Orders</span>
-                          <span className="text-[10px] text-gray-400 font-normal">Track & History</span>
+                          <span className="text-[10px] text-foreground-muted font-normal">Track & History</span>
                         </div>
                       </Link>
 
                       <Link
                         href="/wishlist"
                         onClick={() => setIsProfileOpen(false)}
-                        className="flex items-center gap-3 px-4 py-2 text-xs font-semibold text-gray-700 hover:bg-emerald-50 hover:text-[#0f3e26] transition-colors group"
+                        className="flex items-center gap-3 px-4 py-2 text-xs font-semibold text-foreground hover:bg-success-bg hover:text-primary transition-colors group"
                       >
-                        <Heart className="w-4 h-4 text-gray-400 group-hover:text-rose-600 transition-colors" />
+                        <Heart className="w-4 h-4 text-foreground-muted group-hover:text-error transition-colors" />
                         <div className="flex-1 flex items-center justify-between">
                           <span>Wishlist</span>
                           {wishlist.length > 0 && (
-                            <span className="bg-rose-100 text-rose-700 text-[10px] font-bold px-1.5 py-0.2 rounded-full">
+                            <span className="bg-error-bg text-error text-[10px] font-bold px-1.5 py-0.2 rounded-full">
                               {wishlist.length}
                             </span>
                           )}
@@ -442,18 +445,18 @@ function HeaderContent() {
                       <Link
                         href="/profile/saved-addresses"
                         onClick={() => setIsProfileOpen(false)}
-                        className="flex items-center gap-3 px-4 py-2 text-xs font-semibold text-gray-700 hover:bg-emerald-50 hover:text-[#0f3e26] transition-colors group"
+                        className="flex items-center gap-3 px-4 py-2 text-xs font-semibold text-foreground hover:bg-success-bg hover:text-primary transition-colors group"
                       >
-                        <MapPin className="w-4 h-4 text-gray-400 group-hover:text-[#0f3e26] transition-colors" />
+                        <MapPin className="w-4 h-4 text-foreground-muted group-hover:text-primary transition-colors" />
                         <span>Saved Addresses</span>
                       </Link>
 
                       <Link
                         href="/subscribe"
                         onClick={() => setIsProfileOpen(false)}
-                        className="flex items-center gap-3 px-4 py-2 text-xs font-semibold text-gray-700 hover:bg-emerald-50 hover:text-[#0f3e26] transition-colors group"
+                        className="flex items-center gap-3 px-4 py-2 text-xs font-semibold text-foreground hover:bg-success-bg hover:text-primary transition-colors group"
                       >
-                        <Sparkles className="w-4 h-4 text-[#c88a23]" />
+                        <Sparkles className="w-4 h-4 text-secondary" />
                         <span>Subscriptions</span>
                       </Link>
 
@@ -461,9 +464,9 @@ function HeaderContent() {
                         <Link
                           href="/seller/dashboard"
                           onClick={() => setIsProfileOpen(false)}
-                          className="flex items-center gap-3 px-4 py-2 text-xs font-bold text-[#0f3e26] bg-emerald-50/60 hover:bg-emerald-100/80 transition-colors"
+                          className="flex items-center gap-3 px-4 py-2 text-xs font-bold text-primary bg-success-bg/60 hover:bg-success-bg/80 transition-colors"
                         >
-                          <Store className="w-4 h-4 text-[#0f3e26]" />
+                          <Store className="w-4 h-4 text-primary" />
                           <span>Seller Dashboard</span>
                         </Link>
                       )}
@@ -485,21 +488,21 @@ function HeaderContent() {
                       <button
                         type="button"
                         onClick={handleLogout}
-                        className="w-full flex items-center gap-3 px-4 py-2 text-xs font-bold text-rose-600 hover:bg-rose-50 transition-colors cursor-pointer text-left"
+                        className="w-full flex items-center gap-3 px-4 py-2 text-xs font-bold text-error hover:bg-error-bg transition-colors cursor-pointer text-left"
                       >
-                        <LogOut className="w-4 h-4 text-rose-500" />
+                        <LogOut className="w-4 h-4 text-error" />
                         <span>Logout</span>
                       </button>
                     </div>
                   </>
                 ) : (
                   <div className="p-3 text-center">
-                    <p className="text-xs font-bold text-gray-900 mb-1">Welcome to Gjanand Sarkar</p>
-                    <p className="text-[11px] text-gray-500 mb-3">Login to manage orders, wishlist & subscriptions</p>
+                    <p className="text-xs font-bold text-foreground mb-1">Welcome to Gjanand Sarkar</p>
+                    <p className="text-[11px] text-foreground-muted mb-3">Login to manage orders, wishlist & subscriptions</p>
                     <Link
                       href="/login"
                       onClick={() => setIsProfileOpen(false)}
-                      className="block w-full py-2 bg-[#0f3e26] hover:bg-[#0a2c1b] text-white text-xs font-bold rounded-xl transition-colors text-center"
+                      className="block w-full py-2 bg-primary hover:bg-primary-fixed-dim text-on-primary text-xs font-bold rounded-xl transition-colors text-center"
                     >
                       Login / Sign Up
                     </Link>
@@ -524,7 +527,7 @@ function HeaderContent() {
 export function Header() {
   return (
     <Suspense fallback={
-      <header className="sticky top-0 w-full z-40 bg-white border-b border-gray-200/80 shadow-xs h-18 md:h-20" />
+      <header className="sticky top-0 w-full z-40 bg-surface border-b border-border/80 shadow-xs h-18 md:h-20" />
     }>
       <HeaderContent />
     </Suspense>

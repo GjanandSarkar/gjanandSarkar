@@ -50,7 +50,7 @@ export default async function OrderDetailsPage({
 
   if (result.error) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-[#fafaf8]">
+      <div className="min-h-screen flex items-center justify-center bg-background">
         <p className="text-red-500 font-semibold">Error loading order: {result.error}</p>
       </div>
     );

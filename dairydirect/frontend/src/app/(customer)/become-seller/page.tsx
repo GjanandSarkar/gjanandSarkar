@@ -258,26 +258,26 @@ export default function BecomeSellerPage() {
   // If user is logged out, show clean login redirect view
   if (!isAuthLoading && !user) {
     return (
-      <div className="min-h-screen bg-[#fafaf8] py-16 px-4 sm:px-6 lg:px-8 flex items-center justify-center">
-        <div className="bg-white rounded-3xl border border-gray-200/90 shadow-xl p-8 sm:p-12 text-center max-w-md mx-auto space-y-6">
-          <div className="w-16 h-16 rounded-2xl bg-[#0f3e26]/10 text-[#0f3e26] flex items-center justify-center mx-auto">
-            <Store className="w-8 h-8 text-[#0f3e26]" />
+      <div className="min-h-screen bg-background py-16 px-4 sm:px-6 lg:px-8 flex items-center justify-center">
+        <div className="bg-surface rounded-3xl border border-border/90 shadow-xl p-8 sm:p-12 text-center max-w-md mx-auto space-y-6">
+          <div className="w-16 h-16 rounded-2xl bg-primary/10 text-primary flex items-center justify-center mx-auto">
+            <Store className="w-8 h-8 text-primary" />
           </div>
           <div className="space-y-2">
-            <h2 className="text-2xl font-black text-gray-900">Sign In to Become a Seller</h2>
-            <p className="text-xs text-gray-600 leading-relaxed">
+            <h2 className="text-2xl font-black text-foreground">Sign In to Become a Seller</h2>
+            <p className="text-xs text-foreground-muted leading-relaxed">
               Please sign in to your Gjanand Sarkar account to submit and track your seller registration application.
             </p>
           </div>
           <Link
             href="/login?redirect=/become-seller"
-            className="w-full py-3.5 px-6 bg-[#0f3e26] hover:bg-[#144f31] text-white text-xs font-black rounded-xl shadow-md flex items-center justify-center gap-2 transition-all active:scale-95"
+            className="w-full py-3.5 px-6 bg-primary hover:bg-primary-hover text-on-primary text-xs font-black rounded-xl shadow-md flex items-center justify-center gap-2 transition-all active:scale-95"
           >
-            <LogIn className="w-4 h-4 text-[#c88a23]" />
+            <LogIn className="w-4 h-4 text-secondary" />
             <span>Sign In to Continue</span>
           </Link>
           <div className="pt-2">
-            <Link href="/home" className="text-xs font-bold text-gray-500 hover:text-gray-900 transition-colors">
+            <Link href="/home" className="text-xs font-bold text-foreground-muted hover:text-foreground transition-colors">
               Return to Marketplace
             </Link>
           </div>
@@ -287,51 +287,51 @@ export default function BecomeSellerPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#fafaf8] py-10 px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-background py-10 px-4 sm:px-6 lg:px-8">
       <div className="max-w-5xl mx-auto space-y-10">
         
         {/* Top Hero Banner */}
         <div className="text-center max-w-3xl mx-auto space-y-3">
-          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[#0f3e26]/10 border border-[#0f3e26]/20 text-[#0f3e26] text-xs font-black uppercase tracking-wider">
-            <Sparkles className="w-4 h-4 text-[#c88a23]" />
+          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-primary/10 border border-primary/20 text-primary text-xs font-black uppercase tracking-wider">
+            <Sparkles className="w-4 h-4 text-secondary" />
             <span>Marketplace Seller Onboarding</span>
           </div>
-          <h1 className="text-3xl sm:text-4xl lg:text-5xl font-black text-[#0f3e26] tracking-tight leading-tight">
+          <h1 className="text-3xl sm:text-4xl lg:text-5xl font-black text-primary tracking-tight leading-tight">
             Become a Verified Seller on Gjanand Sarkar
           </h1>
-          <p className="text-sm sm:text-base text-gray-600 leading-relaxed">
+          <p className="text-sm sm:text-base text-foreground-muted leading-relaxed">
             Expand your business across India with verified merchant privileges, dedicated delivery logistics, and transparent payouts. Submit your seller application below for admin review.
           </p>
         </div>
 
         {/* 3-Step Manual Onboarding Workflow Banner */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <div className="bg-white p-5 rounded-2xl border border-gray-200 shadow-2xs relative">
-            <div className="w-10 h-10 rounded-xl bg-emerald-100 text-[#0f3e26] flex items-center justify-center font-black text-sm mb-3">
+          <div className="bg-surface p-5 rounded-2xl border border-border shadow-2xs relative">
+            <div className="w-10 h-10 rounded-xl bg-success-bg text-primary flex items-center justify-center font-black text-sm mb-3">
               01
             </div>
-            <h3 className="text-sm font-black text-gray-900 mb-1">Submit Application</h3>
-            <p className="text-xs text-gray-500 leading-normal">
+            <h3 className="text-sm font-black text-foreground mb-1">Submit Application</h3>
+            <p className="text-xs text-foreground-muted leading-normal">
               Provide your business name, address, GSTIN, PAN, and verification documents.
             </p>
           </div>
 
-          <div className="bg-white p-5 rounded-2xl border border-[#c88a23]/30 shadow-2xs relative">
-            <div className="w-10 h-10 rounded-xl bg-amber-100 text-[#c88a23] flex items-center justify-center font-black text-sm mb-3">
+          <div className="bg-surface p-5 rounded-2xl border border-secondary/30 shadow-2xs relative">
+            <div className="w-10 h-10 rounded-xl bg-warning-bg text-secondary flex items-center justify-center font-black text-sm mb-3">
               02
             </div>
-            <h3 className="text-sm font-black text-gray-900 mb-1">Admin Verification</h3>
-            <p className="text-xs text-gray-500 leading-normal">
+            <h3 className="text-sm font-black text-foreground mb-1">Admin Verification</h3>
+            <p className="text-xs text-foreground-muted leading-normal">
               Our marketplace compliance team reviews your business credentials and licenses.
             </p>
           </div>
 
-          <div className="bg-white p-5 rounded-2xl border border-gray-200 shadow-2xs relative">
-            <div className="w-10 h-10 rounded-xl bg-blue-100 text-blue-800 flex items-center justify-center font-black text-sm mb-3">
+          <div className="bg-surface p-5 rounded-2xl border border-border shadow-2xs relative">
+            <div className="w-10 h-10 rounded-xl bg-info-bg text-blue-800 flex items-center justify-center font-black text-sm mb-3">
               03
             </div>
-            <h3 className="text-sm font-black text-gray-900 mb-1">Seller Dashboard Unlocked</h3>
-            <p className="text-xs text-gray-500 leading-normal">
+            <h3 className="text-sm font-black text-foreground mb-1">Seller Dashboard Unlocked</h3>
+            <p className="text-xs text-foreground-muted leading-normal">
               Once approved, your seller portal is activated to list products and start selling.
             </p>
           </div>
@@ -339,8 +339,8 @@ export default function BecomeSellerPage() {
 
         {/* Success Alert Banner when just submitted */}
         {submissionSuccessMsg && (
-          <div className="bg-emerald-50 border-2 border-emerald-500/40 rounded-2xl p-5 flex items-center gap-3 text-emerald-900 text-sm font-bold shadow-sm animate-in fade-in">
-            <CheckCircle2 className="w-6 h-6 text-emerald-600 shrink-0" />
+          <div className="bg-success-bg border-2 border-success/40 rounded-2xl p-5 flex items-center gap-3 text-success text-sm font-bold shadow-sm animate-in fade-in">
+            <CheckCircle2 className="w-6 h-6 text-success shrink-0" />
             <div className="flex-1">
               <p>{submissionSuccessMsg}</p>
             </div>
@@ -349,13 +349,13 @@ export default function BecomeSellerPage() {
 
         {/* ─── Dynamic View Based on Application Status ─────────────────────── */}
         {isCheckingStatus ? (
-          <div className="bg-white rounded-3xl border border-gray-200 shadow-sm p-12 text-center max-w-xl mx-auto space-y-4">
-            <div className="w-16 h-16 rounded-2xl bg-[#0f3e26]/10 text-[#0f3e26] flex items-center justify-center mx-auto">
-              <Loader2 className="w-8 h-8 animate-spin text-[#0f3e26]" />
+          <div className="bg-surface rounded-3xl border border-border shadow-sm p-12 text-center max-w-xl mx-auto space-y-4">
+            <div className="w-16 h-16 rounded-2xl bg-primary/10 text-primary flex items-center justify-center mx-auto">
+              <Loader2 className="w-8 h-8 animate-spin text-primary" />
             </div>
             <div className="space-y-1">
-              <h3 className="text-lg font-black text-gray-900">Checking Seller Application Status</h3>
-              <p className="text-xs text-gray-500">
+              <h3 className="text-lg font-black text-foreground">Checking Seller Application Status</h3>
+              <p className="text-xs text-foreground-muted">
                 Fetching your registration records and review history from the database...
               </p>
             </div>
@@ -364,39 +364,39 @@ export default function BecomeSellerPage() {
           <>
             {/* ─── 1. PENDING / CONTACTED SCREEN ───────────────────────────── */}
             {(existingInquiry.status === 'pending' || existingInquiry.status === 'contacted') && (
-              <div className="bg-white rounded-3xl border-2 border-amber-500/30 p-8 sm:p-12 shadow-xl text-center max-w-2xl mx-auto space-y-6 animate-in fade-in zoom-in-95">
-                <div className="w-20 h-20 rounded-full bg-amber-100 text-amber-800 flex items-center justify-center mx-auto shadow-inner">
-                  <Clock className="w-12 h-12 text-amber-600 animate-pulse" />
+              <div className="bg-surface rounded-3xl border-2 border-warning/30 p-8 sm:p-12 shadow-xl text-center max-w-2xl mx-auto space-y-6 animate-in fade-in zoom-in-95">
+                <div className="w-20 h-20 rounded-full bg-warning-bg text-warning flex items-center justify-center mx-auto shadow-inner">
+                  <Clock className="w-12 h-12 text-warning animate-pulse" />
                 </div>
 
                 <div className="space-y-3">
-                  <span className="px-3.5 py-1 rounded-full bg-amber-50 border border-amber-200 text-amber-800 text-xs font-black uppercase tracking-wider">
+                  <span className="px-3.5 py-1 rounded-full bg-warning-bg border border-warning/20 text-warning text-xs font-black uppercase tracking-wider">
                     Application Pending Review
                   </span>
-                  <h2 className="text-2xl sm:text-3xl font-black text-gray-900">
+                  <h2 className="text-2xl sm:text-3xl font-black text-foreground">
                     Awaiting Admin Approval
                   </h2>
-                  <p className="text-sm font-medium text-gray-700 leading-relaxed max-w-lg mx-auto bg-amber-50/60 p-4 rounded-2xl border border-amber-200/60">
+                  <p className="text-sm font-medium text-foreground leading-relaxed max-w-lg mx-auto bg-warning-bg/60 p-4 rounded-2xl border border-warning/20/60">
                     Your seller application has been submitted successfully and is awaiting admin approval. Duplicate submissions are prevented while an application is pending.
                   </p>
                 </div>
 
                 {/* Inquiry Details Summary Card */}
-                <div className="p-5 bg-gray-50 rounded-2xl border border-gray-200 text-left space-y-3 max-w-lg mx-auto">
-                  <div className="flex items-center justify-between pb-3 border-b border-gray-200">
+                <div className="p-5 bg-surface-muted rounded-2xl border border-border text-left space-y-3 max-w-lg mx-auto">
+                  <div className="flex items-center justify-between pb-3 border-b border-border">
                     <div>
-                      <p className="text-[10px] uppercase font-black text-gray-400">Business Name</p>
-                      <p className="text-base font-black text-gray-900">{existingInquiry.business_name}</p>
+                      <p className="text-[10px] uppercase font-black text-foreground-muted">Business Name</p>
+                      <p className="text-base font-black text-foreground">{existingInquiry.business_name}</p>
                     </div>
                     <div className="text-right">
-                      <p className="text-[10px] uppercase font-black text-gray-400">Application ID</p>
+                      <p className="text-[10px] uppercase font-black text-foreground-muted">Application ID</p>
                       <button
                         type="button"
                         onClick={handleCopyId}
-                        className="px-2.5 py-1 bg-white border border-gray-200 rounded-lg text-xs font-bold text-gray-700 hover:bg-gray-100 flex items-center gap-1.5 transition-colors shadow-2xs font-mono"
+                        className="px-2.5 py-1 bg-surface border border-border rounded-lg text-xs font-bold text-foreground hover:bg-surface-muted flex items-center gap-1.5 transition-colors shadow-2xs font-mono"
                         title="Click to copy ID"
                       >
-                        {copiedId ? <Check className="w-3.5 h-3.5 text-emerald-600" /> : <Copy className="w-3.5 h-3.5" />}
+                        {copiedId ? <Check className="w-3.5 h-3.5 text-success" /> : <Copy className="w-3.5 h-3.5" />}
                         <span>{existingInquiry.id.slice(0, 8)}...</span>
                       </button>
                     </div>
@@ -404,45 +404,45 @@ export default function BecomeSellerPage() {
 
                   <div className="grid grid-cols-2 gap-3 text-xs">
                     <div>
-                      <span className="text-gray-400 font-bold block text-[10px] uppercase">Contact Person</span>
-                      <span className="font-semibold text-gray-900">{existingInquiry.full_name}</span>
+                      <span className="text-foreground-muted font-bold block text-[10px] uppercase">Contact Person</span>
+                      <span className="font-semibold text-foreground">{existingInquiry.full_name}</span>
                     </div>
                     <div>
-                      <span className="text-gray-400 font-bold block text-[10px] uppercase">Mobile Number</span>
-                      <span className="font-semibold text-gray-900 font-mono">+91 {existingInquiry.phone}</span>
+                      <span className="text-foreground-muted font-bold block text-[10px] uppercase">Mobile Number</span>
+                      <span className="font-semibold text-foreground font-mono">+91 {existingInquiry.phone}</span>
                     </div>
                     <div>
-                      <span className="text-gray-400 font-bold block text-[10px] uppercase">Category</span>
-                      <span className="font-semibold text-gray-900">{existingInquiry.category}</span>
+                      <span className="text-foreground-muted font-bold block text-[10px] uppercase">Category</span>
+                      <span className="font-semibold text-foreground">{existingInquiry.category}</span>
                     </div>
                     <div>
-                      <span className="text-gray-400 font-bold block text-[10px] uppercase">Business Type</span>
-                      <span className="font-semibold text-gray-900 capitalize">{existingInquiry.business_type?.replace(/_/g, ' ') || 'Sole Proprietorship'}</span>
+                      <span className="text-foreground-muted font-bold block text-[10px] uppercase">Business Type</span>
+                      <span className="font-semibold text-foreground capitalize">{existingInquiry.business_type?.replace(/_/g, ' ') || 'Sole Proprietorship'}</span>
                     </div>
                     <div className="col-span-2">
-                      <span className="text-gray-400 font-bold block text-[10px] uppercase">Submitted Date</span>
-                      <span className="font-semibold text-gray-900">{new Date(existingInquiry.created_at).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}</span>
+                      <span className="text-foreground-muted font-bold block text-[10px] uppercase">Submitted Date</span>
+                      <span className="font-semibold text-foreground">{new Date(existingInquiry.created_at).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}</span>
                     </div>
                   </div>
                 </div>
 
                 {/* What Happens Next Card */}
-                <div className="bg-amber-50/70 border border-amber-200/80 rounded-2xl p-5 text-left space-y-3">
-                  <h4 className="text-xs font-black text-amber-950 uppercase tracking-wider flex items-center gap-2">
-                    <Clock className="w-4 h-4 text-[#c88a23]" />
+                <div className="bg-warning-bg/70 border border-warning/20/80 rounded-2xl p-5 text-left space-y-3">
+                  <h4 className="text-xs font-black text-warning uppercase tracking-wider flex items-center gap-2">
+                    <Clock className="w-4 h-4 text-secondary" />
                     <span>What Happens Next?</span>
                   </h4>
-                  <ul className="text-xs text-amber-900 space-y-2">
+                  <ul className="text-xs text-warning space-y-2">
                     <li className="flex items-start gap-2">
-                      <span className="font-bold text-[#c88a23]">•</span>
+                      <span className="font-bold text-secondary">•</span>
                       <span>The admin team verifies your business details, PAN, and applicable GSTIN.</span>
                     </li>
                     <li className="flex items-start gap-2">
-                      <span className="font-bold text-[#c88a23]">•</span>
+                      <span className="font-bold text-secondary">•</span>
                       <span>Upon approval, your seller account is activated and your seller dashboard is unlocked automatically.</span>
                     </li>
                     <li className="flex items-start gap-2">
-                      <span className="font-bold text-[#c88a23]">•</span>
+                      <span className="font-bold text-secondary">•</span>
                       <span>You will receive an in-app notification and email once a decision is made.</span>
                     </li>
                   </ul>
@@ -454,15 +454,15 @@ export default function BecomeSellerPage() {
                     type="button"
                     onClick={handleRefresh}
                     disabled={isRefreshing}
-                    className="w-full sm:w-auto px-5 py-3 bg-white border border-gray-300 hover:bg-gray-50 text-gray-800 text-xs font-bold rounded-xl flex items-center justify-center gap-2 shadow-2xs transition-all disabled:opacity-50"
+                    className="w-full sm:w-auto px-5 py-3 bg-surface border border-border-hover hover:bg-surface-muted text-foreground text-xs font-bold rounded-xl flex items-center justify-center gap-2 shadow-2xs transition-all disabled:opacity-50"
                   >
-                    <RefreshCw className={`w-3.5 h-3.5 ${isRefreshing ? 'animate-spin text-emerald-600' : 'text-gray-500'}`} />
+                    <RefreshCw className={`w-3.5 h-3.5 ${isRefreshing ? 'animate-spin text-success' : 'text-foreground-muted'}`} />
                     <span>{isRefreshing ? 'Checking Status...' : 'Refresh Status'}</span>
                   </button>
 
                   <Link
                     href="/home"
-                    className="w-full sm:w-auto px-6 py-3 bg-gray-100 hover:bg-gray-200 text-gray-800 text-xs font-bold rounded-xl flex items-center justify-center transition-colors"
+                    className="w-full sm:w-auto px-6 py-3 bg-surface-muted hover:bg-border text-foreground text-xs font-bold rounded-xl flex items-center justify-center transition-colors"
                   >
                     Return to Marketplace
                   </Link>
@@ -472,32 +472,32 @@ export default function BecomeSellerPage() {
 
             {/* ─── 2. APPROVED SCREEN ───────────────────────────────────────── */}
             {existingInquiry.status === 'approved' && (
-              <div className="bg-white rounded-3xl border-2 border-emerald-500/40 p-8 sm:p-12 shadow-xl text-center max-w-2xl mx-auto space-y-6 animate-in fade-in zoom-in-95">
-                <div className="w-20 h-20 rounded-full bg-emerald-100 text-[#0f3e26] flex items-center justify-center mx-auto shadow-inner">
-                  <CheckCircle2 className="w-12 h-12 text-emerald-600" />
+              <div className="bg-surface rounded-3xl border-2 border-success/40 p-8 sm:p-12 shadow-xl text-center max-w-2xl mx-auto space-y-6 animate-in fade-in zoom-in-95">
+                <div className="w-20 h-20 rounded-full bg-success-bg text-primary flex items-center justify-center mx-auto shadow-inner">
+                  <CheckCircle2 className="w-12 h-12 text-success" />
                 </div>
 
                 <div className="space-y-3">
-                  <span className="px-3.5 py-1 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-black uppercase tracking-wider">
+                  <span className="px-3.5 py-1 rounded-full bg-success-bg border border-success/20 text-success text-xs font-black uppercase tracking-wider">
                     Application Approved
                   </span>
-                  <h2 className="text-2xl sm:text-3xl font-black text-gray-900">
+                  <h2 className="text-2xl sm:text-3xl font-black text-foreground">
                     Welcome to Gjanand Sarkar!
                   </h2>
-                  <p className="text-sm font-semibold text-emerald-950 leading-relaxed max-w-lg mx-auto bg-emerald-50/70 p-4 rounded-2xl border border-emerald-200">
+                  <p className="text-sm font-semibold text-success leading-relaxed max-w-lg mx-auto bg-success-bg/70 p-4 rounded-2xl border border-success/20">
                     Congratulations! Your seller registration application has been approved by admin. Your seller dashboard is active and ready for product submissions.
                   </p>
                 </div>
 
                 {/* Approved Store Badge */}
-                <div className="p-4 bg-gray-50 rounded-2xl border border-gray-200 flex items-center justify-between gap-4 max-w-md mx-auto text-left">
+                <div className="p-4 bg-surface-muted rounded-2xl border border-border flex items-center justify-between gap-4 max-w-md mx-auto text-left">
                   <div>
-                    <p className="text-[10px] uppercase font-black text-gray-400">Verified Seller Account</p>
-                    <p className="text-base font-black text-[#0f3e26]">{existingInquiry.business_name}</p>
-                    <p className="text-xs text-gray-500 font-medium">Category: {existingInquiry.category}</p>
+                    <p className="text-[10px] uppercase font-black text-foreground-muted">Verified Seller Account</p>
+                    <p className="text-base font-black text-primary">{existingInquiry.business_name}</p>
+                    <p className="text-xs text-foreground-muted font-medium">Category: {existingInquiry.category}</p>
                   </div>
-                  <div className="inline-flex items-center gap-1.5 px-3 py-1 bg-emerald-100 text-emerald-800 rounded-lg text-xs font-black">
-                    <ShieldCheck className="w-4 h-4 text-emerald-600" />
+                  <div className="inline-flex items-center gap-1.5 px-3 py-1 bg-success-bg text-success rounded-lg text-xs font-black">
+                    <ShieldCheck className="w-4 h-4 text-success" />
                     <span>Active Seller</span>
                   </div>
                 </div>
@@ -506,16 +506,16 @@ export default function BecomeSellerPage() {
                 <div className="flex flex-col sm:flex-row items-center justify-center gap-3 pt-2">
                   <Link
                     href="/seller/dashboard"
-                    className="w-full sm:w-auto px-8 py-3.5 bg-[#0f3e26] hover:bg-[#144f31] text-white text-xs font-black rounded-xl shadow-md flex items-center justify-center gap-2 transition-all active:scale-95"
+                    className="w-full sm:w-auto px-8 py-3.5 bg-primary hover:bg-primary-hover text-on-primary text-xs font-black rounded-xl shadow-md flex items-center justify-center gap-2 transition-all active:scale-95"
                   >
-                    <Store className="w-4 h-4 text-[#c88a23]" />
+                    <Store className="w-4 h-4 text-secondary" />
                     <span>Go to Seller Dashboard</span>
                     <ArrowRight className="w-4 h-4 text-white" />
                   </Link>
 
                   <Link
                     href="/home"
-                    className="w-full sm:w-auto px-6 py-3.5 bg-gray-100 hover:bg-gray-200 text-gray-800 text-xs font-bold rounded-xl flex items-center justify-center transition-colors"
+                    className="w-full sm:w-auto px-6 py-3.5 bg-surface-muted hover:bg-border text-foreground text-xs font-bold rounded-xl flex items-center justify-center transition-colors"
                   >
                     Browse Marketplace
                   </Link>
@@ -525,30 +525,30 @@ export default function BecomeSellerPage() {
 
             {/* ─── 3. REJECTED SCREEN ───────────────────────────────────────── */}
             {existingInquiry.status === 'rejected' && (
-              <div className="bg-white rounded-3xl border-2 border-rose-500/30 p-8 sm:p-12 shadow-xl text-center max-w-2xl mx-auto space-y-6 animate-in fade-in zoom-in-95">
-                <div className="w-20 h-20 rounded-full bg-rose-100 text-rose-800 flex items-center justify-center mx-auto shadow-inner">
-                  <XCircle className="w-12 h-12 text-rose-600" />
+              <div className="bg-surface rounded-3xl border-2 border-error/30 p-8 sm:p-12 shadow-xl text-center max-w-2xl mx-auto space-y-6 animate-in fade-in zoom-in-95">
+                <div className="w-20 h-20 rounded-full bg-error-bg text-error flex items-center justify-center mx-auto shadow-inner">
+                  <XCircle className="w-12 h-12 text-error" />
                 </div>
 
                 <div className="space-y-3">
-                  <span className="px-3.5 py-1 rounded-full bg-rose-50 border border-rose-200 text-rose-800 text-xs font-black uppercase tracking-wider">
+                  <span className="px-3.5 py-1 rounded-full bg-error-bg border border-error/20 text-error text-xs font-black uppercase tracking-wider">
                     Application Rejected
                   </span>
-                  <h2 className="text-2xl sm:text-3xl font-black text-gray-900">
+                  <h2 className="text-2xl sm:text-3xl font-black text-foreground">
                     Application Review Update
                   </h2>
-                  <p className="text-sm font-medium text-gray-700 leading-relaxed max-w-lg mx-auto bg-rose-50/60 p-4 rounded-2xl border border-rose-200/60">
+                  <p className="text-sm font-medium text-foreground leading-relaxed max-w-lg mx-auto bg-error-bg/60 p-4 rounded-2xl border border-error/20/60">
                     Your seller registration application was not approved. You may review the admin feedback below, update your details, and resubmit for review.
                   </p>
                 </div>
 
                 {/* Admin Feedback Box */}
-                <div className="bg-rose-50/80 border border-rose-200 rounded-2xl p-5 text-left space-y-2 max-w-lg mx-auto">
-                  <h4 className="text-xs font-black text-rose-950 uppercase tracking-wider flex items-center gap-2">
-                    <AlertCircle className="w-4 h-4 text-rose-600" />
+                <div className="bg-error-bg/80 border border-error/20 rounded-2xl p-5 text-left space-y-2 max-w-lg mx-auto">
+                  <h4 className="text-xs font-black text-error uppercase tracking-wider flex items-center gap-2">
+                    <AlertCircle className="w-4 h-4 text-error" />
                     <span>Admin Rejection Reason</span>
                   </h4>
-                  <p className="text-xs text-rose-900 leading-relaxed font-semibold">
+                  <p className="text-xs text-error leading-relaxed font-semibold">
                     {existingInquiry.admin_notes?.trim() 
                       ? existingInquiry.admin_notes 
                       : 'Business verification could not be completed with the provided information. Please verify your business registration, PAN, and contact details.'}
@@ -564,15 +564,15 @@ export default function BecomeSellerPage() {
                       setIsEditing(true);
                       setError('');
                     }}
-                    className="w-full sm:w-auto px-6 py-3.5 bg-[#0f3e26] hover:bg-[#144f31] text-white text-xs font-black rounded-xl shadow-md flex items-center justify-center gap-2 transition-all active:scale-95 cursor-pointer"
+                    className="w-full sm:w-auto px-6 py-3.5 bg-primary hover:bg-primary-hover text-on-primary text-xs font-black rounded-xl shadow-md flex items-center justify-center gap-2 transition-all active:scale-95 cursor-pointer"
                   >
-                    <Edit3 className="w-4 h-4 text-[#c88a23]" />
+                    <Edit3 className="w-4 h-4 text-secondary" />
                     <span>Edit & Resubmit Application</span>
                   </button>
 
                   <Link
                     href="/home"
-                    className="w-full sm:w-auto px-6 py-3.5 bg-gray-100 hover:bg-gray-200 text-gray-800 text-xs font-bold rounded-xl flex items-center justify-center transition-colors"
+                    className="w-full sm:w-auto px-6 py-3.5 bg-surface-muted hover:bg-border text-foreground text-xs font-bold rounded-xl flex items-center justify-center transition-colors"
                   >
                     Return to Marketplace
                   </Link>
@@ -582,27 +582,27 @@ export default function BecomeSellerPage() {
 
             {/* ─── 4. SUSPENDED SCREEN ──────────────────────────────────────── */}
             {existingInquiry.status === 'suspended' && (
-              <div className="bg-white rounded-3xl border-2 border-red-500/30 p-8 sm:p-12 shadow-xl text-center max-w-2xl mx-auto space-y-6 animate-in fade-in zoom-in-95">
-                <div className="w-20 h-20 rounded-full bg-red-100 text-red-800 flex items-center justify-center mx-auto shadow-inner">
-                  <AlertTriangle className="w-12 h-12 text-red-600" />
+              <div className="bg-surface rounded-3xl border-2 border-red-500/30 p-8 sm:p-12 shadow-xl text-center max-w-2xl mx-auto space-y-6 animate-in fade-in zoom-in-95">
+                <div className="w-20 h-20 rounded-full bg-error-bg text-error flex items-center justify-center mx-auto shadow-inner">
+                  <AlertTriangle className="w-12 h-12 text-error" />
                 </div>
 
                 <div className="space-y-3">
-                  <span className="px-3.5 py-1 rounded-full bg-red-50 border border-red-200 text-red-800 text-xs font-black uppercase tracking-wider">
+                  <span className="px-3.5 py-1 rounded-full bg-error-bg border border-error/20 text-error text-xs font-black uppercase tracking-wider">
                     Seller Account Suspended
                   </span>
-                  <h2 className="text-2xl sm:text-3xl font-black text-gray-900">
+                  <h2 className="text-2xl sm:text-3xl font-black text-foreground">
                     Account Under Suspension
                   </h2>
-                  <p className="text-sm font-medium text-gray-700 leading-relaxed max-w-lg mx-auto bg-red-50/60 p-4 rounded-2xl border border-red-200/60">
+                  <p className="text-sm font-medium text-foreground leading-relaxed max-w-lg mx-auto bg-error-bg/60 p-4 rounded-2xl border border-error/20/60">
                     Your seller account is currently suspended by administration. Product listings are temporarily hidden from the marketplace.
                   </p>
                 </div>
 
                 {existingInquiry.admin_notes && (
-                  <div className="bg-gray-50 border border-gray-200 rounded-2xl p-4 max-w-lg mx-auto text-left">
-                    <p className="text-[10px] uppercase font-bold text-gray-400">Suspension Notice</p>
-                    <p className="text-xs text-gray-800 mt-1">{existingInquiry.admin_notes}</p>
+                  <div className="bg-surface-muted border border-border rounded-2xl p-4 max-w-lg mx-auto text-left">
+                    <p className="text-[10px] uppercase font-bold text-foreground-muted">Suspension Notice</p>
+                    <p className="text-xs text-foreground mt-1">{existingInquiry.admin_notes}</p>
                   </div>
                 )}
 
@@ -614,15 +614,15 @@ export default function BecomeSellerPage() {
                       setIsEditing(true);
                       setError('');
                     }}
-                    className="w-full sm:w-auto px-6 py-3.5 bg-[#0f3e26] hover:bg-[#144f31] text-white text-xs font-black rounded-xl shadow-md flex items-center justify-center gap-2 transition-all active:scale-95 cursor-pointer"
+                    className="w-full sm:w-auto px-6 py-3.5 bg-primary hover:bg-primary-hover text-on-primary text-xs font-black rounded-xl shadow-md flex items-center justify-center gap-2 transition-all active:scale-95 cursor-pointer"
                   >
-                    <Edit3 className="w-4 h-4 text-[#c88a23]" />
+                    <Edit3 className="w-4 h-4 text-secondary" />
                     <span>Update Business Details</span>
                   </button>
 
                   <Link
                     href="/home"
-                    className="w-full sm:w-auto px-6 py-3.5 bg-gray-100 hover:bg-gray-200 text-gray-800 text-xs font-bold rounded-xl flex items-center justify-center transition-colors"
+                    className="w-full sm:w-auto px-6 py-3.5 bg-surface-muted hover:bg-border text-foreground text-xs font-bold rounded-xl flex items-center justify-center transition-colors"
                   >
                     Return to Marketplace
                   </Link>
@@ -632,19 +632,19 @@ export default function BecomeSellerPage() {
           </>
         ) : (
           /* ─── 5. SELLER REGISTRATION / EDIT FORM ────────────────────────── */
-          <div className="bg-white rounded-3xl border border-gray-200/90 shadow-sm p-6 sm:p-10">
+          <div className="bg-surface rounded-3xl border border-border/90 shadow-sm p-6 sm:p-10">
             {isEditing && (
-              <div className="mb-6 p-4 bg-amber-50 border border-amber-200 rounded-2xl flex items-center justify-between gap-4">
+              <div className="mb-6 p-4 bg-warning-bg border border-warning/20 rounded-2xl flex items-center justify-between gap-4">
                 <div className="text-left">
-                  <p className="text-xs font-black text-amber-900">Editing Your Application</p>
-                  <p className="text-[11px] text-amber-700">
+                  <p className="text-xs font-black text-warning">Editing Your Application</p>
+                  <p className="text-[11px] text-warning">
                     Update any requested details or verification documents below. Submitting will send your updated application for admin review.
                   </p>
                 </div>
                 <button
                   type="button"
                   onClick={() => setIsEditing(false)}
-                  className="px-3 py-1.5 bg-white border border-amber-300 rounded-xl text-xs font-bold text-gray-700 hover:bg-amber-100 transition-colors"
+                  className="px-3 py-1.5 bg-surface border border-warning rounded-xl text-xs font-bold text-foreground hover:bg-warning-bg transition-colors"
                 >
                   Cancel Edit
                 </button>
@@ -654,23 +654,23 @@ export default function BecomeSellerPage() {
             <form onSubmit={handleSubmit} className="space-y-8">
               
               {error && (
-                <div className="p-4 bg-rose-50 border border-rose-200 rounded-2xl text-rose-700 text-xs font-bold flex items-center gap-2">
-                  <AlertCircle className="w-4 h-4 shrink-0 text-rose-500" />
+                <div className="p-4 bg-error-bg border border-error/20 rounded-2xl text-error text-xs font-bold flex items-center gap-2">
+                  <AlertCircle className="w-4 h-4 shrink-0 text-error" />
                   <span>{error}</span>
                 </div>
               )}
 
               {/* Section 1: Business Identity */}
               <div>
-                <h3 className="text-sm font-black text-[#0f3e26] uppercase tracking-wider mb-4 flex items-center gap-2 pb-2 border-b border-gray-100">
-                  <Building2 className="w-4 h-4 text-[#c88a23]" />
+                <h3 className="text-sm font-black text-primary uppercase tracking-wider mb-4 flex items-center gap-2 pb-2 border-b border-border">
+                  <Building2 className="w-4 h-4 text-secondary" />
                   <span>1. Business & Store Identity</span>
                 </h3>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-xs font-bold text-gray-700 mb-1.5">
-                      Seller or Business Name <span className="text-rose-500">*</span>
+                    <label className="block text-xs font-bold text-foreground mb-1.5">
+                      Seller or Business Name <span className="text-error">*</span>
                     </label>
                     <input
                       type="text"
@@ -678,18 +678,18 @@ export default function BecomeSellerPage() {
                       value={businessName}
                       onChange={(e) => setBusinessName(e.target.value)}
                       placeholder="e.g. Gir Organic Farms Pvt Ltd"
-                      className="w-full px-4 py-2.5 rounded-xl border border-gray-300 text-xs text-gray-900 focus:border-[#0f3e26] focus:ring-1 focus:ring-[#0f3e26] outline-none"
+                      className="w-full px-4 py-2.5 rounded-xl border border-border-hover text-xs text-foreground focus:border-primary focus:ring-1 focus:ring-[var(--primary)] outline-none"
                     />
                   </div>
 
                   <div>
-                    <label className="block text-xs font-bold text-gray-700 mb-1.5">
-                      Business Entity Type <span className="text-rose-500">*</span>
+                    <label className="block text-xs font-bold text-foreground mb-1.5">
+                      Business Entity Type <span className="text-error">*</span>
                     </label>
                     <select
                       value={businessType}
                       onChange={(e) => setBusinessType(e.target.value)}
-                      className="w-full px-4 py-2.5 rounded-xl border border-gray-300 text-xs text-gray-900 focus:border-[#0f3e26] focus:ring-1 focus:ring-[#0f3e26] outline-none bg-white"
+                      className="w-full px-4 py-2.5 rounded-xl border border-border-hover text-xs text-foreground focus:border-primary focus:ring-1 focus:ring-[var(--primary)] outline-none bg-surface"
                     >
                       {businessTypes.map((bt) => (
                         <option key={bt.id} value={bt.id}>{bt.label}</option>
@@ -698,13 +698,13 @@ export default function BecomeSellerPage() {
                   </div>
 
                   <div>
-                    <label className="block text-xs font-bold text-gray-700 mb-1.5">
-                      Primary Product Category <span className="text-rose-500">*</span>
+                    <label className="block text-xs font-bold text-foreground mb-1.5">
+                      Primary Product Category <span className="text-error">*</span>
                     </label>
                     <select
                       value={category}
                       onChange={(e) => setCategory(e.target.value)}
-                      className="w-full px-4 py-2.5 rounded-xl border border-gray-300 text-xs text-gray-900 focus:border-[#0f3e26] focus:ring-1 focus:ring-[#0f3e26] outline-none bg-white"
+                      className="w-full px-4 py-2.5 rounded-xl border border-border-hover text-xs text-foreground focus:border-primary focus:ring-1 focus:ring-[var(--primary)] outline-none bg-surface"
                     >
                       {categoriesList.map((cat) => (
                         <option key={cat} value={cat}>{cat}</option>
@@ -713,13 +713,13 @@ export default function BecomeSellerPage() {
                   </div>
 
                   <div>
-                    <label className="block text-xs font-bold text-gray-700 mb-1.5">
+                    <label className="block text-xs font-bold text-foreground mb-1.5">
                       Estimated Monthly Capacity
                     </label>
                     <select
                       value={monthlyVolume}
                       onChange={(e) => setMonthlyVolume(e.target.value)}
-                      className="w-full px-4 py-2.5 rounded-xl border border-gray-300 text-xs text-gray-900 focus:border-[#0f3e26] focus:ring-1 focus:ring-[#0f3e26] outline-none bg-white"
+                      className="w-full px-4 py-2.5 rounded-xl border border-border-hover text-xs text-foreground focus:border-primary focus:ring-1 focus:ring-[var(--primary)] outline-none bg-surface"
                     >
                       {volumeOptions.map((opt) => (
                         <option key={opt} value={opt}>{opt}</option>
@@ -731,15 +731,15 @@ export default function BecomeSellerPage() {
 
               {/* Section 2: Contact Person */}
               <div>
-                <h3 className="text-sm font-black text-[#0f3e26] uppercase tracking-wider mb-4 flex items-center gap-2 pb-2 border-b border-gray-100">
-                  <Phone className="w-4 h-4 text-[#c88a23]" />
+                <h3 className="text-sm font-black text-primary uppercase tracking-wider mb-4 flex items-center gap-2 pb-2 border-b border-border">
+                  <Phone className="w-4 h-4 text-secondary" />
                   <span>2. Contact Person Information</span>
                 </h3>
 
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                   <div>
-                    <label className="block text-xs font-bold text-gray-700 mb-1.5">
-                      Contact Person's Full Name <span className="text-rose-500">*</span>
+                    <label className="block text-xs font-bold text-foreground mb-1.5">
+                      Contact Person's Full Name <span className="text-error">*</span>
                     </label>
                     <input
                       type="text"
@@ -747,19 +747,19 @@ export default function BecomeSellerPage() {
                       value={fullName}
                       onChange={(e) => setFullName(e.target.value)}
                       placeholder="e.g. Bhavesh Bhai Patel"
-                      className="w-full px-4 py-2.5 rounded-xl border border-gray-300 text-xs text-gray-900 focus:border-[#0f3e26] focus:ring-1 focus:ring-[#0f3e26] outline-none"
+                      className="w-full px-4 py-2.5 rounded-xl border border-border-hover text-xs text-foreground focus:border-primary focus:ring-1 focus:ring-[var(--primary)] outline-none"
                     />
                   </div>
 
                   <div>
-                    <label className="block text-xs font-bold text-gray-700 mb-1.5">
-                      Mobile Number <span className="text-rose-500">*</span>
+                    <label className="block text-xs font-bold text-foreground mb-1.5">
+                      Mobile Number <span className="text-error">*</span>
                     </label>
                     <div className="relative flex items-center">
-                      <div className="absolute left-3.5 flex items-center gap-1.5 pointer-events-none text-xs font-bold text-gray-600 select-none">
+                      <div className="absolute left-3.5 flex items-center gap-1.5 pointer-events-none text-xs font-bold text-foreground-muted select-none">
                         <span>🇮🇳</span>
                         <span>+91</span>
-                        <span className="text-gray-300">|</span>
+                        <span className="text-foreground-muted">|</span>
                       </div>
                       <input
                         type="tel"
@@ -772,17 +772,17 @@ export default function BecomeSellerPage() {
                           setPhone(digits);
                         }}
                         placeholder="9825123456"
-                        className="w-full pl-[72px] pr-4 py-2.5 rounded-xl border border-gray-300 text-xs text-gray-900 font-medium focus:border-[#0f3e26] focus:ring-1 focus:ring-[#0f3e26] outline-none"
+                        className="w-full pl-[72px] pr-4 py-2.5 rounded-xl border border-border-hover text-xs text-foreground font-medium focus:border-primary focus:ring-1 focus:ring-[var(--primary)] outline-none"
                       />
                     </div>
-                    <p className="text-[10px] text-gray-400 mt-1">
+                    <p className="text-[10px] text-foreground-muted mt-1">
                       Enter 10-digit mobile number without +91 prefix
                     </p>
                   </div>
 
                   <div>
-                    <label className="block text-xs font-bold text-gray-700 mb-1.5">
-                      Business Email Address <span className="text-rose-500">*</span>
+                    <label className="block text-xs font-bold text-foreground mb-1.5">
+                      Business Email Address <span className="text-error">*</span>
                     </label>
                     <input
                       type="email"
@@ -790,7 +790,7 @@ export default function BecomeSellerPage() {
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
                       placeholder="contact@girfarms.com"
-                      className="w-full px-4 py-2.5 rounded-xl border border-gray-300 text-xs text-gray-900 focus:border-[#0f3e26] focus:ring-1 focus:ring-[#0f3e26] outline-none"
+                      className="w-full px-4 py-2.5 rounded-xl border border-border-hover text-xs text-foreground focus:border-primary focus:ring-1 focus:ring-[var(--primary)] outline-none"
                     />
                   </div>
                 </div>
@@ -798,15 +798,15 @@ export default function BecomeSellerPage() {
 
               {/* Section 3: Business Address */}
               <div>
-                <h3 className="text-sm font-black text-[#0f3e26] uppercase tracking-wider mb-4 flex items-center gap-2 pb-2 border-b border-gray-100">
-                  <MapPin className="w-4 h-4 text-[#c88a23]" />
+                <h3 className="text-sm font-black text-primary uppercase tracking-wider mb-4 flex items-center gap-2 pb-2 border-b border-border">
+                  <MapPin className="w-4 h-4 text-secondary" />
                   <span>3. Registered Business Address</span>
                 </h3>
 
                 <div className="space-y-4">
                   <div>
-                    <label className="block text-xs font-bold text-gray-700 mb-1.5">
-                      Address (Shop / Survey No / Building / Street) <span className="text-rose-500">*</span>
+                    <label className="block text-xs font-bold text-foreground mb-1.5">
+                      Address (Shop / Survey No / Building / Street) <span className="text-error">*</span>
                     </label>
                     <input
                       type="text"
@@ -814,14 +814,14 @@ export default function BecomeSellerPage() {
                       value={businessAddress}
                       onChange={(e) => setBusinessAddress(e.target.value)}
                       placeholder="Plot No. 42, GIDC Industrial Estate, Highway Road"
-                      className="w-full px-4 py-2.5 rounded-xl border border-gray-300 text-xs text-gray-900 focus:border-[#0f3e26] focus:ring-1 focus:ring-[#0f3e26] outline-none"
+                      className="w-full px-4 py-2.5 rounded-xl border border-border-hover text-xs text-foreground focus:border-primary focus:ring-1 focus:ring-[var(--primary)] outline-none"
                     />
                   </div>
 
                   <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                     <div>
-                      <label className="block text-xs font-bold text-gray-700 mb-1.5">
-                        City / Town <span className="text-rose-500">*</span>
+                      <label className="block text-xs font-bold text-foreground mb-1.5">
+                        City / Town <span className="text-error">*</span>
                       </label>
                       <input
                         type="text"
@@ -829,18 +829,18 @@ export default function BecomeSellerPage() {
                         value={city}
                         onChange={(e) => setCity(e.target.value)}
                         placeholder="e.g. Palanpur"
-                        className="w-full px-4 py-2.5 rounded-xl border border-gray-300 text-xs text-gray-900 focus:border-[#0f3e26] focus:ring-1 focus:ring-[#0f3e26] outline-none"
+                        className="w-full px-4 py-2.5 rounded-xl border border-border-hover text-xs text-foreground focus:border-primary focus:ring-1 focus:ring-[var(--primary)] outline-none"
                       />
                     </div>
 
                     <div>
-                      <label className="block text-xs font-bold text-gray-700 mb-1.5">
-                        State <span className="text-rose-500">*</span>
+                      <label className="block text-xs font-bold text-foreground mb-1.5">
+                        State <span className="text-error">*</span>
                       </label>
                       <select
                         value={stateOrigin}
                         onChange={(e) => setStateOrigin(e.target.value)}
-                        className="w-full px-4 py-2.5 rounded-xl border border-gray-300 text-xs text-gray-900 focus:border-[#0f3e26] focus:ring-1 focus:ring-[#0f3e26] outline-none bg-white"
+                        className="w-full px-4 py-2.5 rounded-xl border border-border-hover text-xs text-foreground focus:border-primary focus:ring-1 focus:ring-[var(--primary)] outline-none bg-surface"
                       >
                         {statesList.map((st) => (
                           <option key={st} value={st}>{st}</option>
@@ -849,8 +849,8 @@ export default function BecomeSellerPage() {
                     </div>
 
                     <div>
-                      <label className="block text-xs font-bold text-gray-700 mb-1.5">
-                        Postal Pincode <span className="text-rose-500">*</span>
+                      <label className="block text-xs font-bold text-foreground mb-1.5">
+                        Postal Pincode <span className="text-error">*</span>
                       </label>
                       <input
                         type="text"
@@ -859,7 +859,7 @@ export default function BecomeSellerPage() {
                         value={pincode}
                         onChange={(e) => setPincode(e.target.value.replace(/\D/g, ''))}
                         placeholder="385001"
-                        className="w-full px-4 py-2.5 rounded-xl border border-gray-300 text-xs text-gray-900 focus:border-[#0f3e26] focus:ring-1 focus:ring-[#0f3e26] outline-none"
+                        className="w-full px-4 py-2.5 rounded-xl border border-border-hover text-xs text-foreground focus:border-primary focus:ring-1 focus:ring-[var(--primary)] outline-none"
                       />
                     </div>
                   </div>
@@ -868,14 +868,14 @@ export default function BecomeSellerPage() {
 
               {/* Section 4: Tax & Regulatory Verification */}
               <div>
-                <h3 className="text-sm font-black text-[#0f3e26] uppercase tracking-wider mb-4 flex items-center gap-2 pb-2 border-b border-gray-100">
-                  <CreditCard className="w-4 h-4 text-[#c88a23]" />
+                <h3 className="text-sm font-black text-primary uppercase tracking-wider mb-4 flex items-center gap-2 pb-2 border-b border-border">
+                  <CreditCard className="w-4 h-4 text-secondary" />
                   <span>4. Tax & Business Verification Details</span>
                 </h3>
 
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                   <div>
-                    <label className="block text-xs font-bold text-gray-700 mb-1.5">
+                    <label className="block text-xs font-bold text-foreground mb-1.5">
                       Business PAN
                     </label>
                     <input
@@ -884,13 +884,13 @@ export default function BecomeSellerPage() {
                       value={pan}
                       onChange={(e) => setPan(e.target.value.toUpperCase())}
                       placeholder="ABCDE1234F"
-                      className="w-full px-4 py-2.5 rounded-xl border border-gray-300 text-xs text-gray-900 font-mono uppercase focus:border-[#0f3e26] focus:ring-1 focus:ring-[#0f3e26] outline-none"
+                      className="w-full px-4 py-2.5 rounded-xl border border-border-hover text-xs text-foreground font-mono uppercase focus:border-primary focus:ring-1 focus:ring-[var(--primary)] outline-none"
                     />
-                    <p className="text-[10px] text-gray-400 mt-1">10-character PAN of business/proprietor</p>
+                    <p className="text-[10px] text-foreground-muted mt-1">10-character PAN of business/proprietor</p>
                   </div>
 
                   <div>
-                    <label className="block text-xs font-bold text-gray-700 mb-1.5">
+                    <label className="block text-xs font-bold text-foreground mb-1.5">
                       GSTIN (If Applicable)
                     </label>
                     <input
@@ -899,13 +899,13 @@ export default function BecomeSellerPage() {
                       value={gstin}
                       onChange={(e) => setGstin(e.target.value.toUpperCase())}
                       placeholder="24AAAAA0000A1Z5"
-                      className="w-full px-4 py-2.5 rounded-xl border border-gray-300 text-xs text-gray-900 font-mono uppercase focus:border-[#0f3e26] focus:ring-1 focus:ring-[#0f3e26] outline-none"
+                      className="w-full px-4 py-2.5 rounded-xl border border-border-hover text-xs text-foreground font-mono uppercase focus:border-primary focus:ring-1 focus:ring-[var(--primary)] outline-none"
                     />
-                    <p className="text-[10px] text-gray-400 mt-1">Optional for unregistered small producers</p>
+                    <p className="text-[10px] text-foreground-muted mt-1">Optional for unregistered small producers</p>
                   </div>
 
                   <div>
-                    <label className="block text-xs font-bold text-gray-700 mb-1.5">
+                    <label className="block text-xs font-bold text-foreground mb-1.5">
                       FSSAI License / Trade Reg. No.
                     </label>
                     <input
@@ -913,14 +913,14 @@ export default function BecomeSellerPage() {
                       value={fssaiNumber}
                       onChange={(e) => setFssaiNumber(e.target.value)}
                       placeholder="e.g. 10723000000000"
-                      className="w-full px-4 py-2.5 rounded-xl border border-gray-300 text-xs text-gray-900 font-mono focus:border-[#0f3e26] focus:ring-1 focus:ring-[#0f3e26] outline-none"
+                      className="w-full px-4 py-2.5 rounded-xl border border-border-hover text-xs text-foreground font-mono focus:border-primary focus:ring-1 focus:ring-[var(--primary)] outline-none"
                     />
-                    <p className="text-[10px] text-gray-400 mt-1">Required for food, dairy, and grocery items</p>
+                    <p className="text-[10px] text-foreground-muted mt-1">Required for food, dairy, and grocery items</p>
                   </div>
                 </div>
 
                 <div className="mt-4">
-                  <label className="block text-xs font-bold text-gray-700 mb-1.5">
+                  <label className="block text-xs font-bold text-foreground mb-1.5">
                     Verification Document / License Link
                   </label>
                   <input
@@ -928,9 +928,9 @@ export default function BecomeSellerPage() {
                     value={documentUrl}
                     onChange={(e) => setDocumentUrl(e.target.value)}
                     placeholder="https://... (Cloud drive link or certificate URL)"
-                    className="w-full px-4 py-2.5 rounded-xl border border-gray-300 text-xs text-gray-900 focus:border-[#0f3e26] focus:ring-1 focus:ring-[#0f3e26] outline-none"
+                    className="w-full px-4 py-2.5 rounded-xl border border-border-hover text-xs text-foreground focus:border-primary focus:ring-1 focus:ring-[var(--primary)] outline-none"
                   />
-                  <p className="text-[10px] text-gray-400 mt-1">
+                  <p className="text-[10px] text-foreground-muted mt-1">
                     Upload your GST certificate, FSSAI license, or Shop Establishment document to a secure cloud drive and share the link.
                   </p>
                 </div>
@@ -938,14 +938,14 @@ export default function BecomeSellerPage() {
 
               {/* Section 5: Products & Notes */}
               <div>
-                <h3 className="text-sm font-black text-[#0f3e26] uppercase tracking-wider mb-4 flex items-center gap-2 pb-2 border-b border-gray-100">
-                  <FileText className="w-4 h-4 text-[#c88a23]" />
+                <h3 className="text-sm font-black text-primary uppercase tracking-wider mb-4 flex items-center gap-2 pb-2 border-b border-border">
+                  <FileText className="w-4 h-4 text-secondary" />
                   <span>5. Products Overview & Remarks</span>
                 </h3>
 
                 <div className="space-y-4">
                   <div>
-                    <label className="block text-xs font-bold text-gray-700 mb-1.5">
+                    <label className="block text-xs font-bold text-foreground mb-1.5">
                       Product Range / Proposed Items
                     </label>
                     <input
@@ -953,12 +953,12 @@ export default function BecomeSellerPage() {
                       value={productRange}
                       onChange={(e) => setProductRange(e.target.value)}
                       placeholder="e.g. A2 Bilona Cow Ghee, Organic Butter, Artisanal Honey"
-                      className="w-full px-4 py-2.5 rounded-xl border border-gray-300 text-xs text-gray-900 focus:border-[#0f3e26] focus:ring-1 focus:ring-[#0f3e26] outline-none"
+                      className="w-full px-4 py-2.5 rounded-xl border border-border-hover text-xs text-foreground focus:border-primary focus:ring-1 focus:ring-[var(--primary)] outline-none"
                     />
                   </div>
 
                   <div>
-                    <label className="block text-xs font-bold text-gray-700 mb-1.5">
+                    <label className="block text-xs font-bold text-foreground mb-1.5">
                       Additional Notes for Admin Team
                     </label>
                     <textarea
@@ -966,17 +966,17 @@ export default function BecomeSellerPage() {
                       value={notes}
                       onChange={(e) => setNotes(e.target.value)}
                       placeholder="Tell us about your production facilities, cold storage, delivery readiness, or certifications..."
-                      className="w-full px-4 py-2.5 rounded-xl border border-gray-300 text-xs text-gray-900 focus:border-[#0f3e26] focus:ring-1 focus:ring-[#0f3e26] outline-none resize-none"
+                      className="w-full px-4 py-2.5 rounded-xl border border-border-hover text-xs text-foreground focus:border-primary focus:ring-1 focus:ring-[var(--primary)] outline-none resize-none"
                     />
                   </div>
                 </div>
               </div>
 
               {/* Submit Buttons */}
-              <div className="pt-4 flex flex-col sm:flex-row items-center justify-end gap-3 border-t border-gray-100">
+              <div className="pt-4 flex flex-col sm:flex-row items-center justify-end gap-3 border-t border-border">
                 <Link
                   href="/home"
-                  className="w-full sm:w-auto px-6 py-3 border border-gray-200 text-gray-600 hover:bg-gray-50 text-xs font-bold rounded-xl text-center transition-colors"
+                  className="w-full sm:w-auto px-6 py-3 border border-border text-foreground-muted hover:bg-surface-muted text-xs font-bold rounded-xl text-center transition-colors"
                 >
                   Cancel
                 </Link>
@@ -984,17 +984,17 @@ export default function BecomeSellerPage() {
                 <button
                   type="submit"
                   disabled={isLoading}
-                  className="w-full sm:w-auto px-8 py-3.5 bg-[#0f3e26] hover:bg-[#144f31] text-white text-xs font-black rounded-xl shadow-md flex items-center justify-center gap-2 transition-all active:scale-95 disabled:opacity-50 cursor-pointer"
+                  className="w-full sm:w-auto px-8 py-3.5 bg-primary hover:bg-primary-hover text-on-primary text-xs font-black rounded-xl shadow-md flex items-center justify-center gap-2 transition-all active:scale-95 disabled:opacity-50 cursor-pointer"
                 >
                   {isLoading ? (
                     <>
-                      <Loader2 className="w-4 h-4 animate-spin text-[#c88a23]" />
+                      <Loader2 className="w-4 h-4 animate-spin text-secondary" />
                       <span>Submitting Application...</span>
                     </>
                   ) : (
                     <>
                       <span>Submit Seller Application</span>
-                      <ArrowRight className="w-4 h-4 text-[#c88a23]" />
+                      <ArrowRight className="w-4 h-4 text-secondary" />
                     </>
                   )}
                 </button>

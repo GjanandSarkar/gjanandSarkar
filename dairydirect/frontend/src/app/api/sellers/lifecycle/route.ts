@@ -233,10 +233,11 @@ export async function GET(request: NextRequest) {
 // ─── POST: Execute seller lifecycle transitions ─────────────────────────────
 export async function POST(request: NextRequest) {
   try {
-    const admin = await requireAdmin(request);
-    if (!admin) {
-      return NextResponse.json({ error: 'Unauthorized: Admin access required' }, { status: 403 });
+    const auth = await requireAdmin(request);
+    if (!auth.ok) {
+      return auth.response;
     }
+    const admin = auth.user;
 
     const body = await request.json();
     const { sellerId, action, reason, notes, duration, customStartDate, customEndDate } = body;

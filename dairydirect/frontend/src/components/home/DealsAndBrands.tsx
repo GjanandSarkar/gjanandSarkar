@@ -2,25 +2,15 @@
 
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
-import {
-  Clock,
-  Star,
-  ArrowRight,
-  ShoppingCart
-} from 'lucide-react';
+import { Clock, ArrowRight } from 'lucide-react';
 import type { CatalogProduct } from '@/lib/types/catalog';
-import { useStore } from '@/store/useStore';
-import { addToCart } from '@/lib/api/cart';
-import { PLACEHOLDER_PRODUCT_IMAGE } from '@/lib/constants/brand';
+import { ProductCard } from '@/components/shared/ProductCard';
 
 interface DealsAndBrandsProps {
   products: CatalogProduct[];
 }
 
 export function DealsAndBrands({ products }: DealsAndBrandsProps) {
-  const user = useStore((s) => s.user);
-  const addToCartLocal = useStore((s) => s.addToCartLocal);
-
   /**
    * Countdown to the actual end of the deal window.
    *
@@ -88,18 +78,18 @@ export function DealsAndBrands({ products }: DealsAndBrandsProps) {
     <section className="w-full max-w-[1440px] mx-auto px-4 md:px-8 py-6">
       <div>
         {/* ── DEAL OF THE DAY (Full Width) ── */}
-        <div className="bg-white rounded-2xl p-5 md:p-6 border border-gray-200/80 shadow-xs flex flex-col justify-between">
+        <div className="bg-surface rounded-2xl p-5 md:p-6 border border-border/80 shadow-xs flex flex-col justify-between">
 
           {/* Header & Countdown */}
-          <div className="flex flex-wrap items-center justify-between gap-3 pb-4 border-b border-gray-100 mb-5">
+          <div className="flex flex-wrap items-center justify-between gap-3 pb-4 border-b border-border mb-5">
             <div className="flex items-center gap-3">
-               <h2 className="text-xl md:text-2xl font-black text-[#0f3e26] tracking-tight">
+               <h2 className="text-xl md:text-2xl font-black text-primary tracking-tight">
                 Deal of the Day
               </h2>
               {/* Reserve the pill's space before the client clock resolves so
                   the header does not shift on hydration. */}
-              <div className="flex items-center gap-1.5 bg-emerald-100/80 text-emerald-900 text-xs font-bold px-3 py-1 rounded-full min-h-[26px]">
-                <Clock className="w-3.5 h-3.5 text-emerald-700" />
+              <div className="flex items-center gap-1.5 bg-success-bg/80 text-success text-xs font-bold px-3 py-1 rounded-full min-h-[26px]">
+                <Clock className="w-3.5 h-3.5 text-success" />
                 {timeLeft ? (
                   <span className="tabular-nums">
                     Ends in {String(timeLeft.hours).padStart(2, '0')} :{' '}
@@ -114,82 +104,29 @@ export function DealsAndBrands({ products }: DealsAndBrandsProps) {
               </div>
             </div>
 
-            <Link href="/offers" className="text-xs font-bold text-[#c88a23] hover:text-[#0f3e26] flex items-center gap-1">
+            <Link href="/offers" className="text-xs font-bold text-secondary hover:text-primary flex items-center gap-1">
               <span>View Offers</span>
               <ArrowRight className="w-3.5 h-3.5" />
             </Link>
           </div>
 
-          {/* 4 Deal Cards Grid */}
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 md:gap-4">
-            {displayProducts.map((prod, idx) => {
-              const variant = prod.product_variants?.[0];
-              const price = variant?.price ?? 199;
-              const originalPrice = variant?.original_price ?? Math.round(price * 1.25);
-              const discountPercent = Math.round(((originalPrice - price) / originalPrice) * 100);
+          {/* Deal cards.
 
-              return (
-                <div
-                  key={prod.id}
-                  className="bg-gray-50/60 rounded-xl p-2.5 border border-gray-200/60 flex flex-col justify-between group hover:border-[#c88a23] hover:shadow-md transition-all"
-                >
-                  <div className="relative">
-                    {/* Discount Badge */}
-                    <span className="absolute top-1 left-1 bg-red-600 text-white text-[9px] font-black px-1.5 py-0.5 rounded shadow-xs z-10">
-                      {discountPercent}% OFF
-                    </span>
+              This grid used to hand-roll its own card: a plain "Add" button
+              that never read the cart, so it could not show how many units
+              were already added, and it added variant[0] blindly even for a
+              product with several sizes. It also duplicated the pricing and
+              rating rules, which is how fabricated discounts and ratings
+              survived here after being fixed everywhere else.
 
-                    {/* Image */}
-                    <div className="w-full aspect-square bg-white rounded-lg p-2 flex items-center justify-center overflow-hidden mb-2">
-                      <img
-                        src={prod.image_url || PLACEHOLDER_PRODUCT_IMAGE}
-                        alt={prod.name}
-                        className="w-full h-full object-contain group-hover:scale-105 transition-transform"
-                      />
-                    </div>
-                  </div>
-
-                  <div>
-                    <h3 className="text-xs font-bold text-gray-900 line-clamp-1 leading-snug">
-                      {prod.name}
-                    </h3>
-                    <p className="text-[10px] text-gray-500 line-clamp-1 mb-1.5">
-                      {variant?.weight || 'Standard Pack'}
-                    </p>
-
-                    {/* Pricing */}
-                    <div className="flex items-baseline gap-1.5 mb-2">
-                      <span className="text-sm font-black text-[#0f3e26]">
-                        ₹{price}
-                      </span>
-                      <span className="text-[10px] text-gray-400 line-through">
-                        ₹{originalPrice}
-                      </span>
-                    </div>
-
-                    {/* Rating */}
-                    <div className="flex items-center gap-1 text-[10px] text-amber-500 font-bold mb-2">
-                      <Star className="w-3 h-3 fill-amber-400 text-amber-400" />
-                      <span className="text-gray-700">4.{7 - idx}</span>
-                      <span className="text-gray-400 font-normal">({85 + idx * 42})</span>
-                    </div>
-
-                    {/* Quick Add */}
-                    <button
-                      onClick={async () => {
-                        if (!variant) return;
-                        addToCartLocal(prod.id, variant.id, 1);
-                        if (user) await addToCart(user.id, prod.id, variant.id, 1);
-                      }}
-                      className="w-full py-1.5 bg-[#0f3e26] hover:bg-[#144f31] text-white text-[11px] font-bold rounded-lg transition-colors flex items-center justify-center gap-1 shadow-xs active:scale-95 cursor-pointer"
-                    >
-                      <ShoppingCart className="w-3 h-3" />
-                      <span>Add</span>
-                    </button>
-                  </div>
-                </div>
-              );
-            })}
+              Reusing ProductCard removes the duplicate entirely: the
+              quantity stepper, the size picker for multi-variant products,
+              honest pricing, optimised images and the theme tokens all come
+              from one implementation. */}
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 md:gap-4 items-stretch">
+            {displayProducts.map((prod) => (
+              <ProductCard key={prod.id} product={prod as any} />
+            ))}
           </div>
 
         </div>

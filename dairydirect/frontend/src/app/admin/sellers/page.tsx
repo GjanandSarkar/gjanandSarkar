@@ -224,36 +224,36 @@ export default function AdminSellersPage() {
     switch (status) {
       case 'active':
         return (
-          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-black uppercase tracking-wider bg-emerald-100 text-emerald-800 border border-emerald-200">
-            <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
+          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-black uppercase tracking-wider bg-success-bg text-success border border-success/20">
+            <CheckCircle2 className="w-3.5 h-3.5 text-success" />
             Active
           </span>
         );
       case 'under_review':
         return (
-          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-black uppercase tracking-wider bg-amber-100 text-amber-900 border border-amber-300 animate-pulse">
-            <Clock className="w-3.5 h-3.5 text-amber-700" />
+          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-black uppercase tracking-wider bg-warning-bg text-warning border border-warning animate-pulse">
+            <Clock className="w-3.5 h-3.5 text-warning" />
             Under Review
           </span>
         );
       case 'deactivated':
         return (
-          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-black uppercase tracking-wider bg-red-100 text-red-800 border border-red-200">
-            <Ban className="w-3.5 h-3.5 text-red-600" />
+          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-black uppercase tracking-wider bg-error-bg text-error border border-error/20">
+            <Ban className="w-3.5 h-3.5 text-error" />
             Deactivated
           </span>
         );
       case 'permanently_deactivated':
         return (
-          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-black uppercase tracking-wider bg-gray-900 text-red-400 border border-gray-700">
+          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-black uppercase tracking-wider bg-primary text-red-400 border border-border-hover">
             <Lock className="w-3.5 h-3.5 text-red-400" />
             Permanently Deactivated
           </span>
         );
       case 'reactivation_requested':
         return (
-          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-black uppercase tracking-wider bg-blue-100 text-blue-800 border border-blue-300">
-            <BadgeAlert className="w-3.5 h-3.5 text-blue-600" />
+          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-black uppercase tracking-wider bg-info-bg text-blue-800 border border-blue-300">
+            <BadgeAlert className="w-3.5 h-3.5 text-info" />
             Reactivation Requested
           </span>
         );
@@ -261,21 +261,21 @@ export default function AdminSellersPage() {
       case 'pending_kyc':
       case 'pending_inquiry':
         return (
-          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-black uppercase tracking-wider bg-yellow-100 text-yellow-800 border border-yellow-200">
+          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-black uppercase tracking-wider bg-warning-bg text-yellow-800 border border-yellow-200">
             <Clock className="w-3.5 h-3.5 text-yellow-600" />
             Pending Onboarding
           </span>
         );
       case 'rejected':
         return (
-          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-black uppercase tracking-wider bg-gray-100 text-gray-700 border border-gray-300">
-            <XCircle className="w-3.5 h-3.5 text-gray-500" />
+          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-black uppercase tracking-wider bg-surface-muted text-foreground border border-border-hover">
+            <XCircle className="w-3.5 h-3.5 text-foreground-muted" />
             Rejected
           </span>
         );
       default:
         return (
-          <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-bold uppercase bg-gray-100 text-gray-800">
+          <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-bold uppercase bg-surface-muted text-foreground">
             {status}
           </span>
         );
@@ -300,12 +300,12 @@ export default function AdminSellersPage() {
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
           <div className="flex items-center gap-2">
-            <h1 className="text-2xl font-black text-gray-900 tracking-tight">Seller Lifecycle Management</h1>
-            <span className="px-2.5 py-0.5 rounded-full text-[10px] font-extrabold uppercase bg-emerald-100 text-emerald-800">
+            <h1 className="text-2xl font-black text-foreground tracking-tight">Seller Lifecycle Management</h1>
+            <span className="px-2.5 py-0.5 rounded-full text-[10px] font-extrabold uppercase bg-success-bg text-success">
               Admin Control
             </span>
           </div>
-          <p className="text-xs text-gray-500 mt-1">
+          <p className="text-xs text-foreground-muted mt-1">
             Supervise seller operational lifecycle states, manage temporary review periods, process deactivations and review reactivation requests.
           </p>
         </div>
@@ -313,33 +313,33 @@ export default function AdminSellersPage() {
         <button
           onClick={loadSellers}
           disabled={isLoading}
-          className="self-start md:self-auto px-4 py-2 bg-white border border-gray-200 text-gray-700 text-xs font-bold rounded-xl hover:bg-gray-50 flex items-center gap-2 shadow-2xs transition-all cursor-pointer"
+          className="self-start md:self-auto px-4 py-2 bg-surface border border-border text-foreground text-xs font-bold rounded-xl hover:bg-surface-muted flex items-center gap-2 shadow-2xs transition-all cursor-pointer"
         >
-          <RefreshCw className={`w-3.5 h-3.5 ${isLoading ? 'animate-spin text-[#0f3e26]' : ''}`} />
+          <RefreshCw className={`w-3.5 h-3.5 ${isLoading ? 'animate-spin text-primary' : ''}`} />
           <span>Refresh Data</span>
         </button>
       </div>
 
       {/* Metric Cards Grid */}
       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
-        <div className="bg-white p-4 rounded-2xl border border-gray-200 shadow-2xs">
-          <p className="text-[10px] font-black uppercase tracking-wider text-gray-400">Active Sellers</p>
-          <p className="text-2xl font-black text-emerald-700 mt-1">{activeCount}</p>
+        <div className="bg-surface p-4 rounded-2xl border border-border shadow-2xs">
+          <p className="text-[10px] font-black uppercase tracking-wider text-foreground-muted">Active Sellers</p>
+          <p className="text-2xl font-black text-success mt-1">{activeCount}</p>
         </div>
-        <div className="bg-white p-4 rounded-2xl border border-amber-200 shadow-2xs bg-amber-50/20">
-          <p className="text-[10px] font-black uppercase tracking-wider text-amber-700">Under Review</p>
-          <p className="text-2xl font-black text-amber-700 mt-1">{underReviewCount}</p>
+        <div className="bg-surface p-4 rounded-2xl border border-warning/20 shadow-2xs bg-warning-bg/20">
+          <p className="text-[10px] font-black uppercase tracking-wider text-warning">Under Review</p>
+          <p className="text-2xl font-black text-warning mt-1">{underReviewCount}</p>
         </div>
-        <div className="bg-white p-4 rounded-2xl border border-blue-200 shadow-2xs bg-blue-50/20">
-          <p className="text-[10px] font-black uppercase tracking-wider text-blue-700">Reactivation Requested</p>
-          <p className="text-2xl font-black text-blue-700 mt-1">{reactivationRequestedCount}</p>
+        <div className="bg-surface p-4 rounded-2xl border border-info/20 shadow-2xs bg-info-bg/20">
+          <p className="text-[10px] font-black uppercase tracking-wider text-info">Reactivation Requested</p>
+          <p className="text-2xl font-black text-info mt-1">{reactivationRequestedCount}</p>
         </div>
-        <div className="bg-white p-4 rounded-2xl border border-red-200 shadow-2xs bg-red-50/20">
-          <p className="text-[10px] font-black uppercase tracking-wider text-red-700">Deactivated</p>
-          <p className="text-2xl font-black text-red-700 mt-1">{deactivatedCount}</p>
+        <div className="bg-surface p-4 rounded-2xl border border-error/20 shadow-2xs bg-error-bg/20">
+          <p className="text-[10px] font-black uppercase tracking-wider text-error">Deactivated</p>
+          <p className="text-2xl font-black text-error mt-1">{deactivatedCount}</p>
         </div>
-        <div className="bg-white p-4 rounded-2xl border border-gray-700 shadow-2xs bg-gray-900 text-white">
-          <p className="text-[10px] font-black uppercase tracking-wider text-gray-400">Permanently Banned</p>
+        <div className="bg-surface p-4 rounded-2xl border border-border-hover shadow-2xs bg-primary text-white">
+          <p className="text-[10px] font-black uppercase tracking-wider text-foreground-muted">Permanently Banned</p>
           <p className="text-2xl font-black text-red-400 mt-1">{permanentCount}</p>
         </div>
       </div>
@@ -352,8 +352,8 @@ export default function AdminSellersPage() {
             onClick={() => setSelectedStatus(tab.id)}
             className={`px-3.5 py-2 text-xs font-bold rounded-xl whitespace-nowrap transition-all cursor-pointer ${
               selectedStatus === tab.id
-                ? 'bg-[#0f3e26] text-white shadow-sm'
-                : 'bg-white border border-gray-200 text-gray-600 hover:border-gray-300 hover:text-gray-900'
+                ? 'bg-primary text-white shadow-sm'
+                : 'bg-surface border border-border text-foreground-muted hover:border-border-hover hover:text-foreground'
             }`}
           >
             {tab.label}
@@ -365,33 +365,33 @@ export default function AdminSellersPage() {
       <div className="grid grid-cols-1 lg:grid-cols-[1fr_480px] gap-6">
         
         {/* Left: Sellers Table & Search */}
-        <div className="bg-white rounded-2xl border border-gray-200 shadow-2xs overflow-hidden flex flex-col">
+        <div className="bg-surface rounded-2xl border border-border shadow-2xs overflow-hidden flex flex-col">
           {/* Search bar */}
-          <div className="p-4 border-b border-gray-100 bg-gray-50/50">
+          <div className="p-4 border-b border-border bg-surface-muted/50">
             <div className="relative">
-              <Search className="w-4 h-4 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2" />
+              <Search className="w-4 h-4 text-foreground-muted absolute left-3 top-1/2 -translate-y-1/2" />
               <input
                 type="text"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder="Search by store name, slug, owner, state, status..."
-                className="w-full pl-9 pr-4 py-2 bg-white rounded-xl border border-gray-200 text-xs text-gray-900 focus:border-[#0f3e26] outline-none"
+                className="w-full pl-9 pr-4 py-2 bg-surface rounded-xl border border-border text-xs text-foreground focus:border-primary outline-none"
               />
             </div>
           </div>
 
           {/* List items */}
-          <div className="divide-y divide-gray-100 overflow-y-auto max-h-[700px]">
+          <div className="divide-y divide-border overflow-y-auto max-h-[700px]">
             {isLoading ? (
               <div className="p-12 text-center">
-                <Loader2 className="w-6 h-6 animate-spin text-[#0f3e26] mx-auto" />
-                <p className="text-xs text-gray-500 mt-2">Loading sellers...</p>
+                <Loader2 className="w-6 h-6 animate-spin text-primary mx-auto" />
+                <p className="text-xs text-foreground-muted mt-2">Loading sellers...</p>
               </div>
             ) : filteredSellers.length === 0 ? (
               <div className="p-12 text-center space-y-2">
-                <Store className="w-8 h-8 text-gray-300 mx-auto" />
-                <p className="text-sm font-bold text-gray-800">No sellers found</p>
-                <p className="text-xs text-gray-500">Try changing status filter or search query</p>
+                <Store className="w-8 h-8 text-foreground-muted mx-auto" />
+                <p className="text-sm font-bold text-foreground">No sellers found</p>
+                <p className="text-xs text-foreground-muted">Try changing status filter or search query</p>
               </div>
             ) : (
               filteredSellers.map((seller) => {
@@ -404,32 +404,32 @@ export default function AdminSellersPage() {
                     onClick={() => handleSelectSeller(seller)}
                     className={`p-4 transition-all cursor-pointer flex items-center justify-between gap-4 ${
                       isSelected
-                        ? 'bg-emerald-50/60 border-l-4 border-l-[#0f3e26]'
-                        : 'hover:bg-gray-50/80 border-l-4 border-l-transparent'
+                        ? 'bg-success-bg/60 border-l-4 border-l-[var(--primary)]'
+                        : 'hover:bg-surface-muted/80 border-l-4 border-l-transparent'
                     }`}
                   >
                     <div className="flex items-center gap-3 min-w-0">
-                      <div className="w-10 h-10 rounded-xl bg-[#0f3e26]/10 text-[#0f3e26] flex items-center justify-center font-bold text-sm shrink-0">
+                      <div className="w-10 h-10 rounded-xl bg-primary/10 text-primary flex items-center justify-center font-bold text-sm shrink-0">
                         {seller.store_name?.charAt(0) || 'S'}
                       </div>
                       <div className="min-w-0">
                         <div className="flex items-center gap-2">
-                          <p className="text-xs font-black text-gray-900 truncate">
+                          <p className="text-xs font-black text-foreground truncate">
                             {seller.store_name}
                           </p>
-                          <span className="text-[10px] text-gray-400 font-mono">
+                          <span className="text-[10px] text-foreground-muted font-mono">
                             /{seller.slug}
                           </span>
                         </div>
-                        <p className="text-[11px] text-gray-500 truncate mt-0.5">
+                        <p className="text-[11px] text-foreground-muted truncate mt-0.5">
                           {seller.profiles?.name ? `${seller.profiles.name} • ` : ''}
                           {seller.state} • Total Sales: ₹{(Number(seller.total_sales) || 0).toLocaleString('en-IN')}
                         </p>
 
                         {/* Review expiry countdown banner if applicable */}
                         {hasReviewExpiry && (
-                          <div className="mt-1.5 flex items-center gap-1.5 text-[10px] font-bold text-amber-700 bg-amber-50 px-2 py-0.5 rounded-md border border-amber-200 w-fit">
-                            <Clock className="w-3 h-3 text-amber-600" />
+                          <div className="mt-1.5 flex items-center gap-1.5 text-[10px] font-bold text-warning bg-warning-bg px-2 py-0.5 rounded-md border border-warning/20 w-fit">
+                            <Clock className="w-3 h-3 text-warning" />
                             <span>{getReviewTimeRemaining(seller.review_expires_at)}</span>
                           </div>
                         )}
@@ -438,7 +438,7 @@ export default function AdminSellersPage() {
 
                     <div className="flex items-center gap-3 shrink-0">
                       {getStatusBadge(seller.status)}
-                      <ChevronRight className="w-4 h-4 text-gray-400" />
+                      <ChevronRight className="w-4 h-4 text-foreground-muted" />
                     </div>
                   </div>
                 );
@@ -450,14 +450,14 @@ export default function AdminSellersPage() {
         {/* Right: Seller Details, Lifecycle Controls & History Drawer */}
         <div className="space-y-6">
           {selectedSeller ? (
-            <div className="bg-white rounded-2xl border border-gray-200 shadow-2xs overflow-hidden p-6 space-y-6">
+            <div className="bg-surface rounded-2xl border border-border shadow-2xs overflow-hidden p-6 space-y-6">
               
               {/* Header */}
-              <div className="flex items-start justify-between gap-4 pb-4 border-b border-gray-100">
+              <div className="flex items-start justify-between gap-4 pb-4 border-b border-border">
                 <div>
-                  <span className="text-[10px] font-black uppercase tracking-wider text-gray-400">Seller Record</span>
-                  <h2 className="text-xl font-black text-gray-900 mt-0.5">{selectedSeller.store_name}</h2>
-                  <p className="text-xs text-gray-500 font-mono mt-0.5">ID: {selectedSeller.id}</p>
+                  <span className="text-[10px] font-black uppercase tracking-wider text-foreground-muted">Seller Record</span>
+                  <h2 className="text-xl font-black text-foreground mt-0.5">{selectedSeller.store_name}</h2>
+                  <p className="text-xs text-foreground-muted font-mono mt-0.5">ID: {selectedSeller.id}</p>
                 </div>
                 <div className="text-right">
                   {getStatusBadge(selectedSeller.status)}
@@ -466,18 +466,18 @@ export default function AdminSellersPage() {
 
               {/* Status Specific Alerts */}
               {selectedSeller.status === 'under_review' && (
-                <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 space-y-2 text-xs">
-                  <div className="flex items-center gap-2 text-amber-900 font-bold">
-                    <AlertTriangle className="w-4 h-4 text-amber-600" />
+                <div className="bg-warning-bg border border-warning/20 rounded-xl p-4 space-y-2 text-xs">
+                  <div className="flex items-center gap-2 text-warning font-bold">
+                    <AlertTriangle className="w-4 h-4 text-warning" />
                     <span>Account Is Currently Under Review</span>
                   </div>
                   {selectedSeller.review_reason && (
-                    <p className="text-amber-800">
+                    <p className="text-warning">
                       <strong>Reason:</strong> {selectedSeller.review_reason}
                     </p>
                   )}
                   {selectedSeller.review_expires_at && (
-                    <div className="pt-1 flex items-center justify-between text-amber-900 font-bold border-t border-amber-200/60">
+                    <div className="pt-1 flex items-center justify-between text-warning font-bold border-t border-warning/20/60">
                       <span>Temporary Review Expiry:</span>
                       <span className="font-mono">
                         {new Date(selectedSeller.review_expires_at).toLocaleDateString('en-IN', {
@@ -493,9 +493,9 @@ export default function AdminSellersPage() {
               )}
 
               {selectedSeller.status === 'reactivation_requested' && (
-                <div className="bg-blue-50 border border-blue-200 rounded-xl p-4 space-y-2 text-xs text-blue-900">
+                <div className="bg-info-bg border border-info/20 rounded-xl p-4 space-y-2 text-xs text-blue-900">
                   <div className="flex items-center gap-2 font-bold text-blue-900">
-                    <BadgeAlert className="w-4 h-4 text-blue-600" />
+                    <BadgeAlert className="w-4 h-4 text-info" />
                     <span>Seller Requested Reactivation</span>
                   </div>
                   <p>
@@ -505,9 +505,9 @@ export default function AdminSellersPage() {
               )}
 
               {selectedSeller.status === 'deactivated' && (
-                <div className="bg-red-50 border border-red-200 rounded-xl p-4 space-y-2 text-xs text-red-900">
+                <div className="bg-error-bg border border-error/20 rounded-xl p-4 space-y-2 text-xs text-red-900">
                   <div className="flex items-center gap-2 font-bold text-red-900">
-                    <Ban className="w-4 h-4 text-red-600" />
+                    <Ban className="w-4 h-4 text-error" />
                     <span>Account Is Deactivated</span>
                   </div>
                   {selectedSeller.deactivation_reason && (
@@ -515,24 +515,24 @@ export default function AdminSellersPage() {
                       <strong>Deactivation reason:</strong> {selectedSeller.deactivation_reason}
                     </p>
                   )}
-                  <p className="text-[11px] text-red-700">
+                  <p className="text-[11px] text-error">
                     Seller is blocked from creating, editing, and deleting products. Seller can submit a reactivation request.
                   </p>
                 </div>
               )}
 
               {selectedSeller.status === 'permanently_deactivated' && (
-                <div className="bg-gray-900 text-white rounded-xl p-4 space-y-2 text-xs border border-red-500/40">
+                <div className="bg-primary text-white rounded-xl p-4 space-y-2 text-xs border border-red-500/40">
                   <div className="flex items-center gap-2 font-bold text-red-400">
                     <Lock className="w-4 h-4 text-red-400" />
                     <span>Permanently Deactivated (Terminal)</span>
                   </div>
                   {selectedSeller.deactivation_reason && (
-                    <p className="text-gray-300">
+                    <p className="text-foreground-muted">
                       <strong>Reason:</strong> {selectedSeller.deactivation_reason}
                     </p>
                   )}
-                  <p className="text-[11px] text-gray-400">
+                  <p className="text-[11px] text-foreground-muted">
                     This account is permanently banned. No further status transitions or reactivation requests are allowed.
                   </p>
                 </div>
@@ -540,15 +540,15 @@ export default function AdminSellersPage() {
 
               {/* Action Buttons Toolbar */}
               <div className="space-y-2 pt-2">
-                <p className="text-[10px] font-black uppercase tracking-wider text-gray-400">Lifecycle Actions</p>
+                <p className="text-[10px] font-black uppercase tracking-wider text-foreground-muted">Lifecycle Actions</p>
                 
                 {/* 1. Put Under Review (from active or suspended) */}
                 {(selectedSeller.status === 'active' || selectedSeller.status === 'suspended') && (
                   <button
                     onClick={() => openActionModal('put_under_review')}
-                    className="w-full px-4 py-2.5 bg-amber-50 hover:bg-amber-100 border border-amber-300 text-amber-900 text-xs font-bold rounded-xl flex items-center justify-center gap-2 transition-colors cursor-pointer"
+                    className="w-full px-4 py-2.5 bg-warning-bg hover:bg-warning-bg border border-warning text-warning text-xs font-bold rounded-xl flex items-center justify-center gap-2 transition-colors cursor-pointer"
                   >
-                    <Clock className="w-4 h-4 text-amber-700" />
+                    <Clock className="w-4 h-4 text-warning" />
                     <span>Place Under Review</span>
                   </button>
                 )}
@@ -558,7 +558,7 @@ export default function AdminSellersPage() {
                   <div className="space-y-2">
                     <button
                       onClick={() => openActionModal('keep_active')}
-                      className="w-full px-4 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-xl flex items-center justify-center gap-2 shadow-sm transition-colors cursor-pointer"
+                      className="w-full px-4 py-2.5 bg-success hover:bg-success text-on-success text-xs font-bold rounded-xl flex items-center justify-center gap-2 shadow-sm transition-colors cursor-pointer"
                     >
                       <Check className="w-4 h-4" />
                       <span>Keep Active / Complete Review (Restore)</span>
@@ -566,9 +566,9 @@ export default function AdminSellersPage() {
 
                     <button
                       onClick={() => openActionModal('start_temporary_review')}
-                      className="w-full px-4 py-2.5 bg-amber-50 hover:bg-amber-100 border border-amber-300 text-amber-900 text-xs font-bold rounded-xl flex items-center justify-center gap-2 transition-colors cursor-pointer"
+                      className="w-full px-4 py-2.5 bg-warning-bg hover:bg-warning-bg border border-warning text-warning text-xs font-bold rounded-xl flex items-center justify-center gap-2 transition-colors cursor-pointer"
                     >
-                      <Calendar className="w-4 h-4 text-amber-700" />
+                      <Calendar className="w-4 h-4 text-warning" />
                       <span>{selectedSeller.review_expires_at ? 'Set / Update Temporary Review Period' : 'Start Temporary Review Period'}</span>
                     </button>
 
@@ -576,16 +576,16 @@ export default function AdminSellersPage() {
                       <div className="grid grid-cols-2 gap-2">
                         <button
                           onClick={() => openActionModal('extend_review')}
-                          className="px-3 py-2 bg-gray-50 hover:bg-gray-100 border border-gray-200 text-gray-800 text-xs font-bold rounded-xl flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
+                          className="px-3 py-2 bg-surface-muted hover:bg-surface-muted border border-border text-foreground text-xs font-bold rounded-xl flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
                         >
-                          <Clock className="w-3.5 h-3.5 text-gray-600" />
+                          <Clock className="w-3.5 h-3.5 text-foreground-muted" />
                           <span>Extend Review</span>
                         </button>
                         <button
                           onClick={() => openActionModal('end_review')}
-                          className="px-3 py-2 bg-gray-50 hover:bg-gray-100 border border-gray-200 text-gray-800 text-xs font-bold rounded-xl flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
+                          className="px-3 py-2 bg-surface-muted hover:bg-surface-muted border border-border text-foreground text-xs font-bold rounded-xl flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
                         >
-                          <XCircle className="w-3.5 h-3.5 text-gray-600" />
+                          <XCircle className="w-3.5 h-3.5 text-foreground-muted" />
                           <span>End Review Early</span>
                         </button>
                       </div>
@@ -593,9 +593,9 @@ export default function AdminSellersPage() {
 
                     <button
                       onClick={() => openActionModal('deactivate')}
-                      className="w-full px-4 py-2.5 bg-red-50 hover:bg-red-100 border border-red-200 text-red-700 text-xs font-bold rounded-xl flex items-center justify-center gap-2 transition-colors cursor-pointer"
+                      className="w-full px-4 py-2.5 bg-error-bg hover:bg-error-bg border border-error/20 text-error text-xs font-bold rounded-xl flex items-center justify-center gap-2 transition-colors cursor-pointer"
                     >
-                      <Ban className="w-4 h-4 text-red-600" />
+                      <Ban className="w-4 h-4 text-error" />
                       <span>Deactivate Seller</span>
                     </button>
                   </div>
@@ -606,16 +606,16 @@ export default function AdminSellersPage() {
                   <div className="space-y-2">
                     <button
                       onClick={() => openActionModal('approve_reactivation')}
-                      className="w-full px-4 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-xl flex items-center justify-center gap-2 shadow-sm transition-colors cursor-pointer"
+                      className="w-full px-4 py-2.5 bg-success hover:bg-success text-on-success text-xs font-bold rounded-xl flex items-center justify-center gap-2 shadow-sm transition-colors cursor-pointer"
                     >
                       <CheckCircle2 className="w-4 h-4" />
                       <span>Approve Reactivation (Restore to Active)</span>
                     </button>
                     <button
                       onClick={() => openActionModal('reject_reactivation')}
-                      className="w-full px-4 py-2.5 bg-red-50 hover:bg-red-100 border border-red-200 text-red-700 text-xs font-bold rounded-xl flex items-center justify-center gap-2 transition-colors cursor-pointer"
+                      className="w-full px-4 py-2.5 bg-error-bg hover:bg-error-bg border border-error/20 text-error text-xs font-bold rounded-xl flex items-center justify-center gap-2 transition-colors cursor-pointer"
                     >
-                      <XCircle className="w-4 h-4 text-red-600" />
+                      <XCircle className="w-4 h-4 text-error" />
                       <span>Reject Reactivation (Remain Deactivated)</span>
                     </button>
                   </div>
@@ -623,8 +623,8 @@ export default function AdminSellersPage() {
 
                 {/* 4. Deactivated Actions */}
                 {selectedSeller.status === 'deactivated' && (
-                  <div className="p-3 bg-gray-50 border border-gray-200 rounded-xl text-center text-xs text-gray-600 space-y-1">
-                    <p className="font-bold text-gray-800">Awaiting Reactivation Request</p>
+                  <div className="p-3 bg-surface-muted border border-border rounded-xl text-center text-xs text-foreground-muted space-y-1">
+                    <p className="font-bold text-foreground">Awaiting Reactivation Request</p>
                     <p className="text-[11px]">
                       Per policy, deactivated sellers must submit a reactivation request from their portal before admin can approve reactivation.
                     </p>
@@ -635,7 +635,7 @@ export default function AdminSellersPage() {
                 {selectedSeller.status !== 'permanently_deactivated' && (
                   <button
                     onClick={() => openActionModal('permanently_deactivate')}
-                    className="w-full px-4 py-2 bg-gray-900 hover:bg-black text-red-400 text-xs font-bold rounded-xl flex items-center justify-center gap-2 transition-colors cursor-pointer mt-2"
+                    className="w-full px-4 py-2 bg-primary hover:bg-black text-red-400 text-xs font-bold rounded-xl flex items-center justify-center gap-2 transition-colors cursor-pointer mt-2"
                   >
                     <Lock className="w-3.5 h-3.5 text-red-400" />
                     <span>Permanently Deactivate (Irreversible)</span>
@@ -644,30 +644,30 @@ export default function AdminSellersPage() {
               </div>
 
               {/* Status History / Audit Trail */}
-              <div className="space-y-3 pt-4 border-t border-gray-100">
+              <div className="space-y-3 pt-4 border-t border-border">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
-                    <History className="w-4 h-4 text-gray-500" />
-                    <h3 className="text-xs font-black uppercase tracking-wider text-gray-700">Status History & Audit Trail</h3>
+                    <History className="w-4 h-4 text-foreground-muted" />
+                    <h3 className="text-xs font-black uppercase tracking-wider text-foreground">Status History & Audit Trail</h3>
                   </div>
-                  <span className="text-[10px] text-gray-400">{sellerHistory.length} events</span>
+                  <span className="text-[10px] text-foreground-muted">{sellerHistory.length} events</span>
                 </div>
 
                 {isLoadingDetails ? (
                   <div className="py-6 text-center">
-                    <Loader2 className="w-5 h-5 animate-spin text-gray-400 mx-auto" />
+                    <Loader2 className="w-5 h-5 animate-spin text-foreground-muted mx-auto" />
                   </div>
                 ) : sellerHistory.length === 0 ? (
-                  <p className="text-xs text-gray-400 text-center py-4">No status transition history recorded yet.</p>
+                  <p className="text-xs text-foreground-muted text-center py-4">No status transition history recorded yet.</p>
                 ) : (
-                  <div className="space-y-2.5 max-h-[300px] overflow-y-auto pr-1 divide-y divide-gray-50">
+                  <div className="space-y-2.5 max-h-[300px] overflow-y-auto pr-1 divide-y divide-border">
                     {sellerHistory.map((item) => (
                       <div key={item.id} className="pt-2 text-xs space-y-1">
                         <div className="flex items-center justify-between gap-2">
-                          <span className="font-bold text-gray-800 capitalize">
+                          <span className="font-bold text-foreground capitalize">
                             {item.action?.replace(/_/g, ' ')}
                           </span>
-                          <span className="text-[10px] text-gray-400 font-mono">
+                          <span className="text-[10px] text-foreground-muted font-mono">
                             {new Date(item.changed_at).toLocaleString('en-IN', {
                               day: 'numeric',
                               month: 'short',
@@ -677,21 +677,21 @@ export default function AdminSellersPage() {
                           </span>
                         </div>
                         {item.reason && (
-                          <p className="text-[11px] text-gray-600">
+                          <p className="text-[11px] text-foreground-muted">
                             <strong>Reason:</strong> {item.reason}
                           </p>
                         )}
                         {item.notes && (
-                          <p className="text-[11px] text-gray-500 italic">
+                          <p className="text-[11px] text-foreground-muted italic">
                             "{item.notes}"
                           </p>
                         )}
                         {item.review_expires_at && (
-                          <p className="text-[10px] font-mono text-amber-700">
+                          <p className="text-[10px] font-mono text-warning">
                             Expires: {new Date(item.review_expires_at).toLocaleDateString('en-IN')}
                           </p>
                         )}
-                        <p className="text-[10px] text-gray-400">
+                        <p className="text-[10px] text-foreground-muted">
                           Changed by: {item.profiles?.name || item.profiles?.email || 'Admin'}
                         </p>
                       </div>
@@ -702,10 +702,10 @@ export default function AdminSellersPage() {
 
             </div>
           ) : (
-            <div className="bg-white rounded-2xl border border-gray-200 p-12 text-center space-y-3">
-              <Store className="w-10 h-10 text-gray-300 mx-auto" />
-              <p className="text-sm font-bold text-gray-800">Select a Seller</p>
-              <p className="text-xs text-gray-500 max-w-xs mx-auto">
+            <div className="bg-surface rounded-2xl border border-border p-12 text-center space-y-3">
+              <Store className="w-10 h-10 text-foreground-muted mx-auto" />
+              <p className="text-sm font-bold text-foreground">Select a Seller</p>
+              <p className="text-xs text-foreground-muted max-w-xs mx-auto">
                 Click on any seller from the list to view their status history, manage review periods, or execute lifecycle transitions.
               </p>
             </div>
@@ -717,20 +717,20 @@ export default function AdminSellersPage() {
       {/* Action Execution Modal */}
       {actionModalOpen && (
         <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-2xs flex items-center justify-center p-4">
-          <div className="bg-white rounded-3xl max-w-lg w-full p-6 sm:p-8 space-y-6 shadow-xl animate-in fade-in">
+          <div className="bg-surface rounded-3xl max-w-lg w-full p-6 sm:p-8 space-y-6 shadow-xl animate-in fade-in">
             
-            <div className="flex items-center justify-between pb-3 border-b border-gray-100">
+            <div className="flex items-center justify-between pb-3 border-b border-border">
               <div>
-                <h3 className="text-lg font-black text-gray-900 capitalize">
+                <h3 className="text-lg font-black text-foreground capitalize">
                   {modalAction.replace(/_/g, ' ')}
                 </h3>
-                <p className="text-xs text-gray-500 mt-0.5">
+                <p className="text-xs text-foreground-muted mt-0.5">
                   Target: <strong>{selectedSeller?.store_name}</strong>
                 </p>
               </div>
               <button
                 onClick={() => setActionModalOpen(false)}
-                className="w-8 h-8 rounded-full bg-gray-100 text-gray-500 hover:bg-gray-200 flex items-center justify-center text-xs font-bold cursor-pointer"
+                className="w-8 h-8 rounded-full bg-surface-muted text-foreground-muted hover:bg-border flex items-center justify-center text-xs font-bold cursor-pointer"
               >
                 ✕
               </button>
@@ -741,14 +741,14 @@ export default function AdminSellersPage() {
               <div
                 className={`p-3 rounded-xl text-xs font-bold flex items-center gap-2 ${
                   actionMessage.type === 'success'
-                    ? 'bg-emerald-50 text-emerald-800 border border-emerald-200'
-                    : 'bg-red-50 text-red-800 border border-red-200'
+                    ? 'bg-success-bg text-success border border-success/20'
+                    : 'bg-error-bg text-error border border-error/20'
                 }`}
               >
                 {actionMessage.type === 'success' ? (
-                  <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+                  <CheckCircle2 className="w-4 h-4 text-success shrink-0" />
                 ) : (
-                  <AlertCircle className="w-4 h-4 text-red-600 shrink-0" />
+                  <AlertCircle className="w-4 h-4 text-error shrink-0" />
                 )}
                 <span>{actionMessage.text}</span>
               </div>
@@ -759,7 +759,7 @@ export default function AdminSellersPage() {
               
               {/* Reason Selector / Input */}
               <div>
-                <label className="block font-bold text-gray-700 mb-1.5">
+                <label className="block font-bold text-foreground mb-1.5">
                   Reason <span className="text-red-500">*</span>
                 </label>
                 {modalAction.includes('review') ? (
@@ -767,7 +767,7 @@ export default function AdminSellersPage() {
                     <select
                       value={actionReason}
                       onChange={(e) => setActionReason(e.target.value)}
-                      className="w-full p-2.5 bg-gray-50 border border-gray-200 rounded-xl text-xs font-medium text-gray-900 outline-none focus:border-[#0f3e26]"
+                      className="w-full p-2.5 bg-surface-muted border border-border rounded-xl text-xs font-medium text-foreground outline-none focus:border-primary"
                     >
                       <option value="">Select predefined reason...</option>
                       {metadata.reviewReasons.map((r) => (
@@ -779,7 +779,7 @@ export default function AdminSellersPage() {
                       placeholder="Or specify custom reason..."
                       value={actionReason}
                       onChange={(e) => setActionReason(e.target.value)}
-                      className="w-full p-2.5 bg-white border border-gray-200 rounded-xl text-xs text-gray-900 outline-none focus:border-[#0f3e26]"
+                      className="w-full p-2.5 bg-surface border border-border rounded-xl text-xs text-foreground outline-none focus:border-primary"
                     />
                   </div>
                 ) : modalAction.includes('deactivate') ? (
@@ -787,7 +787,7 @@ export default function AdminSellersPage() {
                     <select
                       value={actionReason}
                       onChange={(e) => setActionReason(e.target.value)}
-                      className="w-full p-2.5 bg-gray-50 border border-gray-200 rounded-xl text-xs font-medium text-gray-900 outline-none focus:border-[#0f3e26]"
+                      className="w-full p-2.5 bg-surface-muted border border-border rounded-xl text-xs font-medium text-foreground outline-none focus:border-primary"
                     >
                       <option value="">Select deactivation reason...</option>
                       {metadata.deactivationReasons.map((r) => (
@@ -799,7 +799,7 @@ export default function AdminSellersPage() {
                       placeholder="Or specify custom deactivation reason..."
                       value={actionReason}
                       onChange={(e) => setActionReason(e.target.value)}
-                      className="w-full p-2.5 bg-white border border-gray-200 rounded-xl text-xs text-gray-900 outline-none focus:border-[#0f3e26]"
+                      className="w-full p-2.5 bg-surface border border-border rounded-xl text-xs text-foreground outline-none focus:border-primary"
                     />
                   </div>
                 ) : (
@@ -808,15 +808,15 @@ export default function AdminSellersPage() {
                     placeholder="Enter reason..."
                     value={actionReason}
                     onChange={(e) => setActionReason(e.target.value)}
-                    className="w-full p-2.5 bg-white border border-gray-200 rounded-xl text-xs text-gray-900 outline-none focus:border-[#0f3e26]"
+                    className="w-full p-2.5 bg-surface border border-border rounded-xl text-xs text-foreground outline-none focus:border-primary"
                   />
                 )}
               </div>
 
               {/* Temporary Review Duration (1 day, 7 days, 14 days, 30 days, or custom) */}
               {(modalAction === 'start_temporary_review' || modalAction === 'extend_review') && (
-                <div className="space-y-3 bg-gray-50 p-4 rounded-2xl border border-gray-200">
-                  <label className="block font-bold text-gray-800">
+                <div className="space-y-3 bg-surface-muted p-4 rounded-2xl border border-border">
+                  <label className="block font-bold text-foreground">
                     Review Duration Period <span className="text-red-500">*</span>
                   </label>
                   <div className="grid grid-cols-3 sm:grid-cols-5 gap-2">
@@ -833,8 +833,8 @@ export default function AdminSellersPage() {
                         onClick={() => setReviewDuration(opt.id)}
                         className={`py-2 px-2 text-xs font-bold rounded-xl border text-center transition-colors cursor-pointer ${
                           reviewDuration === opt.id
-                            ? 'bg-[#0f3e26] text-white border-[#0f3e26]'
-                            : 'bg-white text-gray-700 border-gray-200 hover:border-gray-300'
+                            ? 'bg-primary text-white border-primary'
+                            : 'bg-surface text-foreground border-border hover:border-border-hover'
                         }`}
                       >
                         {opt.label}
@@ -846,22 +846,22 @@ export default function AdminSellersPage() {
                     <div className="grid grid-cols-2 gap-3 pt-2">
                       {modalAction === 'start_temporary_review' && (
                         <div>
-                          <label className="block text-[10px] font-bold text-gray-500 mb-1">Start Date</label>
+                          <label className="block text-[10px] font-bold text-foreground-muted mb-1">Start Date</label>
                           <input
                             type="date"
                             value={customStartDate}
                             onChange={(e) => setCustomStartDate(e.target.value)}
-                            className="w-full p-2 bg-white border border-gray-200 rounded-xl text-xs text-gray-900 outline-none"
+                            className="w-full p-2 bg-surface border border-border rounded-xl text-xs text-foreground outline-none"
                           />
                         </div>
                       )}
                       <div>
-                        <label className="block text-[10px] font-bold text-gray-500 mb-1">End Date</label>
+                        <label className="block text-[10px] font-bold text-foreground-muted mb-1">End Date</label>
                         <input
                           type="date"
                           value={customEndDate}
                           onChange={(e) => setCustomEndDate(e.target.value)}
-                          className="w-full p-2 bg-white border border-gray-200 rounded-xl text-xs text-gray-900 outline-none"
+                          className="w-full p-2 bg-surface border border-border rounded-xl text-xs text-foreground outline-none"
                         />
                       </div>
                     </div>
@@ -871,20 +871,20 @@ export default function AdminSellersPage() {
 
               {/* Internal Notes */}
               <div>
-                <label className="block font-bold text-gray-700 mb-1">Internal Notes (Optional)</label>
+                <label className="block font-bold text-foreground mb-1">Internal Notes (Optional)</label>
                 <textarea
                   rows={3}
                   value={actionNotes}
                   onChange={(e) => setActionNotes(e.target.value)}
                   placeholder="Additional notes for audit history..."
-                  className="w-full p-2.5 bg-white border border-gray-200 rounded-xl text-xs text-gray-900 outline-none focus:border-[#0f3e26]"
+                  className="w-full p-2.5 bg-surface border border-border rounded-xl text-xs text-foreground outline-none focus:border-primary"
                 />
               </div>
 
               {/* Warning for permanent deactivation */}
               {modalAction === 'permanently_deactivate' && (
-                <div className="p-3 bg-red-50 border border-red-200 rounded-xl text-[11px] text-red-800 font-bold flex items-center gap-2">
-                  <AlertTriangle className="w-4 h-4 text-red-600 shrink-0" />
+                <div className="p-3 bg-error-bg border border-error/20 rounded-xl text-[11px] text-error font-bold flex items-center gap-2">
+                  <AlertTriangle className="w-4 h-4 text-error shrink-0" />
                   <span>Warning: Permanent deactivation cannot be reversed. The seller will never be able to reactivate.</span>
                 </div>
               )}
@@ -892,12 +892,12 @@ export default function AdminSellersPage() {
             </div>
 
             {/* Modal Footer */}
-            <div className="flex items-center justify-end gap-3 pt-4 border-t border-gray-100">
+            <div className="flex items-center justify-end gap-3 pt-4 border-t border-border">
               <button
                 type="button"
                 onClick={() => setActionModalOpen(false)}
                 disabled={isSubmitting}
-                className="px-4 py-2.5 bg-gray-100 hover:bg-gray-200 text-gray-700 text-xs font-bold rounded-xl transition-colors cursor-pointer"
+                className="px-4 py-2.5 bg-surface-muted hover:bg-border text-foreground text-xs font-bold rounded-xl transition-colors cursor-pointer"
               >
                 Cancel
               </button>
@@ -908,7 +908,7 @@ export default function AdminSellersPage() {
                 className={`px-5 py-2.5 text-xs font-bold rounded-xl text-white shadow-sm flex items-center gap-2 transition-all cursor-pointer ${
                   modalAction === 'permanently_deactivate'
                     ? 'bg-red-700 hover:bg-red-800'
-                    : 'bg-[#0f3e26] hover:bg-[#144f31]'
+                    : 'bg-primary hover:bg-primary-hover'
                 } ${isSubmitting || !actionReason.trim() ? 'opacity-50 cursor-not-allowed' : ''}`}
               >
                 {isSubmitting && <Loader2 className="w-3.5 h-3.5 animate-spin" />}

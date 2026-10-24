@@ -63,7 +63,7 @@ export default function AdminCustomersPage() {
           </div>
         </div>
 
-        <div className="flex items-center bg-white rounded-[12px] px-4 h-12"
+        <div className="flex items-center bg-surface rounded-[12px] px-4 h-12"
           style={{ border: '1px solid rgba(195,201,187,0.5)' }}>
           <Search className="w-5 h-5" style={{ color: 'var(--color-on-surface-variant)' }} />
           <input
@@ -75,7 +75,7 @@ export default function AdminCustomersPage() {
             style={{ color: 'var(--color-on-surface)' }}
           />
           {search && (
-            <button onClick={() => setSearch('')} className="p-1 text-gray-400 hover:text-gray-600">
+            <button onClick={() => setSearch('')} className="p-1 text-foreground-muted hover:text-foreground-muted">
               <X className="w-4 h-4" />
             </button>
           )}
@@ -128,11 +128,11 @@ export default function AdminCustomersPage() {
                     ₹{parseFloat(c.total_spent || '0').toLocaleString('en-IN', { maximumFractionDigits: 0 })}
                   </span>
                   <div className="flex items-center gap-1.5">
-                    <span className="text-[10px] font-bold px-2 py-0.5 rounded-full" style={{ background: '#dce8ff', color: '#4a6fa5' }}>
+                    <span className="text-[10px] font-bold px-2 py-0.5 rounded-full" style={{ background: 'var(--info-bg)', color: 'var(--info)' }}>
                       {c.total_orders} Orders
                     </span>
                     {parseInt(c.active_subscriptions) > 0 && (
-                      <span className="text-[10px] font-bold px-2 py-0.5 rounded-full" style={{ background: '#ffdcc7', color: '#774117' }}>
+                      <span className="text-[10px] font-bold px-2 py-0.5 rounded-full" style={{ background: 'var(--warning-bg)', color: 'var(--warning)' }}>
                         {c.active_subscriptions} Subs
                       </span>
                     )}
@@ -159,11 +159,11 @@ export default function AdminCustomersPage() {
               animate={{ scale: 1 }}
               exit={{ scale: 0.95 }}
               onClick={e => e.stopPropagation()}
-              className="w-full max-w-lg bg-white rounded-[20px] overflow-hidden shadow-2xl p-6 flex flex-col gap-6"
+              className="w-full max-w-lg bg-surface rounded-[20px] overflow-hidden shadow-2xl p-6 flex flex-col gap-6"
             >
-              <div className="flex justify-between items-center pb-4 border-b border-gray-100">
+              <div className="flex justify-between items-center pb-4 border-b border-border">
                 <div className="flex items-center gap-3">
-                  <div className="w-12 h-12 rounded-full flex items-center justify-center font-bold text-white text-[18px]" style={{ background: '#4a8c3f' }}>
+                  <div className="w-12 h-12 rounded-full flex items-center justify-center font-bold text-white text-[18px]" style={{ background: 'var(--primary-light)' }}>
                     {(selectedCustomer.name || selectedCustomer.email || 'C')[0].toUpperCase()}
                   </div>
                   <div>
@@ -175,19 +175,19 @@ export default function AdminCustomersPage() {
                     </p>
                   </div>
                 </div>
-                <button onClick={() => setSelectedCustomer(null)} className="p-2 rounded-full hover:bg-gray-100 text-gray-500">
+                <button onClick={() => setSelectedCustomer(null)} className="p-2 rounded-full hover:bg-surface-muted text-foreground-muted">
                   <X className="w-5 h-5" />
                 </button>
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                <div className="p-3 rounded-[12px] bg-green-50 border border-green-100 text-center">
+                <div className="p-3 rounded-[12px] bg-success-bg border border-green-100 text-center">
                   <p className="text-[10px] font-bold uppercase text-green-800">Total Spent</p>
                   <p className="font-extrabold text-[16px] text-green-900 mt-1">
                     ₹{parseFloat(selectedCustomer.total_spent || '0').toLocaleString('en-IN', { maximumFractionDigits: 0 })}
                   </p>
                 </div>
-                <div className="p-3 rounded-[12px] bg-blue-50 border border-blue-100 text-center">
+                <div className="p-3 rounded-[12px] bg-info-bg border border-blue-100 text-center">
                   <p className="text-[10px] font-bold uppercase text-blue-800">Orders</p>
                   <p className="font-extrabold text-[16px] text-blue-900 mt-1">{selectedCustomer.total_orders}</p>
                 </div>
@@ -198,20 +198,20 @@ export default function AdminCustomersPage() {
               </div>
 
               <div className="flex flex-col gap-2 text-[13px]">
-                <div className="flex justify-between py-2 border-b border-gray-100">
-                  <span className="text-gray-500">Phone</span>
+                <div className="flex justify-between py-2 border-b border-border">
+                  <span className="text-foreground-muted">Phone</span>
                   <span className="font-semibold">+91 {selectedCustomer.phone || 'N/A'}</span>
                 </div>
-                <div className="flex justify-between py-2 border-b border-gray-100">
-                  <span className="text-gray-500">Email</span>
+                <div className="flex justify-between py-2 border-b border-border">
+                  <span className="text-foreground-muted">Email</span>
                   <span className="font-semibold">{selectedCustomer.email || 'N/A'}</span>
                 </div>
-                <div className="flex justify-between py-2 border-b border-gray-100">
-                  <span className="text-gray-500">Loyalty Points</span>
-                  <span className="font-bold text-[#4a8c3f]">{selectedCustomer.loyalty_points || 0} pts</span>
+                <div className="flex justify-between py-2 border-b border-border">
+                  <span className="text-foreground-muted">Loyalty Points</span>
+                  <span className="font-bold text-primary-light">{selectedCustomer.loyalty_points || 0} pts</span>
                 </div>
                 <div className="flex justify-between py-2">
-                  <span className="text-gray-500">Last Login</span>
+                  <span className="text-foreground-muted">Last Login</span>
                   <span className="font-semibold">
                     {selectedCustomer.last_login_at ? new Date(selectedCustomer.last_login_at).toLocaleString('en-IN') : 'Never'}
                   </span>

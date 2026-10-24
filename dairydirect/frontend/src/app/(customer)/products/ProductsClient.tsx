@@ -5,7 +5,8 @@ import { useSearchParams } from 'next/navigation';
 import { useTranslation } from '@/lib/i18n';
 import { getProducts } from '@/lib/api/products';
 import type { CatalogProduct } from '@/lib/types/catalog';
-import { CATEGORY_NAMES } from '@/lib/constants/categories';
+import { VISIBLE_CATEGORY_NAMES } from '@/lib/constants/categories';
+import { isSectionEnabled } from '@/lib/config/launch';
 import { ProductCard } from '@/components/shared/ProductCard';
 import { useStore } from '@/store/useStore';
 import { 
@@ -38,6 +39,9 @@ function ProductsScreenContent({ initialProducts }: { initialProducts: CatalogPr
   const [searchQuery, setSearchQuery] = useState(initialSearch);
   const [sortBy, setSortBy] = useState<'featured' | 'price_asc' | 'price_desc' | 'rating'>('featured');
   const [priceRange, setPriceRange] = useState<'all' | 'under500' | '500to1500' | 'above1500'>('all');
+  // Mobile filter sheet. Closed by default so products are the first thing
+  // on screen; see the layout note in the render below.
+  const [filtersOpen, setFiltersOpen] = useState(false);
 
   useEffect(() => {
     // Only hit the network if the server render produced nothing (e.g. the
@@ -73,7 +77,7 @@ function ProductsScreenContent({ initialProducts }: { initialProducts: CatalogPr
 
   // Was a hand-maintained 16-item array that disagreed with the navigation
   // and with the admin product form. Now derived from the single taxonomy.
-  const defaultCategories = ['All', ...CATEGORY_NAMES];
+  const defaultCategories = ['All', ...VISIBLE_CATEGORY_NAMES];
 
   const categories = useMemo(() => {
     const list = Array.from(
@@ -142,168 +146,193 @@ function ProductsScreenContent({ initialProducts }: { initialProducts: CatalogPr
     setSortBy('featured');
   };
 
+  const activeFilterCount =
+    (activeCategory !== 'All' ? 1 : 0) +
+    (priceRange !== 'all' ? 1 : 0) +
+    (searchQuery.trim() ? 1 : 0);
+
+  // Filter controls are rendered twice from one definition: inline in the
+  // desktop sidebar, and inside the mobile sheet. Keeping a single source
+  // avoids the two copies drifting apart.
+  const filterControls = (
+    <div className="space-y-6">
+      <div className="bg-surface rounded-2xl border border-border/90 p-4 shadow-2xs">
+        <h3 className="text-xs font-black text-foreground mb-3 uppercase tracking-wider">
+          Categories
+        </h3>
+        <div className="space-y-1">
+          {categories.map((cat) => (
+            <button
+              key={cat}
+              onClick={() => { setActiveCategory(cat); setFiltersOpen(false); }}
+              className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-sm font-bold transition-colors ${
+                activeCategory.toLowerCase() === cat.toLowerCase()
+                  ? 'bg-primary text-on-primary shadow-2xs'
+                  : 'text-foreground-muted hover:bg-surface-muted'
+              }`}
+            >
+              <span>{cat}</span>
+              {activeCategory.toLowerCase() === cat.toLowerCase() && (
+                <Check className="w-4 h-4" />
+              )}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* State-origin filter is gated: it needs a multi-state catalogue to
+          mean anything, and today every product ships from one dairy
+          partner. See lib/config/launch.ts. */}
+      {isSectionEnabled('shopByState') && (
+        <div className="bg-surface rounded-2xl border border-border/90 p-4 shadow-2xs">
+          <h3 className="text-xs font-black text-foreground mb-3 uppercase tracking-wider flex items-center gap-1.5">
+            <MapPin className="w-3.5 h-3.5 text-secondary" />
+            <span>Shop by State Origin</span>
+          </h3>
+          <div className="space-y-1">
+            {states.map((st) => (
+              <button
+                key={st}
+                onClick={() => { setActiveState(st); setFiltersOpen(false); }}
+                className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-sm font-bold transition-colors ${
+                  activeState === st
+                    ? 'bg-secondary text-on-secondary shadow-2xs'
+                    : 'text-foreground-muted hover:bg-surface-muted'
+                }`}
+              >
+                <span>{st}</span>
+                {activeState === st && <Check className="w-4 h-4" />}
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+
+      <div className="bg-surface rounded-2xl border border-border/90 p-4 shadow-2xs">
+        <h3 className="text-xs font-black text-foreground mb-3 uppercase tracking-wider">
+          Price
+        </h3>
+        <div className="space-y-1">
+          {[
+            { id: 'all', label: 'All Prices' },
+            { id: 'under500', label: 'Under \u20b9500' },
+            { id: '500to1500', label: '\u20b9500 - \u20b91,500' },
+            { id: 'above1500', label: 'Above \u20b91,500' },
+          ].map((pr) => (
+            <button
+              key={pr.id}
+              onClick={() => { setPriceRange(pr.id as any); setFiltersOpen(false); }}
+              className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-sm font-bold transition-colors ${
+                priceRange === pr.id
+                  ? 'bg-success-bg text-success'
+                  : 'text-foreground-muted hover:bg-surface-muted'
+              }`}
+            >
+              <span>{pr.label}</span>
+              {priceRange === pr.id && <Check className="w-4 h-4 text-success" />}
+            </button>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+
   return (
-    <div className="min-h-screen bg-[#fafaf8] py-6 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-[1440px] mx-auto">
-        
-        {/* Top Header Banner */}
-        <div className="mb-6 bg-gradient-to-r from-[#0f3e26] via-[#144f31] to-[#0f3e26] rounded-2xl p-6 sm:p-8 text-white relative overflow-hidden shadow-md">
-          <div className="relative z-10 max-w-2xl">
-            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/10 backdrop-blur-xs border border-white/20 text-[#c88a23] text-xs font-black uppercase tracking-wider mb-2">
-              <Sparkles className="w-3.5 h-3.5" />
-              <span>Authentic Bharat Heritage</span>
-            </div>
-            <h1 className="text-2xl sm:text-3xl font-black tracking-tight">
-              Direct-from-Farm & Artisan Marketplace
+    <div className="min-h-screen bg-background pb-24 lg:pb-10">
+      <div className="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8 pt-4 lg:pt-6">
+
+        {/* Page heading. Deliberately small on mobile: this used to be a tall
+            gradient hero that, combined with the filter sidebar stacking
+            above the grid, meant a phone user had to scroll roughly two
+            screens before seeing a single product. */}
+        <div className="mb-4 lg:mb-6">
+          <div className="lg:bg-gradient-to-r lg:from-[var(--primary)] lg:to-[var(--primary-hover)] lg:text-on-primary lg:rounded-2xl lg:p-8 lg:shadow-md">
+            <h1 className="text-xl lg:text-3xl font-black tracking-tight text-foreground lg:text-on-primary">
+              Shop all products
             </h1>
-            <p className="text-xs text-gray-200 mt-1">
-              Explore 100% lab-tested Gir A2 dairy, cold-pressed oils, handlooms, and state specialities.
+            <p className="hidden lg:block text-sm text-on-primary/80 mt-1">
+              Lab-tested Gir A2 dairy, delivered direct from our verified partner.
             </p>
           </div>
         </div>
 
-        {/* Layout Grid: Sidebar Filters + Main Product Grid */}
         <div className="grid grid-cols-1 lg:grid-cols-[260px_1fr] gap-8">
-          
-          {/* Left Sidebar Filters */}
-          <aside className="space-y-6">
-            
-            {/* Categories Filter */}
-            <div className="bg-white rounded-2xl border border-gray-200/90 p-4 shadow-2xs">
-              <h3 className="text-xs font-black text-gray-900 mb-3 uppercase tracking-wider">
-                Categories
-              </h3>
-              <div className="space-y-1">
-                {categories.map((cat) => (
+
+          {/* Desktop-only sidebar. On mobile these same controls live in the
+              bottom sheet below, so they cannot push the grid down. */}
+          <aside className="hidden lg:block">{filterControls}</aside>
+
+          <main className="space-y-4 min-w-0">
+
+            {/* Compact toolbar. Sticky on mobile so filtering and sorting stay
+                reachable without scrolling back to the top of a long grid. */}
+            <div className="sticky top-0 z-20 -mx-4 px-4 py-2.5 bg-background/95 backdrop-blur-sm border-b border-border lg:static lg:mx-0 lg:px-4 lg:py-4 lg:bg-surface lg:rounded-2xl lg:border lg:border-border/90 lg:shadow-2xs lg:backdrop-blur-none">
+              <div className="flex items-center justify-between gap-3">
+                <div className="text-xs font-bold text-foreground shrink-0">
+                  <strong className="text-primary">{filteredProducts.length}</strong>
+                  <span className="hidden sm:inline"> products</span>
+                </div>
+
+                <div className="flex items-center gap-2 min-w-0">
                   <button
-                    key={cat}
-                    onClick={() => setActiveCategory(cat)}
-                    className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-bold transition-colors ${
-                      activeCategory.toLowerCase() === cat.toLowerCase()
-                        ? 'bg-[#0f3e26] text-white shadow-2xs'
-                        : 'text-gray-600 hover:bg-gray-100'
-                    }`}
+                    onClick={() => setFiltersOpen(true)}
+                    className="lg:hidden inline-flex items-center gap-1.5 px-3 py-2 rounded-xl border border-border-hover bg-surface text-xs font-bold text-foreground active:scale-95 transition-transform"
                   >
-                    <span>{cat}</span>
-                    {activeCategory.toLowerCase() === cat.toLowerCase() && (
-                      <Check className="w-3.5 h-3.5" />
+                    <SlidersHorizontal className="w-3.5 h-3.5" />
+                    <span>Filters</span>
+                    {activeFilterCount > 0 && (
+                      <span className="ml-0.5 w-4 h-4 rounded-full bg-primary text-on-primary text-[10px] font-black grid place-items-center">
+                        {activeFilterCount}
+                      </span>
                     )}
                   </button>
-                ))}
-              </div>
-            </div>
 
-            {/* State Origin Filter */}
-            <div className="bg-white rounded-2xl border border-gray-200/90 p-4 shadow-2xs">
-              <h3 className="text-xs font-black text-gray-900 mb-3 uppercase tracking-wider flex items-center gap-1.5">
-                <MapPin className="w-3.5 h-3.5 text-[#c88a23]" />
-                <span>Shop by State Origin</span>
-              </h3>
-              <div className="space-y-1">
-                {states.map((st) => (
-                  <button
-                    key={st}
-                    onClick={() => setActiveState(st)}
-                    className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-bold transition-colors ${
-                      activeState === st
-                        ? 'bg-[#c88a23] text-white shadow-2xs'
-                        : 'text-gray-600 hover:bg-gray-100'
-                    }`}
+                  <select
+                    value={sortBy}
+                    onChange={(e) => setSortBy(e.target.value as any)}
+                    aria-label="Sort products"
+                    className="px-2.5 py-2 rounded-xl border border-border-hover text-xs font-bold text-foreground bg-surface focus:border-primary outline-none max-w-[9.5rem] lg:max-w-none"
                   >
-                    <span>{st}</span>
-                    {activeState === st && <Check className="w-3.5 h-3.5" />}
-                  </button>
-                ))}
+                    <option value="featured">Featured</option>
+                    <option value="price_asc">Price: Low to High</option>
+                    <option value="price_desc">Price: High to Low</option>
+                  </select>
+
+                  {activeFilterCount > 0 && (
+                    <button
+                      onClick={handleClearFilters}
+                      className="hidden lg:flex text-xs font-bold text-error hover:underline items-center gap-1"
+                    >
+                      <X className="w-3.5 h-3.5" />
+                      <span>Clear</span>
+                    </button>
+                  )}
+                </div>
               </div>
             </div>
 
-            {/* Price Range Filter */}
-            <div className="bg-white rounded-2xl border border-gray-200/90 p-4 shadow-2xs">
-              <h3 className="text-xs font-black text-gray-900 mb-3 uppercase tracking-wider">
-                Price Filter
-              </h3>
-              <div className="space-y-1">
-                {[
-                  { id: 'all', label: 'All Prices' },
-                  { id: 'under500', label: 'Under ₹500' },
-                  { id: '500to1500', label: '₹500 - ₹1,500' },
-                  { id: 'above1500', label: 'Above ₹1,500' },
-                ].map((p) => (
-                  <button
-                    key={p.id}
-                    onClick={() => setPriceRange(p.id as any)}
-                    className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-bold transition-colors ${
-                      priceRange === p.id
-                        ? 'bg-emerald-100 text-emerald-900'
-                        : 'text-gray-600 hover:bg-gray-100'
-                    }`}
-                  >
-                    <span>{p.label}</span>
-                    {priceRange === p.id && <Check className="w-3.5 h-3.5 text-emerald-700" />}
-                  </button>
-                ))}
-              </div>
-            </div>
-
-          </aside>
-
-          {/* Right Product Grid */}
-          <main className="space-y-4">
-            
-            {/* Top Toolbar (Sort + Count + Active Filter Tags) */}
-            <div className="bg-white rounded-2xl border border-gray-200/90 p-4 shadow-2xs flex flex-wrap items-center justify-between gap-4">
-              <div className="text-xs font-bold text-gray-700">
-                Showing <strong className="text-[#0f3e26]">{filteredProducts.length}</strong> authentic products
-              </div>
-
-              <div className="flex items-center gap-3">
-                <span className="text-xs text-gray-500 font-bold">Sort By:</span>
-                <select
-                  value={sortBy}
-                  onChange={(e) => setSortBy(e.target.value as any)}
-                  className="px-3 py-1.5 rounded-xl border border-gray-300 text-xs font-bold text-gray-800 bg-white focus:border-[#0f3e26] outline-none"
-                >
-                  <option value="featured">Featured / Popular</option>
-                  <option value="price_asc">Price: Low to High</option>
-                  <option value="price_desc">Price: High to Low</option>
-                </select>
-
-                {(activeCategory !== 'All' || activeState !== 'All' || searchQuery || priceRange !== 'all') && (
-                  <button
-                    onClick={handleClearFilters}
-                    className="text-xs font-bold text-rose-600 hover:underline flex items-center gap-1"
-                  >
-                    <X className="w-3.5 h-3.5" />
-                    <span>Clear Filters</span>
-                  </button>
-                )}
-              </div>
-            </div>
-
-            {/* Products Grid */}
             {isLoading ? (
-              /* Was eight blank pulsing rectangles of a fixed 18rem height,
-                 which did not match the real card and so still shifted the
-                 layout on load. ProductGridSkeleton mirrors the card exactly. */
               <ProductGridSkeleton count={8} />
             ) : filteredProducts.length === 0 ? (
-              <div className="bg-white rounded-2xl border border-gray-200/90 p-12 text-center space-y-4">
-                <div className="w-14 h-14 rounded-2xl bg-gray-100 flex items-center justify-center mx-auto"><svg className="w-7 h-7 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg></div>
-                <h3 className="text-base font-black text-gray-900">
-                  No products found matching your filters
+              <div className="bg-surface rounded-2xl border border-border/90 p-10 text-center space-y-4">
+                <div className="w-14 h-14 rounded-2xl bg-surface-muted flex items-center justify-center mx-auto">
+                  <svg className="w-7 h-7 text-foreground-muted" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
+                </div>
+                <h3 className="text-base font-black text-foreground">
+                  No products match your filters
                 </h3>
-                <p className="text-xs text-gray-500 max-w-sm mx-auto">
-                  Try clearing your search term or selecting a different category or state.
+                <p className="text-sm text-foreground-muted max-w-sm mx-auto">
+                  Try clearing your search or choosing a different category.
                 </p>
                 <button
                   onClick={handleClearFilters}
-                  className="px-5 py-2.5 bg-[#0f3e26] text-white text-xs font-bold rounded-xl shadow-sm hover:bg-[#144f31] transition-colors"
+                  className="px-5 py-2.5 bg-primary text-on-primary text-sm font-bold rounded-xl shadow-sm hover:bg-primary-hover transition-colors"
                 >
-                  Reset All Filters
+                  Reset filters
                 </button>
               </div>
             ) : (
-              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-3 xl:grid-cols-4 gap-4 reveal">
+              <div className="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-4">
                 {filteredProducts.map((prod) => (
                   <div key={prod.id} className="h-full">
                     <ProductCard product={prod} />
@@ -313,10 +342,57 @@ function ProductsScreenContent({ initialProducts }: { initialProducts: CatalogPr
             )}
 
           </main>
-
         </div>
-
       </div>
+
+      {/* Mobile filter sheet. */}
+      <AnimatePresence>
+        {filtersOpen && (
+          <>
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setFiltersOpen(false)}
+              className="fixed inset-0 bg-black/50 z-40 lg:hidden"
+            />
+            <motion.div
+              initial={{ y: '100%' }}
+              animate={{ y: 0 }}
+              exit={{ y: '100%' }}
+              transition={{ type: 'tween', duration: 0.22 }}
+              className="fixed inset-x-0 bottom-0 z-50 lg:hidden bg-background rounded-t-2xl max-h-[80vh] flex flex-col"
+              role="dialog"
+              aria-modal="true"
+              aria-label="Filters"
+            >
+              <div className="flex items-center justify-between px-4 py-3 border-b border-border shrink-0">
+                <h2 className="text-base font-black text-foreground">Filters</h2>
+                <div className="flex items-center gap-3">
+                  {activeFilterCount > 0 && (
+                    <button
+                      onClick={handleClearFilters}
+                      className="text-xs font-bold text-error"
+                    >
+                      Clear all
+                    </button>
+                  )}
+                  <button
+                    onClick={() => setFiltersOpen(false)}
+                    aria-label="Close filters"
+                    className="w-9 h-9 grid place-items-center rounded-full bg-surface-muted text-foreground"
+                  >
+                    <X className="w-4 h-4" />
+                  </button>
+                </div>
+              </div>
+              <div className="overflow-y-auto p-4 pb-[max(1rem,env(safe-area-inset-bottom))]">
+                {filterControls}
+              </div>
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
@@ -327,7 +403,7 @@ export default function ProductsClient({
   initialProducts: CatalogProduct[];
 }) {
   return (
-    <Suspense fallback={<div className="min-h-screen bg-[#fafaf8]" />}>
+    <Suspense fallback={<div className="min-h-screen bg-background" />}>
       <ProductsScreenContent initialProducts={initialProducts} />
     </Suspense>
   );

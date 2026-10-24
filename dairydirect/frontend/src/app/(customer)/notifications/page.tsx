@@ -87,9 +87,9 @@ export default function NotificationsPage() {
   };
 
   return (
-    <div className="flex flex-col min-h-screen bg-white">
+    <div className="flex flex-col min-h-screen bg-surface">
       {/* Header */}
-      <div className="sticky top-0 z-30 bg-white/80 backdrop-blur-md border-b border-sand px-4 py-4 md:px-8">
+      <div className="sticky top-0 z-30 bg-surface/80 backdrop-blur-md border-b border-sand px-4 py-4 md:px-8">
         <div className="flex items-center justify-between max-w-[800px] mx-auto w-full">
           <div className="flex items-center gap-4">
             <button onClick={() => router.back()} 
@@ -135,7 +135,7 @@ export default function NotificationsPage() {
         ) : (
           <div className="space-y-4">
             <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-muted ml-2 mb-4">Recent Notifications</h3>
-            <div className="rounded-[28px] overflow-hidden border border-sand bg-white shadow-sm">
+            <div className="rounded-[28px] overflow-hidden border border-sand bg-surface shadow-sm">
               {notifications.map((notif, i) => {
                 const Icon = TYPE_ICON[notif.type ?? 'system'] ?? Info;
                 return (

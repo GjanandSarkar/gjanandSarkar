@@ -27,11 +27,13 @@ export function BottomNav() {
   return (
     <nav className="fixed bottom-0 left-0 right-0 flex justify-around items-end z-50 md:hidden pb-safe"
       style={{ 
-        background: 'rgba(255, 255, 255, 0.92)',
+        background: 'var(--surface-translucent)',
         backdropFilter: 'blur(20px)',
         WebkitBackdropFilter: 'blur(20px)',
         paddingBottom: 'max(env(safe-area-inset-bottom, 0px), 8px)',
         paddingTop: '8px',
+        minHeight: 'calc(var(--bottom-nav-h) + env(safe-area-inset-bottom, 0px))',
+        boxSizing: 'border-box',
       }}>
       
       {/* Top tonal line */}
@@ -70,7 +72,7 @@ export function BottomNav() {
               {item.badge ? (
                 <span
                   key={item.badge}
-                  className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full text-[9px] font-bold text-white bg-secondary border border-white pop tabular-nums"
+                  className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full text-[9px] font-bold text-on-secondary bg-secondary border border-white pop tabular-nums"
                 >
                   {item.badge}
                 </span>

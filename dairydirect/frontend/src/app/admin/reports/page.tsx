@@ -92,7 +92,7 @@ export default function AdminReportsPage() {
                 { label: 'Gross Revenue', val: `₹${parseFloat(data?.overview?.gross_revenue || '0').toLocaleString('en-IN', { maximumFractionDigits: 0 })}`, sub: `${data?.overview?.total_orders || 0} orders`, bg: '#c2efac', text: '#2d5a27' },
                 { label: 'Net Delivered', val: `₹${parseFloat(data?.overview?.net_revenue || '0').toLocaleString('en-IN', { maximumFractionDigits: 0 })}`, sub: `${data?.overview?.delivered_orders || 0} fulfilled`, bg: '#dce8ff', text: '#4a6fa5' },
                 { label: 'Avg Order Value', val: `₹${parseFloat(data?.overview?.avg_order_value || '0').toFixed(0)}`, sub: 'Per transaction', bg: '#f3e8ff', text: '#6b21a8' },
-                { label: 'Discounts Given', val: `₹${parseFloat(data?.overview?.total_discounts || '0').toLocaleString('en-IN', { maximumFractionDigits: 0 })}`, sub: 'Coupons applied', bg: '#ffdcc7', text: '#774117' },
+                { label: 'Discounts Given', val: `₹${parseFloat(data?.overview?.total_discounts || '0').toLocaleString('en-IN', { maximumFractionDigits: 0 })}`, sub: 'Coupons applied', bg: '#ffdcc7', text: 'var(--warning)' },
               ].map(kpi => (
                 <div key={kpi.label} className="rounded-[16px] p-4 flex flex-col gap-1" style={{ background: kpi.bg }}>
                   <p className="font-extrabold text-[22px]" style={{ color: kpi.text }}>{kpi.val}</p>
@@ -193,7 +193,7 @@ export default function AdminReportsPage() {
                         <td className="px-5 py-3 text-[12px]" style={{ color: 'var(--color-on-surface-variant)' }}>
                           ₹{parseFloat(p.cost || '0').toLocaleString('en-IN', { maximumFractionDigits: 0 })}
                         </td>
-                        <td className="px-5 py-3 font-bold text-[13px]" style={{ color: '#2d5a27' }}>
+                        <td className="px-5 py-3 font-bold text-[13px]" style={{ color: 'var(--primary)' }}>
                           ₹{parseFloat(p.profit || '0').toLocaleString('en-IN', { maximumFractionDigits: 0 })}
                         </td>
                       </tr>

@@ -70,7 +70,7 @@ export function AddressSelection({
   return (
     <div className="flex flex-col gap-4">
       {/* Delivery Address */}
-      <div className="bg-white rounded-[20px] p-4 border border-sand shadow-sm">
+      <div className="bg-surface rounded-[20px] p-4 border border-sand shadow-sm">
         <div className="flex items-center justify-between mb-3">
           <div className="flex items-center gap-2">
             <MapPin className="w-4 h-4 text-primary" />
@@ -93,7 +93,7 @@ export function AddressSelection({
           <button
             type="button"
             onClick={handleOpenAdd}
-            className="w-full p-4 rounded-[16px] border border-dashed border-clay text-clay bg-white hover:bg-clay/5 flex items-center justify-center font-semibold text-sm transition-colors cursor-pointer"
+            className="w-full p-4 rounded-[16px] border border-dashed border-clay text-clay bg-surface hover:bg-clay/5 flex items-center justify-center font-semibold text-sm transition-colors cursor-pointer"
           >
             <Plus className="w-5 h-5 mr-2" /> Add Delivery Address
           </button>
@@ -110,7 +110,7 @@ export function AddressSelection({
                     "p-3.5 rounded-[16px] border transition-all cursor-pointer flex items-start justify-between gap-3",
                     isSelected
                       ? "border-primary bg-mint/10 shadow-sm ring-1 ring-primary/20"
-                      : "border-sand bg-white hover:border-sand/80"
+                      : "border-sand bg-surface hover:border-sand/80"
                   )}
                 >
                   <div className="flex items-start gap-3 flex-1 min-w-0">
@@ -156,7 +156,7 @@ export function AddressSelection({
                   <button
                     type="button"
                     onClick={(e) => handleOpenEdit(addr, e)}
-                    className="p-1.5 text-muted hover:text-primary hover:bg-white rounded-lg transition-colors shrink-0 cursor-pointer"
+                    className="p-1.5 text-muted hover:text-primary hover:bg-surface rounded-lg transition-colors shrink-0 cursor-pointer"
                     title="Edit address"
                   >
                     <Edit3 className="w-4 h-4" />

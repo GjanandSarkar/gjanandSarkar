@@ -178,11 +178,11 @@ function LoginScreenInner() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4 bg-[#fafaf8] relative overflow-hidden" suppressHydrationWarning>
+    <div className="min-h-screen flex items-center justify-center p-4 bg-background relative overflow-hidden" suppressHydrationWarning>
       
       {/* Decorative Palace Glow Background */}
-      <div className="absolute -top-32 -right-32 w-96 h-96 rounded-full bg-[#0f3e26]/10 blur-[100px] pointer-events-none" />
-      <div className="absolute -bottom-32 -left-32 w-96 h-96 rounded-full bg-[#c88a23]/15 blur-[100px] pointer-events-none" />
+      <div className="absolute -top-32 -right-32 w-96 h-96 rounded-full bg-primary/10 blur-[100px] pointer-events-none" />
+      <div className="absolute -bottom-32 -left-32 w-96 h-96 rounded-full bg-secondary/15 blur-[100px] pointer-events-none" />
 
       <div className="w-full max-w-[440px] relative z-10">
         
@@ -200,31 +200,31 @@ function LoginScreenInner() {
               />
               <div className="flex flex-col text-left">
                 <span className="text-2xl font-black tracking-tight leading-none">
-                  <span className="text-[#0f3e26]">Gjanand</span>
+                  <span className="text-primary">Gjanand</span>
                 </span>
-                <span className="text-[11px] tracking-[0.2em] font-black text-[#c88a23] uppercase text-right leading-none mt-0.5">
+                <span className="text-[11px] tracking-[0.2em] font-black text-secondary uppercase text-right leading-none mt-0.5">
                   SARKAR
                 </span>
               </div>
             </div>
           </Link>
-          <p className="text-xs text-gray-500 font-medium">
+          <p className="text-xs text-foreground-muted font-medium">
             India's Purest Heritage & Artisanal Marketplace
           </p>
         </div>
 
         {/* Main Card */}
-        <div className="bg-white rounded-2xl border border-gray-200/90 shadow-xl p-6 sm:p-8 backdrop-blur-sm">
+        <div className="bg-surface rounded-2xl border border-border/90 shadow-xl p-6 sm:p-8 backdrop-blur-sm">
           
           {/* Mode Switcher */}
-          <div className="grid grid-cols-2 gap-1 p-1 bg-gray-100/80 rounded-xl mb-6 text-xs font-bold">
+          <div className="grid grid-cols-2 gap-1 p-1 bg-surface-muted/80 rounded-xl mb-6 text-xs font-bold">
             <button
               type="button"
               onClick={() => { setMode('password'); setError(''); }}
               className={`py-2 rounded-lg transition-all ${
                 mode === 'password'
-                  ? 'bg-white text-[#0f3e26] shadow-2xs font-extrabold'
-                  : 'text-gray-500 hover:text-gray-900'
+                  ? 'bg-surface text-primary shadow-2xs font-extrabold'
+                  : 'text-foreground-muted hover:text-foreground'
               }`}
             >
               Sign In / Sign Up
@@ -234,24 +234,24 @@ function LoginScreenInner() {
               onClick={() => { setMode('quick'); setError(''); }}
               className={`py-2 rounded-lg transition-all flex items-center justify-center gap-1 ${
                 mode === 'quick'
-                  ? 'bg-white text-[#c88a23] shadow-2xs font-extrabold'
-                  : 'text-gray-500 hover:text-gray-900'
+                  ? 'bg-surface text-secondary shadow-2xs font-extrabold'
+                  : 'text-foreground-muted hover:text-foreground'
               }`}
             >
-              <Sparkles className="w-3.5 h-3.5 text-[#c88a23]" />
+              <Sparkles className="w-3.5 h-3.5 text-secondary" />
               <span>Instant Access</span>
             </button>
           </div>
 
           {error && (
-            <div className="mb-4 p-3 rounded-xl bg-red-50 border border-red-200 text-xs font-semibold text-red-700">
+            <div className="mb-4 p-3 rounded-xl bg-error-bg border border-error/20 text-xs font-semibold text-error">
               {error}
             </div>
           )}
 
           {successMsg && (
-            <div className="mb-4 p-3 rounded-xl bg-emerald-50 border border-emerald-200 text-xs font-bold text-[#0f3e26] flex items-center gap-2">
-              <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+            <div className="mb-4 p-3 rounded-xl bg-success-bg border border-success/20 text-xs font-bold text-primary flex items-center gap-2">
+              <CheckCircle2 className="w-4 h-4 text-success shrink-0" />
               <span>{successMsg}</span>
             </div>
           )}
@@ -260,48 +260,48 @@ function LoginScreenInner() {
             <form onSubmit={handleEmailAuth} className="space-y-4">
               {isSignUp && (
                 <div>
-                  <label className="block text-xs font-bold text-gray-700 mb-1">
+                  <label className="block text-xs font-bold text-foreground mb-1">
                     Full Name
                   </label>
                   <div className="relative">
-                    <User className="w-4 h-4 text-gray-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
+                    <User className="w-4 h-4 text-foreground-muted absolute left-3.5 top-1/2 -translate-y-1/2" />
                     <input
                       type="text"
                       value={name}
                       onChange={(e) => setName(e.target.value)}
                       placeholder="e.g. Ramesh Patel"
                       required={isSignUp}
-                      className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-gray-300 text-xs text-gray-900 focus:border-[#0f3e26] focus:ring-1 focus:ring-[#0f3e26] outline-none transition-all"
+                      className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-border-hover text-xs text-foreground focus:border-primary focus:ring-1 focus:ring-[var(--primary)] outline-none transition-all"
                     />
                   </div>
                 </div>
               )}
 
               <div>
-                <label className="block text-xs font-bold text-gray-700 mb-1">
+                <label className="block text-xs font-bold text-foreground mb-1">
                   Email Address
                 </label>
                 <div className="relative">
-                  <Mail className="w-4 h-4 text-gray-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
+                  <Mail className="w-4 h-4 text-foreground-muted absolute left-3.5 top-1/2 -translate-y-1/2" />
                   <input
                     type="email"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     placeholder="you@example.com"
                     required
-                    className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-gray-300 text-xs text-gray-900 focus:border-[#0f3e26] focus:ring-1 focus:ring-[#0f3e26] outline-none transition-all"
+                    className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-border-hover text-xs text-foreground focus:border-primary focus:ring-1 focus:ring-[var(--primary)] outline-none transition-all"
                   />
                 </div>
               </div>
 
               <div>
                 <div className="flex items-center justify-between mb-1">
-                  <label className="text-xs font-bold text-gray-700">
+                  <label className="text-xs font-bold text-foreground">
                     Password
                   </label>
                 </div>
                 <div className="relative">
-                  <Lock className="w-4 h-4 text-gray-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
+                  <Lock className="w-4 h-4 text-foreground-muted absolute left-3.5 top-1/2 -translate-y-1/2" />
                   <input
                     type="password"
                     value={password}
@@ -309,7 +309,7 @@ function LoginScreenInner() {
                     placeholder="••••••••"
                     required
                     minLength={6}
-                    className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-gray-300 text-xs text-gray-900 focus:border-[#0f3e26] focus:ring-1 focus:ring-[#0f3e26] outline-none transition-all"
+                    className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-border-hover text-xs text-foreground focus:border-primary focus:ring-1 focus:ring-[var(--primary)] outline-none transition-all"
                   />
                 </div>
               </div>
@@ -317,7 +317,7 @@ function LoginScreenInner() {
               <button
                 type="submit"
                 disabled={isLoading}
-                className="w-full py-3 bg-[#0f3e26] hover:bg-[#144f31] text-white font-bold text-xs rounded-xl shadow-md transition-all active:scale-[0.98] disabled:opacity-50 flex items-center justify-center gap-2 mt-2 cursor-pointer"
+                className="w-full py-3 bg-primary hover:bg-primary-hover text-on-primary font-bold text-xs rounded-xl shadow-md transition-all active:scale-[0.98] disabled:opacity-50 flex items-center justify-center gap-2 mt-2 cursor-pointer"
               >
                 {isLoading ? (
                   <Loader2 className="w-4 h-4 animate-spin" />
@@ -327,16 +327,16 @@ function LoginScreenInner() {
               </button>
 
               <div className="relative flex py-2 items-center">
-                <div className="flex-grow border-t border-gray-200"></div>
-                <span className="flex-shrink mx-3 text-gray-400 text-[10px] uppercase font-bold tracking-wider">or</span>
-                <div className="flex-grow border-t border-gray-200"></div>
+                <div className="flex-grow border-t border-border"></div>
+                <span className="flex-shrink mx-3 text-foreground-muted text-[10px] uppercase font-bold tracking-wider">or</span>
+                <div className="flex-grow border-t border-border"></div>
               </div>
 
               <button
                 type="button"
                 onClick={handleGoogleLogin}
                 disabled={isLoading}
-                className="w-full py-2.5 bg-white border border-gray-300 hover:bg-gray-50 text-gray-700 font-bold text-xs rounded-xl shadow-2xs transition-all flex items-center justify-center gap-2 cursor-pointer"
+                className="w-full py-2.5 bg-surface border border-border-hover hover:bg-surface-muted text-foreground font-bold text-xs rounded-xl shadow-2xs transition-all flex items-center justify-center gap-2 cursor-pointer"
               >
                 <svg className="w-4 h-4" viewBox="0 0 24 24">
                   <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
@@ -351,7 +351,7 @@ function LoginScreenInner() {
                 <button
                   type="button"
                   onClick={() => { setIsSignUp(!isSignUp); setError(''); }}
-                  className="text-xs font-bold text-[#c88a23] hover:underline cursor-pointer"
+                  className="text-xs font-bold text-secondary hover:underline cursor-pointer"
                 >
                   {isSignUp ? 'Already have an account? Sign In' : "Don't have an account? Create One"}
                 </button>
@@ -359,7 +359,7 @@ function LoginScreenInner() {
             </form>
           ) : (
             <div className="space-y-3">
-              <p className="text-xs text-gray-500 leading-relaxed mb-4 text-center">
+              <p className="text-xs text-foreground-muted leading-relaxed mb-4 text-center">
                 Select a test profile to jump straight into the application with zero latency:
               </p>
 
@@ -367,72 +367,72 @@ function LoginScreenInner() {
               <button
                 type="button"
                 onClick={() => handleQuickLogin('customer')}
-                className="w-full p-3.5 rounded-xl border border-gray-200 hover:border-[#0f3e26] bg-emerald-50/40 hover:bg-emerald-50 flex items-center justify-between text-left transition-all group cursor-pointer"
+                className="w-full p-3.5 rounded-xl border border-border hover:border-primary bg-success-bg/40 hover:bg-success-bg flex items-center justify-between text-left transition-all group cursor-pointer"
               >
                 <div className="flex items-center gap-3">
-                  <div className="w-9 h-9 rounded-lg bg-[#0f3e26] text-white flex items-center justify-center font-bold text-sm">
+                  <div className="w-9 h-9 rounded-lg bg-primary text-on-primary flex items-center justify-center font-bold text-sm">
                     👤
                   </div>
                   <div>
-                    <h4 className="text-xs font-bold text-gray-900 group-hover:text-[#0f3e26]">
+                    <h4 className="text-xs font-bold text-foreground group-hover:text-primary">
                       Customer Account
                     </h4>
-                    <p className="text-[10px] text-gray-500">
+                    <p className="text-[10px] text-foreground-muted">
                       Explore storefront, wishlist, and checkout items
                     </p>
                   </div>
                 </div>
-                <ArrowRight className="w-4 h-4 text-gray-400 group-hover:text-[#0f3e26] group-hover:translate-x-0.5 transition-transform" />
+                <ArrowRight className="w-4 h-4 text-foreground-muted group-hover:text-primary group-hover:translate-x-0.5 transition-transform" />
               </button>
 
               {/* 2. Seller Demo */}
               <button
                 type="button"
                 onClick={() => handleQuickLogin('seller')}
-                className="w-full p-3.5 rounded-xl border border-gray-200 hover:border-[#c88a23] bg-amber-50/40 hover:bg-amber-50 flex items-center justify-between text-left transition-all group cursor-pointer"
+                className="w-full p-3.5 rounded-xl border border-border hover:border-secondary bg-warning-bg/40 hover:bg-warning-bg flex items-center justify-between text-left transition-all group cursor-pointer"
               >
                 <div className="flex items-center gap-3">
-                  <div className="w-9 h-9 rounded-lg bg-[#c88a23] text-white flex items-center justify-center font-bold text-sm">
+                  <div className="w-9 h-9 rounded-lg bg-secondary text-white flex items-center justify-center font-bold text-sm">
                     🏪
                   </div>
                   <div>
-                    <h4 className="text-xs font-bold text-gray-900 group-hover:text-[#c88a23]">
+                    <h4 className="text-xs font-bold text-foreground group-hover:text-secondary">
                       Verified Seller / Vendor
                     </h4>
-                    <p className="text-[10px] text-gray-500">
+                    <p className="text-[10px] text-foreground-muted">
                       SaaS portal, revenue payouts, stock & catalog
                     </p>
                   </div>
                 </div>
-                <ArrowRight className="w-4 h-4 text-gray-400 group-hover:text-[#c88a23] group-hover:translate-x-0.5 transition-transform" />
+                <ArrowRight className="w-4 h-4 text-foreground-muted group-hover:text-secondary group-hover:translate-x-0.5 transition-transform" />
               </button>
 
               {/* 3. Admin Demo */}
               <button
                 type="button"
                 onClick={() => handleQuickLogin('admin')}
-                className="w-full p-3.5 rounded-xl border border-gray-200 hover:border-purple-600 bg-purple-50/40 hover:bg-purple-50 flex items-center justify-between text-left transition-all group cursor-pointer"
+                className="w-full p-3.5 rounded-xl border border-border hover:border-purple-600 bg-purple-50/40 hover:bg-purple-50 flex items-center justify-between text-left transition-all group cursor-pointer"
               >
                 <div className="flex items-center gap-3">
                   <div className="w-9 h-9 rounded-lg bg-purple-900 text-white flex items-center justify-center font-bold text-xs tracking-tight">
                     SA
                   </div>
                   <div>
-                    <h4 className="text-xs font-bold text-gray-900 group-hover:text-purple-900">
+                    <h4 className="text-xs font-bold text-foreground group-hover:text-purple-900">
                       Super Admin
                     </h4>
-                    <p className="text-[10px] text-gray-500">
+                    <p className="text-[10px] text-foreground-muted">
                       Platform control, order status & product catalog
                     </p>
                   </div>
                 </div>
-                <ArrowRight className="w-4 h-4 text-gray-400 group-hover:text-purple-900 group-hover:translate-x-0.5 transition-transform" />
+                <ArrowRight className="w-4 h-4 text-foreground-muted group-hover:text-purple-900 group-hover:translate-x-0.5 transition-transform" />
               </button>
             </div>
           )}
         </div>
 
-        <p className="text-center text-[11px] text-gray-400 mt-6">
+        <p className="text-center text-[11px] text-foreground-muted mt-6">
           © {new Date().getFullYear()} Gjanand Sarkar. 100% Secure & Encrypted.
         </p>
 
@@ -443,7 +443,7 @@ function LoginScreenInner() {
 
 export function LoginView() {
   return (
-    <Suspense fallback={<div className="min-h-screen bg-[#fafaf8] flex items-center justify-center"><Loader2 className="w-8 h-8 text-[#0f3e26] animate-spin" /></div>}>
+    <Suspense fallback={<div className="min-h-screen bg-background flex items-center justify-center"><Loader2 className="w-8 h-8 text-primary animate-spin" /></div>}>
       <LoginScreenInner />
     </Suspense>
   );

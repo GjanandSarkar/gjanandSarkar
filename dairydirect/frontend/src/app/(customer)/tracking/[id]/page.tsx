@@ -4,8 +4,6 @@ import { useEffect, useState, useMemo } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { ArrowLeft, Phone, MessageSquare, Star, Info, MapPin, Repeat, ThermometerSnowflake, ShieldCheck } from 'lucide-react';
 import { motion } from 'framer-motion';
-import OrderTrackingMap from '@/components/shared/OrderTrackingMap';
-import type { Coordinates } from '@/components/shared/MapComponent';
 import { getOrderById } from '@/lib/api/orders';
 import type { OrderWithItems } from '@/lib/api/orders';
 import { TrackingSkeleton } from '@/components/tracking/TrackingSkeleton';
@@ -26,10 +24,6 @@ export default function TrackingPage() {
   // Cart actions for reordering
   const addToCartLocal = useStore(state => state.addToCartLocal);
   const user = useStore(state => state.user);
-
-  // Farm Coordinates
-  const farmCoords: Coordinates = { lat: 23.0300, lng: 72.5800 }; 
-  const customerCoords: Coordinates = { lat: 23.0225, lng: 72.5714 };
 
   useEffect(() => {
     getOrderById(id).then(res => {
@@ -81,108 +75,97 @@ export default function TrackingPage() {
   const addressLabel = order.user_addresses?.label || 'Delivery Address';
   const addressText = order.user_addresses?.address || 'Details unavailable';
 
+  const statusLabel =
+    order.status === 'delivered'
+      ? 'Delivered'
+      : order.status === 'out_for_delivery'
+        ? 'Arriving soon'
+        : order.status === 'cancelled'
+          ? 'Cancelled'
+          : 'Preparing your order';
+
   return (
-    <div className="min-h-screen flex flex-col bg-surface-container relative pb-[120px]">
-      {/* Header Over Map */}
-      <div className="absolute top-0 left-0 right-0 z-10 p-4 pt-12 flex justify-between items-center bg-gradient-to-b from-black/50 to-transparent pointer-events-none">
-        <button 
-          onClick={() => router.back()}
-          className="w-10 h-10 rounded-full bg-white/20 backdrop-blur-md flex items-center justify-center text-white pointer-events-auto transition-transform active:scale-95 hover:bg-white/30"
-        >
-          <ArrowLeft className="w-5 h-5" />
-        </button>
-        <div className="px-4 py-2 rounded-full bg-white/20 backdrop-blur-md text-white text-[13px] font-bold pointer-events-auto shadow-sm">
-          Order #{order.id.substring(0, 8)}
-        </div>
-      </div>
+    <div className="min-h-screen flex flex-col bg-background">
+      <div className="w-full max-w-3xl mx-auto px-4 pt-4 pb-6 flex flex-col gap-5">
 
-      {/* Map Segment */}
-      <div className="relative w-full" style={{ height: '40vh' }}>
-        <OrderTrackingMap 
-          farmLocation={farmCoords} 
-          customerLocation={customerCoords} 
-          driverLocation={undefined} 
-          height="100%" 
-        />
-      </div>
-
-      {/* Main Content Area */}
-      <motion.div 
-        initial={{ y: "100%" }}
-        animate={{ y: 0 }}
-        transition={{ type: "spring", stiffness: 300, damping: 30 }}
-        className="bg-cream rounded-t-[32px] shadow-[0_-10px_40px_rgba(0,0,0,0.08)] z-20 -mt-8 relative flex-1 flex flex-col gap-6 p-4 pt-6 w-full max-w-3xl mx-auto"
-      >
-        <div className="w-12 h-1.5 bg-sand rounded-full mx-auto mb-2" />
-
-        {/* Status Header */}
-        <div className="flex justify-between items-end border-b border-sand pb-6">
-          <div>
-            <h2 className="text-2xl font-black text-dark mb-1">
-              {order.status === 'delivered' ? 'Delivered' : 
-               order.status === 'out_for_delivery' ? 'Arriving Soon' : 
-               'Preparing'}
-            </h2>
-            <p className="text-muted text-sm font-medium">
-              Expected by {new Date(order.delivery_date || Date.now()).toLocaleDateString()}
+        {/* Header */}
+        <div className="flex items-center gap-3">
+          <button
+            onClick={() => router.back()}
+            aria-label="Go back"
+            className="w-10 h-10 rounded-full bg-surface border border-border grid place-items-center text-foreground active:scale-95 transition-transform shrink-0"
+          >
+            <ArrowLeft className="w-5 h-5" />
+          </button>
+          <div className="min-w-0">
+            <h1 className="text-lg font-black text-foreground leading-tight truncate">
+              Order #{order.id.substring(0, 8)}
+            </h1>
+            <p className="text-xs text-foreground-muted">
+              Placed {new Date(order.created_at || Date.now()).toLocaleDateString()}
             </p>
           </div>
-          <div className="px-3 py-1.5 rounded-xl bg-mint/20 text-primary text-xs font-bold uppercase tracking-wide border border-mint/50">
-            {order.status.replace(/_/g, ' ')}
+        </div>
+
+        {/* Status. This page used to open with a 40vh map pinned to two
+            hardcoded Ahmedabad coordinates, with a "Live Driver GPS: NOT
+            CONFIGURED" label sitting on top of it. There is no driver
+            telemetry, so that map showed every customer the same invented
+            route; it is removed until real locations exist rather than
+            dressed up as tracking. */}
+        <div className="bg-surface rounded-2xl border border-border p-5 shadow-2xs">
+          <div className="flex items-start justify-between gap-4">
+            <div className="min-w-0">
+              <h2 className="text-2xl font-black text-foreground leading-tight">
+                {statusLabel}
+              </h2>
+              {order.status !== 'cancelled' && (
+                <p className="text-sm text-foreground-muted font-medium mt-1">
+                  Expected by{' '}
+                  {new Date(order.delivery_date || Date.now()).toLocaleDateString(undefined, {
+                    weekday: 'short',
+                    day: 'numeric',
+                    month: 'short',
+                  })}
+                </p>
+              )}
+            </div>
+            <span className="px-3 py-1.5 rounded-xl bg-primary-fixed text-primary text-xs font-bold uppercase tracking-wide border border-primary/20 shrink-0">
+              {order.status.replace(/_/g, ' ')}
+            </span>
           </div>
         </div>
 
-        {/* Driver Profile (Only if out for delivery) */}
-        {order.status === 'out_for_delivery' && (
-          <div className="flex items-center justify-center bg-gray-100 p-4 rounded-[20px] border border-gray-200 shadow-inner">
-            <div className="flex items-center gap-2 text-gray-500">
-              <MapPin className="w-5 h-5" />
-              <span className="text-sm font-bold tracking-wide">Live Driver GPS: NOT CONFIGURED</span>
-            </div>
-          </div>
-        )}
-
-        {/* Timeline */}
         <OrderStatusTimeline currentStatus={order.status} />
 
-        {/* Delivery Address Summary */}
-        <div className="bg-white rounded-[20px] p-6 shadow-[0_4px_20px_rgba(0,0,0,0.03)] border border-sand">
-          <h3 className="font-bold text-dark text-sm flex items-center mb-3 uppercase tracking-wider">
+        {/* Delivery address */}
+        <div className="bg-surface rounded-2xl border border-border p-5 shadow-2xs">
+          <h3 className="font-bold text-foreground text-xs flex items-center mb-2 uppercase tracking-wider">
             <MapPin className="w-4 h-4 mr-2 text-primary" /> {addressLabel}
           </h3>
-          <p className="text-muted text-sm leading-relaxed font-medium">
+          <p className="text-sm text-foreground-muted leading-relaxed font-medium">
             {addressText}
           </p>
         </div>
 
-        {/* Order Items */}
         <OrderItemsReview order={order} />
-        
-        {/* Trust & Freshness Assurance */}
-        <div className="bg-gradient-to-r from-blue-50 to-white border border-blue-100 rounded-[20px] p-5">
-          <h3 className="font-bold text-dark text-[13px] uppercase tracking-wider mb-3 flex items-center gap-2">
-            <ThermometerSnowflake className="w-4 h-4 text-blue-600" />
-            Freshness Guaranteed
-          </h3>
-          <p className="text-[12px] text-muted leading-relaxed mb-4">
-            Your GjanandSarkar order is being transported at an optimal 4°C to lock in freshness. We ensure safe, contactless delivery straight from our farms.
-          </p>
-          <div className="flex gap-2 items-center text-[11px] font-bold text-dark bg-white rounded-lg p-2 border border-sand">
-            <ShieldCheck className="w-4 h-4 text-green-600" />
-            Need help? Our support team is ready.
-          </div>
+
+        <div className="flex items-center gap-2 text-xs font-semibold text-foreground-muted bg-surface-muted rounded-xl p-3 border border-border">
+          <ShieldCheck className="w-4 h-4 text-success shrink-0" />
+          <span>Something wrong with this order? Our support team can help.</span>
         </div>
+      </div>
 
-      </motion.div>
-
-      {/* Sticky Bottom Actions */}
-      <div className="fixed bottom-0 left-0 right-0 z-40 bg-white border-t border-sand p-4 pb-safe shadow-[0_-10px_20px_rgba(0,0,0,0.05)] md:left-[260px]">
-        <div className="max-w-[800px] mx-auto flex gap-3">
-          <Button variant="outline" className="flex-1 shadow-sm font-bold text-sm h-14" onClick={() => router.push('/support')}>
-            Need Help?
+      {/* Sticky actions. Previously offset by md:left-[260px] for an admin
+          sidebar that does not exist on the customer shell, and pinned to
+          bottom-0 where the mobile nav sits. */}
+      <div className="sticky bottom-0 z-30 mt-auto bg-surface border-t border-border px-4 pt-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] shadow-[0_-8px_20px_rgba(0,0,0,0.05)]">
+        <div className="max-w-3xl mx-auto flex gap-3">
+          <Button variant="outline" className="flex-1 font-bold text-sm h-12" onClick={() => router.push('/support')}>
+            Need help?
           </Button>
-          <Button className="flex-1 shadow-active font-bold text-sm h-14" onClick={handleReorder}>
-            <Repeat className="w-4 h-4 mr-2" /> Reorder Items
+          <Button className="flex-1 font-bold text-sm h-12" onClick={handleReorder}>
+            <Repeat className="w-4 h-4 mr-2" /> Reorder
           </Button>
         </div>
       </div>

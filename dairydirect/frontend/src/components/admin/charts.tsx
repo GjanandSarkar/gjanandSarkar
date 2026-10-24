@@ -43,8 +43,8 @@ const CustomTooltip = ({ active, payload, label, valuePrefix, valueSuffix }: any
     const dataPoint = payload[0];
     const val = dataPoint.value;
     return (
-      <div className="bg-gray-900/95 text-white px-3 py-2 rounded-xl shadow-xl backdrop-blur-md border border-gray-700/50 text-xs flex flex-col gap-0.5 z-50">
-        <span className="font-semibold text-gray-300 tracking-wide uppercase text-[10px]">
+      <div className="bg-primary/95 text-white px-3 py-2 rounded-xl shadow-xl backdrop-blur-md border border-border-hover/50 text-xs flex flex-col gap-0.5 z-50">
+        <span className="font-semibold text-foreground-muted tracking-wide uppercase text-[10px]">
           {dataPoint.payload.fullDate || label}
         </span>
         <span className="font-extrabold text-sm text-emerald-400">
@@ -167,7 +167,7 @@ export function LollipopChart({
               className="flex flex-col items-center flex-1 h-full justify-end group relative cursor-pointer"
             >
               {/* Floating Hover Tooltip */}
-              <div className="opacity-0 group-hover:opacity-100 transition-all duration-200 absolute -top-10 bg-gray-900 text-white px-3 py-1.5 rounded-xl text-xs font-semibold whitespace-nowrap shadow-xl z-30 pointer-events-none transform -translate-y-1">
+              <div className="opacity-0 group-hover:opacity-100 transition-all duration-200 absolute -top-10 bg-primary text-white px-3 py-1.5 rounded-xl text-xs font-semibold whitespace-nowrap shadow-xl z-30 pointer-events-none transform -translate-y-1">
                 {item.fullDate || item.label}: <span className="text-sky-400 font-extrabold">{item.value}{valueSuffix}</span>
               </div>
 
@@ -301,7 +301,7 @@ export function DonutChart({
             </Pie>
             <Tooltip
               formatter={(val: any, name: any) => [`${val} (${total > 0 ? ((val / total) * 100).toFixed(1) : 0}%)`, name]}
-              contentStyle={{ background: '#111827', borderRadius: '12px', border: 'none', color: '#fff', fontSize: '12px' }}
+              contentStyle={{ background: '#111827', borderRadius: '12px', border: 'none', color: 'var(--on-primary)', fontSize: '12px' }}
             />
           </PieChart>
         </ResponsiveContainer>
@@ -548,7 +548,7 @@ export function CalendarHeatmapChart({
       };
     } else {
       return {
-        bg: 'bg-[#0c3c26] border-[#072617] hover:bg-[#114e32] shadow-md text-white',
+        bg: 'bg-primary border-primary-fixed-dim hover:bg-primary-hover shadow-md text-white',
         text: 'text-white font-extrabold',
       };
     }
@@ -590,7 +590,7 @@ export function CalendarHeatmapChart({
                 <span className="text-[10px] text-muted">Low</span>
                 <span className="w-2.5 h-2.5 rounded-xs bg-emerald-300 border border-emerald-400" title="Med" />
                 <span className="text-[10px] text-muted">Med</span>
-                <span className="w-2.5 h-2.5 rounded-xs bg-[#0c3c26] border border-[#072617]" title="High" />
+                <span className="w-2.5 h-2.5 rounded-xs bg-primary border border-primary-fixed-dim" title="High" />
                 <span className="text-[10px] text-muted">High</span>
               </div>
             </div>
@@ -672,8 +672,8 @@ export function CalendarHeatmapChart({
 
               {/* Hover Tooltip */}
               {inMonth && (
-                <div className="opacity-0 group-hover:opacity-100 transition-all duration-200 absolute -top-12 bg-gray-900 text-white px-2.5 py-1.5 rounded-lg text-[11px] font-semibold whitespace-nowrap shadow-2xl z-50 pointer-events-none transform -translate-y-1 border border-gray-700/60 flex flex-col gap-0.5 text-center">
-                  <span className="text-[9px] text-gray-400 font-bold uppercase tracking-wider">
+                <div className="opacity-0 group-hover:opacity-100 transition-all duration-200 absolute -top-12 bg-primary text-white px-2.5 py-1.5 rounded-lg text-[11px] font-semibold whitespace-nowrap shadow-2xl z-50 pointer-events-none transform -translate-y-1 border border-border-hover/60 flex flex-col gap-0.5 text-center">
+                  <span className="text-[9px] text-foreground-muted font-bold uppercase tracking-wider">
                     {format(day, 'EEEE, MMM d, yyyy')}
                   </span>
                   <div className="flex items-center justify-center gap-1.5 text-[11px]">
@@ -811,7 +811,7 @@ export function DayTimeHeatmapChart({
       };
     } else {
       return {
-        bg: 'bg-[#0c3c26] border-[#072617] hover:bg-[#114e32] shadow-md',
+        bg: 'bg-primary border-primary-fixed-dim hover:bg-primary-hover shadow-md',
         text: 'text-white font-extrabold',
       };
     }
@@ -839,7 +839,7 @@ export function DayTimeHeatmapChart({
             <span className="w-5 sm:w-6 h-2 bg-emerald-200" />
             <span className="w-5 sm:w-6 h-2 bg-emerald-300" />
             <span className="w-5 sm:w-6 h-2 bg-emerald-500" />
-            <span className="w-5 sm:w-6 h-2 rounded-r-full bg-[#0c3c26]" />
+            <span className="w-5 sm:w-6 h-2 rounded-r-full bg-primary" />
           </div>
 
           <span className="text-muted font-semibold text-[11px]">High Orders</span>
@@ -875,8 +875,8 @@ export function DayTimeHeatmapChart({
                   </div>
 
                   {/* Tooltip */}
-                  <div className="opacity-0 group-hover:opacity-100 transition-all duration-200 absolute -top-12 bg-gray-900 text-white px-2.5 py-1.5 rounded-lg text-[11px] font-semibold whitespace-nowrap shadow-2xl z-50 pointer-events-none transform -translate-y-1 border border-gray-700/60 flex flex-col gap-0.5 text-center">
-                    <span className="text-[9px] text-gray-400 font-bold uppercase tracking-wider">
+                  <div className="opacity-0 group-hover:opacity-100 transition-all duration-200 absolute -top-12 bg-primary text-white px-2.5 py-1.5 rounded-lg text-[11px] font-semibold whitespace-nowrap shadow-2xl z-50 pointer-events-none transform -translate-y-1 border border-border-hover/60 flex flex-col gap-0.5 text-center">
+                    <span className="text-[9px] text-foreground-muted font-bold uppercase tracking-wider">
                       {day.label} • {slot.label} ({slot.sub})
                     </span>
                     <div className="flex items-center justify-center gap-1.5 text-[11px]">
@@ -1052,8 +1052,8 @@ export function CategoryTreemapChart({
               </div>
 
               {/* Tooltip */}
-              <div className="opacity-0 group-hover:opacity-100 transition-all duration-200 absolute -top-12 left-1/2 transform -translate-x-1/2 bg-gray-900 text-white px-2.5 py-1.5 rounded-lg text-[11px] font-semibold whitespace-nowrap shadow-2xl z-50 pointer-events-none border border-gray-700/60 flex flex-col gap-0.5 text-center">
-                <span className="text-[9px] text-gray-400 font-bold uppercase tracking-wider">
+              <div className="opacity-0 group-hover:opacity-100 transition-all duration-200 absolute -top-12 left-1/2 transform -translate-x-1/2 bg-primary text-white px-2.5 py-1.5 rounded-lg text-[11px] font-semibold whitespace-nowrap shadow-2xl z-50 pointer-events-none border border-border-hover/60 flex flex-col gap-0.5 text-center">
+                <span className="text-[9px] text-foreground-muted font-bold uppercase tracking-wider">
                   {item.label}
                 </span>
                 <div className="flex items-center justify-center gap-1.5 text-[11px]">
@@ -1191,7 +1191,7 @@ export function OrderStatusDonutChart({
                   background: '#111827',
                   borderRadius: '12px',
                   border: 'none',
-                  color: '#fff',
+                  color: 'var(--on-primary)',
                   fontSize: '12px',
                 }}
               />
@@ -1276,8 +1276,8 @@ export function TopCategoriesCard({ orders, className = '' }: TopCategoriesCardP
   }, [orders]);
 
   const cards = ranked.sorted.slice(0, 2);
-  const cardStyles = ['bg-[#0c3c26]', 'bg-[#b87d20]'];
-  const dotStyles = ['bg-[#0c3c26]', 'bg-[#b87d20]'];
+  const cardStyles = ['bg-primary', 'bg-secondary'];
+  const dotStyles = ['bg-primary', 'bg-secondary'];
 
   return (
     <div className={`w-full bg-surface-container-lowest border border-sand/30 rounded-2xl p-4 sm:p-5 shadow-xs flex flex-col justify-between ${className}`}>

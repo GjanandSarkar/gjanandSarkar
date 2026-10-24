@@ -12,7 +12,8 @@ import {
   RefreshCw,
   Search,
   Filter,
-  X
+  X,
+  IndianRupee
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { getAllOrders } from '@/lib/api/orders';
@@ -22,11 +23,11 @@ import type { SellerLifecycleRecord } from '@/lib/api/sellers';
 import { PLACEHOLDER_PRODUCT_IMAGE } from '@/lib/constants/brand';
 
 const STATUS_STYLES: Record<string, { bg: string; color: string; dot: string; label: string }> = {
-  'pending':          { bg: '#ffdcc7', color: '#774117', dot: '#d4712a', label: 'Pending' },
+  'pending':          { bg: '#ffdcc7', color: 'var(--warning)', dot: '#d4712a', label: 'Pending' },
   'confirmed':        { bg: '#c2efac', color: '#042100', dot: '#3f6530', label: 'Confirmed' },
-  'out_for_delivery': { bg: '#fff8e6', color: '#7d5200', dot: '#c78c2e', label: 'Out for Delivery' },
+  'out_for_delivery': { bg: '#fff8e6', color: 'var(--warning)', dot: '#c78c2e', label: 'Out for Delivery' },
   'delivered':        { bg: '#eaf4e2', color: '#2a4f1d', dot: '#3f6530', label: 'Delivered' },
-  'cancelled':        { bg: '#e3e3dc', color: '#43493e', dot: '#73796d', label: 'Cancelled' },
+  'cancelled':        { bg: '#e3e3dc', color: 'var(--foreground-muted)', dot: '#73796d', label: 'Cancelled' },
 };
 
 export default function AllSellerOrdersListPage() {
@@ -145,7 +146,12 @@ export default function AllSellerOrdersListPage() {
   const filteredOrders = useMemo(() => {
     return orders.filter(order => {
       // 1. Status Filter
-      const matchesStatus = activeTab === 'all' ? true : order.status === activeTab;
+      const matchesStatus =
+        activeTab === 'all'
+          ? true
+          : activeTab === 'cod_pending'
+          ? (order.payment_method || '').toUpperCase() === 'COD' && order.payment_status === 'pending'
+          : order.status === activeTab;
 
       // 2. Seller Filter
       let matchesSeller = true;
@@ -178,6 +184,7 @@ export default function AllSellerOrdersListPage() {
   const pendingCount = orders.filter(o => o.status === 'pending').length;
   const inTransitCount = orders.filter(o => o.status === 'out_for_delivery').length;
   const deliveredCount = orders.filter(o => o.status === 'delivered').length;
+  const codPendingCount = orders.filter(o => (o.payment_method || '').toUpperCase() === 'COD' && o.payment_status === 'pending').length;
   const totalSellerRevenue = orders.reduce((sum, o) => sum + Number(o.total_amount || 0), 0);
 
   if (isLoading) {
@@ -208,7 +215,7 @@ export default function AllSellerOrdersListPage() {
                   ({filteredOrders.length})
                 </span>
               </h1>
-              <p className="text-[12px] text-gray-500 mt-0.5">
+              <p className="text-[12px] text-foreground-muted mt-0.5">
                 Overview of vendor store orders across all marketplace sellers. Order fulfillment and status changes are managed directly by each seller.
               </p>
             </div>
@@ -222,7 +229,7 @@ export default function AllSellerOrdersListPage() {
                   fetchSellers();
                 }}
                 title="Refresh Orders"
-                className="p-2 rounded-xl border border-gray-200 hover:bg-gray-50 text-gray-600 transition-colors cursor-pointer"
+                className="p-2 rounded-xl border border-border hover:bg-surface-muted text-foreground-muted transition-colors cursor-pointer"
               >
                 <RefreshCw className="w-4 h-4" />
               </button>
@@ -230,17 +237,17 @@ export default function AllSellerOrdersListPage() {
           </div>
 
           {/* ─── Filter Bar: Seller Dropdown, Search & Status Tabs ─── */}
-          <div className="bg-white/80 backdrop-blur-xs rounded-2xl border border-gray-200/80 p-3 mb-3 flex flex-col lg:flex-row lg:items-center justify-between gap-3 shadow-2xs">
+          <div className="bg-surface/80 backdrop-blur-xs rounded-2xl border border-border/80 p-3 mb-3 flex flex-col lg:flex-row lg:items-center justify-between gap-3 shadow-2xs">
             {/* Seller Filter Dropdown */}
             <div className="flex items-center gap-2 shrink-0">
-              <div className="flex items-center gap-1.5 text-xs font-bold text-gray-700">
+              <div className="flex items-center gap-1.5 text-xs font-bold text-foreground">
                 <Filter className="w-4 h-4 text-purple-700" />
                 <span>Filter by Seller:</span>
               </div>
               <select
                 value={selectedSellerId}
                 onChange={e => setSelectedSellerId(e.target.value)}
-                className="px-3 py-1.5 bg-gray-50 border border-gray-300 rounded-xl text-xs font-bold text-gray-800 outline-none focus:ring-2 focus:ring-purple-500/20 cursor-pointer"
+                className="px-3 py-1.5 bg-surface-muted border border-border-hover rounded-xl text-xs font-bold text-foreground outline-none focus:ring-2 focus:ring-purple-500/20 cursor-pointer"
               >
                 <option value="all">All Sellers ({orders.length} orders)</option>
                 {sellerOptions.map(seller => (
@@ -253,18 +260,18 @@ export default function AllSellerOrdersListPage() {
 
             {/* Search Input */}
             <div className="relative flex-1 max-w-md">
-              <Search className="w-4 h-4 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+              <Search className="w-4 h-4 text-foreground-muted absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
               <input
                 type="text"
                 placeholder="Search order ID, store, customer, product..."
                 value={searchQuery}
                 onChange={e => setSearchQuery(e.target.value)}
-                className="w-full pl-9 pr-3 py-1.5 bg-gray-50 border border-gray-200 rounded-xl text-xs font-medium placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#0f3e26]/20 focus:bg-white"
+                className="w-full pl-9 pr-3 py-1.5 bg-surface-muted border border-border rounded-xl text-xs font-medium placeholder-foreground-muted focus:outline-none focus:ring-2 focus:ring-[var(--primary)]/20 focus:bg-surface"
               />
               {searchQuery && (
                 <button
                   onClick={() => setSearchQuery('')}
-                  className="absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                  className="absolute right-2.5 top-1/2 -translate-y-1/2 text-foreground-muted hover:text-foreground-muted"
                 >
                   <X className="w-3.5 h-3.5" />
                 </button>
@@ -274,18 +281,25 @@ export default function AllSellerOrdersListPage() {
 
           {/* Status Tabs */}
           <div className="flex gap-2 overflow-x-auto no-scrollbar -mx-6 px-6 pb-1">
-            {['all', 'pending', 'confirmed', 'out_for_delivery', 'delivered', 'cancelled'].map(tab => (
+            {['all', 'cod_pending', 'pending', 'confirmed', 'out_for_delivery', 'delivered', 'cancelled'].map(tab => (
               <button key={tab} onClick={() => setActiveTab(tab)}
-                className="whitespace-nowrap px-4 py-2 rounded-full text-[12px] font-semibold transition-all duration-200 shrink-0 capitalize"
+                className="whitespace-nowrap px-4 py-2 rounded-full text-[12px] font-semibold transition-all duration-200 shrink-0 capitalize flex items-center gap-1.5"
                 style={activeTab === tab ? {
-                  background: 'var(--cta-gradient)',
+                  background: tab === 'cod_pending' ? 'linear-gradient(135deg, #b45309, #d97706)' : 'var(--cta-gradient)',
                   color: 'white',
                   boxShadow: '0 3px 10px rgba(12, 60, 38, 0.25)',
                 } : {
                   background: 'var(--color-surface-container-low)',
                   color: 'var(--color-on-surface-variant)',
                 }}>
-                {tab.replace(/_/g, ' ')}
+                {tab === 'cod_pending' ? (
+                  <>
+                    <IndianRupee className="w-3.5 h-3.5" />
+                    <span>COD Pending ({codPendingCount})</span>
+                  </>
+                ) : (
+                  tab.replace(/_/g, ' ')
+                )}
               </button>
             ))}
           </div>
@@ -314,7 +328,7 @@ export default function AllSellerOrdersListPage() {
                     setSelectedSellerId('all');
                     setSearchQuery('');
                   }}
-                  className="mt-4 px-4 py-2 bg-gray-100 hover:bg-gray-200 text-xs font-bold text-gray-800 rounded-xl"
+                  className="mt-4 px-4 py-2 bg-surface-muted hover:bg-border text-xs font-bold text-foreground rounded-xl"
                 >
                   Reset Filters
                 </button>
@@ -344,7 +358,7 @@ export default function AllSellerOrdersListPage() {
                     style={{ background: 'var(--color-surface-container-lowest)', border: '1px solid rgba(195,201,187,0.3)' }}>
 
                     {/* Order Header Summary */}
-                    <div className="flex items-center justify-between px-5 py-4 cursor-pointer hover:bg-gray-50/50 transition-colors"
+                    <div className="flex items-center justify-between px-5 py-4 cursor-pointer hover:bg-surface-muted/50 transition-colors"
                       onClick={() => setExpandedId(isExpanded ? null : order.id)}>
                       <div className="flex items-center gap-3">
                         <div>
@@ -372,7 +386,7 @@ export default function AllSellerOrdersListPage() {
 
                             {/* Payment Status */}
                             <span className={`px-2 py-0.5 rounded-md text-[10px] font-bold uppercase tracking-wider ${
-                              order.payment_status === 'paid' ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800'
+                              order.payment_status === 'paid' ? 'bg-success-bg text-success' : 'bg-warning-bg text-warning'
                             }`}>
                               {order.payment_status === 'paid' ? 'Paid' : `Payment: ${order.payment_status || 'Pending'}`} ({order.payment_method || 'COD'})
                             </span>
@@ -414,29 +428,29 @@ export default function AllSellerOrdersListPage() {
                           <div className="px-5 py-4 space-y-4">
 
                             {/* Customer Delivery Details Box */}
-                            <div className="p-3.5 rounded-xl border border-gray-200/80 bg-gray-50/70 text-xs grid grid-cols-1 md:grid-cols-2 gap-3">
+                            <div className="p-3.5 rounded-xl border border-border/80 bg-surface-muted/70 text-xs grid grid-cols-1 md:grid-cols-2 gap-3">
                               <div>
-                                <span className="text-[10px] font-bold uppercase tracking-wider text-gray-400 block">Customer Information</span>
-                                <p className="font-bold text-gray-900 mt-0.5">{order.profiles?.name || 'Customer'}</p>
-                                <p className="text-gray-600">{order.profiles?.email || 'N/A'}</p>
+                                <span className="text-[10px] font-bold uppercase tracking-wider text-foreground-muted block">Customer Information</span>
+                                <p className="font-bold text-foreground mt-0.5">{order.profiles?.name || 'Customer'}</p>
+                                <p className="text-foreground-muted">{order.profiles?.email || 'N/A'}</p>
                                 {order.profiles?.phone && (
-                                  <p className="text-gray-700 flex items-center gap-1 mt-0.5 font-medium">
-                                    <Phone className="w-3 h-3 text-gray-400" />
+                                  <p className="text-foreground flex items-center gap-1 mt-0.5 font-medium">
+                                    <Phone className="w-3 h-3 text-foreground-muted" />
                                     <span>+91 {order.profiles.phone}</span>
                                   </p>
                                 )}
                               </div>
 
                               <div>
-                                <span className="text-[10px] font-bold uppercase tracking-wider text-gray-400 block">Shipping Destination</span>
-                                <p className="text-gray-800 mt-0.5 leading-relaxed font-medium">
+                                <span className="text-[10px] font-bold uppercase tracking-wider text-foreground-muted block">Shipping Destination</span>
+                                <p className="text-foreground mt-0.5 leading-relaxed font-medium">
                                   {order.user_addresses?.address || order.shipping_address || 'Address on file'}
                                 </p>
                                 {order.user_addresses?.apartment && (
-                                  <p className="text-gray-500 text-[11px]">Apt/Flat: {order.user_addresses.apartment}</p>
+                                  <p className="text-foreground-muted text-[11px]">Apt/Flat: {order.user_addresses.apartment}</p>
                                 )}
                                 {order.delivery_slot && (
-                                  <p className="text-emerald-700 font-semibold mt-1 text-[11px]">Slot: {order.delivery_slot}</p>
+                                  <p className="text-success font-semibold mt-1 text-[11px]">Slot: {order.delivery_slot}</p>
                                 )}
                               </div>
                             </div>
@@ -444,7 +458,7 @@ export default function AllSellerOrdersListPage() {
                             {/* Ordered Items with Seller Store Attribution */}
                             <div className="rounded-[10px] p-3 mb-2"
                               style={{ background: 'var(--color-surface-container-low)' }}>
-                              <span className="text-[10px] font-bold uppercase tracking-wider text-gray-400 block mb-2">Vendor Products & Order Items</span>
+                              <span className="text-[10px] font-bold uppercase tracking-wider text-foreground-muted block mb-2">Vendor Products & Order Items</span>
                               {order.order_items?.map((item, j) => {
                                 const pName = item.product_name || item.products?.name || (item.product_id ? `Product #${item.product_id.slice(0, 6)}` : 'Dairy Product');
                                 const pWeight = item.weight || item.product_variants?.weight || '';
@@ -458,7 +472,7 @@ export default function AllSellerOrdersListPage() {
                                       <img
                                         src={img}
                                         alt={pName}
-                                        className="w-10 h-10 rounded-lg object-cover bg-white border border-gray-200 shrink-0"
+                                        className="w-10 h-10 rounded-lg object-cover bg-surface border border-border shrink-0"
                                         onError={e => {
                                           (e.target as HTMLImageElement).src = PLACEHOLDER_PRODUCT_IMAGE;
                                         }}
@@ -483,14 +497,67 @@ export default function AllSellerOrdersListPage() {
                               })}
                             </div>
 
+                            {/* Cash on Delivery (COD) Payment Tracking Section (Seller-Managed) */}
+                            <div className="rounded-xl border p-4 text-xs space-y-3 bg-surface"
+                              style={{ borderColor: order.payment_status === 'paid' ? 'rgba(16, 185, 129, 0.3)' : 'rgba(245, 158, 11, 0.3)' }}>
+                              <div className="flex items-center justify-between flex-wrap gap-2">
+                                <div className="flex items-center gap-2">
+                                  <span className="p-1.5 rounded-lg bg-warning-bg text-warning">
+                                    <IndianRupee className="w-4 h-4" />
+                                  </span>
+                                  <div>
+                                    <span className="font-bold text-foreground block text-[13px]">
+                                      Payment Tracking ({order.payment_method || 'COD'})
+                                    </span>
+                                    <span className="text-foreground-muted text-[11px]">
+                                      Payment Status: <strong className={order.payment_status === 'paid' ? 'text-success' : 'text-warning'}>
+                                        {order.payment_status === 'paid' ? 'Paid (Cash Collected by Seller)' : 'Pending Collection (Seller Managed)'}
+                                      </strong>
+                                    </span>
+                                  </div>
+                                </div>
+
+                                <span className="px-2.5 py-1 rounded-lg bg-purple-50 text-purple-800 border border-purple-200 text-[10px] font-bold">
+                                  Seller Direct Collection
+                                </span>
+                              </div>
+
+                              {order.payment_status === 'paid' && (
+                                <div className="p-2.5 rounded-lg bg-success-bg/70 border border-success/20/80 text-[11px] text-success space-y-0.5">
+                                  <div className="flex items-center justify-between">
+                                    <span className="font-semibold">Confirmed Amount:</span>
+                                    <span className="font-bold font-mono">₹{order.cod_collected_amount || order.total_amount}</span>
+                                  </div>
+                                  {order.payment_confirmed_at && (
+                                    <div className="flex items-center justify-between">
+                                      <span className="text-success/80">Confirmed At:</span>
+                                      <span>{format(new Date(order.payment_confirmed_at), 'MMM d, yyyy · hh:mm a')}</span>
+                                    </div>
+                                  )}
+                                  {order.payment_confirmed_by && (
+                                    <div className="flex items-center justify-between">
+                                      <span className="text-success/80">Confirmed By (ID):</span>
+                                      <span className="font-mono text-[10px]">{order.payment_confirmed_by.slice(0, 8)}...</span>
+                                    </div>
+                                  )}
+                                </div>
+                              )}
+
+                              {((order.payment_method || '').toUpperCase() === 'COD') && order.payment_status !== 'paid' && order.status === 'cancelled' && (
+                                <div className="p-2 rounded-lg bg-surface-muted border border-border text-[11px] text-foreground-muted">
+                                  Order was cancelled before cash collection. Payment remains uncollected.
+                                </div>
+                              )}
+                            </div>
+
                             {/* Cancellation Reason Display */}
                             {order.status === 'cancelled' && (
-                              <div className="p-3 rounded-xl bg-gray-100 border border-gray-200 text-xs text-gray-700 space-y-1">
-                                <span className="font-bold text-gray-900 block flex items-center gap-1">
-                                  <Ban className="w-3.5 h-3.5 text-gray-500" />
+                              <div className="p-3 rounded-xl bg-surface-muted border border-border text-xs text-foreground space-y-1">
+                                <span className="font-bold text-foreground block flex items-center gap-1">
+                                  <Ban className="w-3.5 h-3.5 text-foreground-muted" />
                                   <span>Cancellation Reason & Audit Log:</span>
                                 </span>
-                                <p className="text-gray-600 font-mono text-[11px]">
+                                <p className="text-foreground-muted font-mono text-[11px]">
                                   {order.notes || 'Order cancelled and stock inventory restored.'}
                                 </p>
                               </div>

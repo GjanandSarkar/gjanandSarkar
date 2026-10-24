@@ -1,12 +1,13 @@
 "use client";
 
 import Link from 'next/link';
+import { ThemeToggle } from '@/components/theme/ThemeToggle';
 import { usePathname } from 'next/navigation';
 import { useRouter } from 'next/navigation';
 import { useStore } from '@/store/useStore';
 import {
   LayoutDashboard, ShoppingBag, Users, Package, BarChart3,
-  Truck, LogOut, Leaf, ShieldCheck, Bell, Settings, Tags, CalendarDays, User, Building2, Store, RotateCcw
+  Truck, LogOut, Leaf, ShieldCheck, Bell, Settings, Tags, CalendarDays, User, Building2, Store, RotateCcw, Megaphone
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -25,7 +26,8 @@ const navItems = [
   { href: '/admin/delivery', icon: Truck, label: 'Deliveries' },
   { href: '/admin/analytics', icon: BarChart3, label: 'Analytics' },
   { href: '/admin/coupons', icon: Package, label: 'Coupons' },
-  { href: '/admin/audit-log', icon: ShieldCheck, label: 'Audit Log' },
+  { href: '/admin/audit', icon: ShieldCheck, label: 'Audit Log' },
+  { href: '/admin/campaigns', icon: Megaphone, label: 'Ad Campaigns' },
   { href: '/home', icon: Leaf, label: 'Visit Storefront' },
 ];
 
@@ -57,7 +59,7 @@ export function AdminSidebar() {
 
       {/* Ambient glow */}
       <div className="absolute top-0 left-0 w-full h-48 opacity-10 pointer-events-none"
-        style={{ background: 'linear-gradient(180deg, #3f6530 0%, transparent 100%)' }} />
+        style={{ background: 'linear-gradient(180deg, var(--primary-light) 0%, transparent 100%)' }} />
 
       {/* ── Brand Logo ── */}
       <div className="px-6 py-5 relative z-10">
@@ -73,9 +75,9 @@ export function AdminSidebar() {
             />
             <div className="flex flex-col">
               <span className="text-xl md:text-2xl font-black tracking-tight leading-none">
-                <span className="text-[#0f3e26]">Gjanand</span>
+                <span className="text-primary">Gjanand</span>
               </span>
-              <span className="text-[10px] md:text-[11px] tracking-[0.2em] font-black text-[#c88a23] uppercase text-right leading-none mt-0.5">
+              <span className="text-[10px] md:text-[11px] tracking-[0.2em] font-black text-secondary uppercase text-right leading-none mt-0.5">
                 SARKAR
               </span>
             </div>
@@ -86,7 +88,7 @@ export function AdminSidebar() {
       {/* Admin user chip */}
       <div className="mx-4 mb-3 px-3.5 py-3 rounded-[12px] flex items-center gap-3"
         style={{ background: 'var(--color-surface-container-low)' }}>
-        <div className="w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm text-white shrink-0 bg-[#0f3e26] border border-[#0f3e26]/10 relative overflow-hidden">
+        <div className="w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm text-on-primary shrink-0 bg-primary border border-primary/10 relative overflow-hidden">
           <img
             src={user?.avatar_url || '/profile/profile.jpg'}
             alt="Profile"
@@ -98,11 +100,11 @@ export function AdminSidebar() {
           />
         </div>
         <div className="flex-1 min-w-0">
-          <p className="text-[10px] font-bold uppercase tracking-wider text-gray-400 mb-0.5">Signed in as</p>
-          <p className="font-extrabold text-[13px] text-gray-900 truncate">
+          <p className="text-[10px] font-bold uppercase tracking-wider text-foreground-muted mb-0.5">Signed in as</p>
+          <p className="font-extrabold text-[13px] text-foreground truncate">
             {user?.name || 'Admin'}
           </p>
-          <p className="text-[10px] font-medium text-gray-500 truncate mt-0.5">
+          <p className="text-[10px] font-medium text-foreground-muted truncate mt-0.5">
             {user?.phone ? `+91 ${user.phone}` : (user?.email || 'Administrator')}
           </p>
         </div>
@@ -150,15 +152,17 @@ export function AdminSidebar() {
       {/* Bottom */}
       <div className="p-3 pb-5">
         <div className="h-px mb-3 opacity-30" style={{ background: 'var(--color-outline-variant)' }} />
+        <ThemeToggle variant="dropdown-item" showLabel />
+
         <button
           onClick={handleLogout}
-          className="flex items-center gap-3.5 px-3.5 py-3 rounded-[12px] w-full transition-all duration-200 hover:bg-red-50 group"
+          className="flex items-center gap-3.5 px-3.5 py-3 rounded-[12px] w-full transition-all duration-200 hover:bg-error-bg group"
           style={{ color: 'var(--color-on-surface-variant)' }}
         >
-          <div className="w-8 h-8 rounded-[8px] flex items-center justify-center group-hover:bg-red-100 transition-colors">
+          <div className="w-8 h-8 rounded-[8px] flex items-center justify-center group-hover:bg-error-bg transition-colors">
             <LogOut className="w-[17px] h-[17px]" strokeWidth={2} />
           </div>
-          <span className="text-[14px] font-medium group-hover:text-red-600">Logout</span>
+          <span className="text-[14px] font-medium group-hover:text-error">Logout</span>
         </button>
       </div>
     </aside>

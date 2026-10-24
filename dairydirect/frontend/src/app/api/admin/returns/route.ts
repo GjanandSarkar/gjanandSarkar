@@ -77,8 +77,9 @@ export async function GET(request: NextRequest) {
 
     // 1. Role-based isolation
     if (auth.isAdmin) {
-      // Admin sees only admin-product (non-seller) return requests
-      query = query.is('seller_id', null);
+      if (sellerIdFilter && sellerIdFilter !== 'all') {
+        query = query.eq('seller_id', sellerIdFilter);
+      }
     } else if (auth.role === 'seller') {
       // Seller sees only requests for their products
       const { data: store } = await sb
@@ -184,6 +185,23 @@ export async function GET(request: NextRequest) {
       return '';
     };
 
+    // Fetch refund rows for these return requests
+    const requestIds = (data || []).map((r: any) => r.id);
+    const orderIds = Array.from(new Set((data || []).map((r: any) => r.order_id).filter(Boolean)));
+    const { data: refundRows } = requestIds.length > 0
+      ? await sb.from('refunds').select('*').or(`return_request_id.in.(${requestIds.join(',')}),order_id.in.(${orderIds.join(',')})`)
+      : { data: [] };
+
+    const refundByRequestMap = new Map<string, any>();
+    const refundByOrderMap = new Map<string, any>();
+    (refundRows || []).forEach((rf: any) => {
+      if (rf.return_request_id) {
+        refundByRequestMap.set(rf.return_request_id, rf);
+      } else if (rf.order_id) {
+        refundByOrderMap.set(rf.order_id, rf);
+      }
+    });
+
     // Format results with consistent naming
     const mapped = (data || []).map((r: any) => ({
       id: r.id,
@@ -206,6 +224,14 @@ export async function GET(request: NextRequest) {
       created_at: r.created_at,
       resolved_at: r.resolved_at,
       updated_at: r.updated_at,
+      pickup_address_id: r.pickup_address_id,
+      picked_up_at: r.picked_up_at,
+      received_at: r.received_at,
+      refund_initiated_at: r.refund_initiated_at,
+      completed_at: r.completed_at,
+      replacement_tracking_no: r.replacement_tracking_no,
+      replacement_dispatched_at: r.replacement_dispatched_at,
+      refund: refundByRequestMap.get(r.id) || refundByOrderMap.get(r.order_id) || null,
       // Joined relations
       order_number: r.orders?.order_number || r.order_id?.slice(0, 8),
       order_total: r.orders?.total_amount ? Number(r.orders.total_amount) : 0,
@@ -547,12 +573,7 @@ export async function PUT(request: NextRequest) {
 
     // 2. Role-based Isolation Check
     if (auth.isAdmin) {
-      // Admin can only process admin-product return requests (seller_id must be null)
-      if (requestRecord.seller_id) {
-        return NextResponse.json({
-          error: 'Forbidden: Admin manages only direct admin product returns. Seller product returns must be handled by the respective seller.'
-        }, { status: 403 });
-      }
+      // Admin has global oversight and override authority across all products
     } else if (auth.role === 'seller') {
       const { data: store } = await sb
         .from('sellers')

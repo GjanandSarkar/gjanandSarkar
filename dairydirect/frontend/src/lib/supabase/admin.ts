@@ -41,3 +41,14 @@ export function getAdminSupabase(): any {
   }
   return adminClient;
 }
+
+export const supabaseAdmin: any = new Proxy({} as any, {
+  get(_target, prop) {
+    const client = getAdminSupabase();
+    const val = (client as any)[prop];
+    if (typeof val === 'function') {
+      return val.bind(client);
+    }
+    return val;
+  },
+});
