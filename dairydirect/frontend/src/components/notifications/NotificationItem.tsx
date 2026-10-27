@@ -46,7 +46,7 @@ export function NotificationItem({ notification, onClick }: NotificationItemProp
           <h4 className={cn("text-sm font-bold truncate", !notification.isRead ? "text-dark" : "text-dark/80")}>
             {notification.title}
           </h4>
-          <span className="text-[10px] font-medium text-muted shrink-0 mt-0.5">{notification.time}</span>
+          <span className="text-xs font-medium text-muted shrink-0 mt-0.5">{notification.time}</span>
         </div>
         <p className={cn("text-[12px] leading-snug line-clamp-2", !notification.isRead ? "text-on-surface-variant font-medium" : "text-muted")}>
           {notification.message}

@@ -98,12 +98,12 @@ export function AdSlot({ placement, category, className }: AdSlotProps) {
       <div className="rounded-2xl border border-warning/20/80 bg-gradient-to-br from-amber-50 to-white p-4 sm:p-6">
         <div className="flex items-center gap-2 mb-4">
           <Megaphone className="w-4 h-4 text-secondary" />
-          <span className="text-[11px] font-bold uppercase tracking-wider text-secondary">
+          <span className="text-xs font-bold uppercase tracking-wider text-secondary">
             {ad.campaignName}
           </span>
           {/* Labelling promoted placements is a legal requirement for
               advertising in India and the honest thing to do regardless. */}
-          <span className="ml-auto text-[10px] font-semibold uppercase tracking-wider text-foreground-muted border border-border rounded px-1.5 py-0.5">
+          <span className="ml-auto text-xs font-semibold uppercase tracking-wider text-foreground-muted border border-border rounded px-1.5 py-0.5">
             Promoted
           </span>
         </div>
@@ -136,7 +136,7 @@ export function AdSlot({ placement, category, className }: AdSlotProps) {
                   {product.name}
                 </p>
                 {typeof price === 'number' && (
-                  <p className="text-sm font-black text-primary mt-1">
+                  <p className="text-sm font-semibold text-primary mt-1">
                     ₹{price.toLocaleString('en-IN')}
                   </p>
                 )}

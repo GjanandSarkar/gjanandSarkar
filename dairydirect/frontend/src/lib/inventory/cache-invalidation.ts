@@ -19,10 +19,10 @@ export async function revalidateInventory(options: {
   try {
     // 1. Invalidate Next.js Data Cache Tags
     try {
-      (revalidateTag as any)('products');
-      (revalidateTag as any)('inventory');
+      (revalidateTag as any)('products', 'max');
+      (revalidateTag as any)('inventory', 'max');
       if (options.productId) {
-        (revalidateTag as any)(`product-${options.productId}`);
+        (revalidateTag as any)(`product-${options.productId}`, 'max');
       }
     } catch (tagErr) {
       // revalidateTag can throw if called outside request context; safely catch

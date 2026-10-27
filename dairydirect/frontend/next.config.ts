@@ -24,23 +24,24 @@ const nextConfig: NextConfig = {
       {
         protocol: 'https',
         hostname: 'ik.imagekit.io',
-      },
-      {
-        protocol: 'https',
-        hostname: '**.imagekit.io',
-      },
-      {
-        protocol: 'https',
-        hostname: '**.supabase.co',
-      },
-      {
-        protocol: 'https',
-        hostname: '**.amazonaws.com',
+        pathname: '/**',
       },
       {
         protocol: 'https',
         hostname: 'images.unsplash.com',
       },
+      // Supabase Storage — scoped to the project host (not all supabase.co subdomains)
+      {
+        protocol: 'https',
+        hostname: 'lnjdlpfbglrczcmiwlfg.supabase.co',
+        pathname: '/storage/v1/object/public/**',
+      },
+      {
+        protocol: 'https',
+        hostname: 'awiyxxbzqjluoqowoiqk.supabase.co',
+        pathname: '/storage/v1/object/public/**',
+      },
+      // Google profile avatars (OAuth)
       {
         protocol: 'https',
         hostname: 'lh3.googleusercontent.com',
@@ -48,10 +49,6 @@ const nextConfig: NextConfig = {
       {
         protocol: 'https',
         hostname: '**.googleusercontent.com',
-      },
-      {
-        protocol: 'https',
-        hostname: 'avatars.githubusercontent.com',
       },
     ],
     deviceSizes: [640, 750, 828, 1080, 1200, 1920],
@@ -88,15 +85,27 @@ const nextConfig: NextConfig = {
           { key: 'X-Frame-Options', value: 'DENY' },
           { key: 'X-XSS-Protection', value: '1; mode=block' },
           { key: 'Referrer-Policy', value: 'strict-origin-when-cross-origin' },
-          // geolocation=(self) allows OUR OWN origin to ask for location, and
-          // nobody else. The previous value was `geolocation=()`, an EMPTY
-          // allowlist, which disables the API for every origin including this
-          // one: the browser rejected getCurrentPosition() instantly with
-          // PERMISSION_DENIED and never showed a permission prompt. That is
-          // why "Use My Location" always failed and why telling the user to
-          // click the lock icon could never help -- the site itself was
-          // forbidding it. Camera and microphone stay fully disabled.
           { key: 'Permissions-Policy', value: 'camera=(), microphone=(), geolocation=(self)' },
+          // HSTS: 1 year, include subdomains, preload-ready
+          { key: 'Strict-Transport-Security', value: 'max-age=31536000; includeSubDomains' },
+          // CSP: restrictive but workable for this stack.
+          // 'unsafe-inline' on script-src is required by Next.js inline scripts.
+          // Tighten further (nonce/hash) once Sentry tunnel and analytics are confirmed.
+          {
+            key: 'Content-Security-Policy',
+            value: [
+              "default-src 'self'",
+              "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://checkout.razorpay.com https://api.razorpay.com",
+              "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
+              "font-src 'self' https://fonts.gstatic.com",
+              "img-src 'self' data: blob: https://ik.imagekit.io https://lnjdlpfbglrczcmiwlfg.supabase.co https://awiyxxbzqjluoqowoiqk.supabase.co https://lh3.googleusercontent.com https://*.googleusercontent.com",
+              "connect-src 'self' https://*.supabase.co https://api.razorpay.com https://*.sentry.io wss://*.supabase.co",
+              "frame-src https://api.razorpay.com https://checkout.razorpay.com",
+              "object-src 'none'",
+              "base-uri 'self'",
+              "form-action 'self'",
+            ].join('; '),
+          },
         ],
       },
       {

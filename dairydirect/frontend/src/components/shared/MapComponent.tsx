@@ -104,7 +104,7 @@ export default function MapComponent({
            <button 
              type="button"
              onClick={(e) => { e.stopPropagation(); toggleStyle(); }}
-             className="bg-surface/90 backdrop-blur-sm px-3 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest text-primary shadow-lg border border-primary/20 hover:bg-surface transition-all active:scale-95"
+             className="bg-surface/90 backdrop-blur-sm px-3 py-2 rounded-xl text-xs font-semibold uppercase tracking-widest text-primary shadow-lg border border-primary/20 hover:bg-surface transition-all active:scale-95"
            >
              {mapStyle.includes('dark') ? 'Light Map' : 'Dark Map'}
            </button>

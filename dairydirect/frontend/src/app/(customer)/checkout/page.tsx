@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
-import { ArrowLeft, Loader2, Tag, ShieldCheck, AlertCircle } from 'lucide-react';
+import { ArrowLeft, Loader2, Tag, ShieldCheck, AlertCircle, Sparkles } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import { cn } from '@/lib/utils';
 import { useTranslation } from '@/lib/i18n';
@@ -21,6 +21,7 @@ import { OrderReview } from '@/components/checkout/OrderReview';
 import { OrderSummary } from '@/components/cart/OrderSummary';
 import { PaymentSelection } from '@/components/checkout/PaymentSelection';
 import { CheckoutConfidence } from '@/components/trust/CheckoutConfidence';
+import { OffersDrawer } from '@/components/checkout/OffersDrawer';
 import { initiateRazorpayPayment } from '@/lib/razorpay-client';
 import { SkeletonBlock } from '@/components/shared/Skeletons';
 
@@ -49,6 +50,7 @@ export default function CheckoutScreen() {
   const [couponCode, setCouponCode] = useState('');
   const [isApplyingCoupon, setIsApplyingCoupon] = useState(false);
   const [couponError, setCouponError] = useState('');
+  const [isOffersDrawerOpen, setIsOffersDrawerOpen] = useState(false);
 
   const [pricing, setPricing] = useState<{
     subtotal: number,
@@ -83,39 +85,45 @@ export default function CheckoutScreen() {
     }).filter(Boolean) as any[]; // Type assertion for brevity since we filtered out nulls
   }, [cart, products]);
 
+  // Stable signature for cart contents to avoid infinite re-render loops
+  const cartSignature = useMemo(
+    () => cart.map(i => `${i.variantId}:${i.quantity}`).sort().join('|'),
+    [cart]
+  );
+
   // Pricing Calculation
   useEffect(() => {
-    if (cartItemsData.length > 0) {
+    if (cart.length > 0) {
       const items = cart.map(i => ({ variantId: i.variantId, quantity: i.quantity }));
-      
-      // Track Checkout Started
-      Analytics.trackEvent('Checkout Started', {
-        cartSize: cart.length,
-        subtotal: pricing?.subtotal || 0
-      });
 
       validateCoupon(items, couponCode).then(res => {
-        setPricing({
-          subtotal: res.subtotal || 0,
-          delivery: res.deliveryFee || 0,
-          discount: res.discount || 0,
-          total: res.total || 0,
-          nextTier: (res as any).nextTierAmount || 0
-        });
+        if (res) {
+          setPricing({
+            subtotal: res.subtotal || 0,
+            delivery: res.deliveryFee || 0,
+            discount: res.discount || 0,
+            total: res.total || 0,
+            nextTier: (res as any).nextTierAmount || 0
+          });
+        }
+        setIsLoading(false);
+      }).catch(() => {
         setIsLoading(false);
       });
-    } else if (products.length > 0) {
+    } else {
       setIsLoading(false);
     }
-  }, [cartItemsData, couponCode, cart, products]);
+  }, [cartSignature, couponCode]);
 
-  const handleApplyCoupon = async () => {
-    if (!couponCode) return;
+  const handleApplyCoupon = async (codeToApply?: string) => {
+    const code = (codeToApply || couponCode).trim().toUpperCase();
+    if (!code) return;
     setIsApplyingCoupon(true);
     setCouponError('');
+    setCouponCode(code);
 
     const items = cart.map(i => ({ variantId: i.variantId, quantity: i.quantity }));
-    const res = await validateCoupon(items, couponCode);
+    const res = await validateCoupon(items, code);
 
     if (res.valid) {
       setPricing({
@@ -188,6 +196,11 @@ export default function CheckoutScreen() {
         currency: 'INR',
         name: 'Gjanand Sarkar',
         description: `Order with ${orderItems.length} item(s)`,
+        items: orderItems.map((item) => ({
+          variantId: item.variantId,
+          quantity: item.quantity,
+        })),
+        couponCode: couponCode || undefined,
         prefill: {
           name: user.name || 'Customer',
           email: user.email || '',
@@ -362,11 +375,11 @@ export default function CheckoutScreen() {
               <button onClick={() => !isProcessing && router.back()} className="p-2 -ml-2 mr-2 rounded-full hover:bg-sand/30" disabled={isProcessing}>
                 <ArrowLeft className="w-6 h-6 text-dark" />
               </button>
-              <h1 className="text-xl font-black text-dark">Secure Checkout</h1>
+              <h1 className="text-xl font-semibold text-dark">Secure Checkout</h1>
             </div>
             <div className="flex items-center gap-1 text-success bg-success-bg px-2 py-1 rounded-md border border-green-100">
               <ShieldCheck className="w-4 h-4" />
-              <span className="text-[10px] font-bold uppercase tracking-wider">100% Safe</span>
+              <span className="text-xs font-bold uppercase tracking-wider">100% Safe</span>
             </div>
           </div>
         </div>
@@ -406,10 +419,20 @@ export default function CheckoutScreen() {
           <OrderReview items={cartItemsData} />
 
           {/* Coupon Section */}
-          <div className="bg-surface rounded-[20px] p-4 border border-sand shadow-sm">
-            <div className="flex items-center gap-2 mb-3">
-              <Tag className="w-4 h-4 text-primary" />
-              <h3 className="text-sm font-bold text-dark uppercase tracking-wider">Offers</h3>
+          <div className="bg-surface rounded-xl p-4 border border-border shadow-xs">
+            <div className="flex items-center justify-between gap-2 mb-3">
+              <div className="flex items-center gap-2">
+                <Tag className="w-4 h-4 text-primary" />
+                <h3 className="text-sm font-semibold text-foreground">Offers & Coupons</h3>
+              </div>
+              <button
+                type="button"
+                onClick={() => setIsOffersDrawerOpen(true)}
+                className="text-xs font-semibold text-primary hover:text-primary-hover flex items-center gap-1 cursor-pointer transition-colors"
+              >
+                <Sparkles className="w-3.5 h-3.5 text-secondary" />
+                <span>View All Offers</span>
+              </button>
             </div>
             <div className="flex gap-2">
               <div className="relative flex-1">
@@ -419,16 +442,17 @@ export default function CheckoutScreen() {
                   onChange={(e) => setCouponCode(e.target.value.toUpperCase())}
                   placeholder="Enter Coupon Code"
                   className={cn(
-                    "w-full text-sm font-bold border rounded-[12px] px-3 py-2.5 outline-none transition-all uppercase placeholder:text-muted/50 placeholder:font-medium",
-                    couponError ? "border-red-400 bg-error-bg text-error" : "border-sand focus:border-primary"
+                    "w-full text-sm font-semibold border rounded-lg px-3 py-2.5 outline-none transition-all uppercase placeholder:text-foreground-muted/60 bg-surface",
+                    couponError ? "border-red-400 bg-error-bg text-error" : "border-border focus:border-primary"
                   )}
                 />
-                {couponError && <p className="absolute -bottom-5 left-0 text-[10px] text-red-500 font-bold">{couponError}</p>}
+                {couponError && <p className="absolute -bottom-5 left-0 text-xs text-red-500 font-bold">{couponError}</p>}
               </div>
               <button
-                onClick={handleApplyCoupon}
+                type="button"
+                onClick={() => handleApplyCoupon()}
                 disabled={isApplyingCoupon || !couponCode}
-                className="bg-primary hover:bg-primary-dark disabled:opacity-50 text-on-primary font-bold px-5 py-2.5 rounded-[12px] text-sm shadow-sm transition-all flex items-center justify-center gap-2 min-w-[80px]"
+                className="bg-primary hover:bg-primary-hover disabled:opacity-50 text-on-primary font-semibold px-5 py-2.5 rounded-lg text-sm shadow-xs transition-all flex items-center justify-center gap-2 min-w-[80px] cursor-pointer"
               >
                 {isApplyingCoupon ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Apply'}
               </button>
@@ -467,8 +491,8 @@ export default function CheckoutScreen() {
               {/* Desktop CTA. The fixed bottom bar is mobile-only. */}
               <div className="hidden lg:block bg-surface rounded-[20px] p-4 border border-sand shadow-sm space-y-3">
                 <div className="flex items-baseline justify-between">
-                  <span className="text-[11px] font-bold text-muted uppercase tracking-wider">Total Pay</span>
-                  <span className="text-2xl font-black text-dark">₹{pricing.total}</span>
+                  <span className="text-xs font-bold text-muted uppercase tracking-wider">Total Pay</span>
+                  <span className="text-2xl font-semibold text-dark">₹{pricing.total}</span>
                 </div>
                 <Button
                   size="lg"
@@ -486,8 +510,8 @@ export default function CheckoutScreen() {
         <div className="lg:hidden checkout-action-bar p-4 bg-surface border-t border-border shadow-[0_-10px_20px_rgba(0,0,0,0.05)]">
           <div className="max-w-[800px] mx-auto flex items-center justify-between gap-4">
             <div className="flex flex-col">
-              <span className="text-[11px] font-bold text-muted uppercase">Total Pay</span>
-              <span className="text-xl font-black text-dark">₹{pricing.total}</span>
+              <span className="text-xs font-bold text-muted uppercase">Total Pay</span>
+              <span className="text-xl font-semibold text-dark">₹{pricing.total}</span>
             </div>
             <Button
               size="lg"
@@ -559,6 +583,14 @@ export default function CheckoutScreen() {
           </motion.div>
         )}
       </AnimatePresence>
+
+      <OffersDrawer
+        isOpen={isOffersDrawerOpen}
+        onClose={() => setIsOffersDrawerOpen(false)}
+        cartSubtotal={pricing?.subtotal || 0}
+        appliedCouponCode={couponCode || undefined}
+        onApplyCoupon={(code) => handleApplyCoupon(code)}
+      />
     </>
   );
 }

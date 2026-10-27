@@ -2,19 +2,12 @@
 
 import React, { useState } from 'react';
 import Link from 'next/link';
-import { Heart, ChevronDown } from 'lucide-react';
+import { Heart, ChevronDown, Globe } from 'lucide-react';
+import { useStore } from '@/store/useStore';
+import { useTranslation } from '@/lib/i18n';
 
 /**
  * Site footer.
- *
- * Deliberately small. It previously carried four link columns, a newsletter
- * signup that was never wired to a mailing provider (so it collected
- * nothing), and a long brand blurb -- several screens of scrolling on a
- * phone, below content people had already finished reading.
- *
- * It is now two columns, which collapse into accordions below md so the
- * footer costs only a couple of lines of height on mobile. The
- * seller/partner links were folded into Company rather than dropped.
  */
 
 const SOCIALS = [
@@ -25,36 +18,64 @@ const SOCIALS = [
   { label: 'X', href: 'https://twitter.com', d: 'M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z' }
 ];
 
-const COLUMNS = [
-  {
-    title: 'Company',
-    links: [
-      { label: 'About Us', href: '/about' },
-      { label: 'Contact Us', href: '/contact' },
-      { label: 'Partner With Us', href: '/become-seller' },
-      { label: 'Seller Portal', href: '/seller/dashboard' },
-      { label: 'Brand Verification', href: '/about#verification' },
-    ],
-  },
-  {
-    title: 'Help & Orders',
-    links: [
-      { label: 'Track Orders', href: '/orders' },
-      { label: 'Returns & Refunds', href: '/returns' },
-      { label: 'Manage Subscriptions', href: '/subscribe' },
-      { label: 'FAQs & Help', href: '/faq' },
-      { label: 'Customer Care', href: '/contact' },
-    ],
-  },
-];
-
 export function Footer() {
-  // Mobile only: which accordion is open. Both render open from md up.
   const [openColumn, setOpenColumn] = useState<string | null>(null);
+  const { t, language } = useTranslation();
+  const setLanguage = useStore((s) => s.setLanguage);
+
+  const columns = [
+    {
+      title: t('company') || 'Company',
+      links: [
+        { label: t('aboutUs') || 'About Us', href: '/about' },
+        { label: t('contactUs') || 'Contact Us', href: '/contact' },
+        { label: t('partnerWithUs') || 'Partner With Us', href: '/become-seller' },
+        { label: t('sellerPortal') || 'Seller Portal', href: '/seller/dashboard' },
+        { label: t('brandVerification') || 'Brand Verification', href: '/about#verification' },
+      ],
+    },
+    {
+      title: t('helpAndOrders') || 'Help & Orders',
+      links: [
+        { label: t('trackOrders') || 'Track Orders', href: '/orders' },
+        { label: t('returnsRefunds') || 'Returns & Refunds', href: '/returns' },
+        { label: t('helpCenter') || 'Help Center', href: '/support' },
+        { label: t('faqsHelp') || 'FAQs & Help', href: '/faq' },
+        { label: t('customerCare') || 'Customer Care', href: '/contact' },
+      ],
+    },
+  ];
 
   return (
-    <footer className="w-full bg-surface-muted text-foreground pt-10 pb-6 border-t border-border">
+    <footer className="w-full bg-surface-muted text-foreground pt-10 pb-[calc(var(--bottom-nav-h,64px)+2.5rem+env(safe-area-inset-bottom,0px))] md:pb-8 border-t border-border">
       <div className="max-w-[1440px] mx-auto px-4 md:px-8">
+
+        {/* Subtle Language Direction Strip */}
+        <div className="flex flex-wrap items-center justify-between gap-3 pb-6 mb-6 border-b border-border text-xs text-foreground-muted">
+          <div className="flex items-center gap-2">
+            <Globe className="w-4 h-4 text-primary shrink-0" />
+            <span>
+              {t('browsingIn') || 'Browsing in'} <strong className="text-foreground font-semibold">{language === 'hi' ? 'हिन्दी' : language === 'gu' ? 'ગુજરાતી' : 'English'}</strong>. {t('languageInstruction') || 'Change preferred language anytime from Account Settings or header.'}
+            </span>
+          </div>
+          <div className="flex items-center gap-1.5">
+            <span className="text-[11px] text-foreground-muted">Language:</span>
+            {(['en', 'hi', 'gu'] as const).map((l) => (
+              <button
+                key={l}
+                type="button"
+                onClick={() => setLanguage(l)}
+                className={`px-2 py-0.5 rounded text-xs font-semibold cursor-pointer transition-colors ${
+                  language === l
+                    ? 'bg-primary text-on-primary shadow-2xs'
+                    : 'text-foreground hover:bg-surface border border-border'
+                }`}
+              >
+                {l === 'en' ? 'English' : l === 'hi' ? 'हिन्दी' : 'ગુજરાતી'}
+              </button>
+            ))}
+          </div>
+        </div>
 
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6 md:gap-8 pb-6 md:pb-8 border-b border-border">
 
@@ -69,14 +90,14 @@ export function Footer() {
                 onError={(e) => { (e.target as HTMLElement).style.display = 'none'; }}
               />
               <span className="flex flex-col">
-                <span className="text-xl font-black tracking-tight leading-none text-foreground">Gjanand</span>
-                <span className="text-[10px] tracking-[0.2em] font-black text-secondary uppercase text-right leading-none mt-0.5">
+                <span className="text-xl font-bold tracking-tight leading-none text-foreground">Gjanand</span>
+                <span className="text-xs font-bold text-secondary leading-none mt-1">
                   SARKAR
                 </span>
               </span>
             </Link>
 
-            <p className="text-xs text-foreground-muted leading-relaxed max-w-xs">
+            <p className="text-xs text-foreground-muted leading-relaxed max-w-xs font-medium">
               One verified partner brand per category. Proudly Indian.
             </p>
 
@@ -88,7 +109,7 @@ export function Footer() {
                   target="_blank"
                   rel="noreferrer"
                   aria-label={s.label}
-                  className="w-8 h-8 rounded-full bg-primary/10 hover:bg-secondary flex items-center justify-center text-foreground hover:text-on-secondary transition-colors"
+                  className="w-8 h-8 rounded-full bg-primary/10 hover:bg-primary flex items-center justify-center text-foreground hover:text-on-primary transition-colors cursor-pointer"
                 >
                   <svg className="w-4 h-4 fill-current" viewBox="0 0 24 24" aria-hidden="true">
                     <path d={s.d} />
@@ -99,26 +120,26 @@ export function Footer() {
           </div>
 
           {/* Link columns: accordions on mobile, plain lists from md up. */}
-          {COLUMNS.map((col) => {
+          {columns.map((col) => {
             const isOpen = openColumn === col.title;
             return (
-              <div key={col.title} className="border-b border-border md:border-0">
+              <div key={col.title} className="border-b border-border/80 md:border-0 last:border-0">
                 <button
                   type="button"
                   onClick={() => setOpenColumn(isOpen ? null : col.title)}
                   aria-expanded={isOpen}
-                  className="w-full flex items-center justify-between py-3 md:py-0 md:pb-3 md:cursor-default text-xs font-bold uppercase tracking-wider text-secondary"
+                  className="w-full flex items-center justify-between py-3.5 md:py-0 md:pb-3 md:cursor-default text-xs font-bold text-foreground min-h-[44px]"
                 >
                   <span>{col.title}</span>
                   <ChevronDown
-                    className={`w-4 h-4 md:hidden transition-transform ${isOpen ? 'rotate-180' : ''}`}
+                    className={`w-4 h-4 md:hidden text-foreground-muted transition-transform duration-200 ${isOpen ? 'rotate-180 text-primary' : ''}`}
                     aria-hidden="true"
                   />
                 </button>
-                <ul className={`${isOpen ? 'block' : 'hidden'} md:block space-y-2 text-xs text-foreground-muted pb-3 md:pb-0`}>
+                <ul className={`${isOpen ? 'block' : 'hidden'} md:block space-y-2.5 text-xs text-foreground-muted pb-3.5 md:pb-0`}>
                   {col.links.map((l) => (
                     <li key={l.label}>
-                      <Link href={l.href} className="hover:text-primary transition-colors">
+                      <Link href={l.href} className="hover:text-primary transition-colors py-1 inline-block">
                         {l.label}
                       </Link>
                     </li>
@@ -130,7 +151,7 @@ export function Footer() {
         </div>
 
         {/* Legal strip */}
-        <div className="pt-4 flex flex-col sm:flex-row items-center justify-between gap-3 text-[11px] text-foreground-muted">
+        <div className="pt-4 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-foreground-muted">
           <div>© {new Date().getFullYear()} Gjanand Sarkar. All Rights Reserved.</div>
 
           <div className="flex items-center gap-3">
@@ -144,7 +165,7 @@ export function Footer() {
           <div className="flex items-center gap-1">
             <span>Made with</span>
             <Heart className="w-3 h-3 fill-error text-error" aria-hidden="true" />
-            <span>in Bharat 🇮🇳</span>
+            <span>in Bharat</span>
           </div>
         </div>
       </div>

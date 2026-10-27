@@ -20,10 +20,11 @@ import {
   Send,
   MessageSquare
 } from 'lucide-react';
-import { SubscriptionUpsellBanner } from '@/components/discovery/SubscriptionUpsellBanner';
 import { RelatedProducts } from '@/components/discovery/RelatedProducts';
+import { ProductQualityReport } from '@/components/trust/ProductQualityReport';
 import { BrandStory } from '@/components/trust/BrandStory';
 import { TrustBadges } from '@/components/trust/TrustBadges';
+import { PartnerBadge } from '@/components/shared/PartnerBadge';
 import { ProductEditModal } from '@/components/admin/ProductEditModal';
 import { getProductReviews, submitProductReview, ReviewItem } from '@/lib/api/reviews';
 import { useRealtimeInventory } from '@/hooks/useRealtimeInventory';
@@ -35,7 +36,7 @@ interface ProductClientProps {
 
 export function ProductClient({ product: initialProduct }: ProductClientProps) {
   const router = useRouter();
-  const { t } = useTranslation();
+  const { t, tProduct, tCategory } = useTranslation();
 
   const user = useStore((state) => state.user);
   const cart = useStore((state) => state.cart);
@@ -213,12 +214,12 @@ export function ProductClient({ product: initialProduct }: ProductClientProps) {
   return (
     <div className="flex flex-col min-h-screen pb-32 bg-background">
       
-      {/* Premium Navigation Header */}
-      <div className="w-full bg-surface/80 backdrop-blur-md border-b border-border/50 sticky top-0 z-30 px-4 md:px-8 py-3.5">
+      {/* Navigation Header */}
+      <div className="w-full bg-surface/90 backdrop-blur-md border-b border-border sticky top-0 z-30 px-4 md:px-8 py-3.5">
         <div className="max-w-6xl mx-auto flex items-center justify-between">
           <button 
             onClick={() => router.back()} 
-            className="flex items-center gap-1 text-xs font-extrabold text-foreground hover:text-primary transition-colors py-1.5 px-3.5 rounded-full hover:bg-surface-muted cursor-pointer"
+            className="flex items-center gap-1 text-xs font-medium text-foreground hover:text-primary transition-colors py-1.5 px-3 rounded-full hover:bg-surface-muted cursor-pointer min-h-[44px]"
           >
             <ChevronLeft className="w-4 h-4" />
             <span>Back</span>
@@ -228,7 +229,7 @@ export function ProductClient({ product: initialProduct }: ProductClientProps) {
             {user?.role === 'admin' && (
               <button
                 onClick={() => setIsEditModalOpen(true)}
-                className="h-8 px-3 rounded-full bg-primary hover:bg-primary-hover text-on-primary text-xs font-bold flex items-center gap-1.5 shadow-sm cursor-pointer"
+                className="h-9 px-3.5 rounded-lg bg-primary hover:bg-primary-hover text-on-primary text-xs font-medium flex items-center gap-1.5 shadow-xs cursor-pointer min-h-[44px]"
               >
                 <Pencil className="w-3.5 h-3.5" />
                 <span>Edit</span>
@@ -237,7 +238,7 @@ export function ProductClient({ product: initialProduct }: ProductClientProps) {
 
             <button
               onClick={handleToggleWishlist}
-              className={`w-8.5 h-8.5 rounded-full flex items-center justify-center transition-all bg-surface border border-border shadow-2xs cursor-pointer ${
+              className={`w-9 h-9 rounded-full flex items-center justify-center transition-colors bg-surface border border-border shadow-xs cursor-pointer min-h-[44px] min-w-[44px] ${
                 isSaved ? 'text-error' : 'text-foreground hover:text-error'
               }`}
             >
@@ -253,11 +254,11 @@ export function ProductClient({ product: initialProduct }: ProductClientProps) {
           
           {/* Left Column: Product Image Gallery (Sticky on desktop) */}
           <div className="col-span-1 md:col-span-6 space-y-4 md:sticky md:top-24">
-            <div className="bg-surface rounded-3xl border border-sand/50 p-6 shadow-2xs flex items-center justify-center bg-gradient-to-b from-white to-[var(--background)] aspect-square max-h-[460px] mx-auto w-full relative overflow-hidden">
+            <div className="bg-surface rounded-lg border border-border p-6 shadow-xs flex items-center justify-center aspect-square max-h-[460px] mx-auto w-full relative overflow-hidden">
               <img
                 src={currentImage}
                 alt={product.name}
-                className="w-auto h-full max-h-[360px] object-contain transition-transform hover:scale-105 duration-500"
+                className="w-auto h-full max-h-[360px] object-contain transition-transform duration-200"
               />
             </div>
 
@@ -269,10 +270,10 @@ export function ProductClient({ product: initialProduct }: ProductClientProps) {
                     key={idx}
                     type="button"
                     onClick={() => setActiveImageIdx(idx)}
-                    className={`relative w-16 h-16 rounded-xl border-2 overflow-hidden flex-shrink-0 transition-all cursor-pointer bg-surface ${
+                    className={`relative w-16 h-16 rounded-lg border overflow-hidden flex-shrink-0 transition-colors cursor-pointer bg-surface min-h-[44px] min-w-[44px] ${
                       activeImageIdx === idx
-                        ? 'border-success ring-2 ring-emerald-600/20 shadow-xs scale-105'
-                        : 'border-border hover:border-border-hover opacity-70 hover:opacity-100'
+                        ? 'border-primary ring-1 ring-primary'
+                        : 'border-border hover:border-border-hover opacity-75 hover:opacity-100'
                     }`}
                   >
                     <img
@@ -291,14 +292,17 @@ export function ProductClient({ product: initialProduct }: ProductClientProps) {
           {/* Right Column: Detailed Product Specs & Interactive Options */}
           <div className="col-span-1 md:col-span-6 space-y-6">
             <div>
-              <div className="flex items-center justify-between gap-4 mb-2">
-                <span className="text-[11px] font-black uppercase tracking-wider text-secondary bg-warning-bg border border-secondary/20 px-2.5 py-1 rounded-full">
-                  {product.category}
-                </span>
+              <div className="flex flex-wrap items-center justify-between gap-2 mb-2">
+                <div className="flex items-center gap-2 flex-wrap">
+                  <span className="text-xs font-medium text-foreground-muted bg-surface-muted border border-border px-2.5 py-1 rounded-full">
+                    {tCategory(product.category)}
+                  </span>
+                  <PartnerBadge />
+                </div>
                 
                 {averageRating !== null ? (
-                  <div className="flex items-center gap-1.5 text-sm font-bold">
-                    <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded bg-success text-on-primary">
+                  <div className="flex items-center gap-1.5 text-xs font-semibold">
+                    <span className="inline-flex items-center gap-0.5 px-2 py-0.5 rounded-full bg-primary text-on-primary">
                       <Star className="w-3 h-3 fill-white text-white" />
                       {averageRating.toFixed(1)}
                     </span>
@@ -308,28 +312,22 @@ export function ProductClient({ product: initialProduct }: ProductClientProps) {
                     </span>
                   </div>
                 ) : (
-                  <span className="text-sm font-semibold text-foreground-muted">
-                    No ratings yet
+                  <span className="text-xs font-medium text-foreground-muted">
+                    {t('noRatingsYet')}
                   </span>
                 )}
               </div>
 
-              <h1 className="text-2xl sm:text-3xl font-black text-foreground tracking-tight leading-tight">
-                {product.name}
+              <h1 className="text-2xl sm:text-3xl font-semibold text-foreground tracking-tight leading-tight">
+                {tProduct(product.name)}
               </h1>
               <p className="text-sm sm:text-base text-foreground-muted mt-2.5 leading-relaxed">
-                {product.description}
+                {tProduct(product.description)}
               </p>
 
-              {/* Price. This page previously showed no price at all outside the
-                  variant chips, so the most important number on a shopping
-                  page was also the smallest. The strikethrough appears only
-                  when a real original_price exists and genuinely exceeds the
-                  selling price: inventing one (e.g. price * 1.25) is a
-                  misleading-pricing offence under the Consumer Protection Act
-                  2019 and the Legal Metrology (Packaged Commodities) Rules. */}
+              {/* Price */}
               <div className="mt-4 flex flex-wrap items-baseline gap-x-3 gap-y-1">
-                <span className="text-3xl sm:text-[2rem] font-black text-foreground tabular-nums leading-none">
+                <span className="text-3xl sm:text-[2rem] font-semibold text-foreground tabular-nums leading-none">
                   ₹{selectedVariant.price}
                 </span>
                 {hasRealDiscount && (
@@ -337,37 +335,37 @@ export function ProductClient({ product: initialProduct }: ProductClientProps) {
                     <span className="text-base text-foreground-muted line-through tabular-nums">
                       MRP ₹{selectedVariant.original_price}
                     </span>
-                    <span className="px-2 py-0.5 rounded-md bg-secondary text-on-secondary text-xs font-black">
+                    <span className="px-2 py-0.5 rounded-full bg-highlight text-on-highlight text-xs font-semibold">
                       {discountPercent}% OFF
                     </span>
                   </>
                 )}
               </div>
               <p className="text-xs text-foreground-muted mt-1">
-                Inclusive of all taxes · {selectedVariant.weight}
+                {t('inclusiveTaxes')} · {selectedVariant.weight}
               </p>
             </div>
 
             {/* Variant Selector & Authoritative Realtime Stock Status */}
-            <div className="bg-surface rounded-2xl border border-border/90 p-5 shadow-2xs space-y-3">
+            <div className="bg-surface rounded-lg border border-border p-5 shadow-xs space-y-3">
               <div className="flex items-center justify-between">
-                <h3 className="text-sm font-bold uppercase tracking-wider text-foreground-muted">
-                  Pack Size
+                <h3 className="text-xs font-medium text-foreground-muted">
+                  {t('selectSize') || 'Pack Size'}
                 </h3>
                 {isOutOfStock ? (
                   <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-bold bg-error-bg text-error border border-error/20">
                     <span className="w-1.5 h-1.5 rounded-full bg-error" />
-                    Out of Stock
+                    {t('outOfStock') || 'Out of Stock'}
                   </span>
                 ) : isLowStock ? (
-                  <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-bold bg-warning-bg text-warning border border-warning/20 animate-pulse">
-                    <span className="w-1.5 h-1.5 rounded-full bg-warning" />
-                    Only {availableStock} left in stock — order soon
+                  <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-medium bg-surface-muted text-highlight border border-highlight/20">
+                    <span className="w-1.5 h-1.5 rounded-full bg-highlight" />
+                    {t('onlyLeftInStock', { amount: String(availableStock) })}
                   </span>
                 ) : (
-                  <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-bold bg-success-bg text-success border border-success/20">
-                    <span className="w-1.5 h-1.5 rounded-full bg-success" />
-                    In Stock ({availableStock} units)
+                  <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-medium bg-surface-muted text-primary border border-primary/20">
+                    <span className="w-1.5 h-1.5 rounded-full bg-primary" />
+                    {t('inStock') || 'In Stock'} ({availableStock} {t('units')})
                   </span>
                 )}
               </div>
@@ -378,15 +376,15 @@ export function ProductClient({ product: initialProduct }: ProductClientProps) {
                     <button
                       key={v.id}
                       onClick={() => setSelectedVariantIdx(idx)}
-                      className={`px-4 py-3 rounded-xl border transition-all font-bold text-sm cursor-pointer flex items-center gap-1.5 min-h-[44px] ${
+                      className={`px-4 py-2.5 rounded-lg border transition-colors font-medium text-xs sm:text-sm cursor-pointer flex items-center gap-1.5 min-h-[44px] ${
                         selectedVariantIdx === idx
-                          ? 'border-primary bg-primary text-white shadow-sm'
+                          ? 'border-primary bg-primary text-white shadow-xs'
                           : 'border-border bg-surface text-foreground hover:border-border-hover'
                       }`}
                     >
                       <span>{v.weight} — ₹{v.price}</span>
                       {vAvail <= 0 && (
-                        <span className="text-[10px] opacity-75 font-normal text-error">(Sold out)</span>
+                        <span className="text-xs opacity-75 font-normal text-error">(Sold out)</span>
                       )}
                     </button>
                   );
@@ -396,20 +394,20 @@ export function ProductClient({ product: initialProduct }: ProductClientProps) {
 
             <TrustBadges className="grid md:hidden" />
 
-            {/* Subscription Option */}
-            <SubscriptionUpsellBanner category={product.category} />
+            {/* Quality Test Reports */}
+            <ProductQualityReport productId={product.id} productName={product.name} />
 
             {/* Brand Story */}
-            <BrandStory />
+            <BrandStory categoryName={product.category} />
 
             {/* Reviews list & Review box */}
-            <div className="bg-surface rounded-2xl border border-border/90 p-5 shadow-2xs space-y-6">
+            <div className="bg-surface rounded-lg border border-border p-5 shadow-xs space-y-6">
               <div className="flex items-center justify-between border-b border-border pb-3">
-                <h3 className="text-sm font-black text-foreground flex items-center gap-2">
-                  <MessageSquare className="w-4 h-4 text-secondary" />
-                  <span>Reviews</span>
+                <h3 className="text-sm font-semibold text-foreground flex items-center gap-2">
+                  <MessageSquare className="w-4 h-4 text-primary" />
+                  <span>{t('customerReviews') || 'Customer Reviews'}</span>
                 </h3>
-                <div className="flex items-center gap-1 text-xs font-bold text-foreground">
+                <div className="flex items-center gap-1 text-xs font-medium text-foreground">
                   <Star className="w-3.5 h-3.5 fill-amber-400 text-warning" />
                   <span>
                     {averageRating !== null
@@ -420,21 +418,21 @@ export function ProductClient({ product: initialProduct }: ProductClientProps) {
               </div>
 
               {/* Review Input Box */}
-              <form onSubmit={handleReviewSubmit} className="bg-surface-muted rounded-xl p-4 space-y-3">
-                <h4 className="text-sm font-bold text-foreground">Write a review</h4>
+              <form onSubmit={handleReviewSubmit} className="bg-surface-muted rounded-lg p-4 space-y-3">
+                <h4 className="text-sm font-semibold text-foreground">Write a review</h4>
                 
                 <div className="flex items-center gap-2">
-                  <span className="text-sm text-foreground-muted font-medium">Rating:</span>
+                  <span className="text-xs text-foreground-muted font-medium">Rating:</span>
                   <div className="flex gap-0.5">
                     {[1, 2, 3, 4, 5].map((star) => (
                       <button
                         key={star}
                         type="button"
                         onClick={() => setNewRating(star)}
-                        className="p-0.5 focus:outline-none cursor-pointer"
+                        className="p-1 focus:outline-none cursor-pointer min-h-[32px] min-w-[32px] flex items-center justify-center"
                       >
                         <Star
-                          className={`w-4.5 h-4.5 ${
+                          className={`w-4 h-4 ${
                             star <= newRating
                               ? 'fill-amber-400 text-warning'
                               : 'text-foreground-muted'
@@ -450,13 +448,13 @@ export function ProductClient({ product: initialProduct }: ProductClientProps) {
                   required
                   value={newComment}
                   onChange={(e) => setNewComment(e.target.value)}
-                  placeholder="Share your thoughts about quality, freshness or taste..."
-                  className="w-full px-3 py-2.5 text-sm rounded-lg border border-border-hover text-foreground bg-surface focus:border-primary outline-none resize-none"
+                  placeholder="Share your thoughts about quality, craftsmanship or performance..."
+                  className="w-full px-3 py-2.5 text-xs sm:text-sm rounded-lg border border-border text-foreground bg-surface focus:border-primary outline-none resize-none"
                 />
 
                 <div className="flex items-center justify-between pt-1">
                   {reviewSuccess && (
-                    <span className="text-xs font-bold text-success flex items-center gap-1">
+                    <span className="text-xs font-medium text-primary flex items-center gap-1">
                       <CheckCircle2 className="w-3.5 h-3.5" />
                       <span>Submitted!</span>
                     </span>
@@ -464,7 +462,7 @@ export function ProductClient({ product: initialProduct }: ProductClientProps) {
                   <button
                     type="submit"
                     disabled={isSubmittingReview}
-                    className="ml-auto px-4 py-2 bg-primary hover:bg-primary-hover text-on-primary font-bold text-xs rounded-lg shadow-2xs flex items-center gap-1.5 cursor-pointer"
+                    className="ml-auto px-4 py-2 bg-primary hover:bg-primary-hover text-on-primary font-medium text-xs rounded-lg shadow-xs flex items-center gap-1.5 cursor-pointer min-h-[44px]"
                   >
                     <Send className="w-3 h-3" />
                     <span>Submit</span>
@@ -479,17 +477,17 @@ export function ProductClient({ product: initialProduct }: ProductClientProps) {
                     <div key={rev.id} className="pt-4 first:pt-0 space-y-1.5">
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-1.5">
-                          <span className="text-sm font-bold text-foreground">
+                          <span className="text-xs font-semibold text-foreground">
                             {rev.user_name}
                           </span>
                           {rev.is_verified_buyer && (
-                            <span className="px-1.5 py-0.2 rounded bg-success-bg text-success text-[9px] font-bold uppercase tracking-wider flex items-center gap-0.5 border border-success-bg">
-                              <CheckCircle2 className="w-2.5 h-2.5" />
+                            <span className="px-1.5 py-0.5 rounded-full bg-surface-muted text-primary text-xs font-medium flex items-center gap-0.5 border border-border">
+                              <CheckCircle2 className="w-3 h-3" />
                               <span>Verified</span>
                             </span>
                           )}
                         </div>
-                        <span className="text-[10px] text-foreground-muted">
+                        <span className="text-xs text-foreground-muted">
                           {rev.created_at && !rev.created_at.includes('ago') && !rev.created_at.includes('Just now')
                             ? new Date(rev.created_at).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })
                             : (rev.created_at || 'Recently')}
@@ -497,16 +495,13 @@ export function ProductClient({ product: initialProduct }: ProductClientProps) {
                       </div>
 
                       <div className="flex items-center gap-0.5">
-                        {/* `rev.rating || 5` rendered a 5-star row for any
-                            review with a missing rating. Clamp to the real
-                            value and show nothing when there isn't one. */}
                         {[...Array(Math.min(5, Math.max(0, rev.rating ?? 0)))].map((_, i) => (
                           <Star key={i} className="w-3 h-3 fill-amber-400 text-warning" />
                         ))}
                       </div>
 
                       {rev.title && (
-                        <h5 className="text-xs font-bold text-foreground">{rev.title}</h5>
+                        <h5 className="text-xs font-medium text-foreground">{rev.title}</h5>
                       )}
 
                       <p className="text-xs text-foreground-muted leading-relaxed">
@@ -529,49 +524,44 @@ export function ProductClient({ product: initialProduct }: ProductClientProps) {
         </div>
       </div>
 
-      {/* Floating action bar.
-
-          This was pinned edge to edge as a full-width slab, which on a wide
-          screen stretched a single Add to Cart button across the whole
-          viewport. It is now a centred, self-contained pill that clears the
-          bottom navigation and the home indicator. */}
-      <div className="pdp-action-bar px-4 py-3 bg-surface/95 backdrop-blur-md border border-border rounded-2xl shadow-xl">
+      {/* Floating action bar */}
+      <div className="pdp-action-bar px-4 py-3 bg-surface/95 backdrop-blur-md border border-border rounded-lg shadow-md">
         <div className="flex items-center justify-between gap-4">
           <div>
-            <p className="text-[10px] font-bold uppercase tracking-wider text-foreground-muted">Price</p>
-            <p className="text-xl sm:text-2xl font-black text-primary">₹{selectedVariant.price}</p>
+            <p className="text-xs font-medium text-foreground-muted">{t('total') || 'Price'}</p>
+            <p className="text-xl sm:text-2xl font-semibold text-primary">₹{selectedVariant.price}</p>
           </div>
 
           {isOutOfStock ? (
             <button
               disabled
-              className="flex-1 h-12 bg-border text-foreground-muted font-bold rounded-xl text-xs sm:text-sm cursor-not-allowed flex items-center justify-center gap-1.5"
+              className="flex-1 h-11 bg-surface-muted text-foreground-muted font-medium rounded-lg text-xs sm:text-sm cursor-not-allowed flex items-center justify-center gap-1.5 min-h-[44px]"
             >
-              <span>Currently Out of Stock</span>
+              <span>{t('outOfStock') || 'Currently Out of Stock'}</span>
             </button>
           ) : quantity === 0 ? (
             <button
               onClick={() => handleUpdate('inc')}
-              className="flex-1 h-12 bg-primary hover:bg-primary-hover text-on-primary font-bold rounded-xl shadow-md active:scale-95 transition-all text-xs sm:text-sm cursor-pointer"
+              className="flex-1 h-11 bg-primary hover:bg-primary-hover text-on-primary font-medium rounded-lg shadow-xs active:scale-95 transition-all text-xs sm:text-sm cursor-pointer min-h-[44px]"
             >
-              Add to Cart
+              {t('addToCart') || 'Add to Cart'}
             </button>
           ) : (
-            <div className="flex-1 flex items-center justify-between h-12 bg-success-bg border border-success/20 rounded-xl px-3">
+            <div className="flex-1 flex items-center justify-between h-11 bg-surface-muted border border-border rounded-lg px-3 min-h-[44px]">
               <button
                 onClick={() => handleUpdate('dec')}
-                className="w-8 h-8 flex items-center justify-center rounded-lg bg-surface text-primary shadow-2xs font-black cursor-pointer"
+                className="w-8 h-8 flex items-center justify-center rounded-md bg-surface text-foreground shadow-xs font-semibold cursor-pointer min-h-[36px] min-w-[36px]"
               >
-                <Minus className="w-4 h-4 stroke-[3]" />
+                <Minus className="w-4 h-4 stroke-[2]" />
               </button>
-              <span className="text-base font-black text-primary">{quantity}</span>
+              <span className="text-base font-semibold text-foreground tabular-nums">{quantity}</span>
               <button
                 onClick={() => handleUpdate('inc')}
                 disabled={quantity >= availableStock}
-                className="w-8 h-8 flex items-center justify-center rounded-lg bg-primary text-on-primary shadow-2xs font-black disabled:opacity-50 cursor-pointer"
+                className="w-8 h-8 flex items-center justify-center rounded-md bg-primary text-on-primary shadow-xs font-semibold disabled:opacity-50 cursor-pointer min-h-[36px] min-w-[36px]"
                 title={quantity >= availableStock ? 'Maximum available stock reached' : undefined}
               >
-                <Plus className="w-4 h-4 stroke-[3]" />
+                <Plus className="w-4 h-4 stroke-[2]" />
               </button>
             </div>
           )}

@@ -18,7 +18,7 @@ export function OrderItemsReview({ order }: OrderItemsReviewProps) {
     <div className="bg-surface rounded-[20px] p-6 shadow-[0_4px_20px_rgba(0,0,0,0.03)] border border-sand">
       <div className="flex items-center gap-2 mb-4">
         <ShoppingBag className="w-5 h-5 text-primary" />
-        <h3 className="text-base font-black text-dark tracking-wide">Order Items</h3>
+        <h3 className="text-base font-semibold text-dark tracking-wide">Order Items</h3>
         <span className="text-xs font-bold text-primary bg-primary/10 px-2 py-0.5 rounded-full ml-auto">
           {order.order_items.reduce((acc, item) => acc + item.quantity, 0)} Items
         </span>
@@ -55,7 +55,7 @@ export function OrderItemsReview({ order }: OrderItemsReviewProps) {
 
             {/* Price */}
             <div className="text-right shrink-0">
-              <span className="text-sm font-black text-dark">
+              <span className="text-sm font-semibold text-dark">
                 {t('currency')}{item.price * item.quantity}
               </span>
             </div>

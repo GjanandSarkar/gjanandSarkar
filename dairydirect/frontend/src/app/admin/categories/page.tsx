@@ -165,7 +165,7 @@ export default function AdminCategoriesPage() {
         style={{ background: 'var(--color-surface-container-lowest)', borderBottom: '1px solid rgba(195,201,187,0.2)' }}
       >
         <div>
-          <h1 className="font-extrabold text-[24px] tracking-tight" style={{ color: 'var(--color-on-surface)' }}>
+          <h1 className="font-semibold text-[24px] tracking-tight" style={{ color: 'var(--color-on-surface)' }}>
             Categories
           </h1>
           <p className="text-[13px] mt-0.5" style={{ color: 'var(--color-on-surface-variant)' }}>
@@ -233,7 +233,7 @@ export default function AdminCategoriesPage() {
                             {cat.name}
                           </span>
                           {cat.description && (
-                            <span className="text-[11px] text-muted block max-w-xs truncate">{cat.description}</span>
+                            <span className="text-xs text-muted block max-w-xs truncate">{cat.description}</span>
                           )}
                         </div>
                       </div>
@@ -307,7 +307,7 @@ export default function AdminCategoriesPage() {
                 <X className="w-5 h-5" />
               </button>
 
-              <h2 className="text-xl font-extrabold text-primary mb-1">
+              <h2 className="text-xl font-semibold text-primary mb-1">
                 {editingCategory ? 'Edit Category' : 'Add New Category'}
               </h2>
               <p className="text-xs text-foreground-muted mb-5">
@@ -353,7 +353,7 @@ export default function AdminCategoriesPage() {
                     <label className="block text-xs font-bold text-foreground uppercase tracking-wider">
                       Category Image
                     </label>
-                    <label className="text-[11px] font-bold text-primary hover:underline cursor-pointer flex items-center gap-1">
+                    <label className="text-xs font-bold text-primary hover:underline cursor-pointer flex items-center gap-1">
                       {isUploadingImage ? <Loader2 className="w-3 h-3 animate-spin" /> : <UploadCloud className="w-3 h-3" />}
                       <span>Upload to ImageKit</span>
                       <input
@@ -414,7 +414,7 @@ export default function AdminCategoriesPage() {
                   <button
                     type="submit"
                     disabled={isSubmitting}
-                    className="px-5 py-2 rounded-xl text-xs font-extrabold text-on-primary bg-primary hover:bg-primary-hover disabled:opacity-50 cursor-pointer flex items-center gap-2"
+                    className="px-5 py-2 rounded-xl text-xs font-semibold text-on-primary bg-primary hover:bg-primary-hover disabled:opacity-50 cursor-pointer flex items-center gap-2"
                   >
                     {isSubmitting && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
                     {editingCategory ? 'Save Changes' : 'Create Category'}
@@ -446,7 +446,7 @@ export default function AdminCategoriesPage() {
               <div className="w-12 h-12 rounded-full bg-error-bg text-error flex items-center justify-center mx-auto mb-3">
                 <Trash2 className="w-6 h-6" />
               </div>
-              <h3 className="font-extrabold text-lg text-foreground mb-1">Delete Category?</h3>
+              <h3 className="font-semibold text-lg text-foreground mb-1">Delete Category?</h3>
               <p className="text-xs text-foreground-muted mb-5">
                 Are you sure you want to delete <strong className="text-foreground">{deletingCategory.name}</strong>? This action cannot be undone.
               </p>
@@ -462,7 +462,7 @@ export default function AdminCategoriesPage() {
                   type="button"
                   onClick={handleDelete}
                   disabled={isSubmitting}
-                  className="px-5 py-2 rounded-xl text-xs font-extrabold text-white bg-red-600 hover:bg-red-700 disabled:opacity-50 cursor-pointer flex items-center gap-2"
+                  className="px-5 py-2 rounded-xl text-xs font-semibold text-white bg-red-600 hover:bg-red-700 disabled:opacity-50 cursor-pointer flex items-center gap-2"
                 >
                   {isSubmitting && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
                   Delete

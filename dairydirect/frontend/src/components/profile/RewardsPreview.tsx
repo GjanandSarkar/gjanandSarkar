@@ -31,17 +31,17 @@ export function RewardsPreview() {
           <div className="w-8 h-8 rounded-full bg-orange-100 flex items-center justify-center">
             <Trophy className="w-4 h-4 text-orange-600" />
           </div>
-          <h3 className="text-sm font-black text-dark">GjanandSarkar Rewards</h3>
+          <h3 className="text-sm font-semibold text-dark">GjanandSarkar Rewards</h3>
         </div>
         <ChevronRight className="w-5 h-5 text-muted group-hover:text-dark transition-colors" />
       </div>
       
       <div className="flex items-end justify-between mb-2">
         <div className="flex items-baseline gap-1">
-          <span className="text-2xl font-black text-dark tracking-tight tabular-nums">{points}</span>
-          <span className="text-[11px] font-bold text-muted uppercase tracking-wider">Points</span>
+          <span className="text-2xl font-semibold text-dark tracking-tight tabular-nums">{points}</span>
+          <span className="text-xs font-bold text-muted uppercase tracking-wider">Points</span>
         </div>
-        <span className="text-[11px] font-medium text-primary tabular-nums">
+        <span className="text-xs font-medium text-primary tabular-nums">
           {pointsToReward > 0 ? `${pointsToReward} pts to your next reward` : 'Reward unlocked'}
         </span>
       </div>

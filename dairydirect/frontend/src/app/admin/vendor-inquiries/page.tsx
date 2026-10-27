@@ -199,11 +199,11 @@ export default function AdminVendorInquiriesPage() {
       {/* Top Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-warning-bg text-secondary text-xs font-black uppercase tracking-wider mb-1">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-warning-bg text-secondary text-xs font-semibold uppercase tracking-wider mb-1">
             <Clock className="w-3.5 h-3.5" />
             <span>Marketplace Onboarding</span>
           </div>
-          <h1 className="text-2xl sm:text-3xl font-black text-foreground tracking-tight">
+          <h1 className="text-2xl sm:text-3xl font-semibold text-foreground tracking-tight">
             Seller Applications & Requests
           </h1>
           <p className="text-xs text-foreground-muted mt-0.5">
@@ -227,8 +227,8 @@ export default function AdminVendorInquiriesPage() {
             <Clock className="w-5 h-5" />
           </div>
           <div>
-            <p className="text-[11px] font-bold text-foreground-muted uppercase tracking-wider">Pending Review</p>
-            <p className="text-xl font-black text-foreground">{pendingCount}</p>
+            <p className="text-xs font-bold text-foreground-muted uppercase tracking-wider">Pending Review</p>
+            <p className="text-xl font-semibold text-foreground">{pendingCount}</p>
           </div>
         </div>
 
@@ -237,8 +237,8 @@ export default function AdminVendorInquiriesPage() {
             <CheckCircle2 className="w-5 h-5" />
           </div>
           <div>
-            <p className="text-[11px] font-bold text-foreground-muted uppercase tracking-wider">Approved Sellers</p>
-            <p className="text-xl font-black text-foreground">{approvedCount}</p>
+            <p className="text-xs font-bold text-foreground-muted uppercase tracking-wider">Approved Sellers</p>
+            <p className="text-xl font-semibold text-foreground">{approvedCount}</p>
           </div>
         </div>
 
@@ -247,8 +247,8 @@ export default function AdminVendorInquiriesPage() {
             <XCircle className="w-5 h-5" />
           </div>
           <div>
-            <p className="text-[11px] font-bold text-foreground-muted uppercase tracking-wider">Rejected</p>
-            <p className="text-xl font-black text-foreground">{rejectedCount}</p>
+            <p className="text-xs font-bold text-foreground-muted uppercase tracking-wider">Rejected</p>
+            <p className="text-xl font-semibold text-foreground">{rejectedCount}</p>
           </div>
         </div>
 
@@ -257,8 +257,8 @@ export default function AdminVendorInquiriesPage() {
             <AlertTriangle className="w-5 h-5" />
           </div>
           <div>
-            <p className="text-[11px] font-bold text-foreground-muted uppercase tracking-wider">Suspended</p>
-            <p className="text-xl font-black text-foreground">{suspendedCount}</p>
+            <p className="text-xs font-bold text-foreground-muted uppercase tracking-wider">Suspended</p>
+            <p className="text-xl font-semibold text-foreground">{suspendedCount}</p>
           </div>
         </div>
       </div>
@@ -314,7 +314,7 @@ export default function AdminVendorInquiriesPage() {
             <div className="bg-surface rounded-2xl p-10 border border-border text-center space-y-2">
               <Building2 className="w-8 h-8 text-foreground-muted mx-auto" />
               <p className="text-xs font-bold text-foreground">No applications match your filter</p>
-              <p className="text-[11px] text-foreground-muted">Applications submitted from the Become a Seller page will appear here.</p>
+              <p className="text-xs text-foreground-muted">Applications submitted from the Become a Seller page will appear here.</p>
             </div>
           ) : (
             filteredInquiries.map((inq) => {
@@ -331,7 +331,7 @@ export default function AdminVendorInquiriesPage() {
                 >
                   <div className="flex items-start justify-between gap-2">
                     <div>
-                      <h4 className="text-sm font-black text-foreground leading-snug">
+                      <h4 className="text-sm font-semibold text-foreground leading-snug">
                         {inq.business_name}
                       </h4>
                       <p className="text-xs text-foreground-muted font-medium flex items-center gap-1.5 mt-0.5">
@@ -342,7 +342,7 @@ export default function AdminVendorInquiriesPage() {
                     </div>
 
                     {/* Status Badge */}
-                    <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider shrink-0 ${
+                    <span className={`px-2.5 py-0.5 rounded-full text-xs font-semibold uppercase tracking-wider shrink-0 ${
                       inq.status === 'approved' 
                         ? 'bg-success-bg text-success border border-success/20'
                         : inq.status === 'rejected'
@@ -355,12 +355,12 @@ export default function AdminVendorInquiriesPage() {
                     </span>
                   </div>
 
-                  <div className="flex items-center justify-between text-[11px] text-foreground-muted pt-1 border-t border-border">
+                  <div className="flex items-center justify-between text-xs text-foreground-muted pt-1 border-t border-border">
                     <span className="flex items-center gap-1">
                       <MapPin className="w-3 h-3" />
                       <span>{inq.city ? `${inq.city}, ${inq.state}` : inq.state}</span>
                     </span>
-                    <span className="flex items-center gap-1 font-mono text-[10px]">
+                    <span className="flex items-center gap-1 font-mono text-xs">
                       <Calendar className="w-3 h-3" />
                       <span>{new Date(inq.created_at).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}</span>
                     </span>
@@ -374,16 +374,16 @@ export default function AdminVendorInquiriesPage() {
         {/* Right Column: Complete Application Review Drawer */}
         <div className="lg:col-span-7">
           {selectedInquiry ? (
-            <div className="bg-surface rounded-3xl border border-border shadow-sm p-6 sm:p-8 space-y-6 text-left">
+            <div className="bg-surface rounded-xl border border-border shadow-sm p-6 sm:p-8 space-y-6 text-left">
               
               {/* Header Box */}
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-border">
                 <div>
                   <div className="flex items-center gap-2">
-                    <h3 className="text-xl font-black text-foreground tracking-tight">
+                    <h3 className="text-xl font-semibold text-foreground tracking-tight">
                       {selectedInquiry.business_name}
                     </h3>
-                    <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider ${
+                    <span className={`px-2.5 py-0.5 rounded-full text-xs font-semibold uppercase tracking-wider ${
                       selectedInquiry.status === 'approved' 
                         ? 'bg-success-bg text-success'
                         : selectedInquiry.status === 'rejected'
@@ -428,22 +428,22 @@ export default function AdminVendorInquiriesPage() {
 
               {/* 1. Owner & Contact Information */}
               <div className="space-y-3">
-                <h4 className="text-xs font-black text-primary uppercase tracking-wider flex items-center gap-2">
+                <h4 className="text-xs font-semibold text-primary uppercase tracking-wider flex items-center gap-2">
                   <PhoneCall className="w-3.5 h-3.5 text-secondary" />
                   <span>Applicant & Contact Details</span>
                 </h4>
                 
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 bg-surface-muted p-4 rounded-2xl border border-border text-xs">
                   <div>
-                    <span className="text-[10px] uppercase font-bold text-foreground-muted block">Contact Person</span>
+                    <span className="text-xs uppercase font-bold text-foreground-muted block">Contact Person</span>
                     <span className="font-bold text-foreground">{selectedInquiry.full_name}</span>
                   </div>
                   <div>
-                    <span className="text-[10px] uppercase font-bold text-foreground-muted block">Mobile Number</span>
+                    <span className="text-xs uppercase font-bold text-foreground-muted block">Mobile Number</span>
                     <span className="font-bold text-foreground font-mono">+91 {selectedInquiry.phone}</span>
                   </div>
                   <div>
-                    <span className="text-[10px] uppercase font-bold text-foreground-muted block">Email Address</span>
+                    <span className="text-xs uppercase font-bold text-foreground-muted block">Email Address</span>
                     <span className="font-bold text-foreground truncate block">{selectedInquiry.email}</span>
                   </div>
                 </div>
@@ -451,7 +451,7 @@ export default function AdminVendorInquiriesPage() {
 
               {/* 2. Business Address & Structure */}
               <div className="space-y-3">
-                <h4 className="text-xs font-black text-primary uppercase tracking-wider flex items-center gap-2">
+                <h4 className="text-xs font-semibold text-primary uppercase tracking-wider flex items-center gap-2">
                   <Building2 className="w-3.5 h-3.5 text-secondary" />
                   <span>Business Address & Structure</span>
                 </h4>
@@ -459,17 +459,17 @@ export default function AdminVendorInquiriesPage() {
                 <div className="bg-surface-muted p-4 rounded-2xl border border-border text-xs space-y-3">
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     <div>
-                      <span className="text-[10px] uppercase font-bold text-foreground-muted block">Business Entity Type</span>
+                      <span className="text-xs uppercase font-bold text-foreground-muted block">Business Entity Type</span>
                       <span className="font-bold text-foreground capitalize">{selectedInquiry.business_type?.replace(/_/g, ' ') || 'Sole Proprietorship'}</span>
                     </div>
                     <div>
-                      <span className="text-[10px] uppercase font-bold text-foreground-muted block">Product Category</span>
+                      <span className="text-xs uppercase font-bold text-foreground-muted block">Product Category</span>
                       <span className="font-bold text-foreground">{selectedInquiry.category}</span>
                     </div>
                   </div>
 
                   <div>
-                    <span className="text-[10px] uppercase font-bold text-foreground-muted block">Full Registered Address</span>
+                    <span className="text-xs uppercase font-bold text-foreground-muted block">Full Registered Address</span>
                     <span className="font-medium text-foreground">
                       {selectedInquiry.business_address || 'Address line not specified'}, {selectedInquiry.city || ''}, {selectedInquiry.state} {selectedInquiry.pincode ? `- ${selectedInquiry.pincode}` : ''}
                     </span>
@@ -479,22 +479,22 @@ export default function AdminVendorInquiriesPage() {
 
               {/* 3. Verification Details (PAN, GSTIN, FSSAI, Docs) */}
               <div className="space-y-3">
-                <h4 className="text-xs font-black text-primary uppercase tracking-wider flex items-center gap-2">
+                <h4 className="text-xs font-semibold text-primary uppercase tracking-wider flex items-center gap-2">
                   <CreditCard className="w-3.5 h-3.5 text-secondary" />
                   <span>Tax & Compliance Verification</span>
                 </h4>
                 
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 bg-surface-muted p-4 rounded-2xl border border-border text-xs">
                   <div>
-                    <span className="text-[10px] uppercase font-bold text-foreground-muted block">Business PAN</span>
+                    <span className="text-xs uppercase font-bold text-foreground-muted block">Business PAN</span>
                     <span className="font-mono font-bold text-foreground">{selectedInquiry.pan || 'Not provided'}</span>
                   </div>
                   <div>
-                    <span className="text-[10px] uppercase font-bold text-foreground-muted block">GSTIN</span>
+                    <span className="text-xs uppercase font-bold text-foreground-muted block">GSTIN</span>
                     <span className="font-mono font-bold text-foreground">{selectedInquiry.gstin || 'Unregistered / Small'}</span>
                   </div>
                   <div>
-                    <span className="text-[10px] uppercase font-bold text-foreground-muted block">FSSAI / Reg. No.</span>
+                    <span className="text-xs uppercase font-bold text-foreground-muted block">FSSAI / Reg. No.</span>
                     <span className="font-mono font-bold text-foreground">{selectedInquiry.fssai_number || 'N/A'}</span>
                   </div>
                 </div>
@@ -522,11 +522,11 @@ export default function AdminVendorInquiriesPage() {
               {/* 4. Submission & Decision Timestamps */}
               <div className="grid grid-cols-2 gap-3 text-xs bg-surface-muted p-3 rounded-2xl border border-border">
                 <div>
-                  <span className="text-[10px] uppercase font-bold text-foreground-muted block">Application Submitted</span>
+                  <span className="text-xs uppercase font-bold text-foreground-muted block">Application Submitted</span>
                   <span className="font-semibold text-foreground">{new Date(selectedInquiry.created_at).toLocaleString('en-IN')}</span>
                 </div>
                 <div>
-                  <span className="text-[10px] uppercase font-bold text-foreground-muted block">Decision / Last Updated</span>
+                  <span className="text-xs uppercase font-bold text-foreground-muted block">Decision / Last Updated</span>
                   <span className="font-semibold text-foreground">{new Date(selectedInquiry.updated_at).toLocaleString('en-IN')}</span>
                 </div>
               </div>
@@ -575,7 +575,7 @@ export default function AdminVendorInquiriesPage() {
                     type="button"
                     onClick={() => handleTriggerConfirm('approved')}
                     disabled={isUpdating}
-                    className="px-6 py-2.5 bg-primary hover:bg-primary-hover text-on-primary text-xs font-black rounded-xl shadow-md flex items-center gap-1.5 transition-all active:scale-95 cursor-pointer"
+                    className="px-6 py-2.5 bg-primary hover:bg-primary-hover text-on-primary text-xs font-semibold rounded-xl shadow-md flex items-center gap-1.5 transition-all active:scale-95 cursor-pointer"
                   >
                     <ShieldCheck className="w-4 h-4 text-secondary" />
                     <span>Approve Seller Account</span>
@@ -584,9 +584,9 @@ export default function AdminVendorInquiriesPage() {
               </div>
             </div>
           ) : (
-            <div className="bg-surface rounded-3xl border border-border p-16 text-center space-y-3">
+            <div className="bg-surface rounded-xl border border-border p-16 text-center space-y-3">
               <Building2 className="w-12 h-12 text-foreground-muted mx-auto" />
-              <h3 className="text-sm font-black text-foreground">Select an application to inspect</h3>
+              <h3 className="text-sm font-semibold text-foreground">Select an application to inspect</h3>
               <p className="text-xs text-foreground-muted max-w-sm mx-auto">
                 Click on any seller application from the list on the left to review their verification documents, PAN, GSTIN, and take approval actions.
               </p>
@@ -598,7 +598,7 @@ export default function AdminVendorInquiriesPage() {
       {/* Confirmation Dialog Modal */}
       {confirmModal.open && (
         <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4 animate-in fade-in">
-          <div className="bg-surface rounded-3xl max-w-md w-full p-6 sm:p-8 space-y-5 border border-border shadow-2xl text-left">
+          <div className="bg-surface rounded-xl max-w-md w-full p-6 sm:p-8 space-y-5 border border-border shadow-2xl text-left">
             <div className="flex items-center gap-3">
               <div className={`w-12 h-12 rounded-2xl flex items-center justify-center ${
                 confirmModal.action === 'approved' 
@@ -612,7 +612,7 @@ export default function AdminVendorInquiriesPage() {
                 )}
               </div>
               <div>
-                <h3 className="text-lg font-black text-foreground leading-tight">
+                <h3 className="text-lg font-semibold text-foreground leading-tight">
                   {confirmModal.title}
                 </h3>
                 <p className="text-xs text-foreground-muted mt-0.5">Please confirm your decision</p>
@@ -637,7 +637,7 @@ export default function AdminVendorInquiriesPage() {
                 type="button"
                 onClick={executeConfirmedAction}
                 disabled={isUpdating}
-                className={`px-6 py-2.5 text-white text-xs font-black rounded-xl shadow-md flex items-center gap-2 cursor-pointer ${
+                className={`px-6 py-2.5 text-white text-xs font-semibold rounded-xl shadow-md flex items-center gap-2 cursor-pointer ${
                   confirmModal.action === 'approved'
                     ? 'bg-primary hover:bg-primary-hover'
                     : 'bg-error hover:bg-error'

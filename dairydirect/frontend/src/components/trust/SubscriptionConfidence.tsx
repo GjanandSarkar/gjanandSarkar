@@ -3,7 +3,7 @@ import { PauseCircle, Bell, Truck } from 'lucide-react';
 export function SubscriptionConfidence() {
   return (
     <div className="bg-gradient-to-r from-blue-50 to-primary/5 border border-primary/20 rounded-[20px] p-5 my-6">
-      <h3 className="text-[14px] font-black text-dark mb-4 tracking-tight">Subscribe with Confidence</h3>
+      <h3 className="text-[14px] font-semibold text-dark mb-4 tracking-tight">Subscribe with Confidence</h3>
       
       <div className="flex flex-col gap-4">
         <div className="flex items-start gap-3">

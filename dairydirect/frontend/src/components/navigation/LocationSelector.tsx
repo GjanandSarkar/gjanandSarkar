@@ -45,7 +45,7 @@ export function LocationSelector({ className }: LocationSelectorProps) {
           <span className="text-[12px] md:text-caption font-bold text-foreground">Delivery to {activeAddress.label}</span>
         </div>
         <div className="flex items-center gap-1 mt-0.5">
-          <span className="text-[11px] md:text-[13px] text-foreground-muted line-clamp-1 max-w-[120px] md:max-w-[200px]">
+          <span className="text-xs md:text-[13px] text-foreground-muted line-clamp-1 max-w-[120px] md:max-w-[200px]">
             {activeAddress.address}
           </span>
           {addresses.length > 1 && (

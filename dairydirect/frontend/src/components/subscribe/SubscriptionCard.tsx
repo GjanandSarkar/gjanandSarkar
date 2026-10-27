@@ -49,7 +49,7 @@ export function SubscriptionCard({ subscription, onPauseToggle, onCancel }: Subs
     <div className="bg-surface rounded-[24px] overflow-hidden border border-sand/50 shadow-sm relative">
       {/* Pending Review Banner */}
       {isPending && (
-        <div className="bg-warning text-on-warning text-[10px] font-black uppercase tracking-widest text-center py-1.5 flex items-center justify-center gap-1.5">
+        <div className="bg-warning text-on-warning text-xs font-semibold uppercase tracking-widest text-center py-1.5 flex items-center justify-center gap-1.5">
           <AlertTriangle className="w-3 h-3" /> Modification Pending Approval
         </div>
       )}
@@ -57,7 +57,7 @@ export function SubscriptionCard({ subscription, onPauseToggle, onCancel }: Subs
       <div className={`p-5 ${isPending ? 'pt-4' : ''}`}>
         {/* Header */}
         <div className="flex justify-between items-start mb-5">
-          <div className={`inline-flex px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest ${
+          <div className={`inline-flex px-3 py-1 rounded-full text-xs font-semibold uppercase tracking-widest ${
             isPaused ? 'bg-warning-bg text-warning' : 'bg-mint/30 text-primary'
           }`}>
             {isPaused ? 'Paused' : 'Active'}
@@ -104,7 +104,7 @@ export function SubscriptionCard({ subscription, onPauseToggle, onCancel }: Subs
             />
           </div>
           <div className="flex-1">
-            <h3 className="font-black text-lg text-dark leading-tight mb-1">
+            <h3 className="font-semibold text-lg text-dark leading-tight mb-1">
               {product?.name || 'A2 Milk'}
             </h3>
             <p className="text-xs font-bold uppercase tracking-wider text-muted mb-2">
@@ -112,7 +112,7 @@ export function SubscriptionCard({ subscription, onPauseToggle, onCancel }: Subs
             </p>
             <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-mint/20 text-primary">
               <Droplets className="w-3 h-3" />
-              <span className="text-[12px] font-black">
+              <span className="text-[12px] font-semibold">
                 {subscription.volume}L
               </span>
             </div>
@@ -126,7 +126,7 @@ export function SubscriptionCard({ subscription, onPauseToggle, onCancel }: Subs
               <CalendarCheck className="w-5 h-5" />
             </div>
             <div>
-              <p className="text-[10px] font-black uppercase tracking-widest text-muted">Next Delivery</p>
+              <p className="text-xs font-semibold uppercase tracking-widest text-muted">Next Delivery</p>
               <p className="text-sm font-bold text-dark">{formatDeliveryDate(subscription.next_delivery_date)}</p>
             </div>
           </div>

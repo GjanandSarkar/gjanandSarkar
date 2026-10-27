@@ -45,7 +45,7 @@ export default function AdminDeliveryPage() {
   return (
     <div className="flex flex-col min-h-screen">
       <div className="px-6 md:px-10 pt-6 pb-5" style={{ background: 'var(--color-surface-container-lowest)' }}>
-        <h1 className="font-extrabold text-[24px] tracking-tight" style={{ color: 'var(--color-on-surface)' }}>
+        <h1 className="font-semibold text-[24px] tracking-tight" style={{ color: 'var(--color-on-surface)' }}>
           Deliveries
         </h1>
         <p className="text-[13px] mt-0.5" style={{ color: 'var(--color-on-surface-variant)' }}>
@@ -77,7 +77,7 @@ export default function AdminDeliveryPage() {
                       {order.profiles?.name || 'Customer'}
                     </p>
                   </div>
-                  <span className="px-3 py-1 rounded-full text-[10px] font-bold uppercase"
+                  <span className="px-3 py-1 rounded-full text-xs font-bold uppercase"
                     style={{
                       background: order.status === 'out_for_delivery' ? '#fff8e6' : '#c2efac',
                       color: order.status === 'out_for_delivery' ? 'var(--warning)' : '#042100',

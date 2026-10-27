@@ -6,7 +6,7 @@ import { useTranslation } from '@/lib/i18n';
 import { getProducts } from '@/lib/api/products';
 import type { ProductWithVariants } from '@/lib/api/products';
 import { ProductEditModal } from '@/components/admin/ProductEditModal';
-import { Search, Plus, Pencil, Droplets, Package, Cylinder, CupSoda, GlassWater, Loader2 } from 'lucide-react';
+import { Search, Plus, Pencil, Eye, Droplets, Package, Cylinder, CupSoda, GlassWater, Loader2 } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { api } from '@/lib/api/client';
 import { PLACEHOLDER_PRODUCT_IMAGE } from '@/lib/constants/brand';
@@ -92,7 +92,7 @@ function AdminProductsContent() {
       <div className="px-6 md:px-10 pt-6 pb-5 flex items-center justify-between"
         style={{ background: 'var(--color-surface-container-lowest)' }}>
         <div>
-          <h1 className="font-extrabold text-[24px] tracking-tight" style={{ color: 'var(--color-on-surface)' }}>
+          <h1 className="font-semibold text-[24px] tracking-tight" style={{ color: 'var(--color-on-surface)' }}>
             Products
           </h1>
           <p className="text-[13px] mt-0.5" style={{ color: 'var(--color-on-surface-variant)' }}>
@@ -208,7 +208,7 @@ function AdminProductsContent() {
                     <div className="absolute inset-0 bg-black/5" />
                     
                     {product.is_freshness_guarantee && (
-                      <div className="absolute top-2.5 left-2.5 px-2 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-wide z-10"
+                      <div className="absolute top-2.5 left-2.5 px-2 py-0.5 rounded-full text-xs font-bold uppercase tracking-wide z-10"
                         style={{ background: 'rgba(255,255,255,0.88)', color: 'var(--color-primary)' }}>
                         Fresh
                       </div>
@@ -220,9 +220,13 @@ function AdminProductsContent() {
                         setIsEditModalOpen(true);
                       }}
                       className="absolute top-2.5 right-2.5 w-8 h-8 rounded-full bg-surface/95 shadow-md flex items-center justify-center opacity-90 group-hover:opacity-100 transition-all hover:scale-110 active:scale-95 z-10 hover:bg-surface text-primary cursor-pointer"
-                      title="Edit Product"
+                      title={product.seller_id ? "View Seller Product (Read-Only)" : "Edit Product"}
                     >
-                      <Pencil className="w-3.5 h-3.5" strokeWidth={2.5} />
+                      {product.seller_id ? (
+                        <Eye className="w-3.5 h-3.5 text-foreground-muted" />
+                      ) : (
+                        <Pencil className="w-3.5 h-3.5" strokeWidth={2.5} />
+                      )}
                     </button>
                   </div>
 
@@ -235,13 +239,20 @@ function AdminProductsContent() {
                     }}
                   >
                     <div className="flex items-center justify-between mb-1">
-                      <span className="text-[11px] font-bold tracking-wide uppercase px-2 py-0.5 rounded-full"
+                      <span className="text-xs font-bold tracking-wide uppercase px-2 py-0.5 rounded-full"
                         style={{ background: 'var(--color-surface-container)', color: catStyle.color }}>
                         {product.category}
                       </span>
-                      <span className={`text-[10px] font-bold uppercase ${product.is_active ? 'text-success' : 'text-foreground-muted'}`}>
-                        {product.is_active ? 'Active' : 'Draft'}
-                      </span>
+                      <div className="flex items-center gap-1.5">
+                        {product.seller_id && (
+                          <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-amber-100 dark:bg-amber-950/40 text-amber-800 dark:text-amber-300 border border-amber-300 dark:border-amber-700">
+                            Seller
+                          </span>
+                        )}
+                        <span className={`text-xs font-bold uppercase ${product.is_active ? 'text-success' : 'text-foreground-muted'}`}>
+                          {product.is_active ? 'Active' : 'Draft'}
+                        </span>
+                      </div>
                     </div>
 
                     <h3 className="font-bold text-[15px] leading-snug line-clamp-1 mt-1"
@@ -257,16 +268,16 @@ function AdminProductsContent() {
                     <div className="mt-3 pt-3 flex items-center justify-between"
                       style={{ borderTop: '1px solid rgba(195,201,187,0.25)' }}>
                       <div>
-                        <span className="font-extrabold text-[16px]" style={{ color: 'var(--color-primary)' }}>
+                        <span className="font-semibold text-[16px]" style={{ color: 'var(--color-primary)' }}>
                           {t('currency')}{product.product_variants?.[0]?.price || 0}
                         </span>
                         {product.product_variants?.[0]?.weight && (
-                          <span className="text-[11px] ml-1 font-medium" style={{ color: 'var(--color-on-surface-variant)' }}>
+                          <span className="text-xs ml-1 font-medium" style={{ color: 'var(--color-on-surface-variant)' }}>
                             / {product.product_variants[0].weight}
                           </span>
                         )}
                       </div>
-                      <span className="text-[11px] font-bold px-2 py-1 rounded-md"
+                      <span className="text-xs font-bold px-2 py-1 rounded-md"
                         style={{
                           background: (product.product_variants?.[0]?.stock || 0) < 10 ? '#ffdcc7' : 'var(--color-surface-container)',
                           color: (product.product_variants?.[0]?.stock || 0) < 10 ? 'var(--warning)' : 'var(--color-on-surface-variant)',

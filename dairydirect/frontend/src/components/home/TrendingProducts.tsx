@@ -5,12 +5,14 @@ import Link from 'next/link';
 import { ArrowRight, ChevronLeft, ChevronRight, Sparkles } from 'lucide-react';
 import { ProductCard } from '@/components/shared/ProductCard';
 import type { CatalogProduct } from '@/lib/types/catalog';
+import { useTranslation } from '@/lib/i18n';
 
 interface TrendingProductsProps {
   products: CatalogProduct[];
 }
 
 export function TrendingProducts({ products }: TrendingProductsProps) {
+  const { t } = useTranslation();
   const scrollRef = useRef<HTMLDivElement>(null);
 
   const handleScroll = (dir: 'left' | 'right') => {
@@ -29,17 +31,11 @@ export function TrendingProducts({ products }: TrendingProductsProps) {
           <div className="flex items-center gap-1.5 mb-1">
             <Sparkles className="w-4 h-4 text-secondary" />
             <span className="text-xs font-bold text-secondary uppercase tracking-wider">
-              Just Added
+              {t('justAdded') || 'Just Added'}
             </span>
           </div>
-          {/* Was "Trending Products" / "Top Picks". The feed behind it is
-              simply the newest products by created_at — there is no
-              popularity, view or sales signal involved. Labelling a
-              reverse-chronological list as trending or top-picked is a claim
-              the data does not support, so it says what it actually is.
-              Rename this back once a real ranking signal exists. */}
-          <h2 className="text-2xl md:text-3xl font-black text-primary tracking-tight">
-            New Arrivals
+          <h2 className="text-2xl md:text-3xl font-semibold text-primary tracking-tight">
+            {t('newArrivals') || 'New Arrivals'}
           </h2>
         </div>
 
@@ -48,7 +44,7 @@ export function TrendingProducts({ products }: TrendingProductsProps) {
             href="/products"
             className="text-xs sm:text-sm font-bold text-secondary hover:text-primary flex items-center gap-1 transition-colors"
           >
-            <span>View All Products</span>
+            <span>{t('viewAllProducts') || 'View All Products'}</span>
             <ArrowRight className="w-4 h-4" />
           </Link>
 

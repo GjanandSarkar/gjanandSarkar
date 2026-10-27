@@ -37,7 +37,7 @@ export function SmartBadge({ type, className }: SmartBadgeProps) {
 
   return (
     <div className={cn(
-      "inline-flex items-center gap-1 px-2 py-0.5 rounded-full border text-[9px] font-black uppercase tracking-widest shadow-sm",
+      "inline-flex items-center gap-1 px-2 py-0.5 rounded-full border text-xs font-semibold uppercase tracking-widest shadow-sm",
       config.styles,
       className
     )}>

@@ -14,12 +14,14 @@ import {
   Mail,
   Phone,
   ChevronDown,
-  Upload
+  Upload,
+  LogOut
 } from 'lucide-react';
+import { useRouter } from 'next/navigation';
 import { useTranslation } from '@/lib/i18n';
-import { updateProfileName, updateProfileAvatar, updateProfilePhone } from '@/lib/api/auth';
+import { updateProfileName, updateProfileAvatar, updateProfilePhone, logout as supabaseLogout } from '@/lib/api/auth';
 import { uploadImageToImageKit } from '@/lib/api/imagekit';
-import type { User as StoreUser } from '@/store/useStore';
+import { useStore, type User as StoreUser } from '@/store/useStore';
 import { motion, AnimatePresence } from 'framer-motion';
 import { formatPhoneInput, validatePhoneNumber } from '@/lib/utils/phone';
 
@@ -58,11 +60,28 @@ export function ProfileSummary({ user, onUpdateProfile }: ProfileSummaryProps) {
   const [rawPhoneDigits, setRawPhoneDigits] = useState('');
   const [selectedCountry, setSelectedCountry] = useState<CountryOption>(COUNTRY_LIST[0]);
   const [isCountryDropdownOpen, setIsCountryDropdownOpen] = useState(false);
-  
   const [isUploading, setIsUploading] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
-  const [showOptionsMenu, setShowOptionsMenu] = useState(false);
-  
+
+  const router = useRouter();
+  const logoutLocal = useStore((s) => s.logout);
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
+
+  const handleSignOut = async () => {
+    if (window.confirm(t('signOutConfirm') || "Are you sure you want to sign out?")) {
+      setIsLoggingOut(true);
+      try {
+        await supabaseLogout();
+        logoutLocal();
+        router.replace('/login');
+      } catch (err) {
+        console.error('Logout error:', err);
+      } finally {
+        setIsLoggingOut(false);
+      }
+    }
+  };
+
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -108,7 +127,7 @@ export function ProfileSummary({ user, onUpdateProfile }: ProfileSummaryProps) {
     if (rawPhoneDigits.trim() && selectedCountry.code === 'IN') {
       const validRes = validatePhoneNumber(fullPhone);
       if (!validRes.isValid) {
-        setErrorMsg("Enter a valid Indian mobile number");
+        setErrorMsg(t('enterValidIndianMobile') || "Enter a valid Indian mobile number");
         return;
       }
     }
@@ -304,7 +323,7 @@ export function ProfileSummary({ user, onUpdateProfile }: ProfileSummaryProps) {
 
                 <div>
                   <h4 className="text-sm font-bold text-foreground">Profile Photo</h4>
-                  <p className="text-[11px] text-foreground-muted font-medium mt-0.5">JPG, PNG or WebP. Max size 2MB.</p>
+                  <p className="text-xs text-foreground-muted font-medium mt-0.5">JPG, PNG or WebP. Max size 2MB.</p>
                 </div>
 
                 <button
@@ -325,7 +344,7 @@ export function ProfileSummary({ user, onUpdateProfile }: ProfileSummaryProps) {
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <div>
                     <label className="block text-xs font-bold text-foreground mb-1.5">
-                      First Name
+                      {t('firstName')}
                     </label>
                     <div className="relative">
                       <User className="w-4 h-4 text-foreground-muted absolute left-3.5 top-1/2 -translate-y-1/2" />
@@ -333,7 +352,7 @@ export function ProfileSummary({ user, onUpdateProfile }: ProfileSummaryProps) {
                         type="text"
                         value={firstName}
                         onChange={(e) => setFirstName(e.target.value)}
-                        placeholder="First Name"
+                        placeholder={t('firstName')}
                         className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-border text-sm font-medium text-foreground outline-none focus:border-primary transition-all bg-surface"
                         autoFocus
                       />
@@ -342,7 +361,7 @@ export function ProfileSummary({ user, onUpdateProfile }: ProfileSummaryProps) {
 
                   <div>
                     <label className="block text-xs font-bold text-foreground mb-1.5">
-                      Last Name
+                      {t('lastName')}
                     </label>
                     <div className="relative">
                       <User className="w-4 h-4 text-foreground-muted absolute left-3.5 top-1/2 -translate-y-1/2" />
@@ -350,7 +369,7 @@ export function ProfileSummary({ user, onUpdateProfile }: ProfileSummaryProps) {
                         type="text"
                         value={lastName}
                         onChange={(e) => setLastName(e.target.value)}
-                        placeholder="Last Name"
+                        placeholder={t('lastName')}
                         className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-border text-sm font-medium text-foreground outline-none focus:border-primary transition-all bg-surface"
                       />
                     </div>
@@ -360,7 +379,7 @@ export function ProfileSummary({ user, onUpdateProfile }: ProfileSummaryProps) {
                 {/* Email Address */}
                 <div>
                   <label className="block text-xs font-bold text-foreground mb-1.5">
-                    Email Address
+                    {t('emailAddress')}
                   </label>
                   <div className="relative">
                     <Mail className="w-4 h-4 text-foreground-muted absolute left-3.5 top-1/2 -translate-y-1/2" />
@@ -368,7 +387,7 @@ export function ProfileSummary({ user, onUpdateProfile }: ProfileSummaryProps) {
                       type="email"
                       value={profileEmail}
                       onChange={(e) => setProfileEmail(e.target.value)}
-                      placeholder="amul.sureja@example.com"
+                      placeholder="name@example.com"
                       className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-border text-sm font-medium text-foreground outline-none focus:border-primary transition-all bg-surface"
                     />
                   </div>
@@ -377,7 +396,7 @@ export function ProfileSummary({ user, onUpdateProfile }: ProfileSummaryProps) {
                 {/* Phone Number with Country Code Dropdown */}
                 <div>
                   <label className="block text-xs font-bold text-foreground mb-1.5">
-                    Phone Number
+                    {t('mobileNumber')}
                   </label>
                   <div className="flex relative">
                     {/* Country Code Pill */}
@@ -420,7 +439,7 @@ export function ProfileSummary({ user, onUpdateProfile }: ProfileSummaryProps) {
                                   <div className="flex items-center gap-2.5 min-w-0">
                                     <span className="font-bold text-foreground text-xs w-5 shrink-0">{c.code}</span>
                                     <span className="truncate text-foreground text-xs font-medium">{c.name}</span>
-                                    <span className="text-foreground-muted text-[11px] font-normal shrink-0">({c.code})</span>
+                                    <span className="text-foreground-muted text-xs font-normal shrink-0">({c.code})</span>
                                   </div>
                                   <span className="font-semibold text-foreground text-xs shrink-0 ml-2">{c.dialCode}</span>
                                 </button>
@@ -462,7 +481,7 @@ export function ProfileSummary({ user, onUpdateProfile }: ProfileSummaryProps) {
                 }}
                 className="px-6 py-2.5 rounded-xl border border-border bg-surface hover:bg-surface-muted text-sm font-semibold text-foreground transition-all cursor-pointer shadow-2xs active:scale-95"
               >
-                Cancel
+                {t('cancel')}
               </button>
               <button
                 type="button"
@@ -473,7 +492,7 @@ export function ProfileSummary({ user, onUpdateProfile }: ProfileSummaryProps) {
                 }
                 className="px-6 py-2.5 rounded-xl bg-primary hover:bg-primary-hover text-on-primary text-sm font-semibold transition-all cursor-pointer shadow-2xs active:scale-95 disabled:opacity-50"
               >
-                Save Changes
+                {t('saveProfileDetails')}
               </button>
             </div>
           </motion.div>
@@ -492,7 +511,7 @@ export function ProfileSummary({ user, onUpdateProfile }: ProfileSummaryProps) {
               <div 
                 onClick={handleSelectPhotoClick}
                 className="relative shrink-0 group cursor-pointer"
-                title="Change photo"
+                title={t('uploadAvatar') || 'Change photo'}
               >
                 <div className="w-20 h-20 sm:w-22 sm:h-22 rounded-full overflow-hidden bg-surface-muted border-2 border-white shadow-xs flex items-center justify-center relative group-hover:brightness-95 transition-all">
                   {isUploading ? (
@@ -521,7 +540,7 @@ export function ProfileSummary({ user, onUpdateProfile }: ProfileSummaryProps) {
                     {user?.name || t('name')}
                   </h2>
                   {user?.role === 'admin' && (
-                    <span className="bg-primary text-white text-[10px] uppercase font-bold px-2 py-0.5 rounded-md tracking-wider shrink-0 ml-1">
+                    <span className="bg-primary text-white text-xs uppercase font-bold px-2 py-0.5 rounded-md tracking-wider shrink-0 ml-1">
                       Admin
                     </span>
                   )}
@@ -542,7 +561,7 @@ export function ProfileSummary({ user, onUpdateProfile }: ProfileSummaryProps) {
                 <div className="flex items-center gap-3 text-xs font-semibold text-foreground-muted">
                   <div className="flex items-center gap-1.5">
                     <Calendar className="w-3.5 h-3.5 text-foreground-muted" />
-                    <span>Joined May 2024</span>
+                    <span>{t('memberSince', { date: 'May 2024' })}</span>
                   </div>
                   <span className="w-px h-3 bg-border/70" />
                   <div className="flex items-center gap-1.5">
@@ -576,7 +595,22 @@ export function ProfileSummary({ user, onUpdateProfile }: ProfileSummaryProps) {
                 className="px-4 py-2 bg-surface hover:bg-surface-muted border border-border rounded-xl text-xs sm:text-sm font-semibold text-foreground shadow-2xs flex items-center gap-2 transition-all active:scale-95 cursor-pointer"
               >
                 <Pencil className="w-4 h-4 text-foreground-muted" />
-                <span>Edit Profile</span>
+                <span>{t('editProfileTitle')}</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={handleSignOut}
+                disabled={isLoggingOut}
+                className="px-3.5 py-2 bg-surface hover:bg-error-bg hover:text-error hover:border-error/30 border border-border rounded-xl text-xs sm:text-sm font-semibold text-foreground shadow-2xs flex items-center gap-1.5 transition-all active:scale-95 cursor-pointer"
+                title="Sign out of your account"
+              >
+                {isLoggingOut ? (
+                  <Loader2 className="w-4 h-4 animate-spin text-error" />
+                ) : (
+                  <LogOut className="w-4 h-4 text-foreground-muted hover:text-error" />
+                )}
+                <span>{t('signOut')}</span>
               </button>
             </div>
           </motion.div>

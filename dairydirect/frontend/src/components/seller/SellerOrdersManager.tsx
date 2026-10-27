@@ -361,10 +361,10 @@ export function SellerOrdersManager({ initialStatusFilter = 'all' }: SellerOrder
               : 'bg-surface hover:bg-surface-muted border-border text-foreground'
           }`}
         >
-          <span className={`text-[11px] font-bold uppercase tracking-wider block ${activeTab === 'all' ? 'text-success-bg' : 'text-foreground-muted'}`}>
+          <span className={`text-xs font-bold uppercase tracking-wider block ${activeTab === 'all' ? 'text-success-bg' : 'text-foreground-muted'}`}>
             Total Orders
           </span>
-          <span className="text-2xl font-black mt-1 block">{orders.length}</span>
+          <span className="text-2xl font-semibold mt-1 block">{orders.length}</span>
         </button>
 
         <button
@@ -376,12 +376,12 @@ export function SellerOrdersManager({ initialStatusFilter = 'all' }: SellerOrder
           }`}
         >
           <div className="flex items-center justify-between">
-            <span className={`text-[11px] font-bold uppercase tracking-wider block ${activeTab === 'requests' ? 'text-warning-bg' : 'text-secondary'}`}>
+            <span className={`text-xs font-bold uppercase tracking-wider block ${activeTab === 'requests' ? 'text-warning-bg' : 'text-secondary'}`}>
               Requests
             </span>
             <RotateCcw className={`w-3.5 h-3.5 ${activeTab === 'requests' ? 'text-white' : 'text-secondary'}`} />
           </div>
-          <span className="text-2xl font-black mt-1 block">{requestsCount}</span>
+          <span className="text-2xl font-semibold mt-1 block">{requestsCount}</span>
         </button>
 
         <button
@@ -393,12 +393,12 @@ export function SellerOrdersManager({ initialStatusFilter = 'all' }: SellerOrder
           }`}
         >
           <div className="flex items-center justify-between">
-            <span className={`text-[11px] font-bold uppercase tracking-wider block ${activeTab === 'pending' ? 'text-warning-bg' : 'text-warning'}`}>
+            <span className={`text-xs font-bold uppercase tracking-wider block ${activeTab === 'pending' ? 'text-warning-bg' : 'text-warning'}`}>
               Pending
             </span>
             <Clock className={`w-3.5 h-3.5 ${activeTab === 'pending' ? 'text-white' : 'text-warning'}`} />
           </div>
-          <span className="text-2xl font-black mt-1 block">{pendingCount}</span>
+          <span className="text-2xl font-semibold mt-1 block">{pendingCount}</span>
         </button>
 
         <button
@@ -410,12 +410,12 @@ export function SellerOrdersManager({ initialStatusFilter = 'all' }: SellerOrder
           }`}
         >
           <div className="flex items-center justify-between">
-            <span className={`text-[11px] font-bold uppercase tracking-wider block ${activeTab === 'confirmed' ? 'text-success-bg' : 'text-success'}`}>
+            <span className={`text-xs font-bold uppercase tracking-wider block ${activeTab === 'confirmed' ? 'text-success-bg' : 'text-success'}`}>
               Confirmed
             </span>
             <CheckCircle2 className={`w-3.5 h-3.5 ${activeTab === 'confirmed' ? 'text-white' : 'text-success'}`} />
           </div>
-          <span className="text-2xl font-black mt-1 block">{confirmedCount}</span>
+          <span className="text-2xl font-semibold mt-1 block">{confirmedCount}</span>
         </button>
 
         <button
@@ -427,12 +427,12 @@ export function SellerOrdersManager({ initialStatusFilter = 'all' }: SellerOrder
           }`}
         >
           <div className="flex items-center justify-between">
-            <span className={`text-[11px] font-bold uppercase tracking-wider block ${activeTab === 'out_for_delivery' ? 'text-yellow-100' : 'text-warning'}`}>
+            <span className={`text-xs font-bold uppercase tracking-wider block ${activeTab === 'out_for_delivery' ? 'text-yellow-100' : 'text-warning'}`}>
               In Transit
             </span>
             <Truck className={`w-3.5 h-3.5 ${activeTab === 'out_for_delivery' ? 'text-white' : 'text-yellow-600'}`} />
           </div>
-          <span className="text-2xl font-black mt-1 block">{outForDeliveryCount}</span>
+          <span className="text-2xl font-semibold mt-1 block">{outForDeliveryCount}</span>
         </button>
 
         <button
@@ -444,12 +444,12 @@ export function SellerOrdersManager({ initialStatusFilter = 'all' }: SellerOrder
           }`}
         >
           <div className="flex items-center justify-between">
-            <span className={`text-[11px] font-bold uppercase tracking-wider block ${activeTab === 'delivered' ? 'text-success-bg' : 'text-primary'}`}>
+            <span className={`text-xs font-bold uppercase tracking-wider block ${activeTab === 'delivered' ? 'text-success-bg' : 'text-primary'}`}>
               Delivered
             </span>
             <Check className={`w-3.5 h-3.5 ${activeTab === 'delivered' ? 'text-white' : 'text-primary'}`} />
           </div>
-          <span className="text-2xl font-black mt-1 block">{deliveredCount}</span>
+          <span className="text-2xl font-semibold mt-1 block">{deliveredCount}</span>
         </button>
       </div>
 
@@ -519,12 +519,12 @@ export function SellerOrdersManager({ initialStatusFilter = 'all' }: SellerOrder
           <p className="text-xs font-semibold text-foreground-muted">Loading your store orders...</p>
         </div>
       ) : filteredOrders.length === 0 ? (
-        <div className="bg-surface rounded-3xl border border-border p-12 text-center space-y-4">
+        <div className="bg-surface rounded-xl border border-border p-12 text-center space-y-4">
           <div className="w-16 h-16 rounded-2xl bg-surface-muted text-foreground-muted flex items-center justify-center mx-auto">
             <ShoppingBag className="w-8 h-8" />
           </div>
           <div className="space-y-1">
-            <h4 className="font-extrabold text-base text-foreground">No Orders Found</h4>
+            <h4 className="font-semibold text-base text-foreground">No Orders Found</h4>
             <p className="text-xs text-foreground-muted max-w-sm mx-auto">
               {searchQuery
                 ? `No orders matching "${searchQuery}". Try a different keyword.`
@@ -565,11 +565,11 @@ export function SellerOrdersManager({ initialStatusFilter = 'all' }: SellerOrder
                   {/* Left: ID, Date, Customer */}
                   <div className="space-y-1">
                     <div className="flex items-center gap-2.5 flex-wrap">
-                      <span className="font-mono font-black text-sm text-primary">
+                      <span className="font-mono font-semibold text-sm text-primary">
                         {order.order_number || `ORD-${order.id.slice(0, 8).toUpperCase()}`}
                       </span>
                       <span
-                        className="px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider flex items-center gap-1.5"
+                        className="px-2.5 py-0.5 rounded-full text-xs font-semibold uppercase tracking-wider flex items-center gap-1.5"
                         style={{
                           backgroundColor: statusStyle.bg,
                           color: statusStyle.color,
@@ -581,7 +581,7 @@ export function SellerOrdersManager({ initialStatusFilter = 'all' }: SellerOrder
                       </span>
 
                       {/* Payment Status Badge */}
-                      <span className={`px-2 py-0.5 rounded-md text-[10px] font-bold uppercase tracking-wider flex items-center gap-1 ${
+                      <span className={`px-2 py-0.5 rounded-md text-xs font-bold uppercase tracking-wider flex items-center gap-1 ${
                         order.payment_status === 'paid'
                           ? 'bg-success-bg text-success'
                           : 'bg-warning-bg text-warning'
@@ -610,10 +610,10 @@ export function SellerOrdersManager({ initialStatusFilter = 'all' }: SellerOrder
                   {/* Right: Amount & Collapse Toggle */}
                   <div className="flex items-center justify-between md:justify-end gap-5">
                     <div className="text-left md:text-right">
-                      <div className="text-base font-black text-foreground">
+                      <div className="text-base font-semibold text-foreground">
                         ₹{order.total_amount}
                       </div>
-                      <div className="text-[11px] text-foreground-muted">
+                      <div className="text-xs text-foreground-muted">
                         {items.length} {items.length === 1 ? 'item' : 'items'}
                       </div>
                     </div>
@@ -689,7 +689,7 @@ export function SellerOrdersManager({ initialStatusFilter = 'all' }: SellerOrder
                                         <div className="flex items-center gap-2 flex-wrap">
                                           <p className="text-xs font-bold text-foreground">{name}</p>
                                           <span
-                                            className="px-2 py-0.5 rounded-md text-[10px] font-black uppercase tracking-wider"
+                                            className="px-2 py-0.5 rounded-md text-xs font-semibold uppercase tracking-wider"
                                             style={{
                                               backgroundColor: itemStatusStyle.bg,
                                               color: itemStatusStyle.color,
@@ -701,18 +701,18 @@ export function SellerOrdersManager({ initialStatusFilter = 'all' }: SellerOrder
                                         </div>
 
                                         {weight && (
-                                          <p className="text-[11px] text-foreground-muted font-medium">
+                                          <p className="text-xs text-foreground-muted font-medium">
                                             Variant: {weight}
                                           </p>
                                         )}
-                                        <div className="text-[11px] text-foreground-muted">
+                                        <div className="text-xs text-foreground-muted">
                                           Qty: <strong className="text-foreground">{item.quantity}</strong> × ₹{item.price}
                                         </div>
                                       </div>
                                     </div>
 
                                     <div className="text-right">
-                                      <div className="font-black text-xs text-foreground">
+                                      <div className="font-semibold text-xs text-foreground">
                                         ₹{item.price * item.quantity}
                                       </div>
 
@@ -723,7 +723,7 @@ export function SellerOrdersManager({ initialStatusFilter = 'all' }: SellerOrder
                                             <button
                                               onClick={() => handleUpdateItemAction(order.id, item.id, 'pack')}
                                               disabled={isBusy}
-                                              className="px-2.5 py-1 rounded-lg bg-info-bg hover:bg-info-bg text-blue-800 border border-info/20 text-[10px] font-bold transition-colors flex items-center gap-1"
+                                              className="px-2.5 py-1 rounded-lg bg-info-bg hover:bg-info-bg text-blue-800 border border-info/20 text-xs font-bold transition-colors flex items-center gap-1"
                                               title="Mark this item as packed and ready for dispatch"
                                             >
                                               <Package className="w-3 h-3" />
@@ -734,7 +734,7 @@ export function SellerOrdersManager({ initialStatusFilter = 'all' }: SellerOrder
                                             <button
                                               onClick={() => handleUpdateItemAction(order.id, item.id, 'dispatch')}
                                               disabled={isBusy}
-                                              className="px-2.5 py-1 rounded-lg bg-warning-bg hover:bg-warning-bg text-warning border border-warning/20 text-[10px] font-bold transition-colors flex items-center gap-1"
+                                              className="px-2.5 py-1 rounded-lg bg-warning-bg hover:bg-warning-bg text-warning border border-warning/20 text-xs font-bold transition-colors flex items-center gap-1"
                                               title="Hand over to dispatch / delivery partner"
                                             >
                                               <Truck className="w-3 h-3" />
@@ -742,7 +742,7 @@ export function SellerOrdersManager({ initialStatusFilter = 'all' }: SellerOrder
                                             </button>
                                           )}
                                           {itemStatus === 'handed_to_dispatch' && (
-                                            <span className="px-2 py-0.5 rounded-md bg-purple-50 text-purple-800 border border-purple-200 text-[10px] font-bold">
+                                            <span className="px-2 py-0.5 rounded-md bg-purple-50 text-purple-800 border border-purple-200 text-xs font-bold">
                                               With Dispatch
                                             </span>
                                           )}
@@ -774,26 +774,26 @@ export function SellerOrdersManager({ initialStatusFilter = 'all' }: SellerOrder
                                                 ) : (
                                                   <RotateCcw className="w-4 h-4 text-info" />
                                                 )}
-                                                <span className="font-extrabold uppercase tracking-wider text-[11px]">
+                                                <span className="font-semibold uppercase tracking-wider text-xs">
                                                   {isCancellation ? 'Cancellation Request' : 'Product Return Request'}
                                                 </span>
                                               </div>
 
                                               <div className="flex items-center gap-2">
-                                                <span className={`px-2 py-0.5 rounded-full text-[10px] font-black uppercase ${
+                                                <span className={`px-2 py-0.5 rounded-full text-xs font-semibold uppercase ${
                                                   req.status === 'approved' ? 'bg-success-bg text-success' :
                                                   req.status === 'rejected' ? 'bg-error-bg text-error' :
                                                   req.status === 'refunded' ? 'bg-info-bg text-blue-800' : 'bg-warning-bg text-warning'
                                                 }`}>
                                                   {req.status}
                                                 </span>
-                                                <span className="text-[10px] text-foreground-muted">
+                                                <span className="text-xs text-foreground-muted">
                                                   {format(new Date(req.created_at), 'MMM d, h:mm a')}
                                                 </span>
                                               </div>
                                             </div>
 
-                                            <div className="text-[11px] space-y-0.5">
+                                            <div className="text-xs space-y-0.5">
                                               <p>
                                                 <strong>Reason:</strong> {req.reason}
                                               </p>
@@ -812,7 +812,7 @@ export function SellerOrdersManager({ initialStatusFilter = 'all' }: SellerOrder
                                             {/* Photo Evidence Gallery */}
                                             {req.images && req.images.length > 0 && (
                                               <div>
-                                                <span className="text-[10px] font-bold text-foreground-muted block mb-1">
+                                                <span className="text-xs font-bold text-foreground-muted block mb-1">
                                                   Customer Uploaded Evidence ({req.images.length}):
                                                 </span>
                                                 <div className="flex gap-2 flex-wrap">
@@ -896,7 +896,7 @@ export function SellerOrdersManager({ initialStatusFilter = 'all' }: SellerOrder
 
                           <div className="bg-surface rounded-xl border border-border p-4 space-y-3 text-xs">
                             <div>
-                              <span className="text-foreground-muted block text-[10px] font-bold uppercase">Customer</span>
+                              <span className="text-foreground-muted block text-xs font-bold uppercase">Customer</span>
                               <p className="font-bold text-foreground mt-0.5">{order.profiles?.name || 'Customer'}</p>
                               {order.profiles?.phone && (
                                 <p className="text-foreground-muted flex items-center gap-1 mt-0.5">
@@ -907,7 +907,7 @@ export function SellerOrdersManager({ initialStatusFilter = 'all' }: SellerOrder
                             </div>
 
                             <div className="border-t border-border pt-2.5">
-                              <span className="text-foreground-muted block text-[10px] font-bold uppercase">Shipping Address</span>
+                              <span className="text-foreground-muted block text-xs font-bold uppercase">Shipping Address</span>
                               <p className="text-foreground mt-0.5 leading-relaxed font-medium">
                                 {order.user_addresses?.address || order.shipping_address || 'Address provided at checkout'}
                               </p>
@@ -920,7 +920,7 @@ export function SellerOrdersManager({ initialStatusFilter = 'all' }: SellerOrder
 
                             {order.delivery_slot && (
                               <div className="border-t border-border pt-2.5">
-                                <span className="text-foreground-muted block text-[10px] font-bold uppercase">Scheduled Slot</span>
+                                <span className="text-foreground-muted block text-xs font-bold uppercase">Scheduled Slot</span>
                                 <span className="font-semibold text-success block mt-0.5">
                                   {order.delivery_slot}
                                 </span>
@@ -937,14 +937,14 @@ export function SellerOrdersManager({ initialStatusFilter = 'all' }: SellerOrder
                                     ₹
                                   </div>
                                   <div>
-                                    <span className="text-[10px] font-bold uppercase tracking-wider text-foreground-muted block">PAYMENT METHOD</span>
-                                    <span className="font-extrabold text-sm text-foreground">Cash on Delivery (COD)</span>
+                                    <span className="text-xs font-bold uppercase tracking-wider text-foreground-muted block">PAYMENT METHOD</span>
+                                    <span className="font-semibold text-sm text-foreground">Cash on Delivery (COD)</span>
                                   </div>
                                 </div>
 
                                 <div className="flex items-center gap-2">
                                   <span className="text-xs text-foreground-muted">Collection Status:</span>
-                                  <span className={`px-2.5 py-0.5 rounded-full text-xs font-black uppercase tracking-wider ${
+                                  <span className={`px-2.5 py-0.5 rounded-full text-xs font-semibold uppercase tracking-wider ${
                                     order.payment_status === 'paid'
                                       ? 'bg-success-bg text-success border border-success/20'
                                       : 'bg-warning-bg text-warning border border-warning/20'
@@ -956,15 +956,15 @@ export function SellerOrdersManager({ initialStatusFilter = 'all' }: SellerOrder
 
                               <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs text-foreground-muted pt-1">
                                 <div>
-                                  <span className="text-[10px] text-foreground-muted font-bold uppercase tracking-wider block">ORDER AMOUNT</span>
-                                  <span className="font-extrabold text-sm text-primary">₹{order.total_amount}</span>
+                                  <span className="text-xs text-foreground-muted font-bold uppercase tracking-wider block">ORDER AMOUNT</span>
+                                  <span className="font-semibold text-sm text-primary">₹{order.total_amount}</span>
                                 </div>
                                 <div>
-                                  <span className="text-[10px] text-foreground-muted font-bold uppercase tracking-wider block">ORDER STATUS</span>
+                                  <span className="text-xs text-foreground-muted font-bold uppercase tracking-wider block">ORDER STATUS</span>
                                   <span className="font-bold text-foreground uppercase">{order.status.replace(/_/g, ' ')}</span>
                                 </div>
                                 <div>
-                                  <span className="text-[10px] text-foreground-muted font-bold uppercase tracking-wider block">CASH CONFIRMED AT</span>
+                                  <span className="text-xs text-foreground-muted font-bold uppercase tracking-wider block">CASH CONFIRMED AT</span>
                                   <span className="font-medium text-foreground">
                                     {order.payment_confirmed_at 
                                       ? format(new Date(order.payment_confirmed_at), 'dd MMM yyyy, hh:mm a') 
@@ -972,7 +972,7 @@ export function SellerOrdersManager({ initialStatusFilter = 'all' }: SellerOrder
                                   </span>
                                 </div>
                                 <div>
-                                  <span className="text-[10px] text-foreground-muted font-bold uppercase tracking-wider block">CONFIRMED BY</span>
+                                  <span className="text-xs text-foreground-muted font-bold uppercase tracking-wider block">CONFIRMED BY</span>
                                   <span className="font-medium text-foreground">
                                     {order.payment_status === 'paid' ? 'Seller Verified' : 'Pending'}
                                   </span>
@@ -999,7 +999,7 @@ export function SellerOrdersManager({ initialStatusFilter = 'all' }: SellerOrder
                           ) : (
                             /* Non-COD Payment summary */
                             <div className="bg-surface rounded-xl border border-border p-4 space-y-2 text-xs">
-                              <span className="text-foreground-muted block text-[10px] font-bold uppercase tracking-wider">Payment Information</span>
+                              <span className="text-foreground-muted block text-xs font-bold uppercase tracking-wider">Payment Information</span>
                               <div className="flex justify-between items-center">
                                 <span className="text-foreground-muted">Method:</span>
                                 <span className="font-bold uppercase text-foreground">{order.payment_method || 'Online'}</span>
@@ -1018,10 +1018,10 @@ export function SellerOrdersManager({ initialStatusFilter = 'all' }: SellerOrder
                       <div className="bg-surface rounded-2xl border border-border p-5 space-y-4">
                         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-border pb-3">
                           <div>
-                            <h5 className="text-xs font-black uppercase tracking-wider text-foreground">
+                            <h5 className="text-xs font-semibold uppercase tracking-wider text-foreground">
                               Order Fulfillment Workflow
                             </h5>
-                            <p className="text-[11px] text-foreground-muted">
+                            <p className="text-xs text-foreground-muted">
                               Advance order through required fulfillment milestones or cancel if permitted.
                             </p>
                           </div>
@@ -1058,7 +1058,7 @@ export function SellerOrdersManager({ initialStatusFilter = 'all' }: SellerOrder
                                   >
                                     {isPassed ? <Check className="w-3.5 h-3.5" /> : idx + 1}
                                   </div>
-                                  <span className={`text-[10px] mt-1 font-bold whitespace-nowrap capitalize ${
+                                  <span className={`text-xs mt-1 font-bold whitespace-nowrap capitalize ${
                                     isCurrent ? 'text-primary' : 'text-foreground-muted'
                                   }`}>
                                     {stepStatus.replace(/_/g, ' ')}
@@ -1214,11 +1214,11 @@ export function SellerOrdersManager({ initialStatusFilter = 'all' }: SellerOrder
       {/* ─── Cancel Order Modal ─── */}
       {cancelModalOrder && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-2xs p-4">
-          <div className="bg-surface rounded-3xl max-w-md w-full p-6 space-y-5 shadow-2xl animate-in fade-in">
+          <div className="bg-surface rounded-xl max-w-md w-full p-6 space-y-5 shadow-2xl animate-in fade-in">
             <div className="flex items-center justify-between border-b border-border pb-3">
               <div className="flex items-center gap-2 text-error">
                 <AlertCircle className="w-5 h-5" />
-                <h3 className="font-extrabold text-base text-foreground">Cancel Order</h3>
+                <h3 className="font-semibold text-base text-foreground">Cancel Order</h3>
               </div>
               <button
                 onClick={() => setCancelModalOrder(null)}
@@ -1292,7 +1292,7 @@ export function SellerOrdersManager({ initialStatusFilter = 'all' }: SellerOrder
       {/* ─── Request Decision Modal (Seller Approve / Reject) ─── */}
       {decisionModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-2xs p-4">
-          <div className="bg-surface rounded-3xl max-w-md w-full p-6 space-y-5 shadow-2xl animate-in fade-in">
+          <div className="bg-surface rounded-xl max-w-md w-full p-6 space-y-5 shadow-2xl animate-in fade-in">
             <div className="flex items-center justify-between border-b border-border pb-3">
               <div className="flex items-center gap-2">
                 {decisionModal.action === 'approve' ? (
@@ -1305,7 +1305,7 @@ export function SellerOrdersManager({ initialStatusFilter = 'all' }: SellerOrder
                   </div>
                 )}
                 <div>
-                  <h3 className="font-extrabold text-base text-foreground">
+                  <h3 className="font-semibold text-base text-foreground">
                     {decisionModal.action === 'approve' ? 'Approve' : 'Reject'}{' '}
                     {decisionModal.requestType === 'cancellation' ? 'Cancellation' : 'Return'}
                   </h3>

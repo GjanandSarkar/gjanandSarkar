@@ -45,7 +45,7 @@ export function HeritageBanner() {
 
   return (
     <section className="w-full max-w-[1440px] mx-auto px-4 md:px-8 py-6">
-      <div className="w-full bg-gradient-to-r from-primary via-primary to-primary-fixed-dim rounded-3xl p-6 md:p-8 text-white relative overflow-hidden shadow-lg">
+      <div className="w-full bg-gradient-to-r from-primary via-primary to-primary-fixed-dim rounded-xl p-6 md:p-8 text-white relative overflow-hidden shadow-lg">
         
         {/* Decorative background */}
         <div className="absolute -left-10 -bottom-10 w-64 h-64 opacity-10 pointer-events-none">
@@ -63,7 +63,7 @@ export function HeritageBanner() {
               <span>Authentic Bharat Heritage</span>
             </div>
 
-            <h2 className="text-2xl sm:text-3xl md:text-4xl font-black text-white leading-tight mb-3 tracking-tight">
+            <h2 className="text-2xl sm:text-3xl md:text-4xl font-semibold text-white leading-tight mb-3 tracking-tight">
               Explore India's Rich <br className="hidden sm:inline" />
               Heritage &amp; Culture
             </h2>
@@ -74,7 +74,7 @@ export function HeritageBanner() {
 
             <Link
               href="/products"
-              className="inline-flex items-center gap-2 px-6 py-3 bg-surface hover:bg-warning-bg text-primary font-black text-sm rounded-full shadow-md hover:shadow-lg transition-all active:scale-95"
+              className="inline-flex items-center gap-2 px-6 py-3 bg-surface hover:bg-warning-bg text-primary font-semibold text-sm rounded-full shadow-md hover:shadow-lg transition-all active:scale-95"
             >
               <span>Explore Collections</span>
               <ArrowRight className="w-4 h-4 text-primary" />
@@ -92,10 +92,10 @@ export function HeritageBanner() {
                 <div className={`w-16 h-16 rounded-xl ${item.bg} flex items-center justify-center mb-2.5 group-hover:scale-105 transition-transform`}>
                   {item.icon}
                 </div>
-                <h3 className="text-xs sm:text-sm font-black text-primary line-clamp-1">
+                <h3 className="text-xs sm:text-sm font-semibold text-primary line-clamp-1">
                   {item.title}
                 </h3>
-                <span className="text-[10px] text-foreground-muted font-medium line-clamp-1 mt-0.5">
+                <span className="text-xs text-foreground-muted font-medium line-clamp-1 mt-0.5">
                   {item.subtitle}
                 </span>
               </Link>

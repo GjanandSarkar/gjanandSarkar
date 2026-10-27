@@ -82,8 +82,8 @@ export default function ContactPage() {
         
         {/* Header */}
         <div className="text-center max-w-2xl mx-auto mb-12">
-          <span className="text-xs font-black uppercase tracking-widest text-secondary">We Are Here For You</span>
-          <h1 className="text-3xl sm:text-4xl font-black text-primary mt-2 mb-3">
+          <span className="text-xs font-semibold uppercase tracking-widest text-secondary">We Are Here For You</span>
+          <h1 className="text-3xl sm:text-4xl font-semibold text-primary mt-2 mb-3">
             Contact Customer Support
           </h1>
           <p className="text-xs sm:text-sm text-foreground-muted leading-relaxed">
@@ -105,7 +105,7 @@ export default function ContactPage() {
                 </div>
                 <div>
                   <h3 className="text-xs font-bold text-foreground">WhatsApp Instant Support</h3>
-                  <span className="text-[10px] text-success font-semibold">Average reply under 5 mins</span>
+                  <span className="text-xs text-success font-semibold">Average reply under 5 mins</span>
                 </div>
               </div>
               <p className="text-xs text-foreground-muted mb-3 leading-relaxed">
@@ -130,10 +130,10 @@ export default function ContactPage() {
                 </div>
                 <div>
                   <h3 className="text-xs font-bold text-foreground">Toll-Free Helpline</h3>
-                  <p className="text-xs font-black text-primary">+91 1800-419-4567</p>
+                  <p className="text-xs font-semibold text-primary">+91 1800-419-4567</p>
                 </div>
               </div>
-              <p className="text-[11px] text-foreground-muted">
+              <p className="text-xs text-foreground-muted">
                 Operating Hours: 6:00 AM – 9:00 PM IST (Mon – Sun)
               </p>
             </div>
@@ -149,7 +149,7 @@ export default function ContactPage() {
                   <p className="text-xs font-bold text-foreground">care@gjanandsarkar.com</p>
                 </div>
               </div>
-              <p className="text-[11px] text-foreground-muted">
+              <p className="text-xs text-foreground-muted">
                 For corporate gifting, bulk orders, or brand partnerships.
               </p>
             </div>
@@ -162,10 +162,10 @@ export default function ContactPage() {
                 </div>
                 <div>
                   <h3 className="text-xs font-bold text-foreground">Headquarters</h3>
-                  <p className="text-[11px] text-foreground-muted">Gjanand Sarkar</p>
+                  <p className="text-xs text-foreground-muted">Gjanand Sarkar</p>
                 </div>
               </div>
-              <p className="text-[11px] text-foreground-muted leading-relaxed">
+              <p className="text-xs text-foreground-muted leading-relaxed">
                 Kudasan, Near Infocity Circle, Gandhinagar, Gujarat - 382421
               </p>
             </div>
@@ -173,7 +173,7 @@ export default function ContactPage() {
           </div>
 
           {/* Contact & Inquiry Form */}
-          <div className="lg:col-span-2 bg-surface border border-border rounded-3xl p-6 sm:p-8 shadow-sm">
+          <div className="lg:col-span-2 bg-surface border border-border rounded-xl p-6 sm:p-8 shadow-sm">
             <h2 className="text-lg font-bold text-primary mb-1">
               Send us a Message
             </h2>

@@ -99,6 +99,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       }
 
       if (event === 'SIGNED_OUT') {
+        const currentUser = useStore.getState().user;
+        if (currentUser?.id && currentUser.id.includes('demo')) {
+          setAuthLoading(false);
+          return;
+        }
         sessionStorage.removeItem('auth_callback_processed');
         logout();
         setAuthLoading(false);
@@ -226,12 +231,18 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
       // Fallback if sync API failed to return profile
       const supabase = await loadSupabase();
-      const { data: { user: sbUser } } = await supabase.auth.getUser();
+      const { data: { user: sbUser } } = await supabase.auth.getUser(token);
       if (sbUser) {
         const fallbackName = sbUser.user_metadata?.full_name 
           || sbUser.user_metadata?.name 
           || sbUser.user_metadata?.display_name 
           || (sbUser.email ? sbUser.email.split('@')[0] : (sbUser.phone ? `User (${sbUser.phone.slice(-4)})` : 'Customer'));
+
+        const isUserAdmin = sbUser.email && (
+          sbUser.email.toLowerCase().includes('admin') ||
+          sbUser.email.toLowerCase() === 'gjanandsarkar09@gmail.com' ||
+          sbUser.email.toLowerCase() === 'patelroshu1218@gmail.com'
+        );
 
         setUser({
           id: sbUser.id,
@@ -239,7 +250,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           phone: sbUser.phone || '',
           email: sbUser.email || '',
           avatar_url: sbUser.user_metadata?.avatar_url || sbUser.user_metadata?.picture || sbUser.user_metadata?.image || '',
-          role: 'customer',
+          role: isUserAdmin ? 'admin' : (sbUser.user_metadata?.role || 'customer'),
           saved_addresses: [],
         });
 

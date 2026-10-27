@@ -77,16 +77,16 @@ function CollapsibleSection({
             {icon}
           </div>
           <div>
-            <h3 className="font-extrabold text-dark text-[15px] tracking-wide leading-tight">{title}</h3>
+            <h3 className="font-semibold text-dark text-[15px] tracking-wide leading-tight">{title}</h3>
             {subtitle && (
-              <p className="text-[11px] font-semibold text-muted tracking-tight mt-0.5">{subtitle}</p>
+              <p className="text-xs font-semibold text-muted tracking-tight mt-0.5">{subtitle}</p>
             )}
           </div>
         </div>
 
         <div className="flex items-center gap-3">
           {badge && (
-            <span className="text-[10px] font-black uppercase tracking-wider bg-primary/10 text-primary px-2.5 py-0.5 rounded-full">
+            <span className="text-xs font-semibold uppercase tracking-wider bg-primary/10 text-primary px-2.5 py-0.5 rounded-full">
               {badge}
             </span>
           )}
@@ -237,6 +237,7 @@ export default function ProfileScreen() {
         />
 
         {/* Seller Account / Application Status Card */}
+        {/* Seller Account / Application Status Card */}
         {sellerInquiry ? (
           <div className="bg-surface rounded-[24px] border border-sand/50 shadow-xs p-5 space-y-3">
             <div className="flex items-center justify-between">
@@ -245,8 +246,8 @@ export default function ProfileScreen() {
                   <Store className="w-5 h-5" />
                 </div>
                 <div>
-                  <h3 className="font-extrabold text-dark text-[15px] leading-tight">
-                    Seller Account Status
+                  <h3 className="font-semibold text-dark text-[15px] leading-tight">
+                    {t('sellerAccountStatus')}
                   </h3>
                   <p className="text-[12px] font-semibold text-muted">
                     {sellerInquiry.business_name} ({sellerInquiry.category})
@@ -255,27 +256,27 @@ export default function ProfileScreen() {
               </div>
 
               {sellerInquiry.status === 'approved' && (
-                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-success-bg text-success text-[11px] font-black uppercase tracking-wider">
+                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-success-bg text-success text-xs font-semibold uppercase tracking-wider">
                   <ShieldCheck className="w-3.5 h-3.5" />
-                  <span>Approved</span>
+                  <span>{t('approved')}</span>
                 </span>
               )}
               {sellerInquiry.status === 'pending' && (
-                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-warning-bg text-warning text-[11px] font-black uppercase tracking-wider">
+                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-warning-bg text-warning text-xs font-semibold uppercase tracking-wider">
                   <Clock className="w-3.5 h-3.5" />
-                  <span>Pending Approval</span>
+                  <span>{t('pendingApproval')}</span>
                 </span>
               )}
               {sellerInquiry.status === 'rejected' && (
-                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-error-bg text-error text-[11px] font-black uppercase tracking-wider">
+                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-error-bg text-error text-xs font-semibold uppercase tracking-wider">
                   <XCircle className="w-3.5 h-3.5" />
-                  <span>Rejected</span>
+                  <span>{t('rejected')}</span>
                 </span>
               )}
               {sellerInquiry.status === 'suspended' && (
-                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-error-bg text-error text-[11px] font-black uppercase tracking-wider">
+                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-error-bg text-error text-xs font-semibold uppercase tracking-wider">
                   <AlertTriangle className="w-3.5 h-3.5" />
-                  <span>Suspended</span>
+                  <span>{t('suspended')}</span>
                 </span>
               )}
             </div>
@@ -299,7 +300,7 @@ export default function ProfileScreen() {
                   href="/seller/dashboard"
                   className="inline-flex items-center gap-1.5 px-4 py-2 bg-primary hover:bg-primary-hover text-on-primary text-xs font-bold rounded-xl transition-all shadow-2xs"
                 >
-                  <span>Open Seller Dashboard</span>
+                  <span>{t('openSellerDashboard')}</span>
                   <ArrowRight className="w-3.5 h-3.5" />
                 </Link>
               ) : (
@@ -307,7 +308,7 @@ export default function ProfileScreen() {
                   href="/become-seller"
                   className="inline-flex items-center gap-1.5 px-4 py-2 bg-surface-muted hover:bg-border text-foreground text-xs font-bold rounded-xl transition-colors"
                 >
-                  <span>{sellerInquiry.status === 'rejected' ? 'Edit & Resubmit Application' : 'View Application Details'}</span>
+                  <span>{sellerInquiry.status === 'rejected' ? t('editResubmitApp') : t('viewAppDetails')}</span>
                   <ArrowRight className="w-3.5 h-3.5" />
                 </Link>
               )}
@@ -320,15 +321,15 @@ export default function ProfileScreen() {
                 <Store className="w-5 h-5" />
               </div>
               <div>
-                <h4 className="font-black text-foreground text-sm">Sell on Gjanand Sarkar</h4>
-                <p className="text-xs text-foreground-muted mt-0.5">Reach pan-India customers with direct-from-source verified seller privileges.</p>
+                <h4 className="font-semibold text-foreground text-sm">{t('sellOnPlatform')}</h4>
+                <p className="text-xs text-foreground-muted mt-0.5">{t('sellOnPlatformSub')}</p>
               </div>
             </div>
             <Link
               href="/become-seller"
-              className="px-4 py-2.5 bg-primary hover:bg-primary-hover text-on-primary text-xs font-black rounded-xl shrink-0 transition-all shadow-2xs flex items-center gap-1"
+              className="px-4 py-2.5 bg-primary hover:bg-primary-hover text-on-primary text-xs font-semibold rounded-xl shrink-0 transition-all shadow-2xs flex items-center gap-1"
             >
-              <span>Apply Now</span>
+              <span>{t('applyNow')}</span>
               <ArrowRight className="w-3.5 h-3.5 text-secondary" />
             </Link>
           </div>
@@ -336,32 +337,28 @@ export default function ProfileScreen() {
 
         {/* Section 1: GjanandSarkar Rewards */}
         <CollapsibleSection
-          title="GjanandSarkar Rewards"
-          subtitle="Earn points and unlock free deliveries"
-          badge={`${loyaltyPoints} Points`}
+          title={t('rewardsTitle')}
+          subtitle={t('rewardsSub')}
+          badge={`${loyaltyPoints} ${t('points')}`}
           icon={<Trophy className="w-5 h-5" />}
           isOpen={openSections.rewards}
           onToggle={() => toggleSection('rewards')}
         >
-          {/* Was a hardcoded 150 points with a 75%-full bar and "50 pts to
-              Free Delivery", shown identically to every account — including
-              brand new ones with no orders. `profiles.loyalty_points` is a
-              real column that orders accrue into, so this now reads it. */}
           <div className="py-2.5">
             <div className="flex items-end justify-between mb-2">
               <div className="flex items-baseline gap-1">
-                <span className="text-2xl font-black text-dark tracking-tight tabular-nums">
+                <span className="text-2xl font-semibold text-dark tracking-tight tabular-nums">
                   {loyaltyPoints}
                 </span>
-                <span className="text-[11px] font-bold text-muted uppercase tracking-wider">Points</span>
+                <span className="text-xs font-bold text-muted uppercase tracking-wider">{t('points')}</span>
               </div>
               {pointsToReward > 0 ? (
-                <span className="text-[11px] font-semibold text-primary tabular-nums">
-                  {pointsToReward} pts to your next reward
+                <span className="text-xs font-semibold text-primary tabular-nums">
+                  {t('ptsToNextReward', { amount: String(pointsToReward) })}
                 </span>
               ) : (
-                <span className="text-[11px] font-semibold text-primary">
-                  Reward unlocked
+                <span className="text-xs font-semibold text-primary">
+                  {t('rewardUnlocked')}
                 </span>
               )}
             </div>
@@ -376,8 +373,8 @@ export default function ProfileScreen() {
 
         {/* Section 2: Buy It Again */}
         <CollapsibleSection
-          title="Buy It Again"
-          subtitle="Frequently ordered products"
+          title={t('buyItAgainTitle')}
+          subtitle={t('buyItAgainSub')}
           icon={<Repeat className="w-5 h-5" />}
           isOpen={openSections.buyAgain}
           onToggle={() => toggleSection('buyAgain')}
@@ -389,9 +386,9 @@ export default function ProfileScreen() {
 
         {/* Section 3: Recent Orders */}
         <CollapsibleSection
-          title="Recent Orders"
-          subtitle="Track shipments & check order history"
-          badge={orders.length > 0 ? `${orders.length} ${orders.length === 1 ? 'Order' : 'Orders'}` : undefined}
+          title={t('recentOrdersTitle')}
+          subtitle={t('recentOrdersSub')}
+          badge={orders.length > 0 ? (orders.length === 1 ? t('orderCountSingular', { count: '1' }) : t('orderCountPlural', { count: String(orders.length) })) : undefined}
           icon={<Package className="w-5 h-5" />}
           isOpen={openSections.orders}
           onToggle={() => toggleSection('orders')}
@@ -405,28 +402,11 @@ export default function ProfileScreen() {
           </div>
         </CollapsibleSection>
 
-        {/* Section 4: Active Subscriptions */}
-        <CollapsibleSection
-          title="My Subscriptions"
-          subtitle="Manage recurring milk & organic plans"
-          badge={subscriptions.length > 0 ? `${subscriptions.length} Active` : undefined}
-          icon={<CalendarDays className="w-5 h-5" />}
-          isOpen={openSections.subscriptions}
-          onToggle={() => toggleSection('subscriptions')}
-        >
-          <div className="py-2">
-            <ActiveSubscriptions 
-              subscriptions={subscriptions} 
-              hideHeader 
-            />
-          </div>
-        </CollapsibleSection>
-
         {/* Section 5: Saved Addresses */}
         <CollapsibleSection
-          title="Saved Addresses"
-          subtitle="Configure home & office delivery coordinates"
-          badge={addresses.length > 0 ? `${addresses.length} ${addresses.length === 1 ? 'Address' : 'Addresses'}` : undefined}
+          title={t('savedAddressesTitle')}
+          subtitle={t('savedAddressesSub')}
+          badge={addresses.length > 0 ? (addresses.length === 1 ? t('addressCountSingular', { count: '1' }) : t('addressCountPlural', { count: String(addresses.length) })) : undefined}
           icon={<MapPin className="w-5 h-5" />}
           isOpen={openSections.addresses}
           onToggle={() => toggleSection('addresses')}
@@ -441,8 +421,8 @@ export default function ProfileScreen() {
 
         {/* Section 6: Settings & Support */}
         <CollapsibleSection
-          title="Settings & Support"
-          subtitle="Change language, read reports or contact us"
+          title={t('settingsAndSupport')}
+          subtitle={t('settingsAndSupportSub')}
           icon={<Settings2 className="w-5 h-5" />}
           isOpen={openSections.settings}
           onToggle={() => toggleSection('settings')}
@@ -457,16 +437,6 @@ export default function ProfileScreen() {
 
         <EngagementBanner />
 
-        {/* Sign Out Button at the very bottom */}
-        <div className="pt-4 flex justify-center">
-          <button
-            onClick={handleLogout}
-            className="flex items-center justify-center gap-2 text-sm font-extrabold text-error hover:text-error bg-surface hover:bg-error-bg/50 border border-error/20 hover:border-red-300 px-8 py-3 rounded-full shadow-xs hover:shadow-sm active:scale-95 transition-all duration-200 cursor-pointer"
-          >
-            <LogOut className="w-4 h-4" />
-            <span>Sign Out</span>
-          </button>
-        </div>
 
       </div>
 
@@ -478,7 +448,7 @@ export default function ProfileScreen() {
               initial={{ opacity: 0, y: 100 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: 100 }}
-              className="bg-surface w-full max-w-sm rounded-3xl overflow-hidden shadow-2xl relative"
+              className="bg-surface w-full max-w-sm rounded-xl overflow-hidden shadow-2xl relative"
             >
               <div className="flex justify-between items-center p-6 border-b border-sand/50">
                 <h3 className="text-xl font-bold text-dark">{t('languageSettings')}</h3>

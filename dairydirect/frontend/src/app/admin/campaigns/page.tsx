@@ -134,7 +134,7 @@ export default function AdminCampaignsPage() {
         <div>
           <div className="flex items-center gap-2 mb-1">
             <Megaphone className="w-5 h-5 text-primary" />
-            <h1 className="text-xl sm:text-2xl font-black text-foreground">Ad Campaigns</h1>
+            <h1 className="text-xl sm:text-2xl font-semibold text-foreground">Ad Campaigns</h1>
           </div>
           <p className="text-sm text-foreground-muted">
             House promotions across the storefront, with impression, click and ROAS tracking.
@@ -208,7 +208,7 @@ export default function AdminCampaignsPage() {
                   (h) => (
                     <th
                       key={h}
-                      className="px-3 py-3 text-[11px] font-bold uppercase tracking-wider text-foreground-muted whitespace-nowrap"
+                      className="px-3 py-3 text-xs font-bold uppercase tracking-wider text-foreground-muted whitespace-nowrap"
                     >
                       {h}
                     </th>
@@ -224,13 +224,13 @@ export default function AdminCampaignsPage() {
                     <td className="px-3 py-3 text-[13px] font-bold text-foreground">
                       {c.name}
                       {c.target_category && (
-                        <span className="block text-[11px] font-medium text-foreground-muted">
+                        <span className="block text-xs font-medium text-foreground-muted">
                           {c.target_category}
                         </span>
                       )}
                     </td>
                     <td className="px-3 py-3 text-[12px] text-foreground-muted capitalize">{c.objective}</td>
-                    <td className="px-3 py-3 text-[11px] text-foreground-muted">{c.placements?.join(', ')}</td>
+                    <td className="px-3 py-3 text-xs text-foreground-muted">{c.placements?.join(', ')}</td>
                     <td className="px-3 py-3 text-[13px] text-foreground tabular-nums">
                       {(m?.impressions ?? 0).toLocaleString('en-IN')}
                     </td>
@@ -258,7 +258,7 @@ export default function AdminCampaignsPage() {
                         value={c.status}
                         onChange={(e) => updateStatus(c.id, e.target.value)}
                         aria-label={`Status for ${c.name}`}
-                        className={`text-[11px] font-bold uppercase tracking-wide rounded-lg border px-2 py-1 cursor-pointer ${
+                        className={`text-xs font-bold uppercase tracking-wide rounded-lg border px-2 py-1 cursor-pointer ${
                           STATUS_STYLES[c.status] ?? STATUS_STYLES.draft
                         }`}
                       >
@@ -294,10 +294,10 @@ function SummaryCard({
     <div className="rounded-2xl border border-border bg-surface p-4">
       <div className="flex items-center gap-1.5 mb-1.5">
         <Icon className="w-3.5 h-3.5 text-foreground-muted" />
-        <span className="text-[11px] font-bold uppercase tracking-wider text-foreground-muted">{label}</span>
+        <span className="text-xs font-bold uppercase tracking-wider text-foreground-muted">{label}</span>
       </div>
-      <p className="text-xl font-black text-foreground tabular-nums">{value}</p>
-      {hint && <p className="text-[11px] text-foreground-muted mt-0.5">{hint}</p>}
+      <p className="text-xl font-semibold text-foreground tabular-nums">{value}</p>
+      {hint && <p className="text-xs text-foreground-muted mt-0.5">{hint}</p>}
     </div>
   );
 }
@@ -377,14 +377,14 @@ function CampaignForm({ onCreated }: { onCreated: () => void }) {
 
       <div className="grid sm:grid-cols-2 gap-4">
         <label className="block">
-          <span className="block text-[11px] font-bold uppercase tracking-wider text-foreground-muted mb-1.5">
+          <span className="block text-xs font-bold uppercase tracking-wider text-foreground-muted mb-1.5">
             Campaign name
           </span>
           <input value={name} onChange={(e) => setName(e.target.value)} className={inputClass} placeholder="Diwali electronics push" />
         </label>
 
         <label className="block">
-          <span className="block text-[11px] font-bold uppercase tracking-wider text-foreground-muted mb-1.5">
+          <span className="block text-xs font-bold uppercase tracking-wider text-foreground-muted mb-1.5">
             Objective
           </span>
           <select value={objective} onChange={(e) => setObjective(e.target.value)} className={inputClass}>
@@ -398,7 +398,7 @@ function CampaignForm({ onCreated }: { onCreated: () => void }) {
       </div>
 
       <div>
-        <span className="block text-[11px] font-bold uppercase tracking-wider text-foreground-muted mb-1.5">
+        <span className="block text-xs font-bold uppercase tracking-wider text-foreground-muted mb-1.5">
           Placements
         </span>
         <div className="flex flex-wrap gap-2">
@@ -422,14 +422,14 @@ function CampaignForm({ onCreated }: { onCreated: () => void }) {
 
       <div className="grid sm:grid-cols-2 gap-4">
         <label className="block">
-          <span className="block text-[11px] font-bold uppercase tracking-wider text-foreground-muted mb-1.5">
+          <span className="block text-xs font-bold uppercase tracking-wider text-foreground-muted mb-1.5">
             Target category
           </span>
           <input value={targetCategory} onChange={(e) => setTargetCategory(e.target.value)} className={inputClass} placeholder="Ghee" />
         </label>
 
         <label className="block">
-          <span className="block text-[11px] font-bold uppercase tracking-wider text-foreground-muted mb-1.5">
+          <span className="block text-xs font-bold uppercase tracking-wider text-foreground-muted mb-1.5">
             Product IDs
           </span>
           <input value={productIds} onChange={(e) => setProductIds(e.target.value)} className={inputClass} placeholder="Comma separated UUIDs" />
@@ -438,27 +438,27 @@ function CampaignForm({ onCreated }: { onCreated: () => void }) {
 
       <div className="grid sm:grid-cols-3 gap-4">
         <label className="block">
-          <span className="block text-[11px] font-bold uppercase tracking-wider text-foreground-muted mb-1.5">
+          <span className="block text-xs font-bold uppercase tracking-wider text-foreground-muted mb-1.5">
             Budget (₹)
           </span>
           <input type="number" min="0" value={spendAmount} onChange={(e) => setSpendAmount(e.target.value)} className={inputClass} />
-          <span className="block text-[11px] text-foreground-muted mt-1">Used as the denominator for ROAS.</span>
+          <span className="block text-xs text-foreground-muted mt-1">Used as the denominator for ROAS.</span>
         </label>
 
         <label className="block">
-          <span className="block text-[11px] font-bold uppercase tracking-wider text-foreground-muted mb-1.5">
+          <span className="block text-xs font-bold uppercase tracking-wider text-foreground-muted mb-1.5">
             Daily frequency cap
           </span>
           <input type="number" min="1" value={frequencyCap} onChange={(e) => setFrequencyCap(e.target.value)} className={inputClass} />
-          <span className="block text-[11px] text-foreground-muted mt-1">Max views per visitor per day.</span>
+          <span className="block text-xs text-foreground-muted mt-1">Max views per visitor per day.</span>
         </label>
 
         <label className="block">
-          <span className="block text-[11px] font-bold uppercase tracking-wider text-foreground-muted mb-1.5">
+          <span className="block text-xs font-bold uppercase tracking-wider text-foreground-muted mb-1.5">
             Priority
           </span>
           <input type="number" value={priority} onChange={(e) => setPriority(e.target.value)} className={inputClass} />
-          <span className="block text-[11px] text-foreground-muted mt-1">Breaks ties only; relevance wins.</span>
+          <span className="block text-xs text-foreground-muted mt-1">Breaks ties only; relevance wins.</span>
         </label>
       </div>
 

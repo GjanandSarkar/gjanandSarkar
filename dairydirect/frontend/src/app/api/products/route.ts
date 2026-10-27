@@ -134,7 +134,11 @@ export async function GET(request: NextRequest) {
           sbQuery = sbQuery.ilike('category', `%${cleanCat}%`);
         }
         if (q) {
-          sbQuery = sbQuery.or(`name.ilike.%${q}%,description.ilike.%${q}%`);
+          // Safety: user-supplied text must not be interpolated into .or() \u2014 use
+          // a single .ilike() on the most important field (name) to avoid PostgREST
+          // filter injection. Product description search can be added via full-text
+          // search (to_tsvector) in a future migration.
+          sbQuery = sbQuery.ilike('name', `%${q}%`);
         }
         const { data, error } = await sbQuery;
         if (!error && data) {

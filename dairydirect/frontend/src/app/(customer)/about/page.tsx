@@ -72,25 +72,19 @@ export default function AboutPage() {
     <div className="min-h-screen bg-background text-foreground pb-20">
       
       {/* Hero Banner */}
-      <section className="relative bg-primary-fixed-dim text-white py-20 md:py-28 overflow-hidden">
-        <div className="absolute inset-0 opacity-10 pointer-events-none">
-          <svg viewBox="0 0 100 100" className="w-full h-full fill-white">
-            <path d="M50 10 C65 25 80 45 70 70 C60 90 40 95 30 75 C20 55 35 25 50 10 Z" />
-          </svg>
-        </div>
-
-        <div className="max-w-5xl mx-auto px-4 sm:px-6 md:px-8 relative z-10 text-center">
-          <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-surface/10 border border-secondary/40 text-secondary text-xs font-bold uppercase tracking-wider mb-6">
+      <section className="bg-primary text-on-primary py-16 md:py-20">
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 md:px-8 text-center">
+          <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-surface-muted text-primary text-xs font-medium mb-6 border border-border">
             <Sparkles className="w-3.5 h-3.5" />
             <span>Championing Brands Made in India</span>
           </div>
 
-          <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-black text-white tracking-tight leading-tight mb-6">
+          <h1 className="text-3xl sm:text-4xl md:text-5xl font-semibold text-white tracking-tight leading-tight mb-5">
             One Platform. <br className="hidden sm:block" />
-            <span className="text-secondary">One Trusted Brand Per Category.</span>
+            <span>One Trusted Brand Per Category.</span>
           </h1>
 
-          <p className="text-sm sm:text-base md:text-lg text-success-bg/90 max-w-2xl mx-auto leading-relaxed mb-8">
+          <p className="text-sm sm:text-base text-white/90 max-w-2xl mx-auto leading-relaxed mb-8">
             Gjanand Sarkar was founded on a simple promise: make it effortless to
             buy genuine Indian products. We partner with exactly one verified company
             in every category, so what you see is what you get — every time.
@@ -99,13 +93,13 @@ export default function AboutPage() {
           <div className="flex flex-wrap items-center justify-center gap-4">
             <Link
               href="/home"
-              className="px-6 py-3 rounded-xl bg-secondary hover:bg-secondary-hover text-white font-extrabold text-sm transition-all shadow-md active:scale-95"
+              className="px-6 py-2.5 rounded-lg bg-surface text-foreground hover:bg-surface-muted font-medium text-xs sm:text-sm transition-colors shadow-xs min-h-[44px] flex items-center"
             >
               Explore Products
             </Link>
             <Link
               href="/become-seller"
-              className="px-6 py-3 rounded-xl bg-surface/10 hover:bg-surface/20 border border-white/30 text-white font-bold text-sm transition-all"
+              className="px-6 py-2.5 rounded-lg border border-white/40 text-white hover:bg-white/10 font-medium text-xs sm:text-sm transition-colors min-h-[44px] flex items-center"
             >
               Become a Partner Brand
             </Link>
@@ -114,11 +108,11 @@ export default function AboutPage() {
       </section>
 
       {/* Core Mission & Story */}
-      <section className="max-w-6xl mx-auto px-4 sm:px-6 md:px-8 py-16">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
+      <section className="max-w-6xl mx-auto px-4 sm:px-6 md:px-8 py-14">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-10 items-center">
           <div>
-            <span className="text-xs font-black uppercase tracking-widest text-secondary">Our Genesis</span>
-            <h2 className="text-2xl sm:text-3xl font-extrabold text-primary mt-2 mb-4">
+            <span className="text-xs font-semibold text-primary">Our Genesis</span>
+            <h2 className="text-2xl sm:text-3xl font-semibold text-foreground mt-1 mb-4">
               Why Gjanand Sarkar was born
             </h2>
             <div className="space-y-4 text-sm text-foreground-muted leading-relaxed">
@@ -129,7 +123,7 @@ export default function AboutPage() {
                 Indian brands get buried; buyers get burned.
               </p>
               <p>
-                We asked a simple question: <strong className="text-foreground font-semibold">what if we picked one brand per category, and stood behind it?</strong> Not the
+                We asked a simple question: <strong className="text-foreground font-medium">what if we picked one brand per category, and stood behind it?</strong> Not the
                 cheapest listing, not the highest bidder — one company we have
                 verified, whose products we would put in our own homes.
               </p>
@@ -141,25 +135,25 @@ export default function AboutPage() {
             </div>
           </div>
 
-          <div className="bg-gradient-to-br from-[var(--primary)] to-primary-fixed-dim rounded-3xl p-8 text-white shadow-xl relative overflow-hidden">
-            <div className="relative z-10 space-y-6">
-              <h3 className="text-xl font-black text-warning">The Gjanand Sarkar Standard</h3>
-              <ul className="space-y-3.5 text-xs sm:text-sm text-success-bg">
+          <div className="bg-surface rounded-lg p-6 sm:p-8 border border-border shadow-xs">
+            <div className="space-y-5">
+              <h3 className="text-base font-semibold text-foreground">The Gjanand Sarkar Standard</h3>
+              <ul className="space-y-3.5 text-xs sm:text-sm text-foreground-muted">
                 <li className="flex items-start gap-3">
-                  <CheckCircle2 className="w-5 h-5 text-secondary shrink-0 mt-0.5" />
-                  <span><strong>Verified before listing:</strong> Business registration, GST and every licence a category requires.</span>
+                  <CheckCircle2 className="w-5 h-5 text-primary shrink-0 mt-0.5" />
+                  <span><strong className="text-foreground">Verified before listing:</strong> Business registration, GST and every licence a category requires.</span>
                 </li>
                 <li className="flex items-start gap-3">
-                  <CheckCircle2 className="w-5 h-5 text-secondary shrink-0 mt-0.5" />
-                  <span><strong>Made in India:</strong> Every product on the platform is manufactured or crafted in India.</span>
+                  <CheckCircle2 className="w-5 h-5 text-primary shrink-0 mt-0.5" />
+                  <span><strong className="text-foreground">Made in India:</strong> Every product on the platform is manufactured or crafted in India.</span>
                 </li>
                 <li className="flex items-start gap-3">
-                  <CheckCircle2 className="w-5 h-5 text-secondary shrink-0 mt-0.5" />
-                  <span><strong>One partner, one category:</strong> A single accountable brand per category — never competing duplicates.</span>
+                  <CheckCircle2 className="w-5 h-5 text-primary shrink-0 mt-0.5" />
+                  <span><strong className="text-foreground">One partner, one category:</strong> A single accountable brand per category — never competing duplicates.</span>
                 </li>
                 <li className="flex items-start gap-3">
-                  <CheckCircle2 className="w-5 h-5 text-secondary shrink-0 mt-0.5" />
-                  <span><strong>We take the complaint:</strong> If something is wrong, we resolve it — you never chase an anonymous seller.</span>
+                  <CheckCircle2 className="w-5 h-5 text-primary shrink-0 mt-0.5" />
+                  <span><strong className="text-foreground">We take the complaint:</strong> If something is wrong, we resolve it — you never chase an anonymous seller.</span>
                 </li>
               </ul>
             </div>
@@ -168,22 +162,22 @@ export default function AboutPage() {
       </section>
 
       {/* 4 Pillars */}
-      <section className="bg-success-bg/60 py-16 border-y border-success-bg">
+      <section className="bg-surface-muted py-14 border-y border-border">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 md:px-8">
-          <div className="text-center max-w-2xl mx-auto mb-12">
-            <span className="text-xs font-black uppercase tracking-widest text-secondary">Our Pillars</span>
-            <h2 className="text-2xl sm:text-3xl font-black text-primary mt-1">
-              Built On Integrity & Science
+          <div className="text-center max-w-2xl mx-auto mb-10">
+            <span className="text-xs font-semibold text-primary">Our Pillars</span>
+            <h2 className="text-2xl sm:text-3xl font-semibold text-foreground mt-1">
+              Built On Integrity &amp; Transparency
             </h2>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
             {pillars.map((pillar, idx) => (
-              <div key={idx} className="bg-surface p-6 rounded-2xl border border-success/20/70 shadow-xs hover:shadow-md transition-shadow">
-                <div className="w-12 h-12 rounded-xl bg-success-bg/70 text-primary flex items-center justify-center mb-4">
-                  <pillar.icon className="w-6 h-6 text-primary" />
+              <div key={idx} className="bg-surface p-5 rounded-lg border border-border shadow-xs">
+                <div className="w-10 h-10 rounded-lg bg-surface-muted text-primary flex items-center justify-center mb-3.5">
+                  <pillar.icon className="w-5 h-5 text-primary" />
                 </div>
-                <h3 className="text-sm font-bold text-foreground mb-2">{pillar.title}</h3>
+                <h3 className="text-xs font-semibold text-foreground mb-1.5">{pillar.title}</h3>
                 <p className="text-xs text-foreground-muted leading-relaxed">{pillar.desc}</p>
               </div>
             ))}
@@ -192,37 +186,37 @@ export default function AboutPage() {
       </section>
 
       {/* Journey Timeline */}
-      <section className="max-w-5xl mx-auto px-4 sm:px-6 md:px-8 py-16">
-        <div className="text-center max-w-2xl mx-auto mb-12">
-          <span className="text-xs font-black uppercase tracking-widest text-secondary">Growth & Impact</span>
-          <h2 className="text-2xl sm:text-3xl font-black text-primary mt-1">
+      <section className="max-w-5xl mx-auto px-4 sm:px-6 md:px-8 py-14">
+        <div className="text-center max-w-2xl mx-auto mb-10">
+          <span className="text-xs font-semibold text-primary">Growth &amp; Impact</span>
+          <h2 className="text-2xl sm:text-3xl font-semibold text-foreground mt-1">
             Our Journey So Far
           </h2>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-5">
           {milestones.map((m, i) => (
-            <div key={i} className="relative bg-surface p-5 rounded-2xl border border-border shadow-xs">
-              <span className="inline-block px-2.5 py-1 rounded-md bg-primary text-on-primary text-[11px] font-black tracking-wider mb-3">
+            <div key={i} className="bg-surface p-5 rounded-lg border border-border shadow-xs">
+              <span className="inline-block px-2.5 py-0.5 rounded-full bg-primary text-on-primary text-xs font-medium mb-2.5">
                 {m.year}
               </span>
-              <h3 className="text-xs font-bold text-foreground mb-1">{m.title}</h3>
-              <p className="text-[11px] text-foreground-muted leading-relaxed">{m.desc}</p>
+              <h3 className="text-xs font-semibold text-foreground mb-1">{m.title}</h3>
+              <p className="text-xs text-foreground-muted leading-relaxed">{m.desc}</p>
             </div>
           ))}
         </div>
       </section>
 
       {/* Partner verification & certifications */}
-      <section id="verification" className="max-w-4xl mx-auto px-4 sm:px-6 md:px-8 pt-4 pb-8">
-        <div className="bg-surface border border-warning/80 rounded-2xl p-6 sm:p-8 flex flex-col sm:flex-row items-center gap-6 shadow-sm">
-          <div className="w-16 h-16 rounded-2xl bg-warning-bg/80 text-secondary flex items-center justify-center shrink-0">
-            <ShieldCheck className="w-9 h-9" />
+      <section id="verification" className="max-w-4xl mx-auto px-4 sm:px-6 md:px-8 pt-2 pb-8">
+        <div className="bg-surface border border-border rounded-lg p-6 flex flex-col sm:flex-row items-center gap-5 shadow-xs">
+          <div className="w-12 h-12 rounded-lg bg-surface-muted text-primary flex items-center justify-center shrink-0 border border-border">
+            <ShieldCheck className="w-6 h-6" />
           </div>
           <div>
-            <h3 className="text-sm font-black text-foreground uppercase tracking-wide mb-1 flex items-center gap-2">
+            <h3 className="text-xs font-semibold text-foreground mb-1 flex items-center gap-2">
               <span>Partner Verification &amp; Certifications</span>
-              <span className="text-[10px] px-2 py-0.5 rounded-full bg-success-bg text-success font-bold">Verified</span>
+              <span className="text-xs px-2 py-0.5 rounded-full bg-surface-muted text-primary font-medium border border-border">Verified</span>
             </h3>
             <p className="text-xs text-foreground-muted leading-relaxed">
               Every partner brand is verified for business registration, GST and the

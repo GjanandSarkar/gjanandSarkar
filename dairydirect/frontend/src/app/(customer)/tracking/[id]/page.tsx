@@ -98,7 +98,7 @@ export default function TrackingPage() {
             <ArrowLeft className="w-5 h-5" />
           </button>
           <div className="min-w-0">
-            <h1 className="text-lg font-black text-foreground leading-tight truncate">
+            <h1 className="text-lg font-semibold text-foreground leading-tight truncate">
               Order #{order.id.substring(0, 8)}
             </h1>
             <p className="text-xs text-foreground-muted">
@@ -116,7 +116,7 @@ export default function TrackingPage() {
         <div className="bg-surface rounded-2xl border border-border p-5 shadow-2xs">
           <div className="flex items-start justify-between gap-4">
             <div className="min-w-0">
-              <h2 className="text-2xl font-black text-foreground leading-tight">
+              <h2 className="text-2xl font-semibold text-foreground leading-tight">
                 {statusLabel}
               </h2>
               {order.status !== 'cancelled' && (

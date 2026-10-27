@@ -218,7 +218,7 @@ function AddressOnboardingInner() {
     <div className="min-h-screen flex flex-col bg-surface">
       {/* Header */}
       <div className="px-6 pt-10 pb-4 max-w-xl mx-auto w-full">
-        <h1 className="text-2xl sm:text-3xl font-black text-on-surface tracking-tight mb-1">
+        <h1 className="text-2xl sm:text-3xl font-semibold text-on-surface tracking-tight mb-1">
           {t('deliveryAddressTitle') || 'Add Delivery Address'}
         </h1>
         <p className="text-muted text-xs sm:text-sm leading-relaxed">
@@ -229,7 +229,7 @@ function AddressOnboardingInner() {
       <div className="flex-1 px-6 space-y-6 pb-32 max-w-xl mx-auto w-full">
         {/* Name Input */}
         <div className="space-y-1.5">
-          <label className="text-[10px] font-bold uppercase tracking-widest text-muted ml-1">
+          <label className="text-xs font-bold uppercase tracking-widest text-muted ml-1">
             {t('fullName') || 'Recipient Name'}
           </label>
           <div className="relative">
@@ -246,7 +246,7 @@ function AddressOnboardingInner() {
         {/* Search Bar / Manual Input */}
         <div className="space-y-3">
           <div className="flex items-center justify-between">
-            <label className="text-[10px] font-bold uppercase tracking-widest text-muted ml-1">
+            <label className="text-xs font-bold uppercase tracking-widest text-muted ml-1">
               Complete Address
             </label>
             <button 
@@ -289,7 +289,7 @@ function AddressOnboardingInner() {
               showCenterMarker={true}
               onLocationChange={handleLocationChange}
             />
-            <div className="absolute bottom-2 right-2 px-2.5 py-1 bg-surface/90 backdrop-blur rounded-lg text-[10px] font-bold text-foreground shadow-sm pointer-events-none">
+            <div className="absolute bottom-2 right-2 px-2.5 py-1 bg-surface/90 backdrop-blur rounded-lg text-xs font-bold text-foreground shadow-sm pointer-events-none">
               📍 Drag map to adjust pin
             </div>
           </div>
@@ -297,7 +297,7 @@ function AddressOnboardingInner() {
 
         {/* Address Type Chips */}
         <div className="space-y-2">
-          <label className="text-[10px] font-bold uppercase tracking-widest text-muted ml-1">{t('saveAs') || 'Save Address As'}</label>
+          <label className="text-xs font-bold uppercase tracking-widest text-muted ml-1">{t('saveAs') || 'Save Address As'}</label>
           <div className="flex flex-wrap gap-2.5">
             {addressTypes.map(item => {
               const Icon = item.icon;
@@ -322,7 +322,7 @@ function AddressOnboardingInner() {
                     <button 
                       type="button"
                       onClick={() => { setType('Home'); setCustomLabel(''); }}
-                      className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[10px] font-black uppercase text-primary/60 hover:text-primary"
+                      className="absolute right-2.5 top-1/2 -translate-y-1/2 text-xs font-semibold uppercase text-primary/60 hover:text-primary"
                     >
                       Reset
                     </button>
@@ -361,7 +361,7 @@ function AddressOnboardingInner() {
           )}
           <div>
             <p className="text-xs font-bold text-foreground">Make this my default delivery address</p>
-            <p className="text-[11px] text-foreground-muted">
+            <p className="text-xs text-foreground-muted">
               {hasExistingAddresses 
                 ? 'Will be used as your primary address for quick checkouts.' 
                 : 'Your primary delivery location.'}

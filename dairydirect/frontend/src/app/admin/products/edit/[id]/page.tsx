@@ -45,7 +45,7 @@ export default function EditProductPage() {
   const [success, setSuccess] = useState('');
 
   const [name, setName] = useState('');
-  const [category, setCategory] = useState('Milk');
+  const [category, setCategory] = useState(CATEGORY_NAMES[0] || 'Dairy');
   const [description, setDescription] = useState('');
   const [imageUrl, setImageUrl] = useState('');
   const [isFreshnessGuarantee, setIsFreshnessGuarantee] = useState(true);
@@ -263,7 +263,7 @@ export default function EditProductPage() {
           </button>
           <div>
             <h1
-              className="font-extrabold text-[22px] tracking-tight"
+              className="font-semibold text-[22px] tracking-tight"
               style={{ color: 'var(--color-on-surface)' }}
             >
               Edit Product
@@ -495,7 +495,7 @@ export default function EditProductPage() {
                       </span>
                       {cost > 0 && (
                         <span
-                          className={`text-[11px] font-black px-2.5 py-0.5 rounded-full flex items-center gap-1 ${
+                          className={`text-xs font-semibold px-2.5 py-0.5 rounded-full flex items-center gap-1 ${
                             isMarginLow
                               ? 'bg-warning-bg text-warning'
                               : 'bg-success-bg text-success'
@@ -520,7 +520,7 @@ export default function EditProductPage() {
 
                   <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
                     <div>
-                      <label className="text-[10px] font-bold text-foreground-muted uppercase block mb-1">
+                      <label className="text-xs font-bold text-foreground-muted uppercase block mb-1">
                         Weight / Size *
                       </label>
                       <input
@@ -533,7 +533,7 @@ export default function EditProductPage() {
                     </div>
 
                     <div>
-                      <label className="text-[10px] font-bold text-foreground-muted uppercase block mb-1">
+                      <label className="text-xs font-bold text-foreground-muted uppercase block mb-1">
                         Selling Price (₹) *
                       </label>
                       <input
@@ -547,7 +547,7 @@ export default function EditProductPage() {
                     </div>
 
                     <div>
-                      <label className="text-[10px] font-bold text-foreground-muted uppercase block mb-1">
+                      <label className="text-xs font-bold text-foreground-muted uppercase block mb-1">
                         Cost Price (₹)
                       </label>
                       <input
@@ -561,7 +561,7 @@ export default function EditProductPage() {
                     </div>
 
                     <div>
-                      <label className="text-[10px] font-bold text-foreground-muted uppercase block mb-1">
+                      <label className="text-xs font-bold text-foreground-muted uppercase block mb-1">
                         Original MRP (₹)
                       </label>
                       <input
@@ -575,7 +575,7 @@ export default function EditProductPage() {
                     </div>
 
                     <div>
-                      <label className="text-[10px] font-bold text-foreground-muted uppercase block mb-1">
+                      <label className="text-xs font-bold text-foreground-muted uppercase block mb-1">
                         Stock Qty
                       </label>
                       <input

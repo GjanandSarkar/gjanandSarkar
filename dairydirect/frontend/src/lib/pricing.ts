@@ -19,6 +19,8 @@ export interface PricingResult {
   couponApplied: boolean;
 }
 
+import { BUSINESS_CONFIG } from '@/lib/config/business';
+
 export interface BusinessSettings {
   min_profit_margin_percent: number;
   free_delivery_threshold: number;
@@ -27,10 +29,10 @@ export interface BusinessSettings {
 }
 
 const DEFAULT_SETTINGS: BusinessSettings = {
-  min_profit_margin_percent: 20,
-  free_delivery_threshold: 299,
-  delivery_cost: 25,
-  max_discount_percent: 30,
+  min_profit_margin_percent: BUSINESS_CONFIG.margins.minProfitMarginPercent,
+  free_delivery_threshold: BUSINESS_CONFIG.delivery.freeDeliveryThreshold,
+  delivery_cost: BUSINESS_CONFIG.delivery.standardDeliveryFee,
+  max_discount_percent: BUSINESS_CONFIG.margins.maxDiscountPercent,
 };
 
 /**
@@ -92,10 +94,10 @@ export async function calculateOrderPricing(
 
       if (sbSettings.data) {
         settings = {
-          min_profit_margin_percent: parseFloat(sbSettings.data.min_profit_margin_percent ?? '20'),
-          free_delivery_threshold: parseFloat(sbSettings.data.free_delivery_threshold ?? '299'),
-          delivery_cost: parseFloat(sbSettings.data.delivery_cost ?? '25'),
-          max_discount_percent: parseFloat(sbSettings.data.max_discount_percent ?? '30'),
+          min_profit_margin_percent: parseFloat(sbSettings.data.min_profit_margin_percent ?? String(BUSINESS_CONFIG.margins.minProfitMarginPercent)),
+          free_delivery_threshold: parseFloat(sbSettings.data.free_delivery_threshold ?? String(BUSINESS_CONFIG.delivery.freeDeliveryThreshold)),
+          delivery_cost: parseFloat(sbSettings.data.delivery_cost ?? String(BUSINESS_CONFIG.delivery.standardDeliveryFee)),
+          max_discount_percent: parseFloat(sbSettings.data.max_discount_percent ?? String(BUSINESS_CONFIG.margins.maxDiscountPercent)),
         };
       }
 
@@ -154,8 +156,8 @@ export async function calculateOrderPricing(
   }
 
   // 3. Delivery Fee
-  const freeThreshold = parseFloat(settings.free_delivery_threshold as any) || 299;
-  const deliveryCost = parseFloat(settings.delivery_cost as any) || 25;
+  const freeThreshold = parseFloat(settings.free_delivery_threshold as any) || BUSINESS_CONFIG.delivery.freeDeliveryThreshold;
+  const deliveryCost = parseFloat(settings.delivery_cost as any) || BUSINESS_CONFIG.delivery.standardDeliveryFee;
   const deliveryFee = subtotal >= freeThreshold ? 0 : deliveryCost;
   const nextTierAmount = subtotal < freeThreshold ? freeThreshold - subtotal : 0;
 
