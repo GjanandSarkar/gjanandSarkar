@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useMemo } from 'react';
 import { useParams, useRouter } from 'next/navigation';
-import { ArrowLeft, Phone, MessageSquare, Star, Info, MapPin, Repeat, ThermometerSnowflake, ShieldCheck } from 'lucide-react';
+import { ArrowLeft, Phone, MessageSquare, Star, Info, MapPin, Repeat, ThermometerSnowflake, ShieldCheck, CreditCard, Banknote } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { getOrderById } from '@/lib/api/orders';
 import type { OrderWithItems } from '@/lib/api/orders';
@@ -146,6 +146,40 @@ export default function TrackingPage() {
           <p className="text-sm text-foreground-muted leading-relaxed font-medium">
             {addressText}
           </p>
+        </div>
+
+        {/* Payment method */}
+        <div className="bg-surface rounded-2xl border border-border p-5 shadow-2xs">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="w-9 h-9 rounded-full bg-sand/30 flex items-center justify-center text-primary shrink-0">
+                {(order.payment_method || '').toUpperCase() === 'COD' ? (
+                  <Banknote className="w-4 h-4" />
+                ) : (
+                  <CreditCard className="w-4 h-4" />
+                )}
+              </div>
+              <div>
+                <h3 className="font-bold text-foreground text-xs uppercase tracking-wider mb-0.5">
+                  Payment Method
+                </h3>
+                <p className="text-sm font-semibold text-foreground">
+                  {(order.payment_method || '').toUpperCase() === 'COD'
+                    ? 'Cash on Delivery (COD)'
+                    : (order.payment_method || '').toLowerCase() === 'razorpay'
+                    ? 'Online Payment (Razorpay)'
+                    : order.payment_method || 'Online'}
+                </p>
+              </div>
+            </div>
+            <span className={`px-2.5 py-1 rounded-full text-xs font-semibold ${
+              order.payment_status === 'paid' 
+                ? 'bg-success-bg text-success' 
+                : 'bg-warning-bg text-warning'
+            }`}>
+              {order.payment_status === 'paid' ? 'Paid' : 'Payment Pending'}
+            </span>
+          </div>
         </div>
 
         <OrderItemsReview order={order} />
