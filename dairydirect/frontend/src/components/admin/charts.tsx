@@ -1,5 +1,17 @@
 "use client";
 
+/**
+ * Admin chart components backed by recharts.
+ *
+ * IMPORTANT: This file must only be imported via Next.js dynamic() so that
+ * recharts (~160 KB gzip) is excluded from the shared customer-facing JS
+ * chunk.  Direct static imports in any page or layout that customers visit
+ * will bloat every page load.
+ *
+ * Usage:
+ *   const AdminCharts = dynamic(() => import('@/components/admin/charts'), { ssr: false });
+ */
+
 import React from 'react';
 import {
   ResponsiveContainer,
@@ -15,6 +27,7 @@ import {
   Pie,
   Cell,
 } from 'recharts';
+
 import {
   format,
   startOfMonth,

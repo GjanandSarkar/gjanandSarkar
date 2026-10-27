@@ -7,7 +7,13 @@ import { ProductCard } from '@/components/shared/ProductCard';
 import { CATEGORIES, categoryColors, categoryHref } from '@/lib/constants/categories';
 import { CategoryIcon } from '@/components/shared/CategoryIcon';
 
-export const dynamic = 'force-dynamic';
+/**
+ * Search results are dynamic (depends on ?q=) but can be cached per-query.
+ * 60 s is short enough that a new product appears within a minute, but long
+ * enough for the CDN to absorb repeated identical searches.
+ */
+export const revalidate = 60;
+
 
 export async function generateMetadata({
   searchParams,

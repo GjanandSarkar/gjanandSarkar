@@ -11,8 +11,12 @@ const nextConfig: NextConfig = {
   // Silence the multiple lockfiles warning
   outputFileTracingRoot: path.join(__dirname, '../..'),
 
-  // Keep heavy server-only packages out of the edge bundle for faster cold starts
-  serverExternalPackages: ['pg', 'ioredis'],
+  // Keep heavy server-only packages out of the edge bundle for faster cold starts.
+  // maplibre-gl is massive (~5 MB raw); it must never be bundled into any
+  // customer-facing chunk.  The OrderTrackingMap component is already wrapped
+  // in Next.js dynamic() (ssr: false), but adding it here provides a hard
+  // safety net at the build level.
+  serverExternalPackages: ['pg', 'ioredis', 'maplibre-gl'],
 
   allowedDevOrigins: [
     "scary-porcupine-headsman.ngrok-free.dev",
@@ -115,12 +119,22 @@ const nextConfig: NextConfig = {
           { key: 'Cache-Control', value: 'public, s-maxage=60, stale-while-revalidate=300' },
         ],
       },
+      {
+        // Search result pages: cache per URL (each ?q= is a distinct URL).
+        // 60 s is short enough that a newly added product appears quickly.
+        source: '/search',
+        headers: [
+          { key: 'Cache-Control', value: 'public, s-maxage=60, stale-while-revalidate=300' },
+        ],
+      },
     ];
   },
 
   /* Experimental features for performance */
   experimental: {
-    optimizePackageImports: ['lucide-react', 'framer-motion'],
+    // Tree-shake named exports from these packages so only the icons/components
+    // actually used are included in each chunk.
+    optimizePackageImports: ['lucide-react', 'framer-motion', 'recharts', 'date-fns'],
   },
 };
 

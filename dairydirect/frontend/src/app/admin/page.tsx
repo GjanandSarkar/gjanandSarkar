@@ -12,9 +12,18 @@ import { format, isToday, subDays } from 'date-fns';
 import Link from 'next/link';
 import { useStore } from '@/store/useStore';
 import { useTranslation } from '@/lib/i18n';
-import {
-  AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid
-} from 'recharts';
+import dynamic from 'next/dynamic';
+
+// Recharts is heavy (~160 KB gzip). Dynamic import ensures it is only loaded
+// when the admin dashboard is actually visited — never on customer routes.
+const AreaChart = dynamic(() => import('recharts').then(m => m.AreaChart));
+const Area = dynamic(() => import('recharts').then(m => m.Area));
+const XAxis = dynamic(() => import('recharts').then(m => m.XAxis));
+const YAxis = dynamic(() => import('recharts').then(m => m.YAxis));
+const Tooltip = dynamic(() => import('recharts').then(m => m.Tooltip));
+const ResponsiveContainer = dynamic(() => import('recharts').then(m => m.ResponsiveContainer));
+const CartesianGrid = dynamic(() => import('recharts').then(m => m.CartesianGrid));
+
 
 const container: Variants = {
   hidden: { opacity: 0 },

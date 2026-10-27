@@ -3,6 +3,7 @@ import { unstable_cache } from 'next/cache';
 import { getAdminSupabase } from '@/lib/supabase/admin';
 import type { CatalogProduct } from '@/lib/types/catalog';
 import { legacyCategoryFilter } from '@/lib/constants/categories';
+import { getProductsPage, PRODUCTS_PAGE_SIZE } from '@/lib/api/products.server';
 
 /**
  * Slim product shape for the homepage.
@@ -78,23 +79,21 @@ export const getHomeFeed = unstable_cache(fetchHomeFeed, ['home-feed-v1'], {
  * Same cache tag as the homepage feed, so one `revalidateTag('products')`
  * refreshes every catalogue surface at once.
  */
+/**
+ * Fetches the first page of the active catalogue for the /products listing.
+ *
+ * Previously fetched up to 500 rows and shipped them all in the RSC payload;
+ * filtering and sorting then happened in the browser's JS.
+ *
+ * Now returns only PRODUCTS_PAGE_SIZE rows (24) — the first page — via the
+ * server-side getProductsPage() helper which applies Postgres-level filtering,
+ * FTS search, and LIMIT/OFFSET.  The user never downloads products they won't
+ * see; subsequent pages are fetched on demand when they click Next.
+ */
 async function fetchCatalog(): Promise<HomeProduct[]> {
   try {
-    const admin = getAdminSupabase();
-    const { data, error } = await admin
-      .from('products')
-      .select(
-        'id, name, category, image_url, description, brand, rating, reviews_count, product_variants(id, weight, price, original_price, stock, available_quantity)'
-      )
-      .eq('is_active', true)
-      .eq('approval_status', 'approved')
-      .order('created_at', { ascending: false })
-      .limit(500);
-
-    if (error) throw error;
-    // Never list a product the storefront cannot price; it renders ₹0
-    // and puts a ₹0 line in the cart.
-    return filterSellable((data ?? []) as HomeProduct[]);
+    const result = await getProductsPage({ page: 1, activeOnly: true });
+    return result.products as HomeProduct[];
   } catch (error) {
     console.error('[catalog] getCatalog failed:', error);
     return [];
@@ -119,38 +118,23 @@ export function getCategoryProducts(category?: string): Promise<HomeProduct[]> {
   return unstable_cache(
     async () => {
       try {
-        const admin = getAdminSupabase();
-        let query = admin
-          .from('products')
-          .select(
-            'id, name, category, image_url, description, brand, rating, reviews_count, product_variants(id, weight, price, original_price, stock, available_quantity)'
-          )
-          .eq('is_active', true)
-      .eq('approval_status', 'approved')
-          .order('created_at', { ascending: false })
-          .limit(200);
-
-        if (category) {
-          const cleanCat = category.replace(/-/g, ' ').trim();
-          const legacy = legacyCategoryFilter(cleanCat);
-          if (legacy) {
-            query = query.or(legacy);
-          } else {
-            query = query.ilike('category', `%${cleanCat}%`);
-          }
-        }
-
-        const { data, error } = await query;
-        if (error) throw error;
-        // Never list a product the storefront cannot price; it renders ₹0
-    // and puts a ₹0 line in the cart.
-    return filterSellable((data ?? []) as HomeProduct[]);
+        // Use the server-side paginator which applies FTS + correct column
+        // projection (no cost_price, no audit columns shipped to browsers).
+        // Limit is set higher here (100) because category pages show more
+        // products per scroll than the homepage, and category size is bounded.
+        const result = await getProductsPage({
+          category,
+          page: 1,
+          activeOnly: true,
+          limit: 100,
+        });
+        return result.products as HomeProduct[];
       } catch (error) {
         console.error('[catalog] getCategoryProducts failed:', error);
         return [];
       }
     },
-    ['category-products-v1', key],
+    ['category-products-v2', key],
     { revalidate: 300, tags: ['products', `category:${key}`] }
   )();
 }

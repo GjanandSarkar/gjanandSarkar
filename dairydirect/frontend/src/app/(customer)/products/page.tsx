@@ -1,5 +1,5 @@
 import type { Metadata } from 'next';
-import { getCatalog } from '@/lib/api/home';
+import { getProductsPage, PRODUCTS_PAGE_SIZE } from '@/lib/api/products.server';
 import ProductsClient from './ProductsClient';
 
 export const metadata: Metadata = {
@@ -9,21 +9,65 @@ export const metadata: Metadata = {
 };
 
 /**
- * The catalogue listing is now server-rendered and cached (5 min, busted on
- * any product change via `revalidateTag('products')`).
+ * Server-rendered product catalogue with server-side pagination and Postgres FTS.
  *
- * It used to be a pure client component: the user got a blank skeleton, then
- * React hydrated, then the browser fetched the entire catalogue over the
- * network, and only then did a single product appear. That round-trip was
- * also invisible to search engines, so none of these product listings could
- * rank.
+ * Architecture change (Phase 4):
  *
- * Interactive filtering/sorting still happens in the client component below —
- * it just starts with real data instead of an empty array.
+ *   BEFORE: `getCatalog()` fetched up to 500 rows on every request, serialised
+ *   them all into the RSC payload, and handed the entire array to a client
+ *   component that filtered/sorted in JS.  The user's browser downloaded
+ *   potentially hundreds of unused product rows.
+ *
+ *   AFTER: `getProductsPage()` fetches exactly one page (24 products) using a
+ *   Postgres-level LIMIT/OFFSET.  Category, search, sort and price filters are
+ *   pushed into the URL as query params; Next.js re-renders this Server
+ *   Component on navigation, so each filter change is handled by Postgres —
+ *   not by the browser.
+ *
+ * The client component `ProductsClient` now only manages:
+ *   • the mobile filter sheet open/close state (local UI)
+ *   • the sort select (pushes ?sort= to URL and triggers a navigation)
+ *   • rendering the product grid and pagination bar
  */
-export const revalidate = 300;
 
-export default async function ProductsPage() {
-  const products = await getCatalog();
-  return <ProductsClient initialProducts={products} />;
+/** Cache per-filter-combination for 60 s; bust on any product change. */
+export const revalidate = 60;
+
+interface ProductsPageProps {
+  searchParams: Promise<{
+    category?: string;
+    q?: string;
+    sort?: 'featured' | 'price_asc' | 'price_desc';
+    page?: string;
+  }>;
+}
+
+export default async function ProductsPage({ searchParams }: ProductsPageProps) {
+  const params = await searchParams;
+
+  const page = Math.max(1, parseInt(params.page ?? '1', 10) || 1);
+  const category = params.category || undefined;
+  const q = params.q || undefined;
+  const sort = (params.sort as 'featured' | 'price_asc' | 'price_desc') || 'featured';
+
+  const result = await getProductsPage({
+    page,
+    category,
+    q,
+    sort,
+    activeOnly: true,
+  });
+
+  return (
+    <ProductsClient
+      initialProducts={result.products}
+      page={result.page}
+      pageSize={result.pageSize}
+      total={result.total}
+      hasMore={result.hasMore}
+      currentCategory={category}
+      currentQ={q}
+      currentSort={sort}
+    />
+  );
 }

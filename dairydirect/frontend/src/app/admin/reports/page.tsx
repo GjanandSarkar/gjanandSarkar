@@ -8,9 +8,22 @@ import {
 } from 'lucide-react';
 import Link from 'next/link';
 import { format } from 'date-fns';
-import {
-  AreaChart, Area, BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid, PieChart, Pie, Cell
-} from 'recharts';
+import dynamic from 'next/dynamic';
+
+// Lazy-load recharts so it is excluded from the customer-facing JS bundle.
+const AreaChart = dynamic(() => import('recharts').then(m => m.AreaChart));
+const Area = dynamic(() => import('recharts').then(m => m.Area));
+const BarChart = dynamic(() => import('recharts').then(m => m.BarChart));
+const Bar = dynamic(() => import('recharts').then(m => m.Bar));
+const XAxis = dynamic(() => import('recharts').then(m => m.XAxis));
+const YAxis = dynamic(() => import('recharts').then(m => m.YAxis));
+const Tooltip = dynamic(() => import('recharts').then(m => m.Tooltip));
+const ResponsiveContainer = dynamic(() => import('recharts').then(m => m.ResponsiveContainer));
+const CartesianGrid = dynamic(() => import('recharts').then(m => m.CartesianGrid));
+const PieChart = dynamic(() => import('recharts').then(m => m.PieChart));
+const Pie = dynamic(() => import('recharts').then(m => m.Pie));
+const Cell = dynamic(() => import('recharts').then(m => m.Cell));
+
 
 const COLORS = ['#4a8c3f', '#4a6fa5', '#d4712a', '#6b21a8', '#065f46', '#c78c2e'];
 

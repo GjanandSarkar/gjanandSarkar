@@ -234,7 +234,13 @@ export function ProductCard({
             src={product.image_url || PLACEHOLDER_PRODUCT_IMAGE}
             alt={product.name}
             fill
-            sizes="(max-width: 768px) 50vw, 25vw"
+            // Matches the product grid breakpoints:
+            //  • 360–639px  → 2 columns → each card ≈ 50vw
+            //  • 640–1279px → 3 columns → each card ≈ 33vw
+            //  • 1280px+    → 4 columns → each card ≈ 25vw
+            // Correct sizes prevents the browser downloading a 1920px image
+            // for a 160px thumbnail, which was a CLS-adjacent bandwidth waste.
+            sizes="(max-width: 639px) 50vw, (max-width: 1279px) 33vw, 25vw"
             priority={priority}
             className={`w-full h-full object-contain transition-transform duration-200 group-hover:scale-105 ${
               isAllOutOfStock ? 'grayscale opacity-75' : ''
