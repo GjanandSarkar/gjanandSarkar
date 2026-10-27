@@ -72,6 +72,15 @@ export function RecentOrders({ orders, onReorder, hideHeader = false }: RecentOr
                   </div>
                   <div className="text-right">
                     <span className="text-sm font-semibold text-dark">₹{order.total_amount}</span>
+                    <div className="mt-1 flex items-center justify-end gap-1">
+                      <span className={`inline-flex items-center text-[10px] font-semibold tracking-wider px-1.5 py-0.5 rounded-full ${
+                        order.payment_status === 'paid' 
+                          ? 'bg-mint/40 text-primary' 
+                          : 'bg-sand/40 text-muted'
+                      }`}>
+                        {(order.payment_method || 'COD').toUpperCase()}
+                      </span>
+                    </div>
                   </div>
                 </div>
 
