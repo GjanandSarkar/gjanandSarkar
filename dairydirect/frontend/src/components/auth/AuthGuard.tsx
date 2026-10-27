@@ -32,29 +32,36 @@ export function AuthGuard() {
       pathname === '/orders' ||
       pathname === '/profile' ||
       pathname === '/profile/saved-addresses' ||
-      pathname.startsWith('/seller/dashboard');
+      pathname.startsWith('/seller');
 
-    // `/` is rewritten to the storefront, so an admin landing there should be
-    // moved to their console — but only AFTER the storefront has already
-    // painted, which is the opposite of the old blocking blank-page redirect.
-    if (user && user.role === 'admin' && pathname === '/') {
-      go('/admin');
-      return;
-    }
-
-    // Not logged in -> go to login if on protected route
-    if (!user && isProtectedRoute) {
+    // Not logged in -> go to login if on protected route, admin, or seller console
+    if (!user && (isProtectedRoute || pathname.startsWith('/admin') || pathname.startsWith('/seller'))) {
       go('/auth/login?redirect=' + encodeURIComponent(pathname));
       return;
     }
 
-    // Logged in seller -> automatically redirect to seller dashboard if accessing general customer pages
+    // Strict Role-Based Route Partitioning:
+    // 1. Admin users are strictly restricted to /admin/* (and auth/api routes). Block customer storefront.
+    if (user && user.role === 'admin') {
+      const isAdminAllowedPage = 
+        pathname.startsWith('/admin') || 
+        pathname.startsWith('/api') || 
+        pathname.startsWith('/auth') || 
+        pathname === '/login';
+
+      if (!isAdminAllowedPage) {
+        go('/admin');
+        return;
+      }
+    }
+
+    // 2. Seller users are strictly restricted to /seller/* (and auth/api routes). Block customer storefront.
     if (user && user.role === 'seller') {
       const isSellerAllowedPage = 
         pathname.startsWith('/seller') || 
         pathname.startsWith('/api') || 
-        pathname.startsWith('/admin') ||
-        pathname === '/profile';
+        pathname.startsWith('/auth') || 
+        pathname === '/login';
 
       if (!isSellerAllowedPage) {
         go('/seller/dashboard');

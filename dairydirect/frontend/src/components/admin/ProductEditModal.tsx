@@ -39,6 +39,7 @@ export function ProductEditModal({
   onProductDeleted,
 }: ProductEditModalProps) {
   const { t } = useTranslation();
+  const isSellerProduct = Boolean(product && (product as any).seller_id);
 
   const [name, setName] = useState('');
   const [category, setCategory] = useState('');
@@ -347,21 +348,17 @@ export function ProductEditModal({
             <div>
               <div className="flex items-center gap-2">
                 <span
-                  className="px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider"
+                  className="px-2.5 py-0.5 rounded-full text-xs font-bold uppercase tracking-wider"
                   style={{
-                    background: 'var(--color-primary-fixed, #eaf6ef)',
-                    color: 'var(--color-primary, #3f6530)',
+                    background: isSellerProduct ? 'var(--color-secondary-container, #f5ebd7)' : 'var(--color-primary-fixed, #eaf6ef)',
+                    color: isSellerProduct ? 'var(--color-secondary, #755b00)' : 'var(--color-primary, #3f6530)',
                   }}
                 >
-                  {(product as any)?.seller_id || (product as any)?.isSeller ? 'Seller Hub' : 'Admin Panel'}
+                  {isSellerProduct ? 'Seller Owned (Read-Only)' : (product.id ? 'Admin Catalog' : 'New Product')}
                 </span>
-                {product.id ? (
+                {product.id && (
                   <span className="text-[12px] font-medium text-foreground-muted">
                     ID: {product.id.slice(0, 8)}...
-                  </span>
-                ) : (
-                  <span className="text-[12px] font-medium text-success font-bold">
-                    New Product
                   </span>
                 )}
               </div>
@@ -369,7 +366,9 @@ export function ProductEditModal({
                 className="text-[18px] font-bold mt-0.5"
                 style={{ color: 'var(--color-on-surface, #1b1c18)' }}
               >
-                {product.id ? `Edit Product: ${product.name}` : 'Add New Product'}
+                {isSellerProduct
+                  ? `View Seller Product: ${product.name}`
+                  : (product.id ? `Edit Product: ${product.name}` : 'Add New Product')}
               </h2>
             </div>
 
@@ -385,6 +384,15 @@ export function ProductEditModal({
 
           {/* Body content */}
           <div className="p-6 overflow-y-auto space-y-6 flex-1">
+            {/* Seller Product Read-Only Alert */}
+            {isSellerProduct && (
+              <div className="p-3.5 rounded-xl bg-amber-50 dark:bg-amber-950/30 border border-amber-300 dark:border-amber-800 text-xs text-amber-900 dark:text-amber-200 flex items-center gap-2.5">
+                <ShieldAlert className="w-4 h-4 text-amber-700 dark:text-amber-400 shrink-0" />
+                <span>
+                  <strong>Seller Owned Product (Read-Only):</strong> This product is owned and managed by seller <strong>"{product?.brand || 'Partner Seller'}"</strong>. In accordance with marketplace business rules, only the seller can edit or delete this product. Admin view is strictly read-only.
+                </span>
+              </div>
+            )}
             {/* Feedback Alerts */}
             {errorMessage && (
               <motion.div
@@ -412,7 +420,7 @@ export function ProductEditModal({
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <label
-                  className="text-[11px] font-bold uppercase tracking-wider mb-1.5 block"
+                  className="text-xs font-bold uppercase tracking-wider mb-1.5 block"
                   style={{ color: 'var(--color-outline, #73796e)' }}
                 >
                   Product Name *
@@ -432,7 +440,7 @@ export function ProductEditModal({
 
               <div>
                 <label
-                  className="text-[11px] font-bold uppercase tracking-wider mb-1.5 block"
+                  className="text-xs font-bold uppercase tracking-wider mb-1.5 block"
                   style={{ color: 'var(--color-outline, #73796e)' }}
                 >
                   Category *
@@ -462,7 +470,7 @@ export function ProductEditModal({
             {/* Description */}
             <div>
               <label
-                className="text-[11px] font-bold uppercase tracking-wider mb-1.5 block"
+                className="text-xs font-bold uppercase tracking-wider mb-1.5 block"
                 style={{ color: 'var(--color-outline, #73796e)' }}
               >
                 Description
@@ -500,7 +508,7 @@ export function ProductEditModal({
                   <span className="text-[13px] font-bold block" style={{ color: 'var(--color-on-surface)' }}>
                     Active on Storefront
                   </span>
-                  <span className="text-[11px] text-foreground-muted block">
+                  <span className="text-xs text-foreground-muted block">
                     {isActive ? 'Customers can view and buy' : 'Hidden from customer views'}
                   </span>
                 </div>
@@ -517,7 +525,7 @@ export function ProductEditModal({
                   <span className="text-[13px] font-bold block" style={{ color: 'var(--color-on-surface)' }}>
                     Freshness Guarantee
                   </span>
-                  <span className="text-[11px] text-foreground-muted block">
+                  <span className="text-xs text-foreground-muted block">
                     Shows "FRESH" badge on product cards
                   </span>
                 </div>
@@ -527,7 +535,7 @@ export function ProductEditModal({
             {/* Product Images (Multi-Image Upload) */}
             <div>
               <label
-                className="text-[11px] font-bold uppercase tracking-wider mb-2 block"
+                className="text-xs font-bold uppercase tracking-wider mb-2 block"
                 style={{ color: 'var(--color-outline, #73796e)' }}
               >
                 Product Images
@@ -550,7 +558,7 @@ export function ProductEditModal({
                     <Layers className="w-4 h-4 text-primary" />
                     Product Variants & Pricing ({variants.length})
                   </h3>
-                  <span className="text-[11px] text-foreground-muted">
+                  <span className="text-xs text-foreground-muted">
                     Define sizes, selling prices, and cost prices. Minimum profit margin applies.
                   </span>
                 </div>
@@ -593,7 +601,7 @@ export function ProductEditModal({
                           </span>
                           {cost > 0 && (
                             <span
-                              className={`text-[11px] font-black px-2 py-0.5 rounded-full flex items-center gap-0.5 ${
+                              className={`text-xs font-semibold px-2 py-0.5 rounded-full flex items-center gap-0.5 ${
                                 isMarginLow
                                   ? 'bg-warning-bg text-warning'
                                   : 'bg-success-bg text-success'
@@ -619,7 +627,7 @@ export function ProductEditModal({
 
                       <div className="grid grid-cols-2 sm:grid-cols-5 gap-2.5 text-[13px]">
                         <div>
-                          <label className="text-[10px] font-bold text-foreground-muted uppercase block mb-1">
+                          <label className="text-xs font-bold text-foreground-muted uppercase block mb-1">
                             Weight / Size *
                           </label>
                           <input
@@ -632,7 +640,7 @@ export function ProductEditModal({
                         </div>
 
                         <div>
-                          <label className="text-[10px] font-bold text-foreground-muted uppercase block mb-1">
+                          <label className="text-xs font-bold text-foreground-muted uppercase block mb-1">
                             Selling Price (₹) *
                           </label>
                           <input
@@ -646,7 +654,7 @@ export function ProductEditModal({
                         </div>
 
                         <div>
-                          <label className="text-[10px] font-bold text-foreground-muted uppercase block mb-1">
+                          <label className="text-xs font-bold text-foreground-muted uppercase block mb-1">
                             Cost Price (₹)
                           </label>
                           <input
@@ -660,7 +668,7 @@ export function ProductEditModal({
                         </div>
 
                         <div>
-                          <label className="text-[10px] font-bold text-foreground-muted uppercase block mb-1">
+                          <label className="text-xs font-bold text-foreground-muted uppercase block mb-1">
                             Original MRP (₹)
                           </label>
                           <input
@@ -674,7 +682,7 @@ export function ProductEditModal({
                         </div>
 
                         <div>
-                          <label className="text-[10px] font-bold text-foreground-muted uppercase block mb-1">
+                          <label className="text-xs font-bold text-foreground-muted uppercase block mb-1">
                             Stock Qty
                           </label>
                           <input
@@ -694,16 +702,17 @@ export function ProductEditModal({
             </div>
 
             {/* Delete / Remove Zone */}
-            <div
-              className="p-4 rounded-[16px] border border-error/20 bg-error-bg/50 space-y-3"
-            >
+            {!isSellerProduct && product.id && (
+              <div
+                className="p-4 rounded-[16px] border border-error/20 bg-error-bg/50 space-y-3"
+              >
               <div className="flex items-center justify-between">
                 <div>
                   <h4 className="text-[13px] font-bold text-red-900 flex items-center gap-1.5">
                     <ShieldAlert className="w-4 h-4 text-error" />
                     Danger Zone: Remove Product
                   </h4>
-                  <p className="text-[11px] text-error">
+                  <p className="text-xs text-error">
                     Deactivate or permanently remove this product from your inventory and customer app.
                   </p>
                 </div>
@@ -782,6 +791,7 @@ export function ProductEditModal({
                 </motion.div>
               )}
             </div>
+            )}
           </div>
 
           {/* Modal Footer */}
@@ -792,33 +802,45 @@ export function ProductEditModal({
               background: 'var(--color-surface-container-lowest, #ffffff)',
             }}
           >
-            <button
-              type="button"
-              onClick={onClose}
-              disabled={isSaving || isDeleting}
-              className="px-5 py-2.5 rounded-[12px] text-[13px] font-semibold text-foreground hover:bg-black/5 transition-all"
-            >
-              Cancel
-            </button>
+            {isSellerProduct ? (
+              <button
+                type="button"
+                onClick={onClose}
+                className="px-6 py-2.5 rounded-[12px] text-[13px] font-bold text-white bg-primary hover:bg-primary-hover shadow-xs transition-all cursor-pointer"
+              >
+                Close (Read-Only)
+              </button>
+            ) : (
+              <>
+                <button
+                  type="button"
+                  onClick={onClose}
+                  disabled={isSaving || isDeleting}
+                  className="px-5 py-2.5 rounded-[12px] text-[13px] font-semibold text-foreground hover:bg-black/5 transition-all cursor-pointer"
+                >
+                  Cancel
+                </button>
 
-            <button
-              type="button"
-              onClick={handleSave}
-              disabled={isSaving || isDeleting}
-              className="px-6 py-2.5 rounded-[12px] text-[13px] font-bold text-white transition-all active:scale-95 flex items-center gap-2 shadow-md hover:opacity-95 disabled:opacity-50"
-              style={{
-                background: 'var(--cta-gradient)',
-              }}
-            >
-              {isSaving ? (
-                <>
-                  <Loader2 className="w-4 h-4 animate-spin" />
-                  Saving Changes...
-                </>
-              ) : (
-                'Save Changes'
-              )}
-            </button>
+                <button
+                  type="button"
+                  onClick={handleSave}
+                  disabled={isSaving || isDeleting}
+                  className="px-6 py-2.5 rounded-[12px] text-[13px] font-bold text-white transition-all active:scale-95 flex items-center gap-2 shadow-md hover:opacity-95 disabled:opacity-50 cursor-pointer"
+                  style={{
+                    background: 'var(--cta-gradient)',
+                  }}
+                >
+                  {isSaving ? (
+                    <>
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                      Saving Changes...
+                    </>
+                  ) : (
+                    'Save Changes'
+                  )}
+                </button>
+              </>
+            )}
           </div>
         </motion.div>
       </div>

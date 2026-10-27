@@ -80,13 +80,26 @@ function LoginScreenInner() {
         if (signInError) throw signInError;
 
         if (data.user) {
-          const isAdmin = email.toLowerCase().includes('admin') || (process.env.ADMIN_EMAILS || '').includes(email.toLowerCase());
+          const isAdmin = email.toLowerCase().includes('admin') || 
+            email.toLowerCase() === 'gjanandsarkar09@gmail.com' || 
+            email.toLowerCase() === 'patelroshu1218@gmail.com';
+          
           setUser({
             id: data.user.id,
             name: data.user.user_metadata?.full_name || email.split('@')[0],
             email: data.user.email || email,
             role: isAdmin ? 'admin' : 'customer'
           });
+
+          // Sync session with backend to mint gs_access_token cookie
+          if (data.session?.access_token) {
+            await fetch('/api/auth/sync', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ token: data.session.access_token, type: 'supabase' }),
+            }).catch(() => {});
+          }
+
           setSuccessMsg('Signed in successfully! Redirecting...');
           setTimeout(() => router.replace(isAdmin ? '/admin' : nextParam), 400);
         }
@@ -125,8 +138,17 @@ function LoginScreenInner() {
   };
 
   // ── Fast Instant Demo Access (Zero Wait / No Network Lag) ───
-  const handleQuickLogin = (role: 'customer' | 'admin' | 'seller') => {
+  const handleQuickLogin = async (role: 'customer' | 'admin' | 'seller') => {
     setIsLoading(true);
+
+    try {
+      // Sync demo session to mint gs_access_token cookie for edge middleware
+      await fetch('/api/auth/sync', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ type: 'demo', role }),
+      }).catch(() => {});
+    } catch {}
     
     if (role === 'admin') {
       setUser({
@@ -199,10 +221,10 @@ function LoginScreenInner() {
                 }}
               />
               <div className="flex flex-col text-left">
-                <span className="text-2xl font-black tracking-tight leading-none">
+                <span className="text-2xl font-semibold tracking-tight leading-none">
                   <span className="text-primary">Gjanand</span>
                 </span>
-                <span className="text-[11px] tracking-[0.2em] font-black text-secondary uppercase text-right leading-none mt-0.5">
+                <span className="text-xs tracking-[0.2em] font-semibold text-secondary uppercase text-right leading-none mt-0.5">
                   SARKAR
                 </span>
               </div>
@@ -223,7 +245,7 @@ function LoginScreenInner() {
               onClick={() => { setMode('password'); setError(''); }}
               className={`py-2 rounded-lg transition-all ${
                 mode === 'password'
-                  ? 'bg-surface text-primary shadow-2xs font-extrabold'
+                  ? 'bg-surface text-primary shadow-2xs font-semibold'
                   : 'text-foreground-muted hover:text-foreground'
               }`}
             >
@@ -234,7 +256,7 @@ function LoginScreenInner() {
               onClick={() => { setMode('quick'); setError(''); }}
               className={`py-2 rounded-lg transition-all flex items-center justify-center gap-1 ${
                 mode === 'quick'
-                  ? 'bg-surface text-secondary shadow-2xs font-extrabold'
+                  ? 'bg-surface text-secondary shadow-2xs font-semibold'
                   : 'text-foreground-muted hover:text-foreground'
               }`}
             >
@@ -328,7 +350,7 @@ function LoginScreenInner() {
 
               <div className="relative flex py-2 items-center">
                 <div className="flex-grow border-t border-border"></div>
-                <span className="flex-shrink mx-3 text-foreground-muted text-[10px] uppercase font-bold tracking-wider">or</span>
+                <span className="flex-shrink mx-3 text-foreground-muted text-xs uppercase font-bold tracking-wider">or</span>
                 <div className="flex-grow border-t border-border"></div>
               </div>
 
@@ -367,17 +389,17 @@ function LoginScreenInner() {
               <button
                 type="button"
                 onClick={() => handleQuickLogin('customer')}
-                className="w-full p-3.5 rounded-xl border border-border hover:border-primary bg-success-bg/40 hover:bg-success-bg flex items-center justify-between text-left transition-all group cursor-pointer"
+                className="w-full p-3.5 rounded-lg border border-border hover:border-primary bg-primary-fixed hover:bg-primary-fixed-dim flex items-center justify-between text-left transition-colors group cursor-pointer min-h-[44px]"
               >
                 <div className="flex items-center gap-3">
-                  <div className="w-9 h-9 rounded-lg bg-primary text-on-primary flex items-center justify-center font-bold text-sm">
-                    👤
+                  <div className="w-9 h-9 rounded-lg bg-primary text-on-primary flex items-center justify-center font-semibold text-sm">
+                    <User className="w-5 h-5 text-on-primary" />
                   </div>
                   <div>
-                    <h4 className="text-xs font-bold text-foreground group-hover:text-primary">
+                    <h4 className="text-xs font-semibold text-foreground group-hover:text-primary">
                       Customer Account
                     </h4>
-                    <p className="text-[10px] text-foreground-muted">
+                    <p className="text-xs text-foreground-muted">
                       Explore storefront, wishlist, and checkout items
                     </p>
                   </div>
@@ -389,17 +411,17 @@ function LoginScreenInner() {
               <button
                 type="button"
                 onClick={() => handleQuickLogin('seller')}
-                className="w-full p-3.5 rounded-xl border border-border hover:border-secondary bg-warning-bg/40 hover:bg-warning-bg flex items-center justify-between text-left transition-all group cursor-pointer"
+                className="w-full p-3.5 rounded-lg border border-border hover:border-secondary bg-warning-bg hover:bg-warning-bg/80 flex items-center justify-between text-left transition-colors group cursor-pointer min-h-[44px]"
               >
                 <div className="flex items-center gap-3">
-                  <div className="w-9 h-9 rounded-lg bg-secondary text-white flex items-center justify-center font-bold text-sm">
-                    🏪
+                  <div className="w-9 h-9 rounded-lg bg-secondary text-white flex items-center justify-center font-semibold text-sm">
+                    <Store className="w-5 h-5 text-white" />
                   </div>
                   <div>
-                    <h4 className="text-xs font-bold text-foreground group-hover:text-secondary">
+                    <h4 className="text-xs font-semibold text-foreground group-hover:text-secondary">
                       Verified Seller / Vendor
                     </h4>
-                    <p className="text-[10px] text-foreground-muted">
+                    <p className="text-xs text-foreground-muted">
                       SaaS portal, revenue payouts, stock & catalog
                     </p>
                   </div>
@@ -421,7 +443,7 @@ function LoginScreenInner() {
                     <h4 className="text-xs font-bold text-foreground group-hover:text-purple-900">
                       Super Admin
                     </h4>
-                    <p className="text-[10px] text-foreground-muted">
+                    <p className="text-xs text-foreground-muted">
                       Platform control, order status & product catalog
                     </p>
                   </div>
@@ -432,7 +454,7 @@ function LoginScreenInner() {
           )}
         </div>
 
-        <p className="text-center text-[11px] text-foreground-muted mt-6">
+        <p className="text-center text-xs text-foreground-muted mt-6">
           © {new Date().getFullYear()} Gjanand Sarkar. 100% Secure & Encrypted.
         </p>
 

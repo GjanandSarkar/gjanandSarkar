@@ -149,7 +149,7 @@ export function RecommendationRail({
               {heading.eyebrow}
             </span>
           </div>
-          <h2 className={compact ? 'text-sm font-black text-dark' : 'text-lg sm:text-xl font-black text-dark'}>
+          <h2 className={compact ? 'text-sm font-semibold text-dark' : 'text-lg sm:text-xl font-semibold text-dark'}>
             {title ?? heading.title}
           </h2>
         </div>

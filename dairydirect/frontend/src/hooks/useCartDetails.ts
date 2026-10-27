@@ -2,6 +2,7 @@ import { useState, useEffect, useMemo, useCallback } from 'react';
 import { useStore } from '@/store/useStore';
 import { getProducts } from '@/lib/api/products';
 import type { ProductWithVariants } from '@/lib/api/products';
+import { BUSINESS_CONFIG } from '@/lib/config/business';
 
 export interface CartItemWithStock {
   productId: string;
@@ -23,8 +24,11 @@ export function useCartDetails() {
      That used to render as "your cart is empty" with no error anywhere. */
   const [loadError, setLoadError] = useState<string | null>(null);
 
-  // Settings
-  const settings = { free_delivery_threshold: 299, delivery_cost: 25 };
+  // Settings from central configuration
+  const settings = {
+    free_delivery_threshold: BUSINESS_CONFIG.delivery.freeDeliveryThreshold,
+    delivery_cost: BUSINESS_CONFIG.delivery.standardDeliveryFee,
+  };
 
   const refreshInventory = useCallback(async () => {
     try {

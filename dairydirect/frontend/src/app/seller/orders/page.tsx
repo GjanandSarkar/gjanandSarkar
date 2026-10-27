@@ -19,10 +19,9 @@ export default function SellerOrdersDedicatedPage() {
   }, [isAuthLoading, user, router]);
 
   return (
-    <div className="min-h-screen bg-background py-8 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-7xl mx-auto space-y-6">
-        {/* Navigation Breadcrumb / Header */}
-        <div className="bg-surface rounded-3xl border border-border/90 shadow-2xs p-6 sm:p-8 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+    <div className="w-full p-4 sm:p-6 md:p-8 flex flex-col gap-6">
+      {/* Navigation Breadcrumb / Header */}
+        <div className="bg-surface rounded-xl border border-border/90 shadow-2xs p-6 sm:p-8 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div className="flex items-center gap-4">
             <Link
               href="/seller/dashboard"
@@ -34,11 +33,11 @@ export default function SellerOrdersDedicatedPage() {
 
             <div className="space-y-0.5">
               <div className="flex items-center gap-2">
-                <span className="px-2 py-0.5 rounded-full bg-success-bg text-success text-[10px] font-black uppercase tracking-wider">
+                <span className="px-2 py-0.5 rounded-full bg-success-bg text-success text-xs font-semibold uppercase tracking-wider">
                   Seller Orders Portal
                 </span>
               </div>
-              <h1 className="text-xl sm:text-2xl font-black text-primary tracking-tight flex items-center gap-2">
+              <h1 className="text-xl sm:text-2xl font-semibold text-primary tracking-tight flex items-center gap-2">
                 <ShoppingBag className="w-6 h-6 text-secondary" />
                 <span>Seller Order Management</span>
               </h1>
@@ -66,9 +65,8 @@ export default function SellerOrdersDedicatedPage() {
           </div>
         </div>
 
-        {/* Orders Manager Component */}
-        <SellerOrdersManager />
-      </div>
+      {/* Orders Manager Component */}
+      <SellerOrdersManager />
     </div>
   );
 }

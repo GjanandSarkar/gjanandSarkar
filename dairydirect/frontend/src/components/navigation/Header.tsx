@@ -21,6 +21,7 @@ import {
 import { useStore } from '@/store/useStore';
 import { useCartDetails } from '@/hooks/useCartDetails';
 import { getUserAddresses, normalizeUserAddress, type UserAddress } from '@/lib/api/addresses';
+import { useTranslation, type Language } from '@/lib/i18n';
 
 function HeaderContent() {
   const router = useRouter();
@@ -30,12 +31,21 @@ function HeaderContent() {
   const wishlist = useStore((state) => state.wishlist);
   const checkoutAddressId = useStore((state) => state.checkoutAddressId);
   const setCheckoutAddressId = useStore((state) => state.setCheckoutAddressId);
+  const setLanguage = useStore((state) => state.setLanguage);
   const { totalItems } = useCartDetails();
+  const { t, language } = useTranslation();
 
+  const [mounted, setMounted] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const [isAddressOpen, setIsAddressOpen] = useState(false);
   const [userAddresses, setUserAddresses] = useState<UserAddress[]>([]);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  const activeUser = mounted ? user : null;
 
   const profileDropdownRef = useRef<HTMLDivElement>(null);
   const addressDropdownRef = useRef<HTMLDivElement>(null);
@@ -161,14 +171,14 @@ function HeaderContent() {
         type="text"
         value={searchTerm}
         onChange={(e) => setSearchTerm(e.target.value)}
-        placeholder="Search products, brands and more"
-        aria-label="Search products"
+        placeholder={t('searchPlaceholder') || "Search products, brands and more"}
+        aria-label={t('search') || "Search products"}
         className="flex-1 min-w-0 px-3 md:px-4 py-2.5 text-sm bg-transparent text-foreground placeholder-foreground-muted outline-none rounded-l-lg"
       />
       <button
         type="submit"
-        className="bg-secondary hover:bg-secondary-hover text-white px-4 h-11 min-w-[48px] flex items-center justify-center transition-colors shrink-0 rounded-r-lg"
-        aria-label="Search"
+        className="bg-secondary hover:bg-secondary-hover text-white px-4 h-11 min-w-[48px] flex items-center justify-center transition-colors shrink-0 rounded-r-lg cursor-pointer"
+        aria-label={t('search') || "Search"}
       >
         <Search className="w-4 h-4 stroke-[2.5]" />
       </button>
@@ -191,10 +201,10 @@ function HeaderContent() {
               }}
             />
             <div className="flex flex-col">
-              <span className="text-xl md:text-2xl font-black tracking-tight leading-none">
+              <span className="text-xl md:text-2xl font-semibold tracking-tight leading-none">
                 <span className="text-primary">Gjanand</span>
               </span>
-              <span className="text-[10px] md:text-[11px] tracking-[0.2em] font-black text-secondary uppercase text-right leading-none mt-0.5">
+              <span className="text-xs md:text-xs tracking-[0.2em] font-semibold text-secondary uppercase text-right leading-none mt-0.5">
                 SARKAR
               </span>
             </div>
@@ -209,24 +219,40 @@ function HeaderContent() {
 
           {/* Become Seller / Seller Portal */}
           <Link
-            href={user?.role === 'seller' ? "/seller/dashboard" : user?.role === 'admin' ? "/admin/products" : "/become-seller"}
+            href={activeUser?.role === 'seller' ? "/seller/dashboard" : activeUser?.role === 'admin' ? "/admin/products" : "/become-seller"}
             className="hidden lg:flex flex-col items-center justify-center text-foreground hover:text-primary transition-colors group"
           >
             <Store className="w-5 h-5 text-foreground-muted group-hover:text-primary transition-colors" />
-            <span className="text-[11px] font-semibold mt-0.5 whitespace-nowrap">
-              {user?.role === 'seller' ? 'Seller Hub' : user?.role === 'admin' ? 'Admin Panel' : 'Become Seller'}
+            <span className="text-xs font-medium mt-0.5 whitespace-nowrap">
+              {activeUser?.role === 'seller' ? (t('sellerHub') || 'Seller Hub') : activeUser?.role === 'admin' ? (t('adminPortal') || 'Admin Panel') : (t('partnerWithUs') || 'Become Seller')}
             </span>
           </Link>
 
+          {/* Language Switcher Pill */}
+          <div className="flex items-center rounded-lg border border-border bg-surface-muted p-0.5 text-xs font-semibold">
+            {(['en', 'hi', 'gu'] as const).map((l) => (
+              <button
+                key={l}
+                type="button"
+                onClick={() => setLanguage(l)}
+                className={`px-2 py-1 rounded text-xs transition-colors cursor-pointer ${
+                  language === l
+                    ? 'bg-primary text-on-primary font-bold shadow-2xs'
+                    : 'text-foreground-muted hover:text-foreground'
+                }`}
+                title={l === 'en' ? 'English' : l === 'hi' ? 'हिन्दी (Hindi)' : 'ગુજરાતી (Gujarati)'}
+                aria-label={`Switch language to ${l}`}
+              >
+                {l === 'en' ? 'EN' : l === 'hi' ? 'हि' : 'ગુ'}
+              </button>
+            ))}
+          </div>
+
           <ThemeToggle />
 
-          <Link href="/offers" className="hidden lg:flex flex-col items-center justify-center text-foreground hover:text-primary transition-colors group">
-            <Sparkles className="w-5 h-5 text-foreground-muted group-hover:text-primary transition-colors" />
-            <span className="text-[11px] font-semibold mt-0.5 whitespace-nowrap">Offers</span>
-          </Link>
 
           {/* ── Delivery Address Selection (ONLY VISIBLE WHEN LOGGED IN) ── */}
-          {user && (
+          {activeUser && (
             <div
               ref={addressDropdownRef}
               onMouseEnter={handleAddressMouseEnter}
@@ -236,37 +262,37 @@ function HeaderContent() {
               <button
                 type="button"
                 onClick={() => setIsAddressOpen(!isAddressOpen)}
-                className="flex items-center gap-2 px-2.5 py-1.5 rounded-xl hover:bg-surface-muted/80 transition-colors text-left group cursor-pointer border border-transparent hover:border-border"
+                className="flex items-center gap-2 px-2.5 py-1.5 rounded-lg hover:bg-surface-muted transition-colors text-left group cursor-pointer border border-transparent hover:border-border min-h-[44px]"
                 aria-label="Select delivery address"
               >
-                <div className="w-8 h-8 rounded-full bg-success-bg text-primary flex items-center justify-center shrink-0 border border-success-bg group-hover:scale-105 transition-transform">
+                <div className="w-8 h-8 rounded-full bg-surface-muted text-primary flex items-center justify-center shrink-0 border border-border">
                   <MapPin className="w-4 h-4 text-primary" />
                 </div>
                 <div className="flex flex-col max-w-[130px] lg:max-w-[170px]">
-                  <span className="text-[10px] font-extrabold uppercase tracking-wider text-foreground-muted flex items-center gap-1">
-                    Deliver to {user.name ? user.name.split(' ')[0] : 'You'}
+                  <span className="text-xs font-medium text-foreground-muted flex items-center gap-1">
+                    {t('deliverTo') || 'Deliver to'} {activeUser.name ? activeUser.name.split(' ')[0] : ''}
                     <ChevronDown className={`w-3 h-3 text-foreground-muted transition-transform duration-200 ${isAddressOpen ? 'rotate-180' : ''}`} />
                   </span>
-                  <span className="text-xs font-bold text-foreground truncate">
-                    {activeAddress ? `${activeAddress.label}: ${activeAddress.address}` : 'Select Address'}
+                  <span className="text-xs font-semibold text-foreground truncate">
+                    {activeAddress ? `${activeAddress.label}: ${activeAddress.address}` : (t('selectAddress') || 'Select Address')}
                   </span>
                 </div>
               </button>
 
               {/* Address Selection Dropdown Menu */}
               {isAddressOpen && (
-                <div className="absolute right-0 top-full mt-2 w-80 bg-surface rounded-2xl shadow-2xl border border-border py-2.5 z-50 animate-in fade-in slide-in-from-top-1">
+                <div className="absolute right-0 top-full mt-2 w-80 bg-surface rounded-xl shadow-lg border border-border py-2.5 z-50 animate-in fade-in slide-in-from-top-1">
                   <div className="px-4 py-2 border-b border-border flex items-center justify-between">
-                    <span className="text-xs font-black text-foreground uppercase tracking-wider flex items-center gap-1.5">
+                    <span className="text-xs font-semibold text-foreground flex items-center gap-1.5">
                       <MapPin className="w-3.5 h-3.5 text-primary" />
-                      Delivery Addresses
+                      {t('deliveryAddresses') || 'Delivery Addresses'}
                     </span>
                     <Link
                       href="/profile/saved-addresses"
                       onClick={() => setIsAddressOpen(false)}
-                      className="text-[11px] font-bold text-secondary hover:underline"
+                      className="text-xs font-medium text-primary hover:underline"
                     >
-                      Manage
+                      {t('manage') || 'Manage'}
                     </Link>
                   </div>
 
@@ -282,21 +308,21 @@ function HeaderContent() {
                               setCheckoutAddressId(addr.id || addr.label);
                               setIsAddressOpen(false);
                             }}
-                            className={`w-full flex items-start justify-between p-2.5 rounded-xl transition-all text-left cursor-pointer ${isSelected
-                                ? 'bg-success-bg/90 border border-success/20 text-primary'
+                            className={`w-full flex items-start justify-between p-2.5 rounded-lg transition-colors text-left cursor-pointer min-h-[44px] ${isSelected
+                                ? 'bg-surface-muted border border-border text-primary'
                                 : 'hover:bg-surface-muted text-foreground'
                               }`}
                           >
                             <div className="min-w-0 pr-2">
                               <div className="flex items-center gap-2">
-                                <span className="text-xs font-bold text-foreground">{addr.label}</span>
+                                <span className="text-xs font-semibold text-foreground">{addr.label}</span>
                                 {addr.is_default && (
-                                  <span className="text-[9px] bg-success-bg text-primary px-1.5 py-0.2 rounded font-bold">
+                                  <span className="text-xs bg-surface-muted text-primary px-1.5 py-0.5 rounded-full border border-border font-medium">
                                     Default
                                   </span>
                                 )}
                               </div>
-                              <p className="text-[11px] text-foreground-muted line-clamp-2 mt-0.5">{addr.address}</p>
+                              <p className="text-xs text-foreground-muted line-clamp-2 mt-0.5">{addr.address}</p>
                             </div>
                             {isSelected && (
                               <Check className="w-4 h-4 text-primary shrink-0 mt-1" />
@@ -310,7 +336,7 @@ function HeaderContent() {
                         <Link
                           href="/profile/saved-addresses"
                           onClick={() => setIsAddressOpen(false)}
-                          className="mt-2 inline-flex items-center gap-1 text-xs font-bold text-primary hover:underline"
+                          className="mt-2 inline-flex items-center gap-1 text-xs font-medium text-primary hover:underline"
                         >
                           <Plus className="w-3.5 h-3.5" />
                           Add Your First Address
@@ -323,7 +349,7 @@ function HeaderContent() {
                     <Link
                       href="/profile/saved-addresses"
                       onClick={() => setIsAddressOpen(false)}
-                      className="w-full flex items-center justify-center gap-1.5 py-2 text-xs font-bold text-primary bg-success-bg hover:bg-success-bg/80 rounded-xl transition-colors"
+                      className="w-full flex items-center justify-center gap-1.5 py-2 text-xs font-medium text-primary bg-surface-muted hover:bg-border rounded-lg transition-colors min-h-[44px]"
                     >
                       <Plus className="w-3.5 h-3.5" />
                       Add New Delivery Address
@@ -334,22 +360,22 @@ function HeaderContent() {
             </div>
           )}
 
-          {/* Cart */}
-          <Link
-            href="/cart"
-            className="flex flex-col items-center justify-center text-foreground hover:text-primary transition-colors relative group"
-            aria-label="View Cart"
-          >
-            <div className="relative">
-              <ShoppingCart className="w-5 h-5 text-foreground group-hover:text-primary transition-colors" />
-              {totalItems > 0 && (
-                <span className="absolute -top-2 -right-2.5 bg-secondary text-white text-[10px] font-black w-4.5 h-4.5 rounded-full flex items-center justify-center shadow-xs">
+          {/* Cart - only visible when user has items in cart */}
+          {totalItems > 0 && (
+            <Link
+              href="/cart"
+              className="flex flex-col items-center justify-center text-foreground hover:text-primary transition-colors relative group min-h-[44px] min-w-[44px] animate-in fade-in zoom-in-95 duration-200"
+              aria-label="View Cart"
+            >
+              <div className="relative">
+                <ShoppingCart className="w-5 h-5 text-foreground group-hover:text-primary transition-colors" />
+                <span className="absolute -top-2 -right-2.5 bg-primary text-on-primary text-xs font-semibold w-4.5 h-4.5 rounded-full flex items-center justify-center shadow-xs">
                   {totalItems}
                 </span>
-              )}
-            </div>
-            <span className="text-[11px] font-semibold mt-0.5">Cart</span>
-          </Link>
+              </div>
+              <span className="text-xs font-medium mt-0.5">{t('cart') || 'Cart'}</span>
+            </Link>
+          )}
 
           {/* ── User Profile with Hover Dropdown ── */}
           <div
@@ -359,13 +385,13 @@ function HeaderContent() {
             className="relative"
           >
             <Link
-              href={user ? "/profile" : "/login"}
+              href={activeUser ? "/profile" : "/login"}
               className="flex flex-col items-center justify-center text-foreground hover:text-primary transition-colors group cursor-pointer"
             >
               <div className="w-7 h-7 rounded-full bg-surface-muted flex items-center justify-center overflow-hidden border border-border group-hover:border-primary transition-colors shadow-2xs">
                 <img
-                  src={user?.avatar_url || '/profile/profile.jpg'}
-                  alt={user?.name || "Profile"}
+                  src={activeUser?.avatar_url || '/profile/profile.jpg'}
+                  alt={activeUser?.name || "Profile"}
                   className="w-full h-full object-cover"
                   referrerPolicy="no-referrer"
                   onError={(e) => {
@@ -374,31 +400,31 @@ function HeaderContent() {
                 />
               </div>
               <div className="flex items-center gap-0.5 mt-0.5">
-                <span className="text-[11px] font-semibold text-foreground group-hover:text-primary whitespace-nowrap">
-                  {user ? (user.name ? user.name.split(' ')[0] : 'Account') : 'Login / Sign up'}
+                <span className="text-xs font-medium text-foreground group-hover:text-primary whitespace-nowrap">
+                  {activeUser ? (activeUser.name ? activeUser.name.split(' ')[0] : (t('account') || 'Account')) : (t('loginSignUp') || 'Login / Sign up')}
                 </span>
-                {user && (
+                {activeUser && (
                   <ChevronDown className={`w-3 h-3 text-foreground-muted transition-transform duration-200 ${isProfileOpen ? 'rotate-180' : ''}`} />
                 )}
               </div>
             </Link>
 
-            {/* Profile Dropdown Menu (on hover / click) */}
+            {/* Profile Dropdown Menu */}
             {isProfileOpen && (
-              <div className="absolute right-0 top-full mt-2 w-64 bg-surface rounded-2xl shadow-2xl border border-border py-2 z-50 animate-in fade-in slide-in-from-top-1 divide-y divide-border">
-                {user ? (
+              <div className="absolute right-0 top-full mt-2 w-64 bg-surface rounded-xl shadow-lg border border-border py-2 z-50 animate-in fade-in slide-in-from-top-1 divide-y divide-border">
+                {activeUser ? (
                   <>
                     {/* User Profile Header */}
-                    <div className="px-4 py-2.5 bg-gradient-to-r from-emerald-50/70 to-amber-50/40 rounded-t-xl">
-                      <p className="text-xs font-black text-foreground truncate">
-                        {user.name || 'Gjanand Customer'}
+                    <div className="px-4 py-2.5 bg-surface-muted rounded-t-lg">
+                      <p className="text-xs font-semibold text-foreground truncate">
+                        {activeUser.name || 'Gjanand Customer'}
                       </p>
-                      <p className="text-[11px] text-foreground-muted truncate">
-                        {user.phone || user.email || 'Logged In'}
+                      <p className="text-xs text-foreground-muted truncate">
+                        {activeUser.phone || activeUser.email || 'Logged In'}
                       </p>
-                      {user.role && user.role !== 'customer' && (
-                        <span className="inline-block mt-1 text-[9px] font-black uppercase tracking-wider px-2 py-0.5 bg-primary text-on-primary rounded-full">
-                          {user.role}
+                      {activeUser.role && activeUser.role !== 'customer' && (
+                        <span className="inline-block mt-1 text-xs font-medium px-2 py-0.5 bg-primary text-on-primary rounded-full">
+                          {activeUser.role}
                         </span>
                       )}
                     </div>
@@ -408,34 +434,34 @@ function HeaderContent() {
                       <Link
                         href="/profile"
                         onClick={() => setIsProfileOpen(false)}
-                        className="flex items-center gap-3 px-4 py-2 text-xs font-semibold text-foreground hover:bg-success-bg hover:text-primary transition-colors group"
+                        className="flex items-center gap-3 px-4 py-2 text-xs font-medium text-foreground hover:bg-surface-muted hover:text-primary transition-colors group"
                       >
                         <User className="w-4 h-4 text-foreground-muted group-hover:text-primary transition-colors" />
-                        <span>Profile</span>
+                        <span>{t('profile') || 'Profile'}</span>
                       </Link>
 
                       <Link
                         href="/orders"
                         onClick={() => setIsProfileOpen(false)}
-                        className="flex items-center gap-3 px-4 py-2 text-xs font-semibold text-foreground hover:bg-success-bg hover:text-primary transition-colors group"
+                        className="flex items-center gap-3 px-4 py-2 text-xs font-medium text-foreground hover:bg-surface-muted hover:text-primary transition-colors group"
                       >
                         <Package className="w-4 h-4 text-foreground-muted group-hover:text-primary transition-colors" />
                         <div className="flex-1 flex items-center justify-between">
-                          <span>Orders</span>
-                          <span className="text-[10px] text-foreground-muted font-normal">Track & History</span>
+                          <span>{t('orders') || 'Orders'}</span>
+                          <span className="text-xs text-foreground-muted font-normal">{t('trackAndHistory') || 'Track & History'}</span>
                         </div>
                       </Link>
 
                       <Link
                         href="/wishlist"
                         onClick={() => setIsProfileOpen(false)}
-                        className="flex items-center gap-3 px-4 py-2 text-xs font-semibold text-foreground hover:bg-success-bg hover:text-primary transition-colors group"
+                        className="flex items-center gap-3 px-4 py-2 text-xs font-medium text-foreground hover:bg-surface-muted hover:text-primary transition-colors group"
                       >
                         <Heart className="w-4 h-4 text-foreground-muted group-hover:text-error transition-colors" />
                         <div className="flex-1 flex items-center justify-between">
-                          <span>Wishlist</span>
+                          <span>{t('wishlist') || 'Wishlist'}</span>
                           {wishlist.length > 0 && (
-                            <span className="bg-error-bg text-error text-[10px] font-bold px-1.5 py-0.2 rounded-full">
+                            <span className="bg-surface-muted text-foreground text-xs font-medium px-1.5 py-0.5 rounded-full border border-border">
                               {wishlist.length}
                             </span>
                           )}
@@ -445,40 +471,31 @@ function HeaderContent() {
                       <Link
                         href="/profile/saved-addresses"
                         onClick={() => setIsProfileOpen(false)}
-                        className="flex items-center gap-3 px-4 py-2 text-xs font-semibold text-foreground hover:bg-success-bg hover:text-primary transition-colors group"
+                        className="flex items-center gap-3 px-4 py-2 text-xs font-medium text-foreground hover:bg-surface-muted hover:text-primary transition-colors group"
                       >
                         <MapPin className="w-4 h-4 text-foreground-muted group-hover:text-primary transition-colors" />
-                        <span>Saved Addresses</span>
+                        <span>{t('savedAddresses') || 'Saved Addresses'}</span>
                       </Link>
 
-                      <Link
-                        href="/subscribe"
-                        onClick={() => setIsProfileOpen(false)}
-                        className="flex items-center gap-3 px-4 py-2 text-xs font-semibold text-foreground hover:bg-success-bg hover:text-primary transition-colors group"
-                      >
-                        <Sparkles className="w-4 h-4 text-secondary" />
-                        <span>Subscriptions</span>
-                      </Link>
-
-                      {user.role === 'seller' && (
+                      {activeUser.role === 'seller' && (
                         <Link
                           href="/seller/dashboard"
                           onClick={() => setIsProfileOpen(false)}
                           className="flex items-center gap-3 px-4 py-2 text-xs font-bold text-primary bg-success-bg/60 hover:bg-success-bg/80 transition-colors"
                         >
                           <Store className="w-4 h-4 text-primary" />
-                          <span>Seller Dashboard</span>
+                          <span>{t('sellerHub') || 'Seller Dashboard'}</span>
                         </Link>
                       )}
 
-                      {user.role === 'admin' && (
+                      {activeUser.role === 'admin' && (
                         <Link
                           href="/admin/products"
                           onClick={() => setIsProfileOpen(false)}
                           className="flex items-center gap-3 px-4 py-2 text-xs font-bold text-purple-700 bg-purple-50/60 hover:bg-purple-100/80 transition-colors"
                         >
                           <Store className="w-4 h-4 text-purple-700" />
-                          <span>Admin Console</span>
+                          <span>{t('adminPortal') || 'Admin Console'}</span>
                         </Link>
                       )}
                     </div>
@@ -491,14 +508,14 @@ function HeaderContent() {
                         className="w-full flex items-center gap-3 px-4 py-2 text-xs font-bold text-error hover:bg-error-bg transition-colors cursor-pointer text-left"
                       >
                         <LogOut className="w-4 h-4 text-error" />
-                        <span>Logout</span>
+                        <span>{t('logout') || 'Logout'}</span>
                       </button>
                     </div>
                   </>
                 ) : (
                   <div className="p-3 text-center">
                     <p className="text-xs font-bold text-foreground mb-1">Welcome to Gjanand Sarkar</p>
-                    <p className="text-[11px] text-foreground-muted mb-3">Login to manage orders, wishlist & subscriptions</p>
+                    <p className="text-xs text-foreground-muted mb-3">Login to manage orders, wishlist & subscriptions</p>
                     <Link
                       href="/login"
                       onClick={() => setIsProfileOpen(false)}

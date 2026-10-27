@@ -11,7 +11,7 @@ export const metadata: Metadata = {
 export default function PrivacyPolicyPage() {
   return (
     <div className="min-h-screen bg-background py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-4xl mx-auto bg-surface border border-border rounded-3xl p-6 sm:p-10 shadow-sm">
+      <div className="max-w-4xl mx-auto bg-surface border border-border rounded-xl p-6 sm:p-10 shadow-sm">
         
         {/* Header */}
         <div className="border-b border-border pb-6 mb-8">
@@ -19,7 +19,7 @@ export default function PrivacyPolicyPage() {
             <Lock className="w-3.5 h-3.5" />
             <span>Data Security & Trust</span>
           </div>
-          <h1 className="text-2xl sm:text-3xl font-black text-primary">
+          <h1 className="text-2xl sm:text-3xl font-semibold text-primary">
             Privacy Policy
           </h1>
           <p className="text-xs text-foreground-muted mt-1">

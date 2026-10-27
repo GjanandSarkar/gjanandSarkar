@@ -91,14 +91,14 @@ export default function ReturnRequestDetailPage() {
             <div className="flex items-center gap-2">
               <span className="text-xs font-bold text-foreground-muted uppercase tracking-wider">Request Reference</span>
               <span
-                className={`px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider ${
+                className={`px-2.5 py-0.5 rounded-full text-xs font-semibold uppercase tracking-wider ${
                   isReturn ? 'bg-success-bg text-success' : 'bg-info-bg text-blue-800'
                 }`}
               >
                 {request.request_type}
               </span>
             </div>
-            <h1 className="text-xl md:text-2xl font-black text-foreground tracking-tight mt-0.5">
+            <h1 className="text-xl md:text-2xl font-semibold text-foreground tracking-tight mt-0.5">
               Request #{request.id.slice(0, 8)}
             </h1>
             <p className="text-xs text-foreground-muted mt-0.5">
@@ -108,7 +108,7 @@ export default function ReturnRequestDetailPage() {
         </div>
 
         {/* Status Bar Card */}
-        <div className="bg-surface rounded-3xl border border-border/80 shadow-2xs p-6 md:p-8">
+        <div className="bg-surface rounded-xl border border-border/80 shadow-2xs p-6 md:p-8">
           <h2 className="text-xs font-bold text-foreground-muted uppercase tracking-wider mb-6">
             Fulfillment Progression
           </h2>
@@ -168,7 +168,7 @@ export default function ReturnRequestDetailPage() {
         {/* Item & Refund Summary */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {/* Item details */}
-          <div className="bg-surface rounded-3xl border border-border/80 shadow-2xs p-6 space-y-4">
+          <div className="bg-surface rounded-xl border border-border/80 shadow-2xs p-6 space-y-4">
             <h3 className="text-xs font-bold text-foreground-muted uppercase tracking-wider flex items-center gap-2">
               <Package className="w-4 h-4 text-secondary" />
               <span>Requested Item</span>
@@ -187,7 +187,7 @@ export default function ReturnRequestDetailPage() {
                 <p className="text-xs text-foreground-muted mt-0.5">
                   {(item?.variant_weight || item?.variant_name) ? `${item?.variant_weight || item?.variant_name} · ` : ''}Qty: {item?.quantity || 1}
                 </p>
-                <p className="text-xs font-black text-foreground mt-1">
+                <p className="text-xs font-semibold text-foreground mt-1">
                   ₹{Number(item?.total_price || (Number(item?.price || item?.unit_price || 0) * Number(item?.quantity || 1))).toFixed(2)}
                 </p>
               </div>
@@ -207,7 +207,7 @@ export default function ReturnRequestDetailPage() {
             {/* Proof Images if any */}
             {request.images && request.images.length > 0 && (
               <div className="pt-2">
-                <span className="text-[11px] font-bold text-foreground-muted uppercase tracking-wider block mb-2">
+                <span className="text-xs font-bold text-foreground-muted uppercase tracking-wider block mb-2">
                   Uploaded Photos
                 </span>
                 <div className="flex items-center gap-2">
@@ -228,7 +228,7 @@ export default function ReturnRequestDetailPage() {
           </div>
 
           {/* Refund / Dispatch information */}
-          <div className="bg-surface rounded-3xl border border-border/80 shadow-2xs p-6 space-y-4">
+          <div className="bg-surface rounded-xl border border-border/80 shadow-2xs p-6 space-y-4">
             <h3 className="text-xs font-bold text-foreground-muted uppercase tracking-wider flex items-center gap-2">
               <IndianRupee className="w-4 h-4 text-success" />
               <span>{isReturn ? 'Refund Details' : 'Replacement Logistics'}</span>
@@ -238,7 +238,7 @@ export default function ReturnRequestDetailPage() {
               <div className="space-y-3">
                 <div className="p-4 rounded-2xl bg-success-bg/60 border border-success-bg flex items-center justify-between">
                   <span className="text-xs font-semibold text-success">Refund Amount</span>
-                  <span className="text-lg font-black text-success">
+                  <span className="text-lg font-semibold text-success">
                     ₹{Number(request.refund_amount).toFixed(2)}
                   </span>
                 </div>
@@ -255,7 +255,7 @@ export default function ReturnRequestDetailPage() {
                     </p>
                   )}
                   {refund?.razorpay_refund_id && (
-                    <p className="font-mono text-[11px]">
+                    <p className="font-mono text-xs">
                       <span className="font-semibold text-foreground">Gateway Ref:</span>{' '}
                       {refund.razorpay_refund_id}
                     </p>
@@ -272,7 +272,7 @@ export default function ReturnRequestDetailPage() {
               <div className="space-y-3">
                 <div className="p-4 rounded-2xl bg-info-bg/60 border border-blue-100 space-y-1">
                   <span className="text-xs font-semibold text-blue-950 block">Replacement Dispatch</span>
-                  <span className="text-sm font-black text-blue-900">
+                  <span className="text-sm font-semibold text-blue-900">
                     {request.replacement_tracking_no || 'Awaiting Item Pickup & Inspection'}
                   </span>
                 </div>
@@ -288,7 +288,7 @@ export default function ReturnRequestDetailPage() {
             {/* Pickup Address */}
             {address && (
               <div className="pt-3 border-t border-border">
-                <span className="text-[11px] font-bold text-foreground-muted uppercase tracking-wider block mb-1">
+                <span className="text-xs font-bold text-foreground-muted uppercase tracking-wider block mb-1">
                   Pickup Address
                 </span>
                 <p className="text-xs text-foreground leading-relaxed">

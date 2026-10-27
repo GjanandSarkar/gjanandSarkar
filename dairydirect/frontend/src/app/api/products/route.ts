@@ -29,9 +29,13 @@ export async function GET(request: NextRequest) {
     const q = searchParams.get('q');
     const activeOnly = searchParams.get('activeOnly') !== 'false';
 
-    // Try cache first (60s TTL) - bypass cache for seller dashboard specific queries
-    const cacheKey = sellerId || q ? `seller_${sellerId}_q_${q}_${activeOnly}` : `${category || 'all'}_${activeOnly}`;
-    if (!sellerId && !q) {
+    // Cache key: seller queries bypass Redis cache; all others use a key
+    // based on the filter params so different search terms cache independently.
+    const cacheKey = sellerId
+      ? null
+      : `products_${category || 'all'}_q${q || ''}_${activeOnly}`;
+
+    if (cacheKey) {
       const cached = await getCachedProducts(cacheKey);
       if (cached) {
         return NextResponse.json(
@@ -134,7 +138,11 @@ export async function GET(request: NextRequest) {
           sbQuery = sbQuery.ilike('category', `%${cleanCat}%`);
         }
         if (q) {
-          sbQuery = sbQuery.or(`name.ilike.%${q}%,description.ilike.%${q}%`);
+          // Safety: user-supplied text must not be interpolated into .or() \u2014 use
+          // a single .ilike() on the most important field (name) to avoid PostgREST
+          // filter injection. Product description search can be added via full-text
+          // search (to_tsvector) in a future migration.
+          sbQuery = sbQuery.ilike('name', `%${q}%`);
         }
         const { data, error } = await sbQuery;
         if (!error && data) {
@@ -166,8 +174,9 @@ export async function GET(request: NextRequest) {
       }
     }
 
-    // Cache products asynchronously (60s TTL)
-    if (products.length > 0 && !sellerId && !q) {
+    // Cache the result asynchronously (60 s TTL).
+    // Seller-scoped and authenticated queries are not cached (personal data).
+    if (products.length > 0 && cacheKey) {
       cacheProducts(cacheKey, products, 60).catch(() => {});
     }
 

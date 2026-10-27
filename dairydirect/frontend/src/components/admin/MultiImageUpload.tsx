@@ -220,7 +220,7 @@ export function MultiImageUpload({
 
                 {/* Primary Badge */}
                 {item.isPrimary ? (
-                  <div className="absolute top-1.5 left-1.5 z-10 flex items-center gap-1 px-2 py-0.5 rounded-full bg-success text-on-success text-[10px] font-black tracking-wide shadow-md">
+                  <div className="absolute top-1.5 left-1.5 z-10 flex items-center gap-1 px-2 py-0.5 rounded-full bg-success text-on-success text-xs font-semibold tracking-wide shadow-md">
                     <Star className="w-3 h-3 fill-current" />
                     <span>COVER</span>
                   </div>
@@ -229,7 +229,7 @@ export function MultiImageUpload({
                     type="button"
                     onClick={() => handleSetPrimary(idx)}
                     title="Set as cover image"
-                    className="absolute top-1.5 left-1.5 z-10 opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-1 px-2 py-0.5 rounded-full bg-black/75 hover:bg-black text-white text-[10px] font-semibold shadow-md"
+                    className="absolute top-1.5 left-1.5 z-10 opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-1 px-2 py-0.5 rounded-full bg-black/75 hover:bg-black text-white text-xs font-semibold shadow-md"
                   >
                     <Star className="w-3 h-3" />
                     <span>Make Cover</span>
@@ -247,7 +247,7 @@ export function MultiImageUpload({
                 </button>
 
                 {/* Footer index indicator */}
-                <div className="absolute bottom-1 right-1 px-1.5 py-0.5 rounded bg-black/60 text-white text-[9px] font-bold">
+                <div className="absolute bottom-1 right-1 px-1.5 py-0.5 rounded bg-black/60 text-white text-xs font-bold">
                   #{idx + 1}
                 </div>
               </div>
@@ -262,8 +262,8 @@ export function MultiImageUpload({
                 <div className="w-8 h-8 rounded-full bg-surface-muted flex items-center justify-center text-foreground-muted mb-1 group-hover:bg-primary/10 group-hover:text-primary">
                   <Plus className="w-4 h-4" />
                 </div>
-                <span className="text-[11px] font-bold text-foreground">Add More</span>
-                <span className="text-[9px] text-foreground-muted">Multiple files</span>
+                <span className="text-xs font-bold text-foreground">Add More</span>
+                <span className="text-xs text-foreground-muted">Multiple files</span>
               </div>
             )}
           </div>

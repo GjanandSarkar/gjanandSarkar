@@ -25,24 +25,24 @@ function QuantityStepper({
 
   return (
     <div className={cn(
-      "flex items-center justify-between rounded-xl overflow-hidden bg-surface-muted shadow-sm",
-      isSm ? "h-11" : "h-12",
+      "flex items-center justify-between rounded-lg overflow-hidden bg-surface border border-border shadow-xs",
+      isSm ? "h-11" : "h-11",
       className
     )}>
       <button
         onClick={onDecrement}
         disabled={disabled || quantity <= min}
         className={cn(
-          "flex items-center justify-center transition-all hover:bg-surface-elevated active:scale-95 disabled:opacity-50 text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-1 focus-visible:z-10",
-          isSm ? "w-11 h-11" : "w-12 h-12"
+          "flex items-center justify-center transition-colors duration-150 hover:bg-surface-muted disabled:opacity-40 text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-1 focus-visible:z-10",
+          "w-11 h-11 min-w-[44px] min-h-[44px]"
         )}
         aria-label="Decrease quantity"
       >
-        <Minus className={isSm ? "w-4 h-4" : "w-5 h-5"} strokeWidth={3} />
+        <Minus className="w-4 h-4" strokeWidth={2.5} />
       </button>
       <span className={cn(
-        "text-center font-bold text-foreground min-w-[2rem]",
-        isSm ? "text-body-sm px-1" : "text-body-md px-2"
+        "text-center font-semibold text-foreground min-w-[2rem] tabular-nums",
+        isSm ? "text-xs px-1" : "text-sm px-2"
       )}>
         {quantity}
       </span>
@@ -50,12 +50,12 @@ function QuantityStepper({
         onClick={onIncrement}
         disabled={disabled}
         className={cn(
-          "flex items-center justify-center transition-all hover:bg-surface-elevated active:scale-95 disabled:opacity-50 text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-1 focus-visible:z-10",
-          isSm ? "w-11 h-11" : "w-12 h-12"
+          "flex items-center justify-center transition-colors duration-150 hover:bg-surface-muted disabled:opacity-40 text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-1 focus-visible:z-10",
+          "w-11 h-11 min-w-[44px] min-h-[44px]"
         )}
         aria-label="Increase quantity"
       >
-        <Plus className={isSm ? "w-4 h-4" : "w-5 h-5"} strokeWidth={3} />
+        <Plus className="w-4 h-4" strokeWidth={2.5} />
       </button>
     </div>
   )

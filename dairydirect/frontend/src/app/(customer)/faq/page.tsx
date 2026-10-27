@@ -93,7 +93,7 @@ export default function FAQPage() {
             <HelpCircle className="w-3.5 h-3.5" />
             <span>Customer Knowledge Base</span>
           </div>
-          <h1 className="text-3xl sm:text-4xl font-black text-primary tracking-tight mb-3">
+          <h1 className="text-3xl sm:text-4xl font-semibold text-primary tracking-tight mb-3">
             Frequently Asked Questions
           </h1>
           <p className="text-xs sm:text-sm text-foreground-muted max-w-xl mx-auto leading-relaxed">
@@ -154,9 +154,9 @@ export default function FAQPage() {
         </div>
 
         {/* Still Have Questions Box */}
-        <div className="mt-12 bg-gradient-to-r from-[var(--primary)] to-primary-light rounded-3xl p-6 sm:p-8 text-white flex flex-col sm:flex-row items-center justify-between gap-6 shadow-lg">
+        <div className="mt-12 bg-gradient-to-r from-[var(--primary)] to-primary-light rounded-xl p-6 sm:p-8 text-white flex flex-col sm:flex-row items-center justify-between gap-6 shadow-lg">
           <div>
-            <h3 className="text-lg font-black text-warning mb-1">
+            <h3 className="text-lg font-semibold text-warning mb-1">
               Still have questions?
             </h3>
             <p className="text-xs text-success-bg/90 leading-relaxed max-w-md">
@@ -166,7 +166,7 @@ export default function FAQPage() {
           </div>
           <Link
             href="/contact"
-            className="px-6 py-3 bg-secondary hover:bg-secondary-hover text-white text-xs font-extrabold rounded-xl transition-all shadow-md shrink-0 flex items-center gap-2"
+            className="px-6 py-3 bg-secondary hover:bg-secondary-hover text-white text-xs font-semibold rounded-xl transition-all shadow-md shrink-0 flex items-center gap-2"
           >
             <PhoneCall className="w-4 h-4" />
             <span>Contact Support</span>

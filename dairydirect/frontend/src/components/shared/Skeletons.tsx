@@ -111,7 +111,7 @@ export function PageSkeleton() {
   return (
     <div className="w-full max-w-[1440px] mx-auto px-4 md:px-8 py-6" role="status" aria-label="Loading page">
       <span className="sr-only">Loading</span>
-      <SkeletonBlock className="w-full h-40 sm:h-56 rounded-3xl mb-8" />
+      <SkeletonBlock className="w-full h-40 sm:h-56 rounded-xl mb-8" />
       <div className="mb-8">
         <CategoryRailSkeleton />
       </div>

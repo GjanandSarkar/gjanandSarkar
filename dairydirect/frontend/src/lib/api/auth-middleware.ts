@@ -96,14 +96,20 @@ export function sellerCanWrite(seller: SellerContext | null): boolean {
   return Boolean(seller && SELLER_WRITE_ALLOWED_STATUSES.has(seller.status));
 }
 
-const ADMIN_EMAILS = (process.env.ADMIN_EMAILS || 'gjanandsarkar09@gmail.com,bestjavacoding444@gmail.com')
-  .toLowerCase()
-  .split(',')
-  .map((e) => e.trim());
+/**
+ * ADMIN_EMAILS / ADMIN_PHONES are optional env-based supplemental overrides.
+ * They do NOT have hardcoded defaults — the profiles.role column in the
+ * database is the primary, authoritative source for the 'admin' role.
+ * These lists are only useful for bootstrapping the very first admin before
+ * any row is updated in profiles, or for emergency access recovery.
+ */
+const ADMIN_EMAILS: string[] = process.env.ADMIN_EMAILS
+  ? process.env.ADMIN_EMAILS.toLowerCase().split(',').map((e) => e.trim()).filter(Boolean)
+  : [];
 
-const ADMIN_PHONES = (process.env.ADMIN_PHONES || '+919876543210')
-  .split(',')
-  .map((p) => p.trim());
+const ADMIN_PHONES: string[] = process.env.ADMIN_PHONES
+  ? process.env.ADMIN_PHONES.split(',').map((p) => p.trim()).filter(Boolean)
+  : [];
 
 /**
  * Verify authentication from request (Custom JWT or Supabase Auth Token)
@@ -200,27 +206,25 @@ export async function getAuthUser(request: Request): Promise<AuthUser | null> {
     console.warn('[AuthMiddleware] PostgreSQL not configured, using Supabase auth.');
   }
 
-  // Supabase-only deployments never reach the RDS branch above, so without
-  // this lookup the user's real role in `profiles` was never consulted: every
-  // seller and every database-assigned admin silently degraded to 'customer'
-  // unless their role happened to be baked into a custom JWT.
-  if (userRole !== 'admin') {
-    try {
-      const sb = getAdminSupabase();
-      const { data: profile } = await sb
-        .from('profiles')
-        .select('role, phone, email')
-        .eq('id', userId)
-        .maybeSingle();
+  // Always consult profiles.role — it is the canonical role column.
+  // The env-based override (isEnvAdmin) acts only as a supplemental signal;
+  // we still need the DB role for sellers and for non-env admins.
+  try {
+    const sb = getAdminSupabase();
+    const { data: profile } = await sb
+      .from('profiles')
+      .select('role, phone, email')
+      .eq('id', userId)
+      .maybeSingle();
 
-      if (profile?.role) {
-        userRole = profile.role as AuthUser['role'];
-        userPhone = profile.phone ?? userPhone;
-        userEmail = profile.email ?? userEmail;
-      }
-    } catch (err) {
-      console.warn('[AuthMiddleware] Supabase profile lookup failed:', err);
+    if (profile?.role) {
+      // DB role wins over the JWT-embedded role; env-admin flag may elevate further
+      userRole = profile.role as AuthUser['role'];
+      userPhone = profile.phone ?? userPhone;
+      userEmail = profile.email ?? userEmail;
     }
+  } catch (err) {
+    console.warn('[AuthMiddleware] Supabase profile lookup failed:', err);
   }
 
   const isAdmin = isEnvAdmin || userRole === 'admin';

@@ -302,7 +302,7 @@ export function CustomerOrderDetailsClient({ initialOrder }: CustomerOrderDetail
         )}
 
         {/* Top Header Card */}
-        <div className="bg-surface rounded-3xl border border-border/80 shadow-2xs p-6 md:p-8 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div className="bg-surface rounded-xl border border-border/80 shadow-2xs p-6 md:p-8 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div className="flex items-center gap-4">
             <Link
               href="/orders"
@@ -315,7 +315,7 @@ export function CustomerOrderDetailsClient({ initialOrder }: CustomerOrderDetail
             <div>
               <div className="flex items-center gap-2">
                 <span className="text-xs font-bold text-foreground-muted uppercase tracking-wider">Order Reference</span>
-                <span className={`px-2.5 py-0.5 rounded-full text-xs font-black uppercase tracking-wider ${
+                <span className={`px-2.5 py-0.5 rounded-full text-xs font-semibold uppercase tracking-wider ${
                   order.status === 'delivered' ? 'bg-success-bg text-success' :
                   order.status === 'cancelled' ? 'bg-surface-muted text-foreground' :
                   order.status === 'out_for_delivery' ? 'bg-warning-bg text-warning' : 'bg-info-bg text-blue-800'
@@ -323,7 +323,7 @@ export function CustomerOrderDetailsClient({ initialOrder }: CustomerOrderDetail
                   {order.status.replace(/_/g, ' ')}
                 </span>
               </div>
-              <h1 className="text-xl md:text-2xl font-black text-foreground tracking-tight mt-0.5">
+              <h1 className="text-xl md:text-2xl font-semibold text-foreground tracking-tight mt-0.5">
                 {order.order_number || `Order #${order.id.slice(0, 8)}`}
               </h1>
               <p className="text-xs text-foreground-muted mt-0.5">
@@ -354,7 +354,7 @@ export function CustomerOrderDetailsClient({ initialOrder }: CustomerOrderDetail
         </div>
 
         {/* Order Lifecycle Status Bar Card */}
-        <div className="bg-surface rounded-3xl border border-border/80 shadow-2xs p-6 md:p-8">
+        <div className="bg-surface rounded-xl border border-border/80 shadow-2xs p-6 md:p-8">
           <div className="flex items-center justify-between mb-6">
             <span className="text-xs font-bold text-foreground-muted uppercase tracking-wider">
               Order Lifecycle Progress
@@ -379,7 +379,7 @@ export function CustomerOrderDetailsClient({ initialOrder }: CustomerOrderDetail
         <div className="p-4 rounded-2xl bg-success-bg/70 border border-success/20/80 flex items-start sm:items-center gap-3 text-xs text-success">
           <ShieldCheck className="w-6 h-6 text-success shrink-0 mt-0.5 sm:mt-0" />
           <div className="flex-1">
-            <span className="font-extrabold text-success">Gjanand Sarkar Freshness & Quality Guarantee:</span>
+            <span className="font-semibold text-success">Gjanand Sarkar Freshness & Quality Guarantee:</span>
             <span className="ml-1 text-success">
               Orders can be cancelled before fulfillment. Delivered items are backed by our 7-day hassle-free replacement or return warranty.
             </span>
@@ -387,7 +387,7 @@ export function CustomerOrderDetailsClient({ initialOrder }: CustomerOrderDetail
         </div>
 
         {/* Purchased Products / Order Items Section */}
-        <div className="bg-surface rounded-3xl border border-border/80 shadow-2xs overflow-hidden">
+        <div className="bg-surface rounded-xl border border-border/80 shadow-2xs overflow-hidden">
           <div className="p-6 border-b border-border flex items-center justify-between">
             <div className="flex items-center gap-2">
               <ShoppingBag className="w-5 h-5 text-secondary" />
@@ -432,7 +432,7 @@ export function CustomerOrderDetailsClient({ initialOrder }: CustomerOrderDetail
 
                       <div className="space-y-1">
                         <div className="flex items-center gap-2 flex-wrap">
-                          <span className="px-2 py-0.5 rounded-md text-[10px] font-bold border" style={{
+                          <span className="px-2 py-0.5 rounded-md text-xs font-bold border" style={{
                             backgroundColor: statusStyle.bg,
                             color: statusStyle.text,
                             borderColor: statusStyle.border,
@@ -440,7 +440,7 @@ export function CustomerOrderDetailsClient({ initialOrder }: CustomerOrderDetail
                             {statusStyle.label}
                           </span>
 
-                          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-surface-muted text-foreground text-[10px] font-bold">
+                          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-surface-muted text-foreground text-xs font-bold">
                             <Store className="w-3 h-3 text-foreground-muted" />
                             <span>{sellerName}</span>
                           </span>
@@ -456,7 +456,7 @@ export function CustomerOrderDetailsClient({ initialOrder }: CustomerOrderDetail
                           {item.variant_weight && ` • ${item.variant_weight}`}
                         </p>
 
-                        <p className="text-sm font-black text-primary">
+                        <p className="text-sm font-semibold text-primary">
                           ₹{Number(item.price) * Number(item.quantity)}
                           <span className="text-xs font-normal text-foreground-muted ml-1">
                             (₹{item.price} each)
@@ -473,15 +473,15 @@ export function CustomerOrderDetailsClient({ initialOrder }: CustomerOrderDetail
                         <div className="p-3 rounded-xl bg-warning-bg border border-warning/20 text-right space-y-0.5">
                           <div className="flex items-center gap-1.5 justify-end">
                             <Clock className="w-3.5 h-3.5 text-warning" />
-                            <span className="text-xs font-black text-warning">
+                            <span className="text-xs font-semibold text-warning">
                               Cancellation: {REQUEST_STATUS_BADGES[activeCancelReq.status]?.label || activeCancelReq.status}
                             </span>
                           </div>
-                          <p className="text-[11px] text-warning max-w-xs">
+                          <p className="text-xs text-warning max-w-xs">
                             Reason: {activeCancelReq.reason}
                           </p>
                           {activeCancelReq.rejection_reason && (
-                            <p className="text-[11px] text-error font-bold">
+                            <p className="text-xs text-error font-bold">
                               Seller Rejection Note: {activeCancelReq.rejection_reason}
                             </p>
                           )}
@@ -493,20 +493,20 @@ export function CustomerOrderDetailsClient({ initialOrder }: CustomerOrderDetail
                         <div className="p-3 rounded-xl bg-info-bg border border-info/20 text-right space-y-0.5">
                           <div className="flex items-center gap-1.5 justify-end">
                             <RotateCcw className="w-3.5 h-3.5 text-info" />
-                            <span className="text-xs font-black text-blue-900">
+                            <span className="text-xs font-semibold text-blue-900">
                               Return: {REQUEST_STATUS_BADGES[activeReturnReq.status]?.label || activeReturnReq.status}
                             </span>
                           </div>
-                          <p className="text-[11px] text-info max-w-xs">
+                          <p className="text-xs text-info max-w-xs">
                             Reason: {activeReturnReq.reason}
                           </p>
                           {activeReturnReq.status === 'refunded' && (
-                            <p className="text-[11px] text-success font-black">
+                            <p className="text-xs text-success font-semibold">
                               ₹{activeReturnReq.refund_amount} Refunded Successfully
                             </p>
                           )}
                           {activeReturnReq.rejection_reason && (
-                            <p className="text-[11px] text-error font-bold">
+                            <p className="text-xs text-error font-bold">
                               Rejection: {activeReturnReq.rejection_reason}
                             </p>
                           )}
@@ -557,7 +557,7 @@ export function CustomerOrderDetailsClient({ initialOrder }: CustomerOrderDetail
             <div className="flex items-center gap-6 self-end sm:self-auto">
               <div className="text-right">
                 <span className="text-xs text-foreground-muted block font-bold uppercase">Order Total</span>
-                <span className="text-xl font-black text-primary">
+                <span className="text-xl font-semibold text-primary">
                   ₹{order.total_amount}
                 </span>
               </div>
@@ -568,10 +568,10 @@ export function CustomerOrderDetailsClient({ initialOrder }: CustomerOrderDetail
         {/* Shipping & Payment Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {/* Shipping Details */}
-          <div className="bg-surface rounded-3xl border border-border/80 shadow-2xs p-6 space-y-3">
+          <div className="bg-surface rounded-xl border border-border/80 shadow-2xs p-6 space-y-3">
             <div className="flex items-center gap-2 pb-2 border-b border-border">
               <MapPin className="w-4 h-4 text-primary" />
-              <h3 className="text-xs font-black uppercase tracking-wider text-foreground">Delivery Address</h3>
+              <h3 className="text-xs font-semibold uppercase tracking-wider text-foreground">Delivery Address</h3>
             </div>
             <div className="text-xs text-foreground-muted space-y-1">
               <p className="font-bold text-foreground text-sm">{order.profiles?.name || 'Customer'}</p>
@@ -586,10 +586,10 @@ export function CustomerOrderDetailsClient({ initialOrder }: CustomerOrderDetail
           </div>
 
           {/* Payment Details */}
-          <div className="bg-surface rounded-3xl border border-border/80 shadow-2xs p-6 space-y-3">
+          <div className="bg-surface rounded-xl border border-border/80 shadow-2xs p-6 space-y-3">
             <div className="flex items-center gap-2 pb-2 border-b border-border">
               <CreditCard className="w-4 h-4 text-primary" />
-              <h3 className="text-xs font-black uppercase tracking-wider text-foreground">Payment & Refund Status</h3>
+              <h3 className="text-xs font-semibold uppercase tracking-wider text-foreground">Payment & Refund Status</h3>
             </div>
             <div className="text-xs text-foreground-muted space-y-2">
               <div className="flex justify-between items-center">
@@ -600,7 +600,7 @@ export function CustomerOrderDetailsClient({ initialOrder }: CustomerOrderDetail
               </div>
               <div className="flex justify-between items-center">
                 <span className="text-foreground-muted">Payment Status:</span>
-                <span className={`font-bold uppercase px-2.5 py-0.5 rounded-full text-[10px] ${
+                <span className={`font-bold uppercase px-2.5 py-0.5 rounded-full text-xs ${
                   order.payment_status === 'paid'
                     ? 'bg-success-bg text-success border border-success/20'
                     : order.payment_status === 'refunded'
@@ -616,16 +616,16 @@ export function CustomerOrderDetailsClient({ initialOrder }: CustomerOrderDetail
               </div>
               <div className="flex justify-between items-center">
                 <span className="text-foreground-muted">Order Total:</span>
-                <span className="font-extrabold text-foreground font-mono">₹{order.total_amount}</span>
+                <span className="font-semibold text-foreground font-mono">₹{order.total_amount}</span>
               </div>
               {order.payment_status === 'paid' && order.payment_confirmed_at && (
-                <div className="flex justify-between items-center pt-1 text-[11px] text-success">
+                <div className="flex justify-between items-center pt-1 text-xs text-success">
                   <span className="text-foreground-muted">Cash Confirmed At:</span>
                   <span>{format(new Date(order.payment_confirmed_at), 'dd MMM yyyy, hh:mm a')}</span>
                 </div>
               )}
               {(order.payment_method || '').toUpperCase() === 'COD' && order.payment_status !== 'paid' && (
-                <p className="text-[11px] text-warning bg-warning-bg p-2.5 rounded-xl border border-warning/20/60 mt-1">
+                <p className="text-xs text-warning bg-warning-bg p-2.5 rounded-xl border border-warning/20/60 mt-1">
                   Cash payment will be collected in person upon delivery and verified by Gjanand Sarkar.
                 </p>
               )}
@@ -641,7 +641,7 @@ export function CustomerOrderDetailsClient({ initialOrder }: CustomerOrderDetail
           <motion.div
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
-            className="w-full max-w-lg bg-surface rounded-3xl shadow-2xl overflow-hidden border border-border"
+            className="w-full max-w-lg bg-surface rounded-xl shadow-2xl overflow-hidden border border-border"
           >
             <div className="p-6 border-b border-border flex items-center justify-between bg-surface-muted/50">
               <div className="flex items-center gap-2.5">
@@ -674,7 +674,7 @@ export function CustomerOrderDetailsClient({ initialOrder }: CustomerOrderDetail
                 </div>
                 <div className="min-w-0">
                   <p className="text-xs font-bold text-foreground truncate">{cancelModalItem.product_name}</p>
-                  <p className="text-[11px] text-foreground-muted">
+                  <p className="text-xs text-foreground-muted">
                     Qty: {cancelModalItem.quantity} • ₹{Number(cancelModalItem.price) * Number(cancelModalItem.quantity)}
                   </p>
                 </div>
@@ -708,7 +708,7 @@ export function CustomerOrderDetailsClient({ initialOrder }: CustomerOrderDetail
                 />
               </div>
 
-              <div className="p-3 rounded-xl bg-warning-bg text-warning text-[11px] leading-relaxed">
+              <div className="p-3 rounded-xl bg-warning-bg text-warning text-xs leading-relaxed">
                 <strong>Policy note:</strong> Cancellation requests are sent directly to the seller for approval. If approved, reserved inventory is restored and eligible payments are refunded.
               </div>
 
@@ -739,7 +739,7 @@ export function CustomerOrderDetailsClient({ initialOrder }: CustomerOrderDetail
           <motion.div
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
-            className="w-full max-w-lg bg-surface rounded-3xl shadow-2xl overflow-hidden border border-border my-8"
+            className="w-full max-w-lg bg-surface rounded-xl shadow-2xl overflow-hidden border border-border my-8"
           >
             <div className="p-6 border-b border-border flex items-center justify-between bg-surface-muted/50">
               <div className="flex items-center gap-2.5">
@@ -772,10 +772,10 @@ export function CustomerOrderDetailsClient({ initialOrder }: CustomerOrderDetail
                 </div>
                 <div className="min-w-0 flex-1">
                   <p className="text-xs font-bold text-foreground truncate">{returnModalItem.product_name}</p>
-                  <p className="text-[11px] text-foreground-muted">
+                  <p className="text-xs text-foreground-muted">
                     Seller: {returnModalItem.products?.sellers?.store_name || 'Direct Seller'} • Qty: {returnModalItem.quantity}
                   </p>
-                  <p className="text-xs font-black text-success mt-0.5">
+                  <p className="text-xs font-semibold text-success mt-0.5">
                     Refund Value: ₹{Number(returnModalItem.price) * Number(returnModalItem.quantity)}
                   </p>
                 </div>
@@ -816,7 +816,7 @@ export function CustomerOrderDetailsClient({ initialOrder }: CustomerOrderDetail
                   <label className="text-xs font-bold text-foreground">
                     Upload Defect / Condition Photos (Max 6)
                   </label>
-                  <span className="text-[11px] text-foreground-muted">{returnImages.length}/6 photos</span>
+                  <span className="text-xs text-foreground-muted">{returnImages.length}/6 photos</span>
                 </div>
 
                 <div className="space-y-2">
@@ -859,7 +859,7 @@ export function CustomerOrderDetailsClient({ initialOrder }: CustomerOrderDetail
                           <span>Attach multiple photos of product defect / issue</span>
                         </div>
                       )}
-                      <span className="text-[10px] text-foreground-muted mt-0.5">JPG, PNG, or WebP up to 10MB (select multiple)</span>
+                      <span className="text-xs text-foreground-muted mt-0.5">JPG, PNG, or WebP up to 10MB (select multiple)</span>
                     </label>
                   )}
                 </div>
@@ -893,12 +893,12 @@ export function CustomerOrderDetailsClient({ initialOrder }: CustomerOrderDetail
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.95 }}
-            className="bg-surface rounded-3xl max-w-md w-full p-6 md:p-8 shadow-2xl border border-border"
+            className="bg-surface rounded-xl max-w-md w-full p-6 md:p-8 shadow-2xl border border-border"
           >
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center gap-2">
                 <Ban className="w-5 h-5 text-error" />
-                <h3 className="text-lg font-black text-foreground tracking-tight">Cancel this order?</h3>
+                <h3 className="text-lg font-semibold text-foreground tracking-tight">Cancel this order?</h3>
               </div>
               <button
                 onClick={() => setIsCancelOrderModalOpen(false)}

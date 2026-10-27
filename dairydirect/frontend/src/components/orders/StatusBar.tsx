@@ -63,7 +63,7 @@ export function StatusBar({ steps, current, times = {}, failed }: Props) {
                 }
               />
               <span
-                className={`relative z-10 flex h-6 w-6 items-center justify-center rounded-full text-[11px] font-bold transition-all shadow-sm ${
+                className={`relative z-10 flex h-6 w-6 items-center justify-center rounded-full text-xs font-bold transition-all shadow-sm ${
                   bad
                     ? 'bg-error text-white ring-4 ring-rose-100'
                     : done
@@ -91,7 +91,7 @@ export function StatusBar({ steps, current, times = {}, failed }: Props) {
               {s.label}
             </p>
             {times[s.code] && (
-              <p className="mt-1 text-[11px] text-foreground-muted">
+              <p className="mt-1 text-xs text-foreground-muted">
                 {new Date(times[s.code]).toLocaleString('en-IN', {
                   month: 'short',
                   day: 'numeric',

@@ -100,7 +100,7 @@ export default function OrderConfirmedScreen() {
           transition={{ delay: 0.2 }}
           className="text-center mb-8"
         >
-          <h1 className="text-[26px] font-black text-dark mb-2">Order Confirmed!</h1>
+          <h1 className="text-[26px] font-semibold text-dark mb-2">Order Confirmed!</h1>
           <p className="text-muted text-sm font-medium">Your order has been placed successfully.</p>
           <div className="inline-block bg-sand/30 px-3 py-1 rounded-full mt-3">
             <span className="text-xs font-bold text-dark uppercase tracking-wider">Order #{order.id.substring(0, 8)}</span>
@@ -118,7 +118,7 @@ export default function OrderConfirmedScreen() {
           </div>
           <div>
             <h3 className="font-bold text-dark text-sm mb-1 mt-0.5 uppercase tracking-wider">Total Amount</h3>
-            <p className="text-primary font-black text-lg tracking-wide">{t('currency')}{order.total_amount}</p>
+            <p className="text-primary font-semibold text-lg tracking-wide">{t('currency')}{order.total_amount}</p>
           </div>
         </motion.div>
 
@@ -126,7 +126,7 @@ export default function OrderConfirmedScreen() {
           initial={{ y: 20, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
           transition={{ delay: 0.4 }}
-          className="bg-surface border border-sand rounded-[20px] p-5 shadow-sm mb-8"
+          className="bg-surface border border-sand rounded-[20px] p-5 shadow-sm mb-4"
         >
           <h3 className="font-bold text-dark text-sm flex items-center mb-3 uppercase tracking-wider">
             <MapPin className="w-4 h-4 mr-2 text-primary" /> {addressLabel}
@@ -140,7 +140,7 @@ export default function OrderConfirmedScreen() {
           initial={{ y: 20, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
           transition={{ delay: 0.5 }}
-          className="flex flex-col gap-3 mt-auto"
+          className="flex flex-col gap-3 mt-2"
         >
           <Link href={`/tracking/${order.id}`} className="block w-full">
             <Button size="lg" className="w-full shadow-active text-base flex justify-center items-center gap-2">

@@ -191,11 +191,11 @@ export default function AdminOrdersPage() {
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-4">
             <div>
               <div className="flex items-center gap-2">
-                <span className="px-2.5 py-0.5 rounded-full bg-success-bg text-success text-[10px] font-black uppercase tracking-wider">
+                <span className="px-2.5 py-0.5 rounded-full bg-success-bg text-success text-xs font-semibold uppercase tracking-wider">
                   Admin Platform Inventory
                 </span>
               </div>
-              <h1 className="font-extrabold text-[24px] tracking-tight mt-1"
+              <h1 className="font-semibold text-[24px] tracking-tight mt-1"
                 style={{ color: 'var(--color-on-surface)' }}>
                 Admin Product Orders
                 <span className="ml-2 text-[15px] font-normal" style={{ color: 'var(--color-on-surface-variant)' }}>
@@ -293,40 +293,40 @@ export default function AdminOrdersPage() {
                               sellerStores.map(storeName => (
                                 <span
                                   key={storeName}
-                                  className="px-2 py-0.5 rounded-md text-[10px] font-black uppercase tracking-wider bg-purple-100 text-purple-800 flex items-center gap-1"
+                                  className="px-2 py-0.5 rounded-md text-xs font-semibold uppercase tracking-wider bg-purple-100 text-purple-800 flex items-center gap-1"
                                 >
                                   <Store className="w-3 h-3 text-purple-600" />
                                   <span>{storeName}</span>
                                 </span>
                               ))
                             ) : (
-                              <span className="px-2 py-0.5 rounded-md text-[10px] font-semibold bg-surface-muted text-foreground-muted">
+                              <span className="px-2 py-0.5 rounded-md text-xs font-semibold bg-surface-muted text-foreground-muted">
                                 Direct Platform
                               </span>
                             )}
 
                             {/* Payment Status */}
-                            <span className={`px-2 py-0.5 rounded-md text-[10px] font-bold uppercase tracking-wider ${
+                            <span className={`px-2 py-0.5 rounded-md text-xs font-bold uppercase tracking-wider ${
                               order.payment_status === 'paid' ? 'bg-success-bg text-success' : 'bg-warning-bg text-warning'
                             }`}>
                               {order.payment_status === 'paid' ? 'Paid' : `Payment: ${order.payment_status || 'Pending'}`} ({order.payment_method || 'COD'})
                             </span>
                           </div>
 
-                          <p className="text-[11px] mt-0.5" style={{ color: 'var(--color-on-surface-variant)' }}>
+                          <p className="text-xs mt-0.5" style={{ color: 'var(--color-on-surface-variant)' }}>
                             {order.profiles?.name || 'Customer'} {order.profiles?.phone ? `(${order.profiles.phone})` : ''} · {format(new Date(order.created_at), 'MMM d, hh:mm a')}
                           </p>
                         </div>
                       </div>
 
                       <div className="flex items-center gap-3">
-                        <span className="font-extrabold text-[15px]" style={{ color: 'var(--color-primary)' }}>
+                        <span className="font-semibold text-[15px]" style={{ color: 'var(--color-primary)' }}>
                           {t('currency')}{order.total_amount}
                         </span>
                         <div className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-full"
                           style={{ background: statusStyle.bg, color: statusStyle.color }}>
                           <div className="w-1.5 h-1.5 rounded-full shrink-0" style={{ background: statusStyle.dot }} />
-                          <span className="text-[10px] font-bold uppercase tracking-wide whitespace-nowrap">
+                          <span className="text-xs font-bold uppercase tracking-wide whitespace-nowrap">
                             {order.status.replace(/_/g, ' ')}
                           </span>
                         </div>
@@ -351,7 +351,7 @@ export default function AdminOrdersPage() {
                             {/* Customer Delivery Details Box */}
                             <div className="p-3.5 rounded-xl border border-border/80 bg-surface-muted/70 text-xs grid grid-cols-1 md:grid-cols-2 gap-3">
                               <div>
-                                <span className="text-[10px] font-bold uppercase tracking-wider text-foreground-muted block">Customer Information</span>
+                                <span className="text-xs font-bold uppercase tracking-wider text-foreground-muted block">Customer Information</span>
                                 <p className="font-bold text-foreground mt-0.5">{order.profiles?.name || 'Customer'}</p>
                                 <p className="text-foreground-muted">{order.profiles?.email || 'N/A'}</p>
                                 {order.profiles?.phone && (
@@ -363,15 +363,15 @@ export default function AdminOrdersPage() {
                               </div>
 
                               <div>
-                                <span className="text-[10px] font-bold uppercase tracking-wider text-foreground-muted block">Shipping Address</span>
+                                <span className="text-xs font-bold uppercase tracking-wider text-foreground-muted block">Shipping Address</span>
                                 <p className="text-foreground mt-0.5 leading-relaxed font-medium">
                                   {order.user_addresses?.address || order.shipping_address || 'Address on file'}
                                 </p>
                                 {order.user_addresses?.apartment && (
-                                  <p className="text-foreground-muted text-[11px]">Apt/Flat: {order.user_addresses.apartment}</p>
+                                  <p className="text-foreground-muted text-xs">Apt/Flat: {order.user_addresses.apartment}</p>
                                 )}
                                 {order.delivery_slot && (
-                                  <p className="text-success font-semibold mt-1 text-[11px]">Slot: {order.delivery_slot}</p>
+                                  <p className="text-success font-semibold mt-1 text-xs">Slot: {order.delivery_slot}</p>
                                 )}
                               </div>
                             </div>
@@ -379,7 +379,7 @@ export default function AdminOrdersPage() {
                             {/* Ordered Items with Seller Attribution */}
                             <div className="rounded-[10px] p-3 mb-2"
                               style={{ background: 'var(--color-surface-container-low)' }}>
-                              <span className="text-[10px] font-bold uppercase tracking-wider text-foreground-muted block mb-2">Order Products & Sellers</span>
+                              <span className="text-xs font-bold uppercase tracking-wider text-foreground-muted block mb-2">Order Products & Sellers</span>
                               {order.order_items?.map((item, j) => {
                                 const pName = item.product_name || item.products?.name || (item.product_id ? `Product #${item.product_id.slice(0, 6)}` : 'Dairy Product');
                                 const pWeight = item.weight || item.product_variants?.weight || '';
@@ -405,7 +405,7 @@ export default function AdminOrdersPage() {
                                         {storeName && (
                                           <div className="flex items-center gap-1 mt-0.5">
                                             <Store className="w-3 h-3 text-purple-600" />
-                                            <span className="text-[11px] font-bold text-purple-700">Store: {storeName}</span>
+                                            <span className="text-xs font-bold text-purple-700">Store: {storeName}</span>
                                           </div>
                                         )}
                                       </div>
@@ -425,7 +425,7 @@ export default function AdminOrdersPage() {
                                   <Ban className="w-3.5 h-3.5 text-foreground-muted" />
                                   <span>Cancellation History & Audit Note:</span>
                                 </span>
-                                <p className="text-foreground-muted font-mono text-[11px]">
+                                <p className="text-foreground-muted font-mono text-xs">
                                   {order.notes || 'Order cancelled and stock inventory restored.'}
                                 </p>
                               </div>
@@ -440,14 +440,14 @@ export default function AdminOrdersPage() {
                                       <IndianRupee className="w-4 h-4" />
                                     </div>
                                     <div>
-                                      <span className="text-[10px] font-bold uppercase tracking-wider text-foreground-muted block">Payment Method</span>
-                                      <span className="font-extrabold text-sm text-foreground">Cash on Delivery (COD)</span>
+                                      <span className="text-xs font-bold uppercase tracking-wider text-foreground-muted block">Payment Method</span>
+                                      <span className="font-semibold text-sm text-foreground">Cash on Delivery (COD)</span>
                                     </div>
                                   </div>
 
                                   <div className="flex items-center gap-2">
                                     <span className="text-xs text-foreground-muted">Collection Status:</span>
-                                    <span className={`px-2.5 py-0.5 rounded-full text-xs font-black uppercase tracking-wider ${
+                                    <span className={`px-2.5 py-0.5 rounded-full text-xs font-semibold uppercase tracking-wider ${
                                       order.payment_status === 'paid' ? 'bg-success-bg text-success border border-success/20' : 'bg-warning-bg text-warning border border-warning/20'
                                     }`}>
                                       {order.payment_status === 'paid' ? '✓ Paid (Cash Collected)' : 'Pending Cash Collection'}
@@ -457,15 +457,15 @@ export default function AdminOrdersPage() {
 
                                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs text-foreground-muted">
                                   <div>
-                                    <span className="text-[10px] text-foreground-muted font-bold uppercase tracking-wider block">Order Amount</span>
-                                    <span className="font-extrabold text-sm text-primary">₹{order.total_amount}</span>
+                                    <span className="text-xs text-foreground-muted font-bold uppercase tracking-wider block">Order Amount</span>
+                                    <span className="font-semibold text-sm text-primary">₹{order.total_amount}</span>
                                   </div>
                                   <div>
-                                    <span className="text-[10px] text-foreground-muted font-bold uppercase tracking-wider block">Order Status</span>
+                                    <span className="text-xs text-foreground-muted font-bold uppercase tracking-wider block">Order Status</span>
                                     <span className="font-bold text-foreground uppercase">{order.status.replace(/_/g, ' ')}</span>
                                   </div>
                                   <div>
-                                    <span className="text-[10px] text-foreground-muted font-bold uppercase tracking-wider block">Cash Confirmed At</span>
+                                    <span className="text-xs text-foreground-muted font-bold uppercase tracking-wider block">Cash Confirmed At</span>
                                     <span className="font-medium text-foreground">
                                       {order.payment_confirmed_at 
                                         ? format(new Date(order.payment_confirmed_at), 'MMM d, hh:mm a') 
@@ -473,7 +473,7 @@ export default function AdminOrdersPage() {
                                     </span>
                                   </div>
                                   <div>
-                                    <span className="text-[10px] text-foreground-muted font-bold uppercase tracking-wider block">Confirmed By</span>
+                                    <span className="text-xs text-foreground-muted font-bold uppercase tracking-wider block">Confirmed By</span>
                                     <span className="font-medium text-foreground">
                                       {order.payment_confirmed_at ? 'Authorized Admin' : 'Pending'}
                                     </span>
@@ -501,7 +501,7 @@ export default function AdminOrdersPage() {
                                   <Loader2 className="w-5 h-5 animate-spin text-primary" />
                                 </div>
                               )}
-                              <p className="text-[11px] font-bold uppercase tracking-wider mb-4"
+                              <p className="text-xs font-bold uppercase tracking-wider mb-4"
                                 style={{ color: 'var(--color-on-surface-variant)' }}>Order Timeline & Fulfillment</p>
                               
                               <div className="flex items-center gap-2 mb-6 w-full max-w-xl">
@@ -536,7 +536,7 @@ export default function AdminOrdersPage() {
                                       disabled={isBusy || isBlocked || isCurrentStatus}
                                       title={blockedReason ?? (isCurrentStatus ? 'Current status' : `Mark as ${status.replace(/_/g, ' ')}`)}
                                       aria-current={isCurrentStatus ? 'true' : undefined}
-                                      className={`px-3.5 py-1.5 rounded-full text-[11px] font-bold transition-all cursor-pointer ${
+                                      className={`px-3.5 py-1.5 rounded-full text-xs font-bold transition-all cursor-pointer ${
                                         isBlocked
                                           ? 'opacity-40 cursor-not-allowed line-through'
                                           : isCurrentStatus
@@ -558,7 +558,7 @@ export default function AdminOrdersPage() {
                               </div>
 
                               {ALLOWED_TRANSITIONS[order.status]?.length === 0 && (
-                                <p className="mt-2 text-[11px]" style={{ color: 'var(--color-on-surface-variant)' }}>
+                                <p className="mt-2 text-xs" style={{ color: 'var(--color-on-surface-variant)' }}>
                                   {order.status === 'delivered'
                                     ? 'This order is fulfilled. To reverse it, raise a return or refund rather than a cancellation.'
                                     : 'This order is cancelled and its stock has been restored.'}

@@ -41,13 +41,27 @@ export async function reverseGeocodeDetailed(lat: number, lng: number): Promise<
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), 6000);
 
+    // 1. First try our fast internal server route (Photon Komoot / Nominatim proxy)
+    const localRes = await fetch(`/api/geocode/reverse?lat=${lat}&lng=${lng}`, {
+      signal: controller.signal,
+    }).catch(() => null);
+
+    if (localRes && localRes.ok) {
+      clearTimeout(timeoutId);
+      const data = await localRes.json();
+      if (data && data.location) {
+        geocodeCache.set(cacheKey, { data: data.location, timestamp: Date.now() });
+        return data.location;
+      }
+    }
+
+    // 2. Direct fallback to OpenStreetMap Nominatim
     const res = await fetch(
       `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&zoom=18&addressdetails=1`,
       {
         signal: controller.signal,
         headers: {
           'Accept-Language': 'en',
-          'User-Agent': 'DairyDirect-Ecommerce-App/1.0',
         },
       }
     );
@@ -58,7 +72,6 @@ export async function reverseGeocodeDetailed(lat: number, lng: number): Promise<
       if (data) {
         const addr = data.address || {};
 
-        // Extract area (suburb, neighbourhood, residential, etc.)
         const area = (
           addr.suburb ||
           addr.neighbourhood ||
@@ -68,7 +81,6 @@ export async function reverseGeocodeDetailed(lat: number, lng: number): Promise<
           ''
         ).trim();
 
-        // Extract street/road
         const street = (
           addr.road ||
           addr.street ||
@@ -78,7 +90,6 @@ export async function reverseGeocodeDetailed(lat: number, lng: number): Promise<
           ''
         ).trim();
 
-        // Extract town/city
         const city = (
           addr.city ||
           addr.town ||
@@ -88,14 +99,9 @@ export async function reverseGeocodeDetailed(lat: number, lng: number): Promise<
           ''
         ).trim();
 
-        // Extract state
         const state = (addr.state || '').trim();
-
-        // Extract pincode (clean non-digits)
         const rawPostcode = (addr.postcode || '').trim();
         const pincode = rawPostcode.replace(/\D/g, '').slice(0, 6);
-
-        // Extract country
         const country = (addr.country || 'India').trim();
 
         const result: DetailedAddressLocation = {

@@ -164,7 +164,7 @@ function AddProductPage() {
             <ArrowLeft className="w-5 h-5" />
           </button>
           <div>
-            <h1 className="font-extrabold text-[22px] tracking-tight" style={{ color: 'var(--color-foreground, var(--foreground))' }}>
+            <h1 className="font-semibold text-[22px] tracking-tight" style={{ color: 'var(--color-foreground, var(--foreground))' }}>
               Add Product
             </h1>
             <p className="text-[13px]" style={{ color: 'var(--color-foreground-muted, var(--foreground-muted))' }}>
@@ -338,7 +338,7 @@ function AddProductPage() {
                 <Package className="w-5 h-5" style={{ color: 'var(--color-primary, var(--primary))' }} />
               </div>
               <div>
-                <h2 className="font-extrabold text-[17px] tracking-tight" style={{ color: 'var(--color-foreground, var(--foreground))' }}>
+                <h2 className="font-semibold text-[17px] tracking-tight" style={{ color: 'var(--color-foreground, var(--foreground))' }}>
                   Variants
                 </h2>
                 <p className="text-[13px]" style={{ color: 'var(--color-foreground-muted, var(--foreground-muted))' }}>
@@ -514,4 +514,4 @@ function AddProductPage() {
 }
 
 export default AddProductPage;
-
+

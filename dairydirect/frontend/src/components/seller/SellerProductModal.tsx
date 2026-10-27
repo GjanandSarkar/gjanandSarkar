@@ -93,7 +93,20 @@ const CATEGORIES_CONFIG: Record<string, { subcategories: string[]; attributes: A
       { key: 'organic_a2_cert', label: 'Organic Certification', placeholder: 'e.g. Certified Organic' },
     ],
   },
+  'Other': {
+    subcategories: [],
+    attributes: [],
+  },
 };
+
+interface VariantRow {
+  id?: string;
+  weight: string;
+  price: string;
+  originalPrice: string;
+  costPrice: string;
+  stock: string;
+}
 
 export function SellerProductModal({
   isOpen,
@@ -107,6 +120,7 @@ export function SellerProductModal({
   // Form Fields
   const [name, setName] = useState('');
   const [category, setCategory] = useState('Dairy');
+  const [customCategory, setCustomCategory] = useState('');
   const [subcategory, setSubcategory] = useState('');
   const [brand, setBrand] = useState('');
   const [sku, setSku] = useState('');
@@ -128,12 +142,10 @@ export function SellerProductModal({
   const [isUploadingGallery, setIsUploadingGallery] = useState(false);
   const galleryFileInputRef = useRef<HTMLInputElement>(null);
 
-  // Pricing & Inventory
-  const [price, setPrice] = useState('');
-  const [originalPrice, setOriginalPrice] = useState('');
-  const [costPrice, setCostPrice] = useState('');
-  const [stock, setStock] = useState('50');
-  const [weight, setWeight] = useState('500g');
+  // Pricing & Variants
+  const [variants, setVariants] = useState<VariantRow[]>([
+    { weight: '500g', price: '', originalPrice: '', costPrice: '', stock: '50' },
+  ]);
   const [taxRate, setTaxRate] = useState('5');
 
   // Logistics & Policies
@@ -164,7 +176,16 @@ export function SellerProductModal({
   useEffect(() => {
     if (product) {
       setName(product.name || '');
-      setCategory(product.category || 'Dairy');
+      if (product.category && CATEGORIES_CONFIG[product.category]) {
+        setCategory(product.category);
+        setCustomCategory('');
+      } else if (product.category) {
+        setCategory('Other');
+        setCustomCategory(product.category);
+      } else {
+        setCategory('Dairy');
+        setCustomCategory('');
+      }
       setSubcategory(product.subcategory || '');
       setBrand(product.brand || defaultStoreName);
       setSku(product.sku || '');
@@ -180,17 +201,32 @@ export function SellerProductModal({
 
       setGalleryImages(Array.isArray(product.gallery_images) ? product.gallery_images : []);
 
-      const primaryVariant = product.product_variants?.[0];
-      setPrice(primaryVariant?.price ? String(primaryVariant.price) : (product.price ? String(product.price) : ''));
-      setOriginalPrice(primaryVariant?.original_price || primaryVariant?.compare_at_price ? String(primaryVariant.original_price || primaryVariant.compare_at_price) : (product.original_price ? String(product.original_price) : ''));
-      setCostPrice(primaryVariant?.cost_price ? String(primaryVariant.cost_price) : (product.cost_price ? String(product.cost_price) : ''));
-      setStock(primaryVariant?.stock !== undefined ? String(primaryVariant.stock) : (product.stock !== undefined ? String(product.stock) : '50'));
-      setWeight(primaryVariant?.weight || product.weight || '500g');
-      setTaxRate(product.tax_rate !== undefined ? String(product.tax_rate) : '5');
+      if (Array.isArray(product.product_variants) && product.product_variants.length > 0) {
+        setVariants(
+          product.product_variants.map((v: any) => ({
+            id: v.id,
+            weight: v.weight || 'Standard',
+            price: v.price ? String(v.price) : '',
+            originalPrice: v.original_price || v.compare_at_price ? String(v.original_price || v.compare_at_price) : '',
+            costPrice: v.cost_price ? String(v.cost_price) : '',
+            stock: v.stock !== undefined ? String(v.stock) : '50',
+          }))
+        );
+      } else {
+        setVariants([
+          {
+            weight: product.weight || '500g',
+            price: product.price ? String(product.price) : '',
+            originalPrice: product.original_price ? String(product.original_price) : '',
+            costPrice: product.cost_price ? String(product.cost_price) : '',
+            stock: product.stock !== undefined ? String(product.stock) : '50',
+          },
+        ]);
+      }
 
+      setTaxRate(product.tax_rate !== undefined ? String(product.tax_rate) : '5');
       setShippingDetails(product.shipping_details || 'Standard delivery within 24-48 hours. Fresh cold chain packaging.');
       setReturnPolicy(product.return_policy || 'Replacement guarantee within 24 hours of delivery for damaged or spoiled items.');
-
       setAttributes(product.attributes || {});
 
       // Extract compliance docs
@@ -204,6 +240,7 @@ export function SellerProductModal({
       // Reset defaults for new
       setName('');
       setCategory('Dairy');
+      setCustomCategory('');
       setSubcategory(CATEGORIES_CONFIG['Dairy']?.subcategories[0] || '');
       setBrand(defaultStoreName);
       setSku(`SKU-DAI-${Date.now().toString(36).toUpperCase()}`);
@@ -214,11 +251,9 @@ export function SellerProductModal({
       setPrimaryUploadSuccess(false);
       setPrimaryUploadMode('device');
       setGalleryImages([]);
-      setPrice('');
-      setOriginalPrice('');
-      setCostPrice('');
-      setStock('50');
-      setWeight('500g');
+      setVariants([
+        { weight: '500g', price: '', originalPrice: '', costPrice: '', stock: '50' },
+      ]);
       setTaxRate('5');
       setShippingDetails('Standard delivery within 24-48 hours. Fresh cold chain packaging.');
       setReturnPolicy('Replacement guarantee within 24 hours of delivery for damaged or spoiled items.');
@@ -234,6 +269,7 @@ export function SellerProductModal({
   const handleResetNewForm = () => {
     setName('');
     setCategory('Dairy');
+    setCustomCategory('');
     setSubcategory(CATEGORIES_CONFIG['Dairy']?.subcategories[0] || '');
     setBrand(defaultStoreName);
     setSku(`SKU-DAI-${Date.now().toString(36).toUpperCase()}`);
@@ -244,11 +280,9 @@ export function SellerProductModal({
     setPrimaryUploadSuccess(false);
     setPrimaryUploadMode('device');
     setGalleryImages([]);
-    setPrice('');
-    setOriginalPrice('');
-    setCostPrice('');
-    setStock('50');
-    setWeight('500g');
+    setVariants([
+      { weight: '500g', price: '', originalPrice: '', costPrice: '', stock: '50' },
+    ]);
     setTaxRate('5');
     setShippingDetails('Standard delivery within 24-48 hours. Fresh cold chain packaging.');
     setReturnPolicy('Replacement guarantee within 24 hours of delivery for damaged or spoiled items.');
@@ -258,6 +292,24 @@ export function SellerProductModal({
     setError('');
     setSuccessInfo(null);
     setSubmittedSuccessData(null);
+  };
+
+  const handleAddVariant = () => {
+    setVariants(prev => [
+      ...prev,
+      { weight: '', price: '', originalPrice: '', costPrice: '', stock: '50' },
+    ]);
+  };
+
+  const handleRemoveVariant = (index: number) => {
+    if (variants.length <= 1) return;
+    setVariants(prev => prev.filter((_, i) => i !== index));
+  };
+
+  const handleUpdateVariant = (index: number, field: keyof VariantRow, value: string) => {
+    setVariants(prev =>
+      prev.map((v, i) => (i === index ? { ...v, [field]: value } : v))
+    );
   };
 
   // Update default subcategory when category changes
@@ -385,16 +437,38 @@ export function SellerProductModal({
       setError('Please select a category.');
       return;
     }
-    const numPrice = parseFloat(price);
-    if (isNaN(numPrice) || numPrice <= 0) {
-      setError('Please enter a valid selling price greater than ₹0.');
+    if (category === 'Other' && !customCategory.trim()) {
+      setError('Please specify the custom category name.');
       return;
     }
-    const numStock = parseInt(stock, 10);
-    if (isNaN(numStock) || numStock < 0) {
-      setError('Available stock must be a non-negative number.');
+    const finalCategory = category === 'Other' ? customCategory.trim() : category.trim();
+
+    if (variants.length === 0) {
+      setError('Please add at least one product variant.');
       return;
     }
+
+    for (let i = 0; i < variants.length; i++) {
+      const v = variants[i];
+      if (!v.weight.trim()) {
+        setError(`Please enter a weight/size for Variant #${i + 1}.`);
+        return;
+      }
+      const p = parseFloat(v.price);
+      if (isNaN(p) || p <= 0) {
+        setError(`Please enter a valid selling price greater than ₹0 for Variant #${i + 1}.`);
+        return;
+      }
+      const s = parseInt(v.stock, 10);
+      if (isNaN(s) || s < 0) {
+        setError(`Stock quantity must be non-negative for Variant #${i + 1}.`);
+        return;
+      }
+    }
+
+    const firstVariant = variants[0];
+    const numPrice = parseFloat(firstVariant.price);
+    const numStock = parseInt(firstVariant.stock, 10);
 
     if (isUploadingPrimary) {
       setError('Please wait for the primary product image to finish uploading.');
@@ -446,7 +520,7 @@ export function SellerProductModal({
 
       const payload: any = {
         name: name.trim(),
-        category: category.trim(),
+        category: finalCategory,
         subcategory: subcategory?.trim() || null,
         description: description.trim(),
         brand: brand.trim() || defaultStoreName,
@@ -454,15 +528,22 @@ export function SellerProductModal({
         imageUrl: finalImageUrl,
         galleryImages,
         price: numPrice,
-        originalPrice: originalPrice ? parseFloat(originalPrice) : null,
-        costPrice: costPrice ? parseFloat(costPrice) : null,
+        originalPrice: firstVariant.originalPrice ? parseFloat(firstVariant.originalPrice) : null,
+        costPrice: firstVariant.costPrice ? parseFloat(firstVariant.costPrice) : null,
         stock: numStock,
-        weight: weight.trim() || 'Standard',
+        weight: firstVariant.weight.trim() || 'Standard',
         taxRate: parseFloat(taxRate) || 0,
         shippingDetails: shippingDetails.trim(),
         returnPolicy: returnPolicy.trim(),
         attributes,
         complianceDocuments,
+        variants: variants.map(v => ({
+          weight: v.weight.trim(),
+          price: parseFloat(v.price),
+          originalPrice: v.originalPrice ? parseFloat(v.originalPrice) : null,
+          costPrice: v.costPrice ? parseFloat(v.costPrice) : null,
+          stock: parseInt(v.stock, 10) || 0,
+        })),
       };
 
       let result;
@@ -504,7 +585,7 @@ export function SellerProductModal({
         initial={{ opacity: 0, scale: 0.96 }}
         animate={{ opacity: 1, scale: 1 }}
         exit={{ opacity: 0, scale: 0.96 }}
-        className="bg-surface rounded-3xl max-w-3xl w-full max-h-[92vh] overflow-y-auto shadow-2xl flex flex-col border border-border"
+        className="bg-surface rounded-xl max-w-3xl w-full max-h-[92vh] overflow-y-auto shadow-2xl flex flex-col border border-border"
       >
         {submittedSuccessData ? (
           <div className="p-8 sm:p-10 flex flex-col items-center text-center space-y-6 animate-in fade-in zoom-in duration-300">
@@ -534,7 +615,7 @@ export function SellerProductModal({
                 <Clock className="w-3.5 h-3.5 text-warning" />
                 <span>Product Approval Status: Pending Review</span>
               </div>
-              <h2 className="text-2xl font-black text-foreground tracking-tight">
+              <h2 className="text-2xl font-semibold text-foreground tracking-tight">
                 {submittedSuccessData.isEdit ? 'Product Resubmitted for Approval!' : 'Product Submitted for Approval!'}
               </h2>
               <p className="text-xs sm:text-sm text-foreground-muted leading-relaxed">
@@ -551,15 +632,15 @@ export function SellerProductModal({
               />
               <div className="flex-1 min-w-0">
                 <h4 className="text-sm font-bold text-foreground truncate">{submittedSuccessData.name}</h4>
-                <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-[11px] text-foreground-muted mt-0.5">
+                <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-foreground-muted mt-0.5">
                   <span>Category: <strong className="text-foreground">{submittedSuccessData.category}</strong></span>
                   <span>•</span>
                   <span>SKU: <code className="text-foreground bg-border/70 px-1 py-0.2 rounded font-mono">{submittedSuccessData.sku}</code></span>
                 </div>
                 <div className="flex items-center gap-2 mt-1">
-                  <span className="text-xs font-black text-success">₹{submittedSuccessData.price.toLocaleString('en-IN')}</span>
-                  <span className="text-[11px] text-foreground-muted">•</span>
-                  <span className="text-[11px] text-foreground-muted font-medium">Initial Stock: {submittedSuccessData.stock} units</span>
+                  <span className="text-xs font-semibold text-success">₹{submittedSuccessData.price.toLocaleString('en-IN')}</span>
+                  <span className="text-xs text-foreground-muted">•</span>
+                  <span className="text-xs text-foreground-muted font-medium">Initial Stock: {submittedSuccessData.stock} units</span>
                 </div>
               </div>
             </div>
@@ -570,7 +651,7 @@ export function SellerProductModal({
                 <ShieldCheck className="w-4 h-4 text-success shrink-0" />
                 <span>What happens next?</span>
               </div>
-              <ul className="text-[11px] text-success space-y-1 list-disc list-inside">
+              <ul className="text-xs text-success space-y-1 list-disc list-inside">
                 <li>Quality review turnaround: Usually completed within <strong>24 to 48 business hours</strong>.</li>
                 <li>Once approved, this product automatically goes live in the customer marketplace catalogue.</li>
                 <li>You can track the live status anytime in your <strong>"My Products"</strong> tab.</li>
@@ -608,7 +689,7 @@ export function SellerProductModal({
               <div>
                 <div className="flex items-center gap-2">
                   <span className="w-2.5 h-2.5 rounded-full bg-primary" />
-                  <h2 className="text-xl font-black text-foreground tracking-tight">
+                  <h2 className="text-xl font-semibold text-foreground tracking-tight">
                     {isEdit ? 'Edit & Resubmit Product' : 'Add New Product for Approval'}
                   </h2>
                 </div>
@@ -645,7 +726,7 @@ export function SellerProductModal({
 
           {/* Section 1: Basic Product Information */}
           <div className="space-y-4">
-            <h3 className="text-xs font-black uppercase tracking-wider text-foreground-muted flex items-center gap-1.5">
+            <h3 className="text-xs font-semibold uppercase tracking-wider text-foreground-muted flex items-center gap-1.5">
               <Package className="w-3.5 h-3.5 text-primary" />
               <span>1. Basic Product Identity</span>
             </h3>
@@ -682,21 +763,40 @@ export function SellerProductModal({
                 </select>
               </div>
 
-              <div>
-                <label className="block text-xs font-bold text-foreground mb-1.5">Subcategory</label>
-                <select
-                  value={subcategory}
-                  onChange={e => setSubcategory(e.target.value)}
-                  className="w-full px-3.5 py-2.5 text-sm rounded-xl border border-border focus:outline-none focus:ring-2 focus:ring-[var(--primary)]/20 focus:border-primary bg-surface cursor-pointer"
-                >
-                  <option value="">Select subcategory (optional)</option>
-                  {currentCategoryConfig.subcategories.map(sub => (
-                    <option key={sub} value={sub}>
-                      {sub}
-                    </option>
-                  ))}
-                </select>
-              </div>
+              {category === 'Other' ? (
+                <div>
+                  <label className="block text-xs font-bold text-foreground mb-1.5">
+                    Custom Category Name <span className="text-error">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    required
+                    value={customCategory}
+                    onChange={e => setCustomCategory(e.target.value)}
+                    placeholder="e.g. Traditional Pottery, Organic Snacks"
+                    className="w-full px-3.5 py-2.5 text-sm rounded-xl border border-border focus:outline-none focus:ring-2 focus:ring-[var(--primary)]/20 bg-surface"
+                  />
+                  <p className="text-[11px] text-foreground-muted mt-1">
+                    Submitted for admin review before appearing on the storefront.
+                  </p>
+                </div>
+              ) : (
+                <div>
+                  <label className="block text-xs font-bold text-foreground mb-1.5">Subcategory</label>
+                  <select
+                    value={subcategory}
+                    onChange={e => setSubcategory(e.target.value)}
+                    className="w-full px-3.5 py-2.5 text-sm rounded-xl border border-border focus:outline-none focus:ring-2 focus:ring-[var(--primary)]/20 focus:border-primary bg-surface cursor-pointer"
+                  >
+                    <option value="">Select subcategory (optional)</option>
+                    {currentCategoryConfig.subcategories.map(sub => (
+                      <option key={sub} value={sub}>
+                        {sub}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              )}
 
               <div>
                 <label className="block text-xs font-bold text-foreground mb-1.5">Brand / Manufacturer</label>
@@ -715,7 +815,7 @@ export function SellerProductModal({
                   <button
                     type="button"
                     onClick={handleGenerateSku}
-                    className="text-[11px] font-bold text-primary hover:underline cursor-pointer"
+                    className="text-xs font-bold text-primary hover:underline cursor-pointer"
                   >
                     Auto-Generate
                   </button>
@@ -742,95 +842,144 @@ export function SellerProductModal({
             </div>
           </div>
 
-          {/* Section 2: Pricing & Inventory */}
+          {/* Section 2: Pricing & Variants */}
           <div className="space-y-4 pt-4 border-t border-border">
-            <h3 className="text-xs font-black uppercase tracking-wider text-foreground-muted flex items-center gap-1.5">
-              <Sparkles className="w-3.5 h-3.5 text-primary" />
-              <span>2. Pricing & Inventory</span>
-            </h3>
-
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
               <div>
-                <label className="block text-xs font-bold text-foreground mb-1.5">
-                  Selling Price (₹) <span className="text-error">*</span>
-                </label>
-                <div className="relative">
-                  <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-foreground-muted font-bold text-sm">₹</span>
-                  <input
-                    type="number"
-                    step="0.01"
-                    required
-                    value={price}
-                    onChange={e => setPrice(e.target.value)}
-                    placeholder="1450"
-                    className="w-full pl-8 pr-3.5 py-2.5 text-sm font-bold text-foreground rounded-xl border border-border focus:outline-none focus:ring-2 focus:ring-[var(--primary)]/20"
-                  />
+                <h3 className="text-xs font-semibold uppercase tracking-wider text-foreground-muted flex items-center gap-1.5">
+                  <Sparkles className="w-3.5 h-3.5 text-primary" />
+                  <span>2. Pricing & Product Variants</span>
+                </h3>
+                <p className="text-xs text-foreground-muted mt-0.5">
+                  Add all packages or weight variants (e.g. 250g, 500g, 1kg, 5L) available for this product.
+                </p>
+              </div>
+
+              <button
+                type="button"
+                onClick={handleAddVariant}
+                className="px-3 py-1.5 rounded-lg bg-surface-muted hover:bg-border text-xs font-bold text-primary flex items-center gap-1.5 transition-colors cursor-pointer self-start sm:self-auto"
+              >
+                <Plus className="w-3.5 h-3.5" />
+                <span>Add Variant</span>
+              </button>
+            </div>
+
+            <div className="space-y-3">
+              {variants.map((v, index) => (
+                <div
+                  key={index}
+                  className="p-3.5 rounded-xl border border-border bg-surface-muted/30 space-y-3"
+                >
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-bold text-foreground flex items-center gap-1.5">
+                      <Package className="w-3 h-3 text-primary" />
+                      <span>Variant #{index + 1}</span>
+                      {index === 0 && (
+                        <span className="text-[10px] font-semibold text-primary bg-primary/10 px-1.5 py-0.5 rounded">
+                          Default
+                        </span>
+                      )}
+                    </span>
+                    {variants.length > 1 && (
+                      <button
+                        type="button"
+                        onClick={() => handleRemoveVariant(index)}
+                        className="text-error hover:bg-error-bg p-1 rounded-md transition-colors cursor-pointer"
+                        title="Remove variant"
+                      >
+                        <Trash2 className="w-3.5 h-3.5" />
+                      </button>
+                    )}
+                  </div>
+
+                  <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
+                    <div className="col-span-2 sm:col-span-1">
+                      <label className="block text-[11px] font-bold text-foreground mb-1">
+                        Weight / Size <span className="text-error">*</span>
+                      </label>
+                      <input
+                        type="text"
+                        required
+                        value={v.weight}
+                        onChange={e => handleUpdateVariant(index, 'weight', e.target.value)}
+                        placeholder="e.g. 500g / 1L"
+                        className="w-full px-2.5 py-2 text-xs rounded-lg border border-border focus:outline-none focus:ring-2 focus:ring-[var(--primary)]/20 bg-surface"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-[11px] font-bold text-foreground mb-1">
+                        Selling Price (₹) <span className="text-error">*</span>
+                      </label>
+                      <div className="relative">
+                        <span className="absolute left-2 top-1/2 -translate-y-1/2 text-foreground-muted font-bold text-xs">₹</span>
+                        <input
+                          type="number"
+                          step="0.01"
+                          required
+                          value={v.price}
+                          onChange={e => handleUpdateVariant(index, 'price', e.target.value)}
+                          placeholder="499"
+                          className="w-full pl-5 pr-2 py-2 text-xs font-bold text-foreground rounded-lg border border-border focus:outline-none focus:ring-2 focus:ring-[var(--primary)]/20 bg-surface"
+                        />
+                      </div>
+                    </div>
+
+                    <div>
+                      <label className="block text-[11px] font-bold text-foreground mb-1">
+                        MRP (₹) <span className="text-foreground-muted font-normal">(Opt)</span>
+                      </label>
+                      <div className="relative">
+                        <span className="absolute left-2 top-1/2 -translate-y-1/2 text-foreground-muted font-bold text-xs">₹</span>
+                        <input
+                          type="number"
+                          step="0.01"
+                          value={v.originalPrice}
+                          onChange={e => handleUpdateVariant(index, 'originalPrice', e.target.value)}
+                          placeholder="599"
+                          className="w-full pl-5 pr-2 py-2 text-xs rounded-lg border border-border focus:outline-none focus:ring-2 focus:ring-[var(--primary)]/20 bg-surface"
+                        />
+                      </div>
+                    </div>
+
+                    <div>
+                      <label className="block text-[11px] font-bold text-foreground mb-1">
+                        Cost (₹) <span className="text-foreground-muted font-normal">(Int)</span>
+                      </label>
+                      <div className="relative">
+                        <span className="absolute left-2 top-1/2 -translate-y-1/2 text-foreground-muted font-bold text-xs">₹</span>
+                        <input
+                          type="number"
+                          step="0.01"
+                          value={v.costPrice}
+                          onChange={e => handleUpdateVariant(index, 'costPrice', e.target.value)}
+                          placeholder="350"
+                          className="w-full pl-5 pr-2 py-2 text-xs rounded-lg border border-border focus:outline-none focus:ring-2 focus:ring-[var(--primary)]/20 bg-surface"
+                        />
+                      </div>
+                    </div>
+
+                    <div>
+                      <label className="block text-[11px] font-bold text-foreground mb-1">
+                        Stock Qty <span className="text-error">*</span>
+                      </label>
+                      <input
+                        type="number"
+                        min="0"
+                        required
+                        value={v.stock}
+                        onChange={e => handleUpdateVariant(index, 'stock', e.target.value)}
+                        placeholder="50"
+                        className="w-full px-2.5 py-2 text-xs rounded-lg border border-border focus:outline-none focus:ring-2 focus:ring-[var(--primary)]/20 bg-surface"
+                      />
+                    </div>
+                  </div>
                 </div>
-              </div>
+              ))}
+            </div>
 
-              <div>
-                <label className="block text-xs font-bold text-foreground mb-1.5">
-                  MRP / Original Price (₹) <span className="text-foreground-muted font-normal">(Optional)</span>
-                </label>
-                <div className="relative">
-                  <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-foreground-muted font-bold text-sm">₹</span>
-                  <input
-                    type="number"
-                    step="0.01"
-                    value={originalPrice}
-                    onChange={e => setOriginalPrice(e.target.value)}
-                    placeholder="1650"
-                    className="w-full pl-8 pr-3.5 py-2.5 text-sm rounded-xl border border-border focus:outline-none focus:ring-2 focus:ring-[var(--primary)]/20"
-                  />
-                </div>
-              </div>
-
-              <div>
-                <label className="block text-xs font-bold text-foreground mb-1.5">
-                  Cost / Purchase Price (₹) <span className="text-foreground-muted font-normal">(Internal)</span>
-                </label>
-                <div className="relative">
-                  <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-foreground-muted font-bold text-sm">₹</span>
-                  <input
-                    type="number"
-                    step="0.01"
-                    value={costPrice}
-                    onChange={e => setCostPrice(e.target.value)}
-                    placeholder="1100"
-                    className="w-full pl-8 pr-3.5 py-2.5 text-sm rounded-xl border border-border focus:outline-none focus:ring-2 focus:ring-[var(--primary)]/20"
-                  />
-                </div>
-              </div>
-
-              <div>
-                <label className="block text-xs font-bold text-foreground mb-1.5">
-                  Available Stock Qty <span className="text-error">*</span>
-                </label>
-                <input
-                  type="number"
-                  min="0"
-                  required
-                  value={stock}
-                  onChange={e => setStock(e.target.value)}
-                  placeholder="45"
-                  className="w-full px-3.5 py-2.5 text-sm rounded-xl border border-border focus:outline-none focus:ring-2 focus:ring-[var(--primary)]/20"
-                />
-              </div>
-
-              <div>
-                <label className="block text-xs font-bold text-foreground mb-1.5">
-                  Unit Weight / Volume <span className="text-error">*</span>
-                </label>
-                <input
-                  type="text"
-                  required
-                  value={weight}
-                  onChange={e => setWeight(e.target.value)}
-                  placeholder="e.g. 1 Liter / 500g / 1 kg"
-                  className="w-full px-3.5 py-2.5 text-sm rounded-xl border border-border focus:outline-none focus:ring-2 focus:ring-[var(--primary)]/20"
-                />
-              </div>
-
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
               <div>
                 <label className="block text-xs font-bold text-foreground mb-1.5">GST / Tax Rate (%)</label>
                 <select
@@ -850,7 +999,7 @@ export function SellerProductModal({
           {/* ─── Section 3: Media & Images (Upload from Device) ─── */}
           <div className="space-y-4 pt-4 border-t border-border">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-              <h3 className="text-xs font-black uppercase tracking-wider text-foreground-muted flex items-center gap-1.5">
+              <h3 className="text-xs font-semibold uppercase tracking-wider text-foreground-muted flex items-center gap-1.5">
                 <UploadCloud className="w-3.5 h-3.5 text-primary" />
                 <span>3. Product Images (Upload from Device)</span>
               </h3>
@@ -913,7 +1062,7 @@ export function SellerProductModal({
                         {isUploadingPrimary && (
                           <div className="absolute inset-0 bg-black/50 flex flex-col items-center justify-center text-white">
                             <Loader2 className="w-5 h-5 animate-spin" />
-                            <span className="text-[9px] font-bold mt-1">Uploading...</span>
+                            <span className="text-xs font-bold mt-1">Uploading...</span>
                           </div>
                         )}
                       </div>
@@ -924,14 +1073,14 @@ export function SellerProductModal({
                             {primaryFile?.name || 'Selected Product Photo'}
                           </span>
                           {primaryUploadSuccess && (
-                            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-success-bg text-success">
+                            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-bold bg-success-bg text-success">
                               <Check className="w-3 h-3" /> Uploaded to CDN
                             </span>
                           )}
                         </div>
 
                         {primaryFile && (
-                          <p className="text-[11px] text-foreground-muted">
+                          <p className="text-xs text-foreground-muted">
                             Size: {(primaryFile.size / (1024 * 1024)).toFixed(2)} MB
                           </p>
                         )}
@@ -978,10 +1127,10 @@ export function SellerProductModal({
                         )}
                       </div>
                       <div>
-                        <p className="text-xs font-extrabold text-foreground">
+                        <p className="text-xs font-semibold text-foreground">
                           Click to upload from device <span className="font-normal text-foreground-muted">or drag and drop</span>
                         </p>
-                        <p className="text-[11px] text-foreground-muted mt-0.5">
+                        <p className="text-xs text-foreground-muted mt-0.5">
                           PNG, JPG, JPEG, WEBP up to 10MB • High resolution product photos
                         </p>
                       </div>
@@ -1025,7 +1174,7 @@ export function SellerProductModal({
                   <label className="block text-xs font-bold text-foreground">
                     Additional Gallery Angles & Nutrition Labels
                   </label>
-                  <p className="text-[11px] text-foreground-muted">
+                  <p className="text-xs text-foreground-muted">
                     Upload side views, pack back, or certification photos
                   </p>
                 </div>
@@ -1073,7 +1222,7 @@ export function SellerProductModal({
                       >
                         <Trash2 className="w-4 h-4 text-error" />
                       </button>
-                      <span className="absolute bottom-1 right-1 px-1 rounded bg-black/60 text-[9px] text-white font-mono">
+                      <span className="absolute bottom-1 right-1 px-1 rounded bg-black/60 text-xs text-white font-mono">
                         #{i + 1}
                       </span>
                     </div>
@@ -1104,7 +1253,7 @@ export function SellerProductModal({
           {/* Section 4: Category Specifications */}
           {currentCategoryConfig.attributes.length > 0 && (
             <div className="space-y-4 pt-4 border-t border-border">
-              <h3 className="text-xs font-black uppercase tracking-wider text-foreground-muted flex items-center gap-1.5">
+              <h3 className="text-xs font-semibold uppercase tracking-wider text-foreground-muted flex items-center gap-1.5">
                 <Layers className="w-3.5 h-3.5 text-primary" />
                 <span>4. {category} Specifications</span>
               </h3>
@@ -1128,7 +1277,7 @@ export function SellerProductModal({
 
           {/* Section 5: Shipping & Return Policy */}
           <div className="space-y-4 pt-4 border-t border-border">
-            <h3 className="text-xs font-black uppercase tracking-wider text-foreground-muted flex items-center gap-1.5">
+            <h3 className="text-xs font-semibold uppercase tracking-wider text-foreground-muted flex items-center gap-1.5">
               <ShieldCheck className="w-3.5 h-3.5 text-primary" />
               <span>5. Shipping & Return Policy</span>
             </h3>
@@ -1160,7 +1309,7 @@ export function SellerProductModal({
 
           {/* Section 6: Regulatory & Compliance */}
           <div className="space-y-4 pt-4 border-t border-border">
-            <h3 className="text-xs font-black uppercase tracking-wider text-foreground-muted flex items-center gap-1.5">
+            <h3 className="text-xs font-semibold uppercase tracking-wider text-foreground-muted flex items-center gap-1.5">
               <FileText className="w-3.5 h-3.5 text-primary" />
               <span>6. Regulatory & Compliance</span>
             </h3>
@@ -1196,7 +1345,7 @@ export function SellerProductModal({
 
           {/* Sticky Modal Footer */}
           <div className="pt-6 border-t border-border flex items-center justify-between sticky bottom-0 bg-surface">
-            <span className="text-[11px] text-foreground-muted">
+            <span className="text-xs text-foreground-muted">
               * Required fields. Uploaded photos are stored on cloud CDN.
             </span>
 

@@ -19,8 +19,8 @@ export function SubscriptionUpsellBanner({ category }: SubscriptionUpsellBannerP
             <Sparkles className="w-5 h-5 text-primary" />
           </div>
           <div>
-            <h4 className="text-sm font-black text-dark tracking-tight">Subscribe & Save 5%</h4>
-            <p className="text-[11px] font-bold text-primary/80 uppercase tracking-widest">Daily Morning Delivery</p>
+            <h4 className="text-sm font-semibold text-dark tracking-tight">Subscribe & Save 5%</h4>
+            <p className="text-xs font-bold text-primary/80 uppercase tracking-widest">Daily Morning Delivery</p>
           </div>
         </div>
         <div className="w-8 h-8 rounded-full bg-surface flex items-center justify-center text-primary shadow-sm">

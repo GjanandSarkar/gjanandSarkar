@@ -46,15 +46,15 @@ const StatCard = ({
 }) => (
   <div className="bg-surface-container-lowest border border-sand/30 rounded-2xl p-5 flex items-center justify-between shadow-2xs">
     <div className="flex flex-col gap-1">
-      <span className="text-muted text-[11px] font-bold uppercase tracking-wider">{title}</span>
-      <span className="text-on-surface text-2xl font-extrabold">{value}</span>
+      <span className="text-muted text-xs font-bold uppercase tracking-wider">{title}</span>
+      <span className="text-on-surface text-2xl font-semibold">{value}</span>
       {growth && (
         <span className="text-success text-xs font-bold flex items-center gap-1 mt-0.5">
           <ArrowUpRight className="w-3.5 h-3.5" />
           {growth}
         </span>
       )}
-      {subText && <span className="text-muted text-[11px] font-medium mt-0.5">{subText}</span>}
+      {subText && <span className="text-muted text-xs font-medium mt-0.5">{subText}</span>}
     </div>
 
     {icon && (
@@ -214,7 +214,7 @@ export default function AdminAnalyticsPage() {
       {/* Top Header */}
       <div className="px-6 md:px-10 pt-8 pb-6 bg-surface-container-lowest border-b border-sand/30">
         <div>
-          <h1 className="font-extrabold text-[28px] tracking-tight text-on-surface">
+          <h1 className="font-semibold text-[28px] tracking-tight text-on-surface">
             Business Intelligence
           </h1>
           <p className="text-sm mt-0.5 text-muted font-medium">
@@ -230,7 +230,7 @@ export default function AdminAnalyticsPage() {
             <div className="w-7 h-7 rounded-xl bg-primary-fixed flex items-center justify-center text-primary">
               <TrendingUp className="w-4 h-4" />
             </div>
-            <h2 className="text-lg font-extrabold text-on-surface">Revenue Analytics</h2>
+            <h2 className="text-lg font-semibold text-on-surface">Revenue Analytics</h2>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
@@ -286,7 +286,7 @@ export default function AdminAnalyticsPage() {
               <div className="w-7 h-7 rounded-xl bg-primary-fixed flex items-center justify-center text-primary">
                 <ShoppingBag className="w-4 h-4" />
               </div>
-              <h2 className="text-lg font-extrabold text-on-surface">Order Analytics</h2>
+              <h2 className="text-lg font-semibold text-on-surface">Order Analytics</h2>
             </div>
 
             {/* Pill Toggle Button */}
@@ -295,7 +295,7 @@ export default function AdminAnalyticsPage() {
                 onClick={() => setOrderTimeframe('7days')}
                 className={`px-3 py-1.5 rounded-lg transition-all cursor-pointer ${
                   orderTimeframe === '7days'
-                    ? 'bg-primary text-white shadow-xs font-extrabold'
+                    ? 'bg-primary text-white shadow-xs font-semibold'
                     : 'text-muted hover:text-on-surface'
                 }`}
                 type="button"
@@ -306,7 +306,7 @@ export default function AdminAnalyticsPage() {
                 onClick={() => setOrderTimeframe('calendar')}
                 className={`px-3 py-1.5 rounded-lg transition-all cursor-pointer ${
                   orderTimeframe === 'calendar'
-                    ? 'bg-primary text-white shadow-xs font-extrabold'
+                    ? 'bg-primary text-white shadow-xs font-semibold'
                     : 'text-muted hover:text-on-surface'
                 }`}
                 type="button"
@@ -369,7 +369,7 @@ export default function AdminAnalyticsPage() {
             <div className="w-7 h-7 rounded-xl bg-primary-fixed flex items-center justify-center text-primary">
               <Package className="w-4 h-4" />
             </div>
-            <h2 className="text-lg font-extrabold text-on-surface">Product Performance</h2>
+            <h2 className="text-lg font-semibold text-on-surface">Product Performance</h2>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -394,7 +394,7 @@ export default function AdminAnalyticsPage() {
             <div className="w-7 h-7 rounded-xl bg-primary-fixed flex items-center justify-center text-primary">
               <Users className="w-4 h-[var(--primary)]" />
             </div>
-            <h2 className="text-lg font-extrabold text-on-surface">Customer Analytics</h2>
+            <h2 className="text-lg font-semibold text-on-surface">Customer Analytics</h2>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-4">
@@ -432,7 +432,7 @@ export default function AdminAnalyticsPage() {
             <div className="w-7 h-7 rounded-xl bg-primary-fixed flex items-center justify-center text-primary">
               <CalendarDays className="w-4 h-4" />
             </div>
-            <h2 className="text-lg font-extrabold text-on-surface">Subscription Analytics</h2>
+            <h2 className="text-lg font-semibold text-on-surface">Subscription Analytics</h2>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-4">

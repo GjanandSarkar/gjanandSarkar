@@ -74,8 +74,8 @@ export function RazorpayButton({
   return (
     <div className="w-full space-y-2">
       {errorMessage && (
-        <div className="flex items-center gap-2 p-3 bg-error-bg border border-error/20 rounded-xl text-error text-xs font-medium">
-          <AlertCircle className="w-4 h-4 shrink-0 text-red-500" />
+        <div className="flex items-center gap-2 p-3 bg-error-bg border border-error/20 rounded-lg text-error text-xs font-medium">
+          <AlertCircle className="w-4 h-4 shrink-0 text-error" />
           <span>{errorMessage}</span>
         </div>
       )}
@@ -85,10 +85,9 @@ export function RazorpayButton({
         onClick={handlePayment}
         disabled={disabled || isLoading || amountInRupees <= 0}
         className={cn(
-          "w-full relative flex items-center justify-center gap-2.5 py-3.5 px-6 rounded-2xl font-bold text-sm text-white",
-          "bg-gradient-to-r from-primary to-primary-light hover:from-primary hover:to-primary",
-          "shadow-[0_4px_14px_rgba(27,67,50,0.35)] hover:shadow-[0_6px_20px_rgba(27,67,50,0.45)]",
-          "transition-all duration-200 active:scale-[0.99] disabled:opacity-50 disabled:cursor-not-allowed disabled:shadow-none",
+          "w-full min-h-[44px] relative flex items-center justify-center gap-2.5 py-3.5 px-6 rounded-lg font-semibold text-sm text-on-primary",
+          "bg-primary hover:bg-primary-hover",
+          "shadow-xs transition-colors active:scale-[0.99] disabled:opacity-50 disabled:cursor-not-allowed disabled:shadow-none",
           className
         )}
       >
@@ -99,10 +98,10 @@ export function RazorpayButton({
           </>
         ) : (
           <>
-            <CreditCard className="w-4 h-4 text-success" />
+            <CreditCard className="w-4 h-4 text-on-primary" />
             <span>{buttonText || `Pay ₹${amountInRupees.toFixed(2)} with Razorpay`}</span>
-            <div className="flex items-center gap-1 ml-auto text-[10px] bg-surface/15 backdrop-blur-sm px-2 py-0.5 rounded-full uppercase tracking-wider font-semibold">
-              <ShieldCheck className="w-3 h-3 text-success" />
+            <div className="flex items-center gap-1 ml-auto text-xs bg-white/20 px-2 py-0.5 rounded-full font-medium">
+              <ShieldCheck className="w-3.5 h-3.5 text-on-primary" />
               <span>Razorpay</span>
             </div>
           </>

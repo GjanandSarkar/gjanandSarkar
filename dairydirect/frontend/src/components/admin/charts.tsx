@@ -1,5 +1,17 @@
 "use client";
 
+/**
+ * Admin chart components backed by recharts.
+ *
+ * IMPORTANT: This file must only be imported via Next.js dynamic() so that
+ * recharts (~160 KB gzip) is excluded from the shared customer-facing JS
+ * chunk.  Direct static imports in any page or layout that customers visit
+ * will bloat every page load.
+ *
+ * Usage:
+ *   const AdminCharts = dynamic(() => import('@/components/admin/charts'), { ssr: false });
+ */
+
 import React from 'react';
 import {
   ResponsiveContainer,
@@ -15,6 +27,7 @@ import {
   Pie,
   Cell,
 } from 'recharts';
+
 import {
   format,
   startOfMonth,
@@ -44,10 +57,10 @@ const CustomTooltip = ({ active, payload, label, valuePrefix, valueSuffix }: any
     const val = dataPoint.value;
     return (
       <div className="bg-primary/95 text-white px-3 py-2 rounded-xl shadow-xl backdrop-blur-md border border-border-hover/50 text-xs flex flex-col gap-0.5 z-50">
-        <span className="font-semibold text-foreground-muted tracking-wide uppercase text-[10px]">
+        <span className="font-semibold text-foreground-muted tracking-wide uppercase text-xs">
           {dataPoint.payload.fullDate || label}
         </span>
-        <span className="font-extrabold text-sm text-emerald-400">
+        <span className="font-semibold text-sm text-emerald-400">
           {valuePrefix || ''}{val.toLocaleString()}{valueSuffix || ''}
         </span>
       </div>
@@ -168,12 +181,12 @@ export function LollipopChart({
             >
               {/* Floating Hover Tooltip */}
               <div className="opacity-0 group-hover:opacity-100 transition-all duration-200 absolute -top-10 bg-primary text-white px-3 py-1.5 rounded-xl text-xs font-semibold whitespace-nowrap shadow-xl z-30 pointer-events-none transform -translate-y-1">
-                {item.fullDate || item.label}: <span className="text-sky-400 font-extrabold">{item.value}{valueSuffix}</span>
+                {item.fullDate || item.label}: <span className="text-sky-400 font-semibold">{item.value}{valueSuffix}</span>
               </div>
 
               {/* Top Lollipop Badge */}
               <div
-                className="w-8 h-8 rounded-full flex items-center justify-center font-extrabold text-xs transition-all duration-300 group-hover:scale-125 group-hover:shadow-lg z-10"
+                className="w-8 h-8 rounded-full flex items-center justify-center font-semibold text-xs transition-all duration-300 group-hover:scale-125 group-hover:shadow-lg z-10"
                 style={{
                   backgroundColor: isZero ? 'var(--color-surface-container-high, #e2e8f0)' : color,
                   color: isZero ? 'var(--color-muted, #94a3b8)' : '#ffffff',
@@ -196,7 +209,7 @@ export function LollipopChart({
               </div>
 
               {/* Day Label */}
-              <span className="text-[11px] uppercase font-bold tracking-wider text-muted truncate w-full text-center mt-2 group-hover:text-on-surface transition-colors">
+              <span className="text-xs uppercase font-bold tracking-wider text-muted truncate w-full text-center mt-2 group-hover:text-on-surface transition-colors">
                 {item.label}
               </span>
             </div>
@@ -308,12 +321,12 @@ export function DonutChart({
         {(centerTitle || centerValue) && (
           <div className="absolute flex flex-col items-center justify-center text-center pointer-events-none">
             {centerValue !== undefined && (
-              <span className="text-xl font-extrabold text-on-surface leading-tight">
+              <span className="text-xl font-semibold text-on-surface leading-tight">
                 {centerValue}
               </span>
             )}
             {centerTitle && (
-              <span className="text-[10px] font-semibold uppercase tracking-wider text-muted">
+              <span className="text-xs font-semibold uppercase tracking-wider text-muted">
                 {centerTitle}
               </span>
             )}
@@ -329,7 +342,7 @@ export function DonutChart({
               <span className="font-semibold text-on-surface">{item.label}</span>
             </div>
             <span className="font-bold text-on-surface">
-              {item.value} <span className="text-muted font-normal text-[11px]">({total > 0 ? Math.round((item.value / total) * 100) : 0}%)</span>
+              {item.value} <span className="text-muted font-normal text-xs">({total > 0 ? Math.round((item.value / total) * 100) : 0}%)</span>
             </span>
           </div>
         ))}
@@ -534,22 +547,22 @@ export function CalendarHeatmapChart({
     if (ratio <= 0.25 || count === 1) {
       return {
         bg: 'bg-emerald-100 border-emerald-200 hover:bg-emerald-200/80 shadow-2xs',
-        text: 'text-emerald-950 font-extrabold',
+        text: 'text-emerald-950 font-semibold',
       };
     } else if (ratio <= 0.5 || count <= 3) {
       return {
         bg: 'bg-emerald-300 border-emerald-400 hover:bg-emerald-400/90 shadow-xs text-white',
-        text: 'text-white font-extrabold',
+        text: 'text-white font-semibold',
       };
     } else if (ratio <= 0.75 || count <= 5) {
       return {
         bg: 'bg-emerald-500 border-emerald-600 hover:bg-emerald-600 shadow-sm text-white',
-        text: 'text-white font-extrabold',
+        text: 'text-white font-semibold',
       };
     } else {
       return {
         bg: 'bg-primary border-primary-fixed-dim hover:bg-primary-hover shadow-md text-white',
-        text: 'text-white font-extrabold',
+        text: 'text-white font-semibold',
       };
     }
   };
@@ -561,10 +574,10 @@ export function CalendarHeatmapChart({
       {/* Header Bar */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 mb-4">
         <div>
-          <h3 className="text-sm sm:text-base font-extrabold text-on-surface tracking-tight">
+          <h3 className="text-sm sm:text-base font-semibold text-on-surface tracking-tight">
             {title}
           </h3>
-          <p className="text-[11px] text-muted font-medium mt-0.5">{subtitle}</p>
+          <p className="text-xs text-muted font-medium mt-0.5">{subtitle}</p>
         </div>
 
         {/* Right Header Controls: Stats + Intensity + Month Picker */}
@@ -572,26 +585,26 @@ export function CalendarHeatmapChart({
           {/* Month Summary & Intensity */}
           <div className="flex items-center gap-2.5 text-xs font-semibold text-muted bg-surface-container border border-sand/30 rounded-xl px-3 py-1.5 shadow-2xs">
             <span>
-              Month Orders: <strong className="text-on-surface font-extrabold">{monthStats.totalCount}</strong>
+              Month Orders: <strong className="text-on-surface font-semibold">{monthStats.totalCount}</strong>
             </span>
             <span>•</span>
             <span>
-              Revenue: <strong className="text-emerald-600 font-extrabold">{currencyPrefix}{monthStats.totalRev.toLocaleString()}</strong>
+              Revenue: <strong className="text-emerald-600 font-semibold">{currencyPrefix}{monthStats.totalRev.toLocaleString()}</strong>
             </span>
             <span>•</span>
             <div className="flex items-center gap-1.5">
-              <span className="text-muted font-semibold text-[10px] uppercase tracking-wider">
+              <span className="text-muted font-semibold text-xs uppercase tracking-wider">
                 Intensity:
               </span>
               <div className="flex items-center gap-1">
                 <span className="w-2.5 h-2.5 rounded-xs bg-amber-50 border border-amber-200" title="0" />
-                <span className="text-[10px] text-muted">0</span>
+                <span className="text-xs text-muted">0</span>
                 <span className="w-2.5 h-2.5 rounded-xs bg-emerald-100 border border-emerald-200" title="Low" />
-                <span className="text-[10px] text-muted">Low</span>
+                <span className="text-xs text-muted">Low</span>
                 <span className="w-2.5 h-2.5 rounded-xs bg-emerald-300 border border-emerald-400" title="Med" />
-                <span className="text-[10px] text-muted">Med</span>
+                <span className="text-xs text-muted">Med</span>
                 <span className="w-2.5 h-2.5 rounded-xs bg-primary border border-primary-fixed-dim" title="High" />
-                <span className="text-[10px] text-muted">High</span>
+                <span className="text-xs text-muted">High</span>
               </div>
             </div>
           </div>
@@ -631,7 +644,7 @@ export function CalendarHeatmapChart({
         {weekDays.map((day) => (
           <div
             key={day}
-            className="text-[10px] sm:text-xs font-bold text-muted uppercase tracking-wider py-0.5"
+            className="text-xs sm:text-xs font-bold text-muted uppercase tracking-wider py-0.5"
           >
             {day}
           </div>
@@ -664,7 +677,7 @@ export function CalendarHeatmapChart({
 
                 {/* Micro order count indicator badge if > 0 */}
                 {inMonth && dayData.count > 0 && (
-                  <span className="text-[9px] opacity-90 font-semibold -mt-0.5 hidden sm:block truncate px-0.5">
+                  <span className="text-xs opacity-90 font-semibold -mt-0.5 hidden sm:block truncate px-0.5">
                     {dayData.count} {dayData.count === 1 ? 'order' : 'orders'}
                   </span>
                 )}
@@ -672,16 +685,16 @@ export function CalendarHeatmapChart({
 
               {/* Hover Tooltip */}
               {inMonth && (
-                <div className="opacity-0 group-hover:opacity-100 transition-all duration-200 absolute -top-12 bg-primary text-white px-2.5 py-1.5 rounded-lg text-[11px] font-semibold whitespace-nowrap shadow-2xl z-50 pointer-events-none transform -translate-y-1 border border-border-hover/60 flex flex-col gap-0.5 text-center">
-                  <span className="text-[9px] text-foreground-muted font-bold uppercase tracking-wider">
+                <div className="opacity-0 group-hover:opacity-100 transition-all duration-200 absolute -top-12 bg-primary text-white px-2.5 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap shadow-2xl z-50 pointer-events-none transform -translate-y-1 border border-border-hover/60 flex flex-col gap-0.5 text-center">
+                  <span className="text-xs text-foreground-muted font-bold uppercase tracking-wider">
                     {format(day, 'EEEE, MMM d, yyyy')}
                   </span>
-                  <div className="flex items-center justify-center gap-1.5 text-[11px]">
-                    <span className="text-emerald-300 font-extrabold">
+                  <div className="flex items-center justify-center gap-1.5 text-xs">
+                    <span className="text-emerald-300 font-semibold">
                       {dayData.count} {dayData.count === 1 ? 'Order' : 'Orders'}
                     </span>
                     {dayData.revenue > 0 && (
-                      <span className="text-emerald-400 font-extrabold">
+                      <span className="text-emerald-400 font-semibold">
                         ({currencyPrefix}{dayData.revenue.toLocaleString()})
                       </span>
                     )}
@@ -802,17 +815,17 @@ export function DayTimeHeatmapChart({
     if (ratio <= 0.35 || count === 1) {
       return {
         bg: 'bg-emerald-100 border-emerald-200/80 hover:bg-emerald-200/80 shadow-2xs',
-        text: 'text-emerald-950 font-extrabold',
+        text: 'text-emerald-950 font-semibold',
       };
     } else if (ratio <= 0.7 || count <= 3) {
       return {
         bg: 'bg-emerald-400 border-emerald-500/90 hover:bg-emerald-500 shadow-xs text-white',
-        text: 'text-white font-extrabold',
+        text: 'text-white font-semibold',
       };
     } else {
       return {
         bg: 'bg-primary border-primary-fixed-dim hover:bg-primary-hover shadow-md',
-        text: 'text-white font-extrabold',
+        text: 'text-white font-semibold',
       };
     }
   };
@@ -822,15 +835,15 @@ export function DayTimeHeatmapChart({
       {/* Header Bar */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
         <div>
-          <h3 className="text-sm sm:text-base font-extrabold text-on-surface tracking-tight">
+          <h3 className="text-sm sm:text-base font-semibold text-on-surface tracking-tight">
             {title}
           </h3>
-          <p className="text-[11px] text-muted font-medium mt-0.5">{subtitle}</p>
+          <p className="text-xs text-muted font-medium mt-0.5">{subtitle}</p>
         </div>
 
         {/* Top-Right Segmented Scale Legend */}
         <div className="flex items-center gap-2.5 text-xs self-start sm:self-auto">
-          <span className="text-muted font-semibold text-[11px]">Low Orders</span>
+          <span className="text-muted font-semibold text-xs">Low Orders</span>
 
           {/* Segmented Color Bar */}
           <div className="flex items-center gap-0.5 rounded-full overflow-hidden p-0.5 bg-surface-container border border-sand/30 shadow-2xs">
@@ -842,7 +855,7 @@ export function DayTimeHeatmapChart({
             <span className="w-5 sm:w-6 h-2 rounded-r-full bg-primary" />
           </div>
 
-          <span className="text-muted font-semibold text-[11px]">High Orders</span>
+          <span className="text-muted font-semibold text-xs">High Orders</span>
         </div>
       </div>
 
@@ -852,7 +865,7 @@ export function DayTimeHeatmapChart({
         {weekDays.map((day) => (
           <div key={day.key} className="grid grid-cols-5 items-center gap-2">
             {/* Day Label (Y-Axis) */}
-            <div className="text-[11px] font-bold text-muted uppercase tracking-wider text-right pr-2">
+            <div className="text-xs font-bold text-muted uppercase tracking-wider text-right pr-2">
               {day.label}
             </div>
 
@@ -875,16 +888,16 @@ export function DayTimeHeatmapChart({
                   </div>
 
                   {/* Tooltip */}
-                  <div className="opacity-0 group-hover:opacity-100 transition-all duration-200 absolute -top-12 bg-primary text-white px-2.5 py-1.5 rounded-lg text-[11px] font-semibold whitespace-nowrap shadow-2xl z-50 pointer-events-none transform -translate-y-1 border border-border-hover/60 flex flex-col gap-0.5 text-center">
-                    <span className="text-[9px] text-foreground-muted font-bold uppercase tracking-wider">
+                  <div className="opacity-0 group-hover:opacity-100 transition-all duration-200 absolute -top-12 bg-primary text-white px-2.5 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap shadow-2xl z-50 pointer-events-none transform -translate-y-1 border border-border-hover/60 flex flex-col gap-0.5 text-center">
+                    <span className="text-xs text-foreground-muted font-bold uppercase tracking-wider">
                       {day.label} • {slot.label} ({slot.sub})
                     </span>
-                    <div className="flex items-center justify-center gap-1.5 text-[11px]">
-                      <span className="text-emerald-300 font-extrabold">
+                    <div className="flex items-center justify-center gap-1.5 text-xs">
+                      <span className="text-emerald-300 font-semibold">
                         {cellData.count} {cellData.count === 1 ? 'Order' : 'Orders'}
                       </span>
                       {cellData.revenue > 0 && (
-                        <span className="text-emerald-400 font-extrabold">
+                        <span className="text-emerald-400 font-semibold">
                           ({currencyPrefix}{cellData.revenue.toLocaleString()})
                         </span>
                       )}
@@ -902,7 +915,7 @@ export function DayTimeHeatmapChart({
           {timeSlots.map((slot) => (
             <div key={slot.key} className="text-center flex flex-col items-center">
               <span className="text-xs font-bold text-on-surface">{slot.label}</span>
-              <span className="text-[9px] text-muted font-medium">{slot.sub}</span>
+              <span className="text-xs text-muted font-medium">{slot.sub}</span>
             </div>
           ))}
         </div>
@@ -1003,10 +1016,10 @@ export function CategoryTreemapChart({
       {/* Header Bar */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
         <div>
-          <h3 className="text-sm sm:text-base font-extrabold text-on-surface tracking-tight">
+          <h3 className="text-sm sm:text-base font-semibold text-on-surface tracking-tight">
             {title}
           </h3>
-          <p className="text-[11px] text-muted font-medium mt-0.5">{subtitle}</p>
+          <p className="text-xs text-muted font-medium mt-0.5">{subtitle}</p>
         </div>
 
         {/* Badge */}
@@ -1042,7 +1055,7 @@ export function CategoryTreemapChart({
                 <span className="text-xs sm:text-sm font-bold tracking-wide block truncate opacity-95">
                   {item.label}
                 </span>
-                <span className="text-xl sm:text-2xl font-extrabold mt-1 block">
+                <span className="text-xl sm:text-2xl font-semibold mt-1 block">
                   {item.value.toLocaleString()}
                 </span>
               </div>
@@ -1052,16 +1065,16 @@ export function CategoryTreemapChart({
               </div>
 
               {/* Tooltip */}
-              <div className="opacity-0 group-hover:opacity-100 transition-all duration-200 absolute -top-12 left-1/2 transform -translate-x-1/2 bg-primary text-white px-2.5 py-1.5 rounded-lg text-[11px] font-semibold whitespace-nowrap shadow-2xl z-50 pointer-events-none border border-border-hover/60 flex flex-col gap-0.5 text-center">
-                <span className="text-[9px] text-foreground-muted font-bold uppercase tracking-wider">
+              <div className="opacity-0 group-hover:opacity-100 transition-all duration-200 absolute -top-12 left-1/2 transform -translate-x-1/2 bg-primary text-white px-2.5 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap shadow-2xl z-50 pointer-events-none border border-border-hover/60 flex flex-col gap-0.5 text-center">
+                <span className="text-xs text-foreground-muted font-bold uppercase tracking-wider">
                   {item.label}
                 </span>
-                <div className="flex items-center justify-center gap-1.5 text-[11px]">
-                  <span className="text-emerald-400 font-extrabold">
+                <div className="flex items-center justify-center gap-1.5 text-xs">
+                  <span className="text-emerald-400 font-semibold">
                     {item.value} units ({pct}%)
                   </span>
                   {item.revenue && item.revenue > 0 && (
-                    <span className="text-amber-300 font-extrabold">
+                    <span className="text-amber-300 font-semibold">
                       • {currencyPrefix}{item.revenue.toLocaleString()}
                     </span>
                   )}
@@ -1073,15 +1086,15 @@ export function CategoryTreemapChart({
       </div>
 
       {/* Footer Legend */}
-      <div className="mt-4 pt-3 border-t border-sand/20 flex flex-wrap items-center justify-between gap-2 text-[11px]">
-        <span className="text-muted font-semibold text-[10px] uppercase tracking-wider">
+      <div className="mt-4 pt-3 border-t border-sand/20 flex flex-wrap items-center justify-between gap-2 text-xs">
+        <span className="text-muted font-semibold text-xs uppercase tracking-wider">
           Categories: {categoriesList.length}
         </span>
         <div className="flex flex-wrap items-center gap-3">
           {categoriesList.slice(0, 5).map((cat, idx) => (
             <div key={idx} className="flex items-center gap-1.5">
               <span className={`w-2.5 h-2.5 rounded-sm ${CATEGORY_COLORS[idx % CATEGORY_COLORS.length].split(' ')[0]}`} />
-              <span className="text-muted font-medium text-[11px]">{cat.label}</span>
+              <span className="text-muted font-medium text-xs">{cat.label}</span>
             </div>
           ))}
         </div>
@@ -1156,10 +1169,10 @@ export function OrderStatusDonutChart({
       {/* Header Bar */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
         <div>
-          <h3 className="text-sm sm:text-base font-extrabold text-on-surface tracking-tight">
+          <h3 className="text-sm sm:text-base font-semibold text-on-surface tracking-tight">
             {title}
           </h3>
-          {subtitle && <p className="text-[11px] text-muted font-medium mt-0.5">{subtitle}</p>}
+          {subtitle && <p className="text-xs text-muted font-medium mt-0.5">{subtitle}</p>}
         </div>
       </div>
 
@@ -1200,8 +1213,8 @@ export function OrderStatusDonutChart({
 
           {/* Center Text */}
           <div className="absolute flex flex-col items-center justify-center text-center pointer-events-none">
-            <span className="text-[11px] font-semibold text-muted">Total</span>
-            <span className="text-2xl font-extrabold text-on-surface leading-none mt-0.5">
+            <span className="text-xs font-semibold text-muted">Total</span>
+            <span className="text-2xl font-semibold text-on-surface leading-none mt-0.5">
               {totalCount}
             </span>
           </div>
@@ -1283,7 +1296,7 @@ export function TopCategoriesCard({ orders, className = '' }: TopCategoriesCardP
     <div className={`w-full bg-surface-container-lowest border border-sand/30 rounded-2xl p-4 sm:p-5 shadow-xs flex flex-col justify-between ${className}`}>
       {/* Header Bar */}
       <div className="flex items-center justify-between gap-3 mb-4">
-        <h3 className="text-sm sm:text-base font-extrabold text-on-surface tracking-tight">
+        <h3 className="text-sm sm:text-base font-semibold text-on-surface tracking-tight">
           Top Categories
         </h3>
       </div>
@@ -1304,7 +1317,7 @@ export function TopCategoriesCard({ orders, className = '' }: TopCategoriesCardP
               >
                 <div>
                   <span className="text-xs font-bold tracking-wide opacity-95 block truncate">{cat.label}</span>
-                  <span className="text-2xl font-extrabold mt-1 block">{cat.value}</span>
+                  <span className="text-2xl font-semibold mt-1 block">{cat.value}</span>
                 </div>
 
                 <div className="flex items-end justify-between mt-4">
@@ -1320,10 +1333,10 @@ export function TopCategoriesCard({ orders, className = '' }: TopCategoriesCardP
           </div>
 
           {/* Footer Text */}
-          <div className="pt-3 border-t border-sand/20 flex items-center justify-between text-[11px] text-muted font-medium">
+          <div className="pt-3 border-t border-sand/20 flex items-center justify-between text-xs text-muted font-medium">
             <span>
               Total Categories{' '}
-              <strong className="text-on-surface font-extrabold">{ranked.categoryCount}</strong>
+              <strong className="text-on-surface font-semibold">{ranked.categoryCount}</strong>
             </span>
             <div className="flex items-center gap-2">
               {cards.map((cat, i) => (
@@ -1361,7 +1374,7 @@ export function ProductPerformanceBarList({
         <h3 className="text-sm font-bold text-on-surface mb-4">{title}</h3>
 
         {/* Table Header */}
-        <div className="flex justify-between text-[11px] font-bold text-muted uppercase tracking-wider mb-3">
+        <div className="flex justify-between text-xs font-bold text-muted uppercase tracking-wider mb-3">
           <span>Product</span>
           <span>{valueHeader}</span>
         </div>
@@ -1376,7 +1389,7 @@ export function ProductPerformanceBarList({
                   <span className="font-semibold text-on-surface truncate pr-2">
                     {item.label}
                   </span>
-                  <span className="font-extrabold text-on-surface shrink-0">
+                  <span className="font-semibold text-on-surface shrink-0">
                     {item.displayValue || item.value}
                   </span>
                 </div>

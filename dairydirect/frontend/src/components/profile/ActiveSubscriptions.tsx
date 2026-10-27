@@ -23,7 +23,7 @@ export function ActiveSubscriptions({ subscriptions, hideHeader = false }: Activ
     <div>
       {!hideHeader && (
         <div className="flex justify-between items-center mb-4">
-          <h2 className="text-lg font-black text-dark tracking-wide">My Subscriptions</h2>
+          <h2 className="text-lg font-semibold text-dark tracking-wide">My Subscriptions</h2>
           {subscriptions.length > 0 && (
             <Link href="/subscribe" className="text-primary text-sm font-bold flex items-center hover:opacity-80 transition-opacity">
               Manage <ChevronRight className="w-4 h-4 ml-0.5" />
@@ -55,7 +55,7 @@ export function ActiveSubscriptions({ subscriptions, hideHeader = false }: Activ
                   <p className="text-xs font-medium text-muted mt-0.5">
                     {sub.volume} {LIQUID_CATEGORIES.has((sub.products?.category ?? '').toLowerCase()) ? 'L' : 'kg'} / {sub.plan}
                   </p>
-                  <p className={`text-[10px] font-bold uppercase tracking-wider mt-1.5 ${isPaused ? 'text-red-500' : 'text-primary'}`}>
+                  <p className={`text-xs font-bold uppercase tracking-wider mt-1.5 ${isPaused ? 'text-red-500' : 'text-primary'}`}>
                     {isPaused ? 'Paused' : 'Active'}
                   </p>
                 </div>

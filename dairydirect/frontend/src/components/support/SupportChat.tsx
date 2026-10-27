@@ -297,7 +297,7 @@ export function SupportChat() {
           ref={panelRef}
           role="dialog"
           aria-label="Help and support"
-          className="fixed z-50 inset-x-0 bottom-0 md:inset-auto md:bottom-6 md:right-6 md:w-[400px] h-[85vh] md:h-[600px] md:max-h-[80vh] bg-surface md:rounded-2xl rounded-t-2xl shadow-2xl border border-sand flex flex-col overflow-hidden"
+          className="fixed z-[75] inset-x-0 bottom-0 md:inset-auto md:bottom-6 md:right-6 md:w-[400px] h-[85dvh] md:h-[600px] md:max-h-[80dvh] bg-surface md:rounded-2xl rounded-t-2xl shadow-2xl border border-border flex flex-col overflow-hidden"
         >
           {/* Header */}
           <div className="flex items-center justify-between px-4 py-3 bg-primary text-foreground-inverse shrink-0">
@@ -305,7 +305,7 @@ export function SupportChat() {
               <MessageCircle className="w-5 h-5 shrink-0" />
               <div className="min-w-0">
                 <p className="font-bold text-sm leading-tight">Help &amp; Support</p>
-                <p className="text-[11px] opacity-80 leading-tight truncate">
+                <p className="text-xs opacity-80 leading-tight truncate">
                   {SUPPORT_CONTACT.hours}
                 </p>
               </div>
@@ -368,7 +368,7 @@ export function SupportChat() {
 
           {/* Direct contact routes */}
           {(SUPPORT_CONTACT.phone || SUPPORT_CONTACT.email) && (
-            <div className="px-3 py-2 border-t border-sand bg-surface flex items-center gap-3 text-[11px] shrink-0">
+            <div className="px-3 py-2 border-t border-sand bg-surface flex items-center gap-3 text-xs shrink-0">
               {SUPPORT_CONTACT.phone && (
                 <a href={`tel:${SUPPORT_CONTACT.phone}`} className="flex items-center gap-1 font-semibold text-primary">
                   <Phone className="w-3.5 h-3.5" /> {SUPPORT_CONTACT.phone}

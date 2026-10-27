@@ -175,7 +175,7 @@ export async function GET(request: Request) {
         const recentOrdersFormatted: any[] = [];
         const seenOrderIds = new Set<string>();
 
-        if (allProductIds.size > 0 || store.id) {
+        if (allProductIds.size > 0) {
           const productIdsArray = Array.from(allProductIds);
           
           let oiQuery = sb
@@ -192,18 +192,17 @@ export async function GET(request: Request) {
                 total_amount,
                 status,
                 payment_status,
+                payment_method,
                 created_at,
                 profiles:user_id (name, email)
               )
-            `);
+            `)
+            .in('product_id', productIdsArray);
 
-          if (productIdsArray.length > 0) {
-            oiQuery = oiQuery.or(`seller_id.eq.${store.id},product_id.in.(${productIdsArray.join(',')})`);
-          } else {
-            oiQuery = oiQuery.eq('seller_id', store.id);
+          const { data: orderItems, error: oiErr } = await oiQuery;
+          if (oiErr) {
+            console.error('[SellerDashboard API] order_items query error:', oiErr.message);
           }
-
-          const { data: orderItems } = await oiQuery;
 
           if (orderItems && orderItems.length > 0) {
             // Group by order_id
@@ -215,7 +214,10 @@ export async function GET(request: Request) {
               if (['cancelled', 'refunded', 'returned'].includes(o.status)) return;
 
               const itemTotal = Number(oi.price || 0) * Number(oi.quantity || 1);
-              if (o.payment_status === 'paid' || o.status === 'delivered') {
+              // Include online paid, delivered, and placed COD orders in revenue
+              const isPaidOrDelivered = o.payment_status === 'paid' || o.status === 'delivered';
+              const isCODOrder = o.payment_method === 'cod' || o.payment_status === 'pending' || o.payment_status === 'cod_pending';
+              if (isPaidOrDelivered || isCODOrder) {
                 grossRevenue += itemTotal;
               }
 
@@ -384,7 +386,15 @@ export async function GET(request: Request) {
       query = query.ilike('state', `%${state}%`);
     }
     if (search) {
-      query = query.or(`store_name.ilike.%${search}%,description.ilike.%${search}%,slug.ilike.%${search}%`);
+      // Safety: do NOT interpolate user-supplied search into .or() — a user could
+      // inject PostgREST filter syntax (commas, dots, parentheses). Use separate
+      // parameterized ilike checks instead.
+      //
+      // Supabase JS SDK v2 does not expose textSearch on .or() with separate params,
+      // so we fetch two filtered sets and merge, or use a text-search column.
+      // For now, search by store_name only (most useful field) safely via .ilike().
+      // TODO: add a generated tsvector column for full-text search in a migration.
+      query = query.ilike('store_name', `%${search}%`);
     }
 
     const { data: sellers, error, count } = await query;

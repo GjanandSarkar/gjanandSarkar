@@ -93,12 +93,12 @@ export default function NotificationsPage() {
         <div className="flex items-center justify-between max-w-[800px] mx-auto w-full">
           <div className="flex items-center gap-4">
             <button onClick={() => router.back()} 
-              className="w-10 h-10 rounded-full flex items-center justify-center hover:bg-surface-container transition-colors">
-              <ArrowLeft className="w-6 h-6 text-dark" />
+              className="w-9 h-9 rounded-full flex items-center justify-center hover:bg-surface-muted transition-colors min-h-[44px] min-w-[44px]">
+              <ArrowLeft className="w-5 h-5 text-foreground" />
             </button>
             <div>
-              <h1 className="text-xl font-black text-dark tracking-tight">{t('notifications')}</h1>
-              {unreadCount > 0 && <p className="text-[11px] font-bold text-primary uppercase tracking-widest">{unreadCount} New Unread</p>}
+              <h1 className="text-xl font-semibold text-foreground tracking-tight">{t('notifications')}</h1>
+              {unreadCount > 0 && <p className="text-xs font-medium text-primary">{unreadCount} New Unread</p>}
             </div>
           </div>
           
@@ -106,7 +106,7 @@ export default function NotificationsPage() {
             <button
               onClick={handleMarkAllRead}
               disabled={markingAll}
-              className="flex items-center gap-2 px-4 py-2 rounded-full text-xs font-black uppercase tracking-widest transition-all active:scale-95 bg-primary/10 text-primary border border-primary/20"
+              className="flex items-center gap-2 px-3.5 py-2 rounded-full text-xs font-medium transition-colors bg-surface-muted text-primary border border-border hover:bg-border min-h-[44px] cursor-pointer"
             >
               {markingAll ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <CheckCheck className="w-3.5 h-3.5" />}
               {t('markAllRead')}
@@ -119,69 +119,61 @@ export default function NotificationsPage() {
       <div className="flex-1 max-w-[800px] mx-auto w-full px-4 py-6">
         {loading ? (
           <div className="flex flex-col items-center justify-center py-20 gap-4">
-            <div className="w-12 h-12 rounded-full border-4 border-sand border-t-primary animate-spin" />
-            <p className="text-sm font-bold text-muted uppercase tracking-widest">Loading History...</p>
+            <div className="w-10 h-10 rounded-full border-2 border-border border-t-primary animate-spin" />
+            <p className="text-xs font-medium text-foreground-muted">Loading History...</p>
           </div>
         ) : notifications.length === 0 ? (
-          <div className="flex flex-col items-center justify-center py-32 text-center">
-            <div className="w-20 h-20 rounded-[32px] bg-surface-container flex items-center justify-center mb-6">
-              <Bell className="w-10 h-10 text-muted" strokeWidth={1.5} />
+          <div className="flex flex-col items-center justify-center py-24 text-center">
+            <div className="w-16 h-16 rounded-lg bg-surface-muted flex items-center justify-center mb-4 border border-border">
+              <Bell className="w-8 h-8 text-foreground-muted" strokeWidth={1.5} />
             </div>
-            <h2 className="text-xl font-bold text-dark mb-2">No notifications yet</h2>
-            <p className="text-sm text-muted max-w-[240px] mx-auto">
-              We'll notify you here about your orders, subscriptions and farm updates.
+            <h2 className="text-lg font-semibold text-foreground mb-1">No notifications yet</h2>
+            <p className="text-xs text-foreground-muted max-w-[260px] mx-auto">
+              We will notify you here about your orders and verified partner updates.
             </p>
           </div>
         ) : (
           <div className="space-y-4">
-            <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-muted ml-2 mb-4">Recent Notifications</h3>
-            <div className="rounded-[28px] overflow-hidden border border-sand bg-surface shadow-sm">
-              {notifications.map((notif, i) => {
+            <h3 className="text-xs font-semibold text-foreground-muted ml-1 mb-2">Recent Notifications</h3>
+            <div className="rounded-lg overflow-hidden border border-border bg-surface shadow-xs divide-y divide-border">
+              {notifications.map((notif) => {
                 const Icon = TYPE_ICON[notif.type ?? 'system'] ?? Info;
                 return (
-                  <motion.button
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: i * 0.05 }}
+                  <button
                     key={notif.id}
                     onClick={() => handleNotificationClick(notif)}
-                    className="w-full flex items-start gap-4 px-6 py-5 text-left transition-all relative hover:bg-surface-container-low group"
-                    style={{
-                      background: notif.is_read ? 'transparent' : 'rgba(12, 60, 38, 0.04)',
-                      borderBottom: i < notifications.length - 1 ? '1px solid rgba(195,201,187,0.3)' : 'none'
-                    }}
+                    className={`w-full flex items-start gap-3.5 px-5 py-4 text-left transition-colors cursor-pointer ${
+                      notif.is_read ? 'hover:bg-surface-muted bg-surface' : 'bg-surface-muted hover:bg-border'
+                    }`}
                   >
-                    <div className="w-12 h-12 rounded-2xl flex items-center justify-center shrink-0 transition-transform group-active:scale-95"
-                      style={{ background: 'var(--color-surface-container)', color: 'var(--color-primary)' }}>
-                      <Icon className="w-6 h-6" strokeWidth={2.2} />
+                    <div className="w-10 h-10 rounded-lg flex items-center justify-center shrink-0 bg-surface text-primary border border-border">
+                      <Icon className="w-5 h-5" strokeWidth={2} />
                     </div>
                     
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center justify-between mb-1">
-                        <p className="font-bold text-[15px] truncate pr-4 text-dark">
+                        <p className="font-semibold text-xs sm:text-sm truncate pr-4 text-foreground">
                           {notif.title}
                         </p>
-                        <span className="text-[10px] font-bold text-muted shrink-0 whitespace-nowrap uppercase tracking-wider">
+                        <span className="text-xs text-foreground-muted shrink-0 whitespace-nowrap">
                           {timeAgo(notif.created_at)}
                         </span>
                       </div>
-                      <p className="text-[13px] leading-relaxed text-muted line-clamp-2">
+                      <p className="text-xs leading-relaxed text-foreground-muted line-clamp-2">
                         {notif.message}
                       </p>
                     </div>
 
                     {!notif.is_read && (
-                      <div className="absolute right-4 top-1/2 -translate-y-1/2 flex items-center">
-                         <div className="w-2.5 h-2.5 rounded-full bg-primary shadow-[0_0_10px_rgba(63,101,48,0.4)]" />
-                      </div>
+                      <div className="w-2 h-2 rounded-full shrink-0 mt-2 bg-primary" />
                     )}
-                  </motion.button>
+                  </button>
                 );
               })}
             </div>
             
-            <div className="p-8 text-center">
-               <p className="text-[11px] font-bold text-muted uppercase tracking-widest">You're all caught up</p>
+            <div className="p-6 text-center">
+               <p className="text-xs text-foreground-muted">You are all caught up</p>
             </div>
           </div>
         )}

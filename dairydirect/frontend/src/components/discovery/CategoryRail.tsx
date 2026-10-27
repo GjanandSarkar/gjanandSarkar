@@ -12,7 +12,7 @@ interface CategoryRailProps {
 }
 
 export function CategoryRail({ categories, activeCategory, onSelect, isLoading }: CategoryRailProps) {
-  const { t } = useTranslation();
+  const { t, tCategory } = useTranslation();
   const allCategories = ['All', ...categories];
 
   if (isLoading) {
@@ -50,7 +50,7 @@ export function CategoryRail({ categories, activeCategory, onSelect, isLoading }
               <CategoryNameIcon category={cat} />
             </div>
             <span className="text-[13px] md:text-[14px] font-bold whitespace-nowrap">
-              {t(cat.toLowerCase() as any) || cat}
+              {tCategory(cat)}
             </span>
           </button>
         );

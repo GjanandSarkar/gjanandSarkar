@@ -230,7 +230,7 @@ function ProductApprovalsContent() {
               >
                 <ArrowLeft className="w-5 h-5" />
               </button>
-              <h1 className="text-2xl font-black text-foreground tracking-tight flex items-center gap-2.5">
+              <h1 className="text-2xl font-semibold text-foreground tracking-tight flex items-center gap-2.5">
                 <Package className="w-7 h-7 text-primary" />
                 Product Approval Requests
               </h1>
@@ -275,8 +275,8 @@ function ProductApprovalsContent() {
                   isSelected ? tab.activeBg + ' ring-2 ring-emerald-600/30 font-bold shadow-xs' : tab.bg + ' hover:opacity-90'
                 }`}
               >
-                <p className="text-[11px] font-semibold uppercase tracking-wider text-foreground-muted">{tab.label}</p>
-                <p className={`text-xl font-extrabold mt-0.5 ${tab.color}`}>{tab.count}</p>
+                <p className="text-xs font-semibold uppercase tracking-wider text-foreground-muted">{tab.label}</p>
+                <p className={`text-xl font-semibold mt-0.5 ${tab.color}`}>{tab.count}</p>
               </button>
             );
           })}
@@ -376,7 +376,7 @@ function ProductApprovalsContent() {
                     />
                     <div className="absolute top-3 left-3 flex flex-wrap gap-1.5">
                       {getStatusBadge(product.approval_status)}
-                      <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-surface/95 text-foreground shadow-xs uppercase tracking-wide">
+                      <span className="px-2 py-0.5 rounded-full text-xs font-bold bg-surface/95 text-foreground shadow-xs uppercase tracking-wide">
                         {product.category}
                       </span>
                     </div>
@@ -401,7 +401,7 @@ function ProductApprovalsContent() {
                       {product.sku && (
                         <>
                           <span>•</span>
-                          <span className="font-mono text-[11px] bg-surface-muted px-1.5 py-0.5 rounded">SKU: {product.sku}</span>
+                          <span className="font-mono text-xs bg-surface-muted px-1.5 py-0.5 rounded">SKU: {product.sku}</span>
                         </>
                       )}
                     </div>
@@ -420,13 +420,13 @@ function ProductApprovalsContent() {
                     <div className="mt-4 pt-3 border-t border-border flex items-center justify-between">
                       <div>
                         <div className="flex items-baseline gap-1.5">
-                          <span className="text-lg font-black text-primary">₹{price}</span>
+                          <span className="text-lg font-semibold text-primary">₹{price}</span>
                           {compareAt && compareAt > price && (
                             <span className="text-xs text-foreground-muted line-through">₹{compareAt}</span>
                           )}
                         </div>
                         {primaryVariant?.weight && (
-                          <span className="text-[11px] text-foreground-muted font-medium">Pack: {primaryVariant.weight}</span>
+                          <span className="text-xs text-foreground-muted font-medium">Pack: {primaryVariant.weight}</span>
                         )}
                       </div>
 
@@ -437,7 +437,7 @@ function ProductApprovalsContent() {
                           {stock > 0 ? `${stock} in stock` : 'Out of stock'}
                         </span>
                         {product.tax_rate ? (
-                          <div className="text-[10px] text-foreground-muted mt-0.5">GST: {product.tax_rate}%</div>
+                          <div className="text-xs text-foreground-muted mt-0.5">GST: {product.tax_rate}%</div>
                         ) : null}
                       </div>
                     </div>
@@ -451,7 +451,7 @@ function ProductApprovalsContent() {
                     )}
 
                     {/* Decision info */}
-                    <div className="mt-3 pt-2 text-[11px] text-foreground-muted flex items-center justify-between">
+                    <div className="mt-3 pt-2 text-xs text-foreground-muted flex items-center justify-between">
                       <span>Submitted: {new Date(product.created_at).toLocaleDateString()}</span>
                       {product.reviewed_at && (
                         <span>Reviewed: {new Date(product.reviewed_at).toLocaleDateString()}</span>
@@ -538,7 +538,7 @@ function ProductApprovalsContent() {
               {/* Header */}
               <div className="px-6 py-4 border-b border-border flex items-center justify-between sticky top-0 bg-surface z-10">
                 <div className="flex items-center gap-2.5">
-                  <span className="font-extrabold text-foreground text-lg">Product Verification Preview</span>
+                  <span className="font-semibold text-foreground text-lg">Product Verification Preview</span>
                   {getStatusBadge(selectedProduct.approval_status)}
                 </div>
                 <button
@@ -683,7 +683,7 @@ function ProductApprovalsContent() {
                           {selectedProduct.product_variants.map(v => (
                             <tr key={v.id} className="hover:bg-surface-muted">
                               <td className="py-2.5 px-3 font-semibold text-foreground">{v.weight || 'Standard Unit'}</td>
-                              <td className="py-2.5 px-3 font-black text-primary">₹{v.price}</td>
+                              <td className="py-2.5 px-3 font-semibold text-primary">₹{v.price}</td>
                               <td className="py-2.5 px-3 text-foreground-muted">{v.compare_at_price ? `₹${v.compare_at_price}` : '—'}</td>
                               <td className="py-2.5 px-3 font-bold">{v.stock} units</td>
                             </tr>
@@ -803,7 +803,7 @@ function ProductApprovalsContent() {
                   )}
                 </div>
                 <div>
-                  <h3 className="font-extrabold text-lg text-foreground capitalize">
+                  <h3 className="font-semibold text-lg text-foreground capitalize">
                     {decisionModal.action} Product?
                   </h3>
                   <p className="text-xs text-foreground-muted">

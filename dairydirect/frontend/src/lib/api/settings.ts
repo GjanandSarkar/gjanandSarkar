@@ -15,7 +15,9 @@ import { getAdminSupabase } from '@/lib/supabase/admin';
  * Reading it from one place means the banner can no longer drift from the
  * engine.
  */
-export const DEFAULT_FREE_DELIVERY_THRESHOLD = 299;
+import { BUSINESS_CONFIG } from '@/lib/config/business';
+
+export const DEFAULT_FREE_DELIVERY_THRESHOLD = BUSINESS_CONFIG.delivery.freeDeliveryThreshold;
 
 async function fetchFreeDeliveryThreshold(): Promise<number> {
   try {

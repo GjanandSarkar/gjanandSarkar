@@ -5,7 +5,7 @@
     }
   },
   "regions": [
-    "iad1"
+    "bom1"
   ],
   "cleanUrls": true,
   "trailingSlash": false,
@@ -19,7 +19,7 @@
         },
         {
           "key": "Access-Control-Allow-Origin",
-          "value": "*"
+          "value": "https://gjanandsarkar.com"
         },
         {
           "key": "Access-Control-Allow-Methods",
@@ -28,6 +28,15 @@
         {
           "key": "Access-Control-Allow-Headers",
           "value": "X-Requested-With, Content-Type, Authorization"
+        }
+      ]
+    },
+    {
+      "source": "/api/health",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "no-store"
         }
       ]
     }

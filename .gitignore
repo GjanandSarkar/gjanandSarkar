@@ -36,3 +36,5 @@ Thumbs.db
 # macOS metadata
 .DS_Store
 ._*
+
+.agent/

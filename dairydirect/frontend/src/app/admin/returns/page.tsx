@@ -307,17 +307,17 @@ export default function AdminReturnsPage() {
 
             <div>
               <div className="flex items-center gap-2">
-                <span className="px-2 py-0.5 rounded-full bg-success-bg text-success text-[10px] font-black uppercase tracking-wider">
+                <span className="px-2 py-0.5 rounded-full bg-success-bg text-success text-xs font-semibold uppercase tracking-wider">
                   Admin Global Operations
                 </span>
                 {stuckCount > 0 && (
-                  <span className="px-2 py-0.5 rounded-full bg-error-bg text-error text-[10px] font-black uppercase tracking-wider flex items-center gap-1 animate-pulse">
+                  <span className="px-2 py-0.5 rounded-full bg-error-bg text-error text-xs font-semibold uppercase tracking-wider flex items-center gap-1 animate-pulse">
                     <AlertTriangle className="w-3 h-3" />
                     <span>{stuckCount} Stuck &gt;3d</span>
                   </span>
                 )}
               </div>
-              <h1 className="text-xl md:text-2xl font-black text-primary tracking-tight flex items-center gap-2 mt-0.5">
+              <h1 className="text-xl md:text-2xl font-semibold text-primary tracking-tight flex items-center gap-2 mt-0.5">
                 <RotateCcw className="w-6 h-6 text-secondary" />
                 <span>Returns & Replacements Monitoring Desk</span>
               </h1>
@@ -347,8 +347,8 @@ export default function AdminReturnsPage() {
               tabFilter === 'all' ? 'bg-primary text-white border-primary shadow-sm' : 'bg-surface-muted border-border/80 text-foreground hover:bg-surface-muted'
             }`}
           >
-            <p className="text-[10px] font-bold uppercase tracking-wider opacity-80">Total</p>
-            <p className="text-xl font-black">{totalCount}</p>
+            <p className="text-xs font-bold uppercase tracking-wider opacity-80">Total</p>
+            <p className="text-xl font-semibold">{totalCount}</p>
           </button>
 
           <button
@@ -357,8 +357,8 @@ export default function AdminReturnsPage() {
               tabFilter === 'returns' ? 'bg-blue-900 text-white border-blue-900 shadow-sm' : 'bg-info-bg/50 border-blue-100 text-blue-900 hover:bg-info-bg'
             }`}
           >
-            <p className="text-[10px] font-bold uppercase tracking-wider opacity-80">Open Returns</p>
-            <p className="text-xl font-black text-blue-800">{openReturnsCount}</p>
+            <p className="text-xs font-bold uppercase tracking-wider opacity-80">Open Returns</p>
+            <p className="text-xl font-semibold text-blue-800">{openReturnsCount}</p>
           </button>
 
           <button
@@ -367,8 +367,8 @@ export default function AdminReturnsPage() {
               tabFilter === 'replacements' ? 'bg-warning text-white border-warning shadow-sm' : 'bg-warning-bg/50 border-warning-bg text-warning hover:bg-warning-bg'
             }`}
           >
-            <p className="text-[10px] font-bold uppercase tracking-wider opacity-80">Open Replacements</p>
-            <p className="text-xl font-black text-warning">{openReplacementsCount}</p>
+            <p className="text-xs font-bold uppercase tracking-wider opacity-80">Open Replacements</p>
+            <p className="text-xl font-semibold text-warning">{openReplacementsCount}</p>
           </button>
 
           <button
@@ -377,8 +377,8 @@ export default function AdminReturnsPage() {
               tabFilter === 'refund_pending' ? 'bg-orange-900 text-white border-orange-900 shadow-sm' : 'bg-orange-50/50 border-orange-100 text-orange-900 hover:bg-orange-50'
             }`}
           >
-            <p className="text-[10px] font-bold uppercase tracking-wider opacity-80">Refunds Pending</p>
-            <p className="text-xl font-black text-orange-800">{refundsPendingCount}</p>
+            <p className="text-xs font-bold uppercase tracking-wider opacity-80">Refunds Pending</p>
+            <p className="text-xl font-semibold text-orange-800">{refundsPendingCount}</p>
           </button>
 
           <button
@@ -388,10 +388,10 @@ export default function AdminReturnsPage() {
             }`}
           >
             <div className="flex items-center justify-between">
-              <p className="text-[10px] font-bold uppercase tracking-wider opacity-80">Refunds Failed</p>
+              <p className="text-xs font-bold uppercase tracking-wider opacity-80">Refunds Failed</p>
               {failedRefundsCount > 0 && <span className="w-2 h-2 rounded-full bg-red-600 animate-ping" />}
             </div>
-            <p className="text-xl font-black text-error">{failedRefundsCount}</p>
+            <p className="text-xl font-semibold text-error">{failedRefundsCount}</p>
           </button>
 
           <button
@@ -400,8 +400,8 @@ export default function AdminReturnsPage() {
               tabFilter === 'cod_awaiting' ? 'bg-success text-white border-success shadow-sm' : 'bg-success-bg/50 border-success-bg text-success hover:bg-success-bg'
             }`}
           >
-            <p className="text-[10px] font-bold uppercase tracking-wider opacity-80">COD Awaiting Payout</p>
-            <p className="text-xl font-black text-success">{codAwaitingCount}</p>
+            <p className="text-xs font-bold uppercase tracking-wider opacity-80">COD Awaiting Payout</p>
+            <p className="text-xl font-semibold text-success">{codAwaitingCount}</p>
           </button>
         </div>
       </div>
@@ -410,7 +410,7 @@ export default function AdminReturnsPage() {
       <div className="flex-1 px-6 md:px-10 py-6 max-w-7xl w-full mx-auto space-y-6">
         
         {/* Search & Status Filters */}
-        <div className="bg-surface rounded-3xl border border-border/90 shadow-2xs p-4 flex flex-col md:flex-row gap-4 items-center justify-between">
+        <div className="bg-surface rounded-xl border border-border/90 shadow-2xs p-4 flex flex-col md:flex-row gap-4 items-center justify-between">
           <div className="relative w-full md:w-96">
             <Search className="w-4 h-4 text-foreground-muted absolute left-3.5 top-1/2 -translate-y-1/2" />
             <input
@@ -454,12 +454,12 @@ export default function AdminReturnsPage() {
             <p className="text-xs font-semibold text-foreground-muted">Loading returns & replacements...</p>
           </div>
         ) : filteredRequests.length === 0 ? (
-          <div className="bg-surface rounded-3xl border border-border p-12 text-center space-y-4">
+          <div className="bg-surface rounded-xl border border-border p-12 text-center space-y-4">
             <div className="w-16 h-16 rounded-2xl bg-surface-muted text-foreground-muted flex items-center justify-center mx-auto">
               <RotateCcw className="w-8 h-8" />
             </div>
             <div className="space-y-1">
-              <h4 className="font-extrabold text-base text-foreground">No Requests Found</h4>
+              <h4 className="font-semibold text-base text-foreground">No Requests Found</h4>
               <p className="text-xs text-foreground-muted max-w-sm mx-auto">
                 No return or replacement records match the active search and queue criteria.
               </p>
@@ -477,18 +477,18 @@ export default function AdminReturnsPage() {
               return (
                 <div
                   key={req.id}
-                  className={`bg-surface rounded-3xl border p-6 space-y-5 transition-all shadow-2xs ${
+                  className={`bg-surface rounded-xl border p-6 space-y-5 transition-all shadow-2xs ${
                     stuck ? 'border-warning/80 ring-2 ring-amber-100' : 'border-border/90 hover:border-border-hover'
                   }`}
                 >
                   {/* Top Bar: ID, Type, Status, Stuck Warning, Dates */}
                   <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-border">
                     <div className="flex items-center gap-3 flex-wrap">
-                      <span className="font-mono text-xs font-black text-foreground-muted">
+                      <span className="font-mono text-xs font-semibold text-foreground-muted">
                         REQ #{req.id.slice(0, 8).toUpperCase()}
                       </span>
 
-                      <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider flex items-center gap-1 ${
+                      <span className={`px-2.5 py-0.5 rounded-full text-xs font-semibold uppercase tracking-wider flex items-center gap-1 ${
                         isReplacement ? 'bg-purple-100 text-purple-900' : 'bg-info-bg text-blue-900'
                       }`}>
                         {isReplacement ? <Repeat className="w-3 h-3" /> : <RotateCcw className="w-3 h-3" />}
@@ -496,14 +496,14 @@ export default function AdminReturnsPage() {
                       </span>
 
                       <span
-                        className="px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider"
+                        className="px-2.5 py-0.5 rounded-full text-xs font-semibold uppercase tracking-wider"
                         style={{ backgroundColor: statusBadge.bg, color: statusBadge.text }}
                       >
                         {statusBadge.label}
                       </span>
 
                       {stuck && (
-                        <span className="px-2 py-0.5 rounded-full bg-warning-bg text-warning text-[10px] font-black uppercase tracking-wider flex items-center gap-1">
+                        <span className="px-2 py-0.5 rounded-full bg-warning-bg text-warning text-xs font-semibold uppercase tracking-wider flex items-center gap-1">
                           <Clock className="w-3 h-3 text-warning" />
                           <span>Stuck &gt; 3 Days</span>
                         </span>
@@ -527,7 +527,7 @@ export default function AdminReturnsPage() {
 
                     {/* Column 1: Product & Order */}
                     <div className="space-y-2">
-                      <span className="text-[10px] font-bold uppercase tracking-wider text-foreground-muted block">
+                      <span className="text-xs font-bold uppercase tracking-wider text-foreground-muted block">
                         Item & Order Information
                       </span>
                       <div className="flex items-start gap-3">
@@ -541,13 +541,13 @@ export default function AdminReturnsPage() {
                         />
                         <div className="space-y-0.5 min-w-0">
                           <p className="text-xs font-bold text-foreground leading-snug">{req.product_name}</p>
-                          <p className="text-[11px] text-foreground-muted">
+                          <p className="text-xs text-foreground-muted">
                             {req.variant_weight && <span className="font-medium mr-2">{req.variant_weight}</span>}
                             <span>Qty: <strong className="text-foreground">{req.item_quantity}</strong></span>
                             <span className="mx-1">·</span>
                             <span>Price: <strong className="text-foreground">₹{req.item_price}</strong></span>
                           </p>
-                          <p className="text-[11px] text-foreground-muted">
+                          <p className="text-xs text-foreground-muted">
                             Order: <Link href={`/orders/${req.order_id}`} className="font-mono font-bold text-primary hover:underline" target="_blank">
                               #{req.order_number}
                             </Link>
@@ -558,7 +558,7 @@ export default function AdminReturnsPage() {
 
                     {/* Column 2: Customer & Seller */}
                     <div className="space-y-2">
-                      <span className="text-[10px] font-bold uppercase tracking-wider text-foreground-muted block">
+                      <span className="text-xs font-bold uppercase tracking-wider text-foreground-muted block">
                         Customer & Fulfillment
                       </span>
                       <div className="space-y-1 text-xs text-foreground-muted">
@@ -587,7 +587,7 @@ export default function AdminReturnsPage() {
 
                     {/* Column 3: Payment & Refund Status */}
                     <div className="space-y-2">
-                      <span className="text-[10px] font-bold uppercase tracking-wider text-foreground-muted block">
+                      <span className="text-xs font-bold uppercase tracking-wider text-foreground-muted block">
                         Payment & Refund Lifecycle
                       </span>
                       <div className="space-y-1.5 text-xs text-foreground-muted">
@@ -597,13 +597,13 @@ export default function AdminReturnsPage() {
                         </div>
                         <div className="flex justify-between items-center">
                           <span className="text-foreground-muted">Target Refund:</span>
-                          <span className="font-black text-primary">
+                          <span className="font-semibold text-primary">
                             ₹{req.refund_amount || (req.item_price * req.item_quantity)}
                           </span>
                         </div>
 
                         {req.refund && (
-                          <div className={`p-2.5 rounded-xl border text-[11px] space-y-1 ${
+                          <div className={`p-2.5 rounded-xl border text-xs space-y-1 ${
                             req.refund.status === 'failed'
                               ? 'bg-error-bg border-error/20 text-red-900'
                               : req.refund.status === 'completed'
@@ -616,7 +616,7 @@ export default function AdminReturnsPage() {
                             </div>
 
                             {req.refund.razorpay_refund_id && (
-                              <div className="font-mono text-[10px] truncate text-foreground-muted">
+                              <div className="font-mono text-xs truncate text-foreground-muted">
                                 Rzp ID: {req.refund.razorpay_refund_id}
                               </div>
                             )}
@@ -685,7 +685,7 @@ export default function AdminReturnsPage() {
 
                   {/* Admin Actions Bar */}
                   <div className="pt-2 flex flex-wrap items-center justify-between gap-3 border-t border-border">
-                    <div className="text-[11px] text-foreground-muted flex items-center gap-2">
+                    <div className="text-xs text-foreground-muted flex items-center gap-2">
                       <span className="font-medium">Lifecycle Milestones:</span>
                       {req.picked_up_at && <span>Picked up: {format(new Date(req.picked_up_at), 'MMM d, h:mm a')} ·</span>}
                       {req.received_at && <span>Received: {format(new Date(req.received_at), 'MMM d, h:mm a')} ·</span>}
@@ -758,10 +758,10 @@ export default function AdminReturnsPage() {
           <motion.div
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
-            className="w-full max-w-md rounded-3xl bg-surface p-6 shadow-2xl space-y-4"
+            className="w-full max-w-md rounded-xl bg-surface p-6 shadow-2xl space-y-4"
           >
             <div className="flex items-center justify-between pb-2 border-b">
-              <h3 className="font-extrabold text-base text-foreground flex items-center gap-2">
+              <h3 className="font-semibold text-base text-foreground flex items-center gap-2">
                 <ShieldAlert className="w-5 h-5 text-warning" />
                 <span>Admin Status Override</span>
               </h3>
@@ -835,10 +835,10 @@ export default function AdminReturnsPage() {
           <motion.div
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
-            className="w-full max-w-md rounded-3xl bg-surface p-6 shadow-2xl space-y-4"
+            className="w-full max-w-md rounded-xl bg-surface p-6 shadow-2xl space-y-4"
           >
             <div className="flex items-center justify-between pb-2 border-b">
-              <h3 className="font-extrabold text-base text-foreground flex items-center gap-2">
+              <h3 className="font-semibold text-base text-foreground flex items-center gap-2">
                 <CreditCard className="w-5 h-5 text-primary" />
                 <span>{refundActionModal.action === 'retry_refund' ? 'Retry Failed Razorpay Refund' : 'Mark COD Refund Paid'}</span>
               </h3>

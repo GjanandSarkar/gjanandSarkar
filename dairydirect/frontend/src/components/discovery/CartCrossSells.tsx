@@ -94,7 +94,7 @@ export function CartCrossSells() {
     <div className="py-4 border-t border-sand/50">
       <div className="flex items-center gap-2 mb-3 px-4">
         <Sparkles className="w-4 h-4 text-primary" />
-        <h3 className="text-sm font-black text-dark">Perfect with your order</h3>
+        <h3 className="text-sm font-semibold text-dark">Perfect with your order</h3>
       </div>
       
       <div className="flex gap-3 overflow-x-auto no-scrollbar snap-rail px-4 pb-4">
@@ -111,8 +111,8 @@ export function CartCrossSells() {
                 <div className="w-16 h-16 bg-info-bg rounded-full mb-2 flex items-center justify-center p-1.5 overflow-hidden border border-sand/30">
                   <SmartImage src={product.image_url} alt={product.name} width={128} height={128} className="w-full h-full object-contain" />
                 </div>
-                <p className="text-[11px] font-bold text-dark leading-tight mb-1 line-clamp-2">{product.name}</p>
-                <p className="text-[12px] font-black text-primary mb-2 mt-auto">₹{product.product_variants[0]?.price}</p>
+                <p className="text-xs font-bold text-dark leading-tight mb-1 line-clamp-2">{product.name}</p>
+                <p className="text-[12px] font-semibold text-primary mb-2 mt-auto">₹{product.product_variants[0]?.price}</p>
                 <button 
                   onClick={() => handleAdd(product)}
                   disabled={addingId === product.id}

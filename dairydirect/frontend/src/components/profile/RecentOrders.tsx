@@ -27,7 +27,7 @@ export function RecentOrders({ orders, onReorder, hideHeader = false }: RecentOr
     <div>
       {!hideHeader && (
         <div className="flex justify-between items-center mb-4">
-          <h2 className="text-lg font-black text-dark tracking-wide">Recent Orders</h2>
+          <h2 className="text-lg font-semibold text-dark tracking-wide">Recent Orders</h2>
           {orders.length > 3 && (
             <Link href="/orders" className="text-primary text-sm font-bold flex items-center hover:opacity-80 transition-opacity">
               View All <ChevronRight className="w-4 h-4 ml-0.5" />
@@ -71,7 +71,7 @@ export function RecentOrders({ orders, onReorder, hideHeader = false }: RecentOr
                     </div>
                   </div>
                   <div className="text-right">
-                    <span className="text-sm font-black text-dark">₹{order.total_amount}</span>
+                    <span className="text-sm font-semibold text-dark">₹{order.total_amount}</span>
                   </div>
                 </div>
 

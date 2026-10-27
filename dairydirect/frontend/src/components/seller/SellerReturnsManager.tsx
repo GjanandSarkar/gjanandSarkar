@@ -201,15 +201,15 @@ export function SellerReturnsManager() {
   return (
     <div className="space-y-6 animate-in fade-in">
       {/* Top Banner / Heading */}
-      <div className="bg-surface rounded-3xl border border-border/90 shadow-2xs p-6 sm:p-8">
+      <div className="bg-surface rounded-xl border border-border/90 shadow-2xs p-6 sm:p-8">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
             <div className="flex items-center gap-2">
-              <span className="px-2.5 py-0.5 rounded-full bg-success-bg text-success text-[10px] font-black uppercase tracking-wider">
+              <span className="px-2.5 py-0.5 rounded-full bg-success-bg text-success text-xs font-semibold uppercase tracking-wider">
                 Store Claims Desk
               </span>
             </div>
-            <h3 className="text-lg md:text-xl font-black text-foreground tracking-tight flex items-center gap-2 mt-1">
+            <h3 className="text-lg md:text-xl font-semibold text-foreground tracking-tight flex items-center gap-2 mt-1">
               <RotateCcw className="w-5 h-5 text-secondary" />
               <span>Customer Returns & Cancellations</span>
             </h3>
@@ -231,28 +231,28 @@ export function SellerReturnsManager() {
         {/* KPI Metric Summary Cards */}
         <div className="grid grid-cols-2 sm:grid-cols-5 gap-3.5 mt-6">
           <div className="p-3.5 rounded-2xl border border-border bg-surface-muted/50">
-            <span className="text-[10px] font-black uppercase tracking-wider text-foreground-muted block">Total Claims</span>
-            <span className="text-xl font-black text-foreground mt-1 block">{totalCount}</span>
+            <span className="text-xs font-semibold uppercase tracking-wider text-foreground-muted block">Total Claims</span>
+            <span className="text-xl font-semibold text-foreground mt-1 block">{totalCount}</span>
           </div>
 
           <div className="p-3.5 rounded-2xl border border-warning/20 bg-warning-bg/50">
-            <span className="text-[10px] font-black uppercase tracking-wider text-warning block">Action Needed</span>
-            <span className="text-xl font-black text-warning mt-1 block">{pendingCount}</span>
+            <span className="text-xs font-semibold uppercase tracking-wider text-warning block">Action Needed</span>
+            <span className="text-xl font-semibold text-warning mt-1 block">{pendingCount}</span>
           </div>
 
           <div className="p-3.5 rounded-2xl border border-orange-200 bg-orange-50/50">
-            <span className="text-[10px] font-black uppercase tracking-wider text-orange-700 block">Cancellations</span>
-            <span className="text-xl font-black text-orange-900 mt-1 block">{cancellationsCount}</span>
+            <span className="text-xs font-semibold uppercase tracking-wider text-orange-700 block">Cancellations</span>
+            <span className="text-xl font-semibold text-orange-900 mt-1 block">{cancellationsCount}</span>
           </div>
 
           <div className="p-3.5 rounded-2xl border border-info/20 bg-info-bg/50">
-            <span className="text-[10px] font-black uppercase tracking-wider text-info block">Returns</span>
-            <span className="text-xl font-black text-blue-900 mt-1 block">{returnsCount}</span>
+            <span className="text-xs font-semibold uppercase tracking-wider text-info block">Returns</span>
+            <span className="text-xl font-semibold text-blue-900 mt-1 block">{returnsCount}</span>
           </div>
 
           <div className="p-3.5 rounded-2xl border border-success/20 bg-success-bg/50">
-            <span className="text-[10px] font-black uppercase tracking-wider text-success block">Resolved</span>
-            <span className="text-xl font-black text-success mt-1 block">{resolvedCount}</span>
+            <span className="text-xs font-semibold uppercase tracking-wider text-success block">Resolved</span>
+            <span className="text-xl font-semibold text-success mt-1 block">{resolvedCount}</span>
           </div>
         </div>
       </div>
@@ -274,7 +274,7 @@ export function SellerReturnsManager() {
       )}
 
       {/* Filter Toolbar */}
-      <div className="bg-surface rounded-3xl border border-border p-5 space-y-4 shadow-2xs">
+      <div className="bg-surface rounded-xl border border-border p-5 space-y-4 shadow-2xs">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           
           {/* Search Input */}
@@ -300,7 +300,7 @@ export function SellerReturnsManager() {
           {/* Filter Dropdown: Request Type */}
           <div className="flex items-center gap-3 flex-wrap">
             <div className="flex items-center gap-1.5 bg-surface-muted border border-border rounded-xl px-3 py-1.5 text-xs font-bold text-foreground">
-              <span className="text-foreground-muted text-[10px] uppercase">Type:</span>
+              <span className="text-foreground-muted text-xs uppercase">Type:</span>
               <select
                 value={typeFilter}
                 onChange={e => setTypeFilter(e.target.value)}
@@ -343,17 +343,17 @@ export function SellerReturnsManager() {
 
       {/* Requests List */}
       {isLoading ? (
-        <div className="py-20 flex flex-col items-center justify-center gap-3 bg-surface rounded-3xl border border-border">
+        <div className="py-20 flex flex-col items-center justify-center gap-3 bg-surface rounded-xl border border-border">
           <Loader2 className="w-8 h-8 text-primary animate-spin" />
           <p className="text-xs font-semibold text-foreground-muted">Loading product return requests...</p>
         </div>
       ) : filteredRequests.length === 0 ? (
-        <div className="bg-surface rounded-3xl border border-border p-12 text-center space-y-4">
+        <div className="bg-surface rounded-xl border border-border p-12 text-center space-y-4">
           <div className="w-16 h-16 rounded-2xl bg-surface-muted text-foreground-muted flex items-center justify-center mx-auto">
             <RotateCcw className="w-8 h-8" />
           </div>
           <div className="space-y-1">
-            <h4 className="font-extrabold text-base text-foreground">No Return or Cancellation Claims</h4>
+            <h4 className="font-semibold text-base text-foreground">No Return or Cancellation Claims</h4>
             <p className="text-xs text-foreground-muted max-w-sm mx-auto">
               There are no customer returns or cancellations matching the selected criteria for your store products.
             </p>
@@ -368,16 +368,16 @@ export function SellerReturnsManager() {
             return (
               <div
                 key={req.id}
-                className="bg-surface rounded-3xl border border-border/90 shadow-2xs p-6 space-y-5 transition-all hover:border-border-hover"
+                className="bg-surface rounded-xl border border-border/90 shadow-2xs p-6 space-y-5 transition-all hover:border-border-hover"
               >
                 {/* Top Bar: Request ID, Type, Status, Submission Date */}
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-border">
                   <div className="flex items-center gap-3 flex-wrap">
-                    <span className="font-mono text-xs font-black text-foreground-muted">
+                    <span className="font-mono text-xs font-semibold text-foreground-muted">
                       REQ #{req.id.slice(0, 8).toUpperCase()}
                     </span>
 
-                    <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider flex items-center gap-1 ${
+                    <span className={`px-2.5 py-0.5 rounded-full text-xs font-semibold uppercase tracking-wider flex items-center gap-1 ${
                       isCancellation ? 'bg-warning-bg text-warning' : 'bg-info-bg text-blue-900'
                     }`}>
                       {isCancellation ? <Ban className="w-3 h-3" /> : <RotateCcw className="w-3 h-3" />}
@@ -385,7 +385,7 @@ export function SellerReturnsManager() {
                     </span>
 
                     <span
-                      className="px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider"
+                      className="px-2.5 py-0.5 rounded-full text-xs font-semibold uppercase tracking-wider"
                       style={{ backgroundColor: statusBadge.bg, color: statusBadge.text }}
                     >
                       {statusBadge.label}
@@ -409,7 +409,7 @@ export function SellerReturnsManager() {
 
                   {/* Column 1: Target Product & Item Details */}
                   <div className="space-y-2">
-                    <span className="text-[10px] font-bold uppercase tracking-wider text-foreground-muted block">
+                    <span className="text-xs font-bold uppercase tracking-wider text-foreground-muted block">
                       Target Product & Item
                     </span>
                     <div className="flex items-start gap-3">
@@ -423,17 +423,17 @@ export function SellerReturnsManager() {
                       />
                       <div className="space-y-0.5 min-w-0">
                         <p className="text-xs font-bold text-foreground leading-snug">{req.product_name}</p>
-                        <p className="text-[11px] text-foreground-muted">
+                        <p className="text-xs text-foreground-muted">
                           Qty: <strong className="text-foreground">{req.item_quantity}</strong>
                           {req.variant_weight && ` • ${req.variant_weight}`}
                         </p>
-                        <p className="text-xs font-black text-primary">
+                        <p className="text-xs font-semibold text-primary">
                           ₹{req.item_price * req.item_quantity}
                         </p>
                       </div>
                     </div>
 
-                    <div className="text-[11px] text-foreground-muted pt-1">
+                    <div className="text-xs text-foreground-muted pt-1">
                       <span>Order: </span>
                       <span className="font-bold text-primary">#{req.order_number}</span>
                     </div>
@@ -441,7 +441,7 @@ export function SellerReturnsManager() {
 
                   {/* Column 2: Customer Contact & Delivery Address */}
                   <div className="space-y-2">
-                    <span className="text-[10px] font-bold uppercase tracking-wider text-foreground-muted block">
+                    <span className="text-xs font-bold uppercase tracking-wider text-foreground-muted block">
                       Customer Contact & Address
                     </span>
                     <div className="space-y-1.5 text-xs text-foreground-muted">
@@ -464,7 +464,7 @@ export function SellerReturnsManager() {
                       {req.delivery_address && (
                         <div className="pt-1.5 mt-1 border-t border-border flex items-start gap-1.5 text-foreground">
                           <MapPin className="w-3.5 h-3.5 text-primary shrink-0 mt-0.5" />
-                          <p className="leading-snug text-[11px] font-medium text-foreground">
+                          <p className="leading-snug text-xs font-medium text-foreground">
                             {req.delivery_address}
                           </p>
                         </div>
@@ -474,7 +474,7 @@ export function SellerReturnsManager() {
 
                   {/* Column 3: Payment & Financial Summary */}
                   <div className="space-y-2">
-                    <span className="text-[10px] font-bold uppercase tracking-wider text-foreground-muted block">
+                    <span className="text-xs font-bold uppercase tracking-wider text-foreground-muted block">
                       Payment & Refund Target
                     </span>
                     <div className="space-y-1.5 text-xs text-foreground-muted">
@@ -488,7 +488,7 @@ export function SellerReturnsManager() {
                       </div>
                       <div className="flex justify-between items-center">
                         <span className="text-foreground-muted">Claim Amount:</span>
-                        <span className="font-black text-primary">
+                        <span className="font-semibold text-primary">
                           ₹{req.refund_amount || (req.item_price * req.item_quantity)}
                         </span>
                       </div>
@@ -546,7 +546,7 @@ export function SellerReturnsManager() {
 
                 {/* Seller Actions Bar */}
                 <div className="pt-2 flex flex-wrap items-center justify-between gap-3 border-t border-border">
-                  <div className="text-[11px] text-foreground-muted">
+                  <div className="text-xs text-foreground-muted">
                     {req.resolved_at 
                       ? `Resolved on ${format(new Date(req.resolved_at), 'MMM d, h:mm a')}` 
                       : 'Awaiting your review or physical return receipt'}
@@ -633,14 +633,14 @@ export function SellerReturnsManager() {
       {/* ─── ACTION CONFIRMATION MODAL ───────────────────────── */}
       {selectedRequest && actionType && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-2xs p-4">
-          <div className="bg-surface rounded-3xl max-w-md w-full p-6 space-y-5 shadow-2xl animate-in fade-in">
+          <div className="bg-surface rounded-xl max-w-md w-full p-6 space-y-5 shadow-2xl animate-in fade-in">
             <div className="flex items-center justify-between border-b border-border pb-3">
               <div className="flex items-center gap-2">
                 <div className="p-2 rounded-xl bg-surface-muted text-primary">
                   <RotateCcw className="w-5 h-5 text-secondary" />
                 </div>
                 <div>
-                  <h3 className="font-extrabold text-base text-foreground capitalize">
+                  <h3 className="font-semibold text-base text-foreground capitalize">
                     {actionType.replace(/_/g, ' ')} Request
                   </h3>
                   <p className="text-xs text-foreground-muted">
@@ -723,12 +723,12 @@ export function SellerReturnsManager() {
       {/* ─── AUDIT HISTORY / TIMELINE MODAL ───────────────────── */}
       {historyModalRequest && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-2xs p-4">
-          <div className="bg-surface rounded-3xl max-w-lg w-full p-6 space-y-4 shadow-2xl animate-in fade-in">
+          <div className="bg-surface rounded-xl max-w-lg w-full p-6 space-y-4 shadow-2xl animate-in fade-in">
             <div className="flex items-center justify-between border-b border-border pb-3">
               <div className="flex items-center gap-2">
                 <History className="w-5 h-5 text-primary" />
                 <div>
-                  <h3 className="font-extrabold text-base text-foreground">Request Lifecycle History</h3>
+                  <h3 className="font-semibold text-base text-foreground">Request Lifecycle History</h3>
                   <p className="text-xs text-foreground-muted">
                     REQ #{historyModalRequest.id.slice(0, 8).toUpperCase()} · Order #{historyModalRequest.order_number}
                   </p>
@@ -748,7 +748,7 @@ export function SellerReturnsManager() {
               ) : (
                 historyModalRequest.history.map((h, i) => (
                   <div key={i} className="p-3 rounded-2xl bg-surface-muted border border-border space-y-1">
-                    <div className="flex items-center justify-between text-foreground-muted text-[10px]">
+                    <div className="flex items-center justify-between text-foreground-muted text-xs">
                       <span className="font-bold uppercase tracking-wider text-primary">
                         {h.actor_type || 'system'}
                       </span>
@@ -758,7 +758,7 @@ export function SellerReturnsManager() {
                       Action: {h.action?.replace(/_/g, ' ')}
                     </p>
                     {h.notes && (
-                      <p className="text-foreground-muted bg-surface p-2 rounded-lg border border-border text-[11px]">
+                      <p className="text-foreground-muted bg-surface p-2 rounded-lg border border-border text-xs">
                         {h.notes}
                       </p>
                     )}

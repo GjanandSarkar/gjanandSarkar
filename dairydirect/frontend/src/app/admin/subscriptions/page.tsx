@@ -63,7 +63,7 @@ export default function AdminSubscriptionsPage() {
     <div className="flex flex-col min-h-screen">
       <div className="sticky top-0 z-30 glass-surface">
         <div className="px-6 md:px-10 pt-6 pb-0">
-          <h1 className="font-extrabold text-[24px] tracking-tight mb-4"
+          <h1 className="font-semibold text-[24px] tracking-tight mb-4"
             style={{ color: 'var(--color-on-surface)' }}>
             Subscriptions
             <span className="ml-2 text-[15px] font-normal" style={{ color: 'var(--color-on-surface-variant)' }}>
@@ -129,7 +129,7 @@ export default function AdminSubscriptionsPage() {
                       <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full shrink-0"
                         style={{ background: statusStyle.bg, color: statusStyle.color }}>
                         <Icon className="w-3.5 h-3.5" />
-                        <span className="text-[10px] font-bold uppercase tracking-wide">
+                        <span className="text-xs font-bold uppercase tracking-wide">
                           {sub.status}
                         </span>
                       </div>
