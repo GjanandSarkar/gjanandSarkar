@@ -101,101 +101,112 @@
     --surface-translucent: rgba(255, 255, 255, 0.92);
     --scrim: rgba(0, 0, 0, 0.5);
 
-    --primary: #0c3c26;
-    --primary-hover: #114e32;
-    --primary-active: #072617;
-    --primary-light: #1b6342;
-    --primary-fixed: #e6f2ec;
-    --primary-fixed-dim: #cce6d9;
-    
-    /* The primary call-to-action gradient.
-       "Proceed to checkout", "Place order" and the floating cart bar were
-       all hardcoded to linear-gradient(135deg, #3f6530, #577f46) — a muted
-       olive that is not the brand green (#0c3c26) and appears nowhere in the
-       palette. The most important button on the site was off-brand in 14
-       places. */
-    --cta-gradient: linear-gradient(135deg, #0c3c26, #1b6342);
-    --cta-shadow: 0 6px 20px rgba(12, 60, 38, 0.28);
+    /* ── Brand: deep indigo ──────────────────────────────────
+       Indigo carries the Indian association without copying the flag, and
+       unlike saffron it recedes behind product photography instead of
+       competing with it. Every surface in the app reads these tokens, so
+       this block restyles customer, seller and admin at once. */
+    --primary: #1f2b6c;
+    --primary-hover: #182257;
+    --primary-active: #121a44;
+    --primary-light: #3b4a9c;
+    --primary-fixed: #e8ebf7;
+    --primary-fixed-dim: #cdd4ee;
 
-    --secondary: #9c6819;
-    --secondary-hover: #855615;
-    
+    /* ── Action: marigold ────────────────────────────────────
+       Marigold is the single loudest colour in the system and is reserved
+       for the one action that matters on a screen: add to cart, place
+       order. Against indigo and warm neutrals it is impossible to miss,
+       which is what makes "where do I buy" answerable at a glance. */
+    --cta-gradient: linear-gradient(135deg, #f59e0b, #d97706);
+    --cta-shadow: 0 6px 20px rgba(217, 119, 6, 0.30);
+
+    /* Terracotta. Deliberately darker than the marigold gradient above:
+       this one sits behind TEXT, and bright marigold cannot reach 4.5:1
+       against white. Same hue family, accessible weight. */
+    --secondary: #b45309;
+    --secondary-hover: #92400e;
+
     --on-primary: #ffffff;
-    --secondary-bg: #fdf4e3;
+    --secondary-bg: #fef3e2;
     --on-success: #ffffff;
     --on-warning: #ffffff;
     --on-error: #ffffff;
     --on-info: #ffffff;
     --on-secondary: #ffffff;
 
-    --background: #fbfaf6;
+    /* Warm off-white, not grey. Keeps product photography looking appetising
+       and stops the page feeling like a dashboard. */
+    --background: #fdfbf7;
     --surface: #ffffff;
-    --surface-muted: #f2ede4;
+    --surface-muted: #f5f0e8;
     --surface-elevated: #ffffff;
 
-    --foreground: #1c201e;
-    --foreground-muted: #58625c;
+    --foreground: #1a1a2e;
+    --foreground-muted: #5c6378;
     --foreground-inverse: #ffffff;
-    
-    --border: #e4e2db;
-    --border-hover: #c5c2b6;
-    --ring: rgba(12, 60, 38, 0.25);
 
-    --success: #007600;
-    --success-bg: #eaf6ef;
-    --warning: #b84f00;
-    --warning-bg: #fff8f2;
-    --error: #ba1a1a;
-    --error-bg: #ffdad6;
-    --info: #0066c0;
-    --info-bg: #f2f8fd;
+    --border: #e8e2d9;
+    --border-hover: #d0c8bb;
+    --ring: rgba(31, 43, 108, 0.25);
+
+    --success: #0f7b3f;
+    --success-bg: #e9f6ee;
+    --warning: #b45309;
+    --warning-bg: #fff7ed;
+    --error: #c0251f;
+    --error-bg: #fde8e6;
+    --info: #1f6fd0;
+    --info-bg: #eff6fd;
   }
 
   .dark {
-    --surface-translucent: rgba(23, 28, 25, 0.92);
+    --surface-translucent: rgba(26, 28, 36, 0.92);
     --scrim: rgba(0, 0, 0, 0.65);
 
-    --primary: #cce6d9;
-    --primary-hover: #e6f2ec;
-    --primary-active: #b3d9c4;
-    --primary-light: #99ccb0;
-    --primary-fixed: #0c3c26;
-    --primary-fixed-dim: #072617;
-    
-    --secondary: #f0bd6c;
-    --secondary-hover: #f3cc8f;
-    
-    --on-primary: #1c201e;
-    --secondary-bg: #3a2a0a;
-    --on-success: #06220f;
-    --on-warning: #2b1600;
-    --on-error: #3c0708;
-    --on-info: #04203d;
-    --cta-gradient: linear-gradient(135deg, #16603f, #1f7a50);
+    --primary: #afc0ff;
+    --primary-hover: #cbd6ff;
+    --primary-active: #93a8f5;
+    --primary-light: #8fa4f0;
+    --primary-fixed: #1f2b6c;
+    --primary-fixed-dim: #151d4c;
+
+    --secondary: #f3b45f;
+    --secondary-hover: #f7c784;
+
+    --on-primary: #121318;
+    --secondary-bg: #3b2a0c;
+    --on-success: #10301d;
+    --on-warning: #3b2a0c;
+    --on-error: #5c1410;
+    --on-info: #12263e;
+    /* Dimmer than the light-mode gradient: full marigold on a dark page
+       glares. */
+    --cta-gradient: linear-gradient(135deg, #d97706, #b45309);
     --cta-shadow: 0 6px 20px rgba(0, 0, 0, 0.45);
-    --on-secondary: #1c201e;
+    --on-secondary: #1a1200;
 
-    --background: #0f1210;
-    --surface: #171c19;
-    --surface-muted: #212824;
-    --surface-elevated: #2b342e;
+    --background: #121318;
+    --surface: #1a1c24;
+    --surface-muted: #232631;
+    --surface-elevated: #2c3040;
 
-    --foreground: #e6f2ec;
-    --foreground-muted: #a6b2ac;
-    --foreground-inverse: #1c201e;
-    
-    --border: #353f3a;
-    --border-hover: #4b5a53;
-    --ring: rgba(204, 230, 217, 0.25);
+    --foreground: #ecedf5;
+    --foreground-muted: #a8adc0;
+    --foreground-inverse: #121318;
 
-    --success: #46b76c;
-    --success-bg: #11311b;
-    --warning: #ff9900;
-    --warning-bg: #3c2400;
-    --error: #ffb4ab;
-    --error-bg: #93000a;
-    --info: #46a2ff;
-    --info-bg: #11283e;
+    --border: #333748;
+    --border-hover: #474d63;
+    --ring: rgba(175, 192, 255, 0.25);
+
+    --success: #4ecb7b;
+    --success-bg: #10301d;
+    --warning: #ffb454;
+    --warning-bg: #3b2a0c;
+    --error: #ff9a91;
+    --error-bg: #5c1410;
+    --info: #68b0ff;
+    --info-bg: #12263e;
   }
 
   *, *::before, *::after {
@@ -656,5 +667,76 @@
       right: 1.5rem;
       bottom: calc(1.5rem + var(--cart-bar-h, 72px) + 12px);
     }
+  }
+}
+
+/* ─────────────────────────────────────────────────────────────
+   Motion
+   "Smooth" is mostly the absence of jank, not the presence of
+   animation. Three rules here: one shared easing curve so nothing
+   feels like it belongs to a different app, transforms/opacity only
+   so animation stays off the layout path, and a full opt-out for
+   anyone who asked their OS for less motion.
+   ───────────────────────────────────────────────────────────── */
+@layer components {
+  :root {
+    /* Decelerating curve: fast to start, settles gently. Reads as
+       responsive rather than slow, unlike a symmetric ease-in-out. */
+    --ease-out-soft: cubic-bezier(0.22, 1, 0.36, 1);
+    --dur-fast: 140ms;
+    --dur-base: 220ms;
+    --dur-slow: 380ms;
+  }
+
+  /* Entrance for content that arrives after paint. The 8px offset is
+     deliberately small - large travel reads as sluggish. */
+  .rise-in {
+    animation: rise-in var(--dur-slow) var(--ease-out-soft) both;
+  }
+  @keyframes rise-in {
+    from { opacity: 0; transform: translate3d(0, 8px, 0); }
+    to   { opacity: 1; transform: none; }
+  }
+
+  /* Staggers a grid so cards cascade instead of snapping in together.
+     Capped at 6 so a 40-product grid never makes the customer wait. */
+  .stagger > *:nth-child(1) { animation-delay: 0ms; }
+  .stagger > *:nth-child(2) { animation-delay: 40ms; }
+  .stagger > *:nth-child(3) { animation-delay: 80ms; }
+  .stagger > *:nth-child(4) { animation-delay: 120ms; }
+  .stagger > *:nth-child(5) { animation-delay: 160ms; }
+  .stagger > *:nth-child(n+6) { animation-delay: 200ms; }
+
+  /* Hover lift. translate3d promotes to its own layer so the browser
+     does not repaint the card's contents on every frame. */
+  .lift {
+    transition:
+      transform var(--dur-base) var(--ease-out-soft),
+      box-shadow var(--dur-base) var(--ease-out-soft);
+    will-change: transform;
+  }
+  @media (hover: hover) {
+    .lift:hover { transform: translate3d(0, -3px, 0); }
+  }
+  /* Touch devices get a press-in instead: there is no hover on a phone,
+     and this is the only tactile feedback a tap gets. */
+  .lift:active { transform: scale(0.985); }
+
+  /* Horizontal chip rails: momentum scrolling, snapping, no scrollbar. */
+  .rail {
+    display: flex;
+    overflow-x: auto;
+    scroll-snap-type: x proximity;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    overscroll-behavior-x: contain;
+  }
+  .rail::-webkit-scrollbar { display: none; }
+  .rail > * { scroll-snap-align: start; flex: 0 0 auto; }
+
+  @media (prefers-reduced-motion: reduce) {
+    .rise-in, .stagger > * { animation: none !important; }
+    .lift { transition: none !important; }
+    .lift:hover, .lift:active { transform: none !important; }
   }
 }
