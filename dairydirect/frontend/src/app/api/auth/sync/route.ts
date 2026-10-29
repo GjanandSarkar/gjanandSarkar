@@ -12,7 +12,7 @@ import { verifyAccessToken, extractTokenFromRequest, signAccessToken, signRefres
 import { cacheUserProfile, checkRateLimit } from '@/lib/aws/redis';
 import { getClientIP } from '@/lib/api/auth-middleware';
 import { getAdminSupabase } from '@/lib/supabase/admin';
-import { syncUserToUsersTable, backfillUsersTable } from '@/lib/supabase/sync-users';
+import { syncUserToUsersTable } from '@/lib/supabase/sync-users';
 
 const ADMIN_EMAILS = (process.env.ADMIN_EMAILS || 'gjanandsarkar09@gmail.com')
   .toLowerCase()
@@ -32,6 +32,62 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json().catch(() => ({}));
+
+    // Support instant demo sessions to set gs_access_token cookie for edge middleware
+    if (body.type === 'demo' && body.role) {
+      const demoRole = body.role as 'customer' | 'admin' | 'seller';
+      const demoUserId = `${demoRole}-demo-user-id`;
+      const demoName = demoRole === 'admin' 
+        ? 'Gjanand Sarkar Admin' 
+        : demoRole === 'seller' 
+        ? 'Gir Organic Farms' 
+        : 'Rajesh Sharma';
+      const demoEmail = `${demoRole}@gjanandsarkar.com`;
+
+      const demoProfile = {
+        id: demoUserId,
+        email: demoEmail,
+        phone: '+919123456789',
+        name: demoName,
+        avatar_url: null,
+        role: demoRole,
+        loyalty_points: 500,
+        saved_addresses: [
+          { label: 'Home', address: 'A-402, Royal Palms, Gandhinagar, Gujarat - 382010' },
+          { label: 'Office', address: 'Block C, Infocity, Gandhinagar, Gujarat - 382007' }
+        ],
+      };
+
+      const accessToken = await signAccessToken({
+        userId: demoProfile.id,
+        name: demoProfile.name,
+        role: demoRole,
+        email: demoProfile.email,
+        phone: demoProfile.phone,
+      });
+      const refreshToken = await signRefreshToken(demoProfile.id);
+
+      const response = NextResponse.json({
+        success: true,
+        user: demoProfile,
+        data: {
+          user: demoProfile,
+          accessToken,
+          refreshToken,
+        },
+      });
+
+      response.cookies.set('gs_access_token', accessToken, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'lax',
+        path: '/',
+        maxAge: 60 * 60 * 24 * 7,
+      });
+
+      return response;
+    }
+
     const headerToken = extractTokenFromRequest(request);
     const bodyToken = body.token;
     const token = headerToken || bodyToken;
@@ -289,19 +345,14 @@ export async function POST(request: NextRequest) {
       avatar_url: profile?.avatar_url || userAvatar || null,
       saved_addresses: savedAddresses,
     };
-
     // Sync users table in Supabase and RDS
     await syncUserToUsersTable({
       id: profile.id,
       phone: profile.phone || cleanPhone,
       name: profileWithAddresses.name,
-      first_name: profile.first_name,
-      last_name: profile.last_name,
       email: profile.email || cleanEmail,
-      country: profile.country,
       created_at: profile.created_at,
     });
-    backfillUsersTable().catch(() => {});
 
     // Cache profile in Redis / Memory
     await cacheUserProfile(profile.id, profileWithAddresses);
@@ -328,8 +379,13 @@ export async function POST(request: NextRequest) {
     });
 
     // Set auth cookie for Edge Middleware
+    // The session cookie is httpOnly: it exists so the server and middleware
+    // can authenticate a request, and must never be readable by page scripts
+    // (an XSS payload could otherwise exfiltrate a 7-day session token).
+    // The browser gets its bearer token from the Supabase session instead,
+    // so nothing client-side needs to read this.
     response.cookies.set('gs_access_token', accessToken, {
-      httpOnly: false,
+      httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'lax',
       path: '/',

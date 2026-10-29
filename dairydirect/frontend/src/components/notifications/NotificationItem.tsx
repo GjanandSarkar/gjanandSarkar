@@ -19,11 +19,11 @@ interface NotificationItemProps {
 }
 
 const typeConfig = {
-  order: { icon: Package, color: 'text-blue-600', bg: 'bg-blue-50' },
-  delivery: { icon: Truck, color: 'text-green-600', bg: 'bg-green-50' },
+  order: { icon: Package, color: 'text-info', bg: 'bg-info-bg' },
+  delivery: { icon: Truck, color: 'text-success', bg: 'bg-success-bg' },
   offer: { icon: Tag, color: 'text-primary', bg: 'bg-primary/10' },
   payment: { icon: CreditCard, color: 'text-orange-600', bg: 'bg-orange-50' },
-  system: { icon: Bell, color: 'text-gray-600', bg: 'bg-gray-100' },
+  system: { icon: Bell, color: 'text-foreground-muted', bg: 'bg-surface-muted' },
 };
 
 export function NotificationItem({ notification, onClick }: NotificationItemProps) {
@@ -46,7 +46,7 @@ export function NotificationItem({ notification, onClick }: NotificationItemProp
           <h4 className={cn("text-sm font-bold truncate", !notification.isRead ? "text-dark" : "text-dark/80")}>
             {notification.title}
           </h4>
-          <span className="text-[10px] font-medium text-muted shrink-0 mt-0.5">{notification.time}</span>
+          <span className="text-xs font-medium text-muted shrink-0 mt-0.5">{notification.time}</span>
         </div>
         <p className={cn("text-[12px] leading-snug line-clamp-2", !notification.isRead ? "text-on-surface-variant font-medium" : "text-muted")}>
           {notification.message}

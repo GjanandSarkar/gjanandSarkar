@@ -10,6 +10,7 @@ import {
   uploadProductImage,
   type ProductWithVariants,
 } from '@/lib/api/products';
+import { MultiImageUpload, ImageItem } from '@/components/admin/MultiImageUpload';
 import {
   ArrowLeft,
   Plus,
@@ -25,7 +26,11 @@ import {
 } from 'lucide-react';
 import { motion } from 'framer-motion';
 
-const CATEGORIES = ['Milk', 'Paneer', 'Ghee', 'Buttermilk', 'Curd', 'Lassi'];
+// Was a dairy-only list, so an admin editing an Electronics product would
+// have had its category silently reset to a dairy value.
+import { CATEGORY_NAMES } from '@/lib/constants/categories';
+
+const CATEGORIES = CATEGORY_NAMES;
 
 export default function EditProductPage() {
   const router = useRouter();
@@ -40,7 +45,7 @@ export default function EditProductPage() {
   const [success, setSuccess] = useState('');
 
   const [name, setName] = useState('');
-  const [category, setCategory] = useState('Milk');
+  const [category, setCategory] = useState(CATEGORY_NAMES[0] || 'Dairy');
   const [description, setDescription] = useState('');
   const [imageUrl, setImageUrl] = useState('');
   const [isFreshnessGuarantee, setIsFreshnessGuarantee] = useState(true);
@@ -56,8 +61,7 @@ export default function EditProductPage() {
     }>
   >([]);
 
-  const [imageFile, setImageFile] = useState<File | null>(null);
-  const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [images, setImages] = useState<ImageItem[]>([]);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [permanentDelete, setPermanentDelete] = useState(false);
 
@@ -74,7 +78,29 @@ export default function EditProductPage() {
         setCategory(data.category || 'Milk');
         setDescription(data.description || '');
         setImageUrl(data.image_url || '');
-        setImagePreview(data.image_url || null);
+
+        // Populate existing images into MultiImageUpload items
+        const existingImages: ImageItem[] = [];
+        if (data.image_url) {
+          existingImages.push({
+            id: 'main-cover',
+            url: data.image_url,
+            isPrimary: true,
+          });
+        }
+        if (Array.isArray(data.gallery_images)) {
+          data.gallery_images.forEach((imgUrl: string, idx: number) => {
+            if (imgUrl && imgUrl !== data.image_url) {
+              existingImages.push({
+                id: `gallery-img-${idx}`,
+                url: imgUrl,
+                isPrimary: false,
+              });
+            }
+          });
+        }
+        setImages(existingImages);
+
         setIsFreshnessGuarantee(data.is_freshness_guarantee ?? true);
         setIsActive(data.is_active ?? true);
         setVariants(
@@ -132,20 +158,35 @@ export default function EditProductPage() {
     setSuccess('');
 
     try {
-      let finalImageUrl = imageUrl;
-      if (imageFile) {
-        const uploadRes = await uploadProductImage(imageFile);
-        if (uploadRes.error || !uploadRes.url) {
-          throw new Error(uploadRes.error || 'Failed to upload image');
+      // Upload any new files in images array
+      const uploadedImageUrls: string[] = [];
+      let primaryUrl = '';
+
+      for (const item of images) {
+        let finalUrl = item.url;
+        if (item.file) {
+          const uploadRes = await uploadProductImage(item.file);
+          if (uploadRes.error || !uploadRes.url) {
+            throw new Error(uploadRes.error || 'Failed to upload one of the product images');
+          }
+          finalUrl = uploadRes.url;
         }
-        finalImageUrl = uploadRes.url;
+        uploadedImageUrls.push(finalUrl);
+        if (item.isPrimary) {
+          primaryUrl = finalUrl;
+        }
+      }
+
+      if (!primaryUrl && uploadedImageUrls.length > 0) {
+        primaryUrl = uploadedImageUrls[0];
       }
 
       const res = await updateProduct(productId, {
         name,
         category,
         description,
-        image_url: finalImageUrl,
+        image_url: primaryUrl || undefined,
+        gallery_images: uploadedImageUrls,
         is_freshness_guarantee: isFreshnessGuarantee,
         is_active: isActive,
         variants: validVariants.map((v) => ({
@@ -197,7 +238,7 @@ export default function EditProductPage() {
     return (
       <div className="flex flex-col items-center justify-center min-h-[60vh]">
         <Loader2 className="w-8 h-8 animate-spin text-primary mb-2" />
-        <p className="text-[13px] font-semibold text-gray-500">Loading product details...</p>
+        <p className="text-[13px] font-semibold text-foreground-muted">Loading product details...</p>
       </div>
     );
   }
@@ -222,12 +263,12 @@ export default function EditProductPage() {
           </button>
           <div>
             <h1
-              className="font-extrabold text-[22px] tracking-tight"
+              className="font-semibold text-[22px] tracking-tight"
               style={{ color: 'var(--color-on-surface)' }}
             >
               Edit Product
             </h1>
-            <p className="text-[12px] text-gray-500">ID: {productId}</p>
+            <p className="text-[12px] text-foreground-muted">ID: {productId}</p>
           </div>
         </div>
 
@@ -236,7 +277,7 @@ export default function EditProductPage() {
           disabled={isSubmitting || isDeleting}
           className="flex items-center gap-2 px-5 py-2.5 rounded-[12px] font-bold text-[13px] text-white transition-all active:scale-95 shadow-md disabled:opacity-50"
           style={{
-            background: 'linear-gradient(135deg, #3f6530, #577f46)',
+            background: 'var(--cta-gradient)',
           }}
         >
           {isSubmitting ? (
@@ -254,9 +295,9 @@ export default function EditProductPage() {
           <motion.div
             initial={{ opacity: 0, y: -6 }}
             animate={{ opacity: 1, y: 0 }}
-            className="p-4 rounded-[14px] flex items-center gap-3 bg-red-50 text-red-700 text-[13px] font-medium border border-red-200"
+            className="p-4 rounded-[14px] flex items-center gap-3 bg-error-bg text-error text-[13px] font-medium border border-error/20"
           >
-            <AlertTriangle className="w-5 h-5 shrink-0 text-red-600" />
+            <AlertTriangle className="w-5 h-5 shrink-0 text-error" />
             <span>{error}</span>
           </motion.div>
         )}
@@ -265,9 +306,9 @@ export default function EditProductPage() {
           <motion.div
             initial={{ opacity: 0, y: -6 }}
             animate={{ opacity: 1, y: 0 }}
-            className="p-4 rounded-[14px] flex items-center gap-3 bg-emerald-50 text-emerald-800 text-[13px] font-medium border border-emerald-200"
+            className="p-4 rounded-[14px] flex items-center gap-3 bg-success-bg text-success text-[13px] font-medium border border-success/20"
           >
-            <CheckCircle2 className="w-5 h-5 shrink-0 text-emerald-600" />
+            <CheckCircle2 className="w-5 h-5 shrink-0 text-success" />
             <span>{success}</span>
           </motion.div>
         )}
@@ -277,7 +318,7 @@ export default function EditProductPage() {
           <div>
             <label
               className="text-[12px] font-bold uppercase tracking-wider mb-2 block"
-              style={{ color: 'var(--color-outline)' }}
+              style={{ color: 'var(--color-on-surface-variant)' }}
             >
               Product Name *
             </label>
@@ -297,7 +338,7 @@ export default function EditProductPage() {
           <div>
             <label
               className="text-[12px] font-bold uppercase tracking-wider mb-2 block"
-              style={{ color: 'var(--color-outline)' }}
+              style={{ color: 'var(--color-on-surface-variant)' }}
             >
               Category *
             </label>
@@ -324,7 +365,7 @@ export default function EditProductPage() {
         <div>
           <label
             className="text-[12px] font-bold uppercase tracking-wider mb-2 block"
-            style={{ color: 'var(--color-outline)' }}
+            style={{ color: 'var(--color-on-surface-variant)' }}
           >
             Description
           </label>
@@ -361,7 +402,7 @@ export default function EditProductPage() {
               <span className="text-[14px] font-bold block" style={{ color: 'var(--color-on-surface)' }}>
                 Active on Storefront
               </span>
-              <span className="text-[12px] text-gray-500 block">
+              <span className="text-[12px] text-foreground-muted block">
                 {isActive ? 'Available to customer view and cart' : 'Draft / hidden from customer store'}
               </span>
             </div>
@@ -378,74 +419,27 @@ export default function EditProductPage() {
               <span className="text-[14px] font-bold block" style={{ color: 'var(--color-on-surface)' }}>
                 Freshness Guarantee
               </span>
-              <span className="text-[12px] text-gray-500 block">
+              <span className="text-[12px] text-foreground-muted block">
                 Displays "Fresh" guarantee ribbon badge
               </span>
             </div>
           </label>
         </div>
 
-        {/* Product Image */}
+        {/* Product Images (Multiple allowed) */}
         <div>
           <label
             className="text-[12px] font-bold uppercase tracking-wider mb-2 block"
-            style={{ color: 'var(--color-outline)' }}
+            style={{ color: 'var(--color-on-surface-variant)' }}
           >
-            Product Image
+            Product Photos (Upload multiple at once)
           </label>
-          <div className="flex items-center gap-4">
-            <label
-              className="cursor-pointer relative flex flex-col items-center justify-center w-28 h-28 rounded-[14px] border-2 border-dashed transition-all hover:border-primary overflow-hidden group"
-              style={{
-                borderColor: 'rgba(195,201,187,0.6)',
-                background: 'var(--color-surface-container)',
-              }}
-            >
-              <input
-                type="file"
-                className="hidden"
-                accept="image/*"
-                onChange={(e) => {
-                  const file = e.target.files?.[0];
-                  if (file) {
-                    setImageFile(file);
-                    setImagePreview(URL.createObjectURL(file));
-                  }
-                }}
-              />
-              {imagePreview ? (
-                <>
-                  <img
-                    src={imagePreview}
-                    alt="Product preview"
-                    className="w-full h-full object-cover"
-                  />
-                  <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center text-white text-[11px] font-bold">
-                    Change
-                  </div>
-                </>
-              ) : (
-                <>
-                  <UploadCloud className="w-6 h-6 mb-1 text-gray-400" />
-                  <span className="text-[11px] font-bold text-gray-500">Upload</span>
-                </>
-              )}
-            </label>
-
-            {imagePreview && (
-              <button
-                type="button"
-                onClick={() => {
-                  setImageFile(null);
-                  setImagePreview(null);
-                  setImageUrl('');
-                }}
-                className="text-[12px] font-bold text-red-600 hover:underline"
-              >
-                Remove Image
-              </button>
-            )}
-          </div>
+          <MultiImageUpload
+            images={images}
+            onChange={setImages}
+            disabled={isSubmitting}
+            maxImages={10}
+          />
         </div>
 
         {/* Variants Manager */}
@@ -454,12 +448,12 @@ export default function EditProductPage() {
             <div>
               <label
                 className="text-[13px] font-bold uppercase tracking-wider flex items-center gap-1.5"
-                style={{ color: 'var(--color-outline)' }}
+                style={{ color: 'var(--color-on-surface-variant)' }}
               >
                 <Layers className="w-4 h-4 text-primary" />
                 Product Variants & Margin Rules ({variants.length})
               </label>
-              <span className="text-[12px] text-gray-500">
+              <span className="text-[12px] text-foreground-muted">
                 Minimum 20% profit margin calculated from cost price.
               </span>
             </div>
@@ -468,7 +462,7 @@ export default function EditProductPage() {
               onClick={addVariant}
               className="flex items-center gap-1 px-3 py-1.5 rounded-[10px] text-[12px] font-bold text-white transition-all active:scale-95 shadow-sm"
               style={{
-                background: 'linear-gradient(135deg, #3f6530, #577f46)',
+                background: 'var(--cta-gradient)',
               }}
             >
               <Plus className="w-4 h-4" /> Add Variant
@@ -501,10 +495,10 @@ export default function EditProductPage() {
                       </span>
                       {cost > 0 && (
                         <span
-                          className={`text-[11px] font-black px-2.5 py-0.5 rounded-full flex items-center gap-1 ${
+                          className={`text-xs font-semibold px-2.5 py-0.5 rounded-full flex items-center gap-1 ${
                             isMarginLow
-                              ? 'bg-amber-100 text-amber-800'
-                              : 'bg-emerald-100 text-emerald-800'
+                              ? 'bg-warning-bg text-warning'
+                              : 'bg-success-bg text-success'
                           }`}
                         >
                           <Percent className="w-3 h-3" />
@@ -517,7 +511,7 @@ export default function EditProductPage() {
                       <button
                         type="button"
                         onClick={() => removeVariant(index)}
-                        className="p-1 rounded-full text-red-500 hover:bg-red-50 transition-colors"
+                        className="p-1 rounded-full text-red-500 hover:bg-error-bg transition-colors"
                       >
                         <Trash2 className="w-4 h-4" />
                       </button>
@@ -526,7 +520,7 @@ export default function EditProductPage() {
 
                   <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
                     <div>
-                      <label className="text-[10px] font-bold text-gray-500 uppercase block mb-1">
+                      <label className="text-xs font-bold text-foreground-muted uppercase block mb-1">
                         Weight / Size *
                       </label>
                       <input
@@ -539,7 +533,7 @@ export default function EditProductPage() {
                     </div>
 
                     <div>
-                      <label className="text-[10px] font-bold text-gray-500 uppercase block mb-1">
+                      <label className="text-xs font-bold text-foreground-muted uppercase block mb-1">
                         Selling Price (₹) *
                       </label>
                       <input
@@ -547,13 +541,13 @@ export default function EditProductPage() {
                         onChange={(e) => updateVariant(index, 'price', e.target.value)}
                         placeholder="Selling Price"
                         type="number"
-                        className="w-full h-10 px-3 rounded-[8px] text-[14px] font-bold border outline-none focus:border-primary text-emerald-700"
+                        className="w-full h-10 px-3 rounded-[8px] text-[14px] font-bold border outline-none focus:border-primary text-success"
                         style={{ background: 'var(--color-surface-container)' }}
                       />
                     </div>
 
                     <div>
-                      <label className="text-[10px] font-bold text-gray-500 uppercase block mb-1">
+                      <label className="text-xs font-bold text-foreground-muted uppercase block mb-1">
                         Cost Price (₹)
                       </label>
                       <input
@@ -567,7 +561,7 @@ export default function EditProductPage() {
                     </div>
 
                     <div>
-                      <label className="text-[10px] font-bold text-gray-500 uppercase block mb-1">
+                      <label className="text-xs font-bold text-foreground-muted uppercase block mb-1">
                         Original MRP (₹)
                       </label>
                       <input
@@ -575,13 +569,13 @@ export default function EditProductPage() {
                         onChange={(e) => updateVariant(index, 'original_price', e.target.value)}
                         placeholder="MRP Price"
                         type="number"
-                        className="w-full h-10 px-3 rounded-[8px] text-[14px] font-medium border outline-none focus:border-primary text-gray-500"
+                        className="w-full h-10 px-3 rounded-[8px] text-[14px] font-medium border outline-none focus:border-primary text-foreground-muted"
                         style={{ background: 'var(--color-surface-container)' }}
                       />
                     </div>
 
                     <div>
-                      <label className="text-[10px] font-bold text-gray-500 uppercase block mb-1">
+                      <label className="text-xs font-bold text-foreground-muted uppercase block mb-1">
                         Stock Qty
                       </label>
                       <input
@@ -601,14 +595,14 @@ export default function EditProductPage() {
         </div>
 
         {/* Danger Zone: Remove / Delete Product */}
-        <div className="p-5 rounded-[16px] border border-red-200 bg-red-50/50 space-y-4">
+        <div className="p-5 rounded-[16px] border border-error/20 bg-error-bg/50 space-y-4">
           <div className="flex items-center justify-between">
             <div>
               <h4 className="text-[14px] font-bold text-red-900 flex items-center gap-2">
-                <ShieldAlert className="w-5 h-5 text-red-600" />
+                <ShieldAlert className="w-5 h-5 text-error" />
                 Danger Zone: Remove Product
               </h4>
-              <p className="text-[12px] text-red-700 mt-0.5">
+              <p className="text-[12px] text-error mt-0.5">
                 Deactivate or permanently remove this product from the inventory.
               </p>
             </div>
@@ -617,7 +611,7 @@ export default function EditProductPage() {
               <button
                 type="button"
                 onClick={() => setShowDeleteConfirm(true)}
-                className="px-4 py-2 rounded-[10px] text-[12px] font-bold text-red-700 border border-red-300 hover:bg-red-100 transition-colors"
+                className="px-4 py-2 rounded-[10px] text-[12px] font-bold text-error border border-red-300 hover:bg-error-bg transition-colors"
               >
                 Remove Product...
               </button>
@@ -628,13 +622,13 @@ export default function EditProductPage() {
             <motion.div
               initial={{ opacity: 0, height: 0 }}
               animate={{ opacity: 1, height: 'auto' }}
-              className="pt-3 border-t border-red-200 space-y-3"
+              className="pt-3 border-t border-error/20 space-y-3"
             >
               <p className="text-[13px] text-red-900 font-semibold">
                 Are you sure you want to remove <span className="font-bold underline">{name}</span>?
               </p>
 
-              <div className="space-y-2 text-[12px] text-gray-700">
+              <div className="space-y-2 text-[12px] text-foreground">
                 <label className="flex items-center gap-2 cursor-pointer">
                   <input
                     type="radio"
@@ -648,13 +642,13 @@ export default function EditProductPage() {
                   </span>
                 </label>
 
-                <label className="flex items-center gap-2 cursor-pointer text-red-700">
+                <label className="flex items-center gap-2 cursor-pointer text-error">
                   <input
                     type="radio"
                     name="del_choice"
                     checked={permanentDelete}
                     onChange={() => setPermanentDelete(true)}
-                    className="text-red-600 accent-red-600"
+                    className="text-error accent-red-600"
                   />
                   <span>
                     <strong>Permanent Delete:</strong> Remove entirely from database (fails if order history exists).
@@ -666,7 +660,7 @@ export default function EditProductPage() {
                 <button
                   type="button"
                   onClick={() => setShowDeleteConfirm(false)}
-                  className="px-3 py-1.5 rounded-[8px] text-[12px] font-semibold text-gray-600 hover:bg-gray-100"
+                  className="px-3 py-1.5 rounded-[8px] text-[12px] font-semibold text-foreground-muted hover:bg-surface-muted"
                 >
                   Cancel
                 </button>

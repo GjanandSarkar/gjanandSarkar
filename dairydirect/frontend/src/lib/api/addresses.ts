@@ -1,4 +1,17 @@
-import { api } from './client';
+import { getAuthToken } from './client';
+
+async function getAuthHeaders(extraHeaders: Record<string, string> = {}): Promise<Record<string, string>> {
+  const headers: Record<string, string> = { ...extraHeaders };
+  try {
+    const token = await getAuthToken();
+    if (token) {
+      headers['Authorization'] = `Bearer ${token}`;
+    }
+  } catch (err) {
+    console.warn('[Address API] Failed to resolve auth token:', err);
+  }
+  return headers;
+}
 
 export type AddressType = 'house' | 'apartment' | 'business' | 'other';
 
@@ -164,7 +177,8 @@ export function normalizeUserAddress(raw: any): UserAddress {
 export async function getUserAddresses(userId?: string): Promise<UserAddress[]> {
   try {
     const url = userId ? `/api/addresses?userId=${encodeURIComponent(userId)}` : '/api/addresses';
-    const res = await fetch(url);
+    const headers = await getAuthHeaders();
+    const res = await fetch(url, { headers });
     if (!res.ok) {
       console.warn('Failed to fetch addresses, status:', res.status);
       return [];
@@ -198,10 +212,11 @@ export async function getUserAddresses(userId?: string): Promise<UserAddress[]> 
  */
 export async function getAddressByIdAPI(addressId: string): Promise<UserAddress | null> {
   try {
-    const res = await fetch(`/api/addresses/${encodeURIComponent(addressId)}`);
+    const headers = await getAuthHeaders();
+    const res = await fetch(`/api/addresses/${encodeURIComponent(addressId)}`, { headers });
     if (!res.ok) {
       // Fallback to query param if needed
-      const fallback = await fetch(`/api/addresses?id=${encodeURIComponent(addressId)}`);
+      const fallback = await fetch(`/api/addresses?id=${encodeURIComponent(addressId)}`, { headers });
       if (!fallback.ok) return null;
       const data = await fallback.json();
       return data.address ? normalizeUserAddress(data.address) : null;
@@ -221,13 +236,14 @@ export async function saveAddressAPI(
   addressData: CreateAddressInput
 ): Promise<{ success: boolean; error?: string; code?: string; data?: UserAddress }> {
   try {
+    const headers = await getAuthHeaders({ 'Content-Type': 'application/json' });
     const res = await fetch('/api/addresses', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers,
       body: JSON.stringify(addressData),
     });
     const data = await res.json();
-    if (!res.ok) throw new Error(data.error || 'Failed to save address');
+    if (!res.ok) throw new Error(data.details || data.error || 'Failed to save address');
     return { success: true, data: normalizeUserAddress(data.address) };
   } catch (err: any) {
     return { success: false, error: err.message || 'Failed to save address' };
@@ -243,10 +259,11 @@ export async function updateAddressAPI(
   addressData: UpdateAddressInput
 ): Promise<{ success: boolean; error?: string; data?: UserAddress }> {
   try {
+    const headers = await getAuthHeaders({ 'Content-Type': 'application/json' });
     // Try PUT /api/addresses/[id] first
     const res = await fetch(`/api/addresses/${encodeURIComponent(addressId)}`, {
       method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
+      headers,
       body: JSON.stringify({ userId, ...addressData }),
     });
 
@@ -258,11 +275,11 @@ export async function updateAddressAPI(
     // Fallback to existing PUT /api/addresses
     const fallbackRes = await fetch('/api/addresses', {
       method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
+      headers,
       body: JSON.stringify({ addressId, userId, ...addressData }),
     });
     const data = await fallbackRes.json();
-    if (!fallbackRes.ok) throw new Error(data.error || 'Failed to update address');
+    if (!fallbackRes.ok) throw new Error(data.details || data.error || 'Failed to update address');
     return { success: true, data: normalizeUserAddress(data.address) };
   } catch (err: any) {
     return { success: false, error: err.message || 'Failed to update address' };
@@ -277,9 +294,10 @@ export async function setDefaultAddressAPI(
   addressId: string
 ): Promise<{ success: boolean; error?: string }> {
   try {
+    const headers = await getAuthHeaders({ 'Content-Type': 'application/json' });
     const res = await fetch(`/api/addresses/${encodeURIComponent(addressId)}`, {
       method: 'PATCH',
-      headers: { 'Content-Type': 'application/json' },
+      headers,
       body: JSON.stringify({ is_default: true, makeDefaultOnly: true }),
     });
 
@@ -288,11 +306,11 @@ export async function setDefaultAddressAPI(
     // Fallback to PUT /api/addresses with makeDefaultOnly
     const fallback = await fetch('/api/addresses', {
       method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
+      headers,
       body: JSON.stringify({ addressId, userId, makeDefaultOnly: true, is_default: true }),
     });
     const data = await fallback.json();
-    if (!fallback.ok) throw new Error(data.error || 'Failed to set default address');
+    if (!fallback.ok) throw new Error(data.details || data.error || 'Failed to set default address');
     return { success: true };
   } catch (err: any) {
     return { success: false, error: err.message || 'Failed to set default address' };
@@ -307,9 +325,11 @@ export async function deleteAddress(
   addressId: string
 ): Promise<{ success: boolean; error?: string }> {
   try {
+    const headers = await getAuthHeaders();
     // Try DELETE /api/addresses/[id]
     const res = await fetch(`/api/addresses/${encodeURIComponent(addressId)}`, {
       method: 'DELETE',
+      headers,
     });
 
     if (res.ok) return { success: true };
@@ -317,10 +337,10 @@ export async function deleteAddress(
     // Fallback to DELETE /api/addresses?id=...
     const fallback = await fetch(
       `/api/addresses?id=${encodeURIComponent(addressId)}&userId=${encodeURIComponent(userId)}`,
-      { method: 'DELETE' }
+      { method: 'DELETE', headers }
     );
     const data = await fallback.json();
-    if (!fallback.ok) throw new Error(data.error || 'Failed to delete address');
+    if (!fallback.ok) throw new Error(data.details || data.error || 'Failed to delete address');
     return { success: true };
   } catch (err: any) {
     return { success: false, error: err.message || 'Failed to delete address' };

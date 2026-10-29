@@ -4,6 +4,8 @@
  * for opening the checkout modal, handling payment events, and verifying signatures.
  */
 
+import { getAuthToken } from '@/lib/api/client';
+
 export interface RazorpaySuccessResponse {
   razorpay_payment_id: string;
   razorpay_order_id: string;
@@ -107,6 +109,8 @@ export interface InitiatePaymentParams {
   receipt?: string;
   name?: string;
   description?: string;
+  items?: Array<{ variantId: string; quantity: number }>;
+  couponCode?: string;
   prefill?: {
     name?: string;
     email?: string;
@@ -121,7 +125,7 @@ export interface InitiatePaymentParams {
 /**
  * High-level helper to execute complete Razorpay Standard Checkout flow:
  * 1. Load SDK script
- * 2. Create order via /api/create-order
+ * 2. Create order via /api/payments/razorpay/create (or fallback /api/create-order)
  * 3. Open Razorpay modal
  * 4. Verify signature on success via /api/verify-payment
  */
@@ -130,7 +134,9 @@ export async function initiateRazorpayPayment({
   currency = 'INR',
   receipt,
   name = 'Gjanand Sarkar',
-  description = 'Farm Fresh Dairy Order',
+  description = 'Gjanand Sarkar Order',
+  items,
+  couponCode,
   prefill,
   notes,
   onSuccess,
@@ -146,20 +152,48 @@ export async function initiateRazorpayPayment({
       return;
     }
 
-    // 2. Call backend to create Razorpay order
-    const createRes = await fetch('/api/create-order', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        amount,
-        currency,
-        receipt,
-        notes,
-      }),
-    });
+    // 2. Prepare auth header
+    const token = await getAuthToken();
+    const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+    if (token) {
+      headers['Authorization'] = `Bearer ${token}`;
+    }
 
-    const createData = await createRes.json();
-    if (!createRes.ok || !createData.order_id) {
+    let createRes: Response;
+    let createData: any;
+
+    // Use secure server-calculated order creation if items are provided
+    if (items && items.length > 0) {
+      createRes = await fetch('/api/payments/razorpay/create', {
+        method: 'POST',
+        headers,
+        body: JSON.stringify({ items, couponCode }),
+      });
+    } else {
+      createRes = await fetch('/api/create-order', {
+        method: 'POST',
+        headers,
+        body: JSON.stringify({
+          amount,
+          currency,
+          receipt,
+          notes,
+        }),
+      });
+    }
+
+    // Safely parse JSON response to prevent HTML doctype parse errors
+    try {
+      createData = await createRes.json();
+    } catch {
+      const err = { message: `Payment service unavailable (${createRes.status}). Please try again.` };
+      onError?.(err);
+      return;
+    }
+
+    const orderId = createData.razorpayOrderId || createData.order_id;
+
+    if (!createRes.ok || !orderId) {
       const err = { 
         message: createData.error || 'Failed to initialize payment order', 
         details: createData 
@@ -168,7 +202,7 @@ export async function initiateRazorpayPayment({
       return;
     }
 
-    const keyId = createData.key_id || process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID;
+    const keyId = createData.keyId || createData.key_id || process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID;
     if (!keyId) {
       onError?.({ message: 'Razorpay Key ID is not configured.' });
       return;
@@ -177,12 +211,12 @@ export async function initiateRazorpayPayment({
     // 3. Configure Razorpay modal options
     const options: RazorpayOptions = {
       key: keyId,
-      amount: createData.amount,
-      currency: createData.currency,
+      amount: createData.amount || amount,
+      currency: createData.currency || currency,
       name,
       description,
       image: '/application logo/gjanand sarkar logo.png',
-      order_id: createData.order_id,
+      order_id: orderId,
       prefill: {
         name: prefill?.name || '',
         email: prefill?.email || '',
@@ -190,7 +224,7 @@ export async function initiateRazorpayPayment({
       },
       notes: notes || {},
       theme: {
-        color: '#1b4332',
+        color: '#0c3c26',
         backdrop_color: 'rgba(0, 0, 0, 0.65)',
       },
       modal: {
@@ -201,9 +235,12 @@ export async function initiateRazorpayPayment({
       handler: async (response: RazorpaySuccessResponse) => {
         try {
           // 4. Verify signature with backend endpoint
+          const verifyHeaders: Record<string, string> = { 'Content-Type': 'application/json' };
+          if (token) verifyHeaders['Authorization'] = `Bearer ${token}`;
+
           const verifyRes = await fetch('/api/verify-payment', {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: verifyHeaders,
             body: JSON.stringify({
               razorpay_order_id: response.razorpay_order_id,
               razorpay_payment_id: response.razorpay_payment_id,
@@ -211,7 +248,12 @@ export async function initiateRazorpayPayment({
             }),
           });
 
-          const verifyData = await verifyRes.json();
+          let verifyData: any;
+          try {
+            verifyData = await verifyRes.json();
+          } catch {
+            verifyData = { success: false, error: 'Failed to verify payment response format' };
+          }
 
           if (!verifyRes.ok || !verifyData.success) {
             onError?.({

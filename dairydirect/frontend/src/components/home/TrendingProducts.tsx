@@ -4,13 +4,15 @@ import React, { useRef } from 'react';
 import Link from 'next/link';
 import { ArrowRight, ChevronLeft, ChevronRight, Sparkles } from 'lucide-react';
 import { ProductCard } from '@/components/shared/ProductCard';
-import type { ProductWithVariants } from '@/lib/api/products';
+import type { CatalogProduct } from '@/lib/types/catalog';
+import { useTranslation } from '@/lib/i18n';
 
 interface TrendingProductsProps {
-  products: ProductWithVariants[];
+  products: CatalogProduct[];
 }
 
 export function TrendingProducts({ products }: TrendingProductsProps) {
+  const { t } = useTranslation();
   const scrollRef = useRef<HTMLDivElement>(null);
 
   const handleScroll = (dir: 'left' | 'right') => {
@@ -24,25 +26,25 @@ export function TrendingProducts({ products }: TrendingProductsProps) {
   return (
     <section className="w-full max-w-[1440px] mx-auto px-4 md:px-8 py-8">
       {/* Header */}
-      <div className="flex items-center justify-between pb-4 mb-6 border-b border-gray-200/80">
+      <div className="flex items-center justify-between pb-4 mb-6 border-b border-border/80">
         <div>
           <div className="flex items-center gap-1.5 mb-1">
-            <Sparkles className="w-4 h-4 text-[#c88a23]" />
-            <span className="text-xs font-bold text-[#c88a23] uppercase tracking-wider">
-              Top Picks
+            <Sparkles className="w-4 h-4 text-secondary" />
+            <span className="text-xs font-bold text-secondary uppercase tracking-wider">
+              {t('justAdded') || 'Just Added'}
             </span>
           </div>
-          <h2 className="text-2xl md:text-3xl font-black text-[#0f3e26] tracking-tight">
-            Trending Products
+          <h2 className="text-2xl md:text-3xl font-semibold text-primary tracking-tight">
+            {t('newArrivals') || 'New Arrivals'}
           </h2>
         </div>
 
         <div className="flex items-center gap-4">
           <Link
             href="/products"
-            className="text-xs sm:text-sm font-bold text-[#c88a23] hover:text-[#0f3e26] flex items-center gap-1 transition-colors"
+            className="text-xs sm:text-sm font-bold text-secondary hover:text-primary flex items-center gap-1 transition-colors"
           >
-            <span>View All Products</span>
+            <span>{t('viewAllProducts') || 'View All Products'}</span>
             <ArrowRight className="w-4 h-4" />
           </Link>
 
@@ -50,14 +52,14 @@ export function TrendingProducts({ products }: TrendingProductsProps) {
           <div className="hidden sm:flex items-center gap-1.5">
             <button
               onClick={() => handleScroll('left')}
-              className="w-8 h-8 rounded-full border border-gray-300 bg-white hover:bg-gray-100 flex items-center justify-center text-gray-700 transition-colors shadow-2xs"
+              className="w-8 h-8 rounded-full border border-border-hover bg-surface hover:bg-surface-muted flex items-center justify-center text-foreground transition-colors shadow-2xs"
               aria-label="Scroll left"
             >
               <ChevronLeft className="w-4 h-4" />
             </button>
             <button
               onClick={() => handleScroll('right')}
-              className="w-8 h-8 rounded-full border border-gray-300 bg-white hover:bg-gray-100 flex items-center justify-center text-gray-700 transition-colors shadow-2xs"
+              className="w-8 h-8 rounded-full border border-border-hover bg-surface hover:bg-surface-muted flex items-center justify-center text-foreground transition-colors shadow-2xs"
               aria-label="Scroll right"
             >
               <ChevronRight className="w-4 h-4" />
@@ -69,7 +71,7 @@ export function TrendingProducts({ products }: TrendingProductsProps) {
       {/* Product List */}
       <div 
         ref={scrollRef}
-        className="flex gap-4 md:gap-6 overflow-x-auto no-scrollbar pb-4 pt-1"
+        className="flex gap-4 md:gap-6 overflow-x-auto no-scrollbar snap-rail reveal pb-4 pt-1"
       >
         {products.map((product, idx) => (
           <div 

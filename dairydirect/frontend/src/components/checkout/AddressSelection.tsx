@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { cn } from '@/lib/utils';
-import { MapPin, Plus, Clock, Edit3 } from 'lucide-react';
+import { MapPin, Plus, Edit3 } from 'lucide-react';
 import type { UserAddress, CreateAddressInput } from '@/lib/api/addresses';
 import { saveAddressAPI, updateAddressAPI } from '@/lib/api/addresses';
 import { AddressFormModal } from '@/components/addresses/AddressFormModal';
@@ -12,9 +12,6 @@ interface AddressSelectionProps {
   addresses: UserAddress[];
   selectedAddressId: string | null;
   onSelectAddress: (id: string) => void;
-  slots: { id: string; time: string; avail: string }[];
-  selectedSlot: string;
-  onSelectSlot: (id: string) => void;
   onAddressCreated?: (newAddress: UserAddress) => void;
   onAddressUpdated?: (updatedAddress: UserAddress) => void;
 }
@@ -23,9 +20,6 @@ export function AddressSelection({
   addresses,
   selectedAddressId,
   onSelectAddress,
-  slots,
-  selectedSlot,
-  onSelectSlot,
   onAddressCreated,
   onAddressUpdated,
 }: AddressSelectionProps) {
@@ -46,28 +40,37 @@ export function AddressSelection({
   };
 
   const handleSaveModal = async (addressData: CreateAddressInput): Promise<boolean> => {
-    if (!user?.id) return false;
+    let uid = user?.id;
+    if (!uid) {
+      try {
+        const { supabase } = await import('@/lib/supabase');
+        const { data } = await supabase.auth.getUser();
+        uid = data?.user?.id;
+      } catch {}
+    }
     setIsSaving(true);
     try {
       if (editingAddress) {
-        const res = await updateAddressAPI(user.id, editingAddress.id, addressData);
+        const res = await updateAddressAPI(uid || '', editingAddress.id, addressData);
         if (res.success && res.data) {
           onAddressUpdated?.(res.data);
           return true;
         }
+        if (res.error) throw new Error(res.error);
         return false;
       } else {
-        const res = await saveAddressAPI({ ...addressData, userId: user.id });
+        const res = await saveAddressAPI({ ...addressData, userId: uid });
         if (res.success && res.data) {
           onAddressCreated?.(res.data);
           onSelectAddress(res.data.id);
           return true;
         }
+        if (res.error) throw new Error(res.error);
         return false;
       }
-    } catch (err) {
+    } catch (err: any) {
       console.error('Error saving address in checkout:', err);
-      return false;
+      throw err;
     } finally {
       setIsSaving(false);
     }
@@ -76,7 +79,7 @@ export function AddressSelection({
   return (
     <div className="flex flex-col gap-4">
       {/* Delivery Address */}
-      <div className="bg-white rounded-[20px] p-4 border border-sand shadow-sm">
+      <div className="bg-surface rounded-[20px] p-4 border border-sand shadow-sm">
         <div className="flex items-center justify-between mb-3">
           <div className="flex items-center gap-2">
             <MapPin className="w-4 h-4 text-primary" />
@@ -99,7 +102,7 @@ export function AddressSelection({
           <button
             type="button"
             onClick={handleOpenAdd}
-            className="w-full p-4 rounded-[16px] border border-dashed border-clay text-clay bg-white hover:bg-clay/5 flex items-center justify-center font-semibold text-sm transition-colors cursor-pointer"
+            className="w-full p-4 rounded-[16px] border border-dashed border-clay text-clay bg-surface hover:bg-clay/5 flex items-center justify-center font-semibold text-sm transition-colors cursor-pointer"
           >
             <Plus className="w-5 h-5 mr-2" /> Add Delivery Address
           </button>
@@ -116,7 +119,7 @@ export function AddressSelection({
                     "p-3.5 rounded-[16px] border transition-all cursor-pointer flex items-start justify-between gap-3",
                     isSelected
                       ? "border-primary bg-mint/10 shadow-sm ring-1 ring-primary/20"
-                      : "border-sand bg-white hover:border-sand/80"
+                      : "border-sand bg-surface hover:border-sand/80"
                   )}
                 >
                   <div className="flex items-start gap-3 flex-1 min-w-0">
@@ -135,7 +138,7 @@ export function AddressSelection({
                       <div className="flex items-center gap-2 mb-0.5 flex-wrap">
                         <span className="font-bold text-dark text-sm capitalize">{addr.label || addr.address_type}</span>
                         {addr.is_default && (
-                          <span className="bg-primary/10 text-primary text-[10px] font-black uppercase px-1.5 py-0.5 rounded tracking-wider">
+                          <span className="bg-primary/10 text-primary text-xs font-semibold uppercase px-1.5 py-0.5 rounded tracking-wider">
                             Default
                           </span>
                         )}
@@ -154,7 +157,7 @@ export function AddressSelection({
                       </p>
 
                       {addr.mobile_number && (
-                        <p className="text-[11px] text-muted/80 mt-0.5">Phone: +91 {addr.mobile_number}</p>
+                        <p className="text-xs text-muted/80 mt-0.5">Phone: +91 {addr.mobile_number}</p>
                       )}
                     </div>
                   </div>
@@ -162,7 +165,7 @@ export function AddressSelection({
                   <button
                     type="button"
                     onClick={(e) => handleOpenEdit(addr, e)}
-                    className="p-1.5 text-muted hover:text-primary hover:bg-white rounded-lg transition-colors shrink-0 cursor-pointer"
+                    className="p-1.5 text-muted hover:text-primary hover:bg-surface rounded-lg transition-colors shrink-0 cursor-pointer"
                     title="Edit address"
                   >
                     <Edit3 className="w-4 h-4" />
@@ -173,41 +176,6 @@ export function AddressSelection({
           </div>
         )}
       </div>
-
-      {/* Delivery Slot */}
-      {addresses.length > 0 && (
-        <div className="bg-white rounded-[20px] p-4 border border-sand shadow-sm">
-          <div className="flex items-center gap-2 mb-3">
-            <Clock className="w-4 h-4 text-primary" />
-            <h3 className="text-sm font-bold text-dark uppercase tracking-wider">Delivery Slot</h3>
-          </div>
-
-          <div className="grid grid-cols-1 gap-2">
-            {slots.map((slot) => (
-              <div
-                key={slot.id}
-                onClick={() => onSelectSlot(slot.id)}
-                className={cn(
-                  "p-3 rounded-[12px] border transition-all cursor-pointer flex justify-between items-center",
-                  selectedSlot === slot.id
-                    ? "border-primary bg-primary text-white shadow-active"
-                    : "border-sand bg-white text-dark hover:border-primary/30"
-                )}
-              >
-                <span className="font-bold text-xs tracking-wide">{slot.time}</span>
-                <span
-                  className={cn(
-                    "text-[10px] uppercase font-bold px-2 py-1 rounded-full",
-                    selectedSlot === slot.id ? "bg-white/20" : "bg-mint/30 text-primary"
-                  )}
-                >
-                  {slot.avail}
-                </span>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
 
       {/* Address Form Modal */}
       <AddressFormModal

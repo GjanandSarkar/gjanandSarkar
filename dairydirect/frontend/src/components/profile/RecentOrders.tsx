@@ -13,9 +13,9 @@ interface RecentOrdersProps {
 }
 
 const STATUS_STYLES: Record<string, { bg: string; color: string; dot: string; icon: any; label: string }> = {
-  'pending':          { bg: '#ffdcc7', color: '#774117', dot: '#d4712a', icon: Clock, label: 'Received' },
+  'pending':          { bg: '#ffdcc7', color: 'var(--warning)', dot: '#d4712a', icon: Clock, label: 'Received' },
   'confirmed':        { bg: '#c2efac', color: '#042100', dot: '#3f6530', icon: CheckCircle2, label: 'Preparing' },
-  'out_for_delivery': { bg: '#fff8e6', color: '#7d5200', dot: '#c78c2e', icon: Truck, label: 'Arriving Soon' },
+  'out_for_delivery': { bg: '#fff8e6', color: 'var(--warning)', dot: '#c78c2e', icon: Truck, label: 'Arriving Soon' },
   'delivered':        { bg: '#eaf4e2', color: '#2a4f1d', dot: '#3f6530', icon: CheckCircle2, label: 'Delivered' },
   'cancelled':        { bg: '#fef2f2', color: '#991b1b', dot: '#dc2626', icon: Package, label: 'Cancelled' },
 };
@@ -27,7 +27,7 @@ export function RecentOrders({ orders, onReorder, hideHeader = false }: RecentOr
     <div>
       {!hideHeader && (
         <div className="flex justify-between items-center mb-4">
-          <h2 className="text-lg font-black text-dark tracking-wide">Recent Orders</h2>
+          <h2 className="text-lg font-semibold text-dark tracking-wide">Recent Orders</h2>
           {orders.length > 3 && (
             <Link href="/orders" className="text-primary text-sm font-bold flex items-center hover:opacity-80 transition-opacity">
               View All <ChevronRight className="w-4 h-4 ml-0.5" />
@@ -37,7 +37,7 @@ export function RecentOrders({ orders, onReorder, hideHeader = false }: RecentOr
       )}
 
       {recentOrders.length === 0 ? (
-        <div className="bg-white rounded-[24px] p-6 border border-sand/50 text-center shadow-sm">
+        <div className="bg-surface rounded-[24px] p-6 border border-sand/50 text-center shadow-sm">
           <Package className="w-10 h-10 text-muted mx-auto mb-3 opacity-50" />
           <h3 className="text-base font-bold text-dark mb-1">No Orders Yet</h3>
           <p className="text-sm text-muted mb-4 font-medium">Looks like you haven't placed any orders.</p>
@@ -54,7 +54,7 @@ export function RecentOrders({ orders, onReorder, hideHeader = false }: RecentOr
             const isCompleted = order.status === 'delivered' || order.status === 'cancelled';
 
             return (
-              <div key={order.id} className="bg-white rounded-[20px] p-4 border border-sand/50 shadow-sm flex flex-col gap-3">
+              <div key={order.id} className="bg-surface rounded-[20px] p-4 border border-sand/50 shadow-sm flex flex-col gap-3">
                 <div className="flex justify-between items-start">
                   <div className="flex items-center gap-3">
                     <div 
@@ -71,7 +71,16 @@ export function RecentOrders({ orders, onReorder, hideHeader = false }: RecentOr
                     </div>
                   </div>
                   <div className="text-right">
-                    <span className="text-sm font-black text-dark">₹{order.total_amount}</span>
+                    <span className="text-sm font-semibold text-dark">₹{order.total_amount}</span>
+                    <div className="mt-1 flex items-center justify-end gap-1">
+                      <span className={`inline-flex items-center text-[10px] font-semibold tracking-wider px-1.5 py-0.5 rounded-full ${
+                        order.payment_status === 'paid' 
+                          ? 'bg-mint/40 text-primary' 
+                          : 'bg-sand/40 text-muted'
+                      }`}>
+                        {(order.payment_method || 'COD').toUpperCase()}
+                      </span>
+                    </div>
                   </div>
                 </div>
 

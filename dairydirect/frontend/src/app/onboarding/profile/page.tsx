@@ -72,18 +72,18 @@ export default function ProfileOnboardingScreen() {
   };
 
   return (
-    <div className="flex flex-col min-h-screen bg-white">
+    <div className="flex flex-col min-h-screen bg-surface">
       <div className="px-6 pt-12 pb-6 border-b" style={{ borderColor: 'rgba(195,201,187,0.3)' }}>
         <div className="flex items-center gap-4 mb-4">
           <button onClick={() => router.back()} className="p-2 -ml-2 rounded-full cursor-pointer hover:bg-sand/20"
             style={{ color: 'var(--color-on-surface-variant)' }}>
             <ArrowLeft className="w-5 h-5" />
           </button>
-          <h1 className="text-2xl font-black tracking-tight" style={{ color: 'var(--color-on-surface)' }}>
+          <h1 className="text-2xl font-semibold tracking-tight" style={{ color: 'var(--color-on-surface)' }}>
             Complete Your Profile
           </h1>
         </div>
-        <p className="text-sm" style={{ color: 'var(--color-outline)' }}>
+        <p className="text-sm" style={{ color: 'var(--color-on-surface-variant)' }}>
           Please enter your details to continue
         </p>
       </div>
@@ -91,7 +91,7 @@ export default function ProfileOnboardingScreen() {
       <div className="flex-1 px-6 py-8 space-y-6">
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
-            <label className="block text-[11px] font-extrabold uppercase tracking-wider text-[#4a5c43] px-2 mb-1">
+            <label className="block text-xs font-semibold uppercase tracking-wider text-foreground-muted px-2 mb-1">
               FIRST NAME
             </label>
             <input
@@ -99,11 +99,11 @@ export default function ProfileOnboardingScreen() {
               value={firstName}
               onChange={(e) => setFirstName(e.target.value)}
               placeholder="First Name"
-              className="w-full bg-[#f3f5f0] text-dark font-bold text-base px-4 py-3 rounded-full outline-none border-2 border-transparent focus:border-[#4b6a41] transition-all"
+              className="w-full bg-surface-muted text-dark font-bold text-base px-4 py-3 rounded-full outline-none border-2 border-transparent focus:border-primary-light transition-all"
             />
           </div>
           <div>
-            <label className="block text-[11px] font-extrabold uppercase tracking-wider text-[#4a5c43] px-2 mb-1">
+            <label className="block text-xs font-semibold uppercase tracking-wider text-foreground-muted px-2 mb-1">
               LAST NAME
             </label>
             <input
@@ -111,13 +111,13 @@ export default function ProfileOnboardingScreen() {
               value={lastName}
               onChange={(e) => setLastName(e.target.value)}
               placeholder="Last Name"
-              className="w-full bg-[#f3f5f0] text-dark font-bold text-base px-4 py-3 rounded-full outline-none border-2 border-transparent focus:border-[#4b6a41] transition-all"
+              className="w-full bg-surface-muted text-dark font-bold text-base px-4 py-3 rounded-full outline-none border-2 border-transparent focus:border-primary-light transition-all"
             />
           </div>
         </div>
 
         {error && (
-          <p className="text-[13px] font-bold text-red-600 px-2">
+          <p className="text-[13px] font-bold text-error px-2">
             {error}
           </p>
         )}

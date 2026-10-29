@@ -1,5 +1,17 @@
 "use client";
 
+/**
+ * Admin chart components backed by recharts.
+ *
+ * IMPORTANT: This file must only be imported via Next.js dynamic() so that
+ * recharts (~160 KB gzip) is excluded from the shared customer-facing JS
+ * chunk.  Direct static imports in any page or layout that customers visit
+ * will bloat every page load.
+ *
+ * Usage:
+ *   const AdminCharts = dynamic(() => import('@/components/admin/charts'), { ssr: false });
+ */
+
 import React from 'react';
 import {
   ResponsiveContainer,
@@ -15,6 +27,7 @@ import {
   Pie,
   Cell,
 } from 'recharts';
+
 import {
   format,
   startOfMonth,
@@ -43,11 +56,11 @@ const CustomTooltip = ({ active, payload, label, valuePrefix, valueSuffix }: any
     const dataPoint = payload[0];
     const val = dataPoint.value;
     return (
-      <div className="bg-gray-900/95 text-white px-3 py-2 rounded-xl shadow-xl backdrop-blur-md border border-gray-700/50 text-xs flex flex-col gap-0.5 z-50">
-        <span className="font-semibold text-gray-300 tracking-wide uppercase text-[10px]">
+      <div className="bg-primary/95 text-white px-3 py-2 rounded-xl shadow-xl backdrop-blur-md border border-border-hover/50 text-xs flex flex-col gap-0.5 z-50">
+        <span className="font-semibold text-foreground-muted tracking-wide uppercase text-xs">
           {dataPoint.payload.fullDate || label}
         </span>
-        <span className="font-extrabold text-sm text-emerald-400">
+        <span className="font-semibold text-sm text-emerald-400">
           {valuePrefix || ''}{val.toLocaleString()}{valueSuffix || ''}
         </span>
       </div>
@@ -167,13 +180,13 @@ export function LollipopChart({
               className="flex flex-col items-center flex-1 h-full justify-end group relative cursor-pointer"
             >
               {/* Floating Hover Tooltip */}
-              <div className="opacity-0 group-hover:opacity-100 transition-all duration-200 absolute -top-10 bg-gray-900 text-white px-3 py-1.5 rounded-xl text-xs font-semibold whitespace-nowrap shadow-xl z-30 pointer-events-none transform -translate-y-1">
-                {item.fullDate || item.label}: <span className="text-sky-400 font-extrabold">{item.value}{valueSuffix}</span>
+              <div className="opacity-0 group-hover:opacity-100 transition-all duration-200 absolute -top-10 bg-primary text-white px-3 py-1.5 rounded-xl text-xs font-semibold whitespace-nowrap shadow-xl z-30 pointer-events-none transform -translate-y-1">
+                {item.fullDate || item.label}: <span className="text-sky-400 font-semibold">{item.value}{valueSuffix}</span>
               </div>
 
               {/* Top Lollipop Badge */}
               <div
-                className="w-8 h-8 rounded-full flex items-center justify-center font-extrabold text-xs transition-all duration-300 group-hover:scale-125 group-hover:shadow-lg z-10"
+                className="w-8 h-8 rounded-full flex items-center justify-center font-semibold text-xs transition-all duration-300 group-hover:scale-125 group-hover:shadow-lg z-10"
                 style={{
                   backgroundColor: isZero ? 'var(--color-surface-container-high, #e2e8f0)' : color,
                   color: isZero ? 'var(--color-muted, #94a3b8)' : '#ffffff',
@@ -196,7 +209,7 @@ export function LollipopChart({
               </div>
 
               {/* Day Label */}
-              <span className="text-[11px] uppercase font-bold tracking-wider text-muted truncate w-full text-center mt-2 group-hover:text-on-surface transition-colors">
+              <span className="text-xs uppercase font-bold tracking-wider text-muted truncate w-full text-center mt-2 group-hover:text-on-surface transition-colors">
                 {item.label}
               </span>
             </div>
@@ -301,19 +314,19 @@ export function DonutChart({
             </Pie>
             <Tooltip
               formatter={(val: any, name: any) => [`${val} (${total > 0 ? ((val / total) * 100).toFixed(1) : 0}%)`, name]}
-              contentStyle={{ background: '#111827', borderRadius: '12px', border: 'none', color: '#fff', fontSize: '12px' }}
+              contentStyle={{ background: '#111827', borderRadius: '12px', border: 'none', color: 'var(--on-primary)', fontSize: '12px' }}
             />
           </PieChart>
         </ResponsiveContainer>
         {(centerTitle || centerValue) && (
           <div className="absolute flex flex-col items-center justify-center text-center pointer-events-none">
             {centerValue !== undefined && (
-              <span className="text-xl font-extrabold text-on-surface leading-tight">
+              <span className="text-xl font-semibold text-on-surface leading-tight">
                 {centerValue}
               </span>
             )}
             {centerTitle && (
-              <span className="text-[10px] font-semibold uppercase tracking-wider text-muted">
+              <span className="text-xs font-semibold uppercase tracking-wider text-muted">
                 {centerTitle}
               </span>
             )}
@@ -329,7 +342,7 @@ export function DonutChart({
               <span className="font-semibold text-on-surface">{item.label}</span>
             </div>
             <span className="font-bold text-on-surface">
-              {item.value} <span className="text-muted font-normal text-[11px]">({total > 0 ? Math.round((item.value / total) * 100) : 0}%)</span>
+              {item.value} <span className="text-muted font-normal text-xs">({total > 0 ? Math.round((item.value / total) * 100) : 0}%)</span>
             </span>
           </div>
         ))}
@@ -534,22 +547,22 @@ export function CalendarHeatmapChart({
     if (ratio <= 0.25 || count === 1) {
       return {
         bg: 'bg-emerald-100 border-emerald-200 hover:bg-emerald-200/80 shadow-2xs',
-        text: 'text-emerald-950 font-extrabold',
+        text: 'text-emerald-950 font-semibold',
       };
     } else if (ratio <= 0.5 || count <= 3) {
       return {
         bg: 'bg-emerald-300 border-emerald-400 hover:bg-emerald-400/90 shadow-xs text-white',
-        text: 'text-white font-extrabold',
+        text: 'text-white font-semibold',
       };
     } else if (ratio <= 0.75 || count <= 5) {
       return {
         bg: 'bg-emerald-500 border-emerald-600 hover:bg-emerald-600 shadow-sm text-white',
-        text: 'text-white font-extrabold',
+        text: 'text-white font-semibold',
       };
     } else {
       return {
-        bg: 'bg-[#0c3c26] border-[#072617] hover:bg-[#114e32] shadow-md text-white',
-        text: 'text-white font-extrabold',
+        bg: 'bg-primary border-primary-fixed-dim hover:bg-primary-hover shadow-md text-white',
+        text: 'text-white font-semibold',
       };
     }
   };
@@ -561,10 +574,10 @@ export function CalendarHeatmapChart({
       {/* Header Bar */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 mb-4">
         <div>
-          <h3 className="text-sm sm:text-base font-extrabold text-on-surface tracking-tight">
+          <h3 className="text-sm sm:text-base font-semibold text-on-surface tracking-tight">
             {title}
           </h3>
-          <p className="text-[11px] text-muted font-medium mt-0.5">{subtitle}</p>
+          <p className="text-xs text-muted font-medium mt-0.5">{subtitle}</p>
         </div>
 
         {/* Right Header Controls: Stats + Intensity + Month Picker */}
@@ -572,26 +585,26 @@ export function CalendarHeatmapChart({
           {/* Month Summary & Intensity */}
           <div className="flex items-center gap-2.5 text-xs font-semibold text-muted bg-surface-container border border-sand/30 rounded-xl px-3 py-1.5 shadow-2xs">
             <span>
-              Month Orders: <strong className="text-on-surface font-extrabold">{monthStats.totalCount}</strong>
+              Month Orders: <strong className="text-on-surface font-semibold">{monthStats.totalCount}</strong>
             </span>
             <span>•</span>
             <span>
-              Revenue: <strong className="text-emerald-600 font-extrabold">{currencyPrefix}{monthStats.totalRev.toLocaleString()}</strong>
+              Revenue: <strong className="text-emerald-600 font-semibold">{currencyPrefix}{monthStats.totalRev.toLocaleString()}</strong>
             </span>
             <span>•</span>
             <div className="flex items-center gap-1.5">
-              <span className="text-muted font-semibold text-[10px] uppercase tracking-wider">
+              <span className="text-muted font-semibold text-xs uppercase tracking-wider">
                 Intensity:
               </span>
               <div className="flex items-center gap-1">
                 <span className="w-2.5 h-2.5 rounded-xs bg-amber-50 border border-amber-200" title="0" />
-                <span className="text-[10px] text-muted">0</span>
+                <span className="text-xs text-muted">0</span>
                 <span className="w-2.5 h-2.5 rounded-xs bg-emerald-100 border border-emerald-200" title="Low" />
-                <span className="text-[10px] text-muted">Low</span>
+                <span className="text-xs text-muted">Low</span>
                 <span className="w-2.5 h-2.5 rounded-xs bg-emerald-300 border border-emerald-400" title="Med" />
-                <span className="text-[10px] text-muted">Med</span>
-                <span className="w-2.5 h-2.5 rounded-xs bg-[#0c3c26] border border-[#072617]" title="High" />
-                <span className="text-[10px] text-muted">High</span>
+                <span className="text-xs text-muted">Med</span>
+                <span className="w-2.5 h-2.5 rounded-xs bg-primary border border-primary-fixed-dim" title="High" />
+                <span className="text-xs text-muted">High</span>
               </div>
             </div>
           </div>
@@ -631,7 +644,7 @@ export function CalendarHeatmapChart({
         {weekDays.map((day) => (
           <div
             key={day}
-            className="text-[10px] sm:text-xs font-bold text-muted uppercase tracking-wider py-0.5"
+            className="text-xs sm:text-xs font-bold text-muted uppercase tracking-wider py-0.5"
           >
             {day}
           </div>
@@ -664,7 +677,7 @@ export function CalendarHeatmapChart({
 
                 {/* Micro order count indicator badge if > 0 */}
                 {inMonth && dayData.count > 0 && (
-                  <span className="text-[9px] opacity-90 font-semibold -mt-0.5 hidden sm:block truncate px-0.5">
+                  <span className="text-xs opacity-90 font-semibold -mt-0.5 hidden sm:block truncate px-0.5">
                     {dayData.count} {dayData.count === 1 ? 'order' : 'orders'}
                   </span>
                 )}
@@ -672,16 +685,16 @@ export function CalendarHeatmapChart({
 
               {/* Hover Tooltip */}
               {inMonth && (
-                <div className="opacity-0 group-hover:opacity-100 transition-all duration-200 absolute -top-12 bg-gray-900 text-white px-2.5 py-1.5 rounded-lg text-[11px] font-semibold whitespace-nowrap shadow-2xl z-50 pointer-events-none transform -translate-y-1 border border-gray-700/60 flex flex-col gap-0.5 text-center">
-                  <span className="text-[9px] text-gray-400 font-bold uppercase tracking-wider">
+                <div className="opacity-0 group-hover:opacity-100 transition-all duration-200 absolute -top-12 bg-primary text-white px-2.5 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap shadow-2xl z-50 pointer-events-none transform -translate-y-1 border border-border-hover/60 flex flex-col gap-0.5 text-center">
+                  <span className="text-xs text-foreground-muted font-bold uppercase tracking-wider">
                     {format(day, 'EEEE, MMM d, yyyy')}
                   </span>
-                  <div className="flex items-center justify-center gap-1.5 text-[11px]">
-                    <span className="text-emerald-300 font-extrabold">
+                  <div className="flex items-center justify-center gap-1.5 text-xs">
+                    <span className="text-emerald-300 font-semibold">
                       {dayData.count} {dayData.count === 1 ? 'Order' : 'Orders'}
                     </span>
                     {dayData.revenue > 0 && (
-                      <span className="text-emerald-400 font-extrabold">
+                      <span className="text-emerald-400 font-semibold">
                         ({currencyPrefix}{dayData.revenue.toLocaleString()})
                       </span>
                     )}
@@ -802,17 +815,17 @@ export function DayTimeHeatmapChart({
     if (ratio <= 0.35 || count === 1) {
       return {
         bg: 'bg-emerald-100 border-emerald-200/80 hover:bg-emerald-200/80 shadow-2xs',
-        text: 'text-emerald-950 font-extrabold',
+        text: 'text-emerald-950 font-semibold',
       };
     } else if (ratio <= 0.7 || count <= 3) {
       return {
         bg: 'bg-emerald-400 border-emerald-500/90 hover:bg-emerald-500 shadow-xs text-white',
-        text: 'text-white font-extrabold',
+        text: 'text-white font-semibold',
       };
     } else {
       return {
-        bg: 'bg-[#0c3c26] border-[#072617] hover:bg-[#114e32] shadow-md',
-        text: 'text-white font-extrabold',
+        bg: 'bg-primary border-primary-fixed-dim hover:bg-primary-hover shadow-md',
+        text: 'text-white font-semibold',
       };
     }
   };
@@ -822,15 +835,15 @@ export function DayTimeHeatmapChart({
       {/* Header Bar */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
         <div>
-          <h3 className="text-sm sm:text-base font-extrabold text-on-surface tracking-tight">
+          <h3 className="text-sm sm:text-base font-semibold text-on-surface tracking-tight">
             {title}
           </h3>
-          <p className="text-[11px] text-muted font-medium mt-0.5">{subtitle}</p>
+          <p className="text-xs text-muted font-medium mt-0.5">{subtitle}</p>
         </div>
 
         {/* Top-Right Segmented Scale Legend */}
         <div className="flex items-center gap-2.5 text-xs self-start sm:self-auto">
-          <span className="text-muted font-semibold text-[11px]">Low Orders</span>
+          <span className="text-muted font-semibold text-xs">Low Orders</span>
 
           {/* Segmented Color Bar */}
           <div className="flex items-center gap-0.5 rounded-full overflow-hidden p-0.5 bg-surface-container border border-sand/30 shadow-2xs">
@@ -839,10 +852,10 @@ export function DayTimeHeatmapChart({
             <span className="w-5 sm:w-6 h-2 bg-emerald-200" />
             <span className="w-5 sm:w-6 h-2 bg-emerald-300" />
             <span className="w-5 sm:w-6 h-2 bg-emerald-500" />
-            <span className="w-5 sm:w-6 h-2 rounded-r-full bg-[#0c3c26]" />
+            <span className="w-5 sm:w-6 h-2 rounded-r-full bg-primary" />
           </div>
 
-          <span className="text-muted font-semibold text-[11px]">High Orders</span>
+          <span className="text-muted font-semibold text-xs">High Orders</span>
         </div>
       </div>
 
@@ -852,7 +865,7 @@ export function DayTimeHeatmapChart({
         {weekDays.map((day) => (
           <div key={day.key} className="grid grid-cols-5 items-center gap-2">
             {/* Day Label (Y-Axis) */}
-            <div className="text-[11px] font-bold text-muted uppercase tracking-wider text-right pr-2">
+            <div className="text-xs font-bold text-muted uppercase tracking-wider text-right pr-2">
               {day.label}
             </div>
 
@@ -875,16 +888,16 @@ export function DayTimeHeatmapChart({
                   </div>
 
                   {/* Tooltip */}
-                  <div className="opacity-0 group-hover:opacity-100 transition-all duration-200 absolute -top-12 bg-gray-900 text-white px-2.5 py-1.5 rounded-lg text-[11px] font-semibold whitespace-nowrap shadow-2xl z-50 pointer-events-none transform -translate-y-1 border border-gray-700/60 flex flex-col gap-0.5 text-center">
-                    <span className="text-[9px] text-gray-400 font-bold uppercase tracking-wider">
+                  <div className="opacity-0 group-hover:opacity-100 transition-all duration-200 absolute -top-12 bg-primary text-white px-2.5 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap shadow-2xl z-50 pointer-events-none transform -translate-y-1 border border-border-hover/60 flex flex-col gap-0.5 text-center">
+                    <span className="text-xs text-foreground-muted font-bold uppercase tracking-wider">
                       {day.label} • {slot.label} ({slot.sub})
                     </span>
-                    <div className="flex items-center justify-center gap-1.5 text-[11px]">
-                      <span className="text-emerald-300 font-extrabold">
+                    <div className="flex items-center justify-center gap-1.5 text-xs">
+                      <span className="text-emerald-300 font-semibold">
                         {cellData.count} {cellData.count === 1 ? 'Order' : 'Orders'}
                       </span>
                       {cellData.revenue > 0 && (
-                        <span className="text-emerald-400 font-extrabold">
+                        <span className="text-emerald-400 font-semibold">
                           ({currencyPrefix}{cellData.revenue.toLocaleString()})
                         </span>
                       )}
@@ -902,7 +915,7 @@ export function DayTimeHeatmapChart({
           {timeSlots.map((slot) => (
             <div key={slot.key} className="text-center flex flex-col items-center">
               <span className="text-xs font-bold text-on-surface">{slot.label}</span>
-              <span className="text-[9px] text-muted font-medium">{slot.sub}</span>
+              <span className="text-xs text-muted font-medium">{slot.sub}</span>
             </div>
           ))}
         </div>
@@ -964,7 +977,7 @@ export function CategoryTreemapChart({
       orders.forEach((o) => {
         if (o.status === 'cancelled') return;
         o.order_items?.forEach((item) => {
-          const catName = item.products?.category || 'Milk & Dairy';
+          const catName = item.products?.category?.trim() || 'Uncategorised';
           const qty = Number(item.quantity) || 1;
           const price = typeof item.price === 'string' ? parseFloat(item.price) : Number(item.price) || 0;
 
@@ -978,15 +991,10 @@ export function CategoryTreemapChart({
       });
     }
 
-    // Default fallback mock categories if no order items exist yet
+    // No mock fallback. Showing invented dairy revenue on an admin dashboard
+    // is worse than showing an honest empty state.
     if (Object.keys(catStats).length === 0) {
-      return [
-        { label: 'Milk & Dairy', value: 320, percentage: 32, revenue: 16000 },
-        { label: 'Curd & Yogurt', value: 280, percentage: 28, revenue: 11200 },
-        { label: 'Paneer & Butter', value: 200, percentage: 20, revenue: 14000 },
-        { label: 'Ghee & Sweets', value: 120, percentage: 12, revenue: 18000 },
-        { label: 'Beverages', value: 80, percentage: 8, revenue: 4800 },
-      ];
+      return [];
     }
 
     const sorted = Object.entries(catStats)
@@ -1008,10 +1016,10 @@ export function CategoryTreemapChart({
       {/* Header Bar */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
         <div>
-          <h3 className="text-sm sm:text-base font-extrabold text-on-surface tracking-tight">
+          <h3 className="text-sm sm:text-base font-semibold text-on-surface tracking-tight">
             {title}
           </h3>
-          <p className="text-[11px] text-muted font-medium mt-0.5">{subtitle}</p>
+          <p className="text-xs text-muted font-medium mt-0.5">{subtitle}</p>
         </div>
 
         {/* Badge */}
@@ -1021,8 +1029,16 @@ export function CategoryTreemapChart({
         </span>
       </div>
 
+      {categoriesList.length === 0 && (
+        <div className="min-h-[220px] flex items-center justify-center text-center">
+          <p className="text-xs text-muted font-medium max-w-[240px]">
+            No category sales data yet. Tiles appear here once orders are placed.
+          </p>
+        </div>
+      )}
+
       {/* Treemap Tile Grid Container */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-2.5 min-h-[220px]">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-2.5 min-h-[220px]" hidden={categoriesList.length === 0}>
         {categoriesList.slice(0, 5).map((item, idx) => {
           const colorClass = CATEGORY_COLORS[idx % CATEGORY_COLORS.length];
           const pct = item.percentage ?? (totalValue > 0 ? Math.round((item.value / totalValue) * 100) : 0);
@@ -1039,7 +1055,7 @@ export function CategoryTreemapChart({
                 <span className="text-xs sm:text-sm font-bold tracking-wide block truncate opacity-95">
                   {item.label}
                 </span>
-                <span className="text-xl sm:text-2xl font-extrabold mt-1 block">
+                <span className="text-xl sm:text-2xl font-semibold mt-1 block">
                   {item.value.toLocaleString()}
                 </span>
               </div>
@@ -1049,16 +1065,16 @@ export function CategoryTreemapChart({
               </div>
 
               {/* Tooltip */}
-              <div className="opacity-0 group-hover:opacity-100 transition-all duration-200 absolute -top-12 left-1/2 transform -translate-x-1/2 bg-gray-900 text-white px-2.5 py-1.5 rounded-lg text-[11px] font-semibold whitespace-nowrap shadow-2xl z-50 pointer-events-none border border-gray-700/60 flex flex-col gap-0.5 text-center">
-                <span className="text-[9px] text-gray-400 font-bold uppercase tracking-wider">
+              <div className="opacity-0 group-hover:opacity-100 transition-all duration-200 absolute -top-12 left-1/2 transform -translate-x-1/2 bg-primary text-white px-2.5 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap shadow-2xl z-50 pointer-events-none border border-border-hover/60 flex flex-col gap-0.5 text-center">
+                <span className="text-xs text-foreground-muted font-bold uppercase tracking-wider">
                   {item.label}
                 </span>
-                <div className="flex items-center justify-center gap-1.5 text-[11px]">
-                  <span className="text-emerald-400 font-extrabold">
+                <div className="flex items-center justify-center gap-1.5 text-xs">
+                  <span className="text-emerald-400 font-semibold">
                     {item.value} units ({pct}%)
                   </span>
                   {item.revenue && item.revenue > 0 && (
-                    <span className="text-amber-300 font-extrabold">
+                    <span className="text-amber-300 font-semibold">
                       • {currencyPrefix}{item.revenue.toLocaleString()}
                     </span>
                   )}
@@ -1070,15 +1086,15 @@ export function CategoryTreemapChart({
       </div>
 
       {/* Footer Legend */}
-      <div className="mt-4 pt-3 border-t border-sand/20 flex flex-wrap items-center justify-between gap-2 text-[11px]">
-        <span className="text-muted font-semibold text-[10px] uppercase tracking-wider">
+      <div className="mt-4 pt-3 border-t border-sand/20 flex flex-wrap items-center justify-between gap-2 text-xs">
+        <span className="text-muted font-semibold text-xs uppercase tracking-wider">
           Categories: {categoriesList.length}
         </span>
         <div className="flex flex-wrap items-center gap-3">
           {categoriesList.slice(0, 5).map((cat, idx) => (
             <div key={idx} className="flex items-center gap-1.5">
               <span className={`w-2.5 h-2.5 rounded-sm ${CATEGORY_COLORS[idx % CATEGORY_COLORS.length].split(' ')[0]}`} />
-              <span className="text-muted font-medium text-[11px]">{cat.label}</span>
+              <span className="text-muted font-medium text-xs">{cat.label}</span>
             </div>
           ))}
         </div>
@@ -1153,10 +1169,10 @@ export function OrderStatusDonutChart({
       {/* Header Bar */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
         <div>
-          <h3 className="text-sm sm:text-base font-extrabold text-on-surface tracking-tight">
+          <h3 className="text-sm sm:text-base font-semibold text-on-surface tracking-tight">
             {title}
           </h3>
-          {subtitle && <p className="text-[11px] text-muted font-medium mt-0.5">{subtitle}</p>}
+          {subtitle && <p className="text-xs text-muted font-medium mt-0.5">{subtitle}</p>}
         </div>
       </div>
 
@@ -1188,7 +1204,7 @@ export function OrderStatusDonutChart({
                   background: '#111827',
                   borderRadius: '12px',
                   border: 'none',
-                  color: '#fff',
+                  color: 'var(--on-primary)',
                   fontSize: '12px',
                 }}
               />
@@ -1197,8 +1213,8 @@ export function OrderStatusDonutChart({
 
           {/* Center Text */}
           <div className="absolute flex flex-col items-center justify-center text-center pointer-events-none">
-            <span className="text-[11px] font-semibold text-muted">Total</span>
-            <span className="text-2xl font-extrabold text-on-surface leading-none mt-0.5">
+            <span className="text-xs font-semibold text-muted">Total</span>
+            <span className="text-2xl font-semibold text-on-surface leading-none mt-0.5">
               {totalCount}
             </span>
           </div>
@@ -1242,60 +1258,96 @@ export interface TopCategoriesCardProps {
 }
 
 export function TopCategoriesCard({ orders, className = '' }: TopCategoriesCardProps) {
+  // Previously rendered two hardcoded cards ("Milk & Dairy 3 / 60%" and
+  // "Buttermilk 3 / 60%") and a hardcoded "Total Categories 6", completely
+  // ignoring the `orders` prop it was given. It now aggregates real order
+  // items, like every other card on the dashboard.
+  const ranked = React.useMemo(() => {
+    const units: Record<string, number> = {};
+    let total = 0;
+
+    for (const order of orders ?? []) {
+      if (order.status === 'cancelled') continue;
+      for (const item of order.order_items ?? []) {
+        const name = item.products?.category?.trim();
+        if (!name) continue;
+        const qty = Number(item.quantity) || 1;
+        units[name] = (units[name] ?? 0) + qty;
+        total += qty;
+      }
+    }
+
+    const sorted = Object.entries(units)
+      .map(([label, value]) => ({
+        label,
+        value,
+        percentage: total > 0 ? Math.round((value / total) * 100) : 0,
+      }))
+      .sort((a, b) => b.value - a.value);
+
+    return { sorted, categoryCount: sorted.length };
+  }, [orders]);
+
+  const cards = ranked.sorted.slice(0, 2);
+  const cardStyles = ['bg-primary', 'bg-secondary'];
+  const dotStyles = ['bg-primary', 'bg-secondary'];
+
   return (
     <div className={`w-full bg-surface-container-lowest border border-sand/30 rounded-2xl p-4 sm:p-5 shadow-xs flex flex-col justify-between ${className}`}>
       {/* Header Bar */}
       <div className="flex items-center justify-between gap-3 mb-4">
-        <h3 className="text-sm sm:text-base font-extrabold text-on-surface tracking-tight">
+        <h3 className="text-sm sm:text-base font-semibold text-on-surface tracking-tight">
           Top Categories
         </h3>
       </div>
 
-      {/* Cards Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-4">
-        {/* Card 1: Milk & Dairy */}
-        <div className="bg-[#0c3c26] rounded-2xl p-4 text-white flex flex-col justify-between min-h-[135px] relative overflow-hidden shadow-sm">
-          <div>
-            <span className="text-xs font-bold tracking-wide opacity-95 block">Milk & Dairy</span>
-            <span className="text-2xl font-extrabold mt-1 block">3</span>
+      {cards.length === 0 ? (
+        <div className="flex-1 flex items-center justify-center py-10 text-center">
+          <p className="text-xs text-muted font-medium max-w-[220px]">
+            No category sales yet. This card fills in once orders start coming through.
+          </p>
+        </div>
+      ) : (
+        <>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-4">
+            {cards.map((cat, i) => (
+              <div
+                key={cat.label}
+                className={`${cardStyles[i]} rounded-2xl p-4 text-white flex flex-col justify-between min-h-[135px] relative overflow-hidden shadow-sm`}
+              >
+                <div>
+                  <span className="text-xs font-bold tracking-wide opacity-95 block truncate">{cat.label}</span>
+                  <span className="text-2xl font-semibold mt-1 block">{cat.value}</span>
+                </div>
+
+                <div className="flex items-end justify-between mt-4">
+                  <span className="text-xs font-semibold opacity-90">{cat.percentage}%</span>
+                  <div className="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center shrink-0">
+                    <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+                    </svg>
+                  </div>
+                </div>
+              </div>
+            ))}
           </div>
 
-          <div className="flex items-end justify-between mt-4">
-            <span className="text-xs font-semibold opacity-90">60%</span>
-            <div className="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center shrink-0">
-              <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
-              </svg>
+          {/* Footer Text */}
+          <div className="pt-3 border-t border-sand/20 flex items-center justify-between text-xs text-muted font-medium">
+            <span>
+              Total Categories{' '}
+              <strong className="text-on-surface font-semibold">{ranked.categoryCount}</strong>
+            </span>
+            <div className="flex items-center gap-2">
+              {cards.map((cat, i) => (
+                <span key={cat.label} className="flex items-center gap-1">
+                  <span className={`w-2 h-2 rounded-full ${dotStyles[i]}`} /> {cat.label}
+                </span>
+              ))}
             </div>
           </div>
-        </div>
-
-        {/* Card 2: Buttermilk */}
-        <div className="bg-[#b87d20] rounded-2xl p-4 text-white flex flex-col justify-between min-h-[135px] relative overflow-hidden shadow-sm">
-          <div>
-            <span className="text-xs font-bold tracking-wide opacity-95 block">Buttermilk</span>
-            <span className="text-2xl font-extrabold mt-1 block">3</span>
-          </div>
-
-          <div className="flex items-end justify-between mt-4">
-            <span className="text-xs font-semibold opacity-90">60%</span>
-            <div className="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center shrink-0">
-              <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
-              </svg>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Footer Text */}
-      <div className="pt-3 border-t border-sand/20 flex items-center justify-between text-[11px] text-muted font-medium">
-        <span>Total Categories <strong className="text-on-surface font-extrabold">6</strong></span>
-        <div className="flex items-center gap-2">
-          <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-[#0c3c26]" /> Milk & Dairy</span>
-          <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-[#b87d20]" /> Buttermilk</span>
-        </div>
-      </div>
+        </>
+      )}
     </div>
   );
 }
@@ -1322,7 +1374,7 @@ export function ProductPerformanceBarList({
         <h3 className="text-sm font-bold text-on-surface mb-4">{title}</h3>
 
         {/* Table Header */}
-        <div className="flex justify-between text-[11px] font-bold text-muted uppercase tracking-wider mb-3">
+        <div className="flex justify-between text-xs font-bold text-muted uppercase tracking-wider mb-3">
           <span>Product</span>
           <span>{valueHeader}</span>
         </div>
@@ -1337,7 +1389,7 @@ export function ProductPerformanceBarList({
                   <span className="font-semibold text-on-surface truncate pr-2">
                     {item.label}
                   </span>
-                  <span className="font-extrabold text-on-surface shrink-0">
+                  <span className="font-semibold text-on-surface shrink-0">
                     {item.displayValue || item.value}
                   </span>
                 </div>

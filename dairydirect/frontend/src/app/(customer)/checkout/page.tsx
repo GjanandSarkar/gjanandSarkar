@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
-import { ArrowLeft, Loader2, Tag, ShieldCheck, AlertCircle } from 'lucide-react';
+import { ArrowLeft, Loader2, Tag, ShieldCheck, AlertCircle, Sparkles } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import { cn } from '@/lib/utils';
 import { useTranslation } from '@/lib/i18n';
@@ -21,7 +21,9 @@ import { OrderReview } from '@/components/checkout/OrderReview';
 import { OrderSummary } from '@/components/cart/OrderSummary';
 import { PaymentSelection } from '@/components/checkout/PaymentSelection';
 import { CheckoutConfidence } from '@/components/trust/CheckoutConfidence';
+import { OffersDrawer } from '@/components/checkout/OffersDrawer';
 import { initiateRazorpayPayment } from '@/lib/razorpay-client';
+import { SkeletonBlock } from '@/components/shared/Skeletons';
 
 export default function CheckoutScreen() {
   const router = useRouter();
@@ -43,12 +45,12 @@ export default function CheckoutScreen() {
   const [isProcessing, setIsProcessing] = useState(false);
   const [stockError, setStockError] = useState<string | null>(null);
 
-  const [selectedSlot, setSelectedSlot] = useState('morning1');
   const [upiId, setUpiId] = useState('');
 
   const [couponCode, setCouponCode] = useState('');
   const [isApplyingCoupon, setIsApplyingCoupon] = useState(false);
   const [couponError, setCouponError] = useState('');
+  const [isOffersDrawerOpen, setIsOffersDrawerOpen] = useState(false);
 
   const [pricing, setPricing] = useState<{
     subtotal: number,
@@ -57,12 +59,6 @@ export default function CheckoutScreen() {
     total: number,
     nextTier: number
   } | null>(null);
-
-  const slots = [
-    { id: 'morning1', time: '6:00 AM - 8:00 AM', avail: 'Fastest' },
-    { id: 'morning2', time: '8:00 AM - 10:00 AM', avail: 'Available' },
-    { id: 'evening', time: '5:00 PM - 7:00 PM', avail: 'Available' },
-  ];
 
   // Fetch Data
   useEffect(() => {
@@ -89,39 +85,45 @@ export default function CheckoutScreen() {
     }).filter(Boolean) as any[]; // Type assertion for brevity since we filtered out nulls
   }, [cart, products]);
 
+  // Stable signature for cart contents to avoid infinite re-render loops
+  const cartSignature = useMemo(
+    () => cart.map(i => `${i.variantId}:${i.quantity}`).sort().join('|'),
+    [cart]
+  );
+
   // Pricing Calculation
   useEffect(() => {
-    if (cartItemsData.length > 0) {
+    if (cart.length > 0) {
       const items = cart.map(i => ({ variantId: i.variantId, quantity: i.quantity }));
-      
-      // Track Checkout Started
-      Analytics.trackEvent('Checkout Started', {
-        cartSize: cart.length,
-        subtotal: pricing?.subtotal || 0
-      });
 
       validateCoupon(items, couponCode).then(res => {
-        setPricing({
-          subtotal: res.subtotal || 0,
-          delivery: res.deliveryFee || 0,
-          discount: res.discount || 0,
-          total: res.total || 0,
-          nextTier: (res as any).nextTierAmount || 0
-        });
+        if (res) {
+          setPricing({
+            subtotal: res.subtotal || 0,
+            delivery: res.deliveryFee || 0,
+            discount: res.discount || 0,
+            total: res.total || 0,
+            nextTier: (res as any).nextTierAmount || 0
+          });
+        }
+        setIsLoading(false);
+      }).catch(() => {
         setIsLoading(false);
       });
-    } else if (products.length > 0) {
+    } else {
       setIsLoading(false);
     }
-  }, [cartItemsData, couponCode, cart, products]);
+  }, [cartSignature, couponCode]);
 
-  const handleApplyCoupon = async () => {
-    if (!couponCode) return;
+  const handleApplyCoupon = async (codeToApply?: string) => {
+    const code = (codeToApply || couponCode).trim().toUpperCase();
+    if (!code) return;
     setIsApplyingCoupon(true);
     setCouponError('');
+    setCouponCode(code);
 
     const items = cart.map(i => ({ variantId: i.variantId, quantity: i.quantity }));
-    const res = await validateCoupon(items, couponCode);
+    const res = await validateCoupon(items, code);
 
     if (res.valid) {
       setPricing({
@@ -165,6 +167,25 @@ export default function CheckoutScreen() {
       price: parseFloat(String(item.variant.price)) || 0, // Supabase numeric comes as string
     }));
 
+    // ─── Reserve Inventory Hold During Checkout ───
+    let activeReservationId: string | undefined = undefined;
+    try {
+      const resRes = await fetch('/api/inventory/reserve', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          items: orderItems.map(i => ({ variantId: i.variantId, quantity: i.quantity, productId: i.productId })),
+          holdSeconds: 600,
+        }),
+      });
+      if (resRes.ok) {
+        const resJson = await resRes.json();
+        activeReservationId = resJson?.reservations?.[0]?.reservation_id || resJson?.reservations?.[0]?.id;
+      }
+    } catch (e) {
+      console.warn('Inventory reservation warning:', e);
+    }
+
     // ─── Razorpay Online Payment Flow ───
     if (selectedMethod === 'razorpay') {
       const amountInPaise = Math.round((pricing?.total || 0) * 100);
@@ -175,6 +196,11 @@ export default function CheckoutScreen() {
         currency: 'INR',
         name: 'Gjanand Sarkar',
         description: `Order with ${orderItems.length} item(s)`,
+        items: orderItems.map((item) => ({
+          variantId: item.variantId,
+          quantity: item.quantity,
+        })),
+        couponCode: couponCode || undefined,
         prefill: {
           name: user.name || 'Customer',
           email: user.email || '',
@@ -196,6 +222,7 @@ export default function CheckoutScreen() {
             paymentMethod: 'razorpay',
             paymentStatus: 'paid',
             couponCode: couponCode || undefined,
+            reservationId: activeReservationId,
             // Pass Razorpay IDs so they get stored in the order record
             razorpayOrderId: razorpayResponse.razorpay_order_id,
             razorpayPaymentId: razorpayResponse.razorpay_payment_id,
@@ -215,6 +242,9 @@ export default function CheckoutScreen() {
             router.replace(`/order-confirmed/${result.orderId}`);
           } else {
             setIsProcessing(false);
+            if (activeReservationId) {
+              fetch(`/api/inventory/reserve?reservationId=${activeReservationId}`, { method: 'DELETE' }).catch(() => {});
+            }
             if (result.error && (result.error.toLowerCase().includes('insufficient') || result.error.toLowerCase().includes('stock') || result.error.toLowerCase().includes('inventory'))) {
               setStockError(result.error);
             } else {
@@ -224,10 +254,16 @@ export default function CheckoutScreen() {
         },
         onError: (error) => {
           setIsProcessing(false);
+          if (activeReservationId) {
+            fetch(`/api/inventory/reserve?reservationId=${activeReservationId}`, { method: 'DELETE' }).catch(() => {});
+          }
           alert(error.message || 'Payment failed or was cancelled.');
         },
         onDismiss: () => {
           setIsProcessing(false);
+          if (activeReservationId) {
+            fetch(`/api/inventory/reserve?reservationId=${activeReservationId}`, { method: 'DELETE' }).catch(() => {});
+          }
         },
       });
       return;
@@ -235,81 +271,131 @@ export default function CheckoutScreen() {
 
     setIsProcessing(true);
 
-    const result = await placeOrder({
-      userId: user.id,
-      customerName: user.name || 'Customer',
-      customerPhone: user.phone || '',
-      items: orderItems,
-      total: pricing?.total || 0,
-      addressId: checkoutAddressId,
-      paymentMethod: selectedMethod,
-      paymentStatus: selectedMethod === 'cod' ? 'pending' : 'paid',
-      couponCode: couponCode || undefined,
-      upiId: selectedMethod === 'upi' ? upiId : undefined
-    });
+    // `navigated` keeps the button disabled while the router transition to the
+    // confirmation page is in flight. Every other exit path -- success, error,
+    // or an unexpected throw -- must release the spinner in `finally`.
+    // Previously there was no try/catch here at all, so anything that threw or
+    // hung left "Placing Order..." on screen permanently with no way out.
+    let navigated = false;
 
-    if (result.success && result.orderId) {
-      Analytics.trackEvent('Checkout Completed', {
-        orderId: result.orderId,
+    try {
+      const result = await placeOrder({
+        userId: user.id,
+        customerName: user.name || 'Customer',
+        customerPhone: user.phone || '',
+        items: orderItems,
         total: pricing?.total || 0,
-        cartSize: cartItemsData.length
+        addressId: checkoutAddressId,
+        paymentMethod: selectedMethod,
+        paymentStatus: selectedMethod === 'cod' ? 'pending' : 'paid',
+        couponCode: couponCode || undefined,
+        upiId: selectedMethod === 'upi' ? upiId : undefined,
+        reservationId: activeReservationId,
       });
-      clearCartLocal();
-      await clearCartApi(user.id);
-      router.replace(`/order-confirmed/${result.orderId}`);
-    } else {
-      setIsProcessing(false);
-      if (result.error && (result.error.toLowerCase().includes('insufficient') || result.error.toLowerCase().includes('stock') || result.error.toLowerCase().includes('inventory'))) {
+
+      if (result.success && result.orderId) {
+        Analytics.trackEvent('Checkout Completed', {
+          orderId: result.orderId,
+          total: pricing?.total || 0,
+          cartSize: cartItemsData.length
+        });
+        clearCartLocal();
+        // Fire-and-forget: the order is already placed, so a slow or failing
+        // cart-cleanup call must never stand between the customer and their
+        // confirmation page.
+        void clearCartApi(user.id).catch(() => {});
+        navigated = true;
+        router.replace(`/order-confirmed/${result.orderId}`);
+      } else if (
+        result.error &&
+        (result.error.toLowerCase().includes('insufficient') ||
+          result.error.toLowerCase().includes('stock') ||
+          result.error.toLowerCase().includes('inventory'))
+      ) {
         setStockError(result.error);
       } else {
         alert(result.error || 'Failed to place order. Please try again.');
       }
+    } catch (err) {
+      console.error('[checkout] Unexpected error while placing order:', err);
+      alert(
+        'Something went wrong while placing your order. ' +
+          'You have not been charged. Please check My Orders before retrying.'
+      );
+    } finally {
+      if (!navigated) setIsProcessing(false);
     }
   };
 
   if (isLoading || !pricing) {
     return (
-      <div className="flex flex-col min-h-screen items-center justify-center bg-cream">
-        <Loader2 className="w-8 h-8 animate-spin text-primary" />
-        <p className="mt-4 text-xs text-muted font-medium">Securing Checkout...</p>
+      /* Was a centred spinner on a blank screen reading "Securing
+         Checkout...". Checkout is the most abandonment-sensitive screen in
+         the app: a blank page with a spinner is exactly where people leave.
+         A skeleton of the real layout keeps the page feeling present. */
+      <div className="flex flex-col min-h-screen bg-cream">
+        <div className="sticky top-0 z-30 bg-surface border-b border-sand">
+          <div className="flex justify-between items-center p-4">
+            <SkeletonBlock className="h-6 w-40" />
+            <SkeletonBlock className="h-6 w-20 rounded-md" />
+          </div>
+        </div>
+        <div className="flex-1 px-4 py-5 space-y-4 max-w-3xl mx-auto w-full">
+          <SkeletonBlock className="h-28 w-full rounded-2xl" />
+          <SkeletonBlock className="h-40 w-full rounded-2xl" />
+          <SkeletonBlock className="h-48 w-full rounded-2xl" />
+        </div>
+        <div className="sticky bottom-0 bg-surface border-t border-sand p-4">
+          <SkeletonBlock className="h-14 w-full rounded-2xl" />
+        </div>
       </div>
     );
   }
 
-  // Calculate free delivery progress for OrderSummary
-  // (We use a mock threshold of 300 for UI purposes, matching earlier logic if needed, 
-  // but it relies on pricing.nextTier)
+  // Free-delivery progress. Derived from the server-calculated pricing tier,
+  // not a hardcoded threshold.
   const deliveryProgress = pricing.nextTier > 0
     ? Math.min(100, (pricing.subtotal / (pricing.subtotal + pricing.nextTier)) * 100)
     : 100;
   const isFreeDelivery = pricing.delivery === 0;
 
+  const ctaLabel =
+    selectedMethod === 'razorpay'
+      ? `Pay ₹${pricing.total} with Razorpay`
+      : selectedMethod === 'cod'
+        ? 'Place Order (Cash on Delivery)'
+        : 'Place Order';
+
   return (
     <>
-      <div className="flex flex-col min-h-screen bg-cream pb-[140px] relative">
-        <div className="sticky top-0 z-30 bg-white border-b border-sand shadow-sm">
+      <div className="flex flex-col min-h-screen bg-cream pb-[140px] lg:pb-10 relative">
+        <div className="sticky top-0 z-30 bg-surface border-b border-sand shadow-sm">
           <div className="flex justify-between items-center p-4">
             <div className="flex items-center">
               <button onClick={() => !isProcessing && router.back()} className="p-2 -ml-2 mr-2 rounded-full hover:bg-sand/30" disabled={isProcessing}>
                 <ArrowLeft className="w-6 h-6 text-dark" />
               </button>
-              <h1 className="text-xl font-black text-dark">Secure Checkout</h1>
+              <h1 className="text-xl font-semibold text-dark">Secure Checkout</h1>
             </div>
-            <div className="flex items-center gap-1 text-green-600 bg-green-50 px-2 py-1 rounded-md border border-green-100">
+            <div className="flex items-center gap-1 text-success bg-success-bg px-2 py-1 rounded-md border border-green-100">
               <ShieldCheck className="w-4 h-4" />
-              <span className="text-[10px] font-bold uppercase tracking-wider">100% Safe</span>
+              <span className="text-xs font-bold uppercase tracking-wider">100% Safe</span>
             </div>
           </div>
         </div>
 
-        <div className="p-4 flex-1 space-y-6">
+        {/* Checkout used to be a single unbounded column, so on anything wider
+            than a phone every card and button stretched the full width of the
+            display. Constrain it and, from `lg` up, split it into the standard
+            two-column checkout: the steps on the left, a sticky order summary
+            and CTA on the right. */}
+        <div className="flex-1 w-full max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-5">
+          <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_minmax(320px,380px)] gap-6 lg:gap-8 items-start">
+            <div className="min-w-0 space-y-5">
           <AddressSelection
             addresses={addresses}
             selectedAddressId={checkoutAddressId}
             onSelectAddress={setCheckoutAddressId}
-            slots={slots}
-            selectedSlot={selectedSlot}
-            onSelectSlot={setSelectedSlot}
             onAddressCreated={(newAddr) => {
               setAddresses((prev) => [
                 newAddr,
@@ -333,10 +419,20 @@ export default function CheckoutScreen() {
           <OrderReview items={cartItemsData} />
 
           {/* Coupon Section */}
-          <div className="bg-white rounded-[20px] p-4 border border-sand shadow-sm">
-            <div className="flex items-center gap-2 mb-3">
-              <Tag className="w-4 h-4 text-primary" />
-              <h3 className="text-sm font-bold text-dark uppercase tracking-wider">Offers</h3>
+          <div className="bg-surface rounded-xl p-4 border border-border shadow-xs">
+            <div className="flex items-center justify-between gap-2 mb-3">
+              <div className="flex items-center gap-2">
+                <Tag className="w-4 h-4 text-primary" />
+                <h3 className="text-sm font-semibold text-foreground">Offers & Coupons</h3>
+              </div>
+              <button
+                type="button"
+                onClick={() => setIsOffersDrawerOpen(true)}
+                className="text-xs font-semibold text-primary hover:text-primary-hover flex items-center gap-1 cursor-pointer transition-colors"
+              >
+                <Sparkles className="w-3.5 h-3.5 text-secondary" />
+                <span>View All Offers</span>
+              </button>
             </div>
             <div className="flex gap-2">
               <div className="relative flex-1">
@@ -346,40 +442,22 @@ export default function CheckoutScreen() {
                   onChange={(e) => setCouponCode(e.target.value.toUpperCase())}
                   placeholder="Enter Coupon Code"
                   className={cn(
-                    "w-full text-sm font-bold border rounded-[12px] px-3 py-2.5 outline-none transition-all uppercase placeholder:text-muted/50 placeholder:font-medium",
-                    couponError ? "border-red-400 bg-red-50 text-red-600" : "border-sand focus:border-primary"
+                    "w-full text-sm font-semibold border rounded-lg px-3 py-2.5 outline-none transition-all uppercase placeholder:text-foreground-muted/60 bg-surface",
+                    couponError ? "border-red-400 bg-error-bg text-error" : "border-border focus:border-primary"
                   )}
                 />
-                {couponError && <p className="absolute -bottom-5 left-0 text-[10px] text-red-500 font-bold">{couponError}</p>}
+                {couponError && <p className="absolute -bottom-5 left-0 text-xs text-red-500 font-bold">{couponError}</p>}
               </div>
               <button
-                onClick={handleApplyCoupon}
+                type="button"
+                onClick={() => handleApplyCoupon()}
                 disabled={isApplyingCoupon || !couponCode}
-                className="bg-primary hover:bg-primary-dark disabled:opacity-50 text-white font-bold px-5 py-2.5 rounded-[12px] text-sm shadow-sm transition-all flex items-center justify-center gap-2 min-w-[80px]"
+                className="bg-primary hover:bg-primary-hover disabled:opacity-50 text-on-primary font-semibold px-5 py-2.5 rounded-lg text-sm shadow-xs transition-all flex items-center justify-center gap-2 min-w-[80px] cursor-pointer"
               >
                 {isApplyingCoupon ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Apply'}
               </button>
             </div>
           </div>
-
-          {/* Order Summary component handles the total breakdown */}
-          <OrderSummary
-            subtotal={pricing.subtotal}
-            delivery={pricing.delivery}
-            total={pricing.total}
-            isFreeDelivery={isFreeDelivery}
-            deliveryProgress={deliveryProgress}
-            neededForFree={pricing.nextTier}
-          />
-
-          {/* Add a manual discount line if OrderSummary doesn't show it natively, or it handles it. 
-              Looking at OrderSummary, it doesn't natively show 'discount' so we'll inject it. */}
-          {pricing.discount > 0 && (
-            <div className="bg-green-50 border border-green-200 rounded-[12px] p-3 flex justify-between items-center -mt-4">
-              <span className="text-sm font-bold text-green-700">Coupon Discount</span>
-              <span className="text-sm font-bold text-green-700">-₹{pricing.discount}</span>
-            </div>
-          )}
 
           <PaymentSelection 
             selectedMethod={selectedMethod} 
@@ -388,14 +466,52 @@ export default function CheckoutScreen() {
             onChangeUpiId={setUpiId} 
           />
 
-          <CheckoutConfidence />
+              <CheckoutConfidence />
+            </div>
+
+            {/* Sticky summary rail (desktop). On mobile this content still
+                appears inline, followed by the fixed bottom bar. */}
+            <aside className="min-w-0 space-y-4 lg:sticky lg:top-24">
+              <OrderSummary
+                subtotal={pricing.subtotal}
+                delivery={pricing.delivery}
+                total={pricing.total}
+                isFreeDelivery={isFreeDelivery}
+                deliveryProgress={deliveryProgress}
+                neededForFree={pricing.nextTier}
+              />
+
+              {pricing.discount > 0 && (
+                <div className="bg-success-bg border border-success/20 rounded-[12px] p-3 flex justify-between items-center">
+                  <span className="text-sm font-bold text-success">Coupon Discount</span>
+                  <span className="text-sm font-bold text-success">-₹{pricing.discount}</span>
+                </div>
+              )}
+
+              {/* Desktop CTA. The fixed bottom bar is mobile-only. */}
+              <div className="hidden lg:block bg-surface rounded-[20px] p-4 border border-sand shadow-sm space-y-3">
+                <div className="flex items-baseline justify-between">
+                  <span className="text-xs font-bold text-muted uppercase tracking-wider">Total Pay</span>
+                  <span className="text-2xl font-semibold text-dark">₹{pricing.total}</span>
+                </div>
+                <Button
+                  size="lg"
+                  className="w-full shadow-active"
+                  onClick={handlePlaceOrder}
+                  disabled={isProcessing || !checkoutAddressId || cartItemsData.length === 0}
+                >
+                  {ctaLabel}
+                </Button>
+              </div>
+            </aside>
+          </div>
         </div>
 
-        <div className="fixed bottom-0 left-0 right-0 md:left-[260px] p-4 bg-white border-t border-sand z-40 pb-safe shadow-[0_-10px_20px_rgba(0,0,0,0.05)]">
+        <div className="lg:hidden checkout-action-bar p-4 bg-surface border-t border-border shadow-[0_-10px_20px_rgba(0,0,0,0.05)]">
           <div className="max-w-[800px] mx-auto flex items-center justify-between gap-4">
             <div className="flex flex-col">
-              <span className="text-[11px] font-bold text-muted uppercase">Total Pay</span>
-              <span className="text-xl font-black text-dark">₹{pricing.total}</span>
+              <span className="text-xs font-bold text-muted uppercase">Total Pay</span>
+              <span className="text-xl font-semibold text-dark">₹{pricing.total}</span>
             </div>
             <Button
               size="lg"
@@ -403,11 +519,7 @@ export default function CheckoutScreen() {
               onClick={handlePlaceOrder}
               disabled={isProcessing || !checkoutAddressId || cartItemsData.length === 0}
             >
-              {selectedMethod === 'razorpay' 
-                ? `Pay ₹${pricing.total} with Razorpay` 
-                : selectedMethod === 'cod' 
-                  ? 'Place Order (Cash on Delivery)' 
-                  : 'Place Order'}
+              {ctaLabel}
             </Button>
           </div>
         </div>
@@ -424,7 +536,7 @@ export default function CheckoutScreen() {
             <motion.div
               initial={{ scale: 0.9, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
-              className="bg-white rounded-[20px] p-8 w-full max-w-[280px] flex flex-col items-center justify-center shadow-xl"
+              className="bg-surface rounded-[20px] p-8 w-full max-w-[280px] flex flex-col items-center justify-center shadow-xl"
             >
               <div className="w-16 h-16 rounded-full border-4 border-sand border-t-primary animate-spin mb-6" />
               <h3 className="font-bold text-dark text-lg mb-2">Placing Order...</h3>
@@ -444,16 +556,16 @@ export default function CheckoutScreen() {
               initial={{ scale: 0.95, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.95, opacity: 0 }}
-              className="bg-white rounded-2xl p-6 w-full max-w-md shadow-2xl border border-rose-200"
+              className="bg-surface rounded-2xl p-6 w-full max-w-md shadow-2xl border border-error/20"
             >
-              <div className="flex items-center gap-3 text-rose-600 mb-3">
+              <div className="flex items-center gap-3 text-error mb-3">
                 <AlertCircle className="w-6 h-6 shrink-0" />
-                <h3 className="font-bold text-lg text-gray-900">Important: Inventory Update</h3>
+                <h3 className="font-bold text-lg text-foreground">Important: Inventory Update</h3>
               </div>
-              <p className="text-sm text-gray-700 leading-relaxed mb-4">
+              <p className="text-sm text-foreground leading-relaxed mb-4">
                 {stockError}
               </p>
-              <p className="text-xs text-gray-500 mb-6">
+              <p className="text-xs text-foreground-muted mb-6">
                 Items in your cart may have been purchased by other customers concurrently. Please return to your cart to review updated quantities.
               </p>
               <div className="flex justify-end gap-3">
@@ -462,7 +574,7 @@ export default function CheckoutScreen() {
                     setStockError(null);
                     router.push('/cart');
                   }}
-                  className="w-full bg-[#0f3e26] hover:bg-[#144f31] text-white font-bold py-2.5 rounded-xl shadow-md"
+                  className="w-full bg-primary hover:bg-primary-hover text-on-primary font-bold py-2.5 rounded-xl shadow-md"
                 >
                   Return to Cart & Adjust Items
                 </Button>
@@ -471,6 +583,14 @@ export default function CheckoutScreen() {
           </motion.div>
         )}
       </AnimatePresence>
+
+      <OffersDrawer
+        isOpen={isOffersDrawerOpen}
+        onClose={() => setIsOffersDrawerOpen(false)}
+        cartSubtotal={pricing?.subtotal || 0}
+        appliedCouponCode={couponCode || undefined}
+        onApplyCoupon={(code) => handleApplyCoupon(code)}
+      />
     </>
   );
 }

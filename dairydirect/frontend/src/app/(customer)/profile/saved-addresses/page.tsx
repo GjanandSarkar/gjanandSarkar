@@ -172,7 +172,7 @@ export default function SavedAddressesPage() {
           return true;
         } else {
           showFeedback(res.error || 'Failed to update address', 'error');
-          return false;
+          throw new Error(res.error || 'Failed to update address');
         }
       } else {
         const res = await saveAddressAPI({ ...addressData, userId: uid });
@@ -187,33 +187,33 @@ export default function SavedAddressesPage() {
           return true;
         } else {
           showFeedback(res.error || 'Failed to save address', 'error');
-          return false;
+          throw new Error(res.error || 'Failed to save address');
         }
       }
     } catch (err: any) {
       showFeedback(err.message || 'An error occurred while saving', 'error');
-      return false;
+      throw err;
     } finally {
       setIsModalSaving(false);
     }
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 text-slate-900 pb-28">
+    <div className="min-h-screen bg-surface-muted text-foreground pb-28">
       {/* Top Navigation */}
-      <header className="sticky top-0 z-30 bg-white/90 backdrop-blur-md border-b border-slate-200">
+      <header className="sticky top-0 z-30 bg-surface/90 backdrop-blur-md border-b border-border">
         <div className="max-w-4xl mx-auto px-4 h-16 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <button
               onClick={() => router.push('/profile')}
-              className="p-2 hover:bg-slate-100 rounded-full transition-colors text-slate-600 hover:text-slate-900 cursor-pointer"
+              className="p-2 hover:bg-surface-muted rounded-full transition-colors text-foreground-muted hover:text-foreground cursor-pointer"
               aria-label="Back to Profile"
             >
               <ChevronLeft className="w-6 h-6" />
             </button>
             <div>
-              <h1 className="text-lg font-bold text-slate-900 leading-none">Saved Addresses</h1>
-              <p className="text-xs text-slate-500 mt-1">Manage delivery locations for quick checkout</p>
+              <h1 className="text-lg font-bold text-foreground leading-none">Saved Addresses</h1>
+              <p className="text-xs text-foreground-muted mt-1">Manage delivery locations for quick checkout</p>
             </div>
           </div>
         </div>
@@ -225,8 +225,8 @@ export default function SavedAddressesPage() {
           <div
             className={`flex items-center gap-2 px-4 py-2.5 rounded-full shadow-lg text-sm font-medium ${
               feedbackMsg.type === 'success'
-                ? 'bg-emerald-800 text-emerald-50 shadow-emerald-950/20'
-                : 'bg-rose-800 text-rose-50 shadow-rose-950/20'
+                ? 'bg-success text-success-bg shadow-emerald-950/20'
+                : 'bg-error text-error-bg shadow-rose-950/20'
             }`}
           >
             {feedbackMsg.type === 'success' ? <Check className="w-4 h-4" /> : <AlertCircle className="w-4 h-4" />}
@@ -241,44 +241,44 @@ export default function SavedAddressesPage() {
         <div className="bg-gradient-to-r from-emerald-600 to-teal-700 rounded-2xl p-5 text-white shadow-sm flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
           <div className="space-y-1">
             <div className="flex items-center gap-2">
-              <span className="p-1.5 bg-white/20 rounded-lg backdrop-blur-sm">
-                <Compass className="w-4 h-4 text-emerald-100" />
+              <span className="p-1.5 bg-surface/20 rounded-lg backdrop-blur-sm">
+                <Compass className="w-4 h-4 text-success-bg" />
               </span>
               <h2 className="font-semibold text-base">Pinpoint Your Exact Delivery Location</h2>
             </div>
-            <p className="text-xs text-emerald-100/90 leading-relaxed max-w-xl">
+            <p className="text-xs text-success-bg/90 leading-relaxed max-w-xl">
               Save multiple delivery addresses for your home, office, or relatives to get superfast dairy delivery.
             </p>
           </div>
           <button
             onClick={handleOpenAdd}
-            className="flex-shrink-0 flex items-center gap-2 px-4 py-2.5 bg-white text-emerald-800 hover:bg-emerald-50 active:scale-95 font-semibold text-xs rounded-xl shadow transition-all cursor-pointer"
+            className="flex-shrink-0 flex items-center gap-2 px-4 py-2.5 bg-surface text-success hover:bg-success-bg active:scale-95 font-semibold text-xs rounded-xl shadow transition-all cursor-pointer"
           >
-            <Plus className="w-4 h-4 text-emerald-700" />
+            <Plus className="w-4 h-4 text-success" />
             Add Address
           </button>
         </div>
 
         {/* Addresses List Container */}
         {isLoading ? (
-          <div className="bg-white rounded-2xl border border-slate-200 p-12 flex flex-col items-center justify-center text-center space-y-3">
-            <Loader2 className="w-8 h-8 text-emerald-600 animate-spin" />
-            <p className="text-sm font-medium text-slate-500">Loading your saved addresses...</p>
+          <div className="bg-surface rounded-2xl border border-border p-12 flex flex-col items-center justify-center text-center space-y-3">
+            <Loader2 className="w-8 h-8 text-success animate-spin" />
+            <p className="text-sm font-medium text-foreground-muted">Loading your saved addresses...</p>
           </div>
         ) : addresses.length === 0 ? (
-          <div className="bg-white rounded-2xl border border-dashed border-slate-300 p-10 flex flex-col items-center justify-center text-center space-y-4">
-            <div className="w-14 h-14 bg-emerald-50 text-emerald-600 rounded-2xl flex items-center justify-center shadow-inner">
+          <div className="bg-surface rounded-2xl border border-dashed border-border p-10 flex flex-col items-center justify-center text-center space-y-4">
+            <div className="w-14 h-14 bg-success-bg text-success rounded-2xl flex items-center justify-center shadow-inner">
               <MapPin className="w-7 h-7" />
             </div>
             <div className="space-y-1 max-w-sm">
-              <h3 className="font-bold text-slate-800 text-base">No saved addresses yet</h3>
-              <p className="text-xs text-slate-500 leading-relaxed">
+              <h3 className="font-bold text-foreground text-base">No saved addresses yet</h3>
+              <p className="text-xs text-foreground-muted leading-relaxed">
                 Add your home or office address to start receiving fresh farm-to-table dairy items.
               </p>
             </div>
             <button
               onClick={handleOpenAdd}
-              className="flex items-center gap-2 px-4 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold rounded-xl shadow transition-all active:scale-95 cursor-pointer"
+              className="flex items-center gap-2 px-4 py-2.5 bg-success hover:bg-success text-on-success text-xs font-semibold rounded-xl shadow transition-all active:scale-95 cursor-pointer"
             >
               <Plus className="w-4 h-4" />
               Add First Address
@@ -287,10 +287,10 @@ export default function SavedAddressesPage() {
         ) : (
           <div className="space-y-4">
             <div className="flex items-center justify-between px-1">
-              <h2 className="text-xs font-bold uppercase tracking-wider text-slate-400">
+              <h2 className="text-xs font-bold uppercase tracking-wider text-foreground-muted">
                 Your Saved Locations ({addresses.length})
               </h2>
-              <span className="text-[11px] text-slate-400">
+              <span className="text-xs text-foreground-muted">
                 {addresses.filter((a) => a.is_default).length} active default address
               </span>
             </div>
@@ -313,27 +313,27 @@ export default function SavedAddressesPage() {
 
       {/* Delete Confirmation Modal */}
       {deleteConfirmId && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-in fade-in duration-200">
-          <div className="bg-white max-w-sm w-full rounded-2xl p-5 shadow-2xl border border-slate-200 space-y-4 animate-in zoom-in-95">
-            <div className="w-12 h-12 bg-rose-50 text-rose-600 rounded-2xl flex items-center justify-center mx-auto">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-foreground/60 backdrop-blur-sm animate-in fade-in duration-200">
+          <div className="bg-surface max-w-sm w-full rounded-2xl p-5 shadow-2xl border border-border space-y-4 animate-in zoom-in-95">
+            <div className="w-12 h-12 bg-error-bg text-error rounded-2xl flex items-center justify-center mx-auto">
               <Trash2 className="w-6 h-6" />
             </div>
             <div className="text-center space-y-1">
-              <h3 className="font-bold text-slate-900 text-base">Delete this address?</h3>
-              <p className="text-xs text-slate-500 leading-relaxed">
+              <h3 className="font-bold text-foreground text-base">Delete this address?</h3>
+              <p className="text-xs text-foreground-muted leading-relaxed">
                 Are you sure you want to remove this delivery address? This action cannot be undone.
               </p>
             </div>
             <div className="flex gap-2 pt-2">
               <button
                 onClick={() => setDeleteConfirmId(null)}
-                className="flex-1 py-2 rounded-xl border border-slate-300 text-slate-700 font-semibold text-xs hover:bg-slate-50 transition-colors cursor-pointer"
+                className="flex-1 py-2 rounded-xl border border-border text-foreground font-semibold text-xs hover:bg-surface-muted transition-colors cursor-pointer"
               >
                 Cancel
               </button>
               <button
                 onClick={() => handleDelete(deleteConfirmId)}
-                className="flex-1 py-2 rounded-xl bg-rose-600 hover:bg-rose-700 text-white font-semibold text-xs transition-colors cursor-pointer"
+                className="flex-1 py-2 rounded-xl bg-error hover:bg-error text-on-error font-semibold text-xs transition-colors cursor-pointer"
               >
                 Delete
               </button>

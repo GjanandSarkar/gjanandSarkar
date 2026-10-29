@@ -105,16 +105,12 @@ export function NotificationBell({ variant = 'mobile' }: NotificationPanelProps)
       <button
         id="notification-bell"
         onClick={() => router.push('/notifications')}
-        className="relative w-9 h-9 rounded-[10px] flex items-center justify-center transition-all active:scale-95"
-        style={{ background: 'var(--color-surface-container-low)', color: 'var(--color-on-surface-variant)' }}
+        className="relative w-9 h-9 rounded-lg flex items-center justify-center transition-colors bg-surface-muted text-foreground hover:bg-border cursor-pointer min-h-[44px] min-w-[44px]"
         aria-label="Notifications"
       >
-        <Bell className="w-4.5 h-4.5" strokeWidth={2} />
+        <Bell className="w-4 h-4 text-foreground" strokeWidth={2} />
         {unreadCount > 0 && (
-          <span
-            className="absolute -top-1.5 -right-1.5 w-[18px] h-[18px] text-[9px] font-bold rounded-full flex items-center justify-center"
-            style={{ background: 'var(--color-error)', color: 'white' }}
-          >
+          <span className="absolute -top-1 -right-1 w-4.5 h-4.5 text-xs font-semibold rounded-full flex items-center justify-center bg-primary text-on-primary">
             {unreadCount > 9 ? '9+' : unreadCount}
           </span>
         )}
@@ -129,16 +125,15 @@ export function NotificationBell({ variant = 'mobile' }: NotificationPanelProps)
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
-                className="fixed inset-0 bg-black/50 z-50"
+                className="fixed inset-0 bg-black/40 z-50"
                 onClick={() => setOpen(false)}
               />
               <motion.div
                 initial={{ y: '100%' }}
                 animate={{ y: 0 }}
                 exit={{ y: '100%' }}
-                transition={{ type: 'spring', damping: 28, stiffness: 320 }}
-                className="fixed bottom-0 left-0 right-0 z-[60] rounded-t-[24px] overflow-hidden"
-                style={{ background: 'var(--color-surface)', maxHeight: '80vh' }}
+                transition={{ duration: 0.18 }}
+                className="fixed bottom-0 left-0 right-0 z-[60] rounded-t-xl overflow-hidden bg-surface border-t border-border max-h-[80vh]"
               >
                 <NotificationSheet
                   notifications={notifications}
@@ -168,12 +163,11 @@ export function NotificationBell({ variant = 'mobile' }: NotificationPanelProps)
                 onClick={() => setOpen(false)}
               />
               <motion.div
-                initial={{ opacity: 0, y: -8, scale: 0.97 }}
-                animate={{ opacity: 1, y: 0, scale: 1 }}
-                exit={{ opacity: 0, y: -8, scale: 0.97 }}
-                transition={{ duration: 0.18 }}
-                className="absolute top-12 right-0 z-50 w-[340px] rounded-[20px] overflow-hidden shadow-2xl"
-                style={{ background: 'var(--color-surface)' }}
+                initial={{ opacity: 0, y: -8 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -8 }}
+                transition={{ duration: 0.15 }}
+                className="absolute top-12 right-0 z-50 w-[340px] rounded-xl overflow-hidden shadow-lg bg-surface border border-border"
               >
                 <NotificationSheet
                   notifications={notifications}
@@ -214,19 +208,18 @@ function NotificationSheet({
   t: (key: string) => string;
 }) {
   return (
-    <div className="flex flex-col" style={{ maxHeight: '75vh' }}>
+    <div className="flex flex-col max-h-[75vh]">
       {/* Handle (mobile) */}
-      <div className="w-12 h-1.5 rounded-full mx-auto mt-3 mb-1"
-        style={{ background: 'var(--color-outline-variant)' }} />
+      <div className="w-12 h-1.5 rounded-full mx-auto mt-3 mb-1 bg-border" />
 
       {/* Header */}
-      <div className="flex items-center justify-between px-5 py-4">
+      <div className="flex items-center justify-between px-5 py-4 border-b border-border">
         <div>
-          <h2 className="font-extrabold text-[18px]" style={{ color: 'var(--color-on-surface)' }}>
+          <h2 className="font-semibold text-base text-foreground">
             {t('notifications')}
           </h2>
           {unreadCount > 0 && (
-            <p className="text-[11px] font-semibold mt-0.5" style={{ color: 'var(--color-outline)' }}>
+            <p className="text-xs text-foreground-muted mt-0.5">
               {unreadCount} unread
             </p>
           )}
@@ -235,73 +228,61 @@ function NotificationSheet({
           {unreadCount > 0 && (
             <button
               onClick={onMarkAllRead}
-              className="text-[11px] font-bold px-3 py-1.5 rounded-full transition-all"
-              style={{ background: 'var(--color-primary-fixed)', color: 'var(--color-primary)' }}
+              className="text-xs font-medium px-3 py-1.5 rounded-full bg-surface-muted text-primary hover:bg-border transition-colors cursor-pointer"
             >
               {t('markAllRead')}
             </button>
           )}
           <button
             onClick={onClose}
-            className="w-8 h-8 rounded-full flex items-center justify-center transition-all"
-            style={{ background: 'var(--color-surface-container-low)', color: 'var(--color-on-surface-variant)' }}
+            className="w-8 h-8 rounded-full flex items-center justify-center bg-surface-muted text-foreground hover:bg-border transition-colors cursor-pointer"
           >
             <X className="w-4 h-4" />
           </button>
         </div>
       </div>
 
-      {/* Divider */}
-      <div className="h-px mx-5" style={{ background: 'var(--color-outline-variant)', opacity: 0.3 }} />
-
       {/* List */}
-      <div className="overflow-y-auto flex-1 pb-6">
+      <div className="overflow-y-auto flex-1 pb-6 divide-y divide-border">
         {loading ? (
           <div className="flex items-center justify-center py-12">
             <div className="w-6 h-6 rounded-full border-2 border-primary border-t-transparent animate-spin" />
           </div>
         ) : notifications.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-14 text-center px-6">
-            <Bell className="w-10 h-10 mb-4" style={{ color: 'var(--color-outline)' }} strokeWidth={1.5} />
-            <p className="font-semibold text-[15px]" style={{ color: 'var(--color-on-surface)' }}>
+            <Bell className="w-10 h-10 mb-3 text-foreground-muted" strokeWidth={1.5} />
+            <p className="font-medium text-sm text-foreground">
               {t('noNotifications')}
             </p>
           </div>
         ) : (
           <div className="flex flex-col">
-            {notifications.map((notif, i) => {
+            {notifications.map((notif) => {
               const Icon = TYPE_ICON[notif.type ?? 'system'] ?? Info;
               return (
                 <button
                   key={notif.id}
                   onClick={() => onNotificationClick(notif)}
-                  className="flex items-start gap-3.5 px-5 py-4 text-left transition-all hover:brightness-95 active:scale-[0.99]"
-                  style={{
-                    background: notif.is_read ? 'transparent' : 'var(--color-primary-fixed)',
-                    borderTop: i > 0 ? '1px solid rgba(195,201,187,0.2)' : undefined,
-                  }}
+                  className={`flex items-start gap-3 px-5 py-3.5 text-left transition-colors cursor-pointer ${
+                    notif.is_read ? 'bg-surface hover:bg-surface-muted' : 'bg-surface-muted hover:bg-border'
+                  }`}
                 >
-                  <div className="w-9 h-9 rounded-[10px] flex items-center justify-center shrink-0 mt-0.5"
-                    style={{ background: 'var(--color-surface-container-low)', color: 'var(--color-primary)' }}>
+                  <div className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0 mt-0.5 bg-surface text-primary border border-border">
                     <Icon className="w-4 h-4" strokeWidth={2} />
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="font-semibold text-[13px] leading-tight"
-                      style={{ color: 'var(--color-on-surface)' }}>
+                    <p className="font-medium text-xs sm:text-sm text-foreground leading-tight">
                       {notif.title}
                     </p>
-                    <p className="text-[12px] mt-0.5 leading-relaxed"
-                      style={{ color: 'var(--color-on-surface-variant)' }}>
+                    <p className="text-xs text-foreground-muted mt-0.5 leading-relaxed">
                       {notif.message}
                     </p>
-                    <p className="text-[10px] mt-1.5 font-semibold uppercase tracking-wide"
-                      style={{ color: 'var(--color-outline)' }}>
+                    <p className="text-xs mt-1 text-foreground-muted font-normal">
                       {timeAgo(notif.created_at)}
                     </p>
                   </div>
                   {!notif.is_read && (
-                    <div className="w-2 h-2 rounded-full shrink-0 mt-1.5"
-                      style={{ background: 'var(--color-primary)' }} />
+                    <div className="w-2 h-2 rounded-full shrink-0 mt-1.5 bg-primary" />
                   )}
                 </button>
               );

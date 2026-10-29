@@ -126,7 +126,7 @@ INSERT INTO products (
   'Milk',
   'Pure, unadulterated farm-fresh A2 milk from grass-fed indigenous Gir cows. Tested for zero antibiotics, preservatives, and adulteration.',
   'https://images.unsplash.com/photo-1550583724-b2692b85b150?auto=format&fit=crop&q=80&w=800',
-  true, true, '11111111-1111-1111-1111-111111111111', 'Gujarat', 'Gjanand Farm', 4.90, 145, true, 12,
+  true, true, '11111111-1111-1111-1111-111111111111', 'Gujarat', 'Gjanand Farm', NULL, 0, true, 12,
   ARRAY['Made in India', 'A2 Milk', 'Grass Fed', 'Freshness Guaranteed']
 ) ON CONFLICT (id) DO UPDATE SET name = EXCLUDED.name, description = EXCLUDED.description, is_active = EXCLUDED.is_active;
 
@@ -146,7 +146,7 @@ INSERT INTO products (
   'Milk',
   'Rich, thick and creamy whole buffalo milk with naturally high fat content (7.5%+), ideal for rich tea, kheer, and traditional sweets.',
   'https://images.unsplash.com/photo-1563636619-e9143da7973b?auto=format&fit=crop&q=80&w=800',
-  true, true, '11111111-1111-1111-1111-111111111111', 'Gujarat', 'Gjanand Farm', 4.80, 98, false, 10,
+  true, true, '11111111-1111-1111-1111-111111111111', 'Gujarat', 'Gjanand Farm', NULL, 0, false, 10,
   ARRAY['Pure Buffalo', 'High Fat', 'Creamy', 'Fresh']
 ) ON CONFLICT (id) DO UPDATE SET name = EXCLUDED.name, description = EXCLUDED.description, is_active = EXCLUDED.is_active;
 
@@ -166,7 +166,7 @@ INSERT INTO products (
   'Ghee',
   'Golden, aromatic Vedic Bilona Ghee made by churning whole curd using wooden churners in earthen pots. Rich in fat-soluble vitamins and gut-friendly nutrients.',
   'https://images.unsplash.com/photo-1589927986089-35812388d1f4?auto=format&fit=crop&q=80&w=800',
-  true, true, '22222222-2222-2222-2222-222222222222', 'Gujarat', 'Gir Amrit', 5.00, 312, true, 15,
+  true, true, '22222222-2222-2222-2222-222222222222', 'Gujarat', 'Gir Amrit', NULL, 0, true, 15,
   ARRAY['Vedic Bilona', 'Gir Cow', 'Hand Churned', 'Pure Ghee']
 ) ON CONFLICT (id) DO UPDATE SET name = EXCLUDED.name, description = EXCLUDED.description, is_active = EXCLUDED.is_active;
 
@@ -186,7 +186,7 @@ INSERT INTO products (
   'Paneer',
   'Super soft, melt-in-mouth cottage cheese crafted from 100% pure fresh cow and buffalo milk curdled naturally with lemon juice.',
   'https://images.unsplash.com/photo-1631452180519-c014fe946bc7?auto=format&fit=crop&q=80&w=800',
-  true, true, '33333333-3333-3333-3333-333333333333', 'Gujarat', 'Gjanand Farm', 4.90, 215, false, 14,
+  true, true, '33333333-3333-3333-3333-333333333333', 'Gujarat', 'Gjanand Farm', NULL, 0, false, 14,
   ARRAY['Malai Paneer', 'High Protein', 'Freshly Made']
 ) ON CONFLICT (id) DO UPDATE SET name = EXCLUDED.name, description = EXCLUDED.description, is_active = EXCLUDED.is_active;
 
@@ -206,7 +206,7 @@ INSERT INTO products (
   'Curd',
   'Set curd prepared from pure boiled cow milk using traditional live cultures. Naturally thick, creamy, and gentle on digestion.',
   'https://images.unsplash.com/photo-1571212515416-fef01fc43637?auto=format&fit=crop&q=80&w=800',
-  true, true, '11111111-1111-1111-1111-111111111111', 'Gujarat', 'Gjanand Farm', 4.80, 84, false, 11,
+  true, true, '11111111-1111-1111-1111-111111111111', 'Gujarat', 'Gjanand Farm', NULL, 0, false, 11,
   ARRAY['Probiotic', 'Set Curd', 'Live Cultures', 'Digestive Health']
 ) ON CONFLICT (id) DO UPDATE SET name = EXCLUDED.name, description = EXCLUDED.description, is_active = EXCLUDED.is_active;
 
@@ -226,7 +226,7 @@ INSERT INTO products (
   'Buttermilk',
   'Refreshing traditional Gujarati spiced buttermilk seasoned with roasted jeera (cumin), black salt, fresh mint, and ginger.',
   'https://images.unsplash.com/photo-1556881286-fc6915169721?auto=format&fit=crop&q=80&w=800',
-  true, true, '11111111-1111-1111-1111-111111111111', 'Gujarat', 'Gjanand Farm', 4.90, 167, false, 20,
+  true, true, '11111111-1111-1111-1111-111111111111', 'Gujarat', 'Gjanand Farm', NULL, 0, false, 20,
   ARRAY['Masala Chhas', 'Refreshing', 'Gujarati Special', 'Cooling']
 ) ON CONFLICT (id) DO UPDATE SET name = EXCLUDED.name, description = EXCLUDED.description, is_active = EXCLUDED.is_active;
 
@@ -246,7 +246,7 @@ INSERT INTO products (
   'Butter',
   'Unsalted, pure white butter churned freshly from cultured cream. Reminiscent of Lord Krishna''s favourite village makhan.',
   'https://images.unsplash.com/photo-1589985270826-4b7bb135bc9d?auto=format&fit=crop&q=80&w=800',
-  true, true, '22222222-2222-2222-2222-222222222222', 'Gujarat', 'Gir Amrit', 4.90, 78, false, 14,
+  true, true, '22222222-2222-2222-2222-222222222222', 'Gujarat', 'Gir Amrit', NULL, 0, false, 14,
   ARRAY['White Makhan', 'Unsalted Butter', 'Village Churned']
 ) ON CONFLICT (id) DO UPDATE SET name = EXCLUDED.name, description = EXCLUDED.description, is_active = EXCLUDED.is_active;
 
@@ -266,7 +266,7 @@ INSERT INTO products (
   'Sweets',
   'Traditional Gujarati sweet made from slow-reduced pure Gir cow mawa, infused with Kashmiri saffron strands and fragrant green cardamom.',
   'https://images.unsplash.com/photo-1599488615731-7e5c2823ff28?auto=format&fit=crop&q=80&w=800',
-  true, true, '11111111-1111-1111-1111-111111111111', 'Gujarat', 'Gjanand Farm', 4.95, 112, false, 14,
+  true, true, '11111111-1111-1111-1111-111111111111', 'Gujarat', 'Gjanand Farm', NULL, 0, false, 14,
   ARRAY['Kesar Peda', 'Mawa Mithai', 'Saffron Infused', 'Festive Special']
 ) ON CONFLICT (id) DO UPDATE SET name = EXCLUDED.name, description = EXCLUDED.description, is_active = EXCLUDED.is_active;
 
@@ -314,3 +314,77 @@ INSERT INTO translations (language, key, value) VALUES
   ('hi', 'btn_subscribe', 'दैनिक सदस्यता लें'),
   ('hi', 'btn_order_now', 'अभी आर्डर करें')
 ON CONFLICT (language, key) DO UPDATE SET value = EXCLUDED.value;
+
+-- ─── 8. Category Taxonomy ─────────────────────────────────────────────
+-- The `categories` table is created by 20261004_create_categories_table.sql
+-- but nothing ever populated it, so Admin -> Categories rendered an empty
+-- list on every fresh install. These twelve rows are the canonical taxonomy
+-- in src/lib/constants/categories.ts; names, slugs and icon_name values must
+-- stay in step with that file (icon_name resolves via CategoryIcon.tsx).
+INSERT INTO categories (name, slug, description, icon_name, sort_order, is_active) VALUES
+  ('Dairy',                  'dairy',        'Milk, ghee, paneer and curd from verified Indian dairies', 'Milk',         1,  true),
+  ('Groceries',              'groceries',    'Everyday staples, grains, pulses and flours',              'Wheat',        2,  true),
+  ('Spices & Masalas',       'spices',       'Single-origin spices and traditional masala blends',       'Flame',        3,  true),
+  ('Cold-Pressed Oils',      'oils',         'Wood-pressed and cold-pressed cooking oils',               'Droplets',     4,  true),
+  ('Ayurveda & Wellness',    'ayurveda',     'Ayurvedic preparations and wellness essentials',           'FlaskConical', 5,  true),
+  ('Beauty & Personal Care', 'beauty',       'Natural skincare, haircare and personal care',             'Heart',        6,  true),
+  ('Home & Kitchen',         'home-kitchen', 'Cookware, storage and everyday home essentials',           'CookingPot',   7,  true),
+  ('Handicrafts & Decor',    'handicrafts',  'Handmade decor and artisan craft from across India',       'Hammer',       8,  true),
+  ('Handloom & Fashion',     'fashion',      'Handloom textiles, apparel and accessories',               'Shirt',        9,  true),
+  ('Pooja & Spiritual',      'pooja',        'Pooja essentials and spiritual goods',                     'Sun',          10, true),
+  ('Electronics',            'electronics',  'Consumer electronics from Indian brands',                  'Plug',         11, true),
+  ('Books & Stationery',     'books',        'Books, journals and stationery',                           'BookOpen',     12, true)
+ON CONFLICT (name) DO UPDATE
+  SET slug        = EXCLUDED.slug,
+      description = EXCLUDED.description,
+      icon_name   = EXCLUDED.icon_name,
+      sort_order  = EXCLUDED.sort_order,
+      updated_at  = now();
+
+-- Retire the dairy-era taxonomy seeded by 20261004_create_categories_table.sql
+-- (Milk, Ghee, Paneer, Curd & Dahi, ...). Those were top-level categories when
+-- this was a dairy shop. After the rebrand Dairy is ONE of twelve categories,
+-- so leaving them in place gave Admin -> Categories 21 rows, with Milk and Ghee
+-- sitting as siblings of Dairy and sort_order values colliding in pairs.
+--
+-- Safe to delete: products.category_id is a nullable FK with ON DELETE SET NULL
+-- and no seeded product populates it. The products.category TEXT column, which
+-- does still hold 'Milk'/'Ghee'/etc., is a separate legacy shim handled in
+-- application code by legacyCategoryFilter() and is deliberately untouched.
+--
+-- 'Ayurveda & Wellness' is NOT in this list: it exists in both taxonomies, so
+-- the upsert above has already re-pointed it at the canonical slug.
+DELETE FROM categories
+WHERE slug IN (
+  'milk', 'ghee', 'paneer', 'curd-dahi', 'butter-makhan',
+  'buttermilk-lassi', 'traditional-sweets', 'cream-khoya', 'organic-oils-spices'
+);
+
+-- ─── 9. Seller catalog projection ─────────────────────────────────────
+-- seller_product is created and backfilled by
+-- 20260930_inventory_synchronization_system.sql, but that migration runs
+-- BEFORE this seed inserts any products, so on a fresh install its backfill
+-- matches zero rows and the seller panel stays empty forever. Populate it
+-- here, after the products exist.
+INSERT INTO seller_product (product_id, seller_id, name, category, description, image_url, price, stock, status)
+SELECT
+  p.id,
+  p.seller_id,
+  p.name,
+  p.category,
+  p.description,
+  p.image_url,
+  (SELECT MIN(pv.price) FROM product_variants pv WHERE pv.product_id = p.id),
+  COALESCE((SELECT SUM(pv.available_quantity) FROM product_variants pv WHERE pv.product_id = p.id), 0),
+  CASE WHEN p.is_active THEN 'active' ELSE 'inactive' END
+FROM products p
+ON CONFLICT (product_id) DO UPDATE
+  SET seller_id   = EXCLUDED.seller_id,
+      name        = EXCLUDED.name,
+      category    = EXCLUDED.category,
+      description = EXCLUDED.description,
+      image_url   = EXCLUDED.image_url,
+      price       = EXCLUDED.price,
+      stock       = EXCLUDED.stock,
+      status      = EXCLUDED.status,
+      updated_at  = now();

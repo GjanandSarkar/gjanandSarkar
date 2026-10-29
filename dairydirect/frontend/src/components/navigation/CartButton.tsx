@@ -20,7 +20,7 @@ export function CartButton({ className }: CartButtonProps) {
       href="/cart"
       className={cn(
         "flex items-center gap-2 h-12 px-4 rounded-xl transition-all hover:opacity-90 active:scale-95",
-        "bg-primary text-white shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2",
+        "bg-primary text-on-primary shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2",
         className
       )}
       aria-label="View cart"

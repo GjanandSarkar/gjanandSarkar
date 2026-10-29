@@ -2,6 +2,7 @@
 
 import { Leaf, Droplets, Package, FlaskConical, Activity, GlassWater } from 'lucide-react';
 import { useTranslation } from '@/lib/i18n';
+import { CategoryNameIcon } from '@/components/shared/CategoryIcon';
 
 interface CategoryRailProps {
   categories: string[];
@@ -10,18 +11,8 @@ interface CategoryRailProps {
   isLoading: boolean;
 }
 
-const CATEGORY_META: Record<string, { icon: React.ReactNode }> = {
-  'All':        { icon: <Leaf className="w-4 h-4" /> },
-  'Milk':       { icon: <Droplets className="w-4 h-4" /> },
-  'Paneer':     { icon: <Package className="w-4 h-4" /> },
-  'Ghee':       { icon: <FlaskConical className="w-4 h-4" /> },
-  'Buttermilk': { icon: <Activity className="w-4 h-4" /> },
-  'Curd':       { icon: <Package className="w-4 h-4" /> },
-  'Lassi':      { icon: <GlassWater className="w-4 h-4" /> },
-};
-
 export function CategoryRail({ categories, activeCategory, onSelect, isLoading }: CategoryRailProps) {
-  const { t } = useTranslation();
+  const { t, tCategory } = useTranslation();
   const allCategories = ['All', ...categories];
 
   if (isLoading) {
@@ -38,7 +29,6 @@ export function CategoryRail({ categories, activeCategory, onSelect, isLoading }
     <div className="flex md:flex-col gap-2 overflow-x-auto md:overflow-y-auto no-scrollbar md:pr-4 pb-2 md:pb-0">
       {allCategories.map(cat => {
         const isActive = activeCategory === cat;
-        const meta = CATEGORY_META[cat] || CATEGORY_META['All'];
         
         return (
           <button 
@@ -55,12 +45,12 @@ export function CategoryRail({ categories, activeCategory, onSelect, isLoading }
           >
             <div className={`
               flex items-center justify-center w-6 h-6 md:w-10 md:h-10 rounded-full
-              ${isActive ? 'bg-white/20' : 'bg-surface-container-highest'}
+              ${isActive ? 'bg-surface/20' : 'bg-surface-container-highest'}
             `}>
-              {meta.icon}
+              <CategoryNameIcon category={cat} />
             </div>
             <span className="text-[13px] md:text-[14px] font-bold whitespace-nowrap">
-              {t(cat.toLowerCase() as any) || cat}
+              {tCategory(cat)}
             </span>
           </button>
         );

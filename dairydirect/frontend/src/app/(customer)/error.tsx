@@ -18,13 +18,13 @@ export default function CustomerError({
 
   return (
     <div className="flex flex-col min-h-[60vh] items-center justify-center py-20 px-6 text-center w-full">
-      <div className="w-20 h-20 rounded-full flex items-center justify-center mb-5 bg-red-50 text-red-500 border border-red-100">
+      <div className="w-20 h-20 rounded-full flex items-center justify-center mb-5 bg-error-bg text-red-500 border border-red-100">
         <AlertCircle className="w-8 h-8" />
       </div>
       <h2 className="font-bold text-[20px] mb-2 text-on-surface">
         Something went wrong
       </h2>
-      <p className="text-[14px] max-w-[280px] leading-relaxed text-outline mb-8">
+      <p className="text-[14px] max-w-[280px] leading-relaxed text-on-surface-variant mb-8">
         We encountered an unexpected error while loading this page.
       </p>
       <button

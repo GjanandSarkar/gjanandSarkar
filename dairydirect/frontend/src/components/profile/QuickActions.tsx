@@ -17,47 +17,49 @@ export function QuickActions({ onLanguageClick, hideHeader = false }: QuickActio
       label: t('qualityReports') || 'Quality Reports',
       icon: HeartHandshake,
       href: '/profile/quality-reports',
-      color: 'text-blue-600',
-      bg: 'bg-blue-50',
+      color: 'text-info',
+      bg: 'bg-info-bg',
     },
     {
-      label: t('helpCentre') || 'Support',
+      label: t('helpCentre') || 'Help Center',
       icon: HelpCircle,
-      href: '#', // Placeholder
-      color: 'text-orange-600',
-      bg: 'bg-orange-50',
+      href: '/support',
+      color: 'text-secondary',
+      bg: 'bg-warning-bg',
     },
     {
-      label: t('termsPolicy') || 'Terms & Policy',
+      label: t('termsPolicy') || 'Terms & Privacy',
       icon: FileText,
-      href: '#', // Placeholder
-      color: 'text-purple-600',
-      bg: 'bg-purple-50',
+      href: '/terms',
+      color: 'text-primary',
+      bg: 'bg-primary/10',
     },
     {
       label: t('languageSettings') || 'Language',
       icon: Globe,
       onClick: onLanguageClick,
-      color: 'text-emerald-600',
-      bg: 'bg-emerald-50',
+      color: 'text-success',
+      bg: 'bg-success-bg',
     },
   ];
 
   return (
     <div>
       {!hideHeader && (
-        <h2 className="text-lg font-black text-dark tracking-wide mb-4">Settings & Support</h2>
+        <h2 className="text-base font-semibold text-foreground tracking-tight mb-3">
+          Settings & Support
+        </h2>
       )}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
         {actions.map((action, idx) => {
           const Icon = action.icon;
           
           const Content = (
-            <div className="bg-white rounded-[20px] p-4 border border-sand/50 shadow-sm flex flex-col items-center justify-center text-center h-full hover:border-primary/50 transition-colors active:scale-95 cursor-pointer">
-              <div className={`w-10 h-10 rounded-full ${action.bg} ${action.color} flex items-center justify-center mb-3`}>
+            <div className="bg-surface rounded-xl p-4 border border-border shadow-2xs flex flex-col items-center justify-center text-center h-full hover:border-primary/50 hover:shadow-xs transition-all active:scale-[0.98] cursor-pointer">
+              <div className={`w-10 h-10 rounded-lg ${action.bg} ${action.color} flex items-center justify-center mb-2.5 shrink-0`}>
                 <Icon className="w-5 h-5" />
               </div>
-              <span className="font-bold text-dark text-xs">{action.label}</span>
+              <span className="font-semibold text-foreground text-xs">{action.label}</span>
             </div>
           );
 

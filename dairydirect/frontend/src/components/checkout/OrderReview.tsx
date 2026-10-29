@@ -28,7 +28,7 @@ export function OrderReview({ items }: OrderReviewProps) {
   if (items.length === 0) return null;
 
   return (
-    <div className="bg-white rounded-[20px] p-4 border border-sand shadow-sm">
+    <div className="bg-surface rounded-[20px] p-4 border border-sand shadow-sm">
       <div className="flex items-center gap-2 mb-4">
         <ShoppingBag className="w-4 h-4 text-primary" />
         <h3 className="text-sm font-bold text-dark uppercase tracking-wider">Order Items</h3>
@@ -61,18 +61,18 @@ export function OrderReview({ items }: OrderReviewProps) {
               <h4 className="text-sm font-bold text-dark truncate leading-tight">
                 {item.product.name}
               </h4>
-              <p className="text-[11px] font-medium text-muted mt-0.5">
+              <p className="text-xs font-medium text-muted mt-0.5">
                 {item.variant.weight} × {item.quantity}
               </p>
             </div>
 
             {/* Price */}
             <div className="text-right shrink-0">
-              <span className="text-sm font-black text-dark">
+              <span className="text-sm font-semibold text-dark">
                 {t('currency')}{item.variant.price * item.quantity}
               </span>
               {item.variant.original_price && item.variant.original_price > item.variant.price && (
-                <p className="text-[10px] text-muted line-through font-medium mt-0.5">
+                <p className="text-xs text-muted line-through font-medium mt-0.5">
                   {t('currency')}{item.variant.original_price * item.quantity}
                 </p>
               )}

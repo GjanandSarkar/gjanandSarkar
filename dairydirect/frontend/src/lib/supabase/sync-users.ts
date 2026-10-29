@@ -19,51 +19,45 @@ export async function syncUserToUsersTable(user: {
   if (!user.id) return;
 
   const phone = user.phone || null;
-  const name = user.name || null;
-  const firstName = user.first_name || null;
-  const lastName = user.last_name || null;
+  const name = user.name || (user.first_name ? `${user.first_name} ${user.last_name || ''}`.trim() : null);
   const email = user.email || null;
-  const country = user.country || 'India';
   const createdAt = user.created_at || new Date().toISOString();
 
   // 1. Sync RDS PostgreSQL users table if configured
   if (isPgConfigured) {
     try {
       await query(
-        `INSERT INTO users (id, phone, name, first_name, last_name, email, country, created_at)
-         VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+        `INSERT INTO users (id, phone, name, email, created_at)
+         VALUES ($1, $2, $3, $4, $5)
          ON CONFLICT (id) DO UPDATE
          SET phone = COALESCE(EXCLUDED.phone, users.phone),
              name = COALESCE(NULLIF(EXCLUDED.name, ''), users.name),
-             first_name = COALESCE(EXCLUDED.first_name, users.first_name),
-             last_name = COALESCE(EXCLUDED.last_name, users.last_name),
-             email = COALESCE(EXCLUDED.email, users.email),
-             country = COALESCE(EXCLUDED.country, users.country)`,
-        [user.id, phone, name, firstName, lastName, email, country, createdAt]
+             email = COALESCE(EXCLUDED.email, users.email)`,
+        [user.id, phone, name, email, createdAt]
       );
     } catch (err: any) {
       console.warn('[SyncUsersTable] RDS error:', err.message);
     }
   }
 
-  // 2. Sync Supabase users table
+  // 2. Sync Supabase users table (strictly matching public.users columns: id, phone, name, email, created_at)
   try {
     const sb = getAdminSupabase();
-    await sb.from('users').upsert(
+    const { error } = await sb.from('users').upsert(
       {
         id: user.id,
         phone,
         name,
-        first_name: firstName,
-        last_name: lastName,
         email,
-        country,
         created_at: createdAt,
       },
       { onConflict: 'id' }
     );
+    if (error) {
+      console.warn('[SyncUsersTable] Supabase upsert error:', error.message);
+    }
   } catch (err: any) {
-    console.warn('[SyncUsersTable] Supabase error:', err.message);
+    console.warn('[SyncUsersTable] Supabase exception:', err.message);
   }
 }
 
@@ -73,19 +67,31 @@ export async function syncUserToUsersTable(user: {
 export async function backfillUsersTable() {
   try {
     const sb = getAdminSupabase();
-    const { data: profiles } = await sb.from('profiles').select('id, phone, name, first_name, last_name, email, country, created_at');
+    const { data: profiles, error: selectErr } = await sb
+      .from('profiles')
+      .select('id, phone, name, email, created_at');
+
+    if (selectErr) {
+      console.warn('[BackfillUsersTable] Select error:', selectErr.message);
+      return;
+    }
+
     if (profiles && profiles.length > 0) {
       const userInserts = profiles.map((p: any) => ({
         id: p.id,
         phone: p.phone || null,
         name: p.name || null,
-        first_name: p.first_name || null,
-        last_name: p.last_name || null,
         email: p.email || null,
-        country: p.country || 'India',
         created_at: p.created_at || new Date().toISOString(),
       }));
-      await sb.from('users').upsert(userInserts, { onConflict: 'id' });
+
+      const { error: upsertErr } = await sb
+        .from('users')
+        .upsert(userInserts, { onConflict: 'id' });
+
+      if (upsertErr) {
+        console.warn('[BackfillUsersTable] Upsert error:', upsertErr.message);
+      }
     }
   } catch (err: any) {
     console.warn('[BackfillUsersTable] Error:', err.message);

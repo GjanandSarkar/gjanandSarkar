@@ -3,7 +3,9 @@
 import React, { useState, useEffect } from 'react';
 import { useTranslation } from '@/lib/i18n';
 import type { ProductWithVariants } from '@/lib/api/products';
+import type { CatalogProduct } from '@/lib/types/catalog';
 import { updateProduct, createProduct, deleteProduct, uploadProductImage } from '@/lib/api/products';
+import { MultiImageUpload, ImageItem } from '@/components/admin/MultiImageUpload';
 import {
   X,
   Plus,
@@ -22,10 +24,10 @@ import { motion, AnimatePresence } from 'framer-motion';
 
 
 interface ProductEditModalProps {
-  product: ProductWithVariants | null;
+  product: CatalogProduct | null;
   isOpen: boolean;
   onClose: () => void;
-  onProductUpdated?: (updatedProduct: ProductWithVariants) => void;
+  onProductUpdated?: (updatedProduct: CatalogProduct) => void;
   onProductDeleted?: (deletedProductId: string) => void;
 }
 
@@ -37,6 +39,7 @@ export function ProductEditModal({
   onProductDeleted,
 }: ProductEditModalProps) {
   const { t } = useTranslation();
+  const isSellerProduct = Boolean(product && (product as any).seller_id);
 
   const [name, setName] = useState('');
   const [category, setCategory] = useState('');
@@ -56,8 +59,7 @@ export function ProductEditModal({
     }>
   >([]);
 
-  const [imageFile, setImageFile] = useState<File | null>(null);
-  const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [images, setImages] = useState<ImageItem[]>([]);
   const [isSaving, setIsSaving] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
@@ -91,8 +93,29 @@ export function ProductEditModal({
       setCategory(product.category || (categoriesList[0] || ''));
       setDescription(product.description || '');
       setImageUrl(product.image_url || '');
-      setImagePreview(product.image_url || null);
-      setImageFile(null);
+
+      // Populate existing images into MultiImageUpload items
+      const existingImages: ImageItem[] = [];
+      if (product.image_url) {
+        existingImages.push({
+          id: 'main-cover',
+          url: product.image_url,
+          isPrimary: true,
+        });
+      }
+      if (Array.isArray((product as any).gallery_images)) {
+        (product as any).gallery_images.forEach((imgUrl: string, idx: number) => {
+          if (imgUrl && imgUrl !== product.image_url) {
+            existingImages.push({
+              id: `gallery-img-${idx}`,
+              url: imgUrl,
+              isPrimary: false,
+            });
+          }
+        });
+      }
+      setImages(existingImages);
+
       setIsFreshnessGuarantee(product.is_freshness_guarantee ?? true);
       setIsActive(product.is_active ?? true);
       setVariants(
@@ -156,14 +179,29 @@ export function ProductEditModal({
     setSuccessMessage('');
 
     try {
-      let finalImageUrl = imageUrl;
-      if (imageFile) {
-        const uploadRes = await uploadProductImage(imageFile);
-        if (uploadRes.error || !uploadRes.url) {
-          throw new Error(uploadRes.error || 'Failed to upload new image');
+      // 1. Upload any new files from images array
+      const uploadedUrls: string[] = [];
+      let primaryUrl = '';
+
+      for (const item of images) {
+        let currentUrl = item.url;
+        if (item.file) {
+          const uploadRes = await uploadProductImage(item.file);
+          if (uploadRes.error || !uploadRes.url) {
+            throw new Error(uploadRes.error || 'Failed to upload product image');
+          }
+          currentUrl = uploadRes.url;
         }
-        finalImageUrl = uploadRes.url;
+
+        if (currentUrl) {
+          uploadedUrls.push(currentUrl);
+          if (item.isPrimary || !primaryUrl) {
+            primaryUrl = currentUrl;
+          }
+        }
       }
+
+      const finalImageUrl = primaryUrl || imageUrl;
 
       if (!product.id) {
         const createRes = await createProduct(
@@ -172,6 +210,7 @@ export function ProductEditModal({
             category,
             description,
             image_url: finalImageUrl,
+            gallery_images: uploadedUrls,
             is_freshness_guarantee: isFreshnessGuarantee,
           },
           validVariants.map((v) => ({
@@ -194,8 +233,10 @@ export function ProductEditModal({
             category,
             description,
             image_url: finalImageUrl,
+            gallery_images: uploadedUrls,
             is_freshness_guarantee: isFreshnessGuarantee,
             is_active: isActive,
+            approval_status: 'approved',
             created_at: new Date().toISOString(),
             product_variants: validVariants.map((v, idx) => ({
               id: 'var-' + idx,
@@ -214,6 +255,7 @@ export function ProductEditModal({
           category,
           description,
           image_url: finalImageUrl,
+          gallery_images: uploadedUrls,
           is_freshness_guarantee: isFreshnessGuarantee,
           is_active: isActive,
           variants: validVariants.map((v) => ({
@@ -292,7 +334,7 @@ export function ProductEditModal({
           animate={{ scale: 1, opacity: 1, y: 0 }}
           exit={{ scale: 0.95, opacity: 0, y: 15 }}
           transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-          className="relative w-full max-w-2xl bg-white rounded-[24px] shadow-2xl overflow-hidden z-10 my-auto flex flex-col max-h-[90vh]"
+          className="relative w-full max-w-2xl bg-surface rounded-[24px] shadow-2xl overflow-hidden z-10 my-auto flex flex-col max-h-[90vh]"
           style={{ background: 'var(--color-surface, #ffffff)' }}
         >
           {/* Header */}
@@ -306,21 +348,17 @@ export function ProductEditModal({
             <div>
               <div className="flex items-center gap-2">
                 <span
-                  className="px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider"
+                  className="px-2.5 py-0.5 rounded-full text-xs font-bold uppercase tracking-wider"
                   style={{
-                    background: 'var(--color-primary-fixed, #eaf6ef)',
-                    color: 'var(--color-primary, #3f6530)',
+                    background: isSellerProduct ? 'var(--color-secondary-container, #f5ebd7)' : 'var(--color-primary-fixed, #eaf6ef)',
+                    color: isSellerProduct ? 'var(--color-secondary, #755b00)' : 'var(--color-primary, #3f6530)',
                   }}
                 >
-                  {(product as any)?.seller_id || (product as any)?.isSeller ? 'Seller Hub' : 'Admin Panel'}
+                  {isSellerProduct ? 'Seller Owned (Read-Only)' : (product.id ? 'Admin Catalog' : 'New Product')}
                 </span>
-                {product.id ? (
-                  <span className="text-[12px] font-medium text-gray-500">
+                {product.id && (
+                  <span className="text-[12px] font-medium text-foreground-muted">
                     ID: {product.id.slice(0, 8)}...
-                  </span>
-                ) : (
-                  <span className="text-[12px] font-medium text-emerald-700 font-bold">
-                    New Product
                   </span>
                 )}
               </div>
@@ -328,7 +366,9 @@ export function ProductEditModal({
                 className="text-[18px] font-bold mt-0.5"
                 style={{ color: 'var(--color-on-surface, #1b1c18)' }}
               >
-                {product.id ? `Edit Product: ${product.name}` : 'Add New Product'}
+                {isSellerProduct
+                  ? `View Seller Product: ${product.name}`
+                  : (product.id ? `Edit Product: ${product.name}` : 'Add New Product')}
               </h2>
             </div>
 
@@ -344,14 +384,23 @@ export function ProductEditModal({
 
           {/* Body content */}
           <div className="p-6 overflow-y-auto space-y-6 flex-1">
+            {/* Seller Product Read-Only Alert */}
+            {isSellerProduct && (
+              <div className="p-3.5 rounded-xl bg-amber-50 dark:bg-amber-950/30 border border-amber-300 dark:border-amber-800 text-xs text-amber-900 dark:text-amber-200 flex items-center gap-2.5">
+                <ShieldAlert className="w-4 h-4 text-amber-700 dark:text-amber-400 shrink-0" />
+                <span>
+                  <strong>Seller Owned Product (Read-Only):</strong> This product is owned and managed by seller <strong>"{product?.brand || 'Partner Seller'}"</strong>. In accordance with marketplace business rules, only the seller can edit or delete this product. Admin view is strictly read-only.
+                </span>
+              </div>
+            )}
             {/* Feedback Alerts */}
             {errorMessage && (
               <motion.div
                 initial={{ opacity: 0, y: -8 }}
                 animate={{ opacity: 1, y: 0 }}
-                className="p-3.5 rounded-[12px] flex items-center gap-3 bg-red-50 text-red-700 text-[13px] font-medium border border-red-200"
+                className="p-3.5 rounded-[12px] flex items-center gap-3 bg-error-bg text-error text-[13px] font-medium border border-error/20"
               >
-                <AlertTriangle className="w-4 h-4 shrink-0 text-red-600" />
+                <AlertTriangle className="w-4 h-4 shrink-0 text-error" />
                 <span>{errorMessage}</span>
               </motion.div>
             )}
@@ -360,9 +409,9 @@ export function ProductEditModal({
               <motion.div
                 initial={{ opacity: 0, y: -8 }}
                 animate={{ opacity: 1, y: 0 }}
-                className="p-3.5 rounded-[12px] flex items-center gap-3 bg-emerald-50 text-emerald-800 text-[13px] font-medium border border-emerald-200"
+                className="p-3.5 rounded-[12px] flex items-center gap-3 bg-success-bg text-success text-[13px] font-medium border border-success/20"
               >
-                <CheckCircle2 className="w-4 h-4 shrink-0 text-emerald-600" />
+                <CheckCircle2 className="w-4 h-4 shrink-0 text-success" />
                 <span>{successMessage}</span>
               </motion.div>
             )}
@@ -371,7 +420,7 @@ export function ProductEditModal({
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <label
-                  className="text-[11px] font-bold uppercase tracking-wider mb-1.5 block"
+                  className="text-xs font-bold uppercase tracking-wider mb-1.5 block"
                   style={{ color: 'var(--color-outline, #73796e)' }}
                 >
                   Product Name *
@@ -391,7 +440,7 @@ export function ProductEditModal({
 
               <div>
                 <label
-                  className="text-[11px] font-bold uppercase tracking-wider mb-1.5 block"
+                  className="text-xs font-bold uppercase tracking-wider mb-1.5 block"
                   style={{ color: 'var(--color-outline, #73796e)' }}
                 >
                   Category *
@@ -421,7 +470,7 @@ export function ProductEditModal({
             {/* Description */}
             <div>
               <label
-                className="text-[11px] font-bold uppercase tracking-wider mb-1.5 block"
+                className="text-xs font-bold uppercase tracking-wider mb-1.5 block"
                 style={{ color: 'var(--color-outline, #73796e)' }}
               >
                 Description
@@ -459,7 +508,7 @@ export function ProductEditModal({
                   <span className="text-[13px] font-bold block" style={{ color: 'var(--color-on-surface)' }}>
                     Active on Storefront
                   </span>
-                  <span className="text-[11px] text-gray-500 block">
+                  <span className="text-xs text-foreground-muted block">
                     {isActive ? 'Customers can view and buy' : 'Hidden from customer views'}
                   </span>
                 </div>
@@ -476,77 +525,26 @@ export function ProductEditModal({
                   <span className="text-[13px] font-bold block" style={{ color: 'var(--color-on-surface)' }}>
                     Freshness Guarantee
                   </span>
-                  <span className="text-[11px] text-gray-500 block">
+                  <span className="text-xs text-foreground-muted block">
                     Shows "FRESH" badge on product cards
                   </span>
                 </div>
               </label>
             </div>
 
-            {/* Product Image */}
+            {/* Product Images (Multi-Image Upload) */}
             <div>
               <label
-                className="text-[11px] font-bold uppercase tracking-wider mb-2 block"
+                className="text-xs font-bold uppercase tracking-wider mb-2 block"
                 style={{ color: 'var(--color-outline, #73796e)' }}
               >
-                Product Image
+                Product Images
               </label>
-              <div className="flex items-center gap-4">
-                <label
-                  className="cursor-pointer relative flex flex-col items-center justify-center w-24 h-24 rounded-[14px] border-2 border-dashed transition-all hover:border-primary overflow-hidden group"
-                  style={{
-                    borderColor: 'rgba(195,201,187,0.6)',
-                    background: 'var(--color-surface-container, #f3f4ef)',
-                  }}
-                >
-                  <input
-                    type="file"
-                    className="hidden"
-                    accept="image/*"
-                    onChange={(e) => {
-                      const file = e.target.files?.[0];
-                      if (file) {
-                        setImageFile(file);
-                        setImagePreview(URL.createObjectURL(file));
-                      }
-                    }}
-                  />
-                  {imagePreview ? (
-                    <>
-                      <img
-                        src={imagePreview}
-                        alt="Product Preview"
-                        className="w-full h-full object-cover"
-                      />
-                      <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center text-white text-[10px] font-bold">
-                        Change
-                      </div>
-                    </>
-                  ) : (
-                    <>
-                      <UploadCloud className="w-6 h-6 mb-1 text-gray-400" />
-                      <span className="text-[10px] font-bold text-gray-500">Upload</span>
-                    </>
-                  )}
-                </label>
-
-                {imagePreview && (
-                  <div className="flex flex-col gap-1 text-[12px]">
-                    <span className="font-semibold text-gray-700">Image selected</span>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setImageFile(null);
-                        setImagePreview(null);
-                        setImageUrl('');
-                      }}
-                      className="text-red-600 font-bold hover:underline self-start text-[11px]"
-                    >
-                      Remove image
-                    </button>
-                  </div>
-                )}
-              </div>
+              <MultiImageUpload
+                images={images}
+                onChange={setImages}
+                disabled={isSaving}
+              />
             </div>
 
             {/* Variants Management */}
@@ -560,7 +558,7 @@ export function ProductEditModal({
                     <Layers className="w-4 h-4 text-primary" />
                     Product Variants & Pricing ({variants.length})
                   </h3>
-                  <span className="text-[11px] text-gray-500">
+                  <span className="text-xs text-foreground-muted">
                     Define sizes, selling prices, and cost prices. Minimum profit margin applies.
                   </span>
                 </div>
@@ -569,7 +567,7 @@ export function ProductEditModal({
                   onClick={handleAddVariant}
                   className="flex items-center gap-1 px-3 py-1.5 rounded-[10px] text-[12px] font-bold text-white transition-all active:scale-95 shadow-sm"
                   style={{
-                    background: 'linear-gradient(135deg, #3f6530, #577f46)',
+                    background: 'var(--cta-gradient)',
                   }}
                 >
                   <Plus className="w-3.5 h-3.5" />
@@ -603,10 +601,10 @@ export function ProductEditModal({
                           </span>
                           {cost > 0 && (
                             <span
-                              className={`text-[11px] font-black px-2 py-0.5 rounded-full flex items-center gap-0.5 ${
+                              className={`text-xs font-semibold px-2 py-0.5 rounded-full flex items-center gap-0.5 ${
                                 isMarginLow
-                                  ? 'bg-amber-100 text-amber-800'
-                                  : 'bg-emerald-100 text-emerald-800'
+                                  ? 'bg-warning-bg text-warning'
+                                  : 'bg-success-bg text-success'
                               }`}
                             >
                               <Percent className="w-3 h-3" />
@@ -619,7 +617,7 @@ export function ProductEditModal({
                           <button
                             type="button"
                             onClick={() => handleRemoveVariant(idx)}
-                            className="p-1 rounded-full text-red-500 hover:bg-red-50 transition-colors"
+                            className="p-1 rounded-full text-red-500 hover:bg-error-bg transition-colors"
                             title="Remove Variant"
                           >
                             <Trash2 className="w-4 h-4" />
@@ -629,7 +627,7 @@ export function ProductEditModal({
 
                       <div className="grid grid-cols-2 sm:grid-cols-5 gap-2.5 text-[13px]">
                         <div>
-                          <label className="text-[10px] font-bold text-gray-500 uppercase block mb-1">
+                          <label className="text-xs font-bold text-foreground-muted uppercase block mb-1">
                             Weight / Size *
                           </label>
                           <input
@@ -642,7 +640,7 @@ export function ProductEditModal({
                         </div>
 
                         <div>
-                          <label className="text-[10px] font-bold text-gray-500 uppercase block mb-1">
+                          <label className="text-xs font-bold text-foreground-muted uppercase block mb-1">
                             Selling Price (₹) *
                           </label>
                           <input
@@ -650,13 +648,13 @@ export function ProductEditModal({
                             value={v.price}
                             onChange={(e) => handleUpdateVariant(idx, 'price', e.target.value)}
                             placeholder="₹ Selling"
-                            className="w-full h-9 px-2.5 rounded-[8px] font-bold border outline-none focus:border-primary text-emerald-700"
+                            className="w-full h-9 px-2.5 rounded-[8px] font-bold border outline-none focus:border-primary text-success"
                             style={{ background: 'var(--color-surface-container)' }}
                           />
                         </div>
 
                         <div>
-                          <label className="text-[10px] font-bold text-gray-500 uppercase block mb-1">
+                          <label className="text-xs font-bold text-foreground-muted uppercase block mb-1">
                             Cost Price (₹)
                           </label>
                           <input
@@ -670,7 +668,7 @@ export function ProductEditModal({
                         </div>
 
                         <div>
-                          <label className="text-[10px] font-bold text-gray-500 uppercase block mb-1">
+                          <label className="text-xs font-bold text-foreground-muted uppercase block mb-1">
                             Original MRP (₹)
                           </label>
                           <input
@@ -678,13 +676,13 @@ export function ProductEditModal({
                             value={v.original_price}
                             onChange={(e) => handleUpdateVariant(idx, 'original_price', e.target.value)}
                             placeholder="₹ MRP"
-                            className="w-full h-9 px-2.5 rounded-[8px] font-medium border outline-none focus:border-primary text-gray-500"
+                            className="w-full h-9 px-2.5 rounded-[8px] font-medium border outline-none focus:border-primary text-foreground-muted"
                             style={{ background: 'var(--color-surface-container)' }}
                           />
                         </div>
 
                         <div>
-                          <label className="text-[10px] font-bold text-gray-500 uppercase block mb-1">
+                          <label className="text-xs font-bold text-foreground-muted uppercase block mb-1">
                             Stock Qty
                           </label>
                           <input
@@ -704,16 +702,17 @@ export function ProductEditModal({
             </div>
 
             {/* Delete / Remove Zone */}
-            <div
-              className="p-4 rounded-[16px] border border-red-200 bg-red-50/50 space-y-3"
-            >
+            {!isSellerProduct && product.id && (
+              <div
+                className="p-4 rounded-[16px] border border-error/20 bg-error-bg/50 space-y-3"
+              >
               <div className="flex items-center justify-between">
                 <div>
                   <h4 className="text-[13px] font-bold text-red-900 flex items-center gap-1.5">
-                    <ShieldAlert className="w-4 h-4 text-red-600" />
+                    <ShieldAlert className="w-4 h-4 text-error" />
                     Danger Zone: Remove Product
                   </h4>
-                  <p className="text-[11px] text-red-700">
+                  <p className="text-xs text-error">
                     Deactivate or permanently remove this product from your inventory and customer app.
                   </p>
                 </div>
@@ -722,7 +721,7 @@ export function ProductEditModal({
                   <button
                     type="button"
                     onClick={() => setShowDeleteConfirm(true)}
-                    className="px-3.5 py-1.5 rounded-[10px] text-[12px] font-bold text-red-700 border border-red-300 hover:bg-red-100 transition-colors"
+                    className="px-3.5 py-1.5 rounded-[10px] text-[12px] font-bold text-error border border-red-300 hover:bg-error-bg transition-colors"
                   >
                     Remove Product...
                   </button>
@@ -733,14 +732,14 @@ export function ProductEditModal({
                 <motion.div
                   initial={{ opacity: 0, height: 0 }}
                   animate={{ opacity: 1, height: 'auto' }}
-                  className="pt-3 border-t border-red-200 space-y-3"
+                  className="pt-3 border-t border-error/20 space-y-3"
                 >
                   <p className="text-[12px] text-red-900 font-semibold">
                     Are you sure you want to remove <span className="font-bold underline">{product.name}</span>?
                   </p>
 
                   <div className="space-y-2">
-                    <label className="flex items-center gap-2 cursor-pointer text-[12px] text-gray-700">
+                    <label className="flex items-center gap-2 cursor-pointer text-[12px] text-foreground">
                       <input
                         type="radio"
                         name="del_option"
@@ -753,15 +752,15 @@ export function ProductEditModal({
                       </span>
                     </label>
 
-                    <label className="flex items-center gap-2 cursor-pointer text-[12px] text-gray-700">
+                    <label className="flex items-center gap-2 cursor-pointer text-[12px] text-foreground">
                       <input
                         type="radio"
                         name="del_option"
                         checked={permanentDelete}
                         onChange={() => setPermanentDelete(true)}
-                        className="text-red-600 accent-red-600"
+                        className="text-error accent-red-600"
                       />
-                      <span className="text-red-700">
+                      <span className="text-error">
                         <strong>Permanent Delete:</strong> Completely delete product and variants (only allowed if product has no past order history).
                       </span>
                     </label>
@@ -771,7 +770,7 @@ export function ProductEditModal({
                     <button
                       type="button"
                       onClick={() => setShowDeleteConfirm(false)}
-                      className="px-3 py-1.5 rounded-[8px] text-[12px] font-semibold text-gray-600 hover:bg-gray-100"
+                      className="px-3 py-1.5 rounded-[8px] text-[12px] font-semibold text-foreground-muted hover:bg-surface-muted"
                     >
                       Cancel
                     </button>
@@ -792,6 +791,7 @@ export function ProductEditModal({
                 </motion.div>
               )}
             </div>
+            )}
           </div>
 
           {/* Modal Footer */}
@@ -802,33 +802,45 @@ export function ProductEditModal({
               background: 'var(--color-surface-container-lowest, #ffffff)',
             }}
           >
-            <button
-              type="button"
-              onClick={onClose}
-              disabled={isSaving || isDeleting}
-              className="px-5 py-2.5 rounded-[12px] text-[13px] font-semibold text-gray-700 hover:bg-black/5 transition-all"
-            >
-              Cancel
-            </button>
+            {isSellerProduct ? (
+              <button
+                type="button"
+                onClick={onClose}
+                className="px-6 py-2.5 rounded-[12px] text-[13px] font-bold text-white bg-primary hover:bg-primary-hover shadow-xs transition-all cursor-pointer"
+              >
+                Close (Read-Only)
+              </button>
+            ) : (
+              <>
+                <button
+                  type="button"
+                  onClick={onClose}
+                  disabled={isSaving || isDeleting}
+                  className="px-5 py-2.5 rounded-[12px] text-[13px] font-semibold text-foreground hover:bg-black/5 transition-all cursor-pointer"
+                >
+                  Cancel
+                </button>
 
-            <button
-              type="button"
-              onClick={handleSave}
-              disabled={isSaving || isDeleting}
-              className="px-6 py-2.5 rounded-[12px] text-[13px] font-bold text-white transition-all active:scale-95 flex items-center gap-2 shadow-md hover:opacity-95 disabled:opacity-50"
-              style={{
-                background: 'linear-gradient(135deg, #3f6530, #577f46)',
-              }}
-            >
-              {isSaving ? (
-                <>
-                  <Loader2 className="w-4 h-4 animate-spin" />
-                  Saving Changes...
-                </>
-              ) : (
-                'Save Changes'
-              )}
-            </button>
+                <button
+                  type="button"
+                  onClick={handleSave}
+                  disabled={isSaving || isDeleting}
+                  className="px-6 py-2.5 rounded-[12px] text-[13px] font-bold text-white transition-all active:scale-95 flex items-center gap-2 shadow-md hover:opacity-95 disabled:opacity-50 cursor-pointer"
+                  style={{
+                    background: 'var(--cta-gradient)',
+                  }}
+                >
+                  {isSaving ? (
+                    <>
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                      Saving Changes...
+                    </>
+                  ) : (
+                    'Save Changes'
+                  )}
+                </button>
+              </>
+            )}
           </div>
         </motion.div>
       </div>

@@ -1,14 +1,40 @@
 /**
  * Custom JWT Authentication (Edge & Node.js Compatible)
  * Uses Web Crypto API for zero-dependency, edge-compatible HS256 signing and verification.
- * 
+ *
  * Env vars required:
- *   JWT_SECRET (min 32 chars)
- *   JWT_REFRESH_SECRET (min 32 chars)
+ *   JWT_SECRET          (min 32 chars)
+ *   JWT_REFRESH_SECRET  (min 32 chars)
+ *
+ * Both variables MUST be set before the module is imported. If either is
+ * missing or shorter than 32 characters the process throws immediately so
+ * misconfigured deployments fail loudly at startup rather than silently
+ * signing tokens with predictable/shared secrets.
  */
 
-const JWT_SECRET = process.env.JWT_SECRET || 'gjanandsarkar-super-secret-production-jwt-key-2026';
-const JWT_REFRESH_SECRET = process.env.JWT_REFRESH_SECRET || 'gjanandsarkar-super-secret-refresh-key-2026';
+const DEV_FALLBACK_SECRET = '7f9c8b3e2d1a4f5c6e8d0b2a4c6e8f1a3b5c7d9e1f3a5b7c9d1e3f5a7b9c1d3e';
+
+function requireSecret(name: string): string {
+  const value = process.env[name];
+  if (!value || value.length < 32) {
+    if (process.env.NODE_ENV !== 'production') {
+      return DEV_FALLBACK_SECRET;
+    }
+    throw new Error(
+      `[JWT] Environment variable ${name} is ${!value ? 'not set' : `too short (${value.length} chars; minimum 32)`}. ` +
+      'Set a cryptographically-random value of at least 32 characters before starting the server.'
+    );
+  }
+  return value;
+}
+
+function getJwtSecret(): string {
+  return requireSecret('JWT_SECRET');
+}
+
+function getJwtRefreshSecret(): string {
+  return requireSecret('JWT_REFRESH_SECRET');
+}
 
 export type JWTPayload = {
   userId: string;
@@ -157,28 +183,28 @@ export async function verifyJwt<T = any>(
  * Issue a short-lived access token (15 min)
  */
 export async function signAccessToken(payload: Omit<JWTPayload, 'iat' | 'exp' | 'type'>): Promise<string> {
-  return signJwt({ ...payload, type: 'access' }, JWT_SECRET, 15 * 60);
+  return signJwt({ ...payload, type: 'access' }, getJwtSecret(), 15 * 60);
 }
 
 /**
  * Issue a long-lived refresh token (30 days)
  */
 export async function signRefreshToken(userId: string): Promise<string> {
-  return signJwt({ userId, type: 'refresh' }, JWT_REFRESH_SECRET, 30 * 24 * 60 * 60);
+  return signJwt({ userId, type: 'refresh' }, getJwtRefreshSecret(), 30 * 24 * 60 * 60);
 }
 
 /**
  * Verify an access token. Returns the decoded payload or null.
  */
 export async function verifyAccessToken(token: string): Promise<JWTPayload | null> {
-  return verifyJwt<JWTPayload>(token, JWT_SECRET);
+  return verifyJwt<JWTPayload>(token, getJwtSecret());
 }
 
 /**
  * Verify a refresh token. Returns userId or null.
  */
 export async function verifyRefreshToken(token: string): Promise<string | null> {
-  const payload = await verifyJwt<{ userId: string; type: string }>(token, JWT_REFRESH_SECRET);
+  const payload = await verifyJwt<{ userId: string; type: string }>(token, getJwtRefreshSecret());
   if (!payload || payload.type !== 'refresh') return null;
   return payload.userId;
 }

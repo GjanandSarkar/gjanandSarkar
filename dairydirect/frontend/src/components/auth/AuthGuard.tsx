@@ -13,6 +13,14 @@ export function AuthGuard() {
   useEffect(() => {
     if (isAuthLoading) return;
 
+    /* Redirecting to the page we are already on re-runs this effect and
+       re-fetches the route, which is half of any redirect loop. Guard every
+       redirect centrally so no individual branch has to remember. */
+    const go = (target: string) => {
+      if (target.split('?')[0] === pathname) return;
+      router.replace(target);
+    };
+
     const isAuthRoute = 
       pathname === '/login' || 
       pathname === '/auth/login' ||
@@ -24,24 +32,39 @@ export function AuthGuard() {
       pathname === '/orders' ||
       pathname === '/profile' ||
       pathname === '/profile/saved-addresses' ||
-      pathname.startsWith('/seller/dashboard');
+      pathname.startsWith('/seller');
 
-    // Not logged in -> go to login if on protected route
-    if (!user && isProtectedRoute) {
-      router.replace('/auth/login?redirect=' + encodeURIComponent(pathname));
+    // Not logged in -> go to login if on protected route, admin, or seller console
+    if (!user && (isProtectedRoute || pathname.startsWith('/admin') || pathname.startsWith('/seller'))) {
+      go('/auth/login?redirect=' + encodeURIComponent(pathname));
       return;
     }
 
-    // Logged in seller -> automatically redirect to seller dashboard if accessing general customer pages
+    // Strict Role-Based Route Partitioning:
+    // 1. Admin users are strictly restricted to /admin/* (and auth/api routes). Block customer storefront.
+    if (user && user.role === 'admin') {
+      const isAdminAllowedPage = 
+        pathname.startsWith('/admin') || 
+        pathname.startsWith('/api') || 
+        pathname.startsWith('/auth') || 
+        pathname === '/login';
+
+      if (!isAdminAllowedPage) {
+        go('/admin');
+        return;
+      }
+    }
+
+    // 2. Seller users are strictly restricted to /seller/* (and auth/api routes). Block customer storefront.
     if (user && user.role === 'seller') {
       const isSellerAllowedPage = 
         pathname.startsWith('/seller') || 
         pathname.startsWith('/api') || 
-        pathname.startsWith('/admin') ||
-        pathname === '/profile';
+        pathname.startsWith('/auth') || 
+        pathname === '/login';
 
       if (!isSellerAllowedPage) {
-        router.replace('/seller/dashboard');
+        go('/seller/dashboard');
         return;
       }
     }
@@ -49,11 +72,11 @@ export function AuthGuard() {
     // Already logged in -> leave login page
     if (user && (pathname === '/login' || pathname === '/auth/login')) {
       if (user.role === 'admin') {
-        router.replace('/admin');
+        go('/admin');
       } else if (user.role === 'seller') {
-        router.replace('/seller/dashboard');
+        go('/seller/dashboard');
       } else {
-        router.replace('/home');
+        go('/home');
       }
     }
   }, [user, pathname, router, isAuthLoading]);

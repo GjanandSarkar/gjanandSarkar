@@ -48,6 +48,9 @@ export default function AdminSettingsPage() {
           morning_cutoff_time: settings.morning_cutoff_time,
           evening_cutoff_time: settings.evening_cutoff_time,
           is_ordering_enabled: settings.is_ordering_enabled,
+          freshness_guarantee_hours: Number(settings.freshness_guarantee_hours || 24),
+          return_window_hours: Number(settings.return_window_hours || 168),
+          replacement_window_hours: Number(settings.replacement_window_hours || 168),
         }),
       });
 
@@ -72,8 +75,8 @@ export default function AdminSettingsPage() {
               <ArrowLeft className="w-4 h-4" style={{ color: 'var(--color-on-surface)' }} />
             </Link>
             <div>
-              <h1 className="font-extrabold text-[24px]" style={{ color: 'var(--color-on-surface)' }}>Business Configuration</h1>
-              <p className="text-[12px]" style={{ color: 'var(--color-outline)' }}>Profit protection rules, cutoff timings, and delivery fees</p>
+              <h1 className="font-semibold text-[24px]" style={{ color: 'var(--color-on-surface)' }}>Business Configuration</h1>
+              <p className="text-[12px]" style={{ color: 'var(--color-on-surface-variant)' }}>Profit protection rules, cutoff timings, and delivery fees</p>
             </div>
           </div>
         </div>
@@ -100,7 +103,7 @@ export default function AdminSettingsPage() {
                 <Shield className="w-5 h-5" style={{ color: 'var(--color-primary)' }} />
                 <h2 className="font-bold text-[16px]" style={{ color: 'var(--color-on-surface)' }}>Profit Margin Protection</h2>
               </div>
-              <p className="text-[12px] mb-4" style={{ color: 'var(--color-outline)' }}>
+              <p className="text-[12px] mb-4" style={{ color: 'var(--color-on-surface-variant)' }}>
                 System-level guard: No product or coupon will be allowed to sell below this margin over cost price.
               </p>
               <div>
@@ -118,7 +121,7 @@ export default function AdminSettingsPage() {
                     className="w-full px-3 py-2 rounded-[10px] text-[14px] font-bold border"
                     style={{ background: 'var(--color-surface-container-low)', borderColor: 'rgba(195,201,187,0.4)', color: 'var(--color-on-surface)' }}
                   />
-                  <span className="font-bold text-[14px]" style={{ color: 'var(--color-outline)' }}>%</span>
+                  <span className="font-bold text-[14px]" style={{ color: 'var(--color-on-surface-variant)' }}>%</span>
                 </div>
               </div>
             </div>
@@ -193,11 +196,74 @@ export default function AdminSettingsPage() {
               </div>
             </div>
 
+            {/* Return and Replacement Policy Windows */}
+            <div className="rounded-[16px] p-6" style={{ background: 'var(--color-surface-container-lowest)', border: '1px solid rgba(195,201,187,0.25)' }}>
+              <div className="flex items-center gap-2 mb-4">
+                <Shield className="w-5 h-5" style={{ color: 'var(--color-primary)' }} />
+                <h2 className="font-bold text-[16px]" style={{ color: 'var(--color-on-surface)' }}>Return & Replacement Policy Windows</h2>
+              </div>
+              <div className="grid sm:grid-cols-3 gap-4">
+                <div>
+                  <label className="block text-[12px] font-bold mb-1" style={{ color: 'var(--color-on-surface)' }}>
+                    Freshness Guarantee (Perishables)
+                  </label>
+                  <div className="relative">
+                    <input
+                      type="number"
+                      min="1"
+                      value={settings.freshness_guarantee_hours || 24}
+                      onChange={e => setSettings({ ...settings, freshness_guarantee_hours: e.target.value })}
+                      className="w-full px-3 py-2 rounded-[10px] text-[14px] font-bold border"
+                      style={{ background: 'var(--color-surface-container-low)', borderColor: 'rgba(195,201,187,0.4)', color: 'var(--color-on-surface)' }}
+                    />
+                    <span className="absolute right-3 top-2 text-[12px] text-foreground-muted font-bold">hrs</span>
+                  </div>
+                  <span className="text-xs text-foreground-muted mt-1 block">Milk, Curd, Paneer, Butter, Sweets</span>
+                </div>
+
+                <div>
+                  <label className="block text-[12px] font-bold mb-1" style={{ color: 'var(--color-on-surface)' }}>
+                    Return Window (Non-perishables)
+                  </label>
+                  <div className="relative">
+                    <input
+                      type="number"
+                      min="1"
+                      value={settings.return_window_hours || 168}
+                      onChange={e => setSettings({ ...settings, return_window_hours: e.target.value })}
+                      className="w-full px-3 py-2 rounded-[10px] text-[14px] font-bold border"
+                      style={{ background: 'var(--color-surface-container-low)', borderColor: 'rgba(195,201,187,0.4)', color: 'var(--color-on-surface)' }}
+                    />
+                    <span className="absolute right-3 top-2 text-[12px] text-foreground-muted font-bold">hrs</span>
+                  </div>
+                  <span className="text-xs text-foreground-muted mt-1 block">Ghee, honey, dry pantry items</span>
+                </div>
+
+                <div>
+                  <label className="block text-[12px] font-bold mb-1" style={{ color: 'var(--color-on-surface)' }}>
+                    Replacement Window (Non-perishables)
+                  </label>
+                  <div className="relative">
+                    <input
+                      type="number"
+                      min="1"
+                      value={settings.replacement_window_hours || 168}
+                      onChange={e => setSettings({ ...settings, replacement_window_hours: e.target.value })}
+                      className="w-full px-3 py-2 rounded-[10px] text-[14px] font-bold border"
+                      style={{ background: 'var(--color-surface-container-low)', borderColor: 'rgba(195,201,187,0.4)', color: 'var(--color-on-surface)' }}
+                    />
+                    <span className="absolute right-3 top-2 text-[12px] text-foreground-muted font-bold">hrs</span>
+                  </div>
+                  <span className="text-xs text-foreground-muted mt-1 block">Replacement dispatch window</span>
+                </div>
+              </div>
+            </div>
+
             {/* Ordering Toggle */}
             <div className="rounded-[16px] p-6 flex items-center justify-between" style={{ background: 'var(--color-surface-container-lowest)', border: '1px solid rgba(195,201,187,0.25)' }}>
               <div>
                 <h2 className="font-bold text-[15px]" style={{ color: 'var(--color-on-surface)' }}>Accepting Customer Orders</h2>
-                <p className="text-[12px]" style={{ color: 'var(--color-outline)' }}>Toggle off during stock counts or holiday closures</p>
+                <p className="text-[12px]" style={{ color: 'var(--color-on-surface-variant)' }}>Toggle off during stock counts or holiday closures</p>
               </div>
               <label className="relative inline-flex items-center cursor-pointer">
                 <input
@@ -206,7 +272,7 @@ export default function AdminSettingsPage() {
                   onChange={e => setSettings({ ...settings, is_ordering_enabled: e.target.checked })}
                   className="sr-only peer"
                 />
-                <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#4a8c3f]"></div>
+                <div className="w-11 h-6 bg-border peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-surface after:border-border-hover after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary-light"></div>
               </label>
             </div>
 

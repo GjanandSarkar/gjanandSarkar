@@ -187,8 +187,8 @@ export function AddressFormModal({
         setLocationNotice({
           text:
             reasonNotice ||
-            'Location auto-filled via network! Please enter your Flat / House number manually.',
-          type: 'success',
+            'Filled in from your network location. This is approximate, so please check the pincode and city before saving, and add your flat / house number.',
+          type: 'info',
         });
         setTimeout(() => setLocationNotice(null), 7000);
         return true;
@@ -226,12 +226,15 @@ export function AddressFormModal({
               applyLocationData(detailed);
             }
           } else {
-            setLatitude(lat);
-            setLongitude(lng);
-            setLocationNotice({
-              text: 'Coordinates pinpointed, but address details were unavailable. Please enter details manually.',
-              type: 'info',
-            });
+            const fallbackWorked = await attemptIPLocationFallback('Coordinates pinpointed; approximate location detected via network.');
+            if (!fallbackWorked) {
+              setLatitude(lat);
+              setLongitude(lng);
+              setLocationNotice({
+                text: 'GPS pinpointed! Please enter your Area, City, and Pincode.',
+                type: 'info',
+              });
+            }
           }
         } catch (err) {
           await attemptIPLocationFallback('GPS lookup timed out. Detected location via network.');
@@ -240,33 +243,45 @@ export function AddressFormModal({
         }
       },
       async (err) => {
-        // When device GPS is denied, timed out, or unavailable:
-        // Automatically attempt network/IP fallback so the user is never stuck!
+        // Fall back to the network location so the user is never stuck, but
+        // describe what actually happened rather than blaming the browser for
+        // every failure mode.
+        const reason =
+          err.code === err.PERMISSION_DENIED
+            ? 'Location access was declined, so we used your network location instead.'
+            : err.code === err.TIMEOUT
+              ? 'Your device took too long to get a GPS fix, so we used your network location instead.'
+              : 'Your device could not provide a GPS fix, so we used your network location instead.';
+
         const success = await attemptIPLocationFallback(
-          'Location auto-filled via network! (Note: GPS was blocked by browser. Click the lock/tune icon in your address bar to enable precise GPS).'
+          `${reason} It is approximate - please check the pincode and city before saving.`
         );
         setIsLocating(false);
 
         if (!success) {
           if (err.code === err.PERMISSION_DENIED) {
             setLocationNotice({
-              text: 'Location permission was denied. Click the lock/tune icon 🔒 next to the website URL in your browser bar to allow location, or enter manually.',
+              text: 'Location access is blocked for this site. Open your browser site settings (the icon to the left of the address bar), set Location to Allow, then try again - or just type the address in.',
               type: 'error',
             });
           } else if (err.code === err.TIMEOUT) {
             setLocationNotice({
-              text: 'Location request timed out. Please try again or fill manually.',
+              text: 'Getting your location timed out. Moving somewhere with a clearer view of the sky can help, or enter the address manually.',
               type: 'error',
             });
           } else {
             setLocationNotice({
-              text: 'Unable to detect your location. Please enter manually.',
+              text: 'We could not detect your location. Please enter the address manually.',
               type: 'error',
             });
           }
         }
       },
-      { enableHighAccuracy: false, timeout: 6000, maximumAge: 60000 }
+      // A delivery address needs a real GPS fix. enableHighAccuracy was false
+      // with a 60s cache, which let the browser hand back a coarse, cached,
+      // often network-derived position - the very thing the fallback exists
+      // for. GPS needs longer than 6s from a cold start.
+      { enableHighAccuracy: true, timeout: 15000, maximumAge: 0 }
     );
   };
 
@@ -346,9 +361,21 @@ export function AddressFormModal({
       longitude: longitude,
     };
 
-    const success = await onSave(payload);
-    if (success) {
-      onClose();
+    try {
+      const success = await onSave(payload);
+      if (success) {
+        onClose();
+      } else {
+        setLocationNotice({
+          text: 'Unable to save address. Please check your network connection and ensure all fields are correct.',
+          type: 'error',
+        });
+      }
+    } catch (err: any) {
+      setLocationNotice({
+        text: err?.message || 'Failed to save address. Please try again.',
+        type: 'error',
+      });
     }
   };
 
@@ -357,27 +384,27 @@ export function AddressFormModal({
       role="dialog"
       aria-modal="true"
       aria-labelledby="address-modal-title"
-      className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-slate-900/60 backdrop-blur-sm overflow-y-auto animate-in fade-in duration-200"
+      className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-foreground/60 backdrop-blur-sm overflow-y-auto animate-in fade-in duration-200"
     >
       <div
         ref={modalRef}
-        className="bg-white w-full max-w-xl rounded-3xl shadow-2xl border border-slate-200 overflow-hidden my-6 animate-in zoom-in-95 duration-200"
+        className="bg-surface w-full max-w-xl rounded-xl shadow-2xl border border-border overflow-hidden my-6 animate-in zoom-in-95 duration-200"
       >
         {/* Modal Header */}
-        <div className="px-6 py-4 border-b border-slate-100 flex items-center justify-between bg-slate-50/70">
+        <div className="px-6 py-4 border-b border-border flex items-center justify-between bg-surface-muted/70">
           <div>
-            <h2 id="address-modal-title" className="text-base sm:text-lg font-bold text-slate-900">
+            <h2 id="address-modal-title" className="text-base sm:text-lg font-bold text-foreground">
               {isEditMode ? 'Edit Delivery Address' : 'Add New Delivery Address'}
             </h2>
-            <p className="text-xs text-slate-500 mt-0.5">
-              Enter your complete address details for seamless farm-fresh delivery.
+            <p className="text-xs text-foreground-muted mt-0.5">
+              Enter your complete address details so we can deliver accurately.
             </p>
           </div>
           <button
             type="button"
             onClick={onClose}
             aria-label="Close address form"
-            className="p-2 text-slate-400 hover:text-slate-700 hover:bg-slate-200/60 rounded-full transition-colors"
+            className="p-2 text-foreground-muted hover:text-foreground hover:bg-border/60 rounded-full transition-colors"
           >
             <X className="w-5 h-5" />
           </button>
@@ -390,18 +417,18 @@ export function AddressFormModal({
             <div
               className={`p-3.5 rounded-xl text-xs font-medium flex items-start gap-2.5 transition-all ${
                 locationNotice.type === 'error'
-                  ? 'bg-rose-50 text-rose-800 border border-rose-200'
+                  ? 'bg-error-bg text-error border border-error/20'
                   : locationNotice.type === 'success'
-                  ? 'bg-emerald-50 text-emerald-800 border border-emerald-200'
-                  : 'bg-blue-50 text-blue-800 border border-blue-200'
+                  ? 'bg-success-bg text-success border border-success/20'
+                  : 'bg-info-bg text-blue-800 border border-info/20'
               }`}
             >
               {locationNotice.type === 'error' ? (
-                <AlertCircle className="w-4 h-4 shrink-0 mt-0.5 text-rose-600" />
+                <AlertCircle className="w-4 h-4 shrink-0 mt-0.5 text-error" />
               ) : locationNotice.type === 'success' ? (
-                <Check className="w-4 h-4 shrink-0 mt-0.5 text-emerald-600" />
+                <Check className="w-4 h-4 shrink-0 mt-0.5 text-success" />
               ) : (
-                <MapPin className="w-4 h-4 shrink-0 mt-0.5 text-blue-600" />
+                <MapPin className="w-4 h-4 shrink-0 mt-0.5 text-info" />
               )}
               <span>{locationNotice.text}</span>
             </div>
@@ -409,9 +436,9 @@ export function AddressFormModal({
 
           {/* Overwrite Confirmation Dialog */}
           {showOverwriteConfirm && (
-            <div className="p-4 bg-amber-50 border border-amber-200 rounded-2xl text-xs text-amber-900 space-y-2">
+            <div className="p-4 bg-warning-bg border border-warning/20 rounded-2xl text-xs text-warning space-y-2">
               <p className="font-semibold">Update existing address fields with detected GPS location?</p>
-              <p className="text-amber-800 leading-relaxed">
+              <p className="text-warning leading-relaxed">
                 This will fill Area, City, State, and Pincode. Your Flat/House number will remain untouched.
               </p>
               <div className="flex gap-2 pt-1">
@@ -421,14 +448,14 @@ export function AddressFormModal({
                     if (pendingLocationRef.current) applyLocationData(pendingLocationRef.current);
                     setShowOverwriteConfirm(false);
                   }}
-                  className="px-3 py-1.5 bg-amber-700 hover:bg-amber-800 text-white font-semibold rounded-lg text-xs transition-colors"
+                  className="px-3 py-1.5 bg-warning hover:bg-warning text-on-warning font-semibold rounded-lg text-xs transition-colors"
                 >
                   Yes, Update Fields
                 </button>
                 <button
                   type="button"
                   onClick={() => setShowOverwriteConfirm(false)}
-                  className="px-3 py-1.5 bg-white border border-amber-300 text-amber-800 font-semibold rounded-lg text-xs hover:bg-amber-100 transition-colors"
+                  className="px-3 py-1.5 bg-surface border border-warning text-warning font-semibold rounded-lg text-xs hover:bg-warning-bg transition-colors"
                 >
                   Cancel
                 </button>
@@ -437,14 +464,14 @@ export function AddressFormModal({
           )}
 
           {/* Quick Action: Use My Location */}
-          <div className="flex items-center justify-between gap-3 bg-emerald-50/60 border border-emerald-100 p-3.5 rounded-2xl">
+          <div className="flex items-center justify-between gap-3 bg-success-bg/60 border border-success-bg p-3.5 rounded-2xl">
             <div className="flex items-center gap-2.5">
-              <div className="w-8 h-8 rounded-xl bg-emerald-100 text-emerald-700 flex items-center justify-center shrink-0">
+              <div className="w-8 h-8 rounded-xl bg-success-bg text-success flex items-center justify-center shrink-0">
                 <Navigation className="w-4 h-4" />
               </div>
               <div>
-                <p className="text-xs font-bold text-slate-800">Quick Fill via Geolocation</p>
-                <p className="text-[11px] text-slate-500">Auto-fills city, area & pincode from your device</p>
+                <p className="text-xs font-bold text-foreground">Quick Fill via Geolocation</p>
+                <p className="text-xs text-foreground-muted">Auto-fills city, area & pincode from your device</p>
               </div>
             </div>
 
@@ -452,7 +479,7 @@ export function AddressFormModal({
               type="button"
               onClick={handleUseMyLocation}
               disabled={isLocating}
-              className="flex items-center gap-1.5 px-3.5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold text-xs rounded-xl shadow-sm transition-all active:scale-95 disabled:opacity-50 shrink-0"
+              className="flex items-center gap-1.5 px-3.5 py-2 bg-success hover:bg-success text-on-success font-semibold text-xs rounded-xl shadow-sm transition-all active:scale-95 disabled:opacity-50 shrink-0"
             >
               {isLocating ? (
                 <>
@@ -470,7 +497,7 @@ export function AddressFormModal({
 
           {/* Section: Address Type */}
           <div>
-            <label className="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-2">
+            <label className="block text-xs font-bold uppercase tracking-wider text-foreground-muted mb-2">
               Address Type *
             </label>
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
@@ -483,11 +510,11 @@ export function AddressFormModal({
                     onClick={() => setAddressType(type)}
                     className={`flex items-center justify-center gap-2 py-2.5 px-3 rounded-xl border text-xs font-semibold transition-all ${
                       isSelected
-                        ? 'border-emerald-600 bg-emerald-50 text-emerald-800 shadow-sm ring-1 ring-emerald-500'
-                        : 'border-slate-200 bg-white text-slate-700 hover:border-slate-300 hover:bg-slate-50'
+                        ? 'border-success bg-success-bg text-success shadow-sm ring-1 ring-emerald-500'
+                        : 'border-border bg-surface text-foreground hover:border-border hover:bg-surface-muted'
                     }`}
                   >
-                    <Icon className={`w-4 h-4 ${isSelected ? 'text-emerald-700' : 'text-slate-500'}`} />
+                    <Icon className={`w-4 h-4 ${isSelected ? 'text-success' : 'text-foreground-muted'}`} />
                     {label}
                   </button>
                 );
@@ -497,7 +524,7 @@ export function AddressFormModal({
 
           {/* Section: Country / Region */}
           <div>
-            <label htmlFor="country" className="block text-xs font-bold text-slate-700 mb-1">
+            <label htmlFor="country" className="block text-xs font-bold text-foreground mb-1">
               Country/Region *
             </label>
             <SearchableCombobox
@@ -510,14 +537,14 @@ export function AddressFormModal({
               allowCustom={true}
             />
             {validationErrors.country && (
-              <p className="text-[11px] text-rose-600 mt-1">{validationErrors.country}</p>
+              <p className="text-xs text-error mt-1">{validationErrors.country}</p>
             )}
           </div>
 
           {/* Full Name & Mobile Number */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-              <label htmlFor="fullName" className="block text-xs font-bold text-slate-700 mb-1">
+              <label htmlFor="fullName" className="block text-xs font-bold text-foreground mb-1">
                 Full name (First and Last name) *
               </label>
               <input
@@ -526,23 +553,23 @@ export function AddressFormModal({
                 value={fullName}
                 onChange={(e) => setFullName(e.target.value)}
                 placeholder="e.g. Rahul Sharma"
-                className={`w-full h-11 px-3.5 bg-white border rounded-xl text-xs font-medium text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 transition-all ${
+                className={`w-full h-11 px-3.5 bg-surface border rounded-xl text-xs font-medium text-foreground placeholder-slate-400 focus:outline-none focus:ring-2 transition-all ${
                   validationErrors.fullName
-                    ? 'border-rose-300 focus:ring-rose-500/20 focus:border-rose-600'
-                    : 'border-slate-200 focus:ring-emerald-500/20 focus:border-emerald-600'
+                    ? 'border-error focus:ring-rose-500/20 focus:border-error'
+                    : 'border-border focus:ring-emerald-500/20 focus:border-success'
                 }`}
               />
               {validationErrors.fullName && (
-                <p className="text-[11px] text-rose-600 mt-1">{validationErrors.fullName}</p>
+                <p className="text-xs text-error mt-1">{validationErrors.fullName}</p>
               )}
             </div>
 
             <div>
-              <label htmlFor="mobileNumber" className="block text-xs font-bold text-slate-700 mb-1">
+              <label htmlFor="mobileNumber" className="block text-xs font-bold text-foreground mb-1">
                 Mobile number *
               </label>
               <div className="relative flex items-center">
-                <span className="absolute left-3 text-xs font-semibold text-slate-400 select-none">
+                <span className="absolute left-3 text-xs font-semibold text-foreground-muted select-none">
                   +91
                 </span>
                 <input
@@ -552,15 +579,15 @@ export function AddressFormModal({
                   value={mobileNumber}
                   onChange={(e) => setMobileNumber(e.target.value.replace(/\D/g, ''))}
                   placeholder="10-digit number"
-                  className={`w-full h-11 pl-12 pr-3.5 bg-white border rounded-xl text-xs font-medium text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 transition-all ${
+                  className={`w-full h-11 pl-12 pr-3.5 bg-surface border rounded-xl text-xs font-medium text-foreground placeholder-slate-400 focus:outline-none focus:ring-2 transition-all ${
                     validationErrors.mobileNumber
-                      ? 'border-rose-300 focus:ring-rose-500/20 focus:border-rose-600'
-                      : 'border-slate-200 focus:ring-emerald-500/20 focus:border-emerald-600'
+                      ? 'border-error focus:ring-rose-500/20 focus:border-error'
+                      : 'border-border focus:ring-emerald-500/20 focus:border-success'
                   }`}
                 />
               </div>
               {validationErrors.mobileNumber && (
-                <p className="text-[11px] text-rose-600 mt-1">{validationErrors.mobileNumber}</p>
+                <p className="text-xs text-error mt-1">{validationErrors.mobileNumber}</p>
               )}
             </div>
           </div>
@@ -568,7 +595,7 @@ export function AddressFormModal({
           {/* Pincode & Flat/House/Building */}
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             <div>
-              <label htmlFor="pincode" className="block text-xs font-bold text-slate-700 mb-1">
+              <label htmlFor="pincode" className="block text-xs font-bold text-foreground mb-1">
                 Pincode *
               </label>
               <input
@@ -578,19 +605,19 @@ export function AddressFormModal({
                 value={pincode}
                 onChange={(e) => setPincode(e.target.value.replace(/\D/g, ''))}
                 placeholder="6 digits"
-                className={`w-full h-11 px-3.5 bg-white border rounded-xl text-xs font-medium text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 transition-all ${
+                className={`w-full h-11 px-3.5 bg-surface border rounded-xl text-xs font-medium text-foreground placeholder-slate-400 focus:outline-none focus:ring-2 transition-all ${
                   validationErrors.pincode
-                    ? 'border-rose-300 focus:ring-rose-500/20 focus:border-rose-600'
-                    : 'border-slate-200 focus:ring-emerald-500/20 focus:border-emerald-600'
+                    ? 'border-error focus:ring-rose-500/20 focus:border-error'
+                    : 'border-border focus:ring-emerald-500/20 focus:border-success'
                 }`}
               />
               {validationErrors.pincode && (
-                <p className="text-[11px] text-rose-600 mt-1">{validationErrors.pincode}</p>
+                <p className="text-xs text-error mt-1">{validationErrors.pincode}</p>
               )}
             </div>
 
             <div className="sm:col-span-2">
-              <label htmlFor="flatHouseBuilding" className="block text-xs font-bold text-slate-700 mb-1">
+              <label htmlFor="flatHouseBuilding" className="block text-xs font-bold text-foreground mb-1">
                 Flat, House no., Building, Company, Apartment *
               </label>
               <input
@@ -599,21 +626,21 @@ export function AddressFormModal({
                 value={flatHouseBuilding}
                 onChange={(e) => setFlatHouseBuilding(e.target.value)}
                 placeholder="e.g. Flat 402, Royal Residency"
-                className={`w-full h-11 px-3.5 bg-white border rounded-xl text-xs font-medium text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 transition-all ${
+                className={`w-full h-11 px-3.5 bg-surface border rounded-xl text-xs font-medium text-foreground placeholder-slate-400 focus:outline-none focus:ring-2 transition-all ${
                   validationErrors.flatHouseBuilding
-                    ? 'border-rose-300 focus:ring-rose-500/20 focus:border-rose-600'
-                    : 'border-slate-200 focus:ring-emerald-500/20 focus:border-emerald-600'
+                    ? 'border-error focus:ring-rose-500/20 focus:border-error'
+                    : 'border-border focus:ring-emerald-500/20 focus:border-success'
                 }`}
               />
               {validationErrors.flatHouseBuilding && (
-                <p className="text-[11px] text-rose-600 mt-1">{validationErrors.flatHouseBuilding}</p>
+                <p className="text-xs text-error mt-1">{validationErrors.flatHouseBuilding}</p>
               )}
             </div>
           </div>
 
           {/* Area / Street / Sector */}
           <div>
-            <label htmlFor="areaStreet" className="block text-xs font-bold text-slate-700 mb-1">
+            <label htmlFor="areaStreet" className="block text-xs font-bold text-foreground mb-1">
               Area, Street, Sector, Village *
             </label>
             <input
@@ -622,21 +649,21 @@ export function AddressFormModal({
               value={areaStreet}
               onChange={(e) => setAreaStreet(e.target.value)}
               placeholder="e.g. S.G. Highway, Opp. City Mall"
-              className={`w-full h-11 px-3.5 bg-white border rounded-xl text-xs font-medium text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 transition-all ${
+              className={`w-full h-11 px-3.5 bg-surface border rounded-xl text-xs font-medium text-foreground placeholder-slate-400 focus:outline-none focus:ring-2 transition-all ${
                 validationErrors.areaStreet
-                  ? 'border-rose-300 focus:ring-rose-500/20 focus:border-rose-600'
-                  : 'border-slate-200 focus:ring-emerald-500/20 focus:border-emerald-600'
+                  ? 'border-error focus:ring-rose-500/20 focus:border-error'
+                  : 'border-border focus:ring-emerald-500/20 focus:border-success'
               }`}
             />
             {validationErrors.areaStreet && (
-              <p className="text-[11px] text-rose-600 mt-1">{validationErrors.areaStreet}</p>
+              <p className="text-xs text-error mt-1">{validationErrors.areaStreet}</p>
             )}
           </div>
 
           {/* Landmark */}
           <div>
-            <label htmlFor="landmark" className="block text-xs font-bold text-slate-700 mb-1">
-              Landmark <span className="text-slate-400 font-normal">(Optional)</span>
+            <label htmlFor="landmark" className="block text-xs font-bold text-foreground mb-1">
+              Landmark <span className="text-foreground-muted font-normal">(Optional)</span>
             </label>
             <input
               id="landmark"
@@ -644,14 +671,14 @@ export function AddressFormModal({
               value={landmark}
               onChange={(e) => setLandmark(e.target.value)}
               placeholder="e.g. Near Apollo Hospital or Behind Bus Stop"
-              className="w-full h-11 px-3.5 bg-white border border-slate-200 rounded-xl text-xs font-medium text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-600 transition-all"
+              className="w-full h-11 px-3.5 bg-surface border border-border rounded-xl text-xs font-medium text-foreground placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-success transition-all"
             />
           </div>
 
           {/* Town / City & State */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-              <label htmlFor="townCity" className="block text-xs font-bold text-slate-700 mb-1">
+              <label htmlFor="townCity" className="block text-xs font-bold text-foreground mb-1">
                 Town/City *
               </label>
               <input
@@ -660,19 +687,19 @@ export function AddressFormModal({
                 value={townCity}
                 onChange={(e) => setTownCity(e.target.value)}
                 placeholder="e.g. Ahmedabad"
-                className={`w-full h-11 px-3.5 bg-white border rounded-xl text-xs font-medium text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 transition-all ${
+                className={`w-full h-11 px-3.5 bg-surface border rounded-xl text-xs font-medium text-foreground placeholder-slate-400 focus:outline-none focus:ring-2 transition-all ${
                   validationErrors.townCity
-                    ? 'border-rose-300 focus:ring-rose-500/20 focus:border-rose-600'
-                    : 'border-slate-200 focus:ring-emerald-500/20 focus:border-emerald-600'
+                    ? 'border-error focus:ring-rose-500/20 focus:border-error'
+                    : 'border-border focus:ring-emerald-500/20 focus:border-success'
                 }`}
               />
               {validationErrors.townCity && (
-                <p className="text-[11px] text-rose-600 mt-1">{validationErrors.townCity}</p>
+                <p className="text-xs text-error mt-1">{validationErrors.townCity}</p>
               )}
             </div>
 
             <div>
-              <label htmlFor="state" className="block text-xs font-bold text-slate-700 mb-1">
+              <label htmlFor="state" className="block text-xs font-bold text-foreground mb-1">
                 State *
               </label>
               <SearchableCombobox
@@ -685,32 +712,32 @@ export function AddressFormModal({
                 allowCustom={true}
               />
               {validationErrors.state && (
-                <p className="text-[11px] text-rose-600 mt-1">{validationErrors.state}</p>
+                <p className="text-xs text-error mt-1">{validationErrors.state}</p>
               )}
             </div>
           </div>
 
           {/* Weekend Delivery Availability */}
-          <div className="p-4 bg-slate-50 border border-slate-200/80 rounded-2xl space-y-3">
+          <div className="p-4 bg-surface-muted border border-border/80 rounded-2xl space-y-3">
             <div>
-              <p className="text-xs font-bold text-slate-800">Weekend Delivery Availability</p>
-              <p className="text-[11px] text-slate-500 mt-0.5 leading-relaxed">
+              <p className="text-xs font-bold text-foreground">Weekend Delivery Availability</p>
+              <p className="text-xs text-foreground-muted mt-0.5 leading-relaxed">
                 Indicate if you are available to receive packages on weekends. (Deliveries remain subject to store operating hours).
               </p>
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
               {/* Saturday */}
-              <div className="flex items-center justify-between bg-white px-3.5 py-2.5 rounded-xl border border-slate-200">
-                <span className="text-xs font-medium text-slate-700">Can receive on Saturdays?</span>
+              <div className="flex items-center justify-between bg-surface px-3.5 py-2.5 rounded-xl border border-border">
+                <span className="text-xs font-medium text-foreground">Can receive on Saturdays?</span>
                 <div className="flex gap-1">
                   <button
                     type="button"
                     onClick={() => setSaturdayDelivery(false)}
                     className={`px-3 py-1 rounded-lg text-xs font-semibold transition-all ${
                       !saturdayDelivery
-                        ? 'bg-rose-100 text-rose-800 border border-rose-200'
-                        : 'text-slate-500 hover:bg-slate-100'
+                        ? 'bg-error-bg text-error border border-error/20'
+                        : 'text-foreground-muted hover:bg-surface-muted'
                     }`}
                   >
                     No
@@ -720,8 +747,8 @@ export function AddressFormModal({
                     onClick={() => setSaturdayDelivery(true)}
                     className={`px-3 py-1 rounded-lg text-xs font-semibold transition-all ${
                       saturdayDelivery
-                        ? 'bg-emerald-100 text-emerald-800 border border-emerald-200'
-                        : 'text-slate-500 hover:bg-slate-100'
+                        ? 'bg-success-bg text-success border border-success/20'
+                        : 'text-foreground-muted hover:bg-surface-muted'
                     }`}
                   >
                     Yes
@@ -730,16 +757,16 @@ export function AddressFormModal({
               </div>
 
               {/* Sunday */}
-              <div className="flex items-center justify-between bg-white px-3.5 py-2.5 rounded-xl border border-slate-200">
-                <span className="text-xs font-medium text-slate-700">Can receive on Sundays?</span>
+              <div className="flex items-center justify-between bg-surface px-3.5 py-2.5 rounded-xl border border-border">
+                <span className="text-xs font-medium text-foreground">Can receive on Sundays?</span>
                 <div className="flex gap-1">
                   <button
                     type="button"
                     onClick={() => setSundayDelivery(false)}
                     className={`px-3 py-1 rounded-lg text-xs font-semibold transition-all ${
                       !sundayDelivery
-                        ? 'bg-rose-100 text-rose-800 border border-rose-200'
-                        : 'text-slate-500 hover:bg-slate-100'
+                        ? 'bg-error-bg text-error border border-error/20'
+                        : 'text-foreground-muted hover:bg-surface-muted'
                     }`}
                   >
                     No
@@ -749,8 +776,8 @@ export function AddressFormModal({
                     onClick={() => setSundayDelivery(true)}
                     className={`px-3 py-1 rounded-lg text-xs font-semibold transition-all ${
                       sundayDelivery
-                        ? 'bg-emerald-100 text-emerald-800 border border-emerald-200'
-                        : 'text-slate-500 hover:bg-slate-100'
+                        ? 'bg-success-bg text-success border border-success/20'
+                        : 'text-foreground-muted hover:bg-surface-muted'
                     }`}
                   >
                     Yes
@@ -761,24 +788,24 @@ export function AddressFormModal({
           </div>
 
           {/* Expandable: Additional Delivery Instructions */}
-          <div className="border border-slate-200 rounded-2xl overflow-hidden transition-all">
+          <div className="border border-border rounded-2xl overflow-hidden transition-all">
             <button
               type="button"
               onClick={() => setShowInstructions(!showInstructions)}
               aria-expanded={showInstructions}
-              className="w-full flex items-center justify-between px-4 py-3 bg-slate-50/70 hover:bg-slate-100 text-left text-xs font-bold text-slate-800 transition-colors"
+              className="w-full flex items-center justify-between px-4 py-3 bg-surface-muted/70 hover:bg-surface-muted text-left text-xs font-bold text-foreground transition-colors"
             >
               <span>Do we need additional instructions to deliver to this address?</span>
               {showInstructions ? (
-                <ChevronUp className="w-4 h-4 text-slate-500" />
+                <ChevronUp className="w-4 h-4 text-foreground-muted" />
               ) : (
-                <ChevronDown className="w-4 h-4 text-slate-500" />
+                <ChevronDown className="w-4 h-4 text-foreground-muted" />
               )}
             </button>
 
             {showInstructions && (
-              <div className="p-4 bg-white border-t border-slate-100 space-y-2">
-                <label htmlFor="deliveryInstructions" className="block text-xs font-semibold text-slate-600">
+              <div className="p-4 bg-surface border-t border-border space-y-2">
+                <label htmlFor="deliveryInstructions" className="block text-xs font-semibold text-foreground-muted">
                   Delivery instructions
                 </label>
                 <textarea
@@ -788,9 +815,9 @@ export function AddressFormModal({
                   value={deliveryInstructions}
                   onChange={(e) => setDeliveryInstructions(e.target.value)}
                   placeholder="Provide details such as building description, a nearby landmark, security gate code, or other navigation instructions."
-                  className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium text-slate-800 placeholder-slate-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-600 transition-all resize-none"
+                  className="w-full p-3 bg-surface-muted border border-border rounded-xl text-xs font-medium text-foreground placeholder-slate-400 focus:bg-surface focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-success transition-all resize-none"
                 />
-                <div className="flex justify-between text-[11px] text-slate-400">
+                <div className="flex justify-between text-xs text-foreground-muted">
                   <span>e.g. Leave package with guard, ring bell twice</span>
                   <span>{deliveryInstructions.length}/500</span>
                 </div>
@@ -805,20 +832,20 @@ export function AddressFormModal({
               type="checkbox"
               checked={isDefault}
               onChange={(e) => setIsDefault(e.target.checked)}
-              className="w-4 h-4 rounded border-slate-300 text-emerald-600 focus:ring-emerald-500 cursor-pointer"
+              className="w-4 h-4 rounded border-border text-success focus:ring-emerald-500 cursor-pointer"
             />
-            <label htmlFor="isDefaultAddress" className="text-xs font-semibold text-slate-700 select-none cursor-pointer">
+            <label htmlFor="isDefaultAddress" className="text-xs font-semibold text-foreground select-none cursor-pointer">
               Make this my default address
             </label>
           </div>
 
           {/* Action Buttons */}
-          <div className="pt-4 border-t border-slate-100 flex items-center justify-end gap-3">
+          <div className="pt-4 border-t border-border flex items-center justify-end gap-3">
             <button
               type="button"
               onClick={onClose}
               disabled={isSaving}
-              className="px-5 py-2.5 rounded-xl border border-slate-300 text-slate-700 hover:bg-slate-100 font-semibold text-xs transition-colors cursor-pointer"
+              className="px-5 py-2.5 rounded-xl border border-border text-foreground hover:bg-surface-muted font-semibold text-xs transition-colors cursor-pointer"
             >
               Cancel
             </button>
@@ -826,7 +853,7 @@ export function AddressFormModal({
             <button
               type="submit"
               disabled={isSaving}
-              className="flex items-center gap-2 px-6 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-semibold text-xs shadow-sm shadow-emerald-700/20 transition-all active:scale-95 disabled:opacity-50 cursor-pointer"
+              className="flex items-center gap-2 px-6 py-2.5 rounded-xl bg-success hover:bg-success text-on-success font-semibold text-xs shadow-sm shadow-emerald-700/20 transition-all active:scale-95 disabled:opacity-50 cursor-pointer"
             >
               {isSaving && <Loader2 className="w-4 h-4 animate-spin" />}
               {isEditMode ? 'Update Address' : 'Save Address'}

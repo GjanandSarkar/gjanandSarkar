@@ -45,10 +45,10 @@ export default function AdminDeliveryPage() {
   return (
     <div className="flex flex-col min-h-screen">
       <div className="px-6 md:px-10 pt-6 pb-5" style={{ background: 'var(--color-surface-container-lowest)' }}>
-        <h1 className="font-extrabold text-[24px] tracking-tight" style={{ color: 'var(--color-on-surface)' }}>
+        <h1 className="font-semibold text-[24px] tracking-tight" style={{ color: 'var(--color-on-surface)' }}>
           Deliveries
         </h1>
-        <p className="text-[13px] mt-0.5" style={{ color: 'var(--color-outline)' }}>
+        <p className="text-[13px] mt-0.5" style={{ color: 'var(--color-on-surface-variant)' }}>
           {orders.length} active deliveries
         </p>
       </div>
@@ -56,9 +56,9 @@ export default function AdminDeliveryPage() {
       <div className="px-6 md:px-10 py-5">
         {orders.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-24 text-center">
-            <CheckCircle2 className="w-12 h-12 mb-4" style={{ color: 'var(--color-outline)' }} strokeWidth={1.5} />
+            <CheckCircle2 className="w-12 h-12 mb-4" style={{ color: 'var(--color-on-surface-variant)' }} strokeWidth={1.5} />
             <p className="font-bold text-[18px]" style={{ color: 'var(--color-on-surface)' }}>All caught up!</p>
-            <p className="text-[13px] mt-1" style={{ color: 'var(--color-outline)' }}>
+            <p className="text-[13px] mt-1" style={{ color: 'var(--color-on-surface-variant)' }}>
               No pending deliveries.
             </p>
           </div>
@@ -77,15 +77,15 @@ export default function AdminDeliveryPage() {
                       {order.profiles?.name || 'Customer'}
                     </p>
                   </div>
-                  <span className="px-3 py-1 rounded-full text-[10px] font-bold uppercase"
+                  <span className="px-3 py-1 rounded-full text-xs font-bold uppercase"
                     style={{
                       background: order.status === 'out_for_delivery' ? '#fff8e6' : '#c2efac',
-                      color: order.status === 'out_for_delivery' ? '#7d5200' : '#042100',
+                      color: order.status === 'out_for_delivery' ? 'var(--warning)' : '#042100',
                     }}>
                     {order.status.replace(/_/g, ' ')}
                   </span>
                 </div>
-                <div className="flex flex-col gap-2 text-[12px]" style={{ color: 'var(--color-outline)' }}>
+                <div className="flex flex-col gap-2 text-[12px]" style={{ color: 'var(--color-on-surface-variant)' }}>
                   <div className="flex items-center gap-2">
                     <MapPin className="w-3.5 h-3.5" />
                     <span>Order #{order.id}</span>

@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect, useRef, Suspense } from 'react';
 import Link from 'next/link';
+import { ThemeToggle } from '@/components/theme/ThemeToggle';
 import { useRouter, useSearchParams } from 'next/navigation';
 import {
   Search,
@@ -20,6 +21,7 @@ import {
 import { useStore } from '@/store/useStore';
 import { useCartDetails } from '@/hooks/useCartDetails';
 import { getUserAddresses, normalizeUserAddress, type UserAddress } from '@/lib/api/addresses';
+import { useTranslation, type Language } from '@/lib/i18n';
 
 function HeaderContent() {
   const router = useRouter();
@@ -29,12 +31,21 @@ function HeaderContent() {
   const wishlist = useStore((state) => state.wishlist);
   const checkoutAddressId = useStore((state) => state.checkoutAddressId);
   const setCheckoutAddressId = useStore((state) => state.setCheckoutAddressId);
+  const setLanguage = useStore((state) => state.setLanguage);
   const { totalItems } = useCartDetails();
+  const { t, language } = useTranslation();
 
+  const [mounted, setMounted] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const [isAddressOpen, setIsAddressOpen] = useState(false);
   const [userAddresses, setUserAddresses] = useState<UserAddress[]>([]);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  const activeUser = mounted ? user : null;
 
   const profileDropdownRef = useRef<HTMLDivElement>(null);
   const addressDropdownRef = useRef<HTMLDivElement>(null);
@@ -146,9 +157,37 @@ function HeaderContent() {
     || userAddresses[0]
     || (user?.address ? { id: 'default-profile', label: 'Default', address: user.address, user_id: user.id, lat: null, lng: null, is_default: true, created_at: '' } : null);
 
+  /* One shared search form, rendered inline on desktop and as its own
+     full-width row on phones. The header used to put the logo, the search box
+     and the account/cart actions on a single row at EVERY breakpoint, so on a
+     360px screen the search was squeezed into roughly 100px: the placeholder
+     was unreadable and the gold submit button was clipped. */
+  const searchForm = (
+    <form
+      onSubmit={handleSearch}
+      className="w-full relative flex items-center bg-surface-muted/80 border border-border-hover rounded-lg overflow-visible focus-within:border-secondary focus-within:ring-1 focus-within:ring-secondary transition-all"
+    >
+      <input
+        type="text"
+        value={searchTerm}
+        onChange={(e) => setSearchTerm(e.target.value)}
+        placeholder={t('searchPlaceholder') || "Search products, brands and more"}
+        aria-label={t('search') || "Search products"}
+        className="flex-1 min-w-0 px-3 md:px-4 py-2.5 text-sm bg-transparent text-foreground placeholder-foreground-muted outline-none rounded-l-lg"
+      />
+      <button
+        type="submit"
+        className="bg-secondary hover:bg-secondary-hover text-white px-4 h-11 min-w-[48px] flex items-center justify-center transition-colors shrink-0 rounded-r-lg cursor-pointer"
+        aria-label={t('search') || "Search"}
+      >
+        <Search className="w-4 h-4 stroke-[2.5]" />
+      </button>
+    </form>
+  );
+
   return (
-    <header className="sticky top-0 w-full z-40 bg-white border-b border-gray-200/80 shadow-xs">
-      <div className="max-w-[1440px] mx-auto px-4 md:px-8 h-18 md:h-20 flex items-center justify-between gap-4 md:gap-8">
+    <header className="sticky top-0 w-full z-40 bg-surface border-b border-border/80 shadow-xs">
+      <div className="max-w-[1440px] mx-auto px-4 md:px-8 h-18 md:h-20 flex items-center justify-between gap-3 md:gap-8">
 
         {/* ── Brand Logo ── */}
         <Link href="/home" className="flex items-center gap-2 shrink-0 group active:scale-95 transition-transform">
@@ -162,60 +201,58 @@ function HeaderContent() {
               }}
             />
             <div className="flex flex-col">
-              <span className="text-xl md:text-2xl font-black tracking-tight leading-none">
-                <span className="text-[#0f3e26]">Gjanand</span>
+              <span className="text-xl md:text-2xl font-semibold tracking-tight leading-none">
+                <span className="text-primary">Gjanand</span>
               </span>
-              <span className="text-[10px] md:text-[11px] tracking-[0.2em] font-black text-[#c88a23] uppercase text-right leading-none mt-0.5">
+              <span className="text-xs md:text-xs tracking-[0.2em] font-semibold text-secondary uppercase text-right leading-none mt-0.5">
                 SARKAR
               </span>
             </div>
           </div>
         </Link>
 
-        {/* ── Search Bar ── */}
-        <form
-          onSubmit={handleSearch}
-          className="flex-1 max-w-2xl mx-auto relative flex items-center bg-gray-50/80 border border-gray-300 rounded-lg overflow-visible focus-within:border-[#c88a23] focus-within:ring-1 focus-within:ring-[#c88a23] transition-all"
-        >
-          <input
-            type="text"
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            placeholder="Search for products, brands and more..."
-            className="flex-1 min-w-0 px-4 py-2.5 text-sm bg-transparent text-gray-800 placeholder-gray-400 outline-none rounded-l-lg"
-          />
-
-          {/* Golden Search Button */}
-          <button
-            type="submit"
-            className="bg-[#c88a23] hover:bg-[#b0781c] text-white px-4 py-2.5 flex items-center justify-center transition-colors shrink-0 rounded-r-lg"
-            aria-label="Search"
-          >
-            <Search className="w-4 h-4 stroke-[2.5]" />
-          </button>
-        </form>
+        {/* ── Search Bar (desktop/tablet: inline) ── */}
+        <div className="hidden md:flex flex-1 max-w-2xl mx-auto">{searchForm}</div>
 
         {/* ── Right Quick Actions ── */}
         <div className="flex items-center gap-4 md:gap-6 shrink-0">
 
           {/* Become Seller / Seller Portal */}
           <Link
-            href={user?.role === 'seller' ? "/seller/dashboard" : user?.role === 'admin' ? "/admin/products" : "/become-seller"}
-            className="hidden lg:flex flex-col items-center justify-center text-gray-700 hover:text-[#0f3e26] transition-colors group"
+            href={activeUser?.role === 'seller' ? "/seller/dashboard" : activeUser?.role === 'admin' ? "/admin/products" : "/become-seller"}
+            className="hidden lg:flex flex-col items-center justify-center text-foreground hover:text-primary transition-colors group"
           >
-            <Store className="w-5 h-5 text-gray-600 group-hover:text-[#0f3e26] transition-colors" />
-            <span className="text-[11px] font-semibold mt-0.5 whitespace-nowrap">
-              {user?.role === 'seller' ? 'Seller Hub' : user?.role === 'admin' ? 'Admin Panel' : 'Become Seller'}
+            <Store className="w-5 h-5 text-foreground-muted group-hover:text-primary transition-colors" />
+            <span className="text-xs font-medium mt-0.5 whitespace-nowrap">
+              {activeUser?.role === 'seller' ? (t('sellerHub') || 'Seller Hub') : activeUser?.role === 'admin' ? (t('adminPortal') || 'Admin Panel') : (t('partnerWithUs') || 'Become Seller')}
             </span>
           </Link>
 
-          <Link href="/offers" className="hidden lg:flex flex-col items-center justify-center text-gray-700 hover:text-[#0f3e26] transition-colors group">
-            <Sparkles className="w-5 h-5 text-gray-600 group-hover:text-[#0f3e26] transition-colors" />
-            <span className="text-[11px] font-semibold mt-0.5 whitespace-nowrap">Offers</span>
-          </Link>
+          {/* Language Switcher Pill */}
+          <div className="flex items-center rounded-lg border border-border bg-surface-muted p-0.5 text-xs font-semibold">
+            {(['en', 'hi', 'gu'] as const).map((l) => (
+              <button
+                key={l}
+                type="button"
+                onClick={() => setLanguage(l)}
+                className={`px-2 py-1 rounded text-xs transition-colors cursor-pointer ${
+                  language === l
+                    ? 'bg-primary text-on-primary font-bold shadow-2xs'
+                    : 'text-foreground-muted hover:text-foreground'
+                }`}
+                title={l === 'en' ? 'English' : l === 'hi' ? 'हिन्दी (Hindi)' : 'ગુજરાતી (Gujarati)'}
+                aria-label={`Switch language to ${l}`}
+              >
+                {l === 'en' ? 'EN' : l === 'hi' ? 'हि' : 'ગુ'}
+              </button>
+            ))}
+          </div>
+
+          <ThemeToggle />
+
 
           {/* ── Delivery Address Selection (ONLY VISIBLE WHEN LOGGED IN) ── */}
-          {user && (
+          {activeUser && (
             <div
               ref={addressDropdownRef}
               onMouseEnter={handleAddressMouseEnter}
@@ -225,37 +262,37 @@ function HeaderContent() {
               <button
                 type="button"
                 onClick={() => setIsAddressOpen(!isAddressOpen)}
-                className="flex items-center gap-2 px-2.5 py-1.5 rounded-xl hover:bg-gray-100/80 transition-colors text-left group cursor-pointer border border-transparent hover:border-gray-200"
+                className="flex items-center gap-2 px-2.5 py-1.5 rounded-lg hover:bg-surface-muted transition-colors text-left group cursor-pointer border border-transparent hover:border-border min-h-[44px]"
                 aria-label="Select delivery address"
               >
-                <div className="w-8 h-8 rounded-full bg-emerald-50 text-[#0f3e26] flex items-center justify-center shrink-0 border border-emerald-100 group-hover:scale-105 transition-transform">
-                  <MapPin className="w-4 h-4 text-[#0f3e26]" />
+                <div className="w-8 h-8 rounded-full bg-surface-muted text-primary flex items-center justify-center shrink-0 border border-border">
+                  <MapPin className="w-4 h-4 text-primary" />
                 </div>
                 <div className="flex flex-col max-w-[130px] lg:max-w-[170px]">
-                  <span className="text-[10px] font-extrabold uppercase tracking-wider text-gray-500 flex items-center gap-1">
-                    Deliver to {user.name ? user.name.split(' ')[0] : 'You'}
-                    <ChevronDown className={`w-3 h-3 text-gray-400 transition-transform duration-200 ${isAddressOpen ? 'rotate-180' : ''}`} />
+                  <span className="text-xs font-medium text-foreground-muted flex items-center gap-1">
+                    {t('deliverTo') || 'Deliver to'} {activeUser.name ? activeUser.name.split(' ')[0] : ''}
+                    <ChevronDown className={`w-3 h-3 text-foreground-muted transition-transform duration-200 ${isAddressOpen ? 'rotate-180' : ''}`} />
                   </span>
-                  <span className="text-xs font-bold text-gray-900 truncate">
-                    {activeAddress ? `${activeAddress.label}: ${activeAddress.address}` : 'Select Address'}
+                  <span className="text-xs font-semibold text-foreground truncate">
+                    {activeAddress ? `${activeAddress.label}: ${activeAddress.address}` : (t('selectAddress') || 'Select Address')}
                   </span>
                 </div>
               </button>
 
               {/* Address Selection Dropdown Menu */}
               {isAddressOpen && (
-                <div className="absolute right-0 top-full mt-2 w-80 bg-white rounded-2xl shadow-2xl border border-gray-200 py-2.5 z-50 animate-in fade-in slide-in-from-top-1">
-                  <div className="px-4 py-2 border-b border-gray-100 flex items-center justify-between">
-                    <span className="text-xs font-black text-gray-900 uppercase tracking-wider flex items-center gap-1.5">
-                      <MapPin className="w-3.5 h-3.5 text-[#0f3e26]" />
-                      Delivery Addresses
+                <div className="absolute right-0 top-full mt-2 w-80 bg-surface rounded-xl shadow-lg border border-border py-2.5 z-50 animate-in fade-in slide-in-from-top-1">
+                  <div className="px-4 py-2 border-b border-border flex items-center justify-between">
+                    <span className="text-xs font-semibold text-foreground flex items-center gap-1.5">
+                      <MapPin className="w-3.5 h-3.5 text-primary" />
+                      {t('deliveryAddresses') || 'Delivery Addresses'}
                     </span>
                     <Link
                       href="/profile/saved-addresses"
                       onClick={() => setIsAddressOpen(false)}
-                      className="text-[11px] font-bold text-[#c88a23] hover:underline"
+                      className="text-xs font-medium text-primary hover:underline"
                     >
-                      Manage
+                      {t('manage') || 'Manage'}
                     </Link>
                   </div>
 
@@ -271,35 +308,35 @@ function HeaderContent() {
                               setCheckoutAddressId(addr.id || addr.label);
                               setIsAddressOpen(false);
                             }}
-                            className={`w-full flex items-start justify-between p-2.5 rounded-xl transition-all text-left cursor-pointer ${isSelected
-                                ? 'bg-emerald-50/90 border border-emerald-200 text-[#0f3e26]'
-                                : 'hover:bg-gray-50 text-gray-700'
+                            className={`w-full flex items-start justify-between p-2.5 rounded-lg transition-colors text-left cursor-pointer min-h-[44px] ${isSelected
+                                ? 'bg-surface-muted border border-border text-primary'
+                                : 'hover:bg-surface-muted text-foreground'
                               }`}
                           >
                             <div className="min-w-0 pr-2">
                               <div className="flex items-center gap-2">
-                                <span className="text-xs font-bold text-gray-900">{addr.label}</span>
+                                <span className="text-xs font-semibold text-foreground">{addr.label}</span>
                                 {addr.is_default && (
-                                  <span className="text-[9px] bg-emerald-100 text-[#0f3e26] px-1.5 py-0.2 rounded font-bold">
+                                  <span className="text-xs bg-surface-muted text-primary px-1.5 py-0.5 rounded-full border border-border font-medium">
                                     Default
                                   </span>
                                 )}
                               </div>
-                              <p className="text-[11px] text-gray-500 line-clamp-2 mt-0.5">{addr.address}</p>
+                              <p className="text-xs text-foreground-muted line-clamp-2 mt-0.5">{addr.address}</p>
                             </div>
                             {isSelected && (
-                              <Check className="w-4 h-4 text-[#0f3e26] shrink-0 mt-1" />
+                              <Check className="w-4 h-4 text-primary shrink-0 mt-1" />
                             )}
                           </button>
                         );
                       })
                     ) : (
                       <div className="p-4 text-center">
-                        <p className="text-xs text-gray-500">No saved addresses found</p>
+                        <p className="text-xs text-foreground-muted">No saved addresses found</p>
                         <Link
                           href="/profile/saved-addresses"
                           onClick={() => setIsAddressOpen(false)}
-                          className="mt-2 inline-flex items-center gap-1 text-xs font-bold text-[#0f3e26] hover:underline"
+                          className="mt-2 inline-flex items-center gap-1 text-xs font-medium text-primary hover:underline"
                         >
                           <Plus className="w-3.5 h-3.5" />
                           Add Your First Address
@@ -308,11 +345,11 @@ function HeaderContent() {
                     )}
                   </div>
 
-                  <div className="px-3 pt-2 border-t border-gray-100">
+                  <div className="px-3 pt-2 border-t border-border">
                     <Link
                       href="/profile/saved-addresses"
                       onClick={() => setIsAddressOpen(false)}
-                      className="w-full flex items-center justify-center gap-1.5 py-2 text-xs font-bold text-[#0f3e26] bg-emerald-50 hover:bg-emerald-100/80 rounded-xl transition-colors"
+                      className="w-full flex items-center justify-center gap-1.5 py-2 text-xs font-medium text-primary bg-surface-muted hover:bg-border rounded-lg transition-colors min-h-[44px]"
                     >
                       <Plus className="w-3.5 h-3.5" />
                       Add New Delivery Address
@@ -323,22 +360,22 @@ function HeaderContent() {
             </div>
           )}
 
-          {/* Cart */}
-          <Link
-            href="/cart"
-            className="flex flex-col items-center justify-center text-gray-700 hover:text-[#0f3e26] transition-colors relative group"
-            aria-label="View Cart"
-          >
-            <div className="relative">
-              <ShoppingCart className="w-5 h-5 text-gray-700 group-hover:text-[#0f3e26] transition-colors" />
-              {totalItems > 0 && (
-                <span className="absolute -top-2 -right-2.5 bg-[#c88a23] text-white text-[10px] font-black w-4.5 h-4.5 rounded-full flex items-center justify-center shadow-xs">
+          {/* Cart - only visible when user has items in cart */}
+          {totalItems > 0 && (
+            <Link
+              href="/cart"
+              className="flex flex-col items-center justify-center text-foreground hover:text-primary transition-colors relative group min-h-[44px] min-w-[44px] animate-in fade-in zoom-in-95 duration-200"
+              aria-label="View Cart"
+            >
+              <div className="relative">
+                <ShoppingCart className="w-5 h-5 text-foreground group-hover:text-primary transition-colors" />
+                <span className="absolute -top-2 -right-2.5 bg-primary text-on-primary text-xs font-semibold w-4.5 h-4.5 rounded-full flex items-center justify-center shadow-xs">
                   {totalItems}
                 </span>
-              )}
-            </div>
-            <span className="text-[11px] font-semibold mt-0.5">Cart</span>
-          </Link>
+              </div>
+              <span className="text-xs font-medium mt-0.5">{t('cart') || 'Cart'}</span>
+            </Link>
+          )}
 
           {/* ── User Profile with Hover Dropdown ── */}
           <div
@@ -348,13 +385,13 @@ function HeaderContent() {
             className="relative"
           >
             <Link
-              href={user ? "/profile" : "/login"}
-              className="flex flex-col items-center justify-center text-gray-700 hover:text-[#0f3e26] transition-colors group cursor-pointer"
+              href={activeUser ? "/profile" : "/login"}
+              className="flex flex-col items-center justify-center text-foreground hover:text-primary transition-colors group cursor-pointer"
             >
-              <div className="w-7 h-7 rounded-full bg-gray-100 flex items-center justify-center overflow-hidden border border-gray-200 group-hover:border-[#0f3e26] transition-colors shadow-2xs">
+              <div className="w-7 h-7 rounded-full bg-surface-muted flex items-center justify-center overflow-hidden border border-border group-hover:border-primary transition-colors shadow-2xs">
                 <img
-                  src={user?.avatar_url || '/profile/profile.jpg'}
-                  alt={user?.name || "Profile"}
+                  src={activeUser?.avatar_url || '/profile/profile.jpg'}
+                  alt={activeUser?.name || "Profile"}
                   className="w-full h-full object-cover"
                   referrerPolicy="no-referrer"
                   onError={(e) => {
@@ -363,31 +400,31 @@ function HeaderContent() {
                 />
               </div>
               <div className="flex items-center gap-0.5 mt-0.5">
-                <span className="text-[11px] font-semibold text-gray-800 group-hover:text-[#0f3e26] whitespace-nowrap">
-                  {user ? (user.name ? user.name.split(' ')[0] : 'Account') : 'Login / Sign up'}
+                <span className="text-xs font-medium text-foreground group-hover:text-primary whitespace-nowrap">
+                  {activeUser ? (activeUser.name ? activeUser.name.split(' ')[0] : (t('account') || 'Account')) : (t('loginSignUp') || 'Login / Sign up')}
                 </span>
-                {user && (
-                  <ChevronDown className={`w-3 h-3 text-gray-400 transition-transform duration-200 ${isProfileOpen ? 'rotate-180' : ''}`} />
+                {activeUser && (
+                  <ChevronDown className={`w-3 h-3 text-foreground-muted transition-transform duration-200 ${isProfileOpen ? 'rotate-180' : ''}`} />
                 )}
               </div>
             </Link>
 
-            {/* Profile Dropdown Menu (on hover / click) */}
+            {/* Profile Dropdown Menu */}
             {isProfileOpen && (
-              <div className="absolute right-0 top-full mt-2 w-64 bg-white rounded-2xl shadow-2xl border border-gray-200 py-2 z-50 animate-in fade-in slide-in-from-top-1 divide-y divide-gray-100">
-                {user ? (
+              <div className="absolute right-0 top-full mt-2 w-64 bg-surface rounded-xl shadow-lg border border-border py-2 z-50 animate-in fade-in slide-in-from-top-1 divide-y divide-border">
+                {activeUser ? (
                   <>
                     {/* User Profile Header */}
-                    <div className="px-4 py-2.5 bg-gradient-to-r from-emerald-50/70 to-amber-50/40 rounded-t-xl">
-                      <p className="text-xs font-black text-gray-900 truncate">
-                        {user.name || 'Gjanand Customer'}
+                    <div className="px-4 py-2.5 bg-surface-muted rounded-t-lg">
+                      <p className="text-xs font-semibold text-foreground truncate">
+                        {activeUser.name || 'Gjanand Customer'}
                       </p>
-                      <p className="text-[11px] text-gray-500 truncate">
-                        {user.phone || user.email || 'Logged In'}
+                      <p className="text-xs text-foreground-muted truncate">
+                        {activeUser.phone || activeUser.email || 'Logged In'}
                       </p>
-                      {user.role && user.role !== 'customer' && (
-                        <span className="inline-block mt-1 text-[9px] font-black uppercase tracking-wider px-2 py-0.5 bg-[#0f3e26] text-white rounded-full">
-                          {user.role}
+                      {activeUser.role && activeUser.role !== 'customer' && (
+                        <span className="inline-block mt-1 text-xs font-medium px-2 py-0.5 bg-primary text-on-primary rounded-full">
+                          {activeUser.role}
                         </span>
                       )}
                     </div>
@@ -397,34 +434,34 @@ function HeaderContent() {
                       <Link
                         href="/profile"
                         onClick={() => setIsProfileOpen(false)}
-                        className="flex items-center gap-3 px-4 py-2 text-xs font-semibold text-gray-700 hover:bg-emerald-50 hover:text-[#0f3e26] transition-colors group"
+                        className="flex items-center gap-3 px-4 py-2 text-xs font-medium text-foreground hover:bg-surface-muted hover:text-primary transition-colors group"
                       >
-                        <User className="w-4 h-4 text-gray-400 group-hover:text-[#0f3e26] transition-colors" />
-                        <span>Profile</span>
+                        <User className="w-4 h-4 text-foreground-muted group-hover:text-primary transition-colors" />
+                        <span>{t('profile') || 'Profile'}</span>
                       </Link>
 
                       <Link
                         href="/orders"
                         onClick={() => setIsProfileOpen(false)}
-                        className="flex items-center gap-3 px-4 py-2 text-xs font-semibold text-gray-700 hover:bg-emerald-50 hover:text-[#0f3e26] transition-colors group"
+                        className="flex items-center gap-3 px-4 py-2 text-xs font-medium text-foreground hover:bg-surface-muted hover:text-primary transition-colors group"
                       >
-                        <Package className="w-4 h-4 text-gray-400 group-hover:text-[#0f3e26] transition-colors" />
+                        <Package className="w-4 h-4 text-foreground-muted group-hover:text-primary transition-colors" />
                         <div className="flex-1 flex items-center justify-between">
-                          <span>Orders</span>
-                          <span className="text-[10px] text-gray-400 font-normal">Track & History</span>
+                          <span>{t('orders') || 'Orders'}</span>
+                          <span className="text-xs text-foreground-muted font-normal">{t('trackAndHistory') || 'Track & History'}</span>
                         </div>
                       </Link>
 
                       <Link
                         href="/wishlist"
                         onClick={() => setIsProfileOpen(false)}
-                        className="flex items-center gap-3 px-4 py-2 text-xs font-semibold text-gray-700 hover:bg-emerald-50 hover:text-[#0f3e26] transition-colors group"
+                        className="flex items-center gap-3 px-4 py-2 text-xs font-medium text-foreground hover:bg-surface-muted hover:text-primary transition-colors group"
                       >
-                        <Heart className="w-4 h-4 text-gray-400 group-hover:text-rose-600 transition-colors" />
+                        <Heart className="w-4 h-4 text-foreground-muted group-hover:text-error transition-colors" />
                         <div className="flex-1 flex items-center justify-between">
-                          <span>Wishlist</span>
+                          <span>{t('wishlist') || 'Wishlist'}</span>
                           {wishlist.length > 0 && (
-                            <span className="bg-rose-100 text-rose-700 text-[10px] font-bold px-1.5 py-0.2 rounded-full">
+                            <span className="bg-surface-muted text-foreground text-xs font-medium px-1.5 py-0.5 rounded-full border border-border">
                               {wishlist.length}
                             </span>
                           )}
@@ -434,40 +471,31 @@ function HeaderContent() {
                       <Link
                         href="/profile/saved-addresses"
                         onClick={() => setIsProfileOpen(false)}
-                        className="flex items-center gap-3 px-4 py-2 text-xs font-semibold text-gray-700 hover:bg-emerald-50 hover:text-[#0f3e26] transition-colors group"
+                        className="flex items-center gap-3 px-4 py-2 text-xs font-medium text-foreground hover:bg-surface-muted hover:text-primary transition-colors group"
                       >
-                        <MapPin className="w-4 h-4 text-gray-400 group-hover:text-[#0f3e26] transition-colors" />
-                        <span>Saved Addresses</span>
+                        <MapPin className="w-4 h-4 text-foreground-muted group-hover:text-primary transition-colors" />
+                        <span>{t('savedAddresses') || 'Saved Addresses'}</span>
                       </Link>
 
-                      <Link
-                        href="/subscribe"
-                        onClick={() => setIsProfileOpen(false)}
-                        className="flex items-center gap-3 px-4 py-2 text-xs font-semibold text-gray-700 hover:bg-emerald-50 hover:text-[#0f3e26] transition-colors group"
-                      >
-                        <Sparkles className="w-4 h-4 text-[#c88a23]" />
-                        <span>Subscriptions</span>
-                      </Link>
-
-                      {user.role === 'seller' && (
+                      {activeUser.role === 'seller' && (
                         <Link
                           href="/seller/dashboard"
                           onClick={() => setIsProfileOpen(false)}
-                          className="flex items-center gap-3 px-4 py-2 text-xs font-bold text-[#0f3e26] bg-emerald-50/60 hover:bg-emerald-100/80 transition-colors"
+                          className="flex items-center gap-3 px-4 py-2 text-xs font-bold text-primary bg-success-bg/60 hover:bg-success-bg/80 transition-colors"
                         >
-                          <Store className="w-4 h-4 text-[#0f3e26]" />
-                          <span>Seller Dashboard</span>
+                          <Store className="w-4 h-4 text-primary" />
+                          <span>{t('sellerHub') || 'Seller Dashboard'}</span>
                         </Link>
                       )}
 
-                      {user.role === 'admin' && (
+                      {activeUser.role === 'admin' && (
                         <Link
                           href="/admin/products"
                           onClick={() => setIsProfileOpen(false)}
                           className="flex items-center gap-3 px-4 py-2 text-xs font-bold text-purple-700 bg-purple-50/60 hover:bg-purple-100/80 transition-colors"
                         >
                           <Store className="w-4 h-4 text-purple-700" />
-                          <span>Admin Console</span>
+                          <span>{t('adminPortal') || 'Admin Console'}</span>
                         </Link>
                       )}
                     </div>
@@ -477,21 +505,21 @@ function HeaderContent() {
                       <button
                         type="button"
                         onClick={handleLogout}
-                        className="w-full flex items-center gap-3 px-4 py-2 text-xs font-bold text-rose-600 hover:bg-rose-50 transition-colors cursor-pointer text-left"
+                        className="w-full flex items-center gap-3 px-4 py-2 text-xs font-bold text-error hover:bg-error-bg transition-colors cursor-pointer text-left"
                       >
-                        <LogOut className="w-4 h-4 text-rose-500" />
-                        <span>Logout</span>
+                        <LogOut className="w-4 h-4 text-error" />
+                        <span>{t('logout') || 'Logout'}</span>
                       </button>
                     </div>
                   </>
                 ) : (
                   <div className="p-3 text-center">
-                    <p className="text-xs font-bold text-gray-900 mb-1">Welcome to Gjanand Sarkar</p>
-                    <p className="text-[11px] text-gray-500 mb-3">Login to manage orders, wishlist & subscriptions</p>
+                    <p className="text-xs font-bold text-foreground mb-1">Welcome to Gjanand Sarkar</p>
+                    <p className="text-xs text-foreground-muted mb-3">Login to manage orders, wishlist & subscriptions</p>
                     <Link
                       href="/login"
                       onClick={() => setIsProfileOpen(false)}
-                      className="block w-full py-2 bg-[#0f3e26] hover:bg-[#0a2c1b] text-white text-xs font-bold rounded-xl transition-colors text-center"
+                      className="block w-full py-2 bg-primary hover:bg-primary-fixed-dim text-on-primary text-xs font-bold rounded-xl transition-colors text-center"
                     >
                       Login / Sign Up
                     </Link>
@@ -503,6 +531,12 @@ function HeaderContent() {
 
         </div>
       </div>
+
+      {/* Search gets its own full-width row on phones, where there is no space
+          for it beside the logo and the account actions. */}
+      <div className="md:hidden px-4 pb-3 -mt-1">
+        {searchForm}
+      </div>
     </header>
   );
 }
@@ -510,7 +544,7 @@ function HeaderContent() {
 export function Header() {
   return (
     <Suspense fallback={
-      <header className="sticky top-0 w-full z-40 bg-white border-b border-gray-200/80 shadow-xs h-18 md:h-20" />
+      <header className="sticky top-0 w-full z-40 bg-surface border-b border-border/80 shadow-xs h-18 md:h-20" />
     }>
       <HeaderContent />
     </Suspense>

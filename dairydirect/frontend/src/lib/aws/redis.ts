@@ -80,54 +80,147 @@ function memDelPattern(pattern: string): void {
 
 // ─── Redis Client ────────────────────────────────────────────
 
-let _redisReady = false;
-
 function createRedisClient(): Redis {
   const redisUrl = process.env.REDIS_URL;
 
+  /* lazyConnect means constructing the client opens no socket. When
+     REDIS_URL is absent we deliberately never call connect(), so the client
+     sits in the 'wait' state: isRedisReady() stays false, every call uses
+     the in-memory fallback, and nothing dials localhost in a hosted
+     environment where no Redis exists. */
   const client = new Redis(redisUrl || 'redis://127.0.0.1:6379', {
     maxRetriesPerRequest: 1,
     enableReadyCheck: false,
     lazyConnect: true,
     connectTimeout: 5000,
     commandTimeout: 3000,
+    /* ioredis announces itself with CLIENT SETINFO LIB-NAME and
+       CLIENT SETINFO LIB-VER on EVERY connection. Upstash bills per command,
+       so on a serverless host - where connections are created constantly by
+       cold starts and, locally, by every hot reload - this handshake can
+       easily outweigh the application's real traffic. It buys us nothing but
+       a label in CLIENT LIST. */
+    disableClientInfo: true,
+    /* Fail fast instead of queueing commands while disconnected. A queued
+       command would hold the request open until it times out; we would rather
+       miss the cache immediately and let PostgreSQL answer. */
+    enableOfflineQueue: false,
     retryStrategy(times) {
-      // Don't spam retries in dev when no REDIS_URL is configured
-      if (!redisUrl && times > 1) return null;
       if (times > 3) return null;
       return Math.min(times * 300, 2000);
     },
   });
 
   client.on('ready', () => {
-    _redisReady = true;
-    if (process.env.NODE_ENV !== 'production') {
-      console.log('[REDIS] Connected and ready');
-    }
+    console.log('[REDIS] Connected and ready');
   });
 
   client.on('error', (err) => {
-    _redisReady = false;
-    if (process.env.REDIS_URL && !err.message.includes('ECONNREFUSED')) {
+    // Only meaningful once a URL is configured; otherwise it is just noise.
+    if (process.env.REDIS_URL) {
       console.error('[REDIS] ERROR', err.message);
     }
   });
 
-  client.on('close', () => {
-    _redisReady = false;
-  });
-
-  // Eagerly connect so _redisReady is set before first request
-  client.connect().catch(() => {});
+  if (redisUrl) {
+    client.connect().catch((err) => {
+      console.error('[REDIS] Initial connection failed:', err?.message ?? err);
+    });
+  } else {
+    console.warn(
+      '[REDIS] REDIS_URL is not set - running on the in-memory fallback. ' +
+      'Caching works per server instance only, and rate limits are NOT shared ' +
+      'across instances. Set REDIS_URL to enable shared caching.'
+    );
+  }
 
   return client;
 }
 
+/* The singleton is kept on globalThis in EVERY environment, not just
+   development. Module scope is per bundle, so without this a serverless
+   instance could construct several clients and hold several connections
+   against the provider's limit. */
 export const redis: Redis = globalForRedis._redis ?? createRedisClient();
-if (process.env.NODE_ENV !== 'production') globalForRedis._redis = redis;
+globalForRedis._redis = redis;
 
+/* Readiness is read straight from the client.
+
+   This used to also require a module-scoped `_redisReady` flag set by the
+   'ready' event. That flag is per MODULE instance while the client lives on
+   globalThis, so after a hot reload (or any re-evaluation of this module)
+   the flag was false while the shared client was long since connected --
+   and every call silently used the in-memory fallback forever. The symptom
+   is Redis looking connected while every log line still says [mem].
+
+   client.status is owned by ioredis and is always accurate. */
 function isRedisReady(): boolean {
-  return _redisReady && redis.status === 'ready';
+  if (isCircuitOpen()) return false;
+  return redis.status === 'ready';
+}
+
+// ─── Circuit Breaker ─────────────────────────────────────────
+
+/* When Redis starts failing, retrying it on every request is the worst of
+   both worlds: each request still pays the timeout, and each failed attempt
+   still counts against the command quota. After a run of consecutive
+   failures we stop asking for a cooldown period and serve straight from the
+   in-memory fallback, then let a single request probe it again. */
+
+const CIRCUIT_FAILURE_THRESHOLD = 5;
+const CIRCUIT_COOLDOWN_MS = 30_000;
+
+let consecutiveFailures = 0;
+let circuitOpenUntil = 0;
+
+function isCircuitOpen(): boolean {
+  return Date.now() < circuitOpenUntil;
+}
+
+function noteRedisSuccess(): void {
+  consecutiveFailures = 0;
+}
+
+function noteRedisFailure(): void {
+  consecutiveFailures += 1;
+  if (consecutiveFailures >= CIRCUIT_FAILURE_THRESHOLD) {
+    circuitOpenUntil = Date.now() + CIRCUIT_COOLDOWN_MS;
+    consecutiveFailures = 0;
+    console.warn(
+      `[REDIS] Circuit opened after ${CIRCUIT_FAILURE_THRESHOLD} consecutive ` +
+      `failures. Using the in-memory fallback for ${CIRCUIT_COOLDOWN_MS / 1000}s.`
+    );
+  }
+}
+
+/** Connection state for the health endpoint. */
+export function getRedisStatus(): {
+  configured: boolean;
+  status: string;
+  ready: boolean;
+  circuitOpen: boolean;
+} {
+  return {
+    configured: Boolean(process.env.REDIS_URL),
+    status: redis.status,
+    ready: isRedisReady(),
+    circuitOpen: isCircuitOpen(),
+  };
+}
+
+/** Round-trip PING. Returns latency in ms, or an error string. */
+export async function pingRedis(): Promise<{ ok: boolean; latencyMs?: number; error?: string }> {
+  if (!process.env.REDIS_URL) {
+    return { ok: false, error: 'REDIS_URL is not set' };
+  }
+  try {
+    const started = Date.now();
+    const pong = await redis.ping();
+    if (pong !== 'PONG') return { ok: false, error: `Unexpected reply: ${pong}` };
+    return { ok: true, latencyMs: Date.now() - started };
+  } catch (err) {
+    return { ok: false, error: err instanceof Error ? err.message : String(err) };
+  }
 }
 
 // ─── TTL Jitter ──────────────────────────────────────────────
@@ -149,10 +242,13 @@ function logRedis(
   event: 'HIT' | 'MISS' | 'SET' | 'DEL' | 'SCAN-DEL' | 'ERROR',
   detail: string
 ): void {
+  if (event === 'ERROR') {
+    noteRedisFailure();
+    console.error(`[REDIS] ERROR ${detail}`);
+    return;
+  }
   if (process.env.NODE_ENV !== 'production') {
     console.log(`[REDIS] ${event} ${detail}`);
-  } else if (event === 'ERROR') {
-    console.error(`[REDIS] ERROR ${detail}`);
   }
 }
 
@@ -166,6 +262,7 @@ export async function cacheGet<T = unknown>(key: string): Promise<T | null> {
   try {
     if (isRedisReady()) {
       const raw = await redis.get(key);
+      noteRedisSuccess();
       if (raw !== null) {
         logRedis('HIT', key);
         return JSON.parse(raw) as T;
@@ -204,6 +301,7 @@ export async function cacheSet(
   try {
     if (isRedisReady()) {
       await redis.setex(key, finalTtl, serialised);
+      noteRedisSuccess();
       logRedis('SET', `${key} TTL=${finalTtl}s`);
     }
   } catch (err: unknown) {
@@ -377,17 +475,39 @@ export async function checkRateLimit(
 
   try {
     if (isRedisReady()) {
+      /* Command budget matters here: this runs on every rate-limited
+         request. INCR is unavoidable. EXPIRE is only needed on the first
+         request of a window. TTL is only needed when we actually block
+         someone, because resetIn is only acted upon in that case - callers
+         use it to tell the user when to retry. So the overwhelmingly common
+         path (allowed, mid-window) costs ONE command instead of three. */
       const current = await redis.incr(key);
-      if (current === 1) await redis.expire(key, windowSeconds);
-      const ttl = await redis.ttl(key);
+      noteRedisSuccess();
+
+      if (current === 1) {
+        await redis.expire(key, windowSeconds);
+        return { allowed: true, remaining: maxRequests - 1, resetIn: windowSeconds };
+      }
+
       if (current > maxRequests) {
+        const ttl = await redis.ttl(key);
         return { allowed: false, remaining: 0, resetIn: Math.max(0, ttl) };
       }
-      return { allowed: true, remaining: maxRequests - current, resetIn: Math.max(0, ttl) };
+
+      /* resetIn is an upper bound here rather than the exact remaining
+         window. Reading the exact value would cost a command on every
+         allowed request, and nothing consumes it unless the request was
+         blocked. */
+      return { allowed: true, remaining: maxRequests - current, resetIn: windowSeconds };
     }
   } catch {
-    // Fall through
+    noteRedisFailure();
   }
+
+  /* Falling back here means limits are counted per server instance, so the
+     effective limit multiplies by the number of running instances. Warn once
+     so this degradation is never silent. */
+  warnRateLimitFallbackOnce();
 
   const current = parseInt(memGet(key) || '0') + 1;
   memSet(key, String(current), windowSeconds);
@@ -395,6 +515,16 @@ export async function checkRateLimit(
     return { allowed: false, remaining: 0, resetIn: windowSeconds };
   }
   return { allowed: true, remaining: maxRequests - current, resetIn: windowSeconds };
+}
+
+let rateLimitFallbackWarned = false;
+function warnRateLimitFallbackOnce(): void {
+  if (rateLimitFallbackWarned) return;
+  rateLimitFallbackWarned = true;
+  console.warn(
+    '[REDIS] Rate limiting is using the in-memory fallback. Limits are per ' +
+    'server instance and are NOT shared. Set REDIS_URL for correct limits.'
+  );
 }
 
 // ─── Product List Cache ──────────────────────────────────────
@@ -515,6 +645,19 @@ export async function invalidateProductsCache(productId?: string): Promise<void>
     tasks.push(cacheDel(`product:${productId}`));
   }
   await Promise.all(tasks);
+
+  // Catalogue pages (homepage, category, search) are now cached by Next's
+  // data/route cache under the 'products' tag instead of being re-queried on
+  // every request. Busting the Redis cache alone would leave those pages
+  // serving stale data for up to their TTL, so the two caches are invalidated
+  // together, here, in one place. Every existing caller of
+  // invalidateProductsCache() gets correct revalidation for free.
+  try {
+    const { revalidateTag } = await import('next/cache');
+    revalidateTag('products', 'max');
+  } catch {
+    // Called outside a Next request scope (e.g. a script) — nothing to do.
+  }
 }
 
 // ─── Category Cache Invalidation ────────────────────────────

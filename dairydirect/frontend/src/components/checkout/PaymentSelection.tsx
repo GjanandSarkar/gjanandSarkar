@@ -40,7 +40,7 @@ export function PaymentSelection({
   ];
 
   return (
-    <div className="bg-white rounded-[20px] p-4 border border-sand shadow-sm">
+    <div className="bg-surface rounded-[20px] p-4 border border-sand shadow-sm">
       <div className="flex items-center gap-2 mb-4">
         <Wallet className="w-4 h-4 text-primary" />
         <h3 className="text-sm font-bold text-dark uppercase tracking-wider">Payment Method</h3>
@@ -57,7 +57,7 @@ export function PaymentSelection({
                 "p-3 rounded-[16px] border transition-all cursor-pointer",
                 selectedMethod === method.id 
                   ? "border-primary bg-mint/10 shadow-sm" 
-                  : "border-sand bg-white hover:border-primary/30"
+                  : "border-sand bg-surface hover:border-primary/30"
               )}
             >
               <div className="flex items-start gap-3">
@@ -73,23 +73,23 @@ export function PaymentSelection({
                   <div className="flex items-center gap-2 mb-0.5">
                     <span className="font-bold text-dark text-sm leading-tight">{method.name}</span>
                     {method.badge && (
-                      <span className="text-[9px] font-extrabold uppercase px-1.5 py-0.5 rounded-md bg-[#1b4332]/10 text-[#1b4332] tracking-wider">
+                      <span className="text-xs font-semibold uppercase px-1.5 py-0.5 rounded-md bg-primary/10 text-primary tracking-wider">
                         {method.badge}
                       </span>
                     )}
                   </div>
-                  <p className="text-[11px] text-muted leading-relaxed truncate">{method.desc}</p>
+                  <p className="text-xs text-muted leading-relaxed truncate">{method.desc}</p>
                   
                   {/* Expansion content */}
                   {selectedMethod === method.id && method.id === 'upi' && (
                     <div className="mt-3 pt-3 border-t border-sand/50" onClick={(e) => e.stopPropagation()}>
-                      <label className="text-[10px] uppercase font-bold text-primary mb-1.5 block">Enter your UPI ID</label>
+                      <label className="text-xs uppercase font-bold text-primary mb-1.5 block">Enter your UPI ID</label>
                       <input 
                         type="text" 
                         value={upiId}
                         onChange={(e) => onChangeUpiId(e.target.value)}
                         placeholder="e.g. roshan@okaxis" 
-                        className="w-full text-sm font-medium border border-sand bg-white rounded-[12px] px-3 py-2.5 outline-none focus:border-primary transition-colors placeholder:text-muted/50" 
+                        className="w-full text-sm font-medium border border-sand bg-surface rounded-[12px] px-3 py-2.5 outline-none focus:border-primary transition-colors placeholder:text-muted/50" 
                       />
                     </div>
                   )}

@@ -18,7 +18,7 @@ export function AddressSnippet({ addresses, hideHeader = false }: AddressSnippet
     <div>
       {!hideHeader && (
         <div className="flex justify-between items-center mb-4">
-          <h2 className="text-lg font-black text-dark tracking-wide">Saved Addresses</h2>
+          <h2 className="text-lg font-semibold text-dark tracking-wide">Saved Addresses</h2>
           {count > 0 && (
             <Link href="/profile/saved-addresses" className="text-primary text-sm font-bold flex items-center hover:opacity-80 transition-opacity">
               Manage <ChevronRight className="w-4 h-4 ml-0.5" />
@@ -28,7 +28,7 @@ export function AddressSnippet({ addresses, hideHeader = false }: AddressSnippet
       )}
 
       {!defaultAddress ? (
-        <div className="bg-white rounded-[24px] p-6 border border-sand/50 text-center shadow-sm">
+        <div className="bg-surface rounded-[24px] p-6 border border-sand/50 text-center shadow-sm">
           <MapPin className="w-10 h-10 text-muted mx-auto mb-3 opacity-50" />
           <h3 className="text-base font-bold text-dark mb-1">No Saved Addresses</h3>
           <p className="text-sm text-muted mb-4 font-medium">Add an address for faster checkout.</p>
@@ -40,7 +40,7 @@ export function AddressSnippet({ addresses, hideHeader = false }: AddressSnippet
         </div>
       ) : (
         <Link href="/profile/saved-addresses" className="block">
-          <div className="bg-white rounded-[20px] p-4 border border-sand/50 shadow-sm flex items-start gap-4 hover:border-primary/50 transition-colors">
+          <div className="bg-surface rounded-[20px] p-4 border border-sand/50 shadow-sm flex items-start gap-4 hover:border-primary/50 transition-colors">
             <div className="w-10 h-10 rounded-full bg-mint/30 text-primary flex items-center justify-center shrink-0">
               <MapPin className="w-5 h-5" />
             </div>
@@ -48,7 +48,7 @@ export function AddressSnippet({ addresses, hideHeader = false }: AddressSnippet
               <div className="flex items-center gap-2 mb-1">
                 <h3 className="font-bold text-dark text-sm truncate">{defaultAddress.label}</h3>
                 {defaultAddress.is_default && (
-                  <span className="bg-primary/10 text-primary text-[10px] font-black uppercase px-2 py-0.5 rounded-md tracking-wider">
+                  <span className="bg-primary/10 text-primary text-xs font-semibold uppercase px-2 py-0.5 rounded-md tracking-wider">
                     Default
                   </span>
                 )}
@@ -57,7 +57,7 @@ export function AddressSnippet({ addresses, hideHeader = false }: AddressSnippet
                 {defaultAddress.address}
               </p>
               {count > 1 && (
-                <p className="text-[11px] font-bold text-primary mt-2">
+                <p className="text-xs font-bold text-primary mt-2">
                   + {count - 1} other {count - 1 === 1 ? 'address' : 'addresses'}
                 </p>
               )}
