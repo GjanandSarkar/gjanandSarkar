@@ -31,7 +31,7 @@ export function HomeTile({ title, images, ctaLabel, ctaHref }: HomeTileProps) {
   if (quad.length === 0) return null;
 
   return (
-    <section className="flex flex-col rounded border border-border bg-surface p-4">
+    <section className="flex flex-col rounded-2xl border border-border bg-surface p-4">
       <h2 className="mb-3 text-[17px] font-bold leading-tight text-foreground">{title}</h2>
 
       <div className="grid grid-cols-2 gap-2.5">
@@ -41,7 +41,7 @@ export function HomeTile({ title, images, ctaLabel, ctaHref }: HomeTileProps) {
             href={img.href}
             className="group block focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
           >
-            <div className="relative aspect-square overflow-hidden bg-surface-muted">
+            <div className="relative aspect-square overflow-hidden rounded-xl bg-surface-muted">
               {img.src ? (
                 <Image
                   src={img.src}

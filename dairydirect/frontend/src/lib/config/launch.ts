@@ -25,7 +25,7 @@ export const DAIRY_ONLY = true;
  * Category keys that have a live, onboarded seller behind them.
  * Only consulted while DAIRY_ONLY is true.
  */
-export const LIVE_CATEGORY_KEYS = ['dairy'] as const;
+export const LIVE_CATEGORY_KEYS = ['dairy', 'handicrafts'] as const;
 
 /**
  * Section-level switches.

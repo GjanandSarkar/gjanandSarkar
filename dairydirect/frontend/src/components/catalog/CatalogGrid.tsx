@@ -19,7 +19,7 @@ export function CatalogGrid({ products, title, priorityCount = 6 }: CatalogGridP
   if (products.length === 0) return null;
 
   return (
-    <section className="rounded border border-border bg-surface p-4">
+    <section className="rounded-2xl border border-border bg-surface p-4">
       {title ? (
         <h2 className="mb-3 text-[19px] font-bold tracking-tight text-foreground">{title}</h2>
       ) : null}

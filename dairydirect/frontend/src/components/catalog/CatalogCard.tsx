@@ -81,12 +81,12 @@ export function CatalogCard({ product, priority = false }: CatalogCardProps) {
   const showRating = reviews > 0 && rating > 0;
 
   return (
-    <article className="flex h-full flex-col rounded border border-border bg-surface p-3">
+    <article className="flex h-full flex-col rounded-2xl border border-border bg-surface p-3">
       <Link
         href={`/products/${product.id}`}
         className="group block focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
       >
-        <div className="relative mx-auto aspect-square w-full overflow-hidden bg-surface">
+        <div className="relative mx-auto aspect-square w-full overflow-hidden rounded-xl bg-surface">
           {product.image_url ? (
             <Image
               src={product.image_url}
@@ -157,7 +157,7 @@ export function CatalogCard({ product, priority = false }: CatalogCardProps) {
                 type="button"
                 onClick={() => setSelectedId(v.id)}
                 aria-pressed={active}
-                className={`rounded border px-1.5 py-0.5 text-[11px] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ${
+                className={`rounded-lg border px-1.5 py-0.5 text-[11px] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ${
                   active
                     ? 'border-primary bg-primary-fixed font-semibold text-primary'
                     : 'border-border text-foreground-muted'

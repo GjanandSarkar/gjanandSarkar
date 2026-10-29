@@ -115,8 +115,13 @@ export const CATEGORIES: Category[] = [
   },
   {
     key: 'handicrafts',
-    name: 'Handicrafts & Decor',
-    description: 'Handmade art, brass and home decor',
+    /* Renamed from "Handicrafts & Decor". This string is also the value
+       stored in products.category, so if any product was ever saved under
+       the old name it must be migrated - see the seed script beside this
+       change. The key is untouched, so URLs and the launch flag still
+       match. */
+    name: 'Handmade',
+    description: 'Handmade purses, bags and decor',
     icon: 'Hammer',
     featured: false,
   },

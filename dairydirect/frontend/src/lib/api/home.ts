@@ -1,3 +1,4 @@
+import { DEMO_PRODUCTS, isDemoCatalogueEnabled } from '@/lib/api/demo-feed';
 import { filterSellable } from '@/lib/catalog/sellable';
 import { unstable_cache } from 'next/cache';
 import { getAdminSupabase } from '@/lib/supabase/admin';
@@ -45,8 +46,14 @@ async function fetchHomeFeed(): Promise<HomeProduct[]> {
     return filterSellable((data ?? []) as HomeProduct[]);
   } catch (error) {
     console.error('[home] getHomeFeed failed:', error);
-    // The homepage must still render (hero, trust bar, banners) if the DB is
-    // slow or down. Returning [] degrades instead of throwing a 500.
+    // The homepage must still render if the DB is slow or down. Returning []
+    // degrades instead of throwing a 500.
+    //
+    // The one exception is an explicit design-preview sandbox, which has no
+    // database at all and would otherwise render a blank page. Gated on an
+    // env var that does not exist in production, so a live site with a
+    // broken database still shows an empty state rather than fake stock.
+    if (isDemoCatalogueEnabled()) return DEMO_PRODUCTS;
     return [];
   }
 }
