@@ -45,7 +45,7 @@ export function ThemeToggle({
           )}
           <span>{isDark ? 'Light Mode' : 'Dark Mode'}</span>
         </span>
-        <span className="text-[10px] font-bold uppercase tracking-wider text-muted px-1.5 py-0.5 rounded bg-surface border border-border">
+        <span className="text-xs font-bold uppercase tracking-wider text-muted px-1.5 py-0.5 rounded bg-surface border border-border">
           {isDark ? 'Dark' : 'Light'}
         </span>
       </button>

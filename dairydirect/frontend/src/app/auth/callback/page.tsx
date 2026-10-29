@@ -70,6 +70,28 @@ function AuthCallbackInner() {
               redirectTarget = '/seller/dashboard';
             }
           }
+        } else if (session?.user) {
+          const u = session.user;
+          const fallbackName = (u.user_metadata?.full_name || u.user_metadata?.name || u.email?.split('@')[0] || 'Customer').trim();
+          const isAdmin = u.email && (
+            u.email.toLowerCase().includes('admin') ||
+            u.email.toLowerCase() === 'gjanandsarkar09@gmail.com' ||
+            u.email.toLowerCase() === 'patelroshu1218@gmail.com'
+          );
+
+          useStore.getState().setUser({
+            id: u.id,
+            name: fallbackName,
+            phone: u.phone || '',
+            email: u.email || '',
+            avatar_url: u.user_metadata?.avatar_url || u.user_metadata?.picture || '',
+            role: isAdmin ? 'admin' : (u.user_metadata?.role || 'customer'),
+            saved_addresses: [],
+          });
+
+          if (isAdmin && (!next || next === '/home' || next === '/')) {
+            redirectTarget = '/admin';
+          }
         }
 
         // Mark callback as processed to prevent loops

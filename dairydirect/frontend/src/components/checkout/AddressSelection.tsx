@@ -40,28 +40,37 @@ export function AddressSelection({
   };
 
   const handleSaveModal = async (addressData: CreateAddressInput): Promise<boolean> => {
-    if (!user?.id) return false;
+    let uid = user?.id;
+    if (!uid) {
+      try {
+        const { supabase } = await import('@/lib/supabase');
+        const { data } = await supabase.auth.getUser();
+        uid = data?.user?.id;
+      } catch {}
+    }
     setIsSaving(true);
     try {
       if (editingAddress) {
-        const res = await updateAddressAPI(user.id, editingAddress.id, addressData);
+        const res = await updateAddressAPI(uid || '', editingAddress.id, addressData);
         if (res.success && res.data) {
           onAddressUpdated?.(res.data);
           return true;
         }
+        if (res.error) throw new Error(res.error);
         return false;
       } else {
-        const res = await saveAddressAPI({ ...addressData, userId: user.id });
+        const res = await saveAddressAPI({ ...addressData, userId: uid });
         if (res.success && res.data) {
           onAddressCreated?.(res.data);
           onSelectAddress(res.data.id);
           return true;
         }
+        if (res.error) throw new Error(res.error);
         return false;
       }
-    } catch (err) {
+    } catch (err: any) {
       console.error('Error saving address in checkout:', err);
-      return false;
+      throw err;
     } finally {
       setIsSaving(false);
     }
@@ -129,7 +138,7 @@ export function AddressSelection({
                       <div className="flex items-center gap-2 mb-0.5 flex-wrap">
                         <span className="font-bold text-dark text-sm capitalize">{addr.label || addr.address_type}</span>
                         {addr.is_default && (
-                          <span className="bg-primary/10 text-primary text-[10px] font-black uppercase px-1.5 py-0.5 rounded tracking-wider">
+                          <span className="bg-primary/10 text-primary text-xs font-semibold uppercase px-1.5 py-0.5 rounded tracking-wider">
                             Default
                           </span>
                         )}
@@ -148,7 +157,7 @@ export function AddressSelection({
                       </p>
 
                       {addr.mobile_number && (
-                        <p className="text-[11px] text-muted/80 mt-0.5">Phone: +91 {addr.mobile_number}</p>
+                        <p className="text-xs text-muted/80 mt-0.5">Phone: +91 {addr.mobile_number}</p>
                       )}
                     </div>
                   </div>

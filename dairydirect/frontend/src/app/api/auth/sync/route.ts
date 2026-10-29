@@ -32,6 +32,62 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json().catch(() => ({}));
+
+    // Support instant demo sessions to set gs_access_token cookie for edge middleware
+    if (body.type === 'demo' && body.role) {
+      const demoRole = body.role as 'customer' | 'admin' | 'seller';
+      const demoUserId = `${demoRole}-demo-user-id`;
+      const demoName = demoRole === 'admin' 
+        ? 'Gjanand Sarkar Admin' 
+        : demoRole === 'seller' 
+        ? 'Gir Organic Farms' 
+        : 'Rajesh Sharma';
+      const demoEmail = `${demoRole}@gjanandsarkar.com`;
+
+      const demoProfile = {
+        id: demoUserId,
+        email: demoEmail,
+        phone: '+919123456789',
+        name: demoName,
+        avatar_url: null,
+        role: demoRole,
+        loyalty_points: 500,
+        saved_addresses: [
+          { label: 'Home', address: 'A-402, Royal Palms, Gandhinagar, Gujarat - 382010' },
+          { label: 'Office', address: 'Block C, Infocity, Gandhinagar, Gujarat - 382007' }
+        ],
+      };
+
+      const accessToken = await signAccessToken({
+        userId: demoProfile.id,
+        name: demoProfile.name,
+        role: demoRole,
+        email: demoProfile.email,
+        phone: demoProfile.phone,
+      });
+      const refreshToken = await signRefreshToken(demoProfile.id);
+
+      const response = NextResponse.json({
+        success: true,
+        user: demoProfile,
+        data: {
+          user: demoProfile,
+          accessToken,
+          refreshToken,
+        },
+      });
+
+      response.cookies.set('gs_access_token', accessToken, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'lax',
+        path: '/',
+        maxAge: 60 * 60 * 24 * 7,
+      });
+
+      return response;
+    }
+
     const headerToken = extractTokenFromRequest(request);
     const bodyToken = body.token;
     const token = headerToken || bodyToken;

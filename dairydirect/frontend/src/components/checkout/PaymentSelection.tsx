@@ -73,17 +73,17 @@ export function PaymentSelection({
                   <div className="flex items-center gap-2 mb-0.5">
                     <span className="font-bold text-dark text-sm leading-tight">{method.name}</span>
                     {method.badge && (
-                      <span className="text-[9px] font-extrabold uppercase px-1.5 py-0.5 rounded-md bg-primary/10 text-primary tracking-wider">
+                      <span className="text-xs font-semibold uppercase px-1.5 py-0.5 rounded-md bg-primary/10 text-primary tracking-wider">
                         {method.badge}
                       </span>
                     )}
                   </div>
-                  <p className="text-[11px] text-muted leading-relaxed truncate">{method.desc}</p>
+                  <p className="text-xs text-muted leading-relaxed truncate">{method.desc}</p>
                   
                   {/* Expansion content */}
                   {selectedMethod === method.id && method.id === 'upi' && (
                     <div className="mt-3 pt-3 border-t border-sand/50" onClick={(e) => e.stopPropagation()}>
-                      <label className="text-[10px] uppercase font-bold text-primary mb-1.5 block">Enter your UPI ID</label>
+                      <label className="text-xs uppercase font-bold text-primary mb-1.5 block">Enter your UPI ID</label>
                       <input 
                         type="text" 
                         value={upiId}

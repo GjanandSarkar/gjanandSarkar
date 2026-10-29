@@ -108,11 +108,11 @@ export default function SellerStoreSettings() {
   }
 
   return (
-    <div className="w-full bg-background min-h-screen pb-16">
-      <div className="max-w-[860px] mx-auto px-4 md:px-8 py-8 pt-24 md:pt-32">
-        <div className="flex items-center justify-between mb-8">
+    <div className="w-full p-4 sm:p-6 md:p-8 flex flex-col gap-6">
+      <div className="max-w-[1000px] mx-auto w-full space-y-6">
+        <div className="flex items-center justify-between mb-4">
           <div>
-            <h1 className="text-2xl md:text-3xl font-black text-foreground">Store Settings & Live Profile</h1>
+            <h1 className="text-2xl md:text-3xl font-semibold text-foreground">Store Settings & Live Profile</h1>
             <p className="text-xs text-foreground-muted mt-1">Configure your public storefront branding, legal compliance, and payout bank account</p>
           </div>
           <button 

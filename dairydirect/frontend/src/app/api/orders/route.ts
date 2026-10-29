@@ -352,6 +352,19 @@ export async function GET(request: NextRequest) {
           };
         } catch (e) {}
       }
+
+      let custName = o.profiles?.name;
+      if (!custName && o.shipping_address) {
+        try {
+          const parsed = typeof o.shipping_address === 'string' ? JSON.parse(o.shipping_address) : o.shipping_address;
+          custName = parsed?.full_name || parsed?.name;
+        } catch (e) {}
+      }
+      if (!custName && o.profiles?.email) {
+        custName = o.profiles.email;
+      }
+      o.customer_name = custName || 'Customer';
+
       return o;
     });
 
@@ -601,15 +614,99 @@ export async function PUT(request: NextRequest) {
     if (status === 'cancelled') {
       const cancelReason = notes || (auth.role === 'seller' ? 'Cancelled by Seller' : auth.isAdmin ? 'Cancelled by Admin' : 'Cancelled by Customer');
 
-      const { data: cancelRes, error: cancelErr } = await sb.rpc('cancel_order_atomic', {
-        p_order_id: orderId,
-        p_actor_id: auth.userId,
-        p_reason: cancelReason,
-      });
+      // Try calling RPC with modern signature (p_user_id, p_order_id, p_reason, p_actor_role)
+      let rpcSucceeded = false;
+      let cancelErrMessage: string | null = null;
 
-      if (cancelErr || !cancelRes?.success) {
-        const msg = cancelErr?.message || cancelRes?.error || 'Failed to cancel order';
-        return NextResponse.json({ error: msg }, { status: 400 });
+      try {
+        const { data: cancelRes1, error: cancelErr1 } = await sb.rpc('cancel_order_atomic', {
+          p_order_id: orderId,
+          p_user_id: auth.userId,
+          p_reason: cancelReason,
+          p_actor_role: auth.role || (auth.isAdmin ? 'admin' : 'customer'),
+        });
+
+        if (!cancelErr1 && cancelRes1?.success !== false) {
+          rpcSucceeded = true;
+        } else {
+          // Fallback to legacy signature (p_order_id, p_actor_id, p_reason)
+          const { data: cancelRes2, error: cancelErr2 } = await sb.rpc('cancel_order_atomic', {
+            p_order_id: orderId,
+            p_actor_id: auth.userId,
+            p_reason: cancelReason,
+          });
+
+          if (!cancelErr2 && cancelRes2?.success !== false) {
+            rpcSucceeded = true;
+          } else {
+            cancelErrMessage = cancelErr2?.message || cancelErr1?.message || 'RPC execution failed';
+          }
+        }
+      } catch (err: any) {
+        cancelErrMessage = err.message;
+      }
+
+      // If stored procedure succeeded, continue.
+      // If RPC failed (e.g. not in schema cache), execute atomic fallback directly in database
+      if (!rpcSucceeded) {
+        console.warn('[Order Cancel] RPC not found or failed, executing direct database fallback:', cancelErrMessage);
+        
+        // 1. Update order status
+        const { error: updateOrderErr } = await sb
+          .from('orders')
+          .update({
+            status: 'cancelled',
+            cancelled_at: new Date().toISOString(),
+            cancel_reason: cancelReason,
+            cancelled_by: auth.role || (auth.isAdmin ? 'admin' : 'customer'),
+            updated_at: new Date().toISOString(),
+          })
+          .eq('id', orderId);
+
+        if (updateOrderErr) {
+          return NextResponse.json({ error: updateOrderErr.message || 'Failed to update order status' }, { status: 400 });
+        }
+
+        // 2. Restock inventory for items if order was not delivered
+        if (currentStatus !== 'delivered') {
+          const { data: orderItems } = await sb
+            .from('order_items')
+            .select('variant_id, quantity, product_id')
+            .eq('order_id', orderId);
+
+          for (const item of (orderItems || [])) {
+            if (item.variant_id && item.quantity > 0) {
+              const { data: vData } = await sb
+                .from('product_variants')
+                .select('stock, available_quantity, reserved_quantity')
+                .eq('id', item.variant_id)
+                .maybeSingle();
+
+              if (vData) {
+                const newStock = (vData.stock || 0) + item.quantity;
+                const newAvail = (vData.available_quantity ?? vData.stock ?? 0) + item.quantity;
+                await sb
+                  .from('product_variants')
+                  .update({ stock: newStock, available_quantity: newAvail })
+                  .eq('id', item.variant_id);
+
+                await sb.from('inventory_transactions').insert({
+                  variant_id: item.variant_id,
+                  product_id: item.product_id,
+                  order_id: orderId,
+                  change_type: 'cancellation',
+                  quantity_change: item.quantity,
+                  stock_before: vData.stock,
+                  stock_after: newStock,
+                  available_before: vData.available_quantity,
+                  available_after: newAvail,
+                  actor_id: auth.userId,
+                  notes: `Order cancelled by ${auth.role}: ${cancelReason}`,
+                }).catch(() => {});
+              }
+            }
+          }
+        }
       }
 
       await revalidateInventory();

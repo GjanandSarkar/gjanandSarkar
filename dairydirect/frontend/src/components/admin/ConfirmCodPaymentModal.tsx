@@ -70,7 +70,7 @@ export function ConfirmCodPaymentModal({
       aria-labelledby="cod-modal-title"
       className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-xs animate-in fade-in duration-150"
     >
-      <div className="bg-surface rounded-3xl max-w-md w-full p-6 shadow-2xl border border-border space-y-4">
+      <div className="bg-surface rounded-xl max-w-md w-full p-6 shadow-2xl border border-border space-y-4">
         {/* Header */}
         <div className="flex items-start justify-between">
           <div className="flex items-center gap-3">
@@ -78,7 +78,7 @@ export function ConfirmCodPaymentModal({
               <IndianRupee className="w-5 h-5" />
             </div>
             <div>
-              <h3 id="cod-modal-title" className="text-base font-extrabold text-foreground">
+              <h3 id="cod-modal-title" className="text-base font-semibold text-foreground">
                 Confirm Cash Collected
               </h3>
               <p className="text-xs text-foreground-muted">Order #{order.order_number || order.id.slice(0, 8)}</p>
@@ -115,8 +115,8 @@ export function ConfirmCodPaymentModal({
             <span className="font-bold uppercase text-foreground">{order.status.replace(/_/g, ' ')}</span>
           </div>
           <div className="flex justify-between items-center pt-2 border-t border-border">
-            <span className="text-foreground font-extrabold">Total Cash Amount:</span>
-            <span className="text-base font-black text-primary">₹{order.total_amount}</span>
+            <span className="text-foreground font-semibold">Total Cash Amount:</span>
+            <span className="text-base font-semibold text-primary">₹{order.total_amount}</span>
           </div>
         </div>
 

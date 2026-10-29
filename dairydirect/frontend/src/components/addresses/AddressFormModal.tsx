@@ -226,12 +226,15 @@ export function AddressFormModal({
               applyLocationData(detailed);
             }
           } else {
-            setLatitude(lat);
-            setLongitude(lng);
-            setLocationNotice({
-              text: 'Coordinates pinpointed, but address details were unavailable. Please enter details manually.',
-              type: 'info',
-            });
+            const fallbackWorked = await attemptIPLocationFallback('Coordinates pinpointed; approximate location detected via network.');
+            if (!fallbackWorked) {
+              setLatitude(lat);
+              setLongitude(lng);
+              setLocationNotice({
+                text: 'GPS pinpointed! Please enter your Area, City, and Pincode.',
+                type: 'info',
+              });
+            }
           }
         } catch (err) {
           await attemptIPLocationFallback('GPS lookup timed out. Detected location via network.');
@@ -358,9 +361,21 @@ export function AddressFormModal({
       longitude: longitude,
     };
 
-    const success = await onSave(payload);
-    if (success) {
-      onClose();
+    try {
+      const success = await onSave(payload);
+      if (success) {
+        onClose();
+      } else {
+        setLocationNotice({
+          text: 'Unable to save address. Please check your network connection and ensure all fields are correct.',
+          type: 'error',
+        });
+      }
+    } catch (err: any) {
+      setLocationNotice({
+        text: err?.message || 'Failed to save address. Please try again.',
+        type: 'error',
+      });
     }
   };
 
@@ -373,7 +388,7 @@ export function AddressFormModal({
     >
       <div
         ref={modalRef}
-        className="bg-surface w-full max-w-xl rounded-3xl shadow-2xl border border-border overflow-hidden my-6 animate-in zoom-in-95 duration-200"
+        className="bg-surface w-full max-w-xl rounded-xl shadow-2xl border border-border overflow-hidden my-6 animate-in zoom-in-95 duration-200"
       >
         {/* Modal Header */}
         <div className="px-6 py-4 border-b border-border flex items-center justify-between bg-surface-muted/70">
@@ -456,7 +471,7 @@ export function AddressFormModal({
               </div>
               <div>
                 <p className="text-xs font-bold text-foreground">Quick Fill via Geolocation</p>
-                <p className="text-[11px] text-foreground-muted">Auto-fills city, area & pincode from your device</p>
+                <p className="text-xs text-foreground-muted">Auto-fills city, area & pincode from your device</p>
               </div>
             </div>
 
@@ -522,7 +537,7 @@ export function AddressFormModal({
               allowCustom={true}
             />
             {validationErrors.country && (
-              <p className="text-[11px] text-error mt-1">{validationErrors.country}</p>
+              <p className="text-xs text-error mt-1">{validationErrors.country}</p>
             )}
           </div>
 
@@ -545,7 +560,7 @@ export function AddressFormModal({
                 }`}
               />
               {validationErrors.fullName && (
-                <p className="text-[11px] text-error mt-1">{validationErrors.fullName}</p>
+                <p className="text-xs text-error mt-1">{validationErrors.fullName}</p>
               )}
             </div>
 
@@ -572,7 +587,7 @@ export function AddressFormModal({
                 />
               </div>
               {validationErrors.mobileNumber && (
-                <p className="text-[11px] text-error mt-1">{validationErrors.mobileNumber}</p>
+                <p className="text-xs text-error mt-1">{validationErrors.mobileNumber}</p>
               )}
             </div>
           </div>
@@ -597,7 +612,7 @@ export function AddressFormModal({
                 }`}
               />
               {validationErrors.pincode && (
-                <p className="text-[11px] text-error mt-1">{validationErrors.pincode}</p>
+                <p className="text-xs text-error mt-1">{validationErrors.pincode}</p>
               )}
             </div>
 
@@ -618,7 +633,7 @@ export function AddressFormModal({
                 }`}
               />
               {validationErrors.flatHouseBuilding && (
-                <p className="text-[11px] text-error mt-1">{validationErrors.flatHouseBuilding}</p>
+                <p className="text-xs text-error mt-1">{validationErrors.flatHouseBuilding}</p>
               )}
             </div>
           </div>
@@ -641,7 +656,7 @@ export function AddressFormModal({
               }`}
             />
             {validationErrors.areaStreet && (
-              <p className="text-[11px] text-error mt-1">{validationErrors.areaStreet}</p>
+              <p className="text-xs text-error mt-1">{validationErrors.areaStreet}</p>
             )}
           </div>
 
@@ -679,7 +694,7 @@ export function AddressFormModal({
                 }`}
               />
               {validationErrors.townCity && (
-                <p className="text-[11px] text-error mt-1">{validationErrors.townCity}</p>
+                <p className="text-xs text-error mt-1">{validationErrors.townCity}</p>
               )}
             </div>
 
@@ -697,7 +712,7 @@ export function AddressFormModal({
                 allowCustom={true}
               />
               {validationErrors.state && (
-                <p className="text-[11px] text-error mt-1">{validationErrors.state}</p>
+                <p className="text-xs text-error mt-1">{validationErrors.state}</p>
               )}
             </div>
           </div>
@@ -706,7 +721,7 @@ export function AddressFormModal({
           <div className="p-4 bg-surface-muted border border-border/80 rounded-2xl space-y-3">
             <div>
               <p className="text-xs font-bold text-foreground">Weekend Delivery Availability</p>
-              <p className="text-[11px] text-foreground-muted mt-0.5 leading-relaxed">
+              <p className="text-xs text-foreground-muted mt-0.5 leading-relaxed">
                 Indicate if you are available to receive packages on weekends. (Deliveries remain subject to store operating hours).
               </p>
             </div>
@@ -802,7 +817,7 @@ export function AddressFormModal({
                   placeholder="Provide details such as building description, a nearby landmark, security gate code, or other navigation instructions."
                   className="w-full p-3 bg-surface-muted border border-border rounded-xl text-xs font-medium text-foreground placeholder-slate-400 focus:bg-surface focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-success transition-all resize-none"
                 />
-                <div className="flex justify-between text-[11px] text-foreground-muted">
+                <div className="flex justify-between text-xs text-foreground-muted">
                   <span>e.g. Leave package with guard, ring bell twice</span>
                   <span>{deliveryInstructions.length}/500</span>
                 </div>

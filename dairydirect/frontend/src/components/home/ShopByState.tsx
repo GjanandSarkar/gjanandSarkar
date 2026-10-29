@@ -71,7 +71,7 @@ export function ShopByState() {
               Geographical Indications &amp; Traditions
             </span>
           </div>
-          <h2 className="text-2xl md:text-3xl font-black text-primary tracking-tight">
+          <h2 className="text-2xl md:text-3xl font-semibold text-primary tracking-tight">
             Shop by State
           </h2>
           <p className="text-xs md:text-sm text-foreground-muted font-medium mt-0.5">
@@ -104,7 +104,7 @@ export function ShopByState() {
             <Globe className="w-9 h-9 text-primary" />
           </div>
 
-          <h3 className="text-xl font-black text-primary mb-1 relative z-10">
+          <h3 className="text-xl font-semibold text-primary mb-1 relative z-10">
             Bharat Darshan
           </h3>
           <p className="text-xs text-foreground-muted max-w-xs mb-4 relative z-10">
@@ -130,18 +130,18 @@ export function ShopByState() {
             >
               <div className="flex items-start justify-between gap-2 mb-2">
                 {/* State abbreviation badge instead of emoji */}
-                <div className={`w-10 h-10 rounded-lg font-black text-sm flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform ${st.abbrColor}`}>
+                <div className={`w-10 h-10 rounded-lg font-semibold text-sm flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform ${st.abbrColor}`}>
                   {st.abbr}
                 </div>
-                <span className="text-[10px] font-bold text-secondary bg-warning-bg px-2 py-0.5 rounded-full">
+                <span className="text-xs font-bold text-secondary bg-warning-bg px-2 py-0.5 rounded-full">
                   {st.badge}
                 </span>
               </div>
 
-              <h4 className="text-sm font-black text-foreground group-hover:text-primary transition-colors">
+              <h4 className="text-sm font-semibold text-foreground group-hover:text-primary transition-colors">
                 {st.name}
               </h4>
-              <p className="text-[11px] text-foreground-muted line-clamp-2 mt-1 leading-snug">
+              <p className="text-xs text-foreground-muted line-clamp-2 mt-1 leading-snug">
                 {st.specialties}
               </p>
             </Link>

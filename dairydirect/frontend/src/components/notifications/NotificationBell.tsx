@@ -53,7 +53,7 @@ export function NotificationBell() {
       >
         <Bell className="w-6 h-6" strokeWidth={2} />
         {unreadCount > 0 && (
-          <span className="absolute top-1.5 right-1.5 flex h-3 w-3 items-center justify-center rounded-full text-[8px] font-bold text-white bg-red-500 border-2 border-white" />
+          <span className="absolute top-1.5 right-1.5 flex h-3 w-3 items-center justify-center rounded-full text-xs font-bold text-white bg-red-500 border-2 border-white" />
         )}
       </button>
 

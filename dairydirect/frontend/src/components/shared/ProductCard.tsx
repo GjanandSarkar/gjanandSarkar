@@ -1,15 +1,16 @@
 "use client";
 
 import React, { useState, useCallback, useEffect } from 'react';
-import Link from 'next/link';
-import { Plus, Minus, Pencil, Star, ShoppingCart, Heart } from 'lucide-react';
-import { useTranslation } from '@/lib/i18n';
 import { createPortal } from 'react-dom';
+import Link from 'next/link';
+import { Plus, Minus, Pencil, Star, ShoppingCart, Heart, X } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { useTranslation } from '@/lib/i18n';
 import { useStore } from '@/store/useStore';
 import { addToCart, updateCartItem } from '@/lib/api/cart';
 import { toggleWishlist } from '@/lib/api/wishlist';
 import type { CatalogProduct } from '@/lib/types/catalog';
-import { motion, AnimatePresence } from 'framer-motion';
+import { PartnerBadge } from '@/components/shared/PartnerBadge';
 import dynamic from 'next/dynamic';
 
 /**
@@ -40,7 +41,7 @@ export function ProductCard({
   onProductUpdated,
   onProductDeleted,
 }: ProductCardProps) {
-  const { t } = useTranslation();
+  const { t, tProduct } = useTranslation();
 
   const user = useStore((s) => s.user);
   const cart = useStore((s) => s.cart);
@@ -216,13 +217,13 @@ export function ProductCard({
         controls in z-order. The whole card is clickable, the link is properly
         announced and focusable, and the buttons stay genuinely separate.
       */}
-      <div className="flex flex-col h-full bg-surface rounded-2xl border border-border/90 p-3.5 shadow-2xs hover:border-secondary group relative lift pressable focus-within:ring-2 focus-within:ring-[var(--primary)]/40">
+      <div className="flex flex-col h-full bg-surface rounded-2xl border border-border/90 p-3.5 shadow-2xs hover:border-secondary/70 group relative lift pressable focus-within:ring-2 focus-within:ring-primary/40">
         <Link
           href={`/products/${product.id}`}
           className="absolute inset-0 z-10 rounded-2xl"
         >
           <span className="sr-only">
-            {product.name}
+            {tProduct(product.name)}
             {product.brand ? ` by ${product.brand}` : ''}, ₹{selectedVariant.price}
           </span>
         </Link>
@@ -233,9 +234,15 @@ export function ProductCard({
             src={product.image_url || PLACEHOLDER_PRODUCT_IMAGE}
             alt={product.name}
             fill
-            sizes="(max-width: 768px) 50vw, 25vw"
+            // Matches the product grid breakpoints:
+            //  • 360–639px  → 2 columns → each card ≈ 50vw
+            //  • 640–1279px → 3 columns → each card ≈ 33vw
+            //  • 1280px+    → 4 columns → each card ≈ 25vw
+            // Correct sizes prevents the browser downloading a 1920px image
+            // for a 160px thumbnail, which was a CLS-adjacent bandwidth waste.
+            sizes="(max-width: 639px) 50vw, (max-width: 1279px) 33vw, 25vw"
             priority={priority}
-            className={`w-full h-full object-contain transition-transform duration-300 group-hover:scale-105 ${
+            className={`w-full h-full object-contain transition-transform duration-200 group-hover:scale-105 ${
               isAllOutOfStock ? 'grayscale opacity-75' : ''
             }`}
             onError={(e) => {
@@ -243,23 +250,21 @@ export function ProductCard({
             }}
           />
 
-          {/* A real discount badge, shown only when there is a genuine saving.
-              This is the single strongest scanning cue on a listing grid and
-              the card had none. */}
+          {/* A real discount badge, shown only when there is a genuine saving. */}
           {hasRealDiscount && discountPct >= 1 && (
-            <span className="absolute top-2 left-2 bg-secondary text-white text-[10px] font-black px-1.5 py-0.5 rounded-md shadow-sm tabular-nums">
+            <span className="absolute top-2 left-2 bg-highlight text-on-secondary text-xs font-medium px-2 py-0.5 rounded-full shadow-xs tabular-nums">
               {discountPct}% OFF
             </span>
           )}
 
           {/* Stock Badges */}
           {isAllOutOfStock ? (
-            <span className="absolute bottom-2 left-2 bg-error text-on-error text-[10px] font-extrabold px-2 py-0.5 rounded-md shadow-xs">
-              Out of Stock
+            <span className="absolute bottom-2 left-2 bg-error text-on-error text-xs font-medium px-2 py-0.5 rounded-full shadow-xs">
+              {t('outOfStock')}
             </span>
           ) : isLowStock ? (
-            <span className="absolute bottom-2 left-2 bg-warning text-on-warning text-[10px] font-extrabold px-2 py-0.5 rounded-md shadow-xs">
-              Only {availableStock} left
+            <span className="absolute bottom-2 left-2 bg-warning-bg text-warning border border-warning/20 text-xs font-medium px-2 py-0.5 rounded-full shadow-xs">
+              {t('onlyLeft', { amount: String(availableStock) })}
             </span>
           ) : null}
 
@@ -267,12 +272,12 @@ export function ProductCard({
           <button
             type="button"
             onClick={handleToggleWishlist}
-            className={`absolute top-2 right-2 w-7 h-7 rounded-full bg-surface/95 backdrop-blur-xs shadow-sm border border-border flex items-center justify-center transition-all hover:scale-110 active:scale-95 z-20 ${
+            className={`absolute top-2 right-2 w-8 h-8 rounded-full bg-surface shadow-xs border border-border flex items-center justify-center transition-colors hover:bg-surface-muted z-20 ${
               isSaved ? 'text-error' : 'text-foreground-muted hover:text-error'
             }`}
             title={isSaved ? 'Remove from Wishlist' : 'Add to Wishlist'}
           >
-            <Heart className={`w-3.5 h-3.5 ${isSaved ? 'fill-rose-600' : ''}`} />
+            <Heart className={`w-4 h-4 ${isSaved ? 'fill-current text-error' : ''}`} />
           </button>
 
           {/* Admin Quick-Edit Button */}
@@ -284,17 +289,17 @@ export function ProductCard({
                 e.stopPropagation();
                 setIsEditModalOpen(true);
               }}
-              className="absolute top-2 right-10 w-7 h-7 rounded-full bg-surface shadow-md border border-border flex items-center justify-center transition-all hover:scale-110 active:scale-95 z-20 text-primary"
+              className="absolute top-2 right-11 w-8 h-8 rounded-full bg-surface shadow-xs border border-border flex items-center justify-center transition-colors hover:bg-surface-muted z-20 text-primary"
               title="Admin: Quick Edit"
             >
-              <Pencil className="w-3.5 h-3.5" strokeWidth={2.5} />
+              <Pencil className="w-3.5 h-3.5" strokeWidth={2} />
             </button>
           )}
 
           {/* Cart Quantity Badge */}
           {isInCart && (
             <div
-              className={`absolute bottom-2 right-2 w-5 h-5 rounded-full bg-secondary text-white text-[10px] font-black flex items-center justify-center shadow-md z-10`}
+              className="absolute bottom-2 right-2 w-5 h-5 rounded-full bg-primary text-on-primary text-xs font-semibold flex items-center justify-center shadow-xs z-10 tabular-nums"
             >
               {totalQuantity}
             </div>
@@ -304,50 +309,47 @@ export function ProductCard({
         {/* Content Section */}
         <div className="flex flex-col flex-1 justify-between">
           <div>
-            {/* The partner brand. This was hardcoded to "By Gjanand Farm" on
-                every card, which is wrong on a marketplace whose entire pitch
-                is one verified brand per category — and absurd on electronics
-                or books. */}
+            {/* Verified Partner Badge */}
+            <PartnerBadge size="sm" className="mb-1.5 self-start text-xs py-0 px-2" />
+
+            {/* Partner Brand */}
             {product.brand && (
-              <span className="text-[10px] text-foreground-muted font-semibold block mb-0.5 truncate">
+              <span className="text-xs text-foreground-muted font-normal block mb-0.5 truncate">
                 {product.brand}
               </span>
             )}
 
-            <h3 className="text-xs sm:text-sm font-bold text-foreground line-clamp-1 group-hover:text-primary transition-colors leading-snug">
-              {product.name}
+            <h3 className="text-sm font-semibold text-foreground line-clamp-1 group-hover:text-primary transition-colors leading-snug">
+              {tProduct(product.name)}
             </h3>
 
-            <div className="flex items-center gap-1 text-[10px] font-bold mt-1 mb-2">
+            <div className="flex items-center gap-1.5 text-xs font-normal mt-1 mb-2">
               {showRating && (
                 <>
-                  <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded bg-success text-on-success">
-                    <Star className="w-2.5 h-2.5 fill-white text-white" />
+                  <span className="inline-flex items-center gap-0.5 px-1.5 py-0.2 rounded bg-success-bg text-success font-medium">
+                    <Star className="w-3 h-3 fill-current text-success" />
                     {rating!.toFixed(1)}
                   </span>
-                  <span className="text-foreground-muted font-normal">({reviewCount})</span>
+                  <span className="text-foreground-muted">({reviewCount})</span>
                   <span className="text-foreground-muted">•</span>
                 </>
               )}
-              <span className="text-foreground-muted font-medium">
+              <span className="text-foreground-muted">
                 {selectedVariant.weight}
                 {variants.length > 1 && ` (+${variants.length - 1})`}
               </span>
             </div>
           </div>
 
-          {/* Price & Action Button.
-              `relative z-20` lifts this row above the stretched link (z-10)
-              so the add button and quantity stepper stay directly clickable
-              instead of being covered by the card-wide anchor. */}
+          {/* Price & Action Button */}
           <div className="relative z-20 flex items-center justify-between gap-2 pt-2 border-t border-border mt-1">
             <div className="flex flex-col">
               <div className="flex items-baseline gap-1">
-                <span className="text-base font-black text-primary">
+                <span className="text-base font-bold text-primary tabular-nums">
                   ₹{selectedVariant.price}
                 </span>
                 {hasRealDiscount && (
-                  <span className="text-[11px] text-foreground-muted line-through">
+                  <span className="text-xs text-foreground-muted line-through tabular-nums">
                     ₹{originalPrice}
                   </span>
                 )}
@@ -357,38 +359,40 @@ export function ProductCard({
             {variants.length === 1 && isOutOfStock ? (
               <button
                 disabled
-                className="px-3 py-1.5 bg-surface-muted text-foreground-muted text-xs font-bold rounded-lg cursor-not-allowed border border-border"
+                className="min-h-[40px] px-3 py-1.5 bg-surface-muted text-foreground-muted text-xs font-semibold rounded-lg cursor-not-allowed border border-border"
               >
-                Sold Out
+                {t('soldOut')}
               </button>
             ) : !isInCart ? (
               <button
                 onClick={handleAdd}
                 disabled={busy || (variants.length === 1 && isOutOfStock)}
-                className="px-3.5 py-1.5 bg-primary hover:bg-primary-hover text-on-primary text-xs font-bold rounded-lg transition-colors flex items-center justify-center gap-1 shadow-xs active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="min-h-[40px] px-4 py-2 bg-primary hover:bg-primary-hover text-on-primary text-xs font-semibold rounded-lg transition-colors flex items-center justify-center gap-1.5 shadow-xs active:scale-95 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 <ShoppingCart className="w-3.5 h-3.5" />
-                <span>{variants.length > 1 ? 'Select' : 'Add'}</span>
+                <span>{variants.length > 1 ? t('select') : t('addShortcut')}</span>
               </button>
             ) : (
-              <div className="flex items-center bg-surface-muted rounded-lg overflow-hidden border border-border-hover">
+              <div className="flex items-center bg-surface rounded-lg overflow-hidden border border-border shadow-xs">
                 <button
                   onClick={(e) => handleUpdate(e, 'dec')}
                   disabled={busy}
-                  className="w-7 h-7 flex items-center justify-center text-foreground hover:bg-border transition-colors active:scale-90"
+                  className="w-9 h-9 flex items-center justify-center text-foreground hover:bg-surface-muted transition-colors"
+                  aria-label="Decrease quantity"
                 >
-                  <Minus className="w-3 h-3 stroke-[3]" />
+                  <Minus className="w-3.5 h-3.5" strokeWidth={2.5} />
                 </button>
-                <span className="px-1.5 text-center text-xs font-black text-foreground min-w-[20px]">
+                <span className="px-2 text-center text-xs font-semibold text-foreground min-w-[20px] tabular-nums">
                   {variants.length > 1 ? totalQuantity : currentVariantQty}
                 </span>
                 <button
                   onClick={(e) => handleUpdate(e, 'inc')}
                   disabled={busy || (variants.length === 1 && currentVariantQty >= availableStock)}
-                  className="w-7 h-7 flex items-center justify-center bg-primary text-on-primary hover:bg-primary-hover transition-colors active:scale-90 disabled:opacity-40 disabled:cursor-not-allowed"
+                  className="w-9 h-9 flex items-center justify-center bg-primary text-on-primary hover:bg-primary-hover transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
                   title={currentVariantQty >= availableStock ? 'Max available stock reached' : undefined}
+                  aria-label="Increase quantity"
                 >
-                  <Plus className="w-3 h-3 stroke-[3]" />
+                  <Plus className="w-3.5 h-3.5" strokeWidth={2.5} />
                 </button>
               </div>
             )}
@@ -410,143 +414,163 @@ export function ProductCard({
           for the open/close animation. It scrolls internally and clears the
           home indicator, instead of overflowing off-screen when a product
           has several sizes. */}
+      {/* Size picker portal: Centered on desktop, full-width bottom sheet on mobile */}
       {mounted &&
         createPortal(
           <AnimatePresence>
             {showDrawer && (
               <>
                 <motion.div
-                  initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-                  className="fixed inset-0 z-[60] backdrop-blur-xs"
-                  style={{ background: 'var(--scrim)' }}
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  transition={{ duration: 0.15 }}
+                  className="fixed inset-0 z-[75] bg-black/50 backdrop-blur-xs"
                   onClick={() => setShowDrawer(false)}
+                  aria-hidden="true"
                 />
-                <div className="fixed inset-0 z-[70] flex items-end justify-center sm:items-center sm:p-6 pointer-events-none">
+                <div className="fixed inset-0 z-[80] flex items-end justify-center sm:items-center sm:p-6 pointer-events-none">
                   <motion.div
-                    initial={{ y: '100%', opacity: 0.6 }}
+                    initial={{ y: '100%', opacity: 0.8 }}
                     animate={{ y: 0, opacity: 1 }}
-                    exit={{ y: '100%', opacity: 0.6 }}
+                    exit={{ y: '100%', opacity: 0 }}
                     transition={{ type: 'spring', damping: 28, stiffness: 320 }}
                     role="dialog"
                     aria-modal="true"
-                    aria-label={`Choose a size for ${product.name}`}
-                    className="pointer-events-auto w-full sm:w-auto sm:min-w-[22rem] sm:max-w-md bg-surface shadow-2xl rounded-t-3xl sm:rounded-3xl max-h-[85dvh] sm:max-h-[80dvh] overflow-y-auto overscroll-contain px-5 pt-3 pb-[calc(1.25rem+env(safe-area-inset-bottom,0px))] sm:px-6 sm:pt-5 sm:pb-6"
+                    aria-label={`Select size for ${product.name}`}
+                    className="pointer-events-auto w-full sm:w-auto sm:min-w-[24rem] sm:max-w-md bg-surface shadow-2xl rounded-t-2xl sm:rounded-2xl max-h-[85dvh] sm:max-h-[80dvh] overflow-y-auto overscroll-contain px-5 pt-3 pb-[calc(1.5rem+env(safe-area-inset-bottom,0px))] sm:px-6 sm:pt-5 sm:pb-6 border border-border"
                   >
-                    <div className="w-12 h-1.5 rounded-full mx-auto mb-5 bg-border sm:hidden" />
-              <div className="flex items-start gap-4 mb-6">
-                <img
-                  src={product.image_url ?? PLACEHOLDER_PRODUCT_IMAGE}
-                  alt={product.name}
-                  className="w-16 h-16 rounded-xl object-contain bg-surface-muted border p-1"
-                />
-                <div>
-                  <h2 className="text-base font-bold text-foreground">
-                    {product.name}
-                  </h2>
-                  <p className="text-xs text-foreground-muted">
-                    {t('selectSizeToAddToCart')}
-                  </p>
-                </div>
-              </div>
+                    {/* Mobile drag handle */}
+                    <div className="w-12 h-1.5 rounded-full mx-auto mb-4 bg-border sm:hidden" />
 
-              <div className="space-y-2.5 mb-6">
-                {variants.map((v) => {
-                  const qty = cart.find(
-                    (i) => i.productId === product.id && i.variantId === v.id
-                  )?.quantity ?? 0;
-                  const vStock = v.available_quantity ?? v.stock ?? 0;
-                  const isVOutOfStock = vStock <= 0;
-                  const isVLowStock = !isVOutOfStock && vStock <= 10;
-
-                  return (
-                    <div 
-                      key={v.id}
-                      className={`flex items-center justify-between p-3.5 rounded-xl border transition-colors ${
-                        isVOutOfStock
-                          ? 'border-border bg-surface-muted/70 opacity-60'
-                          : qty > 0
-                          ? 'border-primary bg-success-bg/40'
-                          : 'border-border bg-surface'
-                      }`}
-                    >
-                      <div className="flex flex-col">
-                        <div className="flex items-center gap-2">
-                          <span className="font-bold text-xs text-foreground">{v.weight}</span>
-                          {isVOutOfStock ? (
-                            <span className="text-[10px] font-bold text-error bg-error-bg px-1.5 py-0.5 rounded">
-                              Out of Stock
-                            </span>
-                          ) : isVLowStock ? (
-                            <span className="text-[10px] font-bold text-warning bg-warning-bg px-1.5 py-0.5 rounded">
-                              Only {vStock} left
-                            </span>
-                          ) : null}
-                        </div>
-                        <div className="flex items-baseline gap-1.5 mt-0.5">
-                          <span className="text-sm font-black text-primary">
-                            ₹{v.price}
-                          </span>
-                          {v.original_price && (
-                            <span className="text-xs line-through text-foreground-muted">
-                              ₹{v.original_price}
-                            </span>
-                          )}
+                    {/* Header */}
+                    <div className="flex items-center justify-between gap-4 pb-4 border-b border-border mb-4">
+                      <div className="flex items-center gap-3">
+                        <img
+                          src={product.image_url || PLACEHOLDER_PRODUCT_IMAGE}
+                          alt={product.name}
+                          className="w-12 h-12 rounded-xl object-contain bg-surface-muted border p-1"
+                        />
+                        <div>
+                          <h2 className="text-base font-bold text-foreground line-clamp-1">
+                            {tProduct(product.name)}
+                          </h2>
+                          <p className="text-xs text-foreground-muted">
+                            {product.brand ? `By ${product.brand}` : 'Select a size to add to cart'}
+                          </p>
                         </div>
                       </div>
-
-                      {isVOutOfStock ? (
-                        <button
-                          disabled
-                          className="px-4 py-1.5 rounded-lg font-bold text-xs bg-surface-muted text-foreground-muted border border-border cursor-not-allowed"
-                        >
-                          Sold Out
-                        </button>
-                      ) : qty === 0 ? (
-                        <button
-                          onClick={(e) => handleAdd(e, v.id)}
-                          disabled={busy}
-                          className="px-5 py-2 rounded-lg font-bold text-xs bg-primary hover:bg-primary-hover text-on-primary active:scale-95 disabled:opacity-50 shadow-xs"
-                        >
-                          Add
-                        </button>
-                      ) : (
-                        <div className="flex items-center gap-2 bg-surface rounded-lg border border-success p-1 shadow-2xs">
-                          <button
-                            onClick={(e) => handleUpdate(e, 'dec', v.id)}
-                            disabled={busy}
-                            className="w-7 h-7 rounded-md flex items-center justify-center bg-surface-muted text-foreground hover:bg-border"
-                          >
-                            <Minus className="w-3.5 h-3.5 stroke-[2.5]" />
-                          </button>
-                          <span className="w-5 text-center text-xs font-bold text-foreground">{qty}</span>
-                          <button
-                            onClick={(e) => handleUpdate(e, 'inc', v.id)}
-                            disabled={busy || qty >= vStock}
-                            className="w-7 h-7 rounded-md flex items-center justify-center bg-primary text-on-primary hover:bg-primary-hover disabled:opacity-40 disabled:cursor-not-allowed"
-                            title={qty >= vStock ? 'Max available stock reached' : undefined}
-                          >
-                            <Plus className="w-3.5 h-3.5 stroke-[2.5]" />
-                          </button>
-                        </div>
-                      )}
+                      <button
+                        onClick={() => setShowDrawer(false)}
+                        className="w-8 h-8 rounded-full flex items-center justify-center bg-surface-muted text-foreground-muted hover:text-foreground transition-colors cursor-pointer"
+                        aria-label="Close"
+                      >
+                        <X className="w-4 h-4" />
+                      </button>
                     </div>
-                  );
-                })}
-              </div>
 
-              <button
-                onClick={() => setShowDrawer(false)}
-                className="w-full py-3 bg-primary hover:bg-primary-hover rounded-xl font-bold text-on-primary text-sm active:scale-95 shadow-md sticky bottom-0"
-              >
-                Done
-              </button>
+                    {/* Variant items list */}
+                    <div className="space-y-2.5 mb-5">
+                      {variants.map((v) => {
+                        const qty = cart.find(
+                          (i) => i.productId === product.id && i.variantId === v.id
+                        )?.quantity ?? 0;
+                        const vStock = v.available_quantity ?? v.stock ?? 0;
+                        const isVOutOfStock = vStock <= 0;
+                        const isVLowStock = !isVOutOfStock && vStock <= 10;
+
+                        return (
+                          <div 
+                            key={v.id}
+                            className={`flex items-center justify-between p-3 rounded-xl border transition-colors ${
+                              isVOutOfStock
+                                ? 'border-border bg-surface-muted/60 opacity-60'
+                                : qty > 0
+                                ? 'border-primary/40 bg-success-bg/40'
+                                : 'border-border bg-surface'
+                            }`}
+                          >
+                            <div className="flex flex-col">
+                              <div className="flex items-center gap-2">
+                                <span className="font-bold text-sm text-foreground">{v.weight}</span>
+                                {isVOutOfStock ? (
+                                  <span className="text-[11px] font-semibold text-error bg-error-bg px-1.5 py-0.5 rounded-full">
+                                    {t('outOfStock')}
+                                  </span>
+                                ) : isVLowStock ? (
+                                  <span className="text-[11px] font-semibold text-warning bg-warning-bg px-1.5 py-0.5 rounded-full">
+                                    {t('onlyLeft', { amount: String(vStock) })}
+                                  </span>
+                                ) : null}
+                              </div>
+                              <div className="flex items-baseline gap-1.5 mt-0.5">
+                                <span className="text-sm font-bold text-foreground tabular-nums">
+                                  ₹{v.price}
+                                </span>
+                                {v.original_price && v.original_price > v.price && (
+                                  <span className="text-xs line-through text-foreground-muted tabular-nums">
+                                    ₹{v.original_price}
+                                  </span>
+                                )}
+                              </div>
+                            </div>
+
+                            {isVOutOfStock ? (
+                              <button
+                                disabled
+                                className="min-h-[44px] px-3.5 py-1.5 rounded-xl font-medium text-xs bg-surface-muted text-foreground-muted border border-border cursor-not-allowed"
+                              >
+                                {t('soldOut')}
+                              </button>
+                            ) : qty === 0 ? (
+                              <button
+                                onClick={(e) => handleAdd(e, v.id)}
+                                disabled={busy}
+                                className="min-h-[44px] px-4 py-2 rounded-xl font-bold text-xs bg-primary hover:bg-primary-hover text-on-primary disabled:opacity-50 shadow-xs cursor-pointer active:scale-95 transition-transform"
+                              >
+                                {t('addShortcut')}
+                              </button>
+                            ) : (
+                              <div className="flex items-center gap-1.5 bg-surface rounded-xl border border-border p-1 shadow-xs">
+                                <button
+                                  onClick={(e) => handleUpdate(e, 'dec', v.id)}
+                                  disabled={busy}
+                                  className="w-8 h-8 rounded-lg flex items-center justify-center bg-surface-muted text-foreground hover:bg-border transition-colors cursor-pointer"
+                                  aria-label="Decrease quantity"
+                                >
+                                  <Minus className="w-3.5 h-3.5 stroke-[2.5]" />
+                                </button>
+                                <span className="w-6 text-center text-xs font-bold text-foreground tabular-nums">{qty}</span>
+                                <button
+                                  onClick={(e) => handleUpdate(e, 'inc', v.id)}
+                                  disabled={busy || qty >= vStock}
+                                  className="w-8 h-8 rounded-lg flex items-center justify-center bg-primary text-on-primary hover:bg-primary-hover transition-colors disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"
+                                  title={qty >= vStock ? 'Max available stock reached' : undefined}
+                                  aria-label="Increase quantity"
+                                >
+                                  <Plus className="w-3.5 h-3.5 stroke-[2.5]" />
+                                </button>
+                              </div>
+                            )}
+                          </div>
+                        );
+                      })}
+                    </div>
+
+                    <button
+                      onClick={() => setShowDrawer(false)}
+                      className="w-full min-h-[44px] py-2.5 bg-primary hover:bg-primary-hover text-on-primary font-bold text-sm rounded-xl shadow-md transition-all active:scale-[0.99] cursor-pointer"
+                    >
+                      {t('confirm') || 'Done'}
+                    </button>
                   </motion.div>
                 </div>
               </>
             )}
           </AnimatePresence>,
           document.body
-        )}
+        )
+      }
 
       {/* Admin Edit / Delete Modal */}
       {user?.role === 'admin' && isEditModalOpen && (

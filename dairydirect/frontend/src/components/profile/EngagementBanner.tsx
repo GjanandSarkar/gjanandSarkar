@@ -22,7 +22,7 @@ export function EngagementBanner() {
           <Sparkles className="w-6 h-6 text-primary" />
         </div>
         <div className="flex-1 min-w-0">
-          <h3 className="text-[15px] font-black text-dark mb-1 leading-tight">Complete your profile</h3>
+          <h3 className="text-[15px] font-semibold text-dark mb-1 leading-tight">Complete your profile</h3>
           <p className="text-[12px] text-dark/80 font-medium">Add your preferences to get personalized dairy recommendations and exclusive offers.</p>
         </div>
         <div className="w-8 h-8 rounded-full bg-surface/40 flex items-center justify-center shrink-0 group-hover:bg-surface transition-colors">

@@ -133,16 +133,26 @@ export async function GET(request: NextRequest) {
         return_policy: r.return_policy,
         attributes: r.attributes,
         compliance_documents: r.compliance_documents,
-        product_variants: [
-          {
-            id: 'v-' + r.id,
-            weight: r.weight || 'Standard',
-            price: r.price,
-            original_price: r.original_price,
-            compare_at_price: r.original_price,
-            stock: r.stock,
-          },
-        ],
+        product_variants: Array.isArray(r.variants) && r.variants.length > 0
+          ? r.variants.map((v: any, idx: number) => ({
+              id: 'v-' + r.id + '-' + idx,
+              weight: v.weight || 'Standard',
+              price: Number(v.price) || r.price,
+              original_price: v.original_price ? Number(v.original_price) : r.original_price,
+              compare_at_price: v.original_price ? Number(v.original_price) : r.original_price,
+              cost_price: v.cost_price ? Number(v.cost_price) : r.cost_price,
+              stock: v.stock !== undefined ? Number(v.stock) : r.stock,
+            }))
+          : [
+              {
+                id: 'v-' + r.id,
+                weight: r.weight || 'Standard',
+                price: r.price,
+                original_price: r.original_price,
+                compare_at_price: r.original_price,
+                stock: r.stock,
+              },
+            ],
       }));
 
     // 4. Format live products
@@ -324,13 +334,23 @@ export async function POST(request: NextRequest) {
       returnPolicy,
       attributes,
       complianceDocuments,
+      variants,
     } = body;
 
     if (!name?.trim() || !category?.trim()) {
       return NextResponse.json({ error: 'Product name and category are required.' }, { status: 400 });
     }
 
-    const numPrice = Number(price) || 0;
+    const rawVariants = Array.isArray(variants) ? variants : [];
+    const sanitizedVariants = rawVariants.map((v: any) => ({
+      weight: v.weight?.trim() || 'Standard',
+      price: Number(v.price) || 0,
+      original_price: v.originalPrice ? Number(v.originalPrice) : (v.original_price ? Number(v.original_price) : null),
+      cost_price: v.costPrice ? Number(v.costPrice) : (v.cost_price ? Number(v.cost_price) : 0),
+      stock: Math.max(0, Number(v.stock) || 0),
+    }));
+
+    const numPrice = sanitizedVariants.length > 0 ? sanitizedVariants[0].price : (Number(price) || 0);
     if (numPrice <= 0) {
       return NextResponse.json({ error: 'Please enter a valid selling price greater than zero.' }, { status: 400 });
     }
@@ -349,10 +369,10 @@ export async function POST(request: NextRequest) {
       brand: brand?.trim() || sellerStore?.store_name || 'Gjanand Farm Organics',
       sku: autoSku,
       price: numPrice,
-      original_price: originalPrice ? Number(originalPrice) : null,
-      cost_price: costPrice ? Number(costPrice) : 0,
-      stock: Math.max(0, Number(stock) || 0),
-      weight: weight?.trim() || 'Standard',
+      original_price: sanitizedVariants.length > 0 && sanitizedVariants[0].original_price ? sanitizedVariants[0].original_price : (originalPrice ? Number(originalPrice) : null),
+      cost_price: sanitizedVariants.length > 0 ? sanitizedVariants[0].cost_price : (costPrice ? Number(costPrice) : 0),
+      stock: sanitizedVariants.length > 0 ? sanitizedVariants[0].stock : Math.max(0, Number(stock) || 0),
+      weight: sanitizedVariants.length > 0 ? sanitizedVariants[0].weight : (weight?.trim() || 'Standard'),
       image_url: imageUrl || null,
       gallery_images: Array.isArray(galleryImages) ? galleryImages : [],
       tax_rate: taxRate !== undefined ? Number(taxRate) : 0.0,
@@ -360,6 +380,7 @@ export async function POST(request: NextRequest) {
       return_policy: returnPolicy?.trim() || null,
       attributes: typeof attributes === 'object' && attributes !== null ? attributes : {},
       compliance_documents: Array.isArray(complianceDocuments) ? complianceDocuments : [],
+      variants: sanitizedVariants,
       status: 'pending',
       is_approved: false,
       is_rejected: false,
@@ -395,6 +416,25 @@ export async function POST(request: NextRequest) {
       }
     } catch {}
 
+    const responseVariants = sanitizedVariants.length > 0
+      ? sanitizedVariants.map((v: any, idx: number) => ({
+          id: 'v-' + createdRequest.id + '-' + idx,
+          weight: v.weight,
+          price: v.price,
+          original_price: v.original_price,
+          compare_at_price: v.original_price,
+          cost_price: v.cost_price,
+          stock: v.stock,
+        }))
+      : [
+          {
+            id: 'v-' + createdRequest.id,
+            weight: createdRequest.weight,
+            price: createdRequest.price,
+            stock: createdRequest.stock,
+          },
+        ];
+
     return NextResponse.json({
       success: true,
       message: 'Product submitted successfully and is awaiting admin approval.',
@@ -404,14 +444,7 @@ export async function POST(request: NextRequest) {
         ...createdRequest,
         approval_status: 'pending',
         is_active: false,
-        product_variants: [
-          {
-            id: 'v-' + createdRequest.id,
-            weight: createdRequest.weight,
-            price: createdRequest.price,
-            stock: createdRequest.stock,
-          },
-        ],
+        product_variants: responseVariants,
       },
     });
   } catch (error: any) {
@@ -430,7 +463,7 @@ export async function PUT(request: NextRequest) {
 
     const sb = getAdminSupabase();
     const body = await request.json();
-    const { id, price, stock, name, category, description, imageUrl, galleryImages, ...rest } = body;
+    const { id, price, stock, name, category, description, imageUrl, galleryImages, variants, ...rest } = body;
 
     if (!id) {
       return NextResponse.json({ error: 'Product ID is required' }, { status: 400 });
@@ -463,6 +496,15 @@ export async function PUT(request: NextRequest) {
       if (stock !== undefined) updatePayload.stock = Number(stock);
       if (imageUrl) updatePayload.image_url = imageUrl;
       if (galleryImages) updatePayload.gallery_images = galleryImages;
+      if (Array.isArray(variants)) {
+        updatePayload.variants = variants.map((v: any) => ({
+          weight: v.weight?.trim() || 'Standard',
+          price: Number(v.price) || 0,
+          original_price: v.originalPrice ? Number(v.originalPrice) : (v.original_price ? Number(v.original_price) : null),
+          cost_price: v.costPrice ? Number(v.costPrice) : (v.cost_price ? Number(v.cost_price) : 0),
+          stock: Math.max(0, Number(v.stock) || 0),
+        }));
+      }
 
       const { data: updatedApproval, error: updateErr } = await sb
         .from('seller_product_approval')

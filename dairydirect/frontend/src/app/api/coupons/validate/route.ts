@@ -10,14 +10,21 @@ import { getClientIP } from '@/lib/api/auth-middleware';
 
 export async function POST(request: NextRequest) {
   try {
-    const ip = getClientIP(request);
-    const limit = await checkRateLimit(ip, 'coupon_val', 20, 60);
-    if (!limit.allowed) {
-      return NextResponse.json({ error: 'Too many requests' }, { status: 429 });
-    }
-
     const body = await request.json();
     const { items, couponCode } = body;
+
+    const ip = getClientIP(request);
+    if (couponCode && typeof couponCode === 'string' && couponCode.trim() !== '') {
+      const limit = await checkRateLimit(ip, 'coupon_val', 30, 60);
+      if (!limit.allowed) {
+        return NextResponse.json({ error: 'Too many coupon attempts. Please try again later.' }, { status: 429 });
+      }
+    } else {
+      const limit = await checkRateLimit(ip, 'pricing_calc', 150, 60);
+      if (!limit.allowed) {
+        return NextResponse.json({ error: 'Too many requests' }, { status: 429 });
+      }
+    }
 
     if (!items || !Array.isArray(items) || items.length === 0) {
       return NextResponse.json({ error: 'No items in cart' }, { status: 400 });

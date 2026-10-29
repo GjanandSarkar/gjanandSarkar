@@ -57,7 +57,7 @@ export default function AdminCustomersPage() {
               <ArrowLeft className="w-4 h-4" style={{ color: 'var(--color-on-surface)' }} />
             </Link>
             <div>
-              <h1 className="font-extrabold text-[24px]" style={{ color: 'var(--color-on-surface)' }}>Customer Directory</h1>
+              <h1 className="font-semibold text-[24px]" style={{ color: 'var(--color-on-surface)' }}>Customer Directory</h1>
               <p className="text-[12px]" style={{ color: 'var(--color-on-surface-variant)' }}>{total} registered customers</p>
             </div>
           </div>
@@ -112,27 +112,27 @@ export default function AdminCustomersPage() {
                   </p>
                   <div className="flex flex-wrap items-center gap-3 mt-1">
                     {c.phone && (
-                      <span className="text-[11px] flex items-center gap-1" style={{ color: 'var(--color-on-surface-variant)' }}>
+                      <span className="text-xs flex items-center gap-1" style={{ color: 'var(--color-on-surface-variant)' }}>
                         <Phone className="w-3 h-3" /> +91 {c.phone}
                       </span>
                     )}
                     {c.email && (
-                      <span className="text-[11px] flex items-center gap-1" style={{ color: 'var(--color-on-surface-variant)' }}>
+                      <span className="text-xs flex items-center gap-1" style={{ color: 'var(--color-on-surface-variant)' }}>
                         <Mail className="w-3 h-3" /> {c.email}
                       </span>
                     )}
                   </div>
                 </div>
                 <div className="text-right flex flex-col items-end gap-1">
-                  <span className="font-extrabold text-[14px]" style={{ color: 'var(--color-primary)' }}>
+                  <span className="font-semibold text-[14px]" style={{ color: 'var(--color-primary)' }}>
                     ₹{parseFloat(c.total_spent || '0').toLocaleString('en-IN', { maximumFractionDigits: 0 })}
                   </span>
                   <div className="flex items-center gap-1.5">
-                    <span className="text-[10px] font-bold px-2 py-0.5 rounded-full" style={{ background: 'var(--info-bg)', color: 'var(--info)' }}>
+                    <span className="text-xs font-bold px-2 py-0.5 rounded-full" style={{ background: 'var(--info-bg)', color: 'var(--info)' }}>
                       {c.total_orders} Orders
                     </span>
                     {parseInt(c.active_subscriptions) > 0 && (
-                      <span className="text-[10px] font-bold px-2 py-0.5 rounded-full" style={{ background: 'var(--warning-bg)', color: 'var(--warning)' }}>
+                      <span className="text-xs font-bold px-2 py-0.5 rounded-full" style={{ background: 'var(--warning-bg)', color: 'var(--warning)' }}>
                         {c.active_subscriptions} Subs
                       </span>
                     )}
@@ -167,7 +167,7 @@ export default function AdminCustomersPage() {
                     {(selectedCustomer.name || selectedCustomer.email || 'C')[0].toUpperCase()}
                   </div>
                   <div>
-                    <h2 className="font-extrabold text-[18px]" style={{ color: 'var(--color-on-surface)' }}>
+                    <h2 className="font-semibold text-[18px]" style={{ color: 'var(--color-on-surface)' }}>
                       {selectedCustomer.name || 'Customer'}
                     </h2>
                     <p className="text-[12px]" style={{ color: 'var(--color-on-surface-variant)' }}>
@@ -182,18 +182,18 @@ export default function AdminCustomersPage() {
 
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                 <div className="p-3 rounded-[12px] bg-success-bg border border-green-100 text-center">
-                  <p className="text-[10px] font-bold uppercase text-green-800">Total Spent</p>
-                  <p className="font-extrabold text-[16px] text-green-900 mt-1">
+                  <p className="text-xs font-bold uppercase text-green-800">Total Spent</p>
+                  <p className="font-semibold text-[16px] text-green-900 mt-1">
                     ₹{parseFloat(selectedCustomer.total_spent || '0').toLocaleString('en-IN', { maximumFractionDigits: 0 })}
                   </p>
                 </div>
                 <div className="p-3 rounded-[12px] bg-info-bg border border-blue-100 text-center">
-                  <p className="text-[10px] font-bold uppercase text-blue-800">Orders</p>
-                  <p className="font-extrabold text-[16px] text-blue-900 mt-1">{selectedCustomer.total_orders}</p>
+                  <p className="text-xs font-bold uppercase text-blue-800">Orders</p>
+                  <p className="font-semibold text-[16px] text-blue-900 mt-1">{selectedCustomer.total_orders}</p>
                 </div>
                 <div className="p-3 rounded-[12px] bg-orange-50 border border-orange-100 text-center">
-                  <p className="text-[10px] font-bold uppercase text-orange-800">Active Subs</p>
-                  <p className="font-extrabold text-[16px] text-orange-900 mt-1">{selectedCustomer.active_subscriptions}</p>
+                  <p className="text-xs font-bold uppercase text-orange-800">Active Subs</p>
+                  <p className="font-semibold text-[16px] text-orange-900 mt-1">{selectedCustomer.active_subscriptions}</p>
                 </div>
               </div>
 

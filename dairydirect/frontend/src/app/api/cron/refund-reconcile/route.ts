@@ -4,8 +4,14 @@ import { fetchRazorpayRefund, createRazorpayRefund } from '@/lib/razorpay-refund
 import { settleRefund } from '@/lib/refunds';
 
 export async function GET(req: NextRequest) {
+  // CRON_SECRET MUST be configured. Skipping the check when unset would allow
+  // any unauthenticated caller to trigger refund processing.
   const cronSecret = process.env.CRON_SECRET;
-  if (cronSecret && req.headers.get('authorization') !== `Bearer ${cronSecret}`) {
+  if (!cronSecret) {
+    console.error('[RefundReconcile] CRON_SECRET environment variable is not set. Refusing request.');
+    return NextResponse.json({ error: 'Cron secret not configured' }, { status: 401 });
+  }
+  if (req.headers.get('authorization') !== `Bearer ${cronSecret}`) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 

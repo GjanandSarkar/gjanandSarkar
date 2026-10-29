@@ -114,7 +114,7 @@ export function CancelOrderButton({
               />
             </div>
 
-            <p className="text-[11px] text-foreground-muted">
+            <p className="text-xs text-foreground-muted">
               This action cannot be undone.
             </p>
 

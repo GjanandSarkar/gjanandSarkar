@@ -79,7 +79,7 @@ export default function ProfileOnboardingScreen() {
             style={{ color: 'var(--color-on-surface-variant)' }}>
             <ArrowLeft className="w-5 h-5" />
           </button>
-          <h1 className="text-2xl font-black tracking-tight" style={{ color: 'var(--color-on-surface)' }}>
+          <h1 className="text-2xl font-semibold tracking-tight" style={{ color: 'var(--color-on-surface)' }}>
             Complete Your Profile
           </h1>
         </div>
@@ -91,7 +91,7 @@ export default function ProfileOnboardingScreen() {
       <div className="flex-1 px-6 py-8 space-y-6">
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
-            <label className="block text-[11px] font-extrabold uppercase tracking-wider text-foreground-muted px-2 mb-1">
+            <label className="block text-xs font-semibold uppercase tracking-wider text-foreground-muted px-2 mb-1">
               FIRST NAME
             </label>
             <input
@@ -103,7 +103,7 @@ export default function ProfileOnboardingScreen() {
             />
           </div>
           <div>
-            <label className="block text-[11px] font-extrabold uppercase tracking-wider text-foreground-muted px-2 mb-1">
+            <label className="block text-xs font-semibold uppercase tracking-wider text-foreground-muted px-2 mb-1">
               LAST NAME
             </label>
             <input

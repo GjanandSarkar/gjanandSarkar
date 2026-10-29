@@ -131,6 +131,19 @@ export async function PUT(request: NextRequest, { params }: Props) {
       return NextResponse.json({ error: 'Admin access required' }, { status: 403 });
     }
 
+    const existing = await fetchProductDetails(id);
+    if (!existing) {
+      return NextResponse.json({ error: 'Product not found' }, { status: 404 });
+    }
+
+    // Business Logic: Only the seller can edit seller-owned products. Admin cannot edit seller products.
+    if (existing.seller_id) {
+      return NextResponse.json(
+        { error: 'Forbidden: This product is owned and managed by a marketplace seller. Admin cannot edit seller products directly.' },
+        { status: 403 }
+      );
+    }
+
     const body = await request.json();
     const { name, category, description, image_url, gallery_images, is_freshness_guarantee, is_active, variants } = body;
 
@@ -316,6 +329,18 @@ export async function DELETE(request: NextRequest, { params }: Props) {
     const auth = await getAuthUser(request);
     if (!auth?.isAdmin) {
       return NextResponse.json({ error: 'Admin access required' }, { status: 403 });
+    }
+
+    const existing = await fetchProductDetails(id);
+    if (!existing) {
+      return NextResponse.json({ error: 'Product not found' }, { status: 404 });
+    }
+
+    if (existing.seller_id) {
+      return NextResponse.json(
+        { error: 'Forbidden: This product is owned and managed by a marketplace seller. Admin cannot delete seller products directly.' },
+        { status: 403 }
+      );
     }
 
     const { searchParams } = new URL(request.url);

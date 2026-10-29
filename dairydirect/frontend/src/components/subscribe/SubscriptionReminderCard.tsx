@@ -13,7 +13,7 @@ export function SubscriptionReminderCard() {
           <CalendarClock className="w-6 h-6 text-primary" />
         </div>
         <div className="flex-1 min-w-0">
-          <h3 className="text-[15px] font-black text-dark leading-tight mb-1">
+          <h3 className="text-[15px] font-semibold text-dark leading-tight mb-1">
             Delivery Tomorrow Morning
           </h3>
           <p className="text-[12px] text-dark/80 font-medium mb-3">

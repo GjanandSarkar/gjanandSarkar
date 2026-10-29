@@ -287,7 +287,7 @@ function ReturnsContent() {
             <ArrowLeft className="w-5 h-5" />
           </Link>
           <div>
-            <h1 className="text-2xl md:text-3xl font-black text-foreground tracking-tight">
+            <h1 className="text-2xl md:text-3xl font-semibold text-foreground tracking-tight">
               Returns & Replacements
             </h1>
             <p className="text-xs md:text-sm text-foreground-muted mt-1">
@@ -300,7 +300,7 @@ function ReturnsContent() {
         <div className="p-4 rounded-2xl bg-success-bg border border-success/20/80 flex items-start gap-3">
           <ShieldCheck className="w-5 h-5 text-success shrink-0 mt-0.5" />
           <div className="text-xs text-success">
-            <span className="font-extrabold">DairyDirect Quality Commitment: </span>
+            <span className="font-semibold">DairyDirect Quality Commitment: </span>
             <span className="text-success">
               Perishables (Milk, Curd, Paneer, Butter, Sweets) are covered within 24 hours of delivery. Non-perishable items enjoy a 7-day window. All requests are auto-approved!
             </span>
@@ -308,8 +308,8 @@ function ReturnsContent() {
         </div>
 
         {/* Create Request Form */}
-        <div className="bg-surface rounded-3xl border border-border/80 shadow-2xs p-6 md:p-8">
-          <h2 className="text-lg font-black text-foreground mb-6 flex items-center gap-2">
+        <div className="bg-surface rounded-xl border border-border/80 shadow-2xs p-6 md:p-8">
+          <h2 className="text-lg font-semibold text-foreground mb-6 flex items-center gap-2">
             <RotateCcw className="w-5 h-5 text-success" />
             <span>Submit a New Request</span>
           </h2>
@@ -363,7 +363,7 @@ function ReturnsContent() {
                   Select Delivered Item
                 </label>
                 {deliveredItems.length > 0 && (
-                  <span className="text-[11px] font-semibold text-success">
+                  <span className="text-xs font-semibold text-success">
                     {deliveredItems.length} eligible item(s)
                   </span>
                 )}
@@ -403,16 +403,16 @@ function ReturnsContent() {
                       <div className="min-w-0 flex-1">
                         <div className="flex items-center gap-2">
                           <p className="text-xs font-bold text-foreground truncate">{selectedItem.product_name}</p>
-                          <span className="px-1.5 py-0.5 rounded text-[10px] font-extrabold bg-success-bg text-success shrink-0">
+                          <span className="px-1.5 py-0.5 rounded text-xs font-semibold bg-success-bg text-success shrink-0">
                             Delivered
                           </span>
                         </div>
-                        <p className="text-[11px] text-foreground-muted mt-0.5">
+                        <p className="text-xs text-foreground-muted mt-0.5">
                           Qty: <span className="font-semibold text-foreground">{selectedItem.quantity}</span>
                           {selectedItem.variant_name ? ` • ${selectedItem.variant_name}` : ''}
                           {' • '}Order #{selectedItem.order_number || selectedItem.order_id?.slice(0, 8)}
                         </p>
-                        <p className="text-xs font-black text-success mt-0.5">
+                        <p className="text-xs font-semibold text-success mt-0.5">
                           ₹{Number(selectedItem.unit_price || selectedItem.price || selectedItem.total_price || 0) * (selectedItem.quantity || 1)}
                         </p>
                       </div>
@@ -460,13 +460,13 @@ function ReturnsContent() {
                 <label className="block text-xs font-bold text-foreground uppercase tracking-wider">
                   Upload Proof Photos {requiresImage && <span className="text-error normal-case font-bold">(Required for this claim)</span>}
                 </label>
-                <span className="text-[11px] font-bold text-foreground-muted">
+                <span className="text-xs font-bold text-foreground-muted">
                   {images.length} / 6 photos uploaded
                 </span>
               </div>
 
               {requiresImage && (
-                <div className="mb-3 p-2.5 rounded-xl bg-warning-bg/80 border border-warning/20/80 text-[11px] text-warning flex items-center gap-2">
+                <div className="mb-3 p-2.5 rounded-xl bg-warning-bg/80 border border-warning/20/80 text-xs text-warning flex items-center gap-2">
                   <AlertCircle className="w-4 h-4 text-warning shrink-0" />
                   <span>
                     Clear photos of the packaging, defect, leakage, or expiry date stamp are required for speedy verification.
@@ -500,7 +500,7 @@ function ReturnsContent() {
                       <div className="flex flex-col items-center py-2">
                         <Loader2 className="w-7 h-7 text-success animate-spin mb-2" />
                         <span className="text-xs font-bold text-foreground">Uploading & processing photo(s)...</span>
-                        <span className="text-[11px] text-foreground-muted mt-0.5">Please wait a moment</span>
+                        <span className="text-xs text-foreground-muted mt-0.5">Please wait a moment</span>
                       </div>
                     ) : (
                       <>
@@ -510,7 +510,7 @@ function ReturnsContent() {
                         <p className="text-xs font-bold text-foreground">
                           Click to select multiple photos or drag and drop here
                         </p>
-                        <p className="text-[11px] text-foreground-muted mt-1">
+                        <p className="text-xs text-foreground-muted mt-1">
                           PNG, JPG, or WebP up to 10MB each (up to 6 photos)
                         </p>
                       </>
@@ -549,7 +549,7 @@ function ReturnsContent() {
                         </div>
 
                         {/* Photo Number Tag */}
-                        <span className="absolute bottom-1.5 left-1.5 px-1.5 py-0.5 rounded-md bg-black/60 text-white text-[9px] font-bold backdrop-blur-xs">
+                        <span className="absolute bottom-1.5 left-1.5 px-1.5 py-0.5 rounded-md bg-black/60 text-white text-xs font-bold backdrop-blur-xs">
                           #{i + 1}
                         </span>
                       </div>
@@ -585,7 +585,7 @@ function ReturnsContent() {
                 <label className="block text-xs font-bold text-warning uppercase tracking-wider mb-1">
                   UPI ID for Direct Refund Payout
                 </label>
-                <p className="text-[11px] text-warning mb-2">
+                <p className="text-xs text-warning mb-2">
                   Since this order was paid via Cash on Delivery, your refund will be transferred directly to your UPI ID upon seller receipt.
                 </p>
                 <input
@@ -602,7 +602,7 @@ function ReturnsContent() {
             <button
               type="submit"
               disabled={isSubmitting || deliveredItems.length === 0}
-              className="w-full py-3.5 bg-primary hover:bg-primary-light text-on-primary text-xs font-extrabold uppercase tracking-wider rounded-2xl shadow-sm transition-all disabled:opacity-50 flex items-center justify-center gap-2"
+              className="w-full py-3.5 bg-primary hover:bg-primary-light text-on-primary text-xs font-semibold uppercase tracking-wider rounded-2xl shadow-sm transition-all disabled:opacity-50 flex items-center justify-center gap-2"
             >
               {isSubmitting ? (
                 <>
@@ -617,7 +617,7 @@ function ReturnsContent() {
         </div>
 
         {/* Existing Requests Section */}
-        <div className="bg-surface rounded-3xl border border-border/80 shadow-2xs overflow-hidden">
+        <div className="bg-surface rounded-xl border border-border/80 shadow-2xs overflow-hidden">
           <div className="p-6 border-b border-border flex items-center justify-between">
             <h2 className="text-base font-bold text-foreground flex items-center gap-2">
               <Package className="w-5 h-5 text-secondary" />
@@ -656,7 +656,7 @@ function ReturnsContent() {
                           {r.order_items?.product_name || 'Product'}
                         </span>
                         <span
-                          className={`px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider ${
+                          className={`px-2 py-0.5 rounded-full text-xs font-bold uppercase tracking-wider ${
                             r.request_type === 'replacement'
                               ? 'bg-info-bg text-blue-800'
                               : 'bg-success-bg text-success'
@@ -665,7 +665,7 @@ function ReturnsContent() {
                           {r.request_type}
                         </span>
                       </div>
-                      <p className="text-[11px] text-foreground-muted mt-0.5">
+                      <p className="text-xs text-foreground-muted mt-0.5">
                         Status: <span className="font-semibold text-foreground capitalize">{r.status.replace(/_/g, ' ')}</span> · Submitted on {new Date(r.created_at).toLocaleDateString('en-IN')}
                       </p>
                     </div>
@@ -673,7 +673,7 @@ function ReturnsContent() {
 
                   <div className="flex items-center gap-3">
                     {r.request_type === 'return' && r.refund_amount > 0 && (
-                      <span className="text-xs font-black text-success">
+                      <span className="text-xs font-semibold text-success">
                         ₹{Number(r.refund_amount).toFixed(2)}
                       </span>
                     )}
@@ -692,7 +692,7 @@ function ReturnsContent() {
             onClick={() => setSelectedPreviewImage(null)}
           >
             <div
-              className="relative max-w-2xl max-h-[85vh] bg-surface rounded-3xl overflow-hidden p-3 shadow-2xl"
+              className="relative max-w-2xl max-h-[85vh] bg-surface rounded-xl overflow-hidden p-3 shadow-2xl"
               onClick={(e) => e.stopPropagation()}
             >
               <button

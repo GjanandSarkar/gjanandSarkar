@@ -7,7 +7,13 @@ import { ProductCard } from '@/components/shared/ProductCard';
 import { CATEGORIES, categoryColors, categoryHref } from '@/lib/constants/categories';
 import { CategoryIcon } from '@/components/shared/CategoryIcon';
 
-export const dynamic = 'force-dynamic';
+/**
+ * Search results are dynamic (depends on ?q=) but can be cached per-query.
+ * 60 s is short enough that a new product appears within a minute, but long
+ * enough for the CDN to absorb repeated identical searches.
+ */
+export const revalidate = 60;
+
 
 export async function generateMetadata({
   searchParams,
@@ -31,14 +37,14 @@ export async function generateMetadata({
 /** Recovery paths shown when a search returns nothing. */
 function CategorySuggestions() {
   return (
-    <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 reveal">
+    <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
       {CATEGORIES.slice(0, 6).map((c) => {
         const color = categoryColors(c.name);
         return (
           <Link
             key={c.key}
             href={categoryHref(c)}
-            className="flex flex-col items-center gap-2 p-4 rounded-2xl bg-surface border border-border/90 lift pressable"
+            className="flex flex-col items-center gap-2 p-4 rounded-lg bg-surface border border-border transition-colors hover:border-primary/40 min-h-[44px]"
           >
             <span
               className="w-11 h-11 rounded-full flex items-center justify-center"
@@ -46,7 +52,7 @@ function CategorySuggestions() {
             >
               <CategoryIcon name={c.icon} className="w-5 h-5" />
             </span>
-            <span className="text-[11px] font-bold text-foreground text-center leading-tight">
+            <span className="text-xs font-semibold text-foreground text-center leading-tight">
               {c.name}
             </span>
           </Link>
@@ -76,28 +82,23 @@ export default async function SearchPage({
     <div className="w-full bg-background min-h-screen">
       <div className="max-w-[1440px] mx-auto px-4 md:px-8 py-8 pt-24 md:pt-32">
         <header className="mb-6">
-          <h1 className="text-2xl md:text-3xl font-black text-foreground tracking-tight">
+          <h1 className="text-2xl md:text-3xl font-semibold text-foreground tracking-tight">
             {heading}
           </h1>
-          {/* A result count was missing entirely, so there was no way to tell
-              a narrow result set from a broken query. */}
           {products.length > 0 && (
-            <p className="text-xs font-semibold text-foreground-muted mt-1 tabular-nums">
+            <p className="text-xs font-medium text-foreground-muted mt-1 tabular-nums">
               {products.length} {products.length === 1 ? 'product' : 'products'}
             </p>
           )}
         </header>
 
         {products.length === 0 ? (
-          /* The empty state was a dead end: a grey box saying "No products
-             found" with no way forward. Every zero-result search ended the
-             session. It now offers real routes back into the catalogue. */
-          <div className="bg-surface rounded-2xl border border-border/90 p-8 md:p-12">
+          <div className="bg-surface rounded-lg border border-border p-8 md:p-12">
             <div className="text-center max-w-md mx-auto">
-              <div className="w-14 h-14 rounded-2xl bg-surface-muted flex items-center justify-center mx-auto mb-4">
+              <div className="w-14 h-14 rounded-lg bg-surface-muted flex items-center justify-center mx-auto mb-4">
                 <SearchX className="w-7 h-7 text-foreground-muted" />
               </div>
-              <h2 className="text-base font-black text-foreground mb-1.5">
+              <h2 className="text-base font-semibold text-foreground mb-1.5">
                 {q ? `No matches for “${q}”` : 'Nothing here yet'}
               </h2>
               <p className="text-xs text-foreground-muted leading-relaxed">
@@ -106,14 +107,14 @@ export default async function SearchPage({
               </p>
               <Link
                 href="/products"
-                className="inline-block mt-5 px-5 py-2.5 bg-primary hover:bg-primary-hover text-on-primary text-xs font-bold rounded-xl pressable"
+                className="inline-flex items-center justify-center mt-5 px-5 py-2.5 min-h-[44px] bg-primary hover:bg-primary-hover text-on-primary text-xs font-semibold rounded-lg transition-colors"
               >
                 Browse all products
               </Link>
             </div>
 
             <div className="mt-10 pt-8 border-t border-border">
-              <p className="text-[10px] font-black text-foreground-muted uppercase tracking-[0.15em] mb-4 text-center">
+              <p className="text-xs font-semibold text-foreground-muted mb-4 text-center">
                 Or explore a category
               </p>
               <CategorySuggestions />

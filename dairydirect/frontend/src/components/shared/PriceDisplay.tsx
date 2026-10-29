@@ -16,25 +16,37 @@ function PriceDisplay({
   className, 
   ...props 
 }: PriceDisplayProps) {
+  const hasDiscount = originalPrice && originalPrice > price;
+  const discountPercent = hasDiscount
+    ? Math.round(((originalPrice - price) / originalPrice) * 100)
+    : 0;
+
   return (
-    <div className={cn("flex items-baseline gap-1.5", className)} {...props}>
+    <div className={cn("flex items-baseline gap-1.5 flex-wrap", className)} {...props}>
       <span className={cn(
-        "font-bold text-primary",
-        size === "sm" && "text-body-sm",
-        size === "md" && "text-body-lg",
-        size === "lg" && "text-h3"
+        "font-semibold text-foreground tabular-nums",
+        size === "sm" && "text-sm",
+        size === "md" && "text-base",
+        size === "lg" && "text-xl"
       )}>
-        {currencySymbol}{price}
+        {currencySymbol}{price.toLocaleString('en-IN')}
       </span>
-      {originalPrice && originalPrice > price && (
-        <span className={cn(
-          "line-through text-foreground-muted",
-          size === "sm" && "text-caption",
-          size === "md" && "text-body-sm",
-          size === "lg" && "text-body-md"
-        )}>
-          {currencySymbol}{originalPrice}
-        </span>
+      {hasDiscount && (
+        <>
+          <span className={cn(
+            "line-through text-foreground-muted tabular-nums",
+            size === "sm" && "text-xs",
+            size === "md" && "text-xs",
+            size === "lg" && "text-sm"
+          )}>
+            {currencySymbol}{originalPrice.toLocaleString('en-IN')}
+          </span>
+          {discountPercent > 0 && (
+            <span className="text-xs font-medium text-highlight bg-highlight-bg px-1.5 py-0.5 rounded-full tabular-nums">
+              {discountPercent}% OFF
+            </span>
+          )}
+        </>
       )}
     </div>
   )

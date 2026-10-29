@@ -75,7 +75,7 @@ export default function AdminSettingsPage() {
               <ArrowLeft className="w-4 h-4" style={{ color: 'var(--color-on-surface)' }} />
             </Link>
             <div>
-              <h1 className="font-extrabold text-[24px]" style={{ color: 'var(--color-on-surface)' }}>Business Configuration</h1>
+              <h1 className="font-semibold text-[24px]" style={{ color: 'var(--color-on-surface)' }}>Business Configuration</h1>
               <p className="text-[12px]" style={{ color: 'var(--color-on-surface-variant)' }}>Profit protection rules, cutoff timings, and delivery fees</p>
             </div>
           </div>
@@ -218,7 +218,7 @@ export default function AdminSettingsPage() {
                     />
                     <span className="absolute right-3 top-2 text-[12px] text-foreground-muted font-bold">hrs</span>
                   </div>
-                  <span className="text-[10px] text-foreground-muted mt-1 block">Milk, Curd, Paneer, Butter, Sweets</span>
+                  <span className="text-xs text-foreground-muted mt-1 block">Milk, Curd, Paneer, Butter, Sweets</span>
                 </div>
 
                 <div>
@@ -236,7 +236,7 @@ export default function AdminSettingsPage() {
                     />
                     <span className="absolute right-3 top-2 text-[12px] text-foreground-muted font-bold">hrs</span>
                   </div>
-                  <span className="text-[10px] text-foreground-muted mt-1 block">Ghee, honey, dry pantry items</span>
+                  <span className="text-xs text-foreground-muted mt-1 block">Ghee, honey, dry pantry items</span>
                 </div>
 
                 <div>
@@ -254,7 +254,7 @@ export default function AdminSettingsPage() {
                     />
                     <span className="absolute right-3 top-2 text-[12px] text-foreground-muted font-bold">hrs</span>
                   </div>
-                  <span className="text-[10px] text-foreground-muted mt-1 block">Replacement dispatch window</span>
+                  <span className="text-xs text-foreground-muted mt-1 block">Replacement dispatch window</span>
                 </div>
               </div>
             </div>

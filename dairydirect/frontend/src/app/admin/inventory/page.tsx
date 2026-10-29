@@ -141,7 +141,7 @@ export default function AdminInventoryPage() {
             <ArrowLeft className="w-4 h-4" style={{ color: 'var(--color-on-surface)' }} />
           </Link>
           <div>
-            <h1 className="font-extrabold text-[24px]" style={{ color: 'var(--color-on-surface)' }}>Inventory Management</h1>
+            <h1 className="font-semibold text-[24px]" style={{ color: 'var(--color-on-surface)' }}>Inventory Management</h1>
             <p className="text-[12px]" style={{ color: 'var(--color-on-surface-variant)' }}>Monitor and update stock levels for all products</p>
           </div>
         </div>
@@ -160,8 +160,8 @@ export default function AdminInventoryPage() {
                 <div key={s.label} className="rounded-[12px] px-4 py-3 flex items-center gap-3" style={{ background: s.bg }}>
                   <Icon className="w-5 h-5 shrink-0" style={{ color: s.text }} strokeWidth={2} />
                   <div>
-                    <p className="font-extrabold text-[18px] leading-none" style={{ color: s.text }}>{s.value}</p>
-                    <p className="text-[10px] font-semibold mt-0.5" style={{ color: s.text, opacity: 0.7 }}>{s.label}</p>
+                    <p className="font-semibold text-[18px] leading-none" style={{ color: s.text }}>{s.value}</p>
+                    <p className="text-xs font-semibold mt-0.5" style={{ color: s.text, opacity: 0.7 }}>{s.label}</p>
                   </div>
                 </div>
               );
@@ -232,7 +232,7 @@ export default function AdminInventoryPage() {
                 <thead>
                   <tr style={{ background: 'var(--color-surface-container-low)' }}>
                     {['Product', 'Category', 'Weight', 'Price', 'Stock', 'Status', 'Batch / Expiry', ''].map(h => (
-                      <th key={h} className="text-left px-4 py-3 text-[10px] font-bold uppercase tracking-wider whitespace-nowrap"
+                      <th key={h} className="text-left px-4 py-3 text-xs font-bold uppercase tracking-wider whitespace-nowrap"
                         style={{ color: 'var(--color-on-surface-variant)' }}>{h}</th>
                     ))}
                   </tr>
@@ -257,7 +257,7 @@ export default function AdminInventoryPage() {
                           <p className="font-semibold text-[13px]" style={{ color: 'var(--color-on-surface)' }}>{variant.product_name}</p>
                         </td>
                         <td className="px-4 py-3">
-                          <span className="text-[11px] font-medium px-2 py-0.5 rounded-full" style={{ background: 'var(--color-surface-container)', color: 'var(--color-on-surface)' }}>
+                          <span className="text-xs font-medium px-2 py-0.5 rounded-full" style={{ background: 'var(--color-surface-container)', color: 'var(--color-on-surface)' }}>
                             {variant.category}
                           </span>
                         </td>
@@ -284,7 +284,7 @@ export default function AdminInventoryPage() {
                           )}
                         </td>
                         <td className="px-4 py-3">
-                          <span className="inline-flex items-center gap-1 px-2 py-1 rounded-[6px] text-[10px] font-bold" style={{ background: ss.bg, color: ss.text }}>
+                          <span className="inline-flex items-center gap-1 px-2 py-1 rounded-[6px] text-xs font-bold" style={{ background: ss.bg, color: ss.text }}>
                             {ss.label}
                           </span>
                         </td>
@@ -295,11 +295,11 @@ export default function AdminInventoryPage() {
                               placeholder="Batch #"
                               value={editData.batch}
                               onChange={e => setEditMap(prev => ({ ...prev, [variant.variant_id]: { ...editData, batch: e.target.value } }))}
-                              className="w-24 px-2 py-1.5 rounded-[8px] text-[11px] outline-none"
+                              className="w-24 px-2 py-1.5 rounded-[8px] text-xs outline-none"
                               style={{ background: 'var(--color-surface-container)', border: '1px solid rgba(195,201,187,0.4)', color: 'var(--color-on-surface)' }}
                             />
                           ) : (
-                            <p className="text-[11px]" style={{ color: 'var(--color-on-surface-variant)' }}>
+                            <p className="text-xs" style={{ color: 'var(--color-on-surface-variant)' }}>
                               {variant.batch_number || '—'}
                               {variant.expiry_date && <span className="block">{format(new Date(variant.expiry_date), 'dd MMM yy')}</span>}
                             </p>

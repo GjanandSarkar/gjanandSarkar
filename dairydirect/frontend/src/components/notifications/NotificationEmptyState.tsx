@@ -11,7 +11,7 @@ export function NotificationEmptyState() {
       <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mb-4 text-primary">
         <BellRing className="w-8 h-8 opacity-50" />
       </div>
-      <h3 className="text-base font-black text-dark mb-2">No Notifications Yet</h3>
+      <h3 className="text-base font-semibold text-dark mb-2">No Notifications Yet</h3>
       <p className="text-sm text-muted mb-6 max-w-[250px]">
         When you have order updates, delivery alerts, or special offers, they'll show up here.
       </p>

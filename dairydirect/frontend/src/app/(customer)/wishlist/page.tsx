@@ -12,12 +12,14 @@ import {
   ShieldCheck
 } from 'lucide-react';
 import { useStore } from '@/store/useStore';
+import { useTranslation } from '@/lib/i18n';
 import { getProducts } from '@/lib/api/products';
 import { toggleWishlist } from '@/lib/api/wishlist';
 import type { ProductWithVariants } from '@/lib/api/products';
 import { ProductGridSkeleton } from '@/components/shared/Skeletons';
 
 export default function WishlistPage() {
+  const { t } = useTranslation();
   const user = useStore((s) => s.user);
   const wishlist = useStore((s) => s.wishlist);
   const toggleWishlistLocal = useStore((s) => s.toggleWishlistLocal);
@@ -64,45 +66,45 @@ export default function WishlistPage() {
       <div className="max-w-6xl mx-auto space-y-8">
         
         {/* Header */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-border/80 pb-6">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-border pb-6">
           <div>
-            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-error-bg border border-error/20 text-error text-xs font-bold uppercase tracking-wider mb-2">
-              <Heart className="w-3.5 h-3.5 fill-rose-600 text-error" />
-              <span>Your Saved Heritage Items</span>
+            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-surface-muted text-foreground-muted text-xs font-semibold mb-2">
+              <Heart className="w-3.5 h-3.5 text-error" />
+              <span>{t('wishlistSavedItems', { count: String(wishlistProducts.length) }) || 'Saved Items'}</span>
             </div>
-            <h1 className="text-2xl sm:text-3xl font-extrabold text-primary tracking-tight">
-              My Wishlist ({wishlistProducts.length})
+            <h1 className="text-2xl sm:text-3xl font-semibold text-foreground tracking-tight">
+              {t('myWishlist') || 'My Wishlist'} ({wishlistProducts.length})
             </h1>
           </div>
 
           {wishlistProducts.length > 0 && (
             <button
               onClick={handleMoveAllToCart}
-              className="px-5 py-2.5 bg-primary hover:bg-primary-hover text-on-primary font-bold text-xs rounded-xl shadow-sm transition-all flex items-center gap-2"
+              className="px-5 py-2.5 min-h-[44px] bg-primary hover:bg-primary-hover text-on-primary font-semibold text-xs rounded-lg shadow-xs transition-colors flex items-center gap-2 cursor-pointer"
             >
               <ShoppingCart className="w-4 h-4" />
-              <span>Move All to Cart</span>
+              <span>{t('moveAllToCart') || 'Move All to Cart'}</span>
             </button>
           )}
         </div>
 
         {/* Wishlist Items List */}
         {wishlistProducts.length === 0 ? (
-          <div className="bg-surface rounded-2xl border border-border/90 shadow-sm p-12 text-center max-w-lg mx-auto space-y-4">
-            <div className="w-16 h-16 rounded-full bg-error-bg text-error flex items-center justify-center mx-auto shadow-2xs">
-              <Heart className="w-8 h-8" />
+          <div className="bg-surface rounded-lg border border-border p-12 text-center max-w-lg mx-auto space-y-4">
+            <div className="w-16 h-16 rounded-full bg-surface-muted text-foreground-muted flex items-center justify-center mx-auto">
+              <Heart className="w-8 h-8 text-error" />
             </div>
-            <h3 className="text-base font-black text-foreground">
-              Your wishlist is currently empty
+            <h3 className="text-base font-semibold text-foreground">
+              {t('emptyWishlist') || 'Your wishlist is currently empty'}
             </h3>
             <p className="text-xs text-foreground-muted leading-relaxed">
-              Explore our curated selection of pure Gir A2 dairy, cold-pressed oils, and artisanal heritage crafts.
+              {t('emptyWishlistSub') || 'Explore verified products directly from official Indian manufacturer partners.'}
             </p>
             <Link
               href="/products"
-              className="inline-flex items-center gap-2 px-6 py-3 bg-primary hover:bg-primary-hover text-on-primary font-bold text-xs rounded-xl shadow-md transition-all mt-2"
+              className="inline-flex items-center justify-center gap-2 px-6 py-2.5 min-h-[44px] bg-primary hover:bg-primary-hover text-on-primary font-semibold text-xs rounded-lg shadow-xs transition-colors mt-2"
             >
-              <span>Explore Authentic Products</span>
+              <span>{t('browseProducts') || 'Explore Products'}</span>
               <ArrowRight className="w-4 h-4" />
             </Link>
           </div>
@@ -116,7 +118,7 @@ export default function WishlistPage() {
               return (
                 <div
                   key={product.id}
-                  className="bg-surface rounded-2xl border border-border/90 shadow-sm hover:shadow-md transition-all overflow-hidden flex flex-col justify-between"
+                  className="bg-surface rounded-lg border border-border shadow-xs hover:border-primary/40 transition-colors overflow-hidden flex flex-col justify-between"
                 >
                   <div className="relative aspect-square w-full bg-surface-muted overflow-hidden">
                     {product.image_url ? (
@@ -127,36 +129,37 @@ export default function WishlistPage() {
                         className="object-cover"
                       />
                     ) : (
-                      <div className="w-full h-full flex items-center justify-center bg-warning-bg/50">
-                        <svg className="w-10 h-10 text-warning" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" /></svg>
+                      <div className="w-full h-full flex items-center justify-center bg-surface-muted">
+                        <svg className="w-10 h-10 text-foreground-muted" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" /></svg>
                       </div>
                     )}
 
                     <button
                       onClick={() => handleRemoveFromWishlist(product.id)}
-                      className="absolute top-3 right-3 w-8 h-8 rounded-full bg-surface/90 backdrop-blur-sm shadow-sm flex items-center justify-center text-error hover:scale-110 transition-transform"
+                      className="absolute top-3 right-3 w-10 h-10 min-h-[44px] min-w-[44px] rounded-full bg-surface/90 backdrop-blur-xs flex items-center justify-center text-error hover:scale-105 transition-transform"
+                      aria-label="Remove from wishlist"
                     >
                       <Trash2 className="w-4 h-4" />
                     </button>
 
-                    <div className="absolute bottom-3 left-3 px-2 py-0.5 rounded-md bg-primary/90 text-on-primary text-[10px] font-bold">
+                    <div className="absolute bottom-3 left-3 px-2 py-0.5 rounded-sm bg-surface/90 text-foreground text-xs font-medium">
                       {product.category}
                     </div>
                   </div>
 
                   <div className="p-4 flex flex-col flex-grow justify-between gap-4">
                     <div>
-                      <h4 className="text-xs font-bold text-foreground line-clamp-2 hover:text-primary">
+                      <h4 className="text-sm font-semibold text-foreground line-clamp-2 hover:text-primary">
                         <Link href={`/products/${product.id}`}>{product.name}</Link>
                       </h4>
-                      <p className="text-[11px] text-foreground-muted mt-1 line-clamp-2">
+                      <p className="text-xs text-foreground-muted mt-1 line-clamp-2">
                         {product.description}
                       </p>
                     </div>
 
                     <div>
                       <div className="flex items-baseline gap-2 mb-3">
-                        <span className="text-sm font-black text-primary">
+                        <span className="text-base font-semibold text-primary">
                           ₹{price}
                         </span>
                         {originalPrice && originalPrice > price && (
@@ -172,9 +175,9 @@ export default function WishlistPage() {
                             addToCartLocal(product.id, defaultVariant.id, 1);
                           }
                         }}
-                        className="w-full py-2 bg-primary hover:bg-primary-hover text-on-primary font-bold text-xs rounded-xl shadow-2xs transition-all flex items-center justify-center gap-1.5 active:scale-[0.98]"
+                        className="w-full py-2.5 min-h-[44px] bg-primary hover:bg-primary-hover text-on-primary font-semibold text-xs rounded-lg shadow-xs transition-colors flex items-center justify-center gap-1.5 active:scale-[0.98]"
                       >
-                        <ShoppingCart className="w-3.5 h-3.5" />
+                        <ShoppingCart className="w-4 h-4" />
                         <span>Add to Cart</span>
                       </button>
                     </div>

@@ -85,13 +85,13 @@ export default function AdminAuditLogsPage() {
                       {log.old_data && (
                         <div className="mb-2">
                           <span className="font-bold text-error block">Old:</span>
-                          <pre className="text-[10px]">{JSON.stringify(log.old_data, null, 2)}</pre>
+                          <pre className="text-xs">{JSON.stringify(log.old_data, null, 2)}</pre>
                         </div>
                       )}
                       {log.new_data && (
                         <div>
                           <span className="font-bold text-success block">New:</span>
-                          <pre className="text-[10px]">{JSON.stringify(log.new_data, null, 2)}</pre>
+                          <pre className="text-xs">{JSON.stringify(log.new_data, null, 2)}</pre>
                         </div>
                       )}
                     </div>

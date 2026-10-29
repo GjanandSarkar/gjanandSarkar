@@ -18,7 +18,7 @@ export function AddressSnippet({ addresses, hideHeader = false }: AddressSnippet
     <div>
       {!hideHeader && (
         <div className="flex justify-between items-center mb-4">
-          <h2 className="text-lg font-black text-dark tracking-wide">Saved Addresses</h2>
+          <h2 className="text-lg font-semibold text-dark tracking-wide">Saved Addresses</h2>
           {count > 0 && (
             <Link href="/profile/saved-addresses" className="text-primary text-sm font-bold flex items-center hover:opacity-80 transition-opacity">
               Manage <ChevronRight className="w-4 h-4 ml-0.5" />
@@ -48,7 +48,7 @@ export function AddressSnippet({ addresses, hideHeader = false }: AddressSnippet
               <div className="flex items-center gap-2 mb-1">
                 <h3 className="font-bold text-dark text-sm truncate">{defaultAddress.label}</h3>
                 {defaultAddress.is_default && (
-                  <span className="bg-primary/10 text-primary text-[10px] font-black uppercase px-2 py-0.5 rounded-md tracking-wider">
+                  <span className="bg-primary/10 text-primary text-xs font-semibold uppercase px-2 py-0.5 rounded-md tracking-wider">
                     Default
                   </span>
                 )}
@@ -57,7 +57,7 @@ export function AddressSnippet({ addresses, hideHeader = false }: AddressSnippet
                 {defaultAddress.address}
               </p>
               {count > 1 && (
-                <p className="text-[11px] font-bold text-primary mt-2">
+                <p className="text-xs font-bold text-primary mt-2">
                   + {count - 1} other {count - 1 === 1 ? 'address' : 'addresses'}
                 </p>
               )}

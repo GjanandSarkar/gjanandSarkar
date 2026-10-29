@@ -16,7 +16,7 @@ export function OrderStatusTimeline({ currentStatus, times = {} }: OrderStatusTi
   return (
     <div className="bg-surface rounded-[24px] p-6 shadow-sm border border-sand">
       <div className="flex items-center justify-between mb-6">
-        <h3 className="text-base font-black text-dark tracking-tight">Order Lifecycle Status</h3>
+        <h3 className="text-base font-semibold text-dark tracking-tight">Order Lifecycle Status</h3>
         {isCancelled && (
           <span className="px-3 py-1 rounded-full text-xs font-bold bg-error-bg text-error border border-error/20">
             Order Cancelled

@@ -1,18 +1,28 @@
 /**
  * POST /api/orders/place
- * Transactional order placement with AWS PostgreSQL + Supabase Fallback.
+ * Secure, atomic order placement.
+ *
+ * Payment verification requirements for 'razorpay' method:
+ *   (a) HMAC-SHA256 signature verified against RAZORPAY_KEY_SECRET
+ *   (b) Payment fetched from Razorpay API; status must be 'captured'
+ *   (c) payment.order_id must equal razorpayOrderId from client
+ *   (d) payment.amount (paise) must equal server-computed total × 100
+ *       looked up from razorpay_pending_orders (never trusts client amount)
+ *   (e) razorpay_pending_orders.user_id must equal the authenticated user
+ *
+ * 'upi' is no longer accepted as a standalone payment method — it must go
+ * through Razorpay (select 'razorpay' and the UPI handle in the Razorpay SDK).
+ * Only 'cod' may produce payment_status = 'pending'.
  */
 
 import { NextRequest, NextResponse } from 'next/server';
-import { query, withTransaction, isPgConfigured } from '@/lib/aws/rds';
 import { calculateOrderPricing } from '@/lib/pricing';
 import { getAuthUser, getClientIP } from '@/lib/api/auth-middleware';
-import { checkRateLimit, invalidateProductsCache, invalidateUserProfileCache, invalidateAdminCaches, invalidateSellerProfileCache, invalidateSellerAnalyticsCache } from '@/lib/aws/redis';
-import { sendOrderConfirmationEmail, sendAdminNewOrderAlert } from '@/lib/aws/ses';
-import { sendSMS } from '@/lib/aws/sns';
+import { checkRateLimit, invalidateUserProfileCache, invalidateAdminCaches, invalidateSellerProfileCache, invalidateSellerAnalyticsCache } from '@/lib/aws/redis';
 import { PlaceOrderSchema } from '@/lib/security/sanitize';
 import { getAdminSupabase } from '@/lib/supabase/admin';
 import { revalidateInventory } from '@/lib/inventory/cache-invalidation';
+import { verifyRazorpayPaymentSignature, getRazorpayClient } from '@/lib/razorpay';
 
 export async function POST(request: NextRequest) {
   try {
@@ -39,7 +49,6 @@ export async function POST(request: NextRequest) {
     // Validate input with Zod
     const parseResult = PlaceOrderSchema.safeParse(orderData);
     if (!parseResult.success) {
-      // Log detailed validation errors server-side for debugging
       console.error('[PlaceOrder] Validation failed:', JSON.stringify({
         errors: parseResult.error.issues,
         received: {
@@ -50,355 +59,302 @@ export async function POST(request: NextRequest) {
             productId: orderData.items[0].productId,
             variantId: orderData.items[0].variantId,
             quantity: orderData.items[0].quantity,
-            price: orderData.items[0].price,
-            priceType: typeof orderData.items[0].price,
           } : null,
         },
       }, null, 2));
       return NextResponse.json(
-        { 
-          error: 'Invalid order data', 
+        {
+          error: 'Invalid order data',
           details: parseResult.error.issues.map((i) => `${i.path.join('.')}: ${i.message}`).join(' | '),
         },
         { status: 400 }
       );
     }
 
-    const { items, addressId, paymentMethod, couponCode, upiId, deliverySlot,
+    const { items, addressId, paymentMethod, couponCode, deliverySlot,
             razorpayOrderId, razorpayPaymentId, razorpaySignature, reservationId } = parseResult.data;
 
-    // ─── Validate Razorpay IDs (CRITICAL security check) ───
-    // For Razorpay payments, we MUST have the payment IDs to link the payment to the order.
-    // This prevents placing "paid" orders without an actual Razorpay transaction.
+    // ─── UPI direct payment is disabled ───
+    // UPI must go through Razorpay checkout (paymentMethod = 'razorpay').
+    // Only COD is allowed as a non-Razorpay payment method.
+    if (paymentMethod === 'upi') {
+      return NextResponse.json(
+        { error: "UPI payments must go through Razorpay checkout. Please select 'Online Payment' and choose UPI inside the payment flow." },
+        { status: 400 }
+      );
+    }
+
+    const sb = getAdminSupabase();
+
+    // ─── RAZORPAY PAYMENT VERIFICATION (all 5 checks) ───
     if (paymentMethod === 'razorpay') {
       if (!razorpayOrderId || !razorpayPaymentId || !razorpaySignature) {
         return NextResponse.json(
-          { error: 'Razorpay payment IDs are required for online payment' },
+          { error: 'Razorpay payment IDs are required for online payment.' },
           { status: 400 }
         );
       }
 
-      // ─── Idempotency Check: Prevent duplicate orders for same payment ───
-      // If an order already exists with this razorpay_order_id, return it instead of creating another
-      const sb = getAdminSupabase();
-      const { data: existingOrder } = await sb
-        .from('orders')
-        .select('id, order_number')
+      // (a) Verify HMAC-SHA256 signature
+      const isSignatureValid = verifyRazorpayPaymentSignature(
+        razorpayOrderId,
+        razorpayPaymentId,
+        razorpaySignature
+      );
+      if (!isSignatureValid) {
+        console.error('[PlaceOrder] SIGNATURE MISMATCH — possible payment fraud', {
+          userId: auth.userId,
+          razorpayOrderId,
+          ip,
+        });
+        return NextResponse.json(
+          { error: 'Payment signature verification failed. Request rejected.' },
+          { status: 400 }
+        );
+      }
+
+      // (e) Look up server-side pending order to verify user ownership and expected amount
+      const { data: pendingOrder, error: pendingErr } = await sb
+        .from('razorpay_pending_orders')
+        .select('user_id, expected_amount_paise, currency, consumed')
         .eq('razorpay_order_id', razorpayOrderId)
         .maybeSingle();
 
-      if (existingOrder) {
-        return NextResponse.json({
-          success: true,
-          orderId: existingOrder.id,
-          orderNumber: existingOrder.order_number,
-          total: 0, // Already processed
-          loyaltyEarned: 0,
-          idempotent: true,
+      if (pendingErr || !pendingOrder) {
+        console.error('[PlaceOrder] No pending order record found for razorpay_order_id:', razorpayOrderId);
+        return NextResponse.json(
+          { error: 'Payment record not found. Please start a new payment from the checkout page.' },
+          { status: 400 }
+        );
+      }
+
+      // (e) Verify ownership — the pending order must belong to THIS user
+      if (pendingOrder.user_id !== auth.userId) {
+        console.error('[PlaceOrder] User mismatch for razorpay_order_id:', razorpayOrderId, {
+          pendingUserId: pendingOrder.user_id,
+          requestUserId: auth.userId,
         });
+        return NextResponse.json(
+          { error: 'Payment does not belong to the authenticated user.' },
+          { status: 403 }
+        );
+      }
+
+      // Prevent duplicate order for already-consumed payment
+      if (pendingOrder.consumed) {
+        // Check if an order was already created with this razorpay_order_id
+        const { data: existingOrder } = await sb
+          .from('orders')
+          .select('id, order_number')
+          .eq('razorpay_order_id', razorpayOrderId)
+          .maybeSingle();
+
+        if (existingOrder) {
+          return NextResponse.json({
+            success: true,
+            orderId: existingOrder.id,
+            orderNumber: existingOrder.order_number,
+            total: 0,
+            loyaltyEarned: 0,
+            idempotent: true,
+          });
+        }
+        return NextResponse.json(
+          { error: 'This payment has already been used.' },
+          { status: 400 }
+        );
+      }
+
+      // (b) Fetch payment from Razorpay API and verify status = 'captured'
+      let razorpayPayment: any;
+      try {
+        const rzClient = getRazorpayClient();
+        razorpayPayment = await (rzClient.payments as any).fetch(razorpayPaymentId);
+      } catch (rzErr: any) {
+        console.error('[PlaceOrder] Razorpay payment fetch failed:', rzErr.message);
+        return NextResponse.json(
+          { error: 'Could not verify payment with payment provider. Please contact support.' },
+          { status: 500 }
+        );
+      }
+
+      if (razorpayPayment.status !== 'captured') {
+        console.error('[PlaceOrder] Payment not captured:', {
+          paymentId: razorpayPaymentId,
+          status: razorpayPayment.status,
+        });
+        return NextResponse.json(
+          { error: `Payment is not captured (current status: ${razorpayPayment.status}). Cannot create order.` },
+          { status: 400 }
+        );
+      }
+
+      // (c) Verify payment.order_id matches the razorpayOrderId from client
+      if (razorpayPayment.order_id !== razorpayOrderId) {
+        console.error('[PlaceOrder] payment.order_id mismatch:', {
+          clientOrderId: razorpayOrderId,
+          paymentOrderId: razorpayPayment.order_id,
+        });
+        return NextResponse.json(
+          { error: 'Payment order ID mismatch. Request rejected.' },
+          { status: 400 }
+        );
+      }
+
+      // (d) Verify payment.amount (paise) matches server-computed expected amount
+      const capturedAmountPaise = Number(razorpayPayment.amount);
+      if (capturedAmountPaise !== pendingOrder.expected_amount_paise) {
+        console.error('[PlaceOrder] Amount mismatch:', {
+          capturedPaise: capturedAmountPaise,
+          expectedPaise: pendingOrder.expected_amount_paise,
+          userId: auth.userId,
+        });
+        return NextResponse.json(
+          { error: 'Captured payment amount does not match order total. Request rejected.' },
+          { status: 400 }
+        );
       }
     }
 
-    // Validate UPI if selected
-    if (paymentMethod === 'upi') {
-      if (!upiId) return NextResponse.json({ error: 'UPI ID is required for UPI payment' }, { status: 400 });
-      if (!upiId.includes('@')) return NextResponse.json({ error: 'Invalid UPI ID format (e.g. name@okhdfc)' }, { status: 400 });
-    }
-
-    // ─── Derive payment_status SERVER-SIDE — never trust the client ───
-    const derivedPaymentStatus = paymentMethod === 'razorpay' ? 'paid' : 
-                                  paymentMethod === 'upi' ? 'paid' : 
-                                  'pending'; // COD is always pending
-
-    // ─── Enforce Complete Product Approval & Seller Status Matrix ───
+    // ─── Validate Product & Seller Status ───────────────────────────────────
     const productIds = Array.from(new Set(items.map((i) => i.productId).filter(Boolean)));
     if (productIds.length > 0) {
-      const sbCheck = getAdminSupabase();
-      const { data: prodsWithSellers } = await sbCheck
+      const { data: prodsWithSellers } = await sb
         .from('products')
         .select('id, name, is_active, approval_status, seller_id, sellers:seller_id(status, store_name)')
         .in('id', productIds);
 
       if (prodsWithSellers) {
         for (const p of prodsWithSellers) {
-          // 1. Product must have approval_status = 'approved' and is_active = true
           if (p.approval_status !== 'approved' || !p.is_active) {
             return NextResponse.json(
-              { error: `Cannot place order. Product "${p.name}" is currently ${p.approval_status || 'unavailable'} and cannot be purchased.` },
+              { error: `Cannot place order. Product "${p.name}" is currently ${p.approval_status || 'unavailable'}.` },
               { status: 400 }
             );
           }
-
-          // 2. If product has a seller, seller must be active / approved
           const seller = (p as any).sellers;
-          if (p.seller_id && seller) {
-            if (seller.status !== 'active') {
-              return NextResponse.json(
-                { error: `Cannot place order. Product "${p.name}" is unavailable because the seller "${seller.store_name}" is currently ${seller.status}.` },
-                { status: 400 }
-              );
-            }
+          if (p.seller_id && seller && seller.status !== 'active') {
+            return NextResponse.json(
+              { error: `Cannot place order. Seller "${seller.store_name}" is currently ${seller.status}.` },
+              { status: 400 }
+            );
           }
         }
       }
     }
 
-    // Calculate pricing server-side
+    // ─── Server-side pricing calculation ────────────────────────────────────
     const pricingItems = items.map((i) => ({ variantId: i.variantId, quantity: i.quantity }));
     const pricing = await calculateOrderPricing(pricingItems, couponCode);
 
-    // Calculate delivery date (tomorrow)
+    // ─── Derive payment_status SERVER-SIDE — never trust the client ─────────
+    // Only COD may produce 'pending'. Razorpay has already been verified above.
+    const derivedPaymentStatus = paymentMethod === 'razorpay' ? 'paid' : 'pending'; // COD only
+
     const deliveryDate = new Date();
     deliveryDate.setDate(deliveryDate.getDate() + 1);
 
-    let placedOrderId: string | null = null;
-    let placedOrderNumber: string | null = null;
-
-    // Fetch delivery address snapshot so past order record is permanently preserved
+    // ─── Snapshot delivery address ───────────────────────────────────────────
     let shippingAddressSnapshot: string | null = null;
     if (addressId) {
-      if (isPgConfigured) {
-        try {
-          const addrRes = await query('SELECT * FROM user_addresses WHERE id = $1', [addressId]);
-          if (addrRes.rows.length > 0) {
-            const a = addrRes.rows[0];
-            shippingAddressSnapshot = JSON.stringify({
-              id: a.id,
-              full_name: a.full_name,
-              mobile_number: a.mobile_number,
-              address_type: a.address_type,
-              flat_house_building: a.flat_house_building || a.building,
-              area_street_sector_village: a.area_street_sector_village || a.street,
-              landmark: a.landmark,
-              town_city: a.town_city || a.city,
-              state: a.state,
-              pincode: a.pincode,
-              country: a.country || 'India',
-              saturday_delivery: a.saturday_delivery,
-              sunday_delivery: a.sunday_delivery,
-              delivery_instructions: a.delivery_instructions || a.instructions,
-              formatted_address: a.address || [
-                a.flat_house_building || a.building,
-                a.area_street_sector_village || a.street,
-                a.landmark ? `Near ${a.landmark}` : null,
-                `${a.town_city || a.city}, ${a.state} - ${a.pincode}`,
-                a.country || 'India'
-              ].filter(Boolean).join(', ')
-            });
-          }
-        } catch (e) {}
+      const { data: a } = await sb.from('user_addresses').select('*').eq('id', addressId).maybeSingle();
+      if (a) {
+        shippingAddressSnapshot = JSON.stringify({
+          id: a.id,
+          full_name: a.full_name,
+          mobile_number: a.mobile_number,
+          address_type: a.address_type,
+          flat_house_building: a.flat_house_building || (a as any).building,
+          area_street_sector_village: a.area_street_sector_village || (a as any).street,
+          landmark: a.landmark,
+          town_city: a.town_city || (a as any).city,
+          state: a.state,
+          pincode: a.pincode,
+          country: a.country || 'India',
+          saturday_delivery: a.saturday_delivery,
+          sunday_delivery: a.sunday_delivery,
+          delivery_instructions: a.delivery_instructions || (a as any).instructions,
+          formatted_address: (a as any).address || [
+            a.flat_house_building || (a as any).building,
+            a.area_street_sector_village || (a as any).street,
+            a.landmark ? `Near ${a.landmark}` : null,
+            `${a.town_city || (a as any).city}, ${a.state} - ${a.pincode}`,
+            a.country || 'India',
+          ].filter(Boolean).join(', '),
+        });
       }
+    }
 
-      if (!shippingAddressSnapshot) {
-        const sb = getAdminSupabase();
-        const { data: a } = await sb.from('user_addresses').select('*').eq('id', addressId).maybeSingle();
-        if (a) {
-          shippingAddressSnapshot = JSON.stringify({
-            id: a.id,
-            full_name: a.full_name,
-            mobile_number: a.mobile_number,
-            address_type: a.address_type,
-            flat_house_building: a.flat_house_building || a.building,
-            area_street_sector_village: a.area_street_sector_village || a.street,
-            landmark: a.landmark,
-            town_city: a.town_city || a.city,
-            state: a.state,
-            pincode: a.pincode,
-            country: a.country || 'India',
-            saturday_delivery: a.saturday_delivery,
-            sunday_delivery: a.sunday_delivery,
-            delivery_instructions: a.delivery_instructions || a.instructions,
-            formatted_address: a.address || [
-              a.flat_house_building || a.building,
-              a.area_street_sector_village || a.street,
-              a.landmark ? `Near ${a.landmark}` : null,
-              `${a.town_city || a.city}, ${a.state} - ${a.pincode}`,
-              a.country || 'India'
-            ].filter(Boolean).join(', ')
+    // ─── Atomic order placement via Supabase RPC ─────────────────────────────
+    const canonicalPaymentMethod = paymentMethod === 'cod' ? 'COD' : 'Razorpay';
+
+    const { data: rpcRes, error: rpcErr } = await sb.rpc('place_order_atomic', {
+      p_user_id: auth.userId,
+      p_address_id: addressId,
+      p_shipping_address: shippingAddressSnapshot,
+      p_delivery_slot: deliverySlot || null,
+      p_delivery_date: deliveryDate.toISOString(),
+      p_notes: (orderData as any)?.notes || null,
+      p_payment_method: canonicalPaymentMethod,
+      p_items: items.map((i) => ({ variant_id: i.variantId, quantity: i.quantity })),
+      p_coupon_code: couponCode || null,
+      p_razorpay_order_id: razorpayOrderId || null,
+      p_razorpay_payment_id: razorpayPaymentId || null,
+      p_razorpay_signature: razorpaySignature || null,
+      p_reservation_id: reservationId || (orderData as any)?.reservationId || null,
+      p_idempotency_key: (orderData as any)?.idempotencyKey || reservationId || razorpayPaymentId || null,
+    });
+
+    if (rpcErr || !rpcRes || !rpcRes.success) {
+      const errorMsg = rpcErr?.message || rpcRes?.error || 'Failed to place order';
+      console.error('[PlaceOrder Atomic] Error:', errorMsg);
+      return NextResponse.json({ error: errorMsg }, { status: 400 });
+    }
+
+    const placedOrderId: string = rpcRes.order_id;
+    const placedOrderNumber: string = rpcRes.order_number;
+
+    // Mark pending order as consumed now that order is confirmed
+    if (razorpayOrderId) {
+      await sb
+        .from('razorpay_pending_orders')
+        .update({ consumed: true })
+        .eq('razorpay_order_id', razorpayOrderId);
+    }
+
+    // In-app notification
+    try {
+      await sb.from('notifications').insert({
+        user_id: auth.userId,
+        role_target: 'customer',
+        title: 'Order Confirmed! 🎉',
+        message: `Your order ${placedOrderNumber} has been confirmed. Total: ₹${rpcRes.total_amount || pricing.total}. Expected delivery tomorrow.`,
+        type: 'order',
+        related_id: placedOrderId,
+      });
+    } catch (notifErr) {
+      console.warn('[PlaceOrder] Failed to insert notification:', notifErr);
+    }
+
+    // Record inventory reservation if not already reserved
+    if (!reservationId) {
+      try {
+        for (const item of items) {
+          await sb.from('inventory_reservations').insert({
+            variant_id: item.variantId,
+            user_id: auth.userId,
+            quantity: item.quantity,
+            status: 'committed',
+            expires_at: new Date(Date.now() + 600000).toISOString(),
+            order_id: placedOrderId,
           });
         }
+      } catch (resErr) {
+        console.warn('[PlaceOrder] Reservation record warning:', resErr);
       }
     }
 
-    // ─── 1. Attempt via AWS RDS PostgreSQL Transaction ───
-    if (isPgConfigured) {
-      try {
-        const txResult = await withTransaction(async (client) => {
-          // Deduct stock
-          for (const item of pricingItems) {
-            await client.query(
-              'UPDATE product_variants SET stock = GREATEST(0, stock - $1) WHERE id = $2',
-              [item.quantity, item.variantId]
-            );
-          }
-
-          // Create order record with razorpay IDs and shipping_address snapshot
-          const orderResult = await client.query<{ id: string; order_number?: string }>(
-            `INSERT INTO orders (
-               user_id, address_id, shipping_address, status, subtotal, delivery_fee, discount_amount,
-               total_amount, payment_method, payment_status, coupon_code, delivery_slot,
-               delivery_date, loyalty_earned,
-               razorpay_order_id, razorpay_payment_id, razorpay_signature
-             ) VALUES ($1, $2, $3, 'confirmed', $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16)
-             RETURNING id, order_number`,
-            [
-              auth.userId,
-              addressId,
-              shippingAddressSnapshot,
-              pricing.subtotal,
-              pricing.deliveryFee,
-              pricing.discount,
-              pricing.total,
-              paymentMethod.toUpperCase(),
-              derivedPaymentStatus,
-              couponCode || null,
-              deliverySlot || null,
-              deliveryDate.toISOString(),
-              Math.floor(pricing.total),
-              razorpayOrderId || null,
-              razorpayPaymentId || null,
-              razorpaySignature || null,
-            ]
-          );
-
-          const orderId = orderResult.rows[0].id;
-          const orderNum = orderResult.rows[0].order_number || `ORD-${orderId.substring(0, 8).toUpperCase()}`;
-
-          // Insert order items
-          for (const item of items) {
-            await client.query(
-              `INSERT INTO order_items (order_id, product_id, variant_id, quantity, price)
-               VALUES ($1, $2, $3, $4, $5)`,
-              [orderId, item.productId, item.variantId, item.quantity, item.price || 0]
-            );
-          }
-
-          // Record or commit inventory reservations
-          try {
-            if (reservationId) {
-              await client.query(
-                `UPDATE inventory_reservations SET status = 'committed', order_id = $1, updated_at = NOW() WHERE id = $2`,
-                [orderId, reservationId]
-              );
-            } else {
-              for (const item of items) {
-                await client.query(
-                  `INSERT INTO inventory_reservations (variant_id, user_id, quantity, status, expires_at, order_id)
-                   VALUES ($1, $2, $3, 'committed', NOW() + INTERVAL '10 minutes', $4)`,
-                  [item.variantId, auth.userId, item.quantity, orderId]
-                );
-              }
-            }
-          } catch (resErr) {
-            console.warn('[PlaceOrder RDS] Reservation record warning:', resErr);
-          }
-
-          // Save default UPI ID if provided
-          if (upiId && paymentMethod === 'upi') {
-            await client.query('UPDATE profiles SET default_upi_id = $1 WHERE id = $2', [upiId, auth.userId]);
-          }
-
-          // Award loyalty points
-          await client.query('UPDATE profiles SET loyalty_points = loyalty_points + $1 WHERE id = $2', [
-            Math.floor(pricing.total),
-            auth.userId,
-          ]);
-
-          // Increment coupon usage
-          if (couponCode && pricing.couponApplied) {
-            await client.query('UPDATE coupons SET used_count = used_count + 1 WHERE UPPER(code) = UPPER($1)', [
-              couponCode,
-            ]);
-          }
-
-          // Create in-app notification
-          await client.query(
-            `INSERT INTO notifications (user_id, role_target, title, message, type, related_id)
-             VALUES ($1, 'customer', $2, $3, 'order', $4)`,
-            [
-              auth.userId,
-              'Order Confirmed! 🎉',
-              `Your order ${orderNum} has been confirmed. Total: ₹${pricing.total}. Expected delivery tomorrow.`,
-              orderId,
-            ]
-          );
-
-          return { orderId, orderNumber: orderNum };
-        });
-
-        placedOrderId = txResult.orderId;
-        placedOrderNumber = txResult.orderNumber;
-      } catch (pgErr: any) {
-        console.warn('[PlaceOrder] PostgreSQL transaction failed, using Supabase fallback:', pgErr.message);
-      }
-    }
-
-    // ─── 2. Supabase Atomic Order Placement (Single Source of Truth) ───
-    if (!placedOrderId) {
-      const sb = getAdminSupabase();
-      const reservationId = (orderData as any)?.reservationId || null;
-
-      const { data: rpcRes, error: rpcErr } = await sb.rpc('place_order_atomic', {
-        p_user_id: auth.userId,
-        p_address_id: addressId,
-        p_shipping_address: shippingAddressSnapshot,
-        p_delivery_slot: deliverySlot || null,
-        p_delivery_date: deliveryDate.toISOString(),
-        p_notes: (orderData as any)?.notes || null,
-        p_payment_method: paymentMethod.toUpperCase(),
-        p_items: items.map((i) => ({ variant_id: i.variantId, quantity: i.quantity })),
-        p_coupon_code: couponCode || null,
-        p_razorpay_order_id: razorpayOrderId || null,
-        p_razorpay_payment_id: razorpayPaymentId || null,
-        p_razorpay_signature: razorpaySignature || null,
-        p_reservation_id: reservationId,
-        p_idempotency_key: (orderData as any)?.idempotencyKey || reservationId || razorpayPaymentId || null,
-      });
-
-      if (rpcErr || !rpcRes || !rpcRes.success) {
-        const errorMsg = rpcErr?.message || rpcRes?.error || 'Failed to place order atomically';
-        console.error('[PlaceOrder Atomic] Error:', errorMsg);
-        return NextResponse.json({ error: errorMsg }, { status: 400 });
-      }
-
-      placedOrderId = rpcRes.order_id;
-      placedOrderNumber = rpcRes.order_number;
-
-      // In-app order notification
-      try {
-        await sb.from('notifications').insert({
-          user_id: auth.userId,
-          role_target: 'customer',
-          title: 'Order Confirmed! 🎉',
-          message: `Your order ${placedOrderNumber} has been confirmed. Total: ₹${rpcRes.total_amount || pricing.total}. Expected delivery tomorrow.`,
-          type: 'order',
-          related_id: placedOrderId,
-        });
-      } catch (notifErr) {
-        console.warn('[PlaceOrder] Failed to insert notification:', notifErr);
-      }
-
-      // Record fallback reservation in inventory_reservations if not already reserved
-      if (!reservationId) {
-        try {
-          for (const item of items) {
-            await sb.from('inventory_reservations').insert({
-              variant_id: item.variantId,
-              user_id: auth.userId,
-              quantity: item.quantity,
-              status: 'committed',
-              expires_at: new Date(Date.now() + 600000).toISOString(),
-              order_id: placedOrderId,
-            });
-          }
-        } catch (resErr) {
-          console.warn('[PlaceOrder Supabase] Reservation record warning:', resErr);
-        }
-      }
-    }
-
-    // ─── Post-Transaction Inventory Revalidation ───
-    // Invalidates Next.js cached pages (Home, Category, Search, Product Details) & Redis
+    // ─── Post-Transaction Cache Invalidation ─────────────────────────────────
     await revalidateInventory({ productId: items[0]?.productId });
 
     setImmediate(async () => {
@@ -406,20 +362,8 @@ export async function POST(request: NextRequest) {
         await invalidateUserProfileCache(auth.userId);
         await invalidateAdminCaches();
 
-        /* Refresh the seller's dashboard too.
-
-           The seller overview (GET /api/sellers?userId=...) is served from a
-           5-minute Redis cache keyed by the seller's user id, and nothing
-           invalidated it when an order arrived. So "Recent Store Orders"
-           kept showing the pre-order snapshot ("No customer orders received
-           yet") while the Orders tab, which queries live, already listed the
-           order -- the two disagreed for up to five minutes.
-
-           Products are matched the same way the dashboard resolves them:
-           by sellers.seller_id and by products.created_by. */
         if (productIds.length > 0) {
-          const sbCache = getAdminSupabase();
-          const { data: orderedProducts, error: orderedErr } = await sbCache
+          const { data: orderedProducts, error: orderedErr } = await sb
             .from('products')
             .select('seller_id, created_by')
             .in('id', productIds);
@@ -437,7 +381,7 @@ export async function POST(request: NextRequest) {
           });
 
           if (sellerIds.size > 0) {
-            const { data: sellerRows } = await sbCache
+            const { data: sellerRows } = await sb
               .from('sellers')
               .select('id, user_id')
               .in('id', Array.from(sellerIds));

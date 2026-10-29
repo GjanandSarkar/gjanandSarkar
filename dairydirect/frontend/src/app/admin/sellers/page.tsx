@@ -224,35 +224,35 @@ export default function AdminSellersPage() {
     switch (status) {
       case 'active':
         return (
-          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-black uppercase tracking-wider bg-success-bg text-success border border-success/20">
+          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold uppercase tracking-wider bg-success-bg text-success border border-success/20">
             <CheckCircle2 className="w-3.5 h-3.5 text-success" />
             Active
           </span>
         );
       case 'under_review':
         return (
-          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-black uppercase tracking-wider bg-warning-bg text-warning border border-warning animate-pulse">
+          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold uppercase tracking-wider bg-warning-bg text-warning border border-warning animate-pulse">
             <Clock className="w-3.5 h-3.5 text-warning" />
             Under Review
           </span>
         );
       case 'deactivated':
         return (
-          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-black uppercase tracking-wider bg-error-bg text-error border border-error/20">
+          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold uppercase tracking-wider bg-error-bg text-error border border-error/20">
             <Ban className="w-3.5 h-3.5 text-error" />
             Deactivated
           </span>
         );
       case 'permanently_deactivated':
         return (
-          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-black uppercase tracking-wider bg-primary text-red-400 border border-border-hover">
+          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold uppercase tracking-wider bg-primary text-red-400 border border-border-hover">
             <Lock className="w-3.5 h-3.5 text-red-400" />
             Permanently Deactivated
           </span>
         );
       case 'reactivation_requested':
         return (
-          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-black uppercase tracking-wider bg-info-bg text-blue-800 border border-blue-300">
+          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold uppercase tracking-wider bg-info-bg text-blue-800 border border-blue-300">
             <BadgeAlert className="w-3.5 h-3.5 text-info" />
             Reactivation Requested
           </span>
@@ -261,21 +261,21 @@ export default function AdminSellersPage() {
       case 'pending_kyc':
       case 'pending_inquiry':
         return (
-          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-black uppercase tracking-wider bg-warning-bg text-yellow-800 border border-yellow-200">
+          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold uppercase tracking-wider bg-warning-bg text-yellow-800 border border-yellow-200">
             <Clock className="w-3.5 h-3.5 text-yellow-600" />
             Pending Onboarding
           </span>
         );
       case 'rejected':
         return (
-          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-black uppercase tracking-wider bg-surface-muted text-foreground border border-border-hover">
+          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold uppercase tracking-wider bg-surface-muted text-foreground border border-border-hover">
             <XCircle className="w-3.5 h-3.5 text-foreground-muted" />
             Rejected
           </span>
         );
       default:
         return (
-          <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-bold uppercase bg-surface-muted text-foreground">
+          <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-bold uppercase bg-surface-muted text-foreground">
             {status}
           </span>
         );
@@ -300,8 +300,8 @@ export default function AdminSellersPage() {
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
           <div className="flex items-center gap-2">
-            <h1 className="text-2xl font-black text-foreground tracking-tight">Seller Lifecycle Management</h1>
-            <span className="px-2.5 py-0.5 rounded-full text-[10px] font-extrabold uppercase bg-success-bg text-success">
+            <h1 className="text-2xl font-semibold text-foreground tracking-tight">Seller Lifecycle Management</h1>
+            <span className="px-2.5 py-0.5 rounded-full text-xs font-semibold uppercase bg-success-bg text-success">
               Admin Control
             </span>
           </div>
@@ -323,24 +323,24 @@ export default function AdminSellersPage() {
       {/* Metric Cards Grid */}
       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
         <div className="bg-surface p-4 rounded-2xl border border-border shadow-2xs">
-          <p className="text-[10px] font-black uppercase tracking-wider text-foreground-muted">Active Sellers</p>
-          <p className="text-2xl font-black text-success mt-1">{activeCount}</p>
+          <p className="text-xs font-semibold uppercase tracking-wider text-foreground-muted">Active Sellers</p>
+          <p className="text-2xl font-semibold text-success mt-1">{activeCount}</p>
         </div>
         <div className="bg-surface p-4 rounded-2xl border border-warning/20 shadow-2xs bg-warning-bg/20">
-          <p className="text-[10px] font-black uppercase tracking-wider text-warning">Under Review</p>
-          <p className="text-2xl font-black text-warning mt-1">{underReviewCount}</p>
+          <p className="text-xs font-semibold uppercase tracking-wider text-warning">Under Review</p>
+          <p className="text-2xl font-semibold text-warning mt-1">{underReviewCount}</p>
         </div>
         <div className="bg-surface p-4 rounded-2xl border border-info/20 shadow-2xs bg-info-bg/20">
-          <p className="text-[10px] font-black uppercase tracking-wider text-info">Reactivation Requested</p>
-          <p className="text-2xl font-black text-info mt-1">{reactivationRequestedCount}</p>
+          <p className="text-xs font-semibold uppercase tracking-wider text-info">Reactivation Requested</p>
+          <p className="text-2xl font-semibold text-info mt-1">{reactivationRequestedCount}</p>
         </div>
         <div className="bg-surface p-4 rounded-2xl border border-error/20 shadow-2xs bg-error-bg/20">
-          <p className="text-[10px] font-black uppercase tracking-wider text-error">Deactivated</p>
-          <p className="text-2xl font-black text-error mt-1">{deactivatedCount}</p>
+          <p className="text-xs font-semibold uppercase tracking-wider text-error">Deactivated</p>
+          <p className="text-2xl font-semibold text-error mt-1">{deactivatedCount}</p>
         </div>
         <div className="bg-surface p-4 rounded-2xl border border-border-hover shadow-2xs bg-primary text-white">
-          <p className="text-[10px] font-black uppercase tracking-wider text-foreground-muted">Permanently Banned</p>
-          <p className="text-2xl font-black text-red-400 mt-1">{permanentCount}</p>
+          <p className="text-xs font-semibold uppercase tracking-wider text-foreground-muted">Permanently Banned</p>
+          <p className="text-2xl font-semibold text-red-400 mt-1">{permanentCount}</p>
         </div>
       </div>
 
@@ -414,21 +414,21 @@ export default function AdminSellersPage() {
                       </div>
                       <div className="min-w-0">
                         <div className="flex items-center gap-2">
-                          <p className="text-xs font-black text-foreground truncate">
+                          <p className="text-xs font-semibold text-foreground truncate">
                             {seller.store_name}
                           </p>
-                          <span className="text-[10px] text-foreground-muted font-mono">
+                          <span className="text-xs text-foreground-muted font-mono">
                             /{seller.slug}
                           </span>
                         </div>
-                        <p className="text-[11px] text-foreground-muted truncate mt-0.5">
+                        <p className="text-xs text-foreground-muted truncate mt-0.5">
                           {seller.profiles?.name ? `${seller.profiles.name} • ` : ''}
                           {seller.state} • Total Sales: ₹{(Number(seller.total_sales) || 0).toLocaleString('en-IN')}
                         </p>
 
                         {/* Review expiry countdown banner if applicable */}
                         {hasReviewExpiry && (
-                          <div className="mt-1.5 flex items-center gap-1.5 text-[10px] font-bold text-warning bg-warning-bg px-2 py-0.5 rounded-md border border-warning/20 w-fit">
+                          <div className="mt-1.5 flex items-center gap-1.5 text-xs font-bold text-warning bg-warning-bg px-2 py-0.5 rounded-md border border-warning/20 w-fit">
                             <Clock className="w-3 h-3 text-warning" />
                             <span>{getReviewTimeRemaining(seller.review_expires_at)}</span>
                           </div>
@@ -455,8 +455,8 @@ export default function AdminSellersPage() {
               {/* Header */}
               <div className="flex items-start justify-between gap-4 pb-4 border-b border-border">
                 <div>
-                  <span className="text-[10px] font-black uppercase tracking-wider text-foreground-muted">Seller Record</span>
-                  <h2 className="text-xl font-black text-foreground mt-0.5">{selectedSeller.store_name}</h2>
+                  <span className="text-xs font-semibold uppercase tracking-wider text-foreground-muted">Seller Record</span>
+                  <h2 className="text-xl font-semibold text-foreground mt-0.5">{selectedSeller.store_name}</h2>
                   <p className="text-xs text-foreground-muted font-mono mt-0.5">ID: {selectedSeller.id}</p>
                 </div>
                 <div className="text-right">
@@ -515,7 +515,7 @@ export default function AdminSellersPage() {
                       <strong>Deactivation reason:</strong> {selectedSeller.deactivation_reason}
                     </p>
                   )}
-                  <p className="text-[11px] text-error">
+                  <p className="text-xs text-error">
                     Seller is blocked from creating, editing, and deleting products. Seller can submit a reactivation request.
                   </p>
                 </div>
@@ -532,7 +532,7 @@ export default function AdminSellersPage() {
                       <strong>Reason:</strong> {selectedSeller.deactivation_reason}
                     </p>
                   )}
-                  <p className="text-[11px] text-foreground-muted">
+                  <p className="text-xs text-foreground-muted">
                     This account is permanently banned. No further status transitions or reactivation requests are allowed.
                   </p>
                 </div>
@@ -540,7 +540,7 @@ export default function AdminSellersPage() {
 
               {/* Action Buttons Toolbar */}
               <div className="space-y-2 pt-2">
-                <p className="text-[10px] font-black uppercase tracking-wider text-foreground-muted">Lifecycle Actions</p>
+                <p className="text-xs font-semibold uppercase tracking-wider text-foreground-muted">Lifecycle Actions</p>
                 
                 {/* 1. Put Under Review (from active or suspended) */}
                 {(selectedSeller.status === 'active' || selectedSeller.status === 'suspended') && (
@@ -625,7 +625,7 @@ export default function AdminSellersPage() {
                 {selectedSeller.status === 'deactivated' && (
                   <div className="p-3 bg-surface-muted border border-border rounded-xl text-center text-xs text-foreground-muted space-y-1">
                     <p className="font-bold text-foreground">Awaiting Reactivation Request</p>
-                    <p className="text-[11px]">
+                    <p className="text-xs">
                       Per policy, deactivated sellers must submit a reactivation request from their portal before admin can approve reactivation.
                     </p>
                   </div>
@@ -648,9 +648,9 @@ export default function AdminSellersPage() {
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
                     <History className="w-4 h-4 text-foreground-muted" />
-                    <h3 className="text-xs font-black uppercase tracking-wider text-foreground">Status History & Audit Trail</h3>
+                    <h3 className="text-xs font-semibold uppercase tracking-wider text-foreground">Status History & Audit Trail</h3>
                   </div>
-                  <span className="text-[10px] text-foreground-muted">{sellerHistory.length} events</span>
+                  <span className="text-xs text-foreground-muted">{sellerHistory.length} events</span>
                 </div>
 
                 {isLoadingDetails ? (
@@ -667,7 +667,7 @@ export default function AdminSellersPage() {
                           <span className="font-bold text-foreground capitalize">
                             {item.action?.replace(/_/g, ' ')}
                           </span>
-                          <span className="text-[10px] text-foreground-muted font-mono">
+                          <span className="text-xs text-foreground-muted font-mono">
                             {new Date(item.changed_at).toLocaleString('en-IN', {
                               day: 'numeric',
                               month: 'short',
@@ -677,21 +677,21 @@ export default function AdminSellersPage() {
                           </span>
                         </div>
                         {item.reason && (
-                          <p className="text-[11px] text-foreground-muted">
+                          <p className="text-xs text-foreground-muted">
                             <strong>Reason:</strong> {item.reason}
                           </p>
                         )}
                         {item.notes && (
-                          <p className="text-[11px] text-foreground-muted italic">
+                          <p className="text-xs text-foreground-muted italic">
                             "{item.notes}"
                           </p>
                         )}
                         {item.review_expires_at && (
-                          <p className="text-[10px] font-mono text-warning">
+                          <p className="text-xs font-mono text-warning">
                             Expires: {new Date(item.review_expires_at).toLocaleDateString('en-IN')}
                           </p>
                         )}
-                        <p className="text-[10px] text-foreground-muted">
+                        <p className="text-xs text-foreground-muted">
                           Changed by: {item.profiles?.name || item.profiles?.email || 'Admin'}
                         </p>
                       </div>
@@ -717,11 +717,11 @@ export default function AdminSellersPage() {
       {/* Action Execution Modal */}
       {actionModalOpen && (
         <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-2xs flex items-center justify-center p-4">
-          <div className="bg-surface rounded-3xl max-w-lg w-full p-6 sm:p-8 space-y-6 shadow-xl animate-in fade-in">
+          <div className="bg-surface rounded-xl max-w-lg w-full p-6 sm:p-8 space-y-6 shadow-xl animate-in fade-in">
             
             <div className="flex items-center justify-between pb-3 border-b border-border">
               <div>
-                <h3 className="text-lg font-black text-foreground capitalize">
+                <h3 className="text-lg font-semibold text-foreground capitalize">
                   {modalAction.replace(/_/g, ' ')}
                 </h3>
                 <p className="text-xs text-foreground-muted mt-0.5">
@@ -846,7 +846,7 @@ export default function AdminSellersPage() {
                     <div className="grid grid-cols-2 gap-3 pt-2">
                       {modalAction === 'start_temporary_review' && (
                         <div>
-                          <label className="block text-[10px] font-bold text-foreground-muted mb-1">Start Date</label>
+                          <label className="block text-xs font-bold text-foreground-muted mb-1">Start Date</label>
                           <input
                             type="date"
                             value={customStartDate}
@@ -856,7 +856,7 @@ export default function AdminSellersPage() {
                         </div>
                       )}
                       <div>
-                        <label className="block text-[10px] font-bold text-foreground-muted mb-1">End Date</label>
+                        <label className="block text-xs font-bold text-foreground-muted mb-1">End Date</label>
                         <input
                           type="date"
                           value={customEndDate}
@@ -883,7 +883,7 @@ export default function AdminSellersPage() {
 
               {/* Warning for permanent deactivation */}
               {modalAction === 'permanently_deactivate' && (
-                <div className="p-3 bg-error-bg border border-error/20 rounded-xl text-[11px] text-error font-bold flex items-center gap-2">
+                <div className="p-3 bg-error-bg border border-error/20 rounded-xl text-xs text-error font-bold flex items-center gap-2">
                   <AlertTriangle className="w-4 h-4 text-error shrink-0" />
                   <span>Warning: Permanent deactivation cannot be reversed. The seller will never be able to reactivate.</span>
                 </div>

@@ -89,15 +89,24 @@ export async function GET(request: NextRequest) {
       return_policy: r.return_policy,
       attributes: r.attributes,
       compliance_documents: r.compliance_documents,
-      product_variants: [
-        {
-          id: 'v-' + r.id,
-          weight: r.weight || 'Standard',
-          price: r.price,
-          compare_at_price: r.original_price,
-          stock: r.stock,
-        },
-      ],
+      product_variants: Array.isArray(r.variants) && r.variants.length > 0
+        ? r.variants.map((v: any, idx: number) => ({
+            id: 'v-' + r.id + '-' + idx,
+            weight: v.weight || 'Standard',
+            price: Number(v.price) || r.price,
+            compare_at_price: v.original_price ? Number(v.original_price) : r.original_price,
+            cost_price: v.cost_price ? Number(v.cost_price) : 0,
+            stock: v.stock !== undefined ? Number(v.stock) : r.stock,
+          }))
+        : [
+            {
+              id: 'v-' + r.id,
+              weight: r.weight || 'Standard',
+              price: r.price,
+              compare_at_price: r.original_price,
+              stock: r.stock,
+            },
+          ],
       sellers: r.sellers,
       product_id: r.product_id,
     }));

@@ -172,7 +172,7 @@ export default function SavedAddressesPage() {
           return true;
         } else {
           showFeedback(res.error || 'Failed to update address', 'error');
-          return false;
+          throw new Error(res.error || 'Failed to update address');
         }
       } else {
         const res = await saveAddressAPI({ ...addressData, userId: uid });
@@ -187,12 +187,12 @@ export default function SavedAddressesPage() {
           return true;
         } else {
           showFeedback(res.error || 'Failed to save address', 'error');
-          return false;
+          throw new Error(res.error || 'Failed to save address');
         }
       }
     } catch (err: any) {
       showFeedback(err.message || 'An error occurred while saving', 'error');
-      return false;
+      throw err;
     } finally {
       setIsModalSaving(false);
     }
@@ -290,7 +290,7 @@ export default function SavedAddressesPage() {
               <h2 className="text-xs font-bold uppercase tracking-wider text-foreground-muted">
                 Your Saved Locations ({addresses.length})
               </h2>
-              <span className="text-[11px] text-foreground-muted">
+              <span className="text-xs text-foreground-muted">
                 {addresses.filter((a) => a.is_default).length} active default address
               </span>
             </div>

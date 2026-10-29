@@ -224,7 +224,7 @@ export function SearchableCombobox({
                   <div className="flex items-center gap-2 truncate">
                     <span className="truncate">{opt.label}</span>
                     {opt.badge && (
-                      <span className="text-[10px] font-semibold uppercase tracking-wider px-1.5 py-0.5 rounded bg-surface-muted text-foreground-muted">
+                      <span className="text-xs font-semibold uppercase tracking-wider px-1.5 py-0.5 rounded bg-surface-muted text-foreground-muted">
                         {opt.badge}
                       </span>
                     )}

@@ -1,7 +1,7 @@
 "use client";
 
-import React, { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+import React, { useState, useEffect, Suspense } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { 
   TrendingUp, 
   IndianRupee, 
@@ -46,6 +46,8 @@ import { getSellerDashboard, SellerDashboardData, getSellerProducts, requestSell
 import { SellerProductModal } from '@/components/seller/SellerProductModal';
 import { SellerOrdersManager } from '@/components/seller/SellerOrdersManager';
 import { SellerReturnsManager } from '@/components/seller/SellerReturnsManager';
+import { SellerSidebar } from '@/components/seller/SellerSidebar';
+import { SellerQualityReportModal } from '@/components/seller/SellerQualityReportModal';
 import Link from 'next/link';
 import { ThemeToggle } from '@/components/theme/ThemeToggle';
 import { PLACEHOLDER_PRODUCT_IMAGE } from '@/lib/constants/brand';
@@ -58,11 +60,14 @@ type DashboardTab =
   | 'inventory' 
   | 'orders' 
   | 'returns'
+  | 'quality-reports'
   | 'analytics' 
-  | 'notifications';
+  | 'notifications'
+  | 'store';
 
-export default function SellerDashboardPage() {
+function SellerDashboardContent() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const user = useStore((s) => s.user);
   const isAuthLoading = useStore((s) => s.isAuthLoading);
   const sellerStore = useStore((s) => s.sellerStore);
@@ -70,6 +75,16 @@ export default function SellerDashboardPage() {
   const [activeTab, setActiveTab] = useState<DashboardTab>('overview');
   const [data, setData] = useState<SellerDashboardData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    const tabParam = searchParams.get('tab') as DashboardTab | null;
+    if (tabParam) {
+      if (tabParam === 'store') setActiveTab('profile');
+      else setActiveTab(tabParam);
+    } else {
+      setActiveTab('overview');
+    }
+  }, [searchParams]);
 
   // Products belonging to this authenticated seller
   const [products, setProducts] = useState<any[]>([]);
@@ -110,6 +125,26 @@ export default function SellerDashboardPage() {
   // Notifications
   const [notifications, setNotifications] = useState<any[]>([]);
 
+  // Quality Test Reports
+  const [qualityReports, setQualityReports] = useState<any[]>([]);
+  const [isLoadingQualityReports, setIsLoadingQualityReports] = useState(false);
+  const [isQualityModalOpen, setIsQualityModalOpen] = useState(false);
+
+  const loadQualityReports = async () => {
+    try {
+      setIsLoadingQualityReports(true);
+      const res = await fetch('/api/quality-reports');
+      if (res.ok) {
+        const d = await res.json();
+        setQualityReports(d.reports || []);
+      }
+    } catch (err) {
+      console.error('Failed to load quality reports', err);
+    } finally {
+      setIsLoadingQualityReports(false);
+    }
+  };
+
   // Load Dashboard Data & Products
   const loadSellerData = async () => {
     if (!user?.id) return;
@@ -149,7 +184,7 @@ export default function SellerDashboardPage() {
   useEffect(() => {
     if (user?.id) {
       setIsLoading(true);
-      Promise.all([loadSellerData(), loadProducts(), loadNotifications()]).finally(() => {
+      Promise.all([loadSellerData(), loadProducts(), loadNotifications(), loadQualityReports()]).finally(() => {
         setIsLoading(false);
       });
 
@@ -158,6 +193,7 @@ export default function SellerDashboardPage() {
         loadSellerData();
         loadProducts();
         loadNotifications();
+        loadQualityReports();
       }, 12000);
 
       // 2. Real-time Supabase listener on product approvals, products, and orders
@@ -314,16 +350,16 @@ export default function SellerDashboardPage() {
     return (
       <div className="min-h-screen bg-background py-12 px-4 sm:px-6 lg:px-8">
         <div className="max-w-3xl mx-auto space-y-8 animate-in fade-in">
-          <div className="bg-surface rounded-3xl border border-error/20 shadow-sm p-8 sm:p-10 text-center space-y-6">
+          <div className="bg-surface rounded-xl border border-error/20 shadow-sm p-8 sm:p-10 text-center space-y-6">
             <div className="w-16 h-16 rounded-2xl bg-error-bg text-error flex items-center justify-center mx-auto shadow-inner">
               <AlertCircle className="w-8 h-8" />
             </div>
 
             <div className="space-y-2">
-              <span className="px-3 py-1 rounded-full bg-error-bg border border-error/20 text-error text-xs font-black uppercase tracking-wider">
+              <span className="px-3 py-1 rounded-full bg-error-bg border border-error/20 text-error text-xs font-semibold uppercase tracking-wider">
                 Seller Application Rejected
               </span>
-              <h1 className="text-2xl sm:text-3xl font-black text-foreground">
+              <h1 className="text-2xl sm:text-3xl font-semibold text-foreground">
                 {inquiry.business_name || 'Seller Application'}
               </h1>
               <p className="text-sm text-foreground-muted max-w-lg mx-auto">
@@ -349,7 +385,7 @@ export default function SellerDashboardPage() {
               </div>
               <div className="flex justify-between py-1">
                 <span className="text-foreground-muted">Current Status:</span>
-                <span className="font-black uppercase px-2 py-0.5 rounded-full bg-error-bg text-error text-[10px]">
+                <span className="font-semibold uppercase px-2 py-0.5 rounded-full bg-error-bg text-error text-xs">
                   Rejected
                 </span>
               </div>
@@ -362,12 +398,6 @@ export default function SellerDashboardPage() {
               >
                 <RotateCcw className="w-4 h-4" />
                 <span>Edit & Resubmit Application</span>
-              </Link>
-              <Link
-                href="/home"
-                className="w-full sm:w-auto px-6 py-3 bg-surface-muted hover:bg-border text-foreground text-xs font-bold rounded-xl flex items-center justify-center transition-colors"
-              >
-                Browse Marketplace
               </Link>
             </div>
           </div>
@@ -386,16 +416,16 @@ export default function SellerDashboardPage() {
       <div className="min-h-screen bg-background py-12 px-4 sm:px-6 lg:px-8">
         <div className="max-w-3xl mx-auto space-y-8 animate-in fade-in">
           
-          <div className="bg-surface rounded-3xl border border-warning/20 shadow-sm p-8 sm:p-10 text-center space-y-6">
+          <div className="bg-surface rounded-xl border border-warning/20 shadow-sm p-8 sm:p-10 text-center space-y-6">
             <div className="w-16 h-16 rounded-2xl bg-warning-bg text-secondary flex items-center justify-center mx-auto shadow-inner">
               <Clock className="w-8 h-8" />
             </div>
 
             <div className="space-y-2">
-              <span className="px-3 py-1 rounded-full bg-warning-bg border border-warning/20 text-warning text-xs font-black uppercase tracking-wider">
+              <span className="px-3 py-1 rounded-full bg-warning-bg border border-warning/20 text-warning text-xs font-semibold uppercase tracking-wider">
                 {inquiry.status === 'contacted' ? 'Contacted & Under Review' : 'Application Under Manual Review'}
               </span>
-              <h1 className="text-2xl sm:text-3xl font-black text-foreground">
+              <h1 className="text-2xl sm:text-3xl font-semibold text-foreground">
                 {inquiry.business_name || 'Your Seller Application'}
               </h1>
               <p className="text-sm text-foreground-muted max-w-lg mx-auto">
@@ -430,7 +460,7 @@ export default function SellerDashboardPage() {
               </div>
               <div className="flex justify-between py-1">
                 <span className="text-foreground-muted">Current Status:</span>
-                <span className="font-black uppercase px-2 py-0.5 rounded-full bg-warning-bg text-warning text-[10px]">
+                <span className="font-semibold uppercase px-2 py-0.5 rounded-full bg-warning-bg text-warning text-xs">
                   Pending Admin Approval
                 </span>
               </div>
@@ -438,7 +468,7 @@ export default function SellerDashboardPage() {
 
             {/* Verification Checklist */}
             <div className="bg-success-bg/70 border border-success/20/80 rounded-2xl p-5 text-left space-y-2 max-w-lg mx-auto text-xs text-success">
-              <h4 className="font-black uppercase tracking-wider flex items-center gap-1.5 text-primary">
+              <h4 className="font-semibold uppercase tracking-wider flex items-center gap-1.5 text-primary">
                 <FileCheck2 className="w-4 h-4 text-primary" />
                 <span>What Happens Next</span>
               </h4>
@@ -458,12 +488,6 @@ export default function SellerDashboardPage() {
                 <MessageCircle className="w-4 h-4" />
                 <span>Chat with Onboarding Team</span>
               </a>
-              <Link
-                href="/home"
-                className="w-full sm:w-auto px-6 py-3 bg-surface-muted hover:bg-border text-foreground text-xs font-bold rounded-xl flex items-center justify-center transition-colors"
-              >
-                Browse Marketplace
-              </Link>
             </div>
 
           </div>
@@ -486,15 +510,15 @@ export default function SellerDashboardPage() {
     return (
       <div className="min-h-screen bg-background py-12 px-4 sm:px-6 lg:px-8">
         <div className="max-w-2xl mx-auto space-y-6">
-          <div className="bg-surface rounded-3xl border border-red-300 p-8 sm:p-10 text-center space-y-6 shadow-sm">
+          <div className="bg-surface rounded-xl border border-red-300 p-8 sm:p-10 text-center space-y-6 shadow-sm">
             <div className="w-16 h-16 rounded-2xl bg-primary text-red-400 flex items-center justify-center mx-auto shadow-inner">
               <Lock className="w-8 h-8" />
             </div>
             <div className="space-y-2">
-              <span className="px-3 py-1 rounded-full bg-error-bg border border-red-300 text-red-900 text-xs font-black uppercase tracking-wider">
+              <span className="px-3 py-1 rounded-full bg-error-bg border border-red-300 text-red-900 text-xs font-semibold uppercase tracking-wider">
                 Seller Account Suspended
               </span>
-              <h1 className="text-2xl font-black text-foreground">
+              <h1 className="text-2xl font-semibold text-foreground">
                 {(sellerStore as any)?.store_name || (data?.store as any)?.storeName || 'Seller Store'}
               </h1>
               <p className="text-xs text-foreground-muted max-w-md mx-auto">
@@ -509,10 +533,10 @@ export default function SellerDashboardPage() {
             )}
             <div className="pt-2 flex items-center justify-center gap-3">
               <Link
-                href="/home"
+                href="/auth/login"
                 className="px-6 py-2.5 bg-primary hover:bg-primary text-on-primary text-xs font-bold rounded-xl transition-all"
               >
-                Return to Storefront
+                Back to Login
               </Link>
             </div>
           </div>
@@ -529,11 +553,11 @@ export default function SellerDashboardPage() {
   if (!isApprovedSeller && !inquiry) {
     return (
       <div className="min-h-screen bg-background py-12 px-4 sm:px-6 lg:px-8 flex items-center justify-center">
-        <div className="max-w-md w-full bg-surface rounded-3xl border border-border p-8 text-center space-y-5 shadow-sm">
+        <div className="max-w-md w-full bg-surface rounded-xl border border-border p-8 text-center space-y-5 shadow-sm">
           <div className="w-16 h-16 rounded-2xl bg-success-bg text-primary flex items-center justify-center mx-auto">
             <Store className="w-8 h-8" />
           </div>
-          <h2 className="text-xl font-black text-foreground">Seller Dashboard Access Required</h2>
+          <h2 className="text-xl font-semibold text-foreground">Seller Dashboard Access Required</h2>
           <p className="text-xs text-foreground-muted">
             You don't have an active seller account. Please submit a seller application to request vendor onboarding and access seller tools.
           </p>
@@ -579,129 +603,113 @@ export default function SellerDashboardPage() {
   });
 
   return (
-    <div className="min-h-screen bg-background py-8 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-7xl mx-auto space-y-6">
-
-        {/* ─── LIFECYCLE BANNER: Under Review ─── */}
-        {sellerStatus === 'under_review' && (
-          <div className="bg-warning-bg border-2 border-warning rounded-2xl p-5 shadow-2xs space-y-2">
-            <div className="flex items-center justify-between flex-wrap gap-2">
-              <div className="flex items-center gap-2 text-warning font-black text-sm">
-                <Clock className="w-5 h-5 text-warning animate-pulse" />
-                <span>Seller Account Under Review</span>
-              </div>
-              {reviewExpiresAt && (
-                <span className="px-3 py-1 rounded-full bg-warning-bg text-warning text-xs font-bold font-mono border border-warning">
-                  Review Expiry: {new Date(reviewExpiresAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}
-                </span>
-              )}
+    <div className="w-full flex flex-col">
+      {/* Operations Top Header matching Admin Panel */}
+      <div className="px-4 sm:px-6 md:px-10 pt-6 pb-5 bg-surface border-b border-border">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div>
+            <div className="flex items-center gap-2 mb-1">
+              <Store className="w-4 h-4 text-primary" strokeWidth={2.5} />
+              <span className="text-xs font-bold uppercase tracking-widest text-primary">
+                Seller Hub Operations
+              </span>
+              <span className="px-2 py-0.5 rounded-full bg-success-bg text-success text-[11px] font-semibold flex items-center gap-1">
+                <ShieldCheck className="w-3 h-3" />
+                <span>Approved Seller</span>
+              </span>
             </div>
-            <p className="text-xs text-warning">
-              Your store is currently under review by our quality and compliance team.
-              {reviewReason ? ` Reason: "${reviewReason}".` : ''} Existing orders continue to be fulfilled normally.
+            <h1 className="font-semibold text-2xl sm:text-[28px] tracking-tight text-foreground">
+              {storeName}
+            </h1>
+            <p className="text-xs text-foreground-muted mt-1">
+              Category: <strong className="text-foreground">{storeCategory}</strong> • Region: <strong className="text-foreground">{storeState}</strong> • Platform Commission: <span className="font-semibold text-secondary">{storeCommission}%</span>
             </p>
           </div>
-        )}
 
-        {/* ─── Top Banner & Store Header ─── */}
-        <div className="bg-surface rounded-3xl border border-border/90 shadow-2xs p-6 sm:p-8 flex flex-col md:flex-row md:items-center justify-between gap-6">
-          <div className="flex items-center gap-4">
-            <div className="w-16 h-16 rounded-2xl bg-primary text-on-primary flex items-center justify-center font-black text-2xl shadow-md border border-secondary/40 shrink-0">
-              <Store className="w-8 h-8 text-secondary" />
-            </div>
-            <div>
-              <div className="flex items-center gap-2 flex-wrap">
-                <h1 className="text-xl sm:text-2xl font-black text-primary tracking-tight">
-                  {storeName}
-                </h1>
-                <span className="px-2.5 py-0.5 rounded-full bg-success-bg text-success text-[10px] font-black uppercase tracking-wider flex items-center gap-1">
-                  <ShieldCheck className="w-3.5 h-3.5" />
-                  <span>Approved Seller</span>
-                </span>
-              </div>
-              <p className="text-xs text-foreground-muted mt-1">
-                Category: <strong className="text-foreground">{storeCategory}</strong> • Region: <strong className="text-foreground">{storeState}</strong> • Commission: <span className="capitalize font-bold text-secondary">{storeCommission}% Platform Fee</span>
-              </p>
-            </div>
-          </div>
-
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2 sm:gap-3 flex-wrap">
             <button
               onClick={() => {
                 setIsLoadingProducts(true);
-                Promise.all([loadSellerData(), loadProducts(), loadNotifications()]).finally(() => {
+                Promise.all([loadSellerData(), loadProducts(), loadNotifications(), loadQualityReports()]).finally(() => {
                   setIsLoadingProducts(false);
                 });
               }}
               title="Refresh live metrics & products"
-              className="p-2.5 rounded-xl border border-border text-foreground hover:bg-surface-muted flex items-center gap-1.5 transition-colors cursor-pointer"
+              className="p-2.5 rounded-lg border border-border text-foreground hover:bg-surface-muted transition-colors cursor-pointer"
             >
-              <RefreshCw className={`w-3.5 h-3.5 ${isLoadingProducts ? 'animate-spin text-primary' : ''}`} />
+              <RefreshCw className={`w-4 h-4 ${isLoadingProducts ? 'animate-spin text-primary' : ''}`} />
             </button>
-
-            <ThemeToggle />
 
             <Link
               href="/seller/activity"
-              className="px-4 py-2.5 rounded-xl border border-border text-xs font-bold text-foreground hover:bg-surface-muted flex items-center gap-1.5 transition-colors"
+              className="hidden sm:inline-flex px-3.5 py-2 rounded-lg border border-border text-xs font-semibold text-foreground hover:bg-surface-muted transition-colors"
             >
-              <span>Activity Log</span>
-            </Link>
-
-            <Link
-              href="/home"
-              className="px-4 py-2.5 rounded-xl border border-border text-xs font-bold text-foreground hover:bg-surface-muted flex items-center gap-1.5 transition-colors"
-            >
-              <span>View Storefront</span>
-              <ExternalLink className="w-3.5 h-3.5" />
+              Activity Log
             </Link>
 
             <button
               onClick={handleOpenAddProduct}
-              className="px-5 py-2.5 rounded-xl bg-primary text-on-primary text-xs font-bold hover:bg-primary-hover flex items-center gap-1.5 shadow-sm transition-all cursor-pointer active:scale-95"
+              className="px-4 py-2 rounded-lg bg-primary text-on-primary text-xs font-semibold hover:opacity-90 flex items-center gap-1.5 shadow-xs transition-all cursor-pointer"
             >
               <Plus className="w-4 h-4" strokeWidth={2.5} />
-              <span>Add New Product</span>
+              <span>Add Product</span>
             </button>
           </div>
         </div>
+      </div>
 
-        {/* ─── Navigation Tabs ─── */}
-        <div className="flex items-center gap-1 border-b border-border overflow-x-auto no-scrollbar bg-surface/70 backdrop-blur-xs p-1.5 rounded-2xl border border-border/60">
-          {[
-            { id: 'overview', label: 'Overview', icon: TrendingUp },
-            { id: 'products', label: `My Products (${products.length})`, icon: Package },
-            { id: 'rejections', label: `Rejected Reasons (${rejectedProducts.length})`, icon: AlertTriangle, badge: rejectedProducts.length },
-            { id: 'inventory', label: 'Inventory Management', icon: Layers },
-            { id: 'profile', label: 'Seller Profile', icon: Building2 },
-            { id: 'orders', label: `Orders (${data?.recentOrders?.length || 0})`, icon: ShoppingBag },
-            { id: 'returns', label: 'Returns & Cancellations', icon: RotateCcw },
-            { id: 'analytics', label: 'Sales & Settlements', icon: IndianRupee },
-            { id: 'notifications', label: 'Notifications', icon: Bell, badge: notifications.length },
-          ].map((tab) => {
-            const Icon = tab.icon;
-            const isActive = activeTab === tab.id;
-            return (
-              <button
-                key={tab.id}
-                onClick={() => setActiveTab(tab.id as DashboardTab)}
-                className={`flex items-center gap-2 px-4 py-2.5 text-xs font-bold whitespace-nowrap rounded-xl transition-all cursor-pointer ${
-                  isActive
-                    ? 'bg-primary text-white shadow-xs'
-                    : 'text-foreground-muted hover:text-foreground hover:bg-surface-muted'
-                }`}
-              >
-                <Icon className="w-3.5 h-3.5" />
-                <span>{tab.label}</span>
-                {tab.badge && tab.badge > 0 && !isActive ? (
-                  <span className="px-1.5 py-0.2 rounded-full text-[10px] font-black bg-error text-on-error">
-                    {tab.badge}
+      {/* Dashboard Sub-tabs Bar */}
+      <div className="flex items-center gap-2 overflow-x-auto no-scrollbar px-4 sm:px-6 md:px-10 py-3 bg-surface border-b border-border">
+        {[
+          { id: 'overview', label: 'Overview' },
+          { id: 'products', label: `Products (${products.length})` },
+          { id: 'orders', label: 'Orders' },
+          { id: 'quality-reports', label: 'Quality Reports' },
+          { id: 'inventory', label: 'Inventory' },
+          { id: 'returns', label: 'Returns' },
+          { id: 'rejections', label: `Rejected (${rejectedProducts.length})` },
+          { id: 'profile', label: 'Store Profile' },
+          { id: 'analytics', label: 'Analytics' },
+        ].map((t) => (
+          <button
+            key={t.id}
+            onClick={() => {
+              setActiveTab(t.id as DashboardTab);
+              window.history.pushState(null, '', t.id === 'overview' ? '/seller/dashboard' : `/seller/dashboard?tab=${t.id}`);
+            }}
+            className={`px-3.5 py-1.5 text-xs font-semibold whitespace-nowrap rounded-lg transition-colors cursor-pointer ${
+              activeTab === t.id
+                ? 'bg-primary text-on-primary shadow-2xs'
+                : 'text-foreground-muted hover:bg-surface-muted hover:text-foreground'
+            }`}
+          >
+            {t.label}
+          </button>
+        ))}
+      </div>
+
+      {/* Content Container */}
+      <div className="max-w-[1400px] w-full p-4 sm:p-6 md:p-8 flex flex-col gap-6">
+          {/* Lifecycle Banner: Under Review */}
+          {sellerStatus === 'under_review' && (
+            <div className="bg-warning-bg border-2 border-warning rounded-2xl p-5 shadow-2xs space-y-2">
+              <div className="flex items-center justify-between flex-wrap gap-2">
+                <div className="flex items-center gap-2 text-warning font-semibold text-sm">
+                  <Clock className="w-5 h-5 text-warning animate-pulse" />
+                  <span>Seller Account Under Review</span>
+                </div>
+                {reviewExpiresAt && (
+                  <span className="px-3 py-1 rounded-full bg-warning-bg text-warning text-xs font-bold font-mono border border-warning">
+                    Review Expiry: {new Date(reviewExpiresAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}
                   </span>
-                ) : null}
-              </button>
-            );
-          })}
-        </div>
+                )}
+              </div>
+              <p className="text-xs text-warning">
+                Your store is currently under review by our quality and compliance team.
+                {reviewReason ? ` Reason: "${reviewReason}".` : ''} Existing orders continue to be fulfilled normally.
+              </p>
+            </div>
+          )}
 
         {/* ─── TAB 1: OVERVIEW ─── */}
         {activeTab === 'overview' && (
@@ -715,10 +723,10 @@ export default function SellerDashboardPage() {
                     <IndianRupee className="w-4 h-4" />
                   </div>
                 </div>
-                <div className="text-2xl font-black text-foreground">
+                <div className="text-2xl font-semibold text-foreground">
                   ₹{(data?.metrics?.grossRevenue ?? 0).toLocaleString('en-IN')}
                 </div>
-                <div className="text-[11px] text-success font-bold mt-1 flex items-center gap-1">
+                <div className="text-xs text-success font-bold mt-1 flex items-center gap-1">
                   <TrendingUp className="w-3.5 h-3.5" />
                   <span>Verified Sales</span>
                 </div>
@@ -731,10 +739,10 @@ export default function SellerDashboardPage() {
                     <CheckCircle2 className="w-4 h-4" />
                   </div>
                 </div>
-                <div className="text-2xl font-black text-success">
+                <div className="text-2xl font-semibold text-success">
                   {approvedProducts.length}
                 </div>
-                <div className="text-[11px] text-foreground-muted mt-1">
+                <div className="text-xs text-foreground-muted mt-1">
                   Active in customer catalog
                 </div>
               </div>
@@ -746,10 +754,10 @@ export default function SellerDashboardPage() {
                     <Clock className="w-4 h-4" />
                   </div>
                 </div>
-                <div className="text-2xl font-black text-warning">
+                <div className="text-2xl font-semibold text-warning">
                   {pendingProducts.length}
                 </div>
-                <div className="text-[11px] text-warning font-semibold mt-1">
+                <div className="text-xs text-warning font-semibold mt-1">
                   Awaiting admin review
                 </div>
               </div>
@@ -761,29 +769,29 @@ export default function SellerDashboardPage() {
                     <AlertTriangle className="w-4 h-4" />
                   </div>
                 </div>
-                <div className="text-2xl font-black text-error">
+                <div className="text-2xl font-semibold text-error">
                   {rejectedProducts.length}
                 </div>
-                <div className="text-[11px] text-error font-bold mt-1">
+                <div className="text-xs text-error font-bold mt-1">
                   Action required to resubmit
                 </div>
               </div>
             </div>
 
             {/* Quick Action Banner */}
-            <div className="bg-gradient-to-r from-[var(--primary)] to-primary-light rounded-3xl p-6 sm:p-8 text-white flex flex-col sm:flex-row sm:items-center justify-between gap-6 shadow-md">
+            <div className="bg-gradient-to-r from-[var(--primary)] to-primary-light rounded-xl p-6 sm:p-8 text-white flex flex-col sm:flex-row sm:items-center justify-between gap-6 shadow-md">
               <div className="space-y-1.5 max-w-xl">
-                <span className="px-2.5 py-0.5 rounded-full bg-surface/20 text-white text-[10px] font-black uppercase tracking-wider">
+                <span className="px-2.5 py-0.5 rounded-full bg-surface/20 text-white text-xs font-semibold uppercase tracking-wider">
                   Product Approval Pipeline
                 </span>
-                <h3 className="text-xl sm:text-2xl font-black">Ready to expand your store catalog?</h3>
+                <h3 className="text-xl sm:text-2xl font-semibold">Ready to expand your store catalog?</h3>
                 <p className="text-xs text-white/80 leading-relaxed">
                   Submit new milk, ghee, sweets, or groceries. All submissions are thoroughly inspected by our quality assurance team before publishing.
                 </p>
               </div>
               <button
                 onClick={handleOpenAddProduct}
-                className="px-6 py-3.5 bg-surface text-primary hover:bg-success-bg rounded-2xl font-extrabold text-xs shadow-lg flex items-center justify-center gap-2 transition-all cursor-pointer active:scale-95 shrink-0"
+                className="px-6 py-3.5 bg-surface text-primary hover:bg-success-bg rounded-2xl font-semibold text-xs shadow-lg flex items-center justify-center gap-2 transition-all cursor-pointer active:scale-95 shrink-0"
               >
                 <Plus className="w-4 h-4" strokeWidth={3} />
                 <span>Add Product Now</span>
@@ -791,9 +799,9 @@ export default function SellerDashboardPage() {
             </div>
 
             {/* Recent Orders Overview */}
-            <div className="bg-surface rounded-3xl border border-border/90 shadow-2xs p-6">
+            <div className="bg-surface rounded-xl border border-border/90 shadow-2xs p-6">
               <div className="flex items-center justify-between mb-4">
-                <h3 className="text-sm font-black text-foreground uppercase tracking-wider">
+                <h3 className="text-sm font-semibold text-foreground uppercase tracking-wider">
                   Recent Store Orders
                 </h3>
                 <button
@@ -813,8 +821,8 @@ export default function SellerDashboardPage() {
                         <p className="text-xs text-foreground-muted">{order.customerName} • {order.itemsCount} items</p>
                       </div>
                       <div className="text-right">
-                        <span className="text-xs font-black text-foreground">₹{order.amount}</span>
-                        <p className="text-[11px] text-success capitalize font-semibold">{order.status.replace('_', ' ')}</p>
+                        <span className="text-xs font-semibold text-foreground">₹{order.amount}</span>
+                        <p className="text-xs text-success capitalize font-semibold">{order.status.replace('_', ' ')}</p>
                       </div>
                     </div>
                   ))
@@ -852,7 +860,7 @@ export default function SellerDashboardPage() {
                     }`}
                   >
                     <span>{pill.label}</span>
-                    <span className={`px-1.5 py-0.2 rounded-full text-[10px] font-black ${
+                    <span className={`px-1.5 py-0.2 rounded-full text-xs font-semibold ${
                       productStatusFilter === pill.id ? 'bg-surface/20 text-white' : 'bg-border text-foreground'
                     }`}>
                       {pill.count}
@@ -905,7 +913,7 @@ export default function SellerDashboardPage() {
                   return (
                     <div
                       key={p.id}
-                      className="bg-surface rounded-3xl border border-border/90 shadow-2xs hover:shadow-md transition-all overflow-hidden flex flex-col justify-between group"
+                      className="bg-surface rounded-xl border border-border/90 shadow-2xs hover:shadow-md transition-all overflow-hidden flex flex-col justify-between group"
                     >
                       {/* Product Header & Image */}
                       <div>
@@ -918,32 +926,32 @@ export default function SellerDashboardPage() {
                           {/* Approval Status Badge */}
                           <div className="absolute top-3 left-3">
                             {isApproved && (
-                              <span className="px-2.5 py-1 rounded-full text-[10px] font-black uppercase tracking-wider bg-success-bg text-success border border-success/20 flex items-center gap-1 shadow-xs">
+                              <span className="px-2.5 py-1 rounded-full text-xs font-semibold uppercase tracking-wider bg-success-bg text-success border border-success/20 flex items-center gap-1 shadow-xs">
                                 <CheckCircle2 className="w-3.5 h-3.5 text-success" />
                                 <span>Approved & Live</span>
                               </span>
                             )}
                             {isPending && (
-                              <span className="px-2.5 py-1 rounded-full text-[10px] font-black uppercase tracking-wider bg-warning-bg text-warning border border-warning/20 flex items-center gap-1 shadow-xs animate-pulse">
+                              <span className="px-2.5 py-1 rounded-full text-xs font-semibold uppercase tracking-wider bg-warning-bg text-warning border border-warning/20 flex items-center gap-1 shadow-xs animate-pulse">
                                 <Clock className="w-3.5 h-3.5 text-warning" />
                                 <span>Awaiting Review</span>
                               </span>
                             )}
                             {isRejected && (
-                              <span className="px-2.5 py-1 rounded-full text-[10px] font-black uppercase tracking-wider bg-error-bg text-error border border-error/20 flex items-center gap-1 shadow-xs">
+                              <span className="px-2.5 py-1 rounded-full text-xs font-semibold uppercase tracking-wider bg-error-bg text-error border border-error/20 flex items-center gap-1 shadow-xs">
                                 <AlertTriangle className="w-3.5 h-3.5 text-error" />
                                 <span>Rejected by Admin</span>
                               </span>
                             )}
                             {p.approval_status === 'suspended' && (
-                              <span className="px-2.5 py-1 rounded-full text-[10px] font-black uppercase tracking-wider bg-border text-foreground border border-border-hover flex items-center gap-1 shadow-xs">
+                              <span className="px-2.5 py-1 rounded-full text-xs font-semibold uppercase tracking-wider bg-border text-foreground border border-border-hover flex items-center gap-1 shadow-xs">
                                 <Ban className="w-3.5 h-3.5 text-foreground-muted" />
                                 <span>Suspended</span>
                               </span>
                             )}
                           </div>
 
-                          <span className="absolute bottom-3 right-3 px-2 py-0.5 rounded-full text-[10px] font-bold bg-surface/95 text-foreground shadow-xs uppercase tracking-wide">
+                          <span className="absolute bottom-3 right-3 px-2 py-0.5 rounded-full text-xs font-bold bg-surface/95 text-foreground shadow-xs uppercase tracking-wide">
                             {p.category}
                           </span>
                         </div>
@@ -952,10 +960,10 @@ export default function SellerDashboardPage() {
                         <div className="p-5 space-y-3">
                           <div>
                             <div className="flex items-center justify-between text-xs text-foreground-muted mb-1">
-                              <span className="font-mono text-[11px] bg-surface-muted px-1.5 py-0.5 rounded">SKU: {p.sku || 'N/A'}</span>
+                              <span className="font-mono text-xs bg-surface-muted px-1.5 py-0.5 rounded">SKU: {p.sku || 'N/A'}</span>
                               <span>{variant?.weight || 'Standard'}</span>
                             </div>
-                            <h4 className="text-sm font-extrabold text-foreground leading-snug line-clamp-2">
+                            <h4 className="text-sm font-semibold text-foreground leading-snug line-clamp-2">
                               {p.name}
                             </h4>
                           </div>
@@ -964,7 +972,7 @@ export default function SellerDashboardPage() {
                           <div className="flex items-center justify-between pt-2 border-t border-border">
                             <div>
                               <div className="flex items-baseline gap-1.5">
-                                <span className="text-base font-black text-primary">₹{price}</span>
+                                <span className="text-base font-semibold text-primary">₹{price}</span>
                                 {compareAt && compareAt > price && (
                                   <span className="text-xs text-foreground-muted line-through">₹{compareAt}</span>
                                 )}
@@ -978,7 +986,7 @@ export default function SellerDashboardPage() {
                           </div>
 
                           {/* Timestamps */}
-                          <div className="text-[11px] text-foreground-muted flex items-center justify-between pt-1">
+                          <div className="text-xs text-foreground-muted flex items-center justify-between pt-1">
                             <span>Submitted: {new Date(p.created_at).toLocaleDateString()}</span>
                             {p.reviewed_at && (
                               <span>Reviewed: {new Date(p.reviewed_at).toLocaleDateString()}</span>
@@ -991,7 +999,7 @@ export default function SellerDashboardPage() {
                               <span className="font-bold flex items-center gap-1 text-error">
                                 <AlertCircle className="w-3.5 h-3.5" /> Rejection Feedback:
                               </span>
-                              <p className="text-[11px] text-error/90 leading-relaxed">{p.rejection_reason}</p>
+                              <p className="text-xs text-error/90 leading-relaxed">{p.rejection_reason}</p>
                             </div>
                           )}
                         </div>
@@ -1038,7 +1046,7 @@ export default function SellerDashboardPage() {
                 })}
               </div>
             ) : (
-              <div className="py-16 text-center text-foreground-muted text-xs font-medium space-y-3 bg-surface rounded-3xl border border-border">
+              <div className="py-16 text-center text-foreground-muted text-xs font-medium space-y-3 bg-surface rounded-xl border border-border">
                 <div className="w-14 h-14 rounded-2xl bg-surface-muted text-foreground-muted flex items-center justify-center mx-auto">
                   <ShoppingBag className="w-7 h-7" />
                 </div>
@@ -1062,11 +1070,114 @@ export default function SellerDashboardPage() {
           </div>
         )}
 
+        {/* ─── TAB: QUALITY TEST REPORTS ─── */}
+        {activeTab === 'quality-reports' && (
+          <div className="space-y-6 animate-in fade-in">
+            <div className="bg-surface rounded-xl border border-border p-6 sm:p-8 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+              <div>
+                <h3 className="text-lg font-semibold text-foreground flex items-center gap-2">
+                  <ShieldCheck className="w-5 h-5 text-primary" />
+                  <span>Certified Laboratory Quality Reports</span>
+                </h3>
+                <p className="text-xs text-foreground-muted mt-1 max-w-2xl">
+                  Upload laboratory test reports and purity certificates for your products. Reports are reviewed and approved by the admin before being published to customer product pages.
+                </p>
+              </div>
+
+              <button
+                type="button"
+                onClick={() => setIsQualityModalOpen(true)}
+                className="px-4 py-2.5 rounded-lg bg-primary hover:bg-primary-hover text-on-primary text-xs font-semibold flex items-center gap-2 transition-colors cursor-pointer shrink-0"
+              >
+                <Plus className="w-4 h-4" />
+                <span>Upload Lab Report</span>
+              </button>
+            </div>
+
+            {isLoadingQualityReports ? (
+              <div className="bg-surface rounded-xl border border-border p-12 text-center">
+                <Loader2 className="w-6 h-6 animate-spin text-primary mx-auto mb-2" />
+                <p className="text-xs text-foreground-muted">Loading quality test reports...</p>
+              </div>
+            ) : qualityReports.length === 0 ? (
+              <div className="bg-surface rounded-xl border border-border p-12 text-center space-y-3">
+                <div className="w-12 h-12 rounded-full bg-primary/10 text-primary flex items-center justify-center mx-auto">
+                  <FileCheck2 className="w-6 h-6" />
+                </div>
+                <h4 className="text-sm font-semibold text-foreground">No quality reports uploaded yet</h4>
+                <p className="text-xs text-foreground-muted max-w-md mx-auto">
+                  Lab reports build trust with your buyers. Upload testing certificates issued by NABL or FSSAI accredited laboratories.
+                </p>
+                <button
+                  type="button"
+                  onClick={() => setIsQualityModalOpen(true)}
+                  className="px-4 py-2 rounded-lg bg-primary text-on-primary text-xs font-semibold hover:bg-primary-hover transition-colors cursor-pointer"
+                >
+                  Upload First Lab Report
+                </button>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {qualityReports.map((report) => (
+                  <div key={report.id} className="bg-surface rounded-xl border border-border p-5 flex flex-col justify-between gap-4">
+                    <div className="space-y-3">
+                      <div className="flex items-start justify-between gap-2">
+                        <span className={`px-2.5 py-0.5 rounded-full text-[11px] font-semibold uppercase tracking-wider ${
+                          report.status === 'approved'
+                            ? 'bg-success-bg text-success border border-success/20'
+                            : report.status === 'rejected'
+                            ? 'bg-error-bg text-error border border-error/20'
+                            : 'bg-warning-bg text-warning border border-warning/20'
+                        }`}>
+                          {report.status === 'approved' ? 'Approved & Live' : report.status === 'rejected' ? 'Rejected' : 'Pending Review'}
+                        </span>
+                        <span className="text-[11px] text-foreground-muted">
+                          {new Date(report.test_date).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}
+                        </span>
+                      </div>
+
+                      <div>
+                        <h4 className="font-semibold text-sm text-foreground">{report.title}</h4>
+                        <p className="text-xs text-foreground-muted mt-0.5">Lab: {report.laboratory_name}</p>
+                        {report.batch_number && (
+                          <p className="text-xs text-foreground-muted">Batch: {report.batch_number}</p>
+                        )}
+                        {report.product_name && (
+                          <p className="text-xs font-medium text-primary mt-1">Product: {report.product_name}</p>
+                        )}
+                      </div>
+
+                      {report.admin_notes && (
+                        <div className="p-2.5 rounded-lg bg-surface-muted text-xs border border-border text-foreground-muted">
+                          <span className="font-semibold text-foreground block mb-0.5">Admin Note:</span>
+                          <p>{report.admin_notes}</p>
+                        </div>
+                      )}
+                    </div>
+
+                    <div className="pt-3 border-t border-border flex items-center justify-between">
+                      <a
+                        href={report.file_url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-xs font-semibold text-primary hover:underline flex items-center gap-1"
+                      >
+                        <span>View Certificate</span>
+                        <ExternalLink className="w-3.5 h-3.5" />
+                      </a>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+
         {/* ─── TAB 3: PRODUCT REJECTION REASONS ─── */}
         {activeTab === 'rejections' && (
-          <div className="bg-surface rounded-3xl border border-border shadow-2xs p-6 sm:p-8 space-y-6 animate-in fade-in">
+          <div className="bg-surface rounded-xl border border-border shadow-2xs p-6 sm:p-8 space-y-6 animate-in fade-in">
             <div>
-              <h3 className="text-lg font-black text-foreground tracking-tight flex items-center gap-2">
+              <h3 className="text-lg font-semibold text-foreground tracking-tight flex items-center gap-2">
                 <AlertTriangle className="w-5 h-5 text-error" />
                 <span>Product Rejection Feedback & Corrections</span>
               </h3>
@@ -1099,12 +1210,12 @@ export default function SellerDashboardPage() {
                           />
                           <div>
                             <div className="flex items-center gap-2">
-                              <span className="font-mono text-[10px] bg-error-bg text-error px-1.5 py-0.5 rounded font-bold">
+                              <span className="font-mono text-xs bg-error-bg text-error px-1.5 py-0.5 rounded font-bold">
                                 SKU: {p.sku || 'N/A'}
                               </span>
-                              <span className="text-[11px] text-foreground-muted">{p.category}</span>
+                              <span className="text-xs text-foreground-muted">{p.category}</span>
                             </div>
-                            <h4 className="font-black text-foreground text-sm mt-0.5">{p.name}</h4>
+                            <h4 className="font-semibold text-foreground text-sm mt-0.5">{p.name}</h4>
                             <p className="text-xs font-bold text-primary mt-0.5">
                               ₹{variant?.price || 0} • {variant?.weight || 'Standard'}
                             </p>
@@ -1123,11 +1234,11 @@ export default function SellerDashboardPage() {
                       {/* Admin Reason Box */}
                       <div className="p-4 rounded-xl bg-surface border border-error/20 text-xs text-error space-y-1">
                         <div className="flex items-center justify-between">
-                          <span className="font-black text-error uppercase tracking-wider text-[11px]">
+                          <span className="font-semibold text-error uppercase tracking-wider text-xs">
                             Admin Feedback / Required Correction:
                           </span>
                           {p.reviewed_at && (
-                            <span className="text-[10px] text-foreground-muted">
+                            <span className="text-xs text-foreground-muted">
                               Decision Date: {new Date(p.reviewed_at).toLocaleDateString()}
                             </span>
                           )}
@@ -1146,10 +1257,10 @@ export default function SellerDashboardPage() {
 
         {/* ─── TAB 4: INVENTORY MANAGEMENT ─── */}
         {activeTab === 'inventory' && (
-          <div className="bg-surface rounded-3xl border border-border shadow-2xs p-6 sm:p-8 space-y-6 animate-in fade-in">
+          <div className="bg-surface rounded-xl border border-border shadow-2xs p-6 sm:p-8 space-y-6 animate-in fade-in">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
               <div>
-                <h3 className="text-lg font-black text-foreground tracking-tight">
+                <h3 className="text-lg font-semibold text-foreground tracking-tight">
                   Inventory & Quick Price Management
                 </h3>
                 <p className="text-xs text-foreground-muted mt-0.5">
@@ -1193,16 +1304,16 @@ export default function SellerDashboardPage() {
                             </div>
                           </td>
                           <td className="py-3 px-4 font-mono text-foreground-muted">{p.sku || '—'}</td>
-                          <td className="py-3 px-4 font-black text-primary">₹{variant?.price || 0}</td>
+                          <td className="py-3 px-4 font-semibold text-primary">₹{variant?.price || 0}</td>
                           <td className="py-3 px-4">
-                            <span className={`px-2 py-0.5 rounded-md font-bold text-[11px] ${
+                            <span className={`px-2 py-0.5 rounded-md font-bold text-xs ${
                               (variant?.stock || 0) < 10 ? 'bg-warning-bg text-warning' : 'bg-success-bg text-success'
                             }`}>
                               {variant?.stock || 0} units
                             </span>
                           </td>
                           <td className="py-3 px-4">
-                            <span className="px-2 py-0.5 rounded-full text-[10px] font-black uppercase bg-success-bg text-success">
+                            <span className="px-2 py-0.5 rounded-full text-xs font-semibold uppercase bg-success-bg text-success">
                               Live
                             </span>
                           </td>
@@ -1225,10 +1336,10 @@ export default function SellerDashboardPage() {
         )}
 
         {/* ─── TAB 5: SELLER PROFILE ─── */}
-        {activeTab === 'profile' && (
-          <div className="bg-surface rounded-3xl border border-border shadow-2xs p-6 sm:p-8 space-y-6 animate-in fade-in">
+        {(activeTab === 'profile' || activeTab === 'store') && (
+          <div className="bg-surface rounded-xl border border-border shadow-2xs p-6 sm:p-8 space-y-6 animate-in fade-in">
             <div>
-              <h3 className="text-lg font-black text-foreground tracking-tight flex items-center gap-2">
+              <h3 className="text-lg font-semibold text-foreground tracking-tight flex items-center gap-2">
                 <Building2 className="w-5 h-5 text-primary" />
                 <span>Seller Store Profile & Business Identity</span>
               </h3>
@@ -1239,7 +1350,7 @@ export default function SellerDashboardPage() {
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="p-5 bg-surface-muted rounded-2xl border border-border space-y-3 text-xs">
-                <span className="font-black text-foreground-muted uppercase tracking-wider block">Store & Contact Details</span>
+                <span className="font-semibold text-foreground-muted uppercase tracking-wider block">Store & Contact Details</span>
                 <div className="flex justify-between py-1.5 border-b border-border">
                   <span className="text-foreground-muted">Business / Store Name:</span>
                   <span className="font-bold text-foreground">{storeName}</span>
@@ -1259,7 +1370,7 @@ export default function SellerDashboardPage() {
               </div>
 
               <div className="p-5 bg-surface-muted rounded-2xl border border-border space-y-3 text-xs">
-                <span className="font-black text-foreground-muted uppercase tracking-wider block">Taxation & Compliance</span>
+                <span className="font-semibold text-foreground-muted uppercase tracking-wider block">Taxation & Compliance</span>
                 <div className="flex justify-between py-1.5 border-b border-border">
                   <span className="text-foreground-muted">Business Entity Type:</span>
                   <span className="font-bold text-foreground">{inquiry?.business_type || 'Registered Vendor'}</span>
@@ -1284,10 +1395,10 @@ export default function SellerDashboardPage() {
         {/* ─── TAB 6: ORDERS ─── */}
         {activeTab === 'orders' && (
           <div className="space-y-6 animate-in fade-in">
-            <div className="bg-surface rounded-3xl border border-border/90 shadow-2xs p-6 sm:p-8">
+            <div className="bg-surface rounded-xl border border-border/90 shadow-2xs p-6 sm:p-8">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div>
-                  <h3 className="text-lg font-black text-foreground tracking-tight flex items-center gap-2">
+                  <h3 className="text-lg font-semibold text-foreground tracking-tight flex items-center gap-2">
                     <ShoppingBag className="w-5 h-5 text-primary" />
                     <span>Store Order Fulfillment</span>
                   </h3>
@@ -1309,9 +1420,9 @@ export default function SellerDashboardPage() {
 
         {/* ─── TAB 7: ANALYTICS & PAYOUTS ─── */}
         {activeTab === 'analytics' && (
-          <div className="bg-surface rounded-3xl border border-border shadow-2xs p-6 sm:p-8 space-y-6 animate-in fade-in">
+          <div className="bg-surface rounded-xl border border-border shadow-2xs p-6 sm:p-8 space-y-6 animate-in fade-in">
             <div>
-              <h3 className="text-sm font-black text-foreground uppercase tracking-wider">
+              <h3 className="text-sm font-semibold text-foreground uppercase tracking-wider">
                 Bank Payout & Settlement History
               </h3>
               <p className="text-xs text-foreground-muted">Automated settlements after deducting {storeCommission}% SaaS platform commission</p>
@@ -1326,8 +1437,8 @@ export default function SellerDashboardPage() {
                       <p className="text-xs text-foreground-muted">Direct Deposit (NEFT) • {payout.date}</p>
                     </div>
                     <div className="text-right">
-                      <span className="text-sm font-black text-success">₹{payout.net.toLocaleString('en-IN')}</span>
-                      <p className="text-[10px] text-foreground-muted">Platform fee deducted: ₹{payout.fee}</p>
+                      <span className="text-sm font-semibold text-success">₹{payout.net.toLocaleString('en-IN')}</span>
+                      <p className="text-xs text-foreground-muted">Platform fee deducted: ₹{payout.fee}</p>
                     </div>
                   </div>
                 ))
@@ -1342,9 +1453,9 @@ export default function SellerDashboardPage() {
 
         {/* ─── TAB 8: NOTIFICATIONS ─── */}
         {activeTab === 'notifications' && (
-          <div className="bg-surface rounded-3xl border border-border shadow-2xs p-6 sm:p-8 space-y-6 animate-in fade-in">
+          <div className="bg-surface rounded-xl border border-border shadow-2xs p-6 sm:p-8 space-y-6 animate-in fade-in">
             <div>
-              <h3 className="text-sm font-black text-foreground uppercase tracking-wider">
+              <h3 className="text-sm font-semibold text-foreground uppercase tracking-wider">
                 Seller Notification Center
               </h3>
               <p className="text-xs text-foreground-muted">Important approvals, alerts, and platform messages</p>
@@ -1363,7 +1474,7 @@ export default function SellerDashboardPage() {
                   >
                     <div className="flex items-center justify-between">
                       <h4 className="font-bold text-foreground">{n.title}</h4>
-                      <span className="text-[10px] text-foreground-muted">
+                      <span className="text-xs text-foreground-muted">
                         {n.created_at ? new Date(n.created_at).toLocaleDateString() : ''}
                       </span>
                     </div>
@@ -1375,7 +1486,7 @@ export default function SellerDashboardPage() {
           </div>
         )}
 
-      </div>
+        </div>
 
       {/* ─── FULL SELLER PRODUCT MODAL (ADD / EDIT / RESUBMIT) ─── */}
       <SellerProductModal
@@ -1386,13 +1497,23 @@ export default function SellerDashboardPage() {
         onSuccess={handleProductSubmitted}
       />
 
+      {/* ─── SELLER QUALITY REPORT MODAL ─── */}
+      <SellerQualityReportModal
+        isOpen={isQualityModalOpen}
+        onClose={() => setIsQualityModalOpen(false)}
+        products={products.map((p) => ({ id: p.id, name: p.name }))}
+        onReportCreated={() => {
+          loadQualityReports();
+        }}
+      />
+
       {/* ─── QUICK STOCK & PRICE UPDATE MODAL ─── */}
       {quickUpdateModal.open && quickUpdateModal.product && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-2xs p-4">
-          <div className="bg-surface rounded-3xl max-w-sm w-full p-6 space-y-5 shadow-2xl animate-in fade-in">
+          <div className="bg-surface rounded-xl max-w-sm w-full p-6 space-y-5 shadow-2xl animate-in fade-in">
             <div className="flex items-center justify-between border-b border-border pb-3">
               <div>
-                <h3 className="font-extrabold text-base text-foreground">Update Stock & Price</h3>
+                <h3 className="font-semibold text-base text-foreground">Update Stock & Price</h3>
                 <p className="text-xs text-foreground-muted truncate max-w-[200px]">{quickUpdateModal.product.name}</p>
               </div>
               <button
@@ -1437,7 +1558,7 @@ export default function SellerDashboardPage() {
                 />
               </div>
 
-              <p className="text-[11px] text-foreground-muted">
+              <p className="text-xs text-foreground-muted">
                 Updating stock or price does not require reapproval. Your product remains live.
               </p>
             </div>
@@ -1467,10 +1588,10 @@ export default function SellerDashboardPage() {
       {/* ─── REACTIVATION MODAL ─── */}
       {reactivationModalOpen && (
         <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-2xs flex items-center justify-center p-4">
-          <div className="bg-surface rounded-3xl max-w-md w-full p-6 sm:p-8 space-y-6 shadow-xl animate-in fade-in">
+          <div className="bg-surface rounded-xl max-w-md w-full p-6 sm:p-8 space-y-6 shadow-xl animate-in fade-in">
             <div className="flex items-center justify-between pb-3 border-b border-border">
               <div>
-                <h3 className="text-lg font-black text-foreground">Request Account Reactivation</h3>
+                <h3 className="text-lg font-semibold text-foreground">Request Account Reactivation</h3>
                 <p className="text-xs text-foreground-muted mt-0.5">Submit an appeal to administrator</p>
               </div>
               <button
@@ -1560,5 +1681,19 @@ export default function SellerDashboardPage() {
       )}
 
     </div>
+  );
+}
+
+export default function SellerDashboardPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="min-h-[400px] flex items-center justify-center">
+          <Loader2 className="w-8 h-8 animate-spin text-primary" />
+        </div>
+      }
+    >
+      <SellerDashboardContent />
+    </Suspense>
   );
 }
