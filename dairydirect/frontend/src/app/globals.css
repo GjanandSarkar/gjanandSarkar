@@ -129,9 +129,13 @@
     --on-info: #FFFFFF;
 
     /* Base authentic cream & sand surfaces */
-    --background: #fbfaf6;
+    /* Neutral chrome. What makes a storefront read as Amazon is not its
+       colour but its ground: a cool grey page with white cards floating
+       on it, so every block separates without needing a shadow. Brand
+       green and brass are unchanged - they now sit on grey, not cream. */
+    --background: #eaeded;
     --surface: #FFFFFF;
-    --surface-muted: #f2ede4;
+    --surface-muted: #f7f8f8;
     --surface-elevated: #FFFFFF;
 
     /* Text & Borders */
@@ -139,8 +143,8 @@
     --foreground-muted: #58625c;
     --foreground-inverse: #FFFFFF;
     
-    --border: #e4e2db;
-    --border-hover: #c5c2b6;
+    --border: #d5d9d9;
+    --border-hover: #bcc1c1;
     --ring: rgba(12, 60, 38, 0.25);
 
     --success: #0c3c26;
