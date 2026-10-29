@@ -1,5 +1,6 @@
 "use client";
 
+import { uploadImageToImageKit } from '@/lib/api/imagekit';
 import React, { useState } from 'react';
 import { SmartImage } from '@/components/ui/SmartImage';
 import Link from 'next/link';
@@ -179,36 +180,16 @@ export function CustomerOrderDetailsClient({ initialOrder }: CustomerOrderDetail
       }
 
       try {
-        // Convert to base64
-        const reader = new FileReader();
-        const base64Promise = new Promise<string>((resolve) => {
-          reader.onload = () => resolve(reader.result as string);
-          reader.readAsDataURL(file);
-        });
-        const base64Data = await base64Promise;
+        /* See the note in (customer)/returns/page.tsx: this call site sent
+           no Authorization header, so the upload 401'd and the raw data:
+           URI was written into the return record instead. */
+        const result = await uploadImageToImageKit(file, 'returns_evidence');
 
-        // Try uploading via ImageKit endpoint
-        const uploadRes = await fetch('/api/upload/imagekit', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          credentials: 'include',
-          body: JSON.stringify({
-            file: base64Data,
-            fileName: `return_${order.id}_${Date.now()}_${i}.png`,
-            folder: '/returns_evidence',
-          }),
-        });
-
-        if (uploadRes.ok) {
-          const uploadData = await uploadRes.json();
-          if (uploadData.url) {
-            setReturnImages(prev => [...prev, uploadData.url]);
-            continue;
-          }
+        if (result.success && result.url) {
+          setReturnImages((prev) => [...prev, result.url!]);
+        } else {
+          showToast('error', `${file.name}: ${result.error ?? 'Upload failed.'}`);
         }
-
-        // Fallback: use base64 data directly if ImageKit is unconfigured
-        setReturnImages(prev => [...prev, base64Data]);
       } catch (err) {
         console.warn('Image upload error:', err);
       }

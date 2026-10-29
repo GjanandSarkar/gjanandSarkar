@@ -12,6 +12,7 @@
 import { NextResponse } from 'next/server';
 import ImageKit from '@imagekit/nodejs';
 import { getAuthUser } from '@/lib/api/auth-middleware';
+import { parseUploadPayload, isParseFailure } from '@/lib/images/payload';
 
 // Allowed upload folders (relative to /dairydirect/).
 // Client can request any of these; anything else is rejected.
@@ -23,32 +24,17 @@ const ALLOWED_FOLDERS = new Set([
   'seller_banners',
   'categories',
   'ads',
+  /* These four are offered by the ImageKitFolder type in lib/api/imagekit.ts,
+     so the client could legitimately request them while the server rejected
+     them with a 400. The type and the allowlist now agree. */
+  'banners',
+  'quality-reports',
+  'claims',
+  'sellers',
 ]);
-
-// Allowed image MIME types (checked on the Content-Type of multipart, and
-// via magic-byte sniffing on base64 for JSON uploads).
-const ALLOWED_MIME_PREFIXES = ['image/jpeg', 'image/png', 'image/webp', 'image/avif', 'image/gif'];
 
 // Maximum upload size: 10 MB (in bytes)
 const MAX_FILE_SIZE_BYTES = 10 * 1024 * 1024;
-
-/**
- * Sniff the first bytes of a base64-encoded file to detect its MIME type.
- * Returns null if the type cannot be determined or is not an image.
- */
-function sniffMimeFromBase64(base64: string): string | null {
-  try {
-    const decoded = Buffer.from(base64.slice(0, 24), 'base64');
-    if (decoded[0] === 0xff && decoded[1] === 0xd8) return 'image/jpeg';
-    if (decoded[0] === 0x89 && decoded[1] === 0x50) return 'image/png';
-    if (decoded[0] === 0x52 && decoded[1] === 0x49 && decoded[3] === 0x57) return 'image/webp';
-    if (decoded[0] === 0x47 && decoded[1] === 0x49) return 'image/gif';
-    // AVIF is a variant of ISOBMFF — harder to sniff simply; allow by extension
-    return null;
-  } catch {
-    return null;
-  }
-}
 
 export async function POST(request: Request) {
   try {
@@ -62,7 +48,6 @@ export async function POST(request: Request) {
     let filePayload: string | null = null;
     let fileName: string | undefined;
     let requestedFolder = 'profiles'; // safe default
-    let fileSizeBytes = 0;
 
     if (contentType.includes('multipart/form-data')) {
       const formData = await request.formData();
@@ -72,31 +57,11 @@ export async function POST(request: Request) {
       if (folderParam) requestedFolder = String(folderParam).trim().replace(/^\/+/, '');
 
       if (fileEntry instanceof File) {
-        fileSizeBytes = fileEntry.size;
-        if (fileSizeBytes > MAX_FILE_SIZE_BYTES) {
-          return NextResponse.json({ error: `File too large. Maximum size is ${MAX_FILE_SIZE_BYTES / 1024 / 1024} MB.` }, { status: 413 });
-        }
-
-        // Validate MIME type via Content-Type on the file part
-        const fileMime = fileEntry.type;
-        if (!ALLOWED_MIME_PREFIXES.some((m) => fileMime.startsWith(m))) {
-          return NextResponse.json({ error: `File type '${fileMime}' is not allowed. Only images are accepted.` }, { status: 415 });
-        }
-
         const arrayBuffer = await fileEntry.arrayBuffer();
         filePayload = Buffer.from(arrayBuffer).toString('base64');
         if (!fileName) fileName = fileEntry.name;
       } else if (typeof fileEntry === 'string') {
-        // Base64 string passed in form field
         filePayload = fileEntry;
-        fileSizeBytes = Math.ceil((fileEntry.length * 3) / 4);
-        if (fileSizeBytes > MAX_FILE_SIZE_BYTES) {
-          return NextResponse.json({ error: `File too large. Maximum size is ${MAX_FILE_SIZE_BYTES / 1024 / 1024} MB.` }, { status: 413 });
-        }
-        const sniffed = sniffMimeFromBase64(fileEntry);
-        if (!sniffed) {
-          return NextResponse.json({ error: 'Could not determine file type. Only images are accepted.' }, { status: 415 });
-        }
       }
     } else {
       const body = await request.json().catch(() => null);
@@ -104,23 +69,27 @@ export async function POST(request: Request) {
         filePayload = body.file || null;
         fileName = body.fileName;
         if (body.folder) requestedFolder = String(body.folder).trim().replace(/^\/+/, '');
-
-        if (filePayload) {
-          fileSizeBytes = Math.ceil((filePayload.length * 3) / 4);
-          if (fileSizeBytes > MAX_FILE_SIZE_BYTES) {
-            return NextResponse.json({ error: `File too large. Maximum size is ${MAX_FILE_SIZE_BYTES / 1024 / 1024} MB.` }, { status: 413 });
-          }
-          const sniffed = sniffMimeFromBase64(filePayload);
-          if (!sniffed) {
-            return NextResponse.json({ error: 'Could not determine file type. Only images are accepted.' }, { status: 415 });
-          }
-        }
       }
     }
 
     if (!filePayload) {
       return NextResponse.json({ error: 'Image file content is required.' }, { status: 400 });
     }
+
+    /* Every caller in this app uploads via FileReader.readAsDataURL, which
+       produces "data:image/png;base64,AAAA...". The previous sniffer read
+       magic bytes out of the first 24 CHARACTERS of that string, so it was
+       decoding the ASCII prefix rather than the image, never matched a
+       signature, and rejected every upload with 415. It also handed the
+       prefixed string to ImageKit, which is not valid base64.
+
+       parseUploadPayload strips any data: prefix, enforces the size cap,
+       and identifies the type from the decoded bytes. */
+    const parsed = parseUploadPayload(filePayload, MAX_FILE_SIZE_BYTES);
+    if (isParseFailure(parsed)) {
+      return NextResponse.json({ error: parsed.error }, { status: parsed.status });
+    }
+    filePayload = parsed.base64;
 
     // ─── Validate folder against allowlist ────────────────────────────────────
     // Strip path separators and leading /dairydirect/ prefix if the caller included it.
@@ -164,6 +133,8 @@ export async function POST(request: Request) {
       url: uploadResponse.url,
       fileId: uploadResponse.fileId,
       name: uploadResponse.name,
+      mime: parsed.mime,
+      sizeBytes: parsed.sizeBytes,
     });
 
   } catch (error: any) {

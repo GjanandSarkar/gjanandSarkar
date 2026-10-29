@@ -1,5 +1,6 @@
 'use client';
 
+import { uploadImageToImageKit } from '@/lib/api/imagekit';
 import React, { useState, useEffect, Suspense } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
@@ -160,42 +161,23 @@ function ReturnsContent() {
           continue;
         }
 
-        // Convert file to base64
-        const reader = new FileReader();
-        const base64Promise = new Promise<string>((resolve, reject) => {
-          reader.onload = () => resolve(reader.result as string);
-          reader.onerror = reject;
-          reader.readAsDataURL(file);
-        });
+        /* Upload through the shared helper rather than a bare fetch. The
+           API authenticates with a bearer token and this call site sent
+           none, so every upload here was rejected with 401.
 
-        const base64Data = await base64Promise;
+           The old code then fell back to pushing the raw data: URI into
+           the returns record. That hid the failure completely and wrote
+           megabytes of base64 into a database column on every photo. A
+           failed upload must be reported, not silently stored. */
+        const result = await uploadImageToImageKit(file, 'returns_evidence');
 
-        // Try upload via ImageKit backend endpoint
-        try {
-          const res = await fetch('/api/upload/imagekit', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            credentials: 'include',
-            body: JSON.stringify({
-              file: base64Data,
-              fileName: `return_${Date.now()}_${i}_${file.name.replace(/[^a-zA-Z0-9.-]/g, '_')}`,
-              folder: '/returns_evidence',
-            }),
-          });
-
-          if (res.ok) {
-            const json = await res.json();
-            if (json.url) {
-              uploadedUrls.push(json.url);
-              continue;
-            }
-          }
-        } catch (uploadErr) {
-          console.warn('ImageKit endpoint upload failed, using base64 fallback:', uploadErr);
+        if (result.success && result.url) {
+          uploadedUrls.push(result.url);
+        } else {
+          setError(
+            `Could not upload "${file.name}". ${result.error ?? 'Please try again.'}`
+          );
         }
-
-        // Fallback: store base64 data directly so user is never blocked
-        uploadedUrls.push(base64Data);
       }
 
       if (uploadedUrls.length > 0) {
