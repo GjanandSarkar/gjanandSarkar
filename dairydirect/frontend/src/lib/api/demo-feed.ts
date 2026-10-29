@@ -22,8 +22,12 @@ export function isDemoCatalogueEnabled(): boolean {
   return process.env.DEMO_CATALOGUE === '1';
 }
 
-const img = (id: string, w = 600) =>
-  `https://images.unsplash.com/${id}?auto=format&fit=crop&w=${w}&q=70`;
+/* Local files, not a remote CDN. Next optimises images on the SERVER, so a
+   remote URL has to be fetchable by the server itself - and the preview
+   sandbox has no outbound access to image hosts, which made the optimiser
+   return 500 and every product render as a broken frame. Files under
+   /public need no network at all. */
+const img = (name: string) => `/demo/${name}`;
 
 export const DEMO_PRODUCTS: CatalogProduct[] = [
   {
@@ -31,7 +35,7 @@ export const DEMO_PRODUCTS: CatalogProduct[] = [
     name: 'Hand Embroidered Cotton Purse',
     category: 'Handmade',
     brand: 'Kutch Craft Collective',
-    image_url: img('photo-1584917865442-de89df76afd3'),
+    image_url: img('purse.jpg'),
     rating: 4.6,
     reviews_count: 38,
     product_variants: [
@@ -44,7 +48,7 @@ export const DEMO_PRODUCTS: CatalogProduct[] = [
     name: 'Handwoven Jute Shoulder Bag',
     category: 'Handmade',
     brand: 'Kutch Craft Collective',
-    image_url: img('photo-1548036328-c9fa89d128fa'),
+    image_url: img('jute-bag.jpg'),
     rating: 4.3,
     reviews_count: 11,
     product_variants: [
@@ -56,7 +60,7 @@ export const DEMO_PRODUCTS: CatalogProduct[] = [
     name: 'A2 Gir Cow Fresh Milk',
     category: 'Dairy',
     brand: 'Gjanand Farm',
-    image_url: img('photo-1563636619-e9143da7973b'),
+    image_url: img('milk.jpg'),
     rating: 4.8,
     reviews_count: 214,
     product_variants: [
@@ -69,7 +73,7 @@ export const DEMO_PRODUCTS: CatalogProduct[] = [
     name: 'Vedic Bilona Cow Ghee',
     category: 'Dairy',
     brand: 'Gjanand Farm',
-    image_url: img('photo-1631452180519-c014fe946bc7'),
+    image_url: img('ghee.jpg'),
     rating: 4.9,
     reviews_count: 97,
     product_variants: [
@@ -81,7 +85,7 @@ export const DEMO_PRODUCTS: CatalogProduct[] = [
     name: 'Fresh Malai Paneer',
     category: 'Dairy',
     brand: 'Gjanand Farm',
-    image_url: img('photo-1631452180775-9e6f0b1b0b0a'),
+    image_url: img('paneer.jpg'),
     rating: 0,
     reviews_count: 0,
     product_variants: [
@@ -93,7 +97,7 @@ export const DEMO_PRODUCTS: CatalogProduct[] = [
     name: 'Set Dahi Natural Curd',
     category: 'Dairy',
     brand: 'Gjanand Farm',
-    image_url: img('photo-1488477181946-6428a0291777'),
+    image_url: img('curd.jpg'),
     rating: 4.2,
     reviews_count: 56,
     product_variants: [

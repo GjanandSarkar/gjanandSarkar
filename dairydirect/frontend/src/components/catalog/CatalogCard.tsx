@@ -98,8 +98,17 @@ export function CatalogCard({ product, priority = false }: CatalogCardProps) {
               loading={priority ? undefined : 'lazy'}
             />
           ) : (
-            <div className="flex h-full w-full items-center justify-center text-xs text-foreground-muted">
-              No image
+            /* Real catalogue rows can have no photo yet. An empty frame
+               reading "No image" looks like a failed load; a branded tile
+               carrying the product's initial looks deliberate and keeps the
+               grid's rhythm intact. */
+            <div
+              className="flex h-full w-full items-center justify-center rounded-xl bg-primary-fixed"
+              aria-hidden="true"
+            >
+              <span className="text-2xl font-bold text-primary">
+                {product.name.trim().charAt(0).toUpperCase()}
+              </span>
             </div>
           )}
         </div>

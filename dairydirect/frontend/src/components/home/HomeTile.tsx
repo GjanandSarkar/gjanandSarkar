@@ -48,10 +48,18 @@ export function HomeTile({ title, images, ctaLabel, ctaHref }: HomeTileProps) {
                   alt=""
                   fill
                   sizes="(max-width: 640px) 22vw, 12vw"
-                  className="object-cover"
+                  /* contain, matching the cards: a cropped thumbnail of a
+                     tall bottle or a wide bag shows neither. */
+                  className="object-contain p-1"
                   loading="lazy"
                 />
-              ) : null}
+              ) : (
+                <div className="flex h-full w-full items-center justify-center bg-primary-fixed">
+                  <span className="text-base font-bold text-primary">
+                    {img.label.trim().charAt(0).toUpperCase()}
+                  </span>
+                </div>
+              )}
             </div>
             <p className="mt-1 truncate text-[11.5px] text-foreground-muted group-hover:underline">
               {img.label}
