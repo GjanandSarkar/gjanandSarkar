@@ -200,7 +200,7 @@ function LoginScreenInner() {
             />
             <span className="flex flex-col text-left">
               <span className="text-2xl font-semibold tracking-tight leading-none text-primary">Gjanand</span>
-              <span className="text-[11px] tracking-[0.22em] font-semibold text-secondary uppercase leading-none mt-1">
+              <span className="text-[11px] tracking-[0.22em] font-semibold text-secondary-ink uppercase leading-none mt-1">
                 SARKAR
               </span>
             </span>

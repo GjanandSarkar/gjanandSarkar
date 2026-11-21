@@ -210,7 +210,7 @@ export function SellerReturnsManager() {
               </span>
             </div>
             <h3 className="text-lg md:text-xl font-semibold text-foreground tracking-tight flex items-center gap-2 mt-1">
-              <RotateCcw className="w-5 h-5 text-secondary" />
+              <RotateCcw className="w-5 h-5 text-secondary-ink" />
               <span>Customer Returns & Cancellations</span>
             </h3>
             <p className="text-xs text-foreground-muted mt-0.5">
@@ -637,7 +637,7 @@ export function SellerReturnsManager() {
             <div className="flex items-center justify-between border-b border-border pb-3">
               <div className="flex items-center gap-2">
                 <div className="p-2 rounded-xl bg-surface-muted text-primary">
-                  <RotateCcw className="w-5 h-5 text-secondary" />
+                  <RotateCcw className="w-5 h-5 text-secondary-ink" />
                 </div>
                 <div>
                   <h3 className="font-semibold text-base text-foreground capitalize">

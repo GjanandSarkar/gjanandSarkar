@@ -140,7 +140,7 @@ export default function StyleguidePage() {
   return (
     <div className="min-h-screen bg-background px-5 md:px-10 py-10 max-w-[1280px] mx-auto">
       <header className="mb-12">
-        <span className="text-xs font-semibold uppercase tracking-[0.2em] text-secondary">
+        <span className="text-xs font-semibold uppercase tracking-[0.2em] text-secondary-ink">
           Internal · development only
         </span>
         <h1 className="text-3xl font-semibold text-primary tracking-tight mt-1">

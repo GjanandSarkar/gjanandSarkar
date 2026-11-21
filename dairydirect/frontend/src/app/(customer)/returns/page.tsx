@@ -620,7 +620,7 @@ function ReturnsContent() {
         <div className="bg-surface rounded-xl border border-border/80 shadow-2xs overflow-hidden">
           <div className="p-6 border-b border-border flex items-center justify-between">
             <h2 className="text-base font-bold text-foreground flex items-center gap-2">
-              <Package className="w-5 h-5 text-secondary" />
+              <Package className="w-5 h-5 text-secondary-ink" />
               <span>My Return & Replacement Requests</span>
             </h2>
             <span className="text-xs font-bold text-foreground-muted">{requests.length} Requests</span>

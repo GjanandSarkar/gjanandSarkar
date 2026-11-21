@@ -417,7 +417,7 @@ function SellerDashboardContent() {
         <div className="max-w-3xl mx-auto space-y-8 animate-in fade-in">
           
           <div className="bg-surface rounded-xl border border-warning/20 shadow-sm p-8 sm:p-10 text-center space-y-6">
-            <div className="w-16 h-16 rounded-2xl bg-warning-bg text-secondary flex items-center justify-center mx-auto shadow-inner">
+            <div className="w-16 h-16 rounded-2xl bg-warning-bg text-secondary-ink flex items-center justify-center mx-auto shadow-inner">
               <Clock className="w-8 h-8" />
             </div>
 
@@ -622,7 +622,7 @@ function SellerDashboardContent() {
               {storeName}
             </h1>
             <p className="text-xs text-foreground-muted mt-1">
-              Category: <strong className="text-foreground">{storeCategory}</strong> • Region: <strong className="text-foreground">{storeState}</strong> • Platform Commission: <span className="font-semibold text-secondary">{storeCommission}%</span>
+              Category: <strong className="text-foreground">{storeCategory}</strong> • Region: <strong className="text-foreground">{storeState}</strong> • Platform Commission: <span className="font-semibold text-secondary-ink">{storeCommission}%</span>
             </p>
           </div>
 

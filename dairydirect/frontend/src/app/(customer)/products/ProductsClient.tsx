@@ -1,25 +1,16 @@
 'use client';
 
-import { Suspense, useCallback, useTransition } from 'react';
+import { Suspense, useCallback, useState, useTransition } from 'react';
 import { useRouter, usePathname, useSearchParams } from 'next/navigation';
 import { useTranslation } from '@/lib/i18n';
 import type { CatalogProduct } from '@/lib/types/catalog';
 import { VISIBLE_CATEGORY_NAMES } from '@/lib/constants/categories';
-import { isSectionEnabled } from '@/lib/config/launch';
 import { ProductCard } from '@/components/shared/ProductCard';
 import { ProductGridSkeleton } from '@/components/shared/Skeletons';
 import { Sheet } from '@/components/ui/Sheet';
-import {
-  MapPin,
-  SlidersHorizontal,
-  ChevronDown,
-  X,
-  Check,
-} from 'lucide-react';
-import { useState } from 'react';
+import { SlidersHorizontal } from 'lucide-react';
 import dynamic from 'next/dynamic';
 
-// Pagination bar is a client component that reads useSearchParams internally.
 const PaginationBar = dynamic(() => import('./PaginationBar'), { ssr: false });
 
 interface ProductsClientProps {
@@ -33,22 +24,20 @@ interface ProductsClientProps {
   currentSort?: 'featured' | 'price_asc' | 'price_desc';
 }
 
-const STATES = [
-  'All', 'Gujarat', 'Rajasthan', 'Kerala', 'Kashmir',
-  'Punjab', 'Tamil Nadu', 'Himachal Pradesh', 'West Bengal',
-];
-
 /**
- * ProductsClient — URL-driven product listing.
+ * Product listing.
  *
- * Phase 4 change:
- *   BEFORE: held all ~500 products in state; filtered/sorted with useMemo.
- *   AFTER:  reads server-rendered initialProducts (24 rows max); every filter
- *   change pushes a new URL param which triggers a full Server Component
- *   re-render on the server — Postgres does the filtering.
+ * Before: a bordered heading card ("All Products" + a sentence of marketing),
+ * a second bordered toolbar with an item count and a mobile Filters button,
+ * a bordered sidebar card of category buttons (the active one a filled green
+ * pill), and a second bordered card for sort options. Four boxes of chrome
+ * around a grid of products.
  *
- * The component manages only pure UI state (filter sheet open/close).
- * Everything else is URL state.
+ * Now: one line — title, count, sort. Category is a plain text list in the
+ * sidebar (the same list the header tabs offer), and sort is a native select.
+ * Phones get a single Filters button that opens the same plain list.
+ *
+ * Filtering still lives entirely in the URL; the server re-renders the grid.
  */
 function ProductsScreenContent({
   initialProducts,
@@ -67,11 +56,10 @@ function ProductsScreenContent({
   const [isPending, startTransition] = useTransition();
   const [filtersOpen, setFiltersOpen] = useState(false);
 
-  /** Build a new URL with the given key=value, resetting page to 1. */
   const pushFilter = useCallback(
     (key: string, value: string | null) => {
       const params = new URLSearchParams(searchParams.toString());
-      params.delete('page'); // filter change resets to page 1
+      params.delete('page');
       if (value === null || value === '' || value === 'All' || value === 'featured') {
         params.delete(key);
       } else {
@@ -82,7 +70,7 @@ function ProductsScreenContent({
         router.push(`${pathname}${qs ? '?' + qs : ''}`, { scroll: false });
       });
     },
-    [searchParams, pathname, router]
+    [searchParams, pathname, router],
   );
 
   const handleCategoryChange = (cat: string) => {
@@ -94,229 +82,114 @@ function ProductsScreenContent({
     pushFilter('sort', sort === 'featured' ? null : sort);
   };
 
-  const handleClearFilters = () => {
-    startTransition(() => {
-      router.push(pathname, { scroll: false });
-    });
-  };
-
   const activeCategory = currentCategory || 'All';
-  const activeSort = currentSort;
-
-  const activeFilterCount =
-    (activeCategory !== 'All' ? 1 : 0) +
-    (activeSort !== 'featured' ? 1 : 0) +
-    (currentQ?.trim() ? 1 : 0);
-
-  // The categories list comes from the constant list (not derived from product data)
-  // so it is stable and doesn't re-derive when the product slice changes.
   const categories = ['All', ...VISIBLE_CATEGORY_NAMES];
 
-  // ── Filter controls ────────────────────────────────────────────────────────
-  // Defined once, rendered in both the desktop sidebar and the mobile sheet.
-  const filterControls = (
-    <div className="space-y-4">
-      {/* Category */}
-      <div className="bg-surface rounded-lg border border-border p-4 shadow-xs">
-        <h3 className="text-xs font-semibold text-foreground mb-3">
-          {t('filterCategories') || 'Categories'}
-        </h3>
-        <div className="space-y-1">
-          {categories.map((cat) => {
-            const isActive = activeCategory.toLowerCase() === cat.toLowerCase();
-            return (
-              <button
-                key={cat}
-                onClick={() => handleCategoryChange(cat)}
-                className={`w-full flex items-center justify-between px-3 py-2.5 rounded-lg text-xs font-medium transition-colors min-h-[44px] cursor-pointer ${
-                  isActive
-                    ? 'bg-primary text-on-primary shadow-xs'
-                    : 'text-foreground-muted hover:bg-surface-muted'
-                }`}
-              >
-                <span>{cat === 'All' ? (t('all') || 'All') : tCategory(cat)}</span>
-                {isActive && <Check className="w-4 h-4" />}
-              </button>
-            );
-          })}
-        </div>
-      </div>
+  const title = currentQ
+    ? `“${currentQ}”`
+    : activeCategory !== 'All'
+      ? tCategory(activeCategory)
+      : t('allProducts') || 'All products';
 
-      {/* Sort — inside filter sheet on mobile */}
-      <div className="bg-surface rounded-lg border border-border p-4 shadow-xs">
-        <h3 className="text-xs font-semibold text-foreground mb-3">Sort by</h3>
-        <div className="space-y-1">
-          {[
-            { id: 'featured', label: t('sortFeatured') || 'Featured' },
-            { id: 'price_asc', label: t('sortPriceAsc') || 'Price: Low to High' },
-            { id: 'price_desc', label: t('sortPriceDesc') || 'Price: High to Low' },
-          ].map((opt) => {
-            const isActive = activeSort === opt.id;
-            return (
-              <button
-                key={opt.id}
-                onClick={() => { handleSortChange(opt.id); setFiltersOpen(false); }}
-                className={`w-full flex items-center justify-between px-3 py-2.5 rounded-lg text-xs font-medium transition-colors min-h-[44px] cursor-pointer ${
-                  isActive
-                    ? 'bg-surface-muted text-primary border border-border'
-                    : 'text-foreground-muted hover:bg-surface-muted'
-                }`}
-              >
-                <span>{opt.label}</span>
-                {isActive && <Check className="w-4 h-4 text-primary" />}
-              </button>
-            );
-          })}
-        </div>
-      </div>
+  // Plain list: no cards, no filled pills. Active row is green and bold.
+  const filterControls = (
+    <div className="space-y-1">
+      {categories.map((cat) => {
+        const isActive = activeCategory.toLowerCase() === cat.toLowerCase();
+        return (
+          <button
+            key={cat}
+            type="button"
+            onClick={() => handleCategoryChange(cat)}
+            aria-current={isActive ? 'page' : undefined}
+            className={`flex min-h-11 w-full items-center justify-between px-2 text-sm ${
+              isActive ? 'font-semibold text-primary' : 'text-foreground-muted'
+            }`}
+          >
+            {cat === 'All' ? t('all') || 'All' : tCategory(cat)}
+          </button>
+        );
+      })}
     </div>
   );
 
   return (
-    <div className="min-h-screen bg-background pb-24 lg:pb-10">
-      <div className="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8 pt-4 lg:pt-6">
-
-        {/* Page heading */}
-        <div className="mb-4 lg:mb-6">
-          <div className="bg-surface border border-border rounded-lg p-5 lg:p-6 shadow-xs">
-            <h1 className="text-xl lg:text-2xl font-semibold tracking-tight text-foreground">
-              {currentQ
-                ? `Results for "${currentQ}"`
-                : activeCategory !== 'All'
-                  ? tCategory(activeCategory)
-                  : (t('allProducts') || 'All Products')}
+    <div className="min-h-screen bg-surface pb-24 lg:pb-10">
+      <div className="mx-auto max-w-[1440px] px-4 pt-3 sm:px-6 lg:px-8 lg:pt-5">
+        <div className="flex items-end justify-between gap-3 border-b border-border pb-3">
+          <div className="min-w-0">
+            <h1 className="truncate text-lg font-semibold tracking-tight text-foreground lg:text-xl">
+              {title}
             </h1>
-            <p className="text-xs sm:text-sm text-foreground-muted mt-1">
-              {t('ourProductsSub') ||
-                'Authentic goods direct from verified Indian manufacturers. One trusted brand per category.'}
-            </p>
+            {total > 0 && (
+              <p className="mt-0.5 text-xs text-foreground-muted">
+                {total} {total === 1 ? 'product' : 'products'}
+              </p>
+            )}
+          </div>
+
+          <div className="flex shrink-0 items-center gap-2">
+            <button
+              type="button"
+              onClick={() => setFiltersOpen(true)}
+              className="flex min-h-11 items-center gap-1.5 text-sm font-medium text-foreground lg:hidden"
+            >
+              <SlidersHorizontal className="h-4 w-4" aria-hidden />
+              {activeCategory === 'All' ? 'Category' : tCategory(activeCategory)}
+            </button>
+            <select
+              value={currentSort}
+              onChange={(e) => handleSortChange(e.target.value)}
+              aria-label="Sort products"
+              className="h-11 border-0 bg-transparent pr-1 text-sm font-medium text-foreground outline-none"
+            >
+              <option value="featured">Sort: Featured</option>
+              <option value="price_asc">Price: low to high</option>
+              <option value="price_desc">Price: high to low</option>
+            </select>
           </div>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-[260px_1fr] gap-6">
+        <div className="grid grid-cols-1 gap-6 lg:grid-cols-[180px_1fr]">
+          <aside className="hidden lg:block lg:pt-4">{filterControls}</aside>
 
-          {/* Desktop-only sidebar */}
-          <aside className="hidden lg:block">{filterControls}</aside>
-
-          <main className="space-y-4 min-w-0">
-
-            {/* Toolbar */}
-            <div className="sticky top-0 z-20 -mx-4 px-4 py-2.5 bg-background/95 backdrop-blur-sm border-b border-border lg:static lg:mx-0 lg:px-4 lg:py-3.5 lg:bg-surface lg:rounded-lg lg:border lg:border-border lg:shadow-xs lg:backdrop-blur-none">
-              <div className="flex items-center justify-between gap-3">
-                <div className="text-xs font-medium text-foreground shrink-0">
-                  {total > 0 && (
-                    <>
-                      <strong className="text-primary font-semibold">{total}</strong>
-                      <span className="hidden sm:inline"> {t('items') || 'products'}</span>
-                    </>
-                  )}
-                </div>
-
-                <div className="flex items-center gap-2 min-w-0">
-                  {/* Mobile filters button */}
-                  <button
-                    onClick={() => setFiltersOpen(true)}
-                    className="lg:hidden inline-flex items-center gap-1.5 px-3 py-2 rounded-lg border border-border bg-surface text-xs font-medium text-foreground active:scale-95 transition-transform min-h-[44px]"
-                  >
-                    <SlidersHorizontal className="w-3.5 h-3.5" />
-                    <span>{t('filters') || 'Filters'}</span>
-                    {activeFilterCount > 0 && (
-                      <span className="ml-0.5 w-4 h-4 rounded-full bg-primary text-on-primary text-xs font-semibold grid place-items-center">
-                        {activeFilterCount}
-                      </span>
-                    )}
-                  </button>
-
-                  {/* Desktop sort select */}
-                  <select
-                    value={activeSort}
-                    onChange={(e) => handleSortChange(e.target.value)}
-                    aria-label="Sort products"
-                    className="hidden lg:block px-2.5 py-2 rounded-lg border border-border text-xs font-medium text-foreground bg-surface focus:border-primary outline-none min-h-[44px]"
-                  >
-                    <option value="featured">{t('sortFeatured') || 'Featured'}</option>
-                    <option value="price_asc">{t('sortPriceAsc') || 'Price: Low to High'}</option>
-                    <option value="price_desc">{t('sortPriceDesc') || 'Price: High to Low'}</option>
-                  </select>
-
-                  {activeFilterCount > 0 && (
-                    <button
-                      onClick={handleClearFilters}
-                      className="hidden lg:flex text-xs font-medium text-error hover:underline items-center gap-1 min-h-[44px]"
-                    >
-                      <X className="w-3.5 h-3.5" />
-                      <span>{t('clearFilters') || 'Clear'}</span>
-                    </button>
-                  )}
-                </div>
-              </div>
-            </div>
-
-            {/* Pending overlay: show skeleton while the server is re-rendering */}
+          <main className="min-w-0 pt-3">
             {isPending ? (
               <ProductGridSkeleton count={8} />
             ) : initialProducts.length === 0 ? (
-              <div className="bg-surface rounded-lg border border-border p-10 text-center space-y-4 shadow-xs">
-                <div className="w-14 h-14 rounded-lg bg-surface-muted flex items-center justify-center mx-auto border border-border">
-                  <svg className="w-7 h-7 text-foreground-muted" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                  </svg>
-                </div>
-                <h3 className="text-base font-semibold text-foreground">
-                  {t('noProductsFound') || 'No products match your filters'}
-                </h3>
-                <p className="text-xs text-foreground-muted max-w-sm mx-auto">
-                  {t('noProductsFoundSub') || 'Try clearing your search or choosing a different category.'}
+              <div className="py-16 text-center">
+                <p className="text-sm font-semibold text-foreground">
+                  {t('noProductsFound') || 'Nothing here yet'}
                 </p>
-                <button
-                  onClick={handleClearFilters}
-                  className="px-5 py-2.5 bg-primary text-on-primary text-xs font-medium rounded-lg shadow-xs hover:bg-primary-hover transition-colors min-h-[44px]"
-                >
-                  {t('clearFilters') || 'Reset filters'}
-                </button>
+                <p className="mt-1 text-xs text-foreground-muted">
+                  {t('noProductsFoundSub') || 'Try another category.'}
+                </p>
+                {activeCategory !== 'All' && (
+                  <button
+                    type="button"
+                    onClick={() => handleCategoryChange('All')}
+                    className="mt-4 text-sm font-semibold text-primary underline-offset-2 hover:underline"
+                  >
+                    Show everything
+                  </button>
+                )}
               </div>
             ) : (
               <>
-                {/* Product grid — reserved aspect-ratio prevents CLS */}
-                <div className="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-4">
+                <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4 xl:grid-cols-4">
                   {initialProducts.map((prod) => (
                     <ProductCard key={prod.id} product={prod} />
                   ))}
                 </div>
-
-                {/* Pagination */}
-                <PaginationBar
-                  page={page}
-                  hasMore={hasMore}
-                  total={total}
-                  pageSize={pageSize}
-                />
+                <PaginationBar page={page} hasMore={hasMore} total={total} pageSize={pageSize} />
               </>
             )}
-
           </main>
         </div>
       </div>
 
-      {/* Mobile filter sheet */}
-      <Sheet
-        isOpen={filtersOpen}
-        onClose={() => setFiltersOpen(false)}
-        title={t('filters') || 'Filters'}
-      >
-        <div className="p-4 pb-[max(1rem,env(safe-area-inset-bottom))] space-y-4">
-          {activeFilterCount > 0 && (
-            <div className="flex justify-end">
-              <button
-                onClick={() => { handleClearFilters(); setFiltersOpen(false); }}
-                className="text-xs font-medium text-error hover:underline cursor-pointer"
-              >
-                {t('clearFilters') || 'Clear all filters'}
-              </button>
-            </div>
-          )}
-          {filterControls}
-        </div>
+      <Sheet isOpen={filtersOpen} onClose={() => setFiltersOpen(false)} title="Category">
+        <div className="px-2 pb-[max(1rem,env(safe-area-inset-bottom))] py-2">{filterControls}</div>
       </Sheet>
     </div>
   );
@@ -324,7 +197,7 @@ function ProductsScreenContent({
 
 export default function ProductsClient(props: ProductsClientProps) {
   return (
-    <Suspense fallback={<div className="min-h-screen bg-background" />}>
+    <Suspense fallback={<div className="min-h-screen bg-surface" />}>
       <ProductsScreenContent {...props} />
     </Suspense>
   );

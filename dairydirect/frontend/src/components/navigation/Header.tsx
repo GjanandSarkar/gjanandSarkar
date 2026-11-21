@@ -1,552 +1,319 @@
 "use client";
 
-import React, { useState, useEffect, useRef, Suspense } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
-import { ThemeToggle } from '@/components/theme/ThemeToggle';
-import { useRouter, useSearchParams } from 'next/navigation';
-import {
-  Search,
-  Store,
-  Package,
-  Heart,
-  ShoppingCart,
-  User,
-  ChevronDown,
-  Check,
-  Sparkles,
-  MapPin,
-  LogOut,
-  Plus
-} from 'lucide-react';
+import { useRouter } from 'next/navigation';
+import { ChevronDown, MapPin, Search, ShoppingCart, User, X, LogOut, Package, Heart, Store, Shield } from 'lucide-react';
 import { useStore } from '@/store/useStore';
 import { useCartDetails } from '@/hooks/useCartDetails';
-import { getUserAddresses, normalizeUserAddress, type UserAddress } from '@/lib/api/addresses';
-import { useTranslation, type Language } from '@/lib/i18n';
+import { getUserAddresses, type UserAddress } from '@/lib/api/addresses';
 
-function HeaderContent() {
+/**
+ * Storefront header — one job per element.
+ *
+ * Modelled on the quick-commerce grammar customers already know: brand,
+ * delivery promise + address, search, account, cart. Nothing else lives here.
+ * The language switcher, theme toggle, seller portal link, trust badges and
+ * wishlist moved into the account menu / footer so the first screen belongs to
+ * the products.
+ *
+ * Density notes:
+ *  - 60px tall on desktop, 56px + a 48px search row on phones.
+ *  - Text-only wordmark: the old 263 KB PNG logo was the largest image on the
+ *    critical path and pushed the search box down.
+ *  - Search is a quiet grey field with no coloured submit button; Enter and the
+ *    leading icon both submit.
+ */
+function HeaderInner() {
   const router = useRouter();
-  const searchParams = useSearchParams();
-  const user = useStore((state) => state.user);
-  const storeLogout = useStore((state) => state.logout);
-  const wishlist = useStore((state) => state.wishlist);
-  const checkoutAddressId = useStore((state) => state.checkoutAddressId);
-  const setCheckoutAddressId = useStore((state) => state.setCheckoutAddressId);
-  const setLanguage = useStore((state) => state.setLanguage);
+  const user = useStore((s) => s.user);
+  const logout = useStore((s) => s.logout);
+  const checkoutAddressId = useStore((s) => s.checkoutAddressId);
+  const setCheckoutAddressId = useStore((s) => s.setCheckoutAddressId);
   const { totalItems } = useCartDetails();
-  const { t, language } = useTranslation();
 
   const [mounted, setMounted] = useState(false);
-  const [searchTerm, setSearchTerm] = useState('');
-  const [isProfileOpen, setIsProfileOpen] = useState(false);
-  const [isAddressOpen, setIsAddressOpen] = useState(false);
-  const [userAddresses, setUserAddresses] = useState<UserAddress[]>([]);
+  const [term, setTerm] = useState('');
+  const [addressOpen, setAddressOpen] = useState(false);
+  const [accountOpen, setAccountOpen] = useState(false);
+  const [addresses, setAddresses] = useState<UserAddress[]>([]);
+  const addressRef = useRef<HTMLDivElement>(null);
+  const accountRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => setMounted(true), []);
+
+  // Read the term from the URL after mount rather than with useSearchParams:
+  // that hook suspends the whole header on static pages, so the bar only
+  // appeared once the JS bundle had downloaded — on a slow phone, a blank
+  // strip above the fold.
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const q = params.get('search') || params.get('q');
+    if (q) setTerm(q);
+  }, []);
 
   useEffect(() => {
-    setMounted(true);
+    if (!user?.id) {
+      setAddresses([]);
+      return;
+    }
+    let alive = true;
+    getUserAddresses(user.id)
+      .then((rows) => {
+        if (alive && rows?.length) setAddresses(rows);
+      })
+      .catch(() => {});
+    return () => {
+      alive = false;
+    };
+  }, [user?.id]);
+
+  useEffect(() => {
+    function onPointerDown(event: MouseEvent) {
+      if (addressRef.current && !addressRef.current.contains(event.target as Node)) setAddressOpen(false);
+      if (accountRef.current && !accountRef.current.contains(event.target as Node)) setAccountOpen(false);
+    }
+    document.addEventListener('mousedown', onPointerDown);
+    return () => document.removeEventListener('mousedown', onPointerDown);
   }, []);
 
   const activeUser = mounted ? user : null;
+  const activeAddress =
+    addresses.find((a) => a.id === checkoutAddressId) ?? addresses.find((a) => a.is_default) ?? addresses[0] ?? null;
 
-  const profileDropdownRef = useRef<HTMLDivElement>(null);
-  const addressDropdownRef = useRef<HTMLDivElement>(null);
-  const profileTimeoutRef = useRef<NodeJS.Timeout | null>(null);
-  const addressTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  function submitSearch(event: React.FormEvent) {
+    event.preventDefault();
+    const q = term.trim();
+    router.push(q ? `/search?search=${encodeURIComponent(q)}` : '/products');
+  }
 
-
-  // Fetch addresses when user is logged in
-  useEffect(() => {
-    if (user?.id) {
-      getUserAddresses(user.id).then((addrs) => {
-        if (addrs && addrs.length > 0) {
-          setUserAddresses(addrs);
-        } else if (user.saved_addresses && user.saved_addresses.length > 0) {
-          setUserAddresses(
-            user.saved_addresses.map((a, i) =>
-              normalizeUserAddress({
-                id: `saved-${i}`,
-                user_id: user.id,
-                label: a.label,
-                address: a.address,
-                is_default: i === 0,
-                created_at: new Date().toISOString(),
-              })
-            )
-          );
-        }
-      });
-    } else {
-      setUserAddresses([]);
-    }
-  }, [user?.id, user?.saved_addresses]);
-
-  // Synchronize search term with URL parameters
-  useEffect(() => {
-    const q = searchParams.get('search') || searchParams.get('q');
-    if (q !== null && q !== undefined) {
-      setSearchTerm(q);
-    }
-  }, [searchParams]);
-
-  // Close dropdowns on outside click
-  useEffect(() => {
-    function handleClickOutside(event: MouseEvent) {
-      if (profileDropdownRef.current && !profileDropdownRef.current.contains(event.target as Node)) {
-        setIsProfileOpen(false);
-      }
-      if (addressDropdownRef.current && !addressDropdownRef.current.contains(event.target as Node)) {
-        setIsAddressOpen(false);
-      }
-    }
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
-      if (profileTimeoutRef.current) clearTimeout(profileTimeoutRef.current);
-      if (addressTimeoutRef.current) clearTimeout(addressTimeoutRef.current);
-    };
-  }, []);
-
-  const handleProfileMouseEnter = () => {
-    if (profileTimeoutRef.current) clearTimeout(profileTimeoutRef.current);
-    setIsProfileOpen(true);
-  };
-
-  const handleProfileMouseLeave = () => {
-    profileTimeoutRef.current = setTimeout(() => {
-      setIsProfileOpen(false);
-    }, 180);
-  };
-
-  const handleAddressMouseEnter = () => {
-    if (addressTimeoutRef.current) clearTimeout(addressTimeoutRef.current);
-    setIsAddressOpen(true);
-  };
-
-  const handleAddressMouseLeave = () => {
-    addressTimeoutRef.current = setTimeout(() => {
-      setIsAddressOpen(false);
-    }, 180);
-  };
-
-  const handleLogout = async () => {
-    setIsProfileOpen(false);
+  async function handleLogout() {
+    setAccountOpen(false);
     try {
       const { logout: apiLogout } = await import('@/lib/api/auth');
       await apiLogout();
-    } catch (e) {
-      console.error('Logout error', e);
-    }
-    storeLogout();
+    } catch {}
+    logout();
     router.push('/login');
     router.refresh();
-  };
-
-
-  const handleSearch = (e: React.FormEvent) => {
-    e.preventDefault();
-    const queryParams = new URLSearchParams();
-    if (searchTerm.trim()) {
-      queryParams.set('search', searchTerm.trim());
-    }
-    const queryStr = queryParams.toString();
-    router.push(`/search${queryStr ? `?${queryStr}` : ''}`);
-  };
-
-  // Find active selected address
-  const activeAddress = userAddresses.find(a => a.id === checkoutAddressId || a.label === checkoutAddressId)
-    || userAddresses.find(a => a.is_default)
-    || userAddresses[0]
-    || (user?.address ? { id: 'default-profile', label: 'Default', address: user.address, user_id: user.id, lat: null, lng: null, is_default: true, created_at: '' } : null);
-
-  /* One shared search form, rendered inline on desktop and as its own
-     full-width row on phones. The header used to put the logo, the search box
-     and the account/cart actions on a single row at EVERY breakpoint, so on a
-     360px screen the search was squeezed into roughly 100px: the placeholder
-     was unreadable and the gold submit button was clipped. */
-  const searchForm = (
-    <form
-      onSubmit={handleSearch}
-      className="w-full relative flex items-center bg-surface-muted/80 border border-border-hover rounded-lg overflow-visible focus-within:border-secondary focus-within:ring-1 focus-within:ring-secondary transition-all"
-    >
-      <input
-        type="text"
-        value={searchTerm}
-        onChange={(e) => setSearchTerm(e.target.value)}
-        placeholder={t('searchPlaceholder') || "Search products, brands and more"}
-        aria-label={t('search') || "Search products"}
-        className="flex-1 min-w-0 px-3 md:px-4 py-2.5 text-sm bg-transparent text-foreground placeholder-foreground-muted outline-none rounded-l-lg"
-      />
-      <button
-        type="submit"
-        className="bg-secondary hover:bg-secondary-hover text-white px-4 h-11 min-w-[48px] flex items-center justify-center transition-colors shrink-0 rounded-r-lg cursor-pointer"
-        aria-label={t('search') || "Search"}
-      >
-        <Search className="w-4 h-4 stroke-[2.5]" />
-      </button>
-    </form>
-  );
+  }
 
   return (
-    <header className="sticky top-0 w-full z-40 bg-surface border-b border-border/80 shadow-xs">
-      <div className="max-w-[1440px] mx-auto px-4 md:px-8 h-18 md:h-20 flex items-center justify-between gap-3 md:gap-8">
-
-        {/* ── Brand Logo ── */}
-        <Link href="/home" className="flex items-center gap-2 shrink-0 group active:scale-95 transition-transform">
-          <div className="relative flex items-center">
-            <img
-              src="/application logo/gjanand sarkar logo.png"
-              alt="Gjanand Sarkar"
-              className="h-12 md:h-14 w-auto object-contain drop-shadow-xs"
-              onError={(e) => {
-                (e.target as HTMLElement).style.display = 'none';
-              }}
-            />
-            <div className="flex flex-col">
-              <span className="text-xl md:text-2xl font-semibold tracking-tight leading-none">
-                <span className="text-primary">Gjanand</span>
-              </span>
-              <span className="text-xs md:text-xs tracking-[0.2em] font-semibold text-secondary uppercase text-right leading-none mt-0.5">
-                SARKAR
-              </span>
-            </div>
-          </div>
-        </Link>
-
-        {/* ── Search Bar (desktop/tablet: inline) ── */}
-        <div className="hidden md:flex flex-1 max-w-2xl mx-auto">{searchForm}</div>
-
-        {/* ── Right Quick Actions ── */}
-        <div className="flex items-center gap-4 md:gap-6 shrink-0">
-
-          {/* Become Seller / Seller Portal */}
-          <Link
-            href={activeUser?.role === 'seller' ? "/seller/dashboard" : activeUser?.role === 'admin' ? "/admin/products" : "/become-seller"}
-            className="hidden lg:flex flex-col items-center justify-center text-foreground hover:text-primary transition-colors group"
-          >
-            <Store className="w-5 h-5 text-foreground-muted group-hover:text-primary transition-colors" />
-            <span className="text-xs font-medium mt-0.5 whitespace-nowrap">
-              {activeUser?.role === 'seller' ? (t('sellerHub') || 'Seller Hub') : activeUser?.role === 'admin' ? (t('adminPortal') || 'Admin Panel') : (t('partnerWithUs') || 'Become Seller')}
+    <header className="sticky top-0 z-40 w-full bg-surface border-b border-border">
+      <div className="max-w-[1440px] mx-auto px-4 md:px-6">
+        {/* ── Row 1 ─────────────────────────────────────────────────────── */}
+        <div className="flex items-center gap-3 md:gap-6 h-14 md:h-16">
+          <Link href="/home" className="shrink-0 leading-none" aria-label="Gjanand Sarkar home">
+            <span className="block text-[21px] md:text-[23px] font-extrabold tracking-[-0.03em] text-primary">
+              Gjanand
+            </span>
+            <span className="hidden sm:block text-[9px] font-bold tracking-[0.22em] text-foreground-muted mt-0.5">
+              SARKAR
             </span>
           </Link>
 
-          {/* Language Switcher Pill */}
-          <div className="flex items-center rounded-lg border border-border bg-surface-muted p-0.5 text-xs font-semibold">
-            {(['en', 'hi', 'gu'] as const).map((l) => (
-              <button
-                key={l}
-                type="button"
-                onClick={() => setLanguage(l)}
-                className={`px-2 py-1 rounded text-xs transition-colors cursor-pointer ${
-                  language === l
-                    ? 'bg-primary text-on-primary font-bold shadow-2xs'
-                    : 'text-foreground-muted hover:text-foreground'
-                }`}
-                title={l === 'en' ? 'English' : l === 'hi' ? 'हिन्दी (Hindi)' : 'ગુજરાતી (Gujarati)'}
-                aria-label={`Switch language to ${l}`}
-              >
-                {l === 'en' ? 'EN' : l === 'hi' ? 'हि' : 'ગુ'}
-              </button>
-            ))}
-          </div>
-
-          <ThemeToggle />
-
-
-          {/* ── Delivery Address Selection (ONLY VISIBLE WHEN LOGGED IN) ── */}
-          {activeUser && (
-            <div
-              ref={addressDropdownRef}
-              onMouseEnter={handleAddressMouseEnter}
-              onMouseLeave={handleAddressMouseLeave}
-              className="relative hidden sm:block"
+          {/* Delivery promise + address */}
+          <div ref={addressRef} className="relative shrink-0">
+            <button
+              type="button"
+              onClick={() => (activeUser ? setAddressOpen((v) => !v) : router.push('/login?redirect=%2Fhome'))}
+              className="flex flex-col items-start justify-center max-w-[150px] sm:max-w-[210px] text-left min-h-[44px] rounded-lg px-1 hover:bg-surface-muted transition-colors"
+              aria-haspopup={activeUser ? 'dialog' : undefined}
+              aria-expanded={activeUser ? addressOpen : undefined}
             >
-              <button
-                type="button"
-                onClick={() => setIsAddressOpen(!isAddressOpen)}
-                className="flex items-center gap-2 px-2.5 py-1.5 rounded-lg hover:bg-surface-muted transition-colors text-left group cursor-pointer border border-transparent hover:border-border min-h-[44px]"
-                aria-label="Select delivery address"
-              >
-                <div className="w-8 h-8 rounded-full bg-surface-muted text-primary flex items-center justify-center shrink-0 border border-border">
-                  <MapPin className="w-4 h-4 text-primary" />
-                </div>
-                <div className="flex flex-col max-w-[130px] lg:max-w-[170px]">
-                  <span className="text-xs font-medium text-foreground-muted flex items-center gap-1">
-                    {t('deliverTo') || 'Deliver to'} {activeUser.name ? activeUser.name.split(' ')[0] : ''}
-                    <ChevronDown className={`w-3 h-3 text-foreground-muted transition-transform duration-200 ${isAddressOpen ? 'rotate-180' : ''}`} />
-                  </span>
-                  <span className="text-xs font-semibold text-foreground truncate">
-                    {activeAddress ? `${activeAddress.label}: ${activeAddress.address}` : (t('selectAddress') || 'Select Address')}
-                  </span>
-                </div>
-              </button>
+              <span className="text-[11px] font-bold text-primary leading-none">Before 8 AM</span>
+              <span className="flex items-center gap-0.5 text-[12px] font-semibold text-foreground leading-tight mt-1 truncate">
+                <MapPin className="w-3 h-3 shrink-0 text-foreground-muted" aria-hidden />
+                {activeAddress ? activeAddress.label : activeUser ? 'Add address' : 'Set location'}
+                <ChevronDown className="w-3 h-3 shrink-0 text-foreground-muted" aria-hidden />
+              </span>
+            </button>
 
-              {/* Address Selection Dropdown Menu */}
-              {isAddressOpen && (
-                <div className="absolute right-0 top-full mt-2 w-80 bg-surface rounded-xl shadow-lg border border-border py-2.5 z-50 animate-in fade-in slide-in-from-top-1">
-                  <div className="px-4 py-2 border-b border-border flex items-center justify-between">
-                    <span className="text-xs font-semibold text-foreground flex items-center gap-1.5">
-                      <MapPin className="w-3.5 h-3.5 text-primary" />
-                      {t('deliveryAddresses') || 'Delivery Addresses'}
-                    </span>
-                    <Link
-                      href="/profile/saved-addresses"
-                      onClick={() => setIsAddressOpen(false)}
-                      className="text-xs font-medium text-primary hover:underline"
-                    >
-                      {t('manage') || 'Manage'}
+            {addressOpen && activeUser && (
+              <div className="absolute left-0 top-full mt-2 w-[300px] rounded-xl border border-border bg-surface shadow-lg p-2 z-50">
+                <div className="flex items-center justify-between px-2 py-1.5">
+                  <span className="text-[11px] font-bold uppercase tracking-wider text-foreground-muted">Deliver to</span>
+                  <Link href="/profile/saved-addresses" className="text-[11px] font-bold text-primary hover:underline">
+                    Manage
+                  </Link>
+                </div>
+                {addresses.length === 0 ? (
+                  <p className="px-2 py-3 text-[12px] text-foreground-muted">
+                    No saved address yet.{' '}
+                    <Link href="/profile/saved-addresses" className="font-bold text-primary hover:underline">
+                      Add one
                     </Link>
-                  </div>
-
-                  <div className="max-h-60 overflow-y-auto p-1.5 space-y-1">
-                    {userAddresses.length > 0 ? (
-                      userAddresses.map((addr, idx) => {
-                        const isSelected = activeAddress?.id === addr.id || (activeAddress?.label === addr.label && activeAddress?.address === addr.address);
-                        return (
-                          <button
-                            key={addr.id || `addr-${idx}-${addr.label}`}
-                            type="button"
-                            onClick={() => {
-                              setCheckoutAddressId(addr.id || addr.label);
-                              setIsAddressOpen(false);
-                            }}
-                            className={`w-full flex items-start justify-between p-2.5 rounded-lg transition-colors text-left cursor-pointer min-h-[44px] ${isSelected
-                                ? 'bg-surface-muted border border-border text-primary'
-                                : 'hover:bg-surface-muted text-foreground'
-                              }`}
-                          >
-                            <div className="min-w-0 pr-2">
-                              <div className="flex items-center gap-2">
-                                <span className="text-xs font-semibold text-foreground">{addr.label}</span>
-                                {addr.is_default && (
-                                  <span className="text-xs bg-surface-muted text-primary px-1.5 py-0.5 rounded-full border border-border font-medium">
-                                    Default
-                                  </span>
-                                )}
-                              </div>
-                              <p className="text-xs text-foreground-muted line-clamp-2 mt-0.5">{addr.address}</p>
-                            </div>
-                            {isSelected && (
-                              <Check className="w-4 h-4 text-primary shrink-0 mt-1" />
-                            )}
-                          </button>
-                        );
-                      })
-                    ) : (
-                      <div className="p-4 text-center">
-                        <p className="text-xs text-foreground-muted">No saved addresses found</p>
-                        <Link
-                          href="/profile/saved-addresses"
-                          onClick={() => setIsAddressOpen(false)}
-                          className="mt-2 inline-flex items-center gap-1 text-xs font-medium text-primary hover:underline"
-                        >
-                          <Plus className="w-3.5 h-3.5" />
-                          Add Your First Address
-                        </Link>
-                      </div>
-                    )}
-                  </div>
-
-                  <div className="px-3 pt-2 border-t border-border">
-                    <Link
-                      href="/profile/saved-addresses"
-                      onClick={() => setIsAddressOpen(false)}
-                      className="w-full flex items-center justify-center gap-1.5 py-2 text-xs font-medium text-primary bg-surface-muted hover:bg-border rounded-lg transition-colors min-h-[44px]"
-                    >
-                      <Plus className="w-3.5 h-3.5" />
-                      Add New Delivery Address
-                    </Link>
-                  </div>
-                </div>
-              )}
-            </div>
-          )}
-
-          {/* Cart - only visible when user has items in cart */}
-          {totalItems > 0 && (
-            <Link
-              href="/cart"
-              className="flex flex-col items-center justify-center text-foreground hover:text-primary transition-colors relative group min-h-[44px] min-w-[44px] animate-in fade-in zoom-in-95 duration-200"
-              aria-label="View Cart"
-            >
-              <div className="relative">
-                <ShoppingCart className="w-5 h-5 text-foreground group-hover:text-primary transition-colors" />
-                <span className="absolute -top-2 -right-2.5 bg-primary text-on-primary text-xs font-semibold w-4.5 h-4.5 rounded-full flex items-center justify-center shadow-xs">
-                  {totalItems}
-                </span>
-              </div>
-              <span className="text-xs font-medium mt-0.5">{t('cart') || 'Cart'}</span>
-            </Link>
-          )}
-
-          {/* ── User Profile with Hover Dropdown ── */}
-          <div
-            ref={profileDropdownRef}
-            onMouseEnter={handleProfileMouseEnter}
-            onMouseLeave={handleProfileMouseLeave}
-            className="relative"
-          >
-            <Link
-              href={activeUser ? "/profile" : "/login"}
-              className="flex flex-col items-center justify-center text-foreground hover:text-primary transition-colors group cursor-pointer"
-            >
-              <div className="w-7 h-7 rounded-full bg-surface-muted flex items-center justify-center overflow-hidden border border-border group-hover:border-primary transition-colors shadow-2xs">
-                <img
-                  src={activeUser?.avatar_url || '/profile/profile.jpg'}
-                  alt={activeUser?.name || "Profile"}
-                  className="w-full h-full object-cover"
-                  referrerPolicy="no-referrer"
-                  onError={(e) => {
-                    (e.currentTarget as HTMLImageElement).src = '/profile/profile.jpg';
-                  }}
-                />
-              </div>
-              <div className="flex items-center gap-0.5 mt-0.5">
-                <span className="text-xs font-medium text-foreground group-hover:text-primary whitespace-nowrap">
-                  {activeUser ? (activeUser.name ? activeUser.name.split(' ')[0] : (t('account') || 'Account')) : (t('loginSignUp') || 'Login / Sign up')}
-                </span>
-                {activeUser && (
-                  <ChevronDown className={`w-3 h-3 text-foreground-muted transition-transform duration-200 ${isProfileOpen ? 'rotate-180' : ''}`} />
-                )}
-              </div>
-            </Link>
-
-            {/* Profile Dropdown Menu */}
-            {isProfileOpen && (
-              <div className="absolute right-0 top-full mt-2 w-64 bg-surface rounded-xl shadow-lg border border-border py-2 z-50 animate-in fade-in slide-in-from-top-1 divide-y divide-border">
-                {activeUser ? (
-                  <>
-                    {/* User Profile Header */}
-                    <div className="px-4 py-2.5 bg-surface-muted rounded-t-lg">
-                      <p className="text-xs font-semibold text-foreground truncate">
-                        {activeUser.name || 'Gjanand Customer'}
-                      </p>
-                      <p className="text-xs text-foreground-muted truncate">
-                        {activeUser.phone || activeUser.email || 'Logged In'}
-                      </p>
-                      {activeUser.role && activeUser.role !== 'customer' && (
-                        <span className="inline-block mt-1 text-xs font-medium px-2 py-0.5 bg-primary text-on-primary rounded-full">
-                          {activeUser.role}
-                        </span>
-                      )}
-                    </div>
-
-                    {/* Navigation Options */}
-                    <div className="py-1.5">
-                      <Link
-                        href="/profile"
-                        onClick={() => setIsProfileOpen(false)}
-                        className="flex items-center gap-3 px-4 py-2 text-xs font-medium text-foreground hover:bg-surface-muted hover:text-primary transition-colors group"
-                      >
-                        <User className="w-4 h-4 text-foreground-muted group-hover:text-primary transition-colors" />
-                        <span>{t('profile') || 'Profile'}</span>
-                      </Link>
-
-                      <Link
-                        href="/orders"
-                        onClick={() => setIsProfileOpen(false)}
-                        className="flex items-center gap-3 px-4 py-2 text-xs font-medium text-foreground hover:bg-surface-muted hover:text-primary transition-colors group"
-                      >
-                        <Package className="w-4 h-4 text-foreground-muted group-hover:text-primary transition-colors" />
-                        <div className="flex-1 flex items-center justify-between">
-                          <span>{t('orders') || 'Orders'}</span>
-                          <span className="text-xs text-foreground-muted font-normal">{t('trackAndHistory') || 'Track & History'}</span>
-                        </div>
-                      </Link>
-
-                      <Link
-                        href="/wishlist"
-                        onClick={() => setIsProfileOpen(false)}
-                        className="flex items-center gap-3 px-4 py-2 text-xs font-medium text-foreground hover:bg-surface-muted hover:text-primary transition-colors group"
-                      >
-                        <Heart className="w-4 h-4 text-foreground-muted group-hover:text-error transition-colors" />
-                        <div className="flex-1 flex items-center justify-between">
-                          <span>{t('wishlist') || 'Wishlist'}</span>
-                          {wishlist.length > 0 && (
-                            <span className="bg-surface-muted text-foreground text-xs font-medium px-1.5 py-0.5 rounded-full border border-border">
-                              {wishlist.length}
-                            </span>
-                          )}
-                        </div>
-                      </Link>
-
-                      <Link
-                        href="/profile/saved-addresses"
-                        onClick={() => setIsProfileOpen(false)}
-                        className="flex items-center gap-3 px-4 py-2 text-xs font-medium text-foreground hover:bg-surface-muted hover:text-primary transition-colors group"
-                      >
-                        <MapPin className="w-4 h-4 text-foreground-muted group-hover:text-primary transition-colors" />
-                        <span>{t('savedAddresses') || 'Saved Addresses'}</span>
-                      </Link>
-
-                      {activeUser.role === 'seller' && (
-                        <Link
-                          href="/seller/dashboard"
-                          onClick={() => setIsProfileOpen(false)}
-                          className="flex items-center gap-3 px-4 py-2 text-xs font-bold text-primary bg-success-bg/60 hover:bg-success-bg/80 transition-colors"
-                        >
-                          <Store className="w-4 h-4 text-primary" />
-                          <span>{t('sellerHub') || 'Seller Dashboard'}</span>
-                        </Link>
-                      )}
-
-                      {activeUser.role === 'admin' && (
-                        <Link
-                          href="/admin/products"
-                          onClick={() => setIsProfileOpen(false)}
-                          className="flex items-center gap-3 px-4 py-2 text-xs font-bold text-purple-700 bg-purple-50/60 hover:bg-purple-100/80 transition-colors"
-                        >
-                          <Store className="w-4 h-4 text-purple-700" />
-                          <span>{t('adminPortal') || 'Admin Console'}</span>
-                        </Link>
-                      )}
-                    </div>
-
-                    {/* Logout Option */}
-                    <div className="pt-1">
-                      <button
-                        type="button"
-                        onClick={handleLogout}
-                        className="w-full flex items-center gap-3 px-4 py-2 text-xs font-bold text-error hover:bg-error-bg transition-colors cursor-pointer text-left"
-                      >
-                        <LogOut className="w-4 h-4 text-error" />
-                        <span>{t('logout') || 'Logout'}</span>
-                      </button>
-                    </div>
-                  </>
+                  </p>
                 ) : (
-                  <div className="p-3 text-center">
-                    <p className="text-xs font-bold text-foreground mb-1">Welcome to Gjanand Sarkar</p>
-                    <p className="text-xs text-foreground-muted mb-3">Login to manage orders, wishlist & subscriptions</p>
-                    <Link
-                      href="/login"
-                      onClick={() => setIsProfileOpen(false)}
-                      className="block w-full py-2 bg-primary hover:bg-primary-fixed-dim text-on-primary text-xs font-bold rounded-xl transition-colors text-center"
-                    >
-                      Login / Sign Up
-                    </Link>
-                  </div>
+                  addresses.map((address) => {
+                    const selected = address.id === activeAddress?.id;
+                    return (
+                      <button
+                        key={address.id}
+                        type="button"
+                        onClick={() => {
+                          setCheckoutAddressId(address.id);
+                          setAddressOpen(false);
+                        }}
+                        className={`w-full text-left rounded-lg px-2 py-2 hover:bg-surface-muted ${
+                          selected ? 'bg-surface-muted' : ''
+                        }`}
+                      >
+                        <span className="block text-[12px] font-bold text-foreground">{address.label}</span>
+                        <span className="block text-[11px] text-foreground-muted line-clamp-1">{address.address}</span>
+                      </button>
+                    );
+                  })
                 )}
               </div>
             )}
           </div>
 
-        </div>
-      </div>
+          {/* Search — inline on md+, second row on phones */}
+          <form onSubmit={submitSearch} role="search" className="hidden md:block flex-1 max-w-[640px]">
+            <div className="relative">
+              <Search
+                className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-foreground-muted pointer-events-none"
+                aria-hidden
+              />
+              <input
+                type="search"
+                value={term}
+                onChange={(e) => setTerm(e.target.value)}
+                placeholder="Search milk, curd, paneer, ghee"
+                aria-label="Search products"
+                className="w-full h-10 rounded-[10px] bg-surface-muted pl-9 pr-3 text-[13px] font-medium text-foreground placeholder:text-foreground-muted outline-none border border-transparent focus:border-primary focus:bg-surface"
+              />
+            </div>
+          </form>
 
-      {/* Search gets its own full-width row on phones, where there is no space
-          for it beside the logo and the account actions. */}
-      <div className="md:hidden px-4 pb-3 -mt-1">
-        {searchForm}
+          {/* Account + cart */}
+          <div className="ml-auto flex items-center gap-1 sm:gap-2 shrink-0">
+            <div ref={accountRef} className="relative">
+              <button
+                type="button"
+                onClick={() => setAccountOpen((v) => !v)}
+                className="flex items-center gap-1.5 min-h-[44px] px-2 rounded-lg text-foreground hover:bg-surface-muted"
+                aria-label="Account"
+                aria-expanded={accountOpen}
+              >
+                <User className="w-[18px] h-[18px]" aria-hidden />
+                <span className="hidden lg:inline text-[12px] font-semibold">
+                  {activeUser ? activeUser.name?.split(' ')[0] || 'Account' : 'Login'}
+                </span>
+              </button>
+
+              {accountOpen && (
+                <div className="absolute right-0 top-full mt-2 w-56 rounded-xl border border-border bg-surface shadow-lg p-1.5 z-50">
+                  {activeUser ? (
+                    <>
+                      <div className="px-2.5 py-2">
+                        <p className="text-[13px] font-bold text-foreground truncate">{activeUser.name || 'My account'}</p>
+                        <p className="text-[11px] text-foreground-muted truncate">{activeUser.phone || activeUser.email}</p>
+                      </div>
+                      <MenuLink href="/profile" icon={<User className="w-4 h-4" aria-hidden />} label="Profile" onNavigate={() => setAccountOpen(false)} />
+                      <MenuLink href="/orders" icon={<Package className="w-4 h-4" aria-hidden />} label="Orders" onNavigate={() => setAccountOpen(false)} />
+                      <MenuLink href="/subscribe" icon={<Heart className="w-4 h-4" aria-hidden />} label="My milk plan" onNavigate={() => setAccountOpen(false)} />
+                      {activeUser.role === 'seller' && (
+                        <MenuLink href="/seller/dashboard" icon={<Store className="w-4 h-4" aria-hidden />} label="Seller hub" onNavigate={() => setAccountOpen(false)} />
+                      )}
+                      {activeUser.role === 'admin' && (
+                        <MenuLink href="/admin" icon={<Shield className="w-4 h-4" aria-hidden />} label="Admin console" onNavigate={() => setAccountOpen(false)} />
+                      )}
+                      <button
+                        type="button"
+                        onClick={handleLogout}
+                        className="w-full flex items-center gap-2 rounded-lg px-2.5 py-2 text-[12px] font-semibold text-foreground hover:bg-surface-muted"
+                      >
+                        <LogOut className="w-4 h-4" aria-hidden />
+                        Log out
+                      </button>
+                    </>
+                  ) : (
+                    <>
+                      <p className="px-2.5 py-2 text-[12px] text-foreground-muted">Sign in to order and track deliveries.</p>
+                      <Link
+                        href="/login"
+                        onClick={() => setAccountOpen(false)}
+                        className="block rounded-lg bg-primary px-3 py-2 text-center text-[12px] font-bold text-on-primary hover:bg-primary-hover"
+                      >
+                        Login
+                      </Link>
+                    </>
+                  )}
+                </div>
+              )}
+            </div>
+
+            <Link
+              href="/cart"
+              className="flex items-center gap-1.5 min-h-[44px] px-2 rounded-lg text-foreground hover:bg-surface-muted relative"
+              aria-label={`Cart, ${totalItems} items`}
+            >
+              <ShoppingCart className="w-[18px] h-[18px]" aria-hidden />
+              <span className="hidden lg:inline text-[12px] font-semibold">Cart</span>
+              {totalItems > 0 && (
+                <span className="absolute -top-0.5 right-0 min-w-[16px] h-4 px-1 rounded-full bg-primary text-on-primary text-[9px] font-extrabold grid place-items-center">
+                  {totalItems > 9 ? '9+' : totalItems}
+                </span>
+              )}
+            </Link>
+          </div>
+        </div>
+
+        {/* ── Row 2 (phones): search ─────────────────────────────────────── */}
+        <form onSubmit={submitSearch} role="search" className="md:hidden pb-2.5">
+          <div className="relative">
+            <Search
+              className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-foreground-muted pointer-events-none"
+              aria-hidden
+            />
+            <input
+              type="search"
+              value={term}
+              onChange={(e) => setTerm(e.target.value)}
+              placeholder="Search milk, curd, paneer, ghee"
+              aria-label="Search products"
+              className="w-full h-10 rounded-[10px] bg-surface-muted pl-9 pr-9 text-[13px] font-medium text-foreground placeholder:text-foreground-muted outline-none border border-transparent focus:border-primary focus:bg-surface"
+            />
+            {term && (
+              <button
+                type="button"
+                onClick={() => setTerm('')}
+                aria-label="Clear search"
+                className="absolute right-2 top-1/2 -translate-y-1/2 w-6 h-6 grid place-items-center rounded-full text-foreground-muted hover:bg-surface"
+              >
+                <X className="w-3.5 h-3.5" aria-hidden />
+              </button>
+            )}
+          </div>
+        </form>
       </div>
     </header>
   );
 }
 
-export function Header() {
+function MenuLink({
+  href,
+  icon,
+  label,
+  onNavigate,
+}: {
+  href: string;
+  icon: React.ReactNode;
+  label: string;
+  onNavigate: () => void;
+}) {
   return (
-    <Suspense fallback={
-      <header className="sticky top-0 w-full z-40 bg-surface border-b border-border/80 shadow-xs h-18 md:h-20" />
-    }>
-      <HeaderContent />
-    </Suspense>
+    <Link
+      href={href}
+      onClick={onNavigate}
+      className="w-full flex items-center gap-2 rounded-lg px-2.5 py-2 text-[12px] font-semibold text-foreground hover:bg-surface-muted"
+    >
+      {icon}
+      {label}
+    </Link>
   );
 }
+
+export { HeaderInner as Header };

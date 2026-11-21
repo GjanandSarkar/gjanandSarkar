@@ -1,15 +1,14 @@
 "use client";
 
 import Link from 'next/link';
-import { HeartHandshake, HelpCircle, FileText, Globe } from 'lucide-react';
+import { HeartHandshake, HelpCircle, FileText } from 'lucide-react';
 import { useTranslation } from '@/lib/i18n';
 
 interface QuickActionsProps {
-  onLanguageClick: () => void;
   hideHeader?: boolean;
 }
 
-export function QuickActions({ onLanguageClick, hideHeader = false }: QuickActionsProps) {
+export function QuickActions({ hideHeader = false }: QuickActionsProps) {
   const { t } = useTranslation();
 
   const actions = [
@@ -24,7 +23,7 @@ export function QuickActions({ onLanguageClick, hideHeader = false }: QuickActio
       label: t('helpCentre') || 'Help Center',
       icon: HelpCircle,
       href: '/support',
-      color: 'text-secondary',
+      color: 'text-secondary-ink',
       bg: 'bg-warning-bg',
     },
     {
@@ -33,13 +32,6 @@ export function QuickActions({ onLanguageClick, hideHeader = false }: QuickActio
       href: '/terms',
       color: 'text-primary',
       bg: 'bg-primary/10',
-    },
-    {
-      label: t('languageSettings') || 'Language',
-      icon: Globe,
-      onClick: onLanguageClick,
-      color: 'text-success',
-      bg: 'bg-success-bg',
     },
   ];
 
@@ -63,18 +55,10 @@ export function QuickActions({ onLanguageClick, hideHeader = false }: QuickActio
             </div>
           );
 
-          if (action.href) {
-            return (
-              <Link key={idx} href={action.href} className="block h-full">
-                {Content}
-              </Link>
-            );
-          }
-
           return (
-            <div key={idx} onClick={action.onClick} className="h-full">
+            <Link key={idx} href={action.href} className="block h-full">
               {Content}
-            </div>
+            </Link>
           );
         })}
       </div>

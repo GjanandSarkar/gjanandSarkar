@@ -170,7 +170,7 @@ export function OffersDrawer({
                             Apply
                           </button>
                         ) : (
-                          <span className="text-[11px] font-semibold text-secondary tabular-nums">
+                          <span className="text-[11px] font-semibold text-secondary-ink tabular-nums">
                             Add ₹{Math.round(diff)} more
                           </span>
                         )}

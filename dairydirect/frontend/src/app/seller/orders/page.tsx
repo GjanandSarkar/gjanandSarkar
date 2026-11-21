@@ -38,7 +38,7 @@ export default function SellerOrdersDedicatedPage() {
                 </span>
               </div>
               <h1 className="text-xl sm:text-2xl font-semibold text-primary tracking-tight flex items-center gap-2">
-                <ShoppingBag className="w-6 h-6 text-secondary" />
+                <ShoppingBag className="w-6 h-6 text-secondary-ink" />
                 <span>Seller Order Management</span>
               </h1>
               <p className="text-xs text-foreground-muted">

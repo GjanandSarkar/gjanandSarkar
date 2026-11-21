@@ -35,7 +35,7 @@ export function ProductCarousel({
             {subtitle && (
               <div className="flex items-center gap-2 mb-1">
                 {icon}
-                <span className="text-xs font-semibold uppercase tracking-widest text-secondary">
+                <span className="text-xs font-semibold uppercase tracking-widest text-secondary-ink">
                   {subtitle}
                 </span>
               </div>

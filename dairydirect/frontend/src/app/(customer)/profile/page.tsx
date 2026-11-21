@@ -44,7 +44,6 @@ import {
 } from 'lucide-react';
 import Link from 'next/link';
 import { motion, AnimatePresence } from 'framer-motion';
-import type { Language } from '@/store/useStore';
 
 interface CollapsibleSectionProps {
   title: string;
@@ -127,7 +126,6 @@ export default function ProfileScreen() {
   );
   const isAuthLoading = useStore((s) => s.isAuthLoading);
   const logoutLocal = useStore((s) => s.logout);
-  const setLanguage = useStore((s) => s.setLanguage);
   const updateProfileLocal = useStore((s) => s.updateProfile);
   const addToCartLocal = useStore(state => state.addToCartLocal);
 
@@ -137,7 +135,6 @@ export default function ProfileScreen() {
   const [sellerInquiry, setSellerInquiry] = useState<SellerInquiry | null>(null);
   
   const [isLoading, setIsLoading] = useState(true);
-  const [showLanguageSettings, setShowLanguageSettings] = useState(false);
 
   // Keep track of open state for each collapsible accordion block
   const [openSections, setOpenSections] = useState<Record<string, boolean>>({
@@ -330,7 +327,7 @@ export default function ProfileScreen() {
               className="px-4 py-2.5 bg-primary hover:bg-primary-hover text-on-primary text-xs font-semibold rounded-xl shrink-0 transition-all shadow-2xs flex items-center gap-1"
             >
               <span>{t('applyNow')}</span>
-              <ArrowRight className="w-3.5 h-3.5 text-secondary" />
+              <ArrowRight className="w-3.5 h-3.5 text-secondary-ink" />
             </Link>
           </div>
         )}
@@ -428,10 +425,7 @@ export default function ProfileScreen() {
           onToggle={() => toggleSection('settings')}
         >
           <div className="py-2">
-            <QuickActions 
-              onLanguageClick={() => setShowLanguageSettings(true)} 
-              hideHeader 
-            />
+            <QuickActions hideHeader />
           </div>
         </CollapsibleSection>
 
@@ -440,60 +434,6 @@ export default function ProfileScreen() {
 
       </div>
 
-      {/* Language Modal (Reused from previous design) */}
-      <AnimatePresence>
-        {showLanguageSettings && (
-          <div className="fixed inset-0 z-50 flex items-end justify-center sm:items-center p-4 bg-black/40 backdrop-blur-sm">
-            <motion.div
-              initial={{ opacity: 0, y: 100 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: 100 }}
-              className="bg-surface w-full max-w-sm rounded-xl overflow-hidden shadow-2xl relative"
-            >
-              <div className="flex justify-between items-center p-6 border-b border-sand/50">
-                <h3 className="text-xl font-bold text-dark">{t('languageSettings')}</h3>
-                <button
-                  type="button"
-                  onClick={() => setShowLanguageSettings(false)}
-                  className="w-10 h-10 rounded-full bg-sand/30 flex items-center justify-center text-dark hover:bg-sand/50 transition-colors"
-                >
-                  <X className="w-5 h-5" />
-                </button>
-              </div>
-              <div className="p-4 space-y-2">
-                {[
-                  { code: 'en', label: 'English', sub: 'English' },
-                  { code: 'hi', label: 'हिंदी', sub: 'Hindi' },
-                  { code: 'gu', label: 'ગુજરાતી', sub: 'Gujarati' },
-                ].map((lang) => (
-                  <button
-                    key={lang.code}
-                    onClick={() => {
-                      setLanguage(lang.code as Language);
-                      setTimeout(() => setShowLanguageSettings(false), 300);
-                    }}
-                    className={`w-full flex items-center justify-between p-4 rounded-[16px] border transition-all ${
-                      language === lang.code
-                        ? 'border-primary bg-primary/5 shadow-[0_4px_20px_rgba(63,101,48,0.08)]'
-                        : 'border-transparent bg-surface hover:bg-sand/10'
-                    }`}
-                  >
-                    <div className="text-left">
-                      <span className="block font-bold text-dark text-base">{lang.label}</span>
-                      <span className="block text-xs font-medium text-muted mt-0.5">{lang.sub}</span>
-                    </div>
-                    {language === lang.code && (
-                      <div className="w-6 h-6 rounded-full bg-primary text-on-primary flex items-center justify-center">
-                        <Check className="w-3.5 h-3.5 text-white" />
-                      </div>
-                    )}
-                  </button>
-                ))}
-              </div>
-            </motion.div>
-          </div>
-        )}
-      </AnimatePresence>
     </div>
   );
 }

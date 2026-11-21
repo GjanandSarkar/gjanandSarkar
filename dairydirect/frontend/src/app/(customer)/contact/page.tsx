@@ -82,7 +82,7 @@ export default function ContactPage() {
         
         {/* Header */}
         <div className="text-center max-w-2xl mx-auto mb-12">
-          <span className="text-xs font-semibold uppercase tracking-widest text-secondary">We Are Here For You</span>
+          <span className="text-xs font-semibold uppercase tracking-widest text-secondary-ink">We Are Here For You</span>
           <h1 className="text-3xl sm:text-4xl font-semibold text-primary mt-2 mb-3">
             Contact Customer Support
           </h1>
@@ -125,7 +125,7 @@ export default function ContactPage() {
             {/* Helpline Phone */}
             <div className="bg-surface border border-border rounded-2xl p-5 shadow-xs space-y-3">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-warning-bg/80 text-secondary flex items-center justify-center">
+                <div className="w-10 h-10 rounded-xl bg-warning-bg/80 text-secondary-ink flex items-center justify-center">
                   <Phone className="w-5 h-5" />
                 </div>
                 <div>
@@ -193,7 +193,7 @@ export default function ContactPage() {
                 <button
                   type="button"
                   onClick={() => setSubmitted(false)}
-                  className="mt-2 text-xs font-bold text-secondary hover:underline"
+                  className="mt-2 text-xs font-bold text-secondary-ink hover:underline"
                 >
                   Send another inquiry
                 </button>
@@ -300,7 +300,7 @@ export default function ContactPage() {
                 <ShieldCheck className="w-4 h-4 text-success" />
                 Data encrypted & secure
               </span>
-              <Link href="/faq" className="text-secondary font-bold hover:underline flex items-center gap-1">
+              <Link href="/faq" className="text-secondary-ink font-bold hover:underline flex items-center gap-1">
                 <HelpCircle className="w-3.5 h-3.5" />
                 <span>Check Frequently Asked Questions</span>
               </Link>

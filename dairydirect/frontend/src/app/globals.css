@@ -23,6 +23,7 @@
   --color-secondary: var(--secondary);
   --color-secondary-hover: var(--secondary-hover);
   --color-secondary-bg: var(--secondary-bg);
+  --color-secondary-ink: var(--secondary-ink);
 
   --color-highlight: var(--highlight);
   --color-highlight-hover: var(--highlight-hover);
@@ -61,7 +62,7 @@
   --color-info: var(--info);
   --color-info-bg: var(--info-bg);
 
-  --font-sans: 'Inter', var(--font-inter), system-ui, -apple-system, sans-serif;
+  --font-sans: 'Manrope', var(--font-manrope), system-ui, -apple-system, sans-serif;
 
   /* === Radius Scale === */
   --radius-xs: 4px;
@@ -116,20 +117,30 @@
     --primary-fixed: #e7f7ee;
     --primary-fixed-dim: #c8edd8;
 
-    --cta-gradient: linear-gradient(135deg, #0a7b3e, #0b8c46);
-    --cta-shadow: 0 4px 14px rgba(10, 123, 62, 0.22);
+    --cta-gradient: #0a7b3e;
+    --cta-shadow: 0 1px 2px rgba(16, 22, 19, 0.08);
 
-    /* Amber for deals, ratings and "only 2 left" style urgency. */
-    --secondary: #b45309;
-    --secondary-hover: #98450a;
-    --secondary-bg: #fff6e5;
+    /*
+     * Marigold is the single accent: price drops, offers, "only 2 left".
+     * It is a surface colour, not a text colour — 1.9:1 against white — so it
+     * always carries near-black ink and never sets body copy.
+     */
+    --accent: #f5a524;
+    --accent-hover: #e0930f;
+    --accent-ink: #1a1206;
+    --accent-soft: #fff6e2;
 
-    --highlight: #b45309;
-    --highlight-hover: #98450a;
-    --highlight-bg: #fff6e5;
+    --secondary: #f5a524;
+    --secondary-hover: #e0930f;
+    --secondary-bg: #fff6e2;
+    --secondary-ink: #8a5400;
+
+    --highlight: #f5a524;
+    --highlight-hover: #e0930f;
+    --highlight-bg: #fff6e2;
 
     --on-primary: #ffffff;
-    --on-secondary: #ffffff;
+    --on-secondary: #1a1206;
     --on-success: #ffffff;
     --on-warning: #ffffff;
     --on-error: #ffffff;
@@ -138,7 +149,7 @@
     /* Pure white canvas — the Blinkit/Zepto starting point. */
     --background: #ffffff;
     --surface: #ffffff;
-    --surface-muted: #f4f6f5;
+    --surface-muted: #f5f6f5;
     --surface-elevated: #ffffff;
 
     /* Near-black text, not pure black, for softer halos on OLED. */
@@ -146,8 +157,8 @@
     --foreground-muted: #5b6660;
     --foreground-inverse: #ffffff;
 
-    --border: #e6eae7;
-    --border-hover: #cbd5cf;
+    --border: #eceeec;
+    --border-hover: #d6dad7;
     --ring: rgba(10, 123, 62, 0.28);
 
     --success: #0a7b3e;
@@ -186,6 +197,7 @@
     --secondary: #FFA726;
     --secondary-hover: #FFB74D;
     --secondary-bg: #3D2600;
+    --secondary-ink: #ffcf7a;
 
     --highlight: #FFA726;
     --highlight-hover: #FFB74D;

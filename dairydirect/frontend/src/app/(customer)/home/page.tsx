@@ -1,54 +1,33 @@
 import { getHomeFeed } from '@/lib/api/home';
-import { HeroBanner } from '@/components/home/HeroBanner';
-import { CircularCategories } from '@/components/home/CircularCategories';
-import { TrustBar } from '@/components/home/TrustBar';
-import { DealsAndBrands } from '@/components/home/DealsAndBrands';
-import { HeritageBanner } from '@/components/home/HeritageBanner';
+import { HomeBanner } from '@/components/home/HomeBanner';
+import { CategoryTiles } from '@/components/home/CategoryTiles';
 import { TrendingProducts } from '@/components/home/TrendingProducts';
-import { WhyGjanandSarkar } from '@/components/home/WhyGjanandSarkar';
-import { OneBrandPerCategorySection } from '@/components/home/OneBrandPerCategorySection';
+import { DealsAndBrands } from '@/components/home/DealsAndBrands';
 import { RecommendationRail } from '@/components/discovery/RecommendationRail';
-import { AdSlot } from '@/components/discovery/AdSlot';
-import { LanguageTrustBadge } from '@/components/home/LanguageTrustBadge';
-import { isSectionEnabled } from '@/lib/config/launch';
 
 export const revalidate = 300;
 
+/**
+ * Homepage — commerce only.
+ *
+ * Before: hero + category circles + trust strip + trending + offers + language
+ * badge + a "one brand per category" essay + recommendations + ad slot +
+ * heritage banner + why-us. Ten sections, four of them about the company.
+ *
+ * Now: one banner, categories, two product rails, one personalised rail. The
+ * company story lives on /about, the language switcher in the footer, and
+ * trust proof on the product page where the decision is actually made.
+ */
 export default async function HomeScreen() {
-  // Cached, column-limited feed (see src/lib/api/home.ts).
-  const prods = await getHomeFeed();
+  const products = await getHomeFeed();
 
   return (
-    <div className="flex flex-col w-full overflow-x-hidden bg-background bg-dot-pattern">
-      {/* 0. One focal promise before the grid — dairy, morning, one partner. */}
-      <HeroBanner products={prods.slice(0, 5)} />
-
-      {/* 1. Category Quick Navigation */}
-      <CircularCategories />
-
-      {/* 2. Trust strip */}
-      <TrustBar />
-
-      {/* 3. Real products feed - multiple products first */}
-      <TrendingProducts products={prods} />
-
-      {/* 4. Live discounts & Deals (minimal) */}
-      <DealsAndBrands products={prods} />
-
-      {/* Language Support Badge */}
-      <LanguageTrustBadge />
-
-      {/* 5. One Brand Per Category Marketplace Model */}
-      <OneBrandPerCategorySection />
-
-      {/* 6. Personalised rail */}
+    <div className="flex flex-col w-full overflow-x-hidden bg-surface">
+      <HomeBanner product={products[0]} />
+      <CategoryTiles />
+      <TrendingProducts products={products} />
+      <DealsAndBrands products={products} />
       <RecommendationRail placement="home" limit={8} />
-
-      {/* 7. House promotion slot */}
-      <AdSlot placement="home" />
-
-      {isSectionEnabled('heritageBanner') && <HeritageBanner />}
-      {isSectionEnabled('whyGjanandSarkar') && <WhyGjanandSarkar />}
     </div>
   );
 }

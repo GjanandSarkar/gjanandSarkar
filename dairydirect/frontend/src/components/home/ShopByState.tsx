@@ -66,8 +66,8 @@ export function ShopByState() {
       <div className="flex items-center justify-between pb-4 mb-6 border-b border-border/80">
         <div>
           <div className="flex items-center gap-2 mb-1">
-            <MapPin className="w-4 h-4 text-secondary" />
-            <span className="text-xs font-bold text-secondary uppercase tracking-wider">
+            <MapPin className="w-4 h-4 text-secondary-ink" />
+            <span className="text-xs font-bold text-secondary-ink uppercase tracking-wider">
               Geographical Indications &amp; Traditions
             </span>
           </div>
@@ -81,7 +81,7 @@ export function ShopByState() {
 
         <Link
           href="/products"
-          className="text-xs sm:text-sm font-bold text-secondary hover:text-primary flex items-center gap-1 transition-colors"
+          className="text-xs sm:text-sm font-bold text-secondary-ink hover:text-primary flex items-center gap-1 transition-colors"
         >
           <span>View All States</span>
           <ArrowRight className="w-4 h-4" />
@@ -133,7 +133,7 @@ export function ShopByState() {
                 <div className={`w-10 h-10 rounded-lg font-semibold text-sm flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform ${st.abbrColor}`}>
                   {st.abbr}
                 </div>
-                <span className="text-xs font-bold text-secondary bg-warning-bg px-2 py-0.5 rounded-full">
+                <span className="text-xs font-bold text-secondary-ink bg-warning-bg px-2 py-0.5 rounded-full">
                   {st.badge}
                 </span>
               </div>

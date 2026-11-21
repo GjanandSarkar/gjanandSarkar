@@ -371,15 +371,15 @@ export function SellerOrdersManager({ initialStatusFilter = 'all' }: SellerOrder
           onClick={() => setActiveTab('requests')}
           className={`p-4 rounded-2xl border text-left transition-all cursor-pointer ${
             activeTab === 'requests'
-              ? 'bg-secondary text-white border-secondary shadow-sm'
+              ? 'bg-secondary text-on-secondary border-secondary shadow-sm'
               : 'bg-surface hover:bg-warning-bg/40 border-border text-foreground'
           }`}
         >
           <div className="flex items-center justify-between">
-            <span className={`text-xs font-bold uppercase tracking-wider block ${activeTab === 'requests' ? 'text-warning-bg' : 'text-secondary'}`}>
+            <span className={`text-xs font-bold uppercase tracking-wider block ${activeTab === 'requests' ? 'text-warning-bg' : 'text-secondary-ink'}`}>
               Requests
             </span>
-            <RotateCcw className={`w-3.5 h-3.5 ${activeTab === 'requests' ? 'text-white' : 'text-secondary'}`} />
+            <RotateCcw className={`w-3.5 h-3.5 ${activeTab === 'requests' ? 'text-white' : 'text-secondary-ink'}`} />
           </div>
           <span className="text-2xl font-semibold mt-1 block">{requestsCount}</span>
         </button>
@@ -1123,7 +1123,7 @@ export function SellerOrdersManager({ initialStatusFilter = 'all' }: SellerOrder
                                     ? 'bg-warning-bg text-yellow-900 border-2 border-yellow-500 shadow-2xs cursor-default'
                                     : isBlocked
                                       ? 'bg-surface-muted text-foreground-muted border border-border cursor-not-allowed line-through opacity-50'
-                                      : 'bg-secondary hover:bg-secondary-hover text-white shadow-xs active:scale-95'
+                                      : 'bg-secondary hover:bg-secondary-hover text-on-secondary shadow-xs active:scale-95'
                                 }`}
                               >
                                 {isBusy ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Truck className="w-3.5 h-3.5" />}

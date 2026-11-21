@@ -1,6 +1,8 @@
 import React from 'react';
 import Link from 'next/link';
 import { Metadata } from 'next';
+import { HeritageBanner } from '@/components/home/HeritageBanner';
+import { WhyGjanandSarkar } from '@/components/home/WhyGjanandSarkar';
 import { 
   ShieldCheck, 
   Award, 
@@ -208,6 +210,9 @@ export default function AboutPage() {
       </section>
 
       {/* Partner verification & certifications */}
+      <HeritageBanner />
+      <WhyGjanandSarkar />
+
       <section id="verification" className="max-w-4xl mx-auto px-4 sm:px-6 md:px-8 pt-2 pb-8">
         <div className="bg-surface border border-border rounded-lg p-6 flex flex-col sm:flex-row items-center gap-5 shadow-xs">
           <div className="w-12 h-12 rounded-lg bg-surface-muted text-primary flex items-center justify-center shrink-0 border border-border">

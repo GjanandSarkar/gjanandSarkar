@@ -144,8 +144,8 @@ export function RecommendationRail({
       >
         <div>
           <div className="flex items-center gap-1.5 mb-1">
-            <Sparkles className="w-4 h-4 text-secondary" />
-            <span className="text-xs font-bold text-secondary uppercase tracking-wider">
+            <Sparkles className="w-4 h-4 text-secondary-ink" />
+            <span className="text-xs font-bold text-secondary-ink uppercase tracking-wider">
               {heading.eyebrow}
             </span>
           </div>

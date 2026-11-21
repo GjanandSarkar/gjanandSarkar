@@ -2,12 +2,15 @@ import type { Metadata, Viewport } from "next";
 import localFont from "next/font/local";
 import "./globals.css";
 
-// Self-hosted Inter variable font (single 48KB woff2 covering weights 100-900).
-// Replaces the previous 7 separate static weights fetched from Google Fonts at
-// build time: fewer requests, no third-party dependency, no build-time network call.
-const inter = localFont({
-  src: "../fonts/inter-latin-wght-normal.woff2",
-  variable: "--font-inter",
+// Self-hosted Manrope variable font (one woff2, weights 200-800).
+//
+// Manrope replaced Inter for the product-first rebuild: it is a little more
+// geometric and open at 12-14 px, which is the size the catalogue actually
+// lives at, and its numerals stay legible in dense price grids. Still one
+// local file — no Google Fonts request, no layout-shifting third party.
+const manrope = localFont({
+  src: "../fonts/manrope-latin-wght-normal.woff2",
+  variable: "--font-manrope",
   weight: "100 900",
   display: "swap",
   preload: true,
@@ -50,7 +53,7 @@ export const metadata: Metadata = {
 export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
-  themeColor: "#fafaf3",
+  themeColor: "#ffffff",
 }
 
 import { LanguageManager } from "@/components/shared/LanguageManager";
@@ -88,7 +91,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en-IN" data-scroll-behavior="smooth" className={`${inter.variable}`} suppressHydrationWarning>
+    <html lang="en-IN" data-scroll-behavior="smooth" className={`${manrope.variable}`} suppressHydrationWarning>
       <head>
         <JsonLd data={orgStructuredData} />
         <JsonLd data={webSiteStructuredData} />
@@ -102,7 +105,7 @@ export default function RootLayout({
         />
       </head>
       <body
-        className={`${inter.className} min-h-screen antialiased`}
+        className={`${manrope.className} min-h-screen antialiased`}
         style={{ background: 'var(--background)', color: 'var(--foreground)' }}
         suppressHydrationWarning
       >

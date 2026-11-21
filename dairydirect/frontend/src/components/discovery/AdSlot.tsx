@@ -97,8 +97,8 @@ export function AdSlot({ placement, category, className }: AdSlotProps) {
     >
       <div className="rounded-2xl border border-warning/20/80 bg-gradient-to-br from-amber-50 to-white p-4 sm:p-6">
         <div className="flex items-center gap-2 mb-4">
-          <Megaphone className="w-4 h-4 text-secondary" />
-          <span className="text-xs font-bold uppercase tracking-wider text-secondary">
+          <Megaphone className="w-4 h-4 text-secondary-ink" />
+          <span className="text-xs font-bold uppercase tracking-wider text-secondary-ink">
             {ad.campaignName}
           </span>
           {/* Labelling promoted placements is a legal requirement for

@@ -149,7 +149,7 @@ export default function CartScreen() {
           </div>
         </div>
         <button onClick={handleClearAll}
-          className="text-xs font-semibold px-3 py-1.5 min-h-[44px] rounded-full transition-all active:scale-95 text-error bg-error-bg">
+          className="min-h-[44px] text-xs font-semibold text-error underline-offset-2 hover:underline">
           {t('clearAll')}
         </button>
       </div>
@@ -209,17 +209,17 @@ export default function CartScreen() {
                   </div>
                   
                   <div className="flex flex-wrap items-center gap-2 mb-1">
-                    <span className="inline-block px-2 py-0.5 rounded-full text-xs font-semibold bg-primary-fixed text-primary">
+                    <span className="text-xs font-medium text-foreground-muted">
                       {item.variant.weight}
                     </span>
 
                     {item.isOutOfStock ? (
-                      <span className="inline-block px-2 py-0.5 rounded-lg text-xs font-semibold bg-error-bg text-error">
+                      <span className="text-xs font-semibold text-error">
                         Out of Stock
                       </span>
                     ) : item.isInsufficientStock ? (
                       <div className="flex items-center gap-1.5">
-                        <span className="inline-block px-2 py-0.5 rounded-lg text-xs font-semibold bg-warning-bg text-warning">
+                        <span className="text-xs font-semibold text-secondary-ink">
                           Only {item.availableStock} in stock
                         </span>
                         <button
@@ -231,7 +231,7 @@ export default function CartScreen() {
                         </button>
                       </div>
                     ) : item.availableStock <= 10 ? (
-                      <span className="inline-block px-2 py-0.5 rounded-lg text-xs font-semibold bg-warning-bg text-warning">
+                      <span className="text-xs font-semibold text-secondary-ink">
                         Only {item.availableStock} left
                       </span>
                     ) : null}

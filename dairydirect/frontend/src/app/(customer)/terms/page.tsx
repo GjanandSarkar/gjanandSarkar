@@ -15,7 +15,7 @@ export default function TermsPage() {
         
         {/* Header */}
         <div className="border-b border-border pb-6 mb-8">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-warning-bg text-secondary text-xs font-bold uppercase tracking-wider mb-3">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-warning-bg text-secondary-ink text-xs font-bold uppercase tracking-wider mb-3">
             <Scale className="w-3.5 h-3.5" />
             <span>Legal & Marketplace Agreement</span>
           </div>
@@ -31,7 +31,7 @@ export default function TermsPage() {
           
           <section>
             <h2 className="text-base font-bold text-primary mb-2 flex items-center gap-2">
-              <CheckCircle2 className="w-4 h-4 text-secondary" />
+              <CheckCircle2 className="w-4 h-4 text-secondary-ink" />
               1. Platform Services & Eligibility
             </h2>
             <p>
@@ -44,7 +44,7 @@ export default function TermsPage() {
 
           <section>
             <h2 className="text-base font-bold text-primary mb-2 flex items-center gap-2">
-              <Truck className="w-4 h-4 text-secondary" />
+              <Truck className="w-4 h-4 text-secondary-ink" />
               2. Deliveries, Slots & Cold Chain
             </h2>
             <p>
@@ -60,7 +60,7 @@ export default function TermsPage() {
 
           <section>
             <h2 className="text-base font-bold text-primary mb-2 flex items-center gap-2">
-              <RefreshCw className="w-4 h-4 text-secondary" />
+              <RefreshCw className="w-4 h-4 text-secondary-ink" />
               3. Pricing, Payments & Refunds
             </h2>
             <p>
@@ -74,7 +74,7 @@ export default function TermsPage() {
 
           <section>
             <h2 className="text-base font-bold text-primary mb-2 flex items-center gap-2">
-              <ShieldAlert className="w-4 h-4 text-secondary" />
+              <ShieldAlert className="w-4 h-4 text-secondary-ink" />
               4. Quality & Purity Assurance
             </h2>
             <p>
@@ -88,7 +88,7 @@ export default function TermsPage() {
         </div>
 
         <div className="mt-8 pt-6 border-t border-border flex items-center justify-between text-xs text-foreground-muted">
-          <Link href="/privacy" className="text-secondary font-bold hover:underline">
+          <Link href="/privacy" className="text-secondary-ink font-bold hover:underline">
             ← Read Privacy Policy
           </Link>
           <Link href="/contact" className="hover:text-foreground transition-colors">

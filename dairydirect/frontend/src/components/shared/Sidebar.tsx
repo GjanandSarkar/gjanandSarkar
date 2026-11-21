@@ -67,7 +67,7 @@ export function Sidebar({ items, title }: SidebarProps) {
             <span className="text-xl font-semibold tracking-tight text-primary leading-none">
               Gjanand
             </span>
-            <span className="text-xs font-semibold text-secondary leading-none mt-1">
+            <span className="text-xs font-semibold text-secondary-ink leading-none mt-1">
               SARKAR
             </span>
           </div>

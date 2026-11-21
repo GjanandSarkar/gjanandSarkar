@@ -318,7 +318,7 @@ export default function AdminReturnsPage() {
                 )}
               </div>
               <h1 className="text-xl md:text-2xl font-semibold text-primary tracking-tight flex items-center gap-2 mt-0.5">
-                <RotateCcw className="w-6 h-6 text-secondary" />
+                <RotateCcw className="w-6 h-6 text-secondary-ink" />
                 <span>Returns & Replacements Monitoring Desk</span>
               </h1>
               <p className="text-xs text-foreground-muted mt-0.5">

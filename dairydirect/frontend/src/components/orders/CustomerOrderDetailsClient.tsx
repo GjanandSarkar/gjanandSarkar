@@ -347,7 +347,7 @@ export function CustomerOrderDetailsClient({ initialOrder }: CustomerOrderDetail
               href={`/tracking/${order.id}`}
               className="px-5 py-2.5 bg-primary hover:bg-primary-light text-on-primary text-xs font-bold rounded-xl flex items-center gap-2 shadow-sm transition-all"
             >
-              <Truck className="w-4 h-4 text-secondary" />
+              <Truck className="w-4 h-4 text-secondary-ink" />
               <span>Track Live Delivery</span>
             </Link>
           </div>
@@ -390,7 +390,7 @@ export function CustomerOrderDetailsClient({ initialOrder }: CustomerOrderDetail
         <div className="bg-surface rounded-xl border border-border/80 shadow-2xs overflow-hidden">
           <div className="p-6 border-b border-border flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <ShoppingBag className="w-5 h-5 text-secondary" />
+              <ShoppingBag className="w-5 h-5 text-secondary-ink" />
               <h2 className="text-base font-bold text-foreground">Order Items & Return Actions</h2>
             </div>
             <span className="text-xs font-bold text-foreground-muted">
@@ -536,7 +536,7 @@ export function CustomerOrderDetailsClient({ initialOrder }: CustomerOrderDetail
                               href={`/returns?orderItemId=${item.id}&type=replacement`}
                               className="px-3 py-1.5 rounded-xl bg-primary hover:bg-primary-light text-on-primary text-xs font-bold flex items-center gap-1 transition-colors shadow-2xs"
                             >
-                              <RefreshCw className="w-3.5 h-3.5 text-secondary" />
+                              <RefreshCw className="w-3.5 h-3.5 text-secondary-ink" />
                               <span>Replace</span>
                             </Link>
                           </>
@@ -855,7 +855,7 @@ export function CustomerOrderDetailsClient({ initialOrder }: CustomerOrderDetail
                         </div>
                       ) : (
                         <div className="flex items-center gap-2 text-xs font-semibold text-foreground-muted">
-                          <Upload className="w-4 h-4 text-secondary" />
+                          <Upload className="w-4 h-4 text-secondary-ink" />
                           <span>Attach multiple photos of product defect / issue</span>
                         </div>
                       )}

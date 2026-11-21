@@ -138,7 +138,7 @@ export default function FAQPage() {
                   </span>
                   <ChevronDown
                     className={`w-4 h-4 text-foreground-muted shrink-0 transition-transform duration-200 ${
-                      isOpen ? 'rotate-180 text-secondary' : ''
+                      isOpen ? 'rotate-180 text-secondary-ink' : ''
                     }`}
                   />
                 </button>
@@ -166,7 +166,7 @@ export default function FAQPage() {
           </div>
           <Link
             href="/contact"
-            className="px-6 py-3 bg-secondary hover:bg-secondary-hover text-white text-xs font-semibold rounded-xl transition-all shadow-md shrink-0 flex items-center gap-2"
+            className="px-6 py-3 bg-secondary hover:bg-secondary-hover text-on-secondary text-xs font-semibold rounded-xl transition-all shadow-md shrink-0 flex items-center gap-2"
           >
             <PhoneCall className="w-4 h-4" />
             <span>Contact Support</span>

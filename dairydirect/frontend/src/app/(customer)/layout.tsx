@@ -1,5 +1,4 @@
 import React from 'react';
-import { TopBar } from '@/components/navigation/TopBar';
 import { Header } from '@/components/navigation/Header';
 import { CategoryNavBar } from '@/components/navigation/CategoryNavBar';
 import { Footer } from '@/components/navigation/Footer';
@@ -13,9 +12,6 @@ export default function CustomerLayout({ children }: { children: React.ReactNode
     <div className="flex flex-col min-h-screen bg-background" suppressHydrationWarning>
       <AuthGuard />
       
-      {/* Top Announcement Bar */}
-      <TopBar />
-
       {/* Main Brand & Search Navigation */}
       <Header />
 

@@ -50,31 +50,22 @@ export function Footer() {
     <footer className="w-full bg-surface-muted text-foreground pt-10 pb-[calc(var(--bottom-nav-h,64px)+2.5rem+env(safe-area-inset-bottom,0px))] md:pb-8 border-t border-border">
       <div className="max-w-[1440px] mx-auto px-4 md:px-8">
 
-        {/* Subtle Language Direction Strip */}
-        <div className="flex flex-wrap items-center justify-between gap-3 pb-6 mb-6 border-b border-border text-xs text-foreground-muted">
-          <div className="flex items-center gap-2">
-            <Globe className="w-4 h-4 text-primary shrink-0" />
-            <span>
-              {t('browsingIn') || 'Browsing in'} <strong className="text-foreground font-semibold">{language === 'hi' ? 'हिन्दी' : language === 'gu' ? 'ગુજરાતી' : 'English'}</strong>. {t('languageInstruction') || 'Change preferred language anytime from Account Settings or header.'}
-            </span>
-          </div>
-          <div className="flex items-center gap-1.5">
-            <span className="text-[11px] text-foreground-muted">Language:</span>
-            {(['en', 'hi', 'gu'] as const).map((l) => (
-              <button
-                key={l}
-                type="button"
-                onClick={() => setLanguage(l)}
-                className={`px-2 py-0.5 rounded text-xs font-semibold cursor-pointer transition-colors ${
-                  language === l
-                    ? 'bg-primary text-on-primary shadow-2xs'
-                    : 'text-foreground hover:bg-surface border border-border'
-                }`}
-              >
-                {l === 'en' ? 'English' : l === 'hi' ? 'हिन्दी' : 'ગુજરાતી'}
-              </button>
-            ))}
-          </div>
+        {/* The only language control in the app. One select, no instructions. */}
+        <div className="flex items-center justify-end gap-2 pb-6 mb-6 border-b border-border">
+          <Globe className="w-3.5 h-3.5 text-foreground-muted" aria-hidden="true" />
+          <label htmlFor="footer-language" className="sr-only">
+            Language
+          </label>
+          <select
+            id="footer-language"
+            value={language}
+            onChange={(e) => setLanguage(e.target.value as 'en' | 'hi' | 'gu')}
+            className="h-8 rounded-md border border-border bg-surface px-2 text-xs font-semibold text-foreground"
+          >
+            <option value="en">English</option>
+            <option value="hi">हिन्दी</option>
+            <option value="gu">ગુજરાતી</option>
+          </select>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6 md:gap-8 pb-6 md:pb-8 border-b border-border">
@@ -91,7 +82,7 @@ export function Footer() {
               />
               <span className="flex flex-col">
                 <span className="text-xl font-bold tracking-tight leading-none text-foreground">Gjanand</span>
-                <span className="text-xs font-bold text-secondary leading-none mt-1">
+                <span className="text-xs font-bold text-foreground-muted leading-none mt-1">
                   SARKAR
                 </span>
               </span>

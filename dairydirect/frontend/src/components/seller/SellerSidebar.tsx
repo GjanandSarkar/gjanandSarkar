@@ -102,7 +102,7 @@ function SellerSidebarContent({
             <span className="text-xl font-semibold tracking-tight text-primary leading-none">
               Gjanand
             </span>
-            <span className="text-xs font-semibold text-secondary leading-none mt-1 uppercase tracking-wider">
+            <span className="text-xs font-semibold text-secondary-ink leading-none mt-1 uppercase tracking-wider">
               Seller Hub
             </span>
           </div>
@@ -168,7 +168,7 @@ function SellerSidebarContent({
               </div>
 
               {item.badge && item.badge > 0 ? (
-                <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-warning-bg text-secondary border border-secondary/20">
+                <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-warning-bg text-secondary-ink border border-secondary/20">
                   {item.badge}
                 </span>
               ) : null}

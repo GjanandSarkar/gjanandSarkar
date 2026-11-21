@@ -418,7 +418,7 @@ export default function CheckoutScreen() {
                 onClick={() => setIsOffersDrawerOpen(true)}
                 className="text-xs font-semibold text-primary hover:text-primary-hover flex items-center gap-1 cursor-pointer transition-colors"
               >
-                <Sparkles className="w-3.5 h-3.5 text-secondary" />
+                <Sparkles className="w-3.5 h-3.5 text-secondary-ink" />
                 <span>View All Offers</span>
               </button>
             </div>

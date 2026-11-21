@@ -78,8 +78,8 @@ export function SellerHeroBanner({ onScrollToForm }: SellerHeroBannerProps) {
 
           {/* Card 2: Verified Sellers */}
           <div className="bg-surface border border-border rounded-xl p-6 shadow-xs flex flex-col items-center text-center hover:border-primary/40 transition-colors">
-            <div className="w-12 h-12 rounded-xl bg-warning-bg text-secondary flex items-center justify-center mb-4">
-              <CheckCircle2 className="w-6 h-6 text-secondary" />
+            <div className="w-12 h-12 rounded-xl bg-warning-bg text-secondary-ink flex items-center justify-center mb-4">
+              <CheckCircle2 className="w-6 h-6 text-secondary-ink" />
             </div>
             <h3 className="text-base font-semibold text-foreground mb-1.5">
               Verified Sellers

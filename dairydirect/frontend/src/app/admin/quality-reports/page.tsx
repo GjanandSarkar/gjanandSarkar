@@ -106,7 +106,7 @@ export default function AdminQualityReportsPage() {
           <div className="flex items-center gap-2">
             <h1 className="text-xl sm:text-2xl font-bold text-foreground">Quality Test Reports</h1>
             {pendingCount > 0 && (
-              <span className="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-warning-bg text-secondary border border-secondary/20">
+              <span className="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-warning-bg text-secondary-ink border border-secondary/20">
                 {pendingCount} Pending Review
               </span>
             )}
@@ -232,7 +232,7 @@ export default function AdminQualityReportsPage() {
                             isApproved
                               ? 'bg-success-bg text-primary border-primary/20'
                               : isPending
-                              ? 'bg-warning-bg text-secondary border-secondary/20'
+                              ? 'bg-warning-bg text-secondary-ink border-secondary/20'
                               : 'bg-error-bg text-error border-error/20'
                           }`}
                         >
