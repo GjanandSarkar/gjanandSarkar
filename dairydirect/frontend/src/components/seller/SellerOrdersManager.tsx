@@ -32,6 +32,7 @@ import { getSellerOrders, updateOrderStatus, processOrderRequest } from '@/lib/a
 import type { OrderWithItems, OrderStatus } from '@/lib/api/orders';
 import { PLACEHOLDER_PRODUCT_IMAGE } from '@/lib/constants/brand';
 import { ConfirmCodPaymentModal } from '@/components/admin/ConfirmCodPaymentModal';
+import { AdminTable } from '@/components/admin/AdminTable';
 
 const STATUS_STYLES: Record<string, { bg: string; color: string; border: string; dot: string; label: string }> = {
   'pending':          { bg: '#fff7ed', color: '#9a3412', border: '#fdba74', dot: '#ea580c', label: 'Pending Confirmation' },
@@ -469,10 +470,10 @@ export function SellerOrdersManager({ initialStatusFilter = 'all' }: SellerOrder
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
-              className={`px-3 py-1.5 rounded-full text-xs font-bold whitespace-nowrap transition-all cursor-pointer ${
+              className={`whitespace-nowrap h-8 px-3.5 rounded-full text-[12px] font-bold transition-all shrink-0 cursor-pointer flex items-center border ${
                 activeTab === tab.id
-                  ? 'bg-primary text-white shadow-xs'
-                  : 'text-foreground-muted hover:text-foreground hover:bg-surface-muted'
+                  ? 'bg-primary text-white border-primary shadow-xs'
+                  : 'bg-surface border-border/80 text-foreground-muted hover:text-foreground hover:border-border-hover'
               }`}
             >
               {tab.label}
@@ -481,20 +482,20 @@ export function SellerOrdersManager({ initialStatusFilter = 'all' }: SellerOrder
         </div>
 
         {/* Search and Refresh */}
-        <div className="flex items-center gap-2">
-          <div className="relative flex-1 md:w-64">
+        <div className="flex items-center gap-2 w-full md:w-auto">
+          <div className="relative flex-1 min-w-0 md:w-64">
             <Search className="w-4 h-4 text-foreground-muted absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
             <input
               type="text"
               placeholder="Search order ID, product, phone..."
               value={searchQuery}
               onChange={e => setSearchQuery(e.target.value)}
-              className="w-full pl-9 pr-3 py-2 bg-surface-muted border border-border rounded-xl text-xs font-medium placeholder-foreground-muted focus:outline-none focus:ring-2 focus:ring-[var(--primary)]/20 focus:bg-surface"
+              className="w-full h-10 pl-9 pr-3 bg-surface border border-border/90 rounded-xl text-xs font-medium placeholder-foreground-muted focus:outline-none focus:ring-2 focus:ring-[var(--primary)]/20 shadow-2xs"
             />
             {searchQuery && (
               <button
                 onClick={() => setSearchQuery('')}
-                className="absolute right-2.5 top-1/2 -translate-y-1/2 text-foreground-muted hover:text-foreground-muted"
+                className="absolute right-2.5 top-1/2 -translate-y-1/2 text-foreground-muted hover:text-foreground"
               >
                 <X className="w-3.5 h-3.5" />
               </button>
@@ -505,145 +506,143 @@ export function SellerOrdersManager({ initialStatusFilter = 'all' }: SellerOrder
             onClick={loadOrders}
             disabled={isLoading}
             title="Refresh Orders"
-            className="p-2 border border-border text-foreground hover:bg-surface-muted rounded-xl transition-colors cursor-pointer shrink-0"
+            className="h-10 w-10 flex items-center justify-center border border-border text-foreground hover:bg-surface-muted rounded-xl transition-colors cursor-pointer shrink-0"
           >
             <RefreshCw className={`w-4 h-4 ${isLoading ? 'animate-spin text-primary' : ''}`} />
           </button>
         </div>
       </div>
 
-      {/* ─── Orders List ─── */}
-      {isLoading ? (
-        <div className="py-20 flex flex-col items-center justify-center gap-3">
-          <Loader2 className="w-8 h-8 text-primary animate-spin" />
-          <p className="text-xs font-semibold text-foreground-muted">Loading your store orders...</p>
-        </div>
-      ) : filteredOrders.length === 0 ? (
-        <div className="bg-surface rounded-xl border border-border p-12 text-center space-y-4">
-          <div className="w-16 h-16 rounded-2xl bg-surface-muted text-foreground-muted flex items-center justify-center mx-auto">
-            <ShoppingBag className="w-8 h-8" />
-          </div>
-          <div className="space-y-1">
-            <h4 className="font-semibold text-base text-foreground">No Orders Found</h4>
-            <p className="text-xs text-foreground-muted max-w-sm mx-auto">
-              {searchQuery
-                ? `No orders matching "${searchQuery}". Try a different keyword.`
-                : activeTab !== 'all'
-                  ? `No orders currently in "${activeTab.replace(/_/g, ' ')}" status.`
-                  : 'Customer orders containing your products will appear here once placed.'}
-            </p>
-          </div>
-          {searchQuery && (
-            <button
-              onClick={() => setSearchQuery('')}
-              className="px-4 py-2 bg-surface-muted hover:bg-border text-foreground text-xs font-bold rounded-xl transition-colors"
-            >
-              Clear Search
-            </button>
-          )}
-        </div>
-      ) : (
-        <div className="space-y-4">
-          {filteredOrders.map(order => {
-            const statusStyle = STATUS_STYLES[order.status] || STATUS_STYLES['cancelled'];
-            const isExpanded = expandedOrderId === order.id;
-            const items = order.order_items || [];
-            const isBusy = isUpdating === order.id;
+      {/* ─── Orders Table (AdminTable Upgrade - Edit #39) ─── */}
+      <AdminTable
+        columns={[
+          { header: 'Order & Customer' },
+          { header: 'Date & Time' },
+          { header: 'Items & Total' },
+          { header: 'Payment' },
+          { header: 'Fulfillment Status' },
+          { header: 'Actions', align: 'right' },
+        ]}
+        isLoading={isLoading}
+        isEmpty={!isLoading && filteredOrders.length === 0}
+        emptyIcon={ShoppingBag}
+        emptyTitle="No Orders Found"
+        emptyDescription={
+          searchQuery
+            ? `No orders matching "${searchQuery}". Try a different keyword.`
+            : activeTab !== 'all'
+              ? `No orders currently in "${activeTab.replace(/_/g, ' ')}" status.`
+              : 'Customer orders containing your products will appear here once placed.'
+        }
+      >
+        {filteredOrders.map(order => {
+          const statusStyle = STATUS_STYLES[order.status] || STATUS_STYLES['cancelled'];
+          const isExpanded = expandedOrderId === order.id;
+          const items = order.order_items || [];
+          const isBusy = isUpdating === order.id;
 
-            return (
-              <motion.div
-                key={order.id}
-                initial={{ opacity: 0, y: 8 }}
-                animate={{ opacity: 1, y: 0 }}
-                className="bg-surface rounded-2xl border border-border/90 shadow-2xs overflow-hidden transition-all"
+          return (
+            <React.Fragment key={order.id}>
+              <tr
+                onClick={() => setExpandedOrderId(isExpanded ? null : order.id)}
+                className="hover:bg-black/[0.02] dark:hover:bg-white/[0.03] transition-colors cursor-pointer border-b border-border/40"
               >
-                {/* Order Summary Bar */}
-                <div
-                  className="p-5 flex flex-col md:flex-row md:items-center justify-between gap-4 cursor-pointer hover:bg-surface-muted/50 transition-colors"
-                  onClick={() => setExpandedOrderId(isExpanded ? null : order.id)}
-                >
-                  {/* Left: ID, Date, Customer */}
-                  <div className="space-y-1">
-                    <div className="flex items-center gap-2.5 flex-wrap">
-                      <span className="font-mono font-semibold text-sm text-primary">
-                        {order.order_number || `ORD-${order.id.slice(0, 8).toUpperCase()}`}
+                {/* 1. Order & Customer */}
+                <td className="px-5 py-3.5">
+                  <div className="flex flex-col">
+                    <span className="font-mono font-bold text-xs text-primary">
+                      {order.order_number || `ORD-${order.id.slice(0, 8).toUpperCase()}`}
+                    </span>
+                    <span className="text-xs font-semibold text-foreground mt-0.5">
+                      {order.profiles?.name || 'Customer'}
+                    </span>
+                    {order.profiles?.phone && (
+                      <span className="text-[11px] text-foreground-muted font-mono">
+                        +91 {order.profiles.phone}
                       </span>
-                      <span
-                        className="px-2.5 py-0.5 rounded-full text-xs font-semibold uppercase tracking-wider flex items-center gap-1.5"
-                        style={{
-                          backgroundColor: statusStyle.bg,
-                          color: statusStyle.color,
-                          border: `1px solid ${statusStyle.border}`,
-                        }}
-                      >
-                        <span className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: statusStyle.dot }} />
-                        <span>{statusStyle.label}</span>
-                      </span>
-
-                      {/* Payment Status Badge */}
-                      <span className={`px-2 py-0.5 rounded-md text-xs font-bold uppercase tracking-wider flex items-center gap-1 ${
-                        order.payment_status === 'paid'
-                          ? 'bg-success-bg text-success'
-                          : 'bg-warning-bg text-warning'
-                      }`}>
-                        <CreditCard className="w-3 h-3" />
-                        <span>{order.payment_status === 'paid' ? 'Paid' : `Payment: ${order.payment_status || 'Pending'}`} ({order.payment_method || 'COD'})</span>
-                      </span>
-                    </div>
-
-                    <div className="flex items-center gap-3 text-xs text-foreground-muted flex-wrap">
-                      <span className="flex items-center gap-1">
-                        <Clock className="w-3.5 h-3.5 text-foreground-muted" />
-                        <span>{format(new Date(order.created_at), 'dd MMM yyyy, hh:mm a')}</span>
-                      </span>
-                      <span>•</span>
-                      <span className="flex items-center gap-1 text-foreground font-medium">
-                        <User className="w-3.5 h-3.5 text-foreground-muted" />
-                        <span>{order.profiles?.name || 'Customer'}</span>
-                        {order.profiles?.phone && (
-                          <span className="text-foreground-muted font-mono">({order.profiles.phone})</span>
-                        )}
-                      </span>
-                    </div>
+                    )}
                   </div>
+                </td>
 
-                  {/* Right: Amount & Collapse Toggle */}
-                  <div className="flex items-center justify-between md:justify-end gap-5">
-                    <div className="text-left md:text-right">
-                      <div className="text-base font-semibold text-foreground">
-                        ₹{order.total_amount}
+                {/* 2. Date & Time */}
+                <td className="px-5 py-3.5 whitespace-nowrap text-xs text-foreground-muted">
+                  <div className="font-medium text-foreground">{format(new Date(order.created_at), 'dd MMM yyyy')}</div>
+                  <div className="text-[11px] text-foreground-muted">{format(new Date(order.created_at), 'hh:mm a')}</div>
+                </td>
+
+                {/* 3. Items & Total */}
+                <td className="px-5 py-3.5 whitespace-nowrap">
+                  <div className="font-bold text-xs text-foreground">
+                    ₹{order.total_amount}
+                  </div>
+                  <div className="text-[11px] text-foreground-muted">
+                    {items.length} {items.length === 1 ? 'item' : 'items'}
+                  </div>
+                </td>
+
+                {/* 4. Payment */}
+                <td className="px-5 py-3.5 whitespace-nowrap">
+                  <span className={`px-2 py-0.5 rounded-md text-[11px] font-bold uppercase tracking-wider inline-flex items-center gap-1 ${
+                    order.payment_status === 'paid'
+                      ? 'bg-success-bg text-success'
+                      : 'bg-warning-bg text-warning'
+                  }`}>
+                    <CreditCard className="w-3 h-3" />
+                    <span>{order.payment_status === 'paid' ? 'Paid' : 'Pending'} ({order.payment_method || 'COD'})</span>
+                  </span>
+                </td>
+
+                {/* 5. Fulfillment Status */}
+                <td className="px-5 py-3.5 whitespace-nowrap">
+                  <span
+                    className="px-2.5 py-1 rounded-full text-[11px] font-bold uppercase tracking-wider inline-flex items-center gap-1.5 border shadow-2xs"
+                    style={{
+                      backgroundColor: statusStyle.bg,
+                      color: statusStyle.color,
+                      borderColor: statusStyle.border,
+                    }}
+                  >
+                    <span className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: statusStyle.dot }} />
+                    <span>{statusStyle.label}</span>
+                  </span>
+                </td>
+
+                {/* 6. Actions */}
+                <td className="px-5 py-3.5 text-right whitespace-nowrap">
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setExpandedOrderId(isExpanded ? null : order.id);
+                    }}
+                    className="px-3 py-1.5 rounded-xl text-xs font-bold border border-border bg-surface hover:bg-surface-muted text-foreground inline-flex items-center gap-1.5 transition-all cursor-pointer shadow-2xs"
+                  >
+                    <span>{isExpanded ? 'Hide' : 'Manage'}</span>
+                    {isExpanded ? <ChevronUp className="w-3.5 h-3.5" /> : <ChevronDown className="w-3.5 h-3.5" />}
+                  </button>
+                </td>
+              </tr>
+
+              {/* Expanded Row for Order Management Details */}
+              {isExpanded && (
+                <tr className="bg-surface-muted/20">
+                  <td colSpan={6} className="p-5 border-b border-border">
+                    {/* Status Messages */}
+                    {errorMessage?.orderId === order.id && (
+                      <div className="mb-3 p-3 rounded-xl bg-error-bg border border-error/20 text-error text-xs font-semibold flex items-start gap-2">
+                        <AlertCircle className="w-4 h-4 text-error shrink-0 mt-0.5" />
+                        <span>{errorMessage.message}</span>
                       </div>
-                      <div className="text-xs text-foreground-muted">
-                        {items.length} {items.length === 1 ? 'item' : 'items'}
+                    )}
+
+                    {successMessage?.orderId === order.id && (
+                      <div className="mb-3 p-3 rounded-xl bg-success-bg border border-success/20 text-success text-xs font-semibold flex items-start gap-2">
+                        <CheckCircle2 className="w-4 h-4 text-success shrink-0 mt-0.5" />
+                        <span>{successMessage.message}</span>
                       </div>
-                    </div>
+                    )}
 
-                    <div className="flex items-center gap-1 text-foreground-muted hover:text-foreground-muted p-1">
-                      {isExpanded ? (
-                        <ChevronUp className="w-5 h-5" />
-                      ) : (
-                        <ChevronDown className="w-5 h-5" />
-                      )}
-                    </div>
-                  </div>
-                </div>
-
-                {/* Status Messages */}
-                {errorMessage?.orderId === order.id && (
-                  <div className="mx-5 mb-3 p-3 rounded-xl bg-error-bg border border-error/20 text-error text-xs font-semibold flex items-start gap-2">
-                    <AlertCircle className="w-4 h-4 text-error shrink-0 mt-0.5" />
-                    <span>{errorMessage.message}</span>
-                  </div>
-                )}
-
-                {successMessage?.orderId === order.id && (
-                  <div className="mx-5 mb-3 p-3 rounded-xl bg-success-bg border border-success/20 text-success text-xs font-semibold flex items-start gap-2">
-                    <CheckCircle2 className="w-4 h-4 text-success shrink-0 mt-0.5" />
-                    <span>{successMessage.message}</span>
-                  </div>
-                )}
-
-                {/* Expanded Details Section */}
+                    {/* Expanded Details Section */}
                 <AnimatePresence>
                   {isExpanded && (
                     <motion.div
@@ -1205,16 +1204,19 @@ export function SellerOrdersManager({ initialStatusFilter = 'all' }: SellerOrder
                     </motion.div>
                   )}
                 </AnimatePresence>
-              </motion.div>
-            );
-          })}
-        </div>
-      )}
+                  </td>
+                </tr>
+              )}
+            </React.Fragment>
+          );
+        })}
+      </AdminTable>
 
       {/* ─── Cancel Order Modal ─── */}
       {cancelModalOrder && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-2xs p-4">
-          <div className="bg-surface rounded-xl max-w-md w-full p-6 space-y-5 shadow-2xl animate-in fade-in">
+        <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/60 backdrop-blur-xs p-0 sm:p-4">
+          <div className="bg-surface rounded-t-[24px] sm:rounded-2xl max-w-md w-full p-6 space-y-5 shadow-2xl max-h-[85vh] overflow-y-auto animate-in fade-in">
+            <div className="sm:hidden w-10 h-1.5 rounded-full bg-border mx-auto -mt-2 mb-2" />
             <div className="flex items-center justify-between border-b border-border pb-3">
               <div className="flex items-center gap-2 text-error">
                 <AlertCircle className="w-5 h-5" />
@@ -1291,8 +1293,9 @@ export function SellerOrdersManager({ initialStatusFilter = 'all' }: SellerOrder
 
       {/* ─── Request Decision Modal (Seller Approve / Reject) ─── */}
       {decisionModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-2xs p-4">
-          <div className="bg-surface rounded-xl max-w-md w-full p-6 space-y-5 shadow-2xl animate-in fade-in">
+        <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/60 backdrop-blur-xs p-0 sm:p-4">
+          <div className="bg-surface rounded-t-[24px] sm:rounded-2xl max-w-md w-full p-6 space-y-5 shadow-2xl max-h-[85vh] overflow-y-auto animate-in fade-in">
+            <div className="sm:hidden w-10 h-1.5 rounded-full bg-border mx-auto -mt-2 mb-2" />
             <div className="flex items-center justify-between border-b border-border pb-3">
               <div className="flex items-center gap-2">
                 {decisionModal.action === 'approve' ? (

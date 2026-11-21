@@ -51,6 +51,10 @@ import { SellerQualityReportModal } from '@/components/seller/SellerQualityRepor
 import Link from 'next/link';
 import { ThemeToggle } from '@/components/theme/ThemeToggle';
 import { PLACEHOLDER_PRODUCT_IMAGE } from '@/lib/constants/brand';
+import { AdminHeader } from '@/components/admin/AdminHeader';
+import { AdminTable } from '@/components/admin/AdminTable';
+import { categoryColors } from '@/lib/constants/categories';
+import { LayoutGrid, List } from 'lucide-react';
 
 type DashboardTab = 
   | 'overview' 
@@ -91,6 +95,7 @@ function SellerDashboardContent() {
   const [isLoadingProducts, setIsLoadingProducts] = useState(true);
   const [productStatusFilter, setProductStatusFilter] = useState<'all' | 'pending' | 'approved' | 'rejected' | 'suspended'>('all');
   const [productSearch, setProductSearch] = useState('');
+  const [productViewMode, setProductViewMode] = useState<'table' | 'grid'>('table');
 
   // Seller Product Modal (Add / Edit / Resubmit)
   const [isProductModalOpen, setIsProductModalOpen] = useState(false);
@@ -604,92 +609,52 @@ function SellerDashboardContent() {
 
   return (
     <div className="w-full flex flex-col">
-      {/* Operations Top Header matching Admin Panel */}
-      <div className="px-4 sm:px-6 md:px-10 pt-6 pb-5 bg-surface border-b border-border">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-          <div>
-            <div className="flex items-center gap-2 mb-1">
-              <Store className="w-4 h-4 text-primary" strokeWidth={2.5} />
-              <span className="text-xs font-bold uppercase tracking-widest text-primary">
-                Seller Hub Operations
-              </span>
-              <span className="px-2 py-0.5 rounded-full bg-success-bg text-success text-[11px] font-semibold flex items-center gap-1">
-                <ShieldCheck className="w-3 h-3" />
-                <span>Approved Seller</span>
-              </span>
-            </div>
-            <h1 className="font-semibold text-2xl sm:text-[28px] tracking-tight text-foreground">
-              {storeName}
-            </h1>
-            <p className="text-xs text-foreground-muted mt-1">
-              Category: <strong className="text-foreground">{storeCategory}</strong> • Region: <strong className="text-foreground">{storeState}</strong> • Platform Commission: <span className="font-semibold text-secondary-ink">{storeCommission}%</span>
-            </p>
+      {/* Operations AdminHeader matching Admin standard */}
+      <AdminHeader
+        title={
+          <div className="flex items-center gap-3">
+            <span>{storeName}</span>
+            <span className="px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-900 border border-emerald-300 dark:bg-emerald-950/40 dark:text-emerald-300 text-xs font-bold flex items-center gap-1">
+              <ShieldCheck className="w-3.5 h-3.5 text-emerald-700" />
+              <span>Verified Partner</span>
+            </span>
           </div>
-
-          <div className="flex items-center gap-2 sm:gap-3 flex-wrap">
-            <button
-              onClick={() => {
-                setIsLoadingProducts(true);
-                Promise.all([loadSellerData(), loadProducts(), loadNotifications(), loadQualityReports()]).finally(() => {
-                  setIsLoadingProducts(false);
-                });
-              }}
-              title="Refresh live metrics & products"
-              className="p-2.5 rounded-lg border border-border text-foreground hover:bg-surface-muted transition-colors cursor-pointer"
-            >
-              <RefreshCw className={`w-4 h-4 ${isLoadingProducts ? 'animate-spin text-primary' : ''}`} />
-            </button>
-
+        }
+        subtitle={
+          <span>
+            Category: <strong className="text-foreground">{storeCategory}</strong> • Region: <strong className="text-foreground">{storeState}</strong> • Commission: <span className="font-semibold text-secondary-ink">{storeCommission}%</span>
+          </span>
+        }
+        onRefresh={() => {
+          setIsLoadingProducts(true);
+          Promise.all([loadSellerData(), loadProducts(), loadNotifications(), loadQualityReports()]).finally(() => {
+            setIsLoadingProducts(false);
+          });
+        }}
+        isRefreshing={isLoadingProducts}
+        actions={
+          <div className="flex items-center gap-2">
             <Link
               href="/seller/activity"
-              className="hidden sm:inline-flex px-3.5 py-2 rounded-lg border border-border text-xs font-semibold text-foreground hover:bg-surface-muted transition-colors"
+              className="hidden sm:inline-flex px-3.5 py-2 rounded-[12px] border border-border text-xs font-bold text-foreground hover:bg-surface-muted transition-colors"
             >
               Activity Log
             </Link>
-
             <button
               onClick={handleOpenAddProduct}
-              className="px-4 py-2 rounded-lg bg-primary text-on-primary text-xs font-semibold hover:opacity-90 flex items-center gap-1.5 shadow-xs transition-all cursor-pointer"
+              className="px-4 py-2 rounded-[12px] bg-primary text-white text-xs font-bold hover:bg-primary/90 flex items-center gap-1.5 shadow-xs transition-all active:scale-95 cursor-pointer"
             >
               <Plus className="w-4 h-4" strokeWidth={2.5} />
               <span>Add Product</span>
             </button>
           </div>
-        </div>
-      </div>
+        }
+      />
 
-      {/* Dashboard Sub-tabs Bar */}
-      <div className="flex items-center gap-2 overflow-x-auto no-scrollbar px-4 sm:px-6 md:px-10 py-3 bg-surface border-b border-border">
-        {[
-          { id: 'overview', label: 'Overview' },
-          { id: 'products', label: `Products (${products.length})` },
-          { id: 'orders', label: 'Orders' },
-          { id: 'quality-reports', label: 'Quality Reports' },
-          { id: 'inventory', label: 'Inventory' },
-          { id: 'returns', label: 'Returns' },
-          { id: 'rejections', label: `Rejected (${rejectedProducts.length})` },
-          { id: 'profile', label: 'Store Profile' },
-          { id: 'analytics', label: 'Analytics' },
-        ].map((t) => (
-          <button
-            key={t.id}
-            onClick={() => {
-              setActiveTab(t.id as DashboardTab);
-              window.history.pushState(null, '', t.id === 'overview' ? '/seller/dashboard' : `/seller/dashboard?tab=${t.id}`);
-            }}
-            className={`px-3.5 py-1.5 text-xs font-semibold whitespace-nowrap rounded-lg transition-colors cursor-pointer ${
-              activeTab === t.id
-                ? 'bg-primary text-on-primary shadow-2xs'
-                : 'text-foreground-muted hover:bg-surface-muted hover:text-foreground'
-            }`}
-          >
-            {t.label}
-          </button>
-        ))}
-      </div>
+
 
       {/* Content Container */}
-      <div className="max-w-[1400px] w-full p-4 sm:p-6 md:p-8 flex flex-col gap-6">
+      <div className="w-full p-4 sm:p-6 md:p-8 flex flex-col gap-6">
           {/* Lifecycle Banner: Under Review */}
           {sellerStatus === 'under_review' && (
             <div className="bg-warning-bg border-2 border-warning rounded-2xl p-5 shadow-2xs space-y-2">
@@ -839,29 +804,29 @@ function SellerDashboardContent() {
         {/* ─── TAB 2: MY PRODUCTS (WITH APPROVAL STATUS TABS) ─── */}
         {activeTab === 'products' && (
           <div className="space-y-6 animate-in fade-in">
-            {/* Filter Bar */}
-            <div className="bg-surface rounded-2xl border border-border p-4 flex flex-col md:flex-row md:items-center justify-between gap-4">
+            {/* Filter & Search Bar with View Mode Switcher */}
+            <div className="bg-surface rounded-2xl border border-border/90 shadow-2xs p-4 flex flex-col md:flex-row md:items-center justify-between gap-3">
               {/* Status Pills */}
               <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar">
                 {[
                   { id: 'all', label: 'All', count: products.length },
-                  { id: 'pending', label: 'Pending Approvals', count: pendingProducts.length, color: 'text-warning bg-warning-bg' },
-                  { id: 'approved', label: 'Approved Live', count: approvedProducts.length, color: 'text-success bg-success-bg' },
-                  { id: 'rejected', label: 'Rejected', count: rejectedProducts.length, color: 'text-error bg-error-bg' },
-                  { id: 'suspended', label: 'Suspended', count: suspendedProducts.length, color: 'text-foreground bg-surface-muted' },
+                  { id: 'pending', label: 'Pending Approvals', count: pendingProducts.length },
+                  { id: 'approved', label: 'Approved Live', count: approvedProducts.length },
+                  { id: 'rejected', label: 'Rejected', count: rejectedProducts.length },
+                  { id: 'suspended', label: 'Suspended', count: suspendedProducts.length },
                 ].map(pill => (
                   <button
                     key={pill.id}
                     onClick={() => setProductStatusFilter(pill.id as any)}
-                    className={`px-3.5 py-2 rounded-xl text-xs font-bold whitespace-nowrap transition-all cursor-pointer flex items-center gap-2 ${
+                    className={`whitespace-nowrap h-8 px-3.5 rounded-full text-[12px] font-bold transition-all shrink-0 cursor-pointer flex items-center gap-1.5 border ${
                       productStatusFilter === pill.id
-                        ? 'bg-primary text-white shadow-xs'
-                        : 'bg-surface-muted text-foreground hover:bg-border'
+                        ? 'bg-primary text-white border-primary shadow-xs'
+                        : 'bg-surface border-border/80 text-foreground-muted hover:text-foreground hover:border-border-hover'
                     }`}
                   >
                     <span>{pill.label}</span>
-                    <span className={`px-1.5 py-0.2 rounded-full text-xs font-semibold ${
-                      productStatusFilter === pill.id ? 'bg-surface/20 text-white' : 'bg-border text-foreground'
+                    <span className={`px-1.5 py-0.2 rounded-full text-[10px] font-semibold ${
+                      productStatusFilter === pill.id ? 'bg-white/20 text-white' : 'bg-surface-muted text-foreground-muted'
                     }`}>
                       {pill.count}
                     </span>
@@ -869,38 +834,77 @@ function SellerDashboardContent() {
                 ))}
               </div>
 
-              {/* Search & Add */}
-              <div className="flex items-center gap-3">
-                <div className="relative flex-1 md:w-64">
-                  <Search className="w-4 h-4 text-foreground-muted absolute left-3 top-1/2 -translate-y-1/2" />
+              {/* Search & View Mode Toggle */}
+              <div className="flex items-center gap-2.5 shrink-0">
+                <div className="relative flex-1 sm:w-64">
+                  <Search className="w-4 h-4 text-foreground-muted absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
                   <input
                     type="text"
                     value={productSearch}
                     onChange={e => setProductSearch(e.target.value)}
-                    placeholder="Search by name, SKU..."
-                    className="w-full pl-9 pr-3 py-2 text-xs rounded-xl border border-border bg-surface focus:outline-none focus:ring-2 focus:ring-[var(--primary)]/20"
+                    placeholder="Search products, SKU..."
+                    className="w-full h-10 pl-10 pr-8 text-xs rounded-xl border border-border bg-surface text-foreground placeholder:text-foreground-muted focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary shadow-2xs transition-all"
                   />
+                  {productSearch && (
+                    <button
+                      type="button"
+                      onClick={() => setProductSearch('')}
+                      className="absolute right-2.5 top-1/2 -translate-y-1/2 text-foreground-muted hover:text-foreground p-0.5 cursor-pointer"
+                    >
+                      <X className="w-3.5 h-3.5" />
+                    </button>
+                  )}
                 </div>
 
-                <button
-                  onClick={handleOpenAddProduct}
-                  className="px-4 py-2 bg-primary text-on-primary text-xs font-bold rounded-xl flex items-center gap-1.5 hover:bg-primary-hover transition-colors cursor-pointer shrink-0"
-                >
-                  <Plus className="w-4 h-4" />
-                  <span>Add Product</span>
-                </button>
+                {/* View Switcher: Table View (default) vs Grid */}
+                <div className="flex items-center rounded-xl border border-border bg-surface p-1 shadow-2xs shrink-0 h-10">
+                  <button
+                    type="button"
+                    onClick={() => setProductViewMode('table')}
+                    className={`h-8 px-2.5 rounded-lg text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer ${
+                      productViewMode === 'table'
+                        ? 'bg-primary text-white shadow-xs'
+                        : 'text-foreground-muted hover:text-foreground'
+                    }`}
+                    title="Table View (Default)"
+                  >
+                    <List className="w-3.5 h-3.5" />
+                    <span className="hidden sm:inline">Table</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setProductViewMode('grid')}
+                    className={`h-8 px-2.5 rounded-lg text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer ${
+                      productViewMode === 'grid'
+                        ? 'bg-primary text-white shadow-xs'
+                        : 'text-foreground-muted hover:text-foreground'
+                    }`}
+                    title="Grid View"
+                  >
+                    <LayoutGrid className="w-3.5 h-3.5" />
+                    <span className="hidden sm:inline">Grid</span>
+                  </button>
+                </div>
               </div>
             </div>
 
-            {/* Products List */}
-            {isLoadingProducts ? (
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                {[1, 2, 3].map(i => (
-                  <div key={i} className="h-48 rounded-2xl bg-surface border border-border animate-pulse" />
-                ))}
-              </div>
-            ) : filteredProducts.length > 0 ? (
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+            {/* Products Table (Default View) */}
+            {productViewMode === 'table' ? (
+              <AdminTable
+                columns={[
+                  { header: 'Product & SKU' },
+                  { header: 'Category' },
+                  { header: 'Price & Stock' },
+                  { header: 'Approval Status' },
+                  { header: 'Submitted' },
+                  { header: 'Actions', align: 'right' },
+                ]}
+                isLoading={isLoadingProducts}
+                isEmpty={!isLoadingProducts && filteredProducts.length === 0}
+                emptyIcon={Package}
+                emptyTitle="No products found"
+                emptyDescription={productSearch ? `No products matching "${productSearch}".` : 'No products found in this status.'}
+              >
                 {filteredProducts.map((p) => {
                   const variant = p.product_variants?.[0];
                   const price = variant?.price || 0;
@@ -909,491 +913,289 @@ function SellerDashboardContent() {
                   const isApproved = p.approval_status === 'approved';
                   const isPending = p.approval_status === 'pending';
                   const isRejected = p.approval_status === 'rejected';
+                  const catStyle = categoryColors(p.category);
 
                   return (
-                    <div
+                    <tr
                       key={p.id}
-                      className="bg-surface rounded-xl border border-border/90 shadow-2xs hover:shadow-md transition-all overflow-hidden flex flex-col justify-between group"
+                      className="hover:bg-black/[0.02] dark:hover:bg-white/[0.03] transition-colors"
                     >
-                      {/* Product Header & Image */}
-                      <div>
-                        <div className="relative h-44 bg-surface-muted overflow-hidden flex items-center justify-center border-b border-border">
+                      <td className="px-5 py-3.5">
+                        <div className="flex items-center gap-3">
                           <img
                             src={p.image_url || PLACEHOLDER_PRODUCT_IMAGE}
                             alt={p.name}
-                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                            className="w-10 h-10 object-cover rounded-[10px] border border-border/80 shrink-0"
                           />
-                          {/* Approval Status Badge */}
-                          <div className="absolute top-3 left-3">
-                            {isApproved && (
-                              <span className="px-2.5 py-1 rounded-full text-xs font-semibold uppercase tracking-wider bg-success-bg text-success border border-success/20 flex items-center gap-1 shadow-xs">
-                                <CheckCircle2 className="w-3.5 h-3.5 text-success" />
-                                <span>Approved & Live</span>
-                              </span>
-                            )}
-                            {isPending && (
-                              <span className="px-2.5 py-1 rounded-full text-xs font-semibold uppercase tracking-wider bg-warning-bg text-warning border border-warning/20 flex items-center gap-1 shadow-xs animate-pulse">
-                                <Clock className="w-3.5 h-3.5 text-warning" />
-                                <span>Awaiting Review</span>
-                              </span>
-                            )}
-                            {isRejected && (
-                              <span className="px-2.5 py-1 rounded-full text-xs font-semibold uppercase tracking-wider bg-error-bg text-error border border-error/20 flex items-center gap-1 shadow-xs">
-                                <AlertTriangle className="w-3.5 h-3.5 text-error" />
-                                <span>Rejected by Admin</span>
-                              </span>
-                            )}
-                            {p.approval_status === 'suspended' && (
-                              <span className="px-2.5 py-1 rounded-full text-xs font-semibold uppercase tracking-wider bg-border text-foreground border border-border-hover flex items-center gap-1 shadow-xs">
-                                <Ban className="w-3.5 h-3.5 text-foreground-muted" />
-                                <span>Suspended</span>
-                              </span>
-                            )}
-                          </div>
-
-                          <span className="absolute bottom-3 right-3 px-2 py-0.5 rounded-full text-xs font-bold bg-surface/95 text-foreground shadow-xs uppercase tracking-wide">
-                            {p.category}
-                          </span>
-                        </div>
-
-                        {/* Details */}
-                        <div className="p-5 space-y-3">
-                          <div>
-                            <div className="flex items-center justify-between text-xs text-foreground-muted mb-1">
-                              <span className="font-mono text-xs bg-surface-muted px-1.5 py-0.5 rounded">SKU: {p.sku || 'N/A'}</span>
-                              <span>{variant?.weight || 'Standard'}</span>
-                            </div>
-                            <h4 className="text-sm font-semibold text-foreground leading-snug line-clamp-2">
+                          <div className="min-w-0 max-w-[260px]">
+                            <span className="font-bold text-[13px] text-foreground block truncate">
                               {p.name}
-                            </h4>
-                          </div>
-
-                          {/* Price & Stock */}
-                          <div className="flex items-center justify-between pt-2 border-t border-border">
-                            <div>
-                              <div className="flex items-baseline gap-1.5">
-                                <span className="text-base font-semibold text-primary">₹{price}</span>
-                                {compareAt && compareAt > price && (
-                                  <span className="text-xs text-foreground-muted line-through">₹{compareAt}</span>
-                                )}
-                              </div>
-                            </div>
-                            <span className={`px-2.5 py-1 rounded-lg text-xs font-bold ${
-                              totalStock > 0 ? 'bg-success-bg text-success' : 'bg-error-bg text-error'
-                            }`}>
-                              {totalStock} in stock
+                            </span>
+                            <span className="text-[11px] text-foreground-muted block font-mono truncate">
+                              SKU: {p.sku || p.id.slice(0, 8).toUpperCase()}
                             </span>
                           </div>
-
-                          {/* Timestamps */}
-                          <div className="text-xs text-foreground-muted flex items-center justify-between pt-1">
-                            <span>Submitted: {new Date(p.created_at).toLocaleDateString()}</span>
-                            {p.reviewed_at && (
-                              <span>Reviewed: {new Date(p.reviewed_at).toLocaleDateString()}</span>
+                        </div>
+                      </td>
+                      <td className="px-5 py-3.5 whitespace-nowrap min-w-[140px]">
+                        <span
+                          style={{ backgroundColor: catStyle.bg, color: catStyle.color }}
+                          className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold whitespace-nowrap border border-black/5"
+                        >
+                          {p.category}
+                        </span>
+                      </td>
+                      <td className="px-5 py-3.5 whitespace-nowrap">
+                        <div className="text-xs space-y-0.5">
+                          <div className="flex items-baseline gap-1.5">
+                            <span className="font-bold text-foreground">₹{price}</span>
+                            {compareAt && compareAt > price && (
+                              <span className="text-[11px] text-foreground-muted line-through">₹{compareAt}</span>
                             )}
                           </div>
-
-                          {/* Rejection Notice if rejected */}
-                          {isRejected && p.rejection_reason && (
-                            <div className="p-3 bg-error-bg border border-error/20 rounded-xl text-xs text-error space-y-1">
-                              <span className="font-bold flex items-center gap-1 text-error">
-                                <AlertCircle className="w-3.5 h-3.5" /> Rejection Feedback:
-                              </span>
-                              <p className="text-xs text-error/90 leading-relaxed">{p.rejection_reason}</p>
-                            </div>
-                          )}
+                          <span className={`inline-block px-2 py-0.5 rounded-md text-[10px] font-bold ${
+                            totalStock > 0 ? 'bg-emerald-100 text-emerald-900 border border-emerald-300 dark:bg-emerald-950/40 dark:text-emerald-300' : 'bg-red-100 text-red-900 border border-red-300 dark:bg-red-950/40 dark:text-red-300'
+                          }`}>
+                            {totalStock > 0 ? `${totalStock} in stock` : 'Out of stock'}
+                          </span>
                         </div>
-                      </div>
-
-                      {/* Card Actions */}
-                      <div className="p-4 pt-0 flex items-center gap-2">
-                        {isApproved ? (
-                          <>
-                            <button
-                              onClick={() => handleOpenQuickUpdate(p)}
-                              className="flex-1 py-2 bg-surface-muted hover:bg-border text-foreground rounded-xl text-xs font-bold transition-colors cursor-pointer"
-                            >
-                              Update Stock/Price
-                            </button>
+                      </td>
+                      <td className="px-5 py-3.5 whitespace-nowrap">
+                        {isApproved && (
+                          <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-bold bg-emerald-100 text-emerald-900 border border-emerald-300 dark:bg-emerald-950/40 dark:text-emerald-300">
+                            <CheckCircle2 className="w-3.5 h-3.5 text-emerald-700" />
+                            <span>Live Approved</span>
+                          </span>
+                        )}
+                        {isPending && (
+                          <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-bold bg-amber-100 text-amber-900 border border-amber-300 dark:bg-amber-950/40 dark:text-amber-300 animate-pulse">
+                            <Clock className="w-3.5 h-3.5 text-amber-700" />
+                            <span>Pending Review</span>
+                          </span>
+                        )}
+                        {isRejected && (
+                          <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-bold bg-red-100 text-red-900 border border-red-300 dark:bg-red-950/40 dark:text-red-300">
+                            <AlertTriangle className="w-3.5 h-3.5 text-red-700" />
+                            <span>Rejected</span>
+                          </span>
+                        )}
+                        {p.approval_status === 'suspended' && (
+                          <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-bold bg-zinc-100 text-zinc-900 border border-zinc-300 dark:bg-zinc-800 dark:text-zinc-300">
+                            <Ban className="w-3.5 h-3.5 text-zinc-600" />
+                            <span>Suspended</span>
+                          </span>
+                        )}
+                      </td>
+                      <td className="px-5 py-3.5 whitespace-nowrap text-xs text-foreground-muted font-mono">
+                        {new Date(p.created_at).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}
+                      </td>
+                      <td className="px-5 py-3.5 text-right whitespace-nowrap">
+                        <div className="flex items-center justify-end gap-1.5">
+                          {isApproved ? (
+                            <>
+                              <button
+                                onClick={() => handleOpenQuickUpdate(p)}
+                                className="px-2.5 py-1 rounded-lg border border-border hover:border-primary text-xs font-semibold text-foreground hover:bg-surface-muted transition-colors cursor-pointer"
+                              >
+                                Stock/Price
+                              </button>
+                              <button
+                                onClick={() => handleOpenEditProduct(p)}
+                                className="p-1.5 rounded-lg border border-border hover:border-primary text-foreground hover:bg-surface-muted transition-colors cursor-pointer"
+                                title="Edit product"
+                              >
+                                <Edit className="w-3.5 h-3.5 text-primary" />
+                              </button>
+                            </>
+                          ) : isRejected ? (
                             <button
                               onClick={() => handleOpenEditProduct(p)}
-                              className="px-3 py-2 bg-surface border border-border hover:bg-surface-muted text-foreground rounded-xl text-xs font-bold transition-colors cursor-pointer"
-                              title="Edit all product specs"
+                              className="px-3 py-1.5 bg-red-600 hover:bg-red-700 text-white text-xs font-bold rounded-xl transition-colors flex items-center gap-1 cursor-pointer shadow-xs"
+                            >
+                              <RotateCcw className="w-3.5 h-3.5" />
+                              <span>Resubmit</span>
+                            </button>
+                          ) : (
+                            <button
+                              onClick={() => handleOpenEditProduct(p)}
+                              className="px-3 py-1.5 border border-amber-300 bg-amber-50 dark:bg-amber-950/40 text-amber-900 dark:text-amber-300 text-xs font-bold rounded-xl transition-colors flex items-center gap-1 cursor-pointer"
                             >
                               <Edit className="w-3.5 h-3.5" />
+                              <span>Edit</span>
                             </button>
-                          </>
-                        ) : isRejected ? (
-                          <button
-                            onClick={() => handleOpenEditProduct(p)}
-                            className="w-full py-2.5 bg-error hover:bg-error text-on-error rounded-xl text-xs font-bold transition-all shadow-xs flex items-center justify-center gap-1.5 cursor-pointer"
-                          >
-                            <RotateCcw className="w-3.5 h-3.5" />
-                            <span>Edit & Resubmit for Review</span>
-                          </button>
-                        ) : (
-                          <button
-                            onClick={() => handleOpenEditProduct(p)}
-                            className="w-full py-2 bg-warning-bg hover:bg-warning-bg text-warning border border-warning/20 rounded-xl text-xs font-bold transition-colors cursor-pointer flex items-center justify-center gap-1.5"
-                          >
-                            <Edit className="w-3.5 h-3.5" />
-                            <span>Modify Pending Request</span>
-                          </button>
-                        )}
-                      </div>
-                    </div>
+                          )}
+                        </div>
+                      </td>
+                    </tr>
                   );
                 })}
-              </div>
+              </AdminTable>
             ) : (
-              <div className="py-16 text-center text-foreground-muted text-xs font-medium space-y-3 bg-surface rounded-xl border border-border">
-                <div className="w-14 h-14 rounded-2xl bg-surface-muted text-foreground-muted flex items-center justify-center mx-auto">
-                  <ShoppingBag className="w-7 h-7" />
+              /* Grid View */
+              isLoadingProducts ? (
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {[1, 2, 3].map(i => (
+                    <div key={i} className="h-48 rounded-2xl bg-surface border border-border animate-pulse" />
+                  ))}
                 </div>
-                <div className="space-y-1">
-                  <p className="font-bold text-foreground text-sm">No products found</p>
-                  <p className="text-foreground-muted max-w-sm mx-auto">
-                    {productStatusFilter !== 'all'
-                      ? `No products with status "${productStatusFilter}".`
-                      : 'You have not added any products yet. Click below to submit your first item.'}
-                  </p>
-                </div>
-                <button
-                  onClick={handleOpenAddProduct}
-                  className="px-5 py-2.5 bg-primary text-on-primary text-xs font-bold rounded-xl hover:bg-primary-hover transition-colors inline-flex items-center gap-1.5 cursor-pointer"
-                >
-                  <Plus className="w-4 h-4" />
-                  <span>Add Product</span>
-                </button>
-              </div>
-            )}
-          </div>
-        )}
+              ) : filteredProducts.length > 0 ? (
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+                  {filteredProducts.map((p) => {
+                    const variant = p.product_variants?.[0];
+                    const price = variant?.price || 0;
+                    const compareAt = variant?.original_price || variant?.compare_at_price;
+                    const totalStock = p.product_variants?.reduce((acc: number, v: any) => acc + (v.stock || 0), 0) ?? 0;
+                    const isApproved = p.approval_status === 'approved';
+                    const isPending = p.approval_status === 'pending';
+                    const isRejected = p.approval_status === 'rejected';
 
-        {/* ─── TAB: QUALITY TEST REPORTS ─── */}
-        {activeTab === 'quality-reports' && (
-          <div className="space-y-6 animate-in fade-in">
-            <div className="bg-surface rounded-xl border border-border p-6 sm:p-8 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-              <div>
-                <h3 className="text-lg font-semibold text-foreground flex items-center gap-2">
-                  <ShieldCheck className="w-5 h-5 text-primary" />
-                  <span>Certified Laboratory Quality Reports</span>
-                </h3>
-                <p className="text-xs text-foreground-muted mt-1 max-w-2xl">
-                  Upload laboratory test reports and purity certificates for your products. Reports are reviewed and approved by the admin before being published to customer product pages.
-                </p>
-              </div>
-
-              <button
-                type="button"
-                onClick={() => setIsQualityModalOpen(true)}
-                className="px-4 py-2.5 rounded-lg bg-primary hover:bg-primary-hover text-on-primary text-xs font-semibold flex items-center gap-2 transition-colors cursor-pointer shrink-0"
-              >
-                <Plus className="w-4 h-4" />
-                <span>Upload Lab Report</span>
-              </button>
-            </div>
-
-            {isLoadingQualityReports ? (
-              <div className="bg-surface rounded-xl border border-border p-12 text-center">
-                <Loader2 className="w-6 h-6 animate-spin text-primary mx-auto mb-2" />
-                <p className="text-xs text-foreground-muted">Loading quality test reports...</p>
-              </div>
-            ) : qualityReports.length === 0 ? (
-              <div className="bg-surface rounded-xl border border-border p-12 text-center space-y-3">
-                <div className="w-12 h-12 rounded-full bg-primary/10 text-primary flex items-center justify-center mx-auto">
-                  <FileCheck2 className="w-6 h-6" />
-                </div>
-                <h4 className="text-sm font-semibold text-foreground">No quality reports uploaded yet</h4>
-                <p className="text-xs text-foreground-muted max-w-md mx-auto">
-                  Lab reports build trust with your buyers. Upload testing certificates issued by NABL or FSSAI accredited laboratories.
-                </p>
-                <button
-                  type="button"
-                  onClick={() => setIsQualityModalOpen(true)}
-                  className="px-4 py-2 rounded-lg bg-primary text-on-primary text-xs font-semibold hover:bg-primary-hover transition-colors cursor-pointer"
-                >
-                  Upload First Lab Report
-                </button>
-              </div>
-            ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {qualityReports.map((report) => (
-                  <div key={report.id} className="bg-surface rounded-xl border border-border p-5 flex flex-col justify-between gap-4">
-                    <div className="space-y-3">
-                      <div className="flex items-start justify-between gap-2">
-                        <span className={`px-2.5 py-0.5 rounded-full text-[11px] font-semibold uppercase tracking-wider ${
-                          report.status === 'approved'
-                            ? 'bg-success-bg text-success border border-success/20'
-                            : report.status === 'rejected'
-                            ? 'bg-error-bg text-error border border-error/20'
-                            : 'bg-warning-bg text-warning border border-warning/20'
-                        }`}>
-                          {report.status === 'approved' ? 'Approved & Live' : report.status === 'rejected' ? 'Rejected' : 'Pending Review'}
-                        </span>
-                        <span className="text-[11px] text-foreground-muted">
-                          {new Date(report.test_date).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}
-                        </span>
-                      </div>
-
-                      <div>
-                        <h4 className="font-semibold text-sm text-foreground">{report.title}</h4>
-                        <p className="text-xs text-foreground-muted mt-0.5">Lab: {report.laboratory_name}</p>
-                        {report.batch_number && (
-                          <p className="text-xs text-foreground-muted">Batch: {report.batch_number}</p>
-                        )}
-                        {report.product_name && (
-                          <p className="text-xs font-medium text-primary mt-1">Product: {report.product_name}</p>
-                        )}
-                      </div>
-
-                      {report.admin_notes && (
-                        <div className="p-2.5 rounded-lg bg-surface-muted text-xs border border-border text-foreground-muted">
-                          <span className="font-semibold text-foreground block mb-0.5">Admin Note:</span>
-                          <p>{report.admin_notes}</p>
-                        </div>
-                      )}
-                    </div>
-
-                    <div className="pt-3 border-t border-border flex items-center justify-between">
-                      <a
-                        href={report.file_url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-xs font-semibold text-primary hover:underline flex items-center gap-1"
+                    return (
+                      <div
+                        key={p.id}
+                        className="bg-surface rounded-xl border border-border/90 shadow-2xs hover:shadow-md transition-all overflow-hidden flex flex-col justify-between group"
                       >
-                        <span>View Certificate</span>
-                        <ExternalLink className="w-3.5 h-3.5" />
-                      </a>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-        )}
-
-        {/* ─── TAB 3: PRODUCT REJECTION REASONS ─── */}
-        {activeTab === 'rejections' && (
-          <div className="bg-surface rounded-xl border border-border shadow-2xs p-6 sm:p-8 space-y-6 animate-in fade-in">
-            <div>
-              <h3 className="text-lg font-semibold text-foreground tracking-tight flex items-center gap-2">
-                <AlertTriangle className="w-5 h-5 text-error" />
-                <span>Product Rejection Feedback & Corrections</span>
-              </h3>
-              <p className="text-xs text-foreground-muted mt-1">
-                Products rejected by the admin team with detailed reasons. You can make the required changes and resubmit for approval.
-              </p>
-            </div>
-
-            {rejectedProducts.length === 0 ? (
-              <div className="py-12 text-center text-foreground-muted text-xs font-medium space-y-2">
-                <CheckCircle2 className="w-12 h-12 text-success mx-auto" />
-                <p className="font-bold text-foreground text-sm">No Rejected Products</p>
-                <p>All your submitted products are either approved or in review!</p>
-              </div>
-            ) : (
-              <div className="space-y-4">
-                {rejectedProducts.map((p) => {
-                  const variant = p.product_variants?.[0];
-                  return (
-                    <div
-                      key={p.id}
-                      className="p-5 rounded-2xl border-2 border-error/20 bg-error-bg/40 space-y-4"
-                    >
-                      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                        <div className="flex items-center gap-3.5">
-                          <img
-                            src={p.image_url || PLACEHOLDER_PRODUCT_IMAGE}
-                            alt={p.name}
-                            className="w-16 h-16 rounded-xl object-cover bg-surface border border-border shrink-0"
-                          />
-                          <div>
-                            <div className="flex items-center gap-2">
-                              <span className="font-mono text-xs bg-error-bg text-error px-1.5 py-0.5 rounded font-bold">
-                                SKU: {p.sku || 'N/A'}
-                              </span>
-                              <span className="text-xs text-foreground-muted">{p.category}</span>
+                        {/* Product Header & Image */}
+                        <div>
+                          <div className="relative h-44 bg-surface-muted overflow-hidden flex items-center justify-center border-b border-border">
+                            <img
+                              src={p.image_url || PLACEHOLDER_PRODUCT_IMAGE}
+                              alt={p.name}
+                              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                            />
+                            {/* Approval Status Badge */}
+                            <div className="absolute top-3 left-3">
+                              {isApproved && (
+                                <span className="px-2.5 py-1 rounded-full text-xs font-semibold uppercase tracking-wider bg-success-bg text-success border border-success/20 flex items-center gap-1 shadow-xs">
+                                  <CheckCircle2 className="w-3.5 h-3.5 text-success" />
+                                  <span>Approved & Live</span>
+                                </span>
+                              )}
+                              {isPending && (
+                                <span className="px-2.5 py-1 rounded-full text-xs font-semibold uppercase tracking-wider bg-warning-bg text-warning border border-warning/20 flex items-center gap-1 shadow-xs animate-pulse">
+                                  <Clock className="w-3.5 h-3.5 text-warning" />
+                                  <span>Awaiting Review</span>
+                                </span>
+                              )}
+                              {isRejected && (
+                                <span className="px-2.5 py-1 rounded-full text-xs font-semibold uppercase tracking-wider bg-error-bg text-error border border-error/20 flex items-center gap-1 shadow-xs">
+                                  <AlertTriangle className="w-3.5 h-3.5 text-error" />
+                                  <span>Rejected by Admin</span>
+                                </span>
+                              )}
+                              {p.approval_status === 'suspended' && (
+                                <span className="px-2.5 py-1 rounded-full text-xs font-semibold uppercase tracking-wider bg-border text-foreground border border-border-hover flex items-center gap-1 shadow-xs">
+                                  <Ban className="w-3.5 h-3.5 text-foreground-muted" />
+                                  <span>Suspended</span>
+                                </span>
+                              )}
                             </div>
-                            <h4 className="font-semibold text-foreground text-sm mt-0.5">{p.name}</h4>
-                            <p className="text-xs font-bold text-primary mt-0.5">
-                              ₹{variant?.price || 0} • {variant?.weight || 'Standard'}
-                            </p>
+
+                            <span className="absolute bottom-3 right-3 px-2 py-0.5 rounded-full text-xs font-bold bg-surface/95 text-foreground shadow-xs uppercase tracking-wide">
+                              {p.category}
+                            </span>
+                          </div>
+
+                          {/* Details */}
+                          <div className="p-5 space-y-3">
+                            <div>
+                              <div className="flex items-center justify-between text-xs text-foreground-muted mb-1">
+                                <span className="font-mono text-xs bg-surface-muted px-1.5 py-0.5 rounded">SKU: {p.sku || 'N/A'}</span>
+                                <span>{variant?.weight || 'Standard'}</span>
+                              </div>
+                              <h4 className="text-sm font-semibold text-foreground leading-snug line-clamp-2">
+                                {p.name}
+                              </h4>
+                            </div>
+
+                            {/* Price & Stock */}
+                            <div className="flex items-center justify-between pt-2 border-t border-border">
+                              <div>
+                                <div className="flex items-baseline gap-1.5">
+                                  <span className="text-base font-semibold text-primary">₹{price}</span>
+                                  {compareAt && compareAt > price && (
+                                    <span className="text-xs text-foreground-muted line-through">₹{compareAt}</span>
+                                  )}
+                                </div>
+                              </div>
+                              <span className={`px-2.5 py-1 rounded-lg text-xs font-bold ${
+                                totalStock > 0 ? 'bg-success-bg text-success' : 'bg-error-bg text-error'
+                              }`}>
+                                {totalStock} in stock
+                              </span>
+                            </div>
+
+                            {/* Timestamps */}
+                            <div className="text-xs text-foreground-muted flex items-center justify-between pt-1">
+                              <span>Submitted: {new Date(p.created_at).toLocaleDateString()}</span>
+                              {p.reviewed_at && (
+                                <span>Reviewed: {new Date(p.reviewed_at).toLocaleDateString()}</span>
+                              )}
+                            </div>
+
+                            {/* Rejection Notice if rejected */}
+                            {isRejected && p.rejection_reason && (
+                              <div className="p-3 bg-error-bg border border-error/20 rounded-xl text-xs text-error space-y-1">
+                                <span className="font-bold flex items-center gap-1 text-error">
+                                  <AlertCircle className="w-3.5 h-3.5" /> Rejection Feedback:
+                                </span>
+                                <p className="text-xs text-error/90 leading-relaxed">{p.rejection_reason}</p>
+                              </div>
+                            )}
                           </div>
                         </div>
 
-                        <button
-                          onClick={() => handleOpenEditProduct(p)}
-                          className="px-5 py-2.5 bg-error hover:bg-error text-on-error rounded-xl text-xs font-bold transition-all shadow-xs flex items-center justify-center gap-2 cursor-pointer self-start sm:self-center"
-                        >
-                          <RotateCcw className="w-4 h-4" />
-                          <span>Edit & Resubmit</span>
-                        </button>
-                      </div>
-
-                      {/* Admin Reason Box */}
-                      <div className="p-4 rounded-xl bg-surface border border-error/20 text-xs text-error space-y-1">
-                        <div className="flex items-center justify-between">
-                          <span className="font-semibold text-error uppercase tracking-wider text-xs">
-                            Admin Feedback / Required Correction:
-                          </span>
-                          {p.reviewed_at && (
-                            <span className="text-xs text-foreground-muted">
-                              Decision Date: {new Date(p.reviewed_at).toLocaleDateString()}
-                            </span>
+                        {/* Card Actions */}
+                        <div className="p-4 pt-0 flex items-center gap-2">
+                          {isApproved ? (
+                            <>
+                              <button
+                                onClick={() => handleOpenQuickUpdate(p)}
+                                className="flex-1 py-2 bg-surface-muted hover:bg-border text-foreground rounded-xl text-xs font-bold transition-colors cursor-pointer"
+                              >
+                                Update Stock/Price
+                              </button>
+                              <button
+                                onClick={() => handleOpenEditProduct(p)}
+                                className="px-3 py-2 bg-surface border border-border hover:bg-surface-muted text-foreground rounded-xl text-xs font-bold transition-colors cursor-pointer"
+                                title="Edit all product specs"
+                              >
+                                <Edit className="w-3.5 h-3.5" />
+                              </button>
+                            </>
+                          ) : isRejected ? (
+                            <button
+                              onClick={() => handleOpenEditProduct(p)}
+                              className="w-full py-2.5 bg-error hover:bg-error text-on-error rounded-xl text-xs font-bold transition-all shadow-xs flex items-center justify-center gap-1.5 cursor-pointer"
+                            >
+                              <RotateCcw className="w-3.5 h-3.5" />
+                              <span>Edit & Resubmit for Review</span>
+                            </button>
+                          ) : (
+                            <button
+                              onClick={() => handleOpenEditProduct(p)}
+                              className="w-full py-2 bg-warning-bg hover:bg-warning-bg text-warning border border-warning/20 rounded-xl text-xs font-bold transition-colors cursor-pointer flex items-center justify-center gap-1.5"
+                            >
+                              <Edit className="w-3.5 h-3.5" />
+                              <span>Modify Pending Request</span>
+                            </button>
                           )}
                         </div>
-                        <p className="text-foreground leading-relaxed font-medium">
-                          {p.rejection_reason || 'Product does not meet standard marketplace quality or compliance requirements.'}
-                        </p>
                       </div>
-                    </div>
-                  );
-                })}
-              </div>
+                    );
+                  })}
+                </div>
+              ) : (
+                <div className="py-16 text-center text-foreground-muted text-xs font-medium space-y-3 bg-surface rounded-xl border border-border">
+                  <div className="w-14 h-14 rounded-2xl bg-surface-muted text-foreground-muted flex items-center justify-center mx-auto">
+                    <Package className="w-7 h-7" />
+                  </div>
+                  <p>No products found matching your current filter.</p>
+                </div>
+              )
             )}
           </div>
         )}
-
-        {/* ─── TAB 4: INVENTORY MANAGEMENT ─── */}
-        {activeTab === 'inventory' && (
-          <div className="bg-surface rounded-xl border border-border shadow-2xs p-6 sm:p-8 space-y-6 animate-in fade-in">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-              <div>
-                <h3 className="text-lg font-semibold text-foreground tracking-tight">
-                  Inventory & Quick Price Management
-                </h3>
-                <p className="text-xs text-foreground-muted mt-0.5">
-                  Update stock quantities and selling prices on your approved products without requiring re-approval.
-                </p>
-              </div>
-            </div>
-
-            {approvedProducts.length === 0 ? (
-              <div className="py-12 text-center text-foreground-muted text-xs font-medium space-y-2">
-                <Layers className="w-12 h-12 text-foreground-muted mx-auto" />
-                <p className="font-bold text-foreground text-sm">No Approved Products</p>
-                <p>Once your products are approved by admin, manage their live inventory here.</p>
-              </div>
-            ) : (
-              <div className="border border-border rounded-2xl overflow-hidden">
-                <table className="w-full text-left text-xs">
-                  <thead className="bg-surface-muted text-foreground-muted font-bold border-b border-border">
-                    <tr>
-                      <th className="py-3 px-4">Product Name</th>
-                      <th className="py-3 px-4">SKU</th>
-                      <th className="py-3 px-4">Current Price</th>
-                      <th className="py-3 px-4">Available Stock</th>
-                      <th className="py-3 px-4">Status</th>
-                      <th className="py-3 px-4 text-right">Actions</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-border">
-                    {approvedProducts.map((p) => {
-                      const variant = p.product_variants?.[0];
-                      return (
-                        <tr key={p.id} className="hover:bg-surface-muted/60 transition-colors">
-                          <td className="py-3 px-4">
-                            <div className="flex items-center gap-2.5">
-                              <img
-                                src={p.image_url || PLACEHOLDER_PRODUCT_IMAGE}
-                                alt={p.name}
-                                className="w-9 h-9 rounded-lg object-cover bg-surface-muted border border-border shrink-0"
-                              />
-                              <span className="font-bold text-foreground line-clamp-1">{p.name}</span>
-                            </div>
-                          </td>
-                          <td className="py-3 px-4 font-mono text-foreground-muted">{p.sku || '—'}</td>
-                          <td className="py-3 px-4 font-semibold text-primary">₹{variant?.price || 0}</td>
-                          <td className="py-3 px-4">
-                            <span className={`px-2 py-0.5 rounded-md font-bold text-xs ${
-                              (variant?.stock || 0) < 10 ? 'bg-warning-bg text-warning' : 'bg-success-bg text-success'
-                            }`}>
-                              {variant?.stock || 0} units
-                            </span>
-                          </td>
-                          <td className="py-3 px-4">
-                            <span className="px-2 py-0.5 rounded-full text-xs font-semibold uppercase bg-success-bg text-success">
-                              Live
-                            </span>
-                          </td>
-                          <td className="py-3 px-4 text-right">
-                            <button
-                              onClick={() => handleOpenQuickUpdate(p)}
-                              className="px-3 py-1.5 bg-primary hover:bg-primary-hover text-on-primary font-bold rounded-lg text-xs transition-colors cursor-pointer"
-                            >
-                              Update Stock/Price
-                            </button>
-                          </td>
-                        </tr>
-                      );
-                    })}
-                  </tbody>
-                </table>
-              </div>
-            )}
-          </div>
-        )}
-
-        {/* ─── TAB 5: SELLER PROFILE ─── */}
-        {(activeTab === 'profile' || activeTab === 'store') && (
-          <div className="bg-surface rounded-xl border border-border shadow-2xs p-6 sm:p-8 space-y-6 animate-in fade-in">
-            <div>
-              <h3 className="text-lg font-semibold text-foreground tracking-tight flex items-center gap-2">
-                <Building2 className="w-5 h-5 text-primary" />
-                <span>Seller Store Profile & Business Identity</span>
-              </h3>
-              <p className="text-xs text-foreground-muted mt-0.5">
-                Verified registration details for your Gjanand Sarkar vendor account.
-              </p>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className="p-5 bg-surface-muted rounded-2xl border border-border space-y-3 text-xs">
-                <span className="font-semibold text-foreground-muted uppercase tracking-wider block">Store & Contact Details</span>
-                <div className="flex justify-between py-1.5 border-b border-border">
-                  <span className="text-foreground-muted">Business / Store Name:</span>
-                  <span className="font-bold text-foreground">{storeName}</span>
-                </div>
-                <div className="flex justify-between py-1.5 border-b border-border">
-                  <span className="text-foreground-muted">Contact Person:</span>
-                  <span className="font-bold text-foreground">{inquiry?.full_name || user?.name || 'Seller'}</span>
-                </div>
-                <div className="flex justify-between py-1.5 border-b border-border">
-                  <span className="text-foreground-muted">Registered Email:</span>
-                  <span className="font-medium text-foreground">{inquiry?.email || user?.email || 'N/A'}</span>
-                </div>
-                <div className="flex justify-between py-1.5">
-                  <span className="text-foreground-muted">Phone Number:</span>
-                  <span className="font-bold text-foreground">{inquiry?.phone ? `+91 ${inquiry.phone}` : (user?.phone || 'N/A')}</span>
-                </div>
-              </div>
-
-              <div className="p-5 bg-surface-muted rounded-2xl border border-border space-y-3 text-xs">
-                <span className="font-semibold text-foreground-muted uppercase tracking-wider block">Taxation & Compliance</span>
-                <div className="flex justify-between py-1.5 border-b border-border">
-                  <span className="text-foreground-muted">Business Entity Type:</span>
-                  <span className="font-bold text-foreground">{inquiry?.business_type || 'Registered Vendor'}</span>
-                </div>
-                <div className="flex justify-between py-1.5 border-b border-border">
-                  <span className="text-foreground-muted">GSTIN:</span>
-                  <span className="font-mono font-bold text-foreground">{inquiry?.gstin || (sellerStore as any)?.gstin || 'Not Applicable'}</span>
-                </div>
-                <div className="flex justify-between py-1.5 border-b border-border">
-                  <span className="text-foreground-muted">PAN Number:</span>
-                  <span className="font-mono font-bold text-foreground">{inquiry?.pan || 'Verified'}</span>
-                </div>
-                <div className="flex justify-between py-1.5">
-                  <span className="text-foreground-muted">Business Address:</span>
-                  <span className="text-foreground text-right max-w-xs">{inquiry?.business_address || storeState}</span>
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* ─── TAB 6: ORDERS ─── */}
-        {activeTab === 'orders' && (
+{activeTab === 'orders' && (
           <div className="space-y-6 animate-in fade-in">
             <div className="bg-surface rounded-xl border border-border/90 shadow-2xs p-6 sm:p-8">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">

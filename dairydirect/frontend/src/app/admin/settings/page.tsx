@@ -3,9 +3,10 @@
 import { useState, useEffect } from 'react';
 import {
   Settings, Shield, Clock, Truck, Percent, Save,
-  ArrowLeft, CheckCircle2, AlertCircle, Loader2, IndianRupee
+  CheckCircle2, AlertCircle, Loader2, IndianRupee
 } from 'lucide-react';
 import Link from 'next/link';
+import { AdminHeader } from '@/components/admin/AdminHeader';
 
 export default function AdminSettingsPage() {
   const [settings, setSettings] = useState<any>({
@@ -66,21 +67,12 @@ export default function AdminSettingsPage() {
   };
 
   return (
-    <div className="flex flex-col min-h-screen" style={{ background: 'var(--color-background)' }}>
-      {/* Header */}
-      <div className="px-6 md:px-10 pt-8 pb-6" style={{ background: 'var(--color-surface-container-lowest)', borderBottom: '1px solid rgba(195,201,187,0.2)' }}>
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <Link href="/admin" className="p-1.5 rounded-[8px] hover:opacity-70 transition-opacity" style={{ background: 'var(--color-surface-container-low)' }}>
-              <ArrowLeft className="w-4 h-4" style={{ color: 'var(--color-on-surface)' }} />
-            </Link>
-            <div>
-              <h1 className="font-semibold text-[24px]" style={{ color: 'var(--color-on-surface)' }}>Business Configuration</h1>
-              <p className="text-[12px]" style={{ color: 'var(--color-on-surface-variant)' }}>Profit protection rules, cutoff timings, and delivery fees</p>
-            </div>
-          </div>
-        </div>
-      </div>
+    <div className="flex flex-col min-h-screen">
+      {/* Standard Admin Header */}
+      <AdminHeader
+        title="Business Settings"
+        subtitle="Profit protection rules, cutoff timings, and delivery fees"
+      />
 
       <div className="px-6 md:px-10 py-6 max-w-4xl">
         {toast && (

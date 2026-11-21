@@ -11,6 +11,8 @@ import {
   Eye,
   IndianRupee,
 } from 'lucide-react';
+import { AdminHeader } from '@/components/admin/AdminHeader';
+import { AdminTable } from '@/components/admin/AdminTable';
 
 interface Campaign {
   id: string;
@@ -129,152 +131,138 @@ export default function AdminCampaignsPage() {
   const blendedRoas = totals.spend > 0 ? totals.revenue / totals.spend : null;
 
   return (
-    <div className="px-1 py-2">
-      <div className="flex flex-wrap items-center justify-between gap-3 mb-6">
-        <div>
-          <div className="flex items-center gap-2 mb-1">
-            <Megaphone className="w-5 h-5 text-primary" />
-            <h1 className="text-xl sm:text-2xl font-semibold text-foreground">Ad Campaigns</h1>
+    <div className="flex flex-col min-h-screen">
+      {/* Standard Admin Header */}
+      <AdminHeader
+        title="Ad Campaigns"
+        subtitle="House promotions across storefront placements with impression, click, and ROAS tracking"
+        onRefresh={() => { void load(); }}
+        isRefreshing={isLoading}
+        actions={
+          <button
+            type="button"
+            onClick={() => setShowForm((v) => !v)}
+            className="flex items-center gap-2 px-4 py-2 rounded-[12px] font-bold text-[13px] text-white transition-all shadow-xs active:scale-95 cursor-pointer"
+            style={{ background: 'var(--color-primary)' }}
+          >
+            <Plus className="w-4 h-4" strokeWidth={2.5} />
+            <span>{showForm ? 'Close' : 'New Campaign'}</span>
+          </button>
+        }
+      />
+
+      <div className="px-6 md:px-10 py-6">
+        {!analyticsConfigured && (
+          <div className="mb-4 flex items-start gap-2 rounded-xl border border-warning/20 bg-warning-bg px-3 py-2.5 text-[13px] text-warning">
+            <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />
+            <span>
+              External analytics is not configured, so A/B results are not being forwarded for
+              analysis. Set <code className="font-mono">POSTHOG_KEY</code> to enable it.
+              The figures below are still recorded first-party and are accurate.
+            </span>
           </div>
-          <p className="text-sm text-foreground-muted">
-            House promotions across the storefront, with impression, click and ROAS tracking.
-          </p>
+        )}
+
+        {error && (
+          <div
+            role="alert"
+            className="mb-4 flex items-start gap-2 rounded-xl border border-error/20 bg-error-bg px-3 py-2.5 text-[13px] text-error"
+          >
+            <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />
+            <span>{error}</span>
+          </div>
+        )}
+
+        {showForm && <CampaignForm onCreated={() => { setShowForm(false); void load(); }} />}
+
+        {/* ─── Totals ─── */}
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-6">
+          <SummaryCard icon={Eye} label="Impressions" value={totals.impressions.toLocaleString('en-IN')} />
+          <SummaryCard icon={MousePointerClick} label="Clicks" value={totals.clicks.toLocaleString('en-IN')} />
+          <SummaryCard icon={IndianRupee} label="Attributed revenue" value={money(totals.revenue)} />
+          <SummaryCard
+            icon={TrendingUp}
+            label="Blended ROAS"
+            value={blendedRoas === null ? '—' : `${blendedRoas.toFixed(2)}x`}
+            hint={blendedRoas === null ? 'No spend recorded yet' : undefined}
+          />
         </div>
 
-        <button
-          type="button"
-          onClick={() => setShowForm((v) => !v)}
-          className="px-4 py-2.5 rounded-xl bg-primary text-on-primary text-xs font-bold hover:bg-primary-hover flex items-center gap-1.5 transition-colors"
+        <AdminTable
+          columns={[
+            { header: 'Campaign' },
+            { header: 'Objective' },
+            { header: 'Placements' },
+            { header: 'Impr.' },
+            { header: 'Clicks' },
+            { header: 'CTR' },
+            { header: 'Conv.' },
+            { header: 'Spend' },
+            { header: 'ROAS' },
+            { header: 'Status', align: 'right' },
+          ]}
+          isLoading={isLoading}
+          isEmpty={!isLoading && campaigns.length === 0}
+          emptyIcon={Megaphone}
+          emptyTitle="No campaigns yet"
+          emptyDescription="Create one to start promoting products on the storefront."
         >
-          <Plus className="w-4 h-4" strokeWidth={2.5} />
-          {showForm ? 'Close' : 'New Campaign'}
-        </button>
-      </div>
-
-      {!analyticsConfigured && (
-        <div className="mb-4 flex items-start gap-2 rounded-xl border border-warning/20 bg-warning-bg px-3 py-2.5 text-[13px] text-warning">
-          <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />
-          <span>
-            External analytics is not configured, so A/B results are not being forwarded for
-            analysis. Set <code className="font-mono">POSTHOG_KEY</code> to enable it.
-            The figures below are still recorded first-party and are accurate.
-          </span>
-        </div>
-      )}
-
-      {error && (
-        <div
-          role="alert"
-          className="mb-4 flex items-start gap-2 rounded-xl border border-error/20 bg-error-bg px-3 py-2.5 text-[13px] text-error"
-        >
-          <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />
-          <span>{error}</span>
-        </div>
-      )}
-
-      {showForm && <CampaignForm onCreated={() => { setShowForm(false); void load(); }} />}
-
-      {/* ─── Totals ─── */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-6">
-        <SummaryCard icon={Eye} label="Impressions" value={totals.impressions.toLocaleString('en-IN')} />
-        <SummaryCard icon={MousePointerClick} label="Clicks" value={totals.clicks.toLocaleString('en-IN')} />
-        <SummaryCard icon={IndianRupee} label="Attributed revenue" value={money(totals.revenue)} />
-        <SummaryCard
-          icon={TrendingUp}
-          label="Blended ROAS"
-          value={blendedRoas === null ? '—' : `${blendedRoas.toFixed(2)}x`}
-          hint={blendedRoas === null ? 'No spend recorded yet' : undefined}
-        />
-      </div>
-
-      {isLoading ? (
-        <div className="flex items-center gap-2 justify-center py-14 text-sm text-foreground-muted">
-          <Loader2 className="w-4 h-4 animate-spin" /> Loading campaigns…
-        </div>
-      ) : campaigns.length === 0 ? (
-        <div className="text-center py-14 rounded-2xl border border-border bg-surface">
-          <Megaphone className="w-10 h-10 mx-auto mb-3 text-foreground-muted" />
-          <p className="font-bold text-foreground mb-1">No campaigns yet</p>
-          <p className="text-sm text-foreground-muted">
-            Create one to start promoting products on the storefront.
-          </p>
-        </div>
-      ) : (
-        <div className="overflow-x-auto rounded-2xl border border-border bg-surface">
-          <table className="w-full min-w-[920px] text-left border-collapse">
-            <thead>
-              <tr className="border-b border-border bg-surface-muted/60">
-                {['Campaign', 'Objective', 'Placements', 'Impr.', 'Clicks', 'CTR', 'Conv.', 'Spend', 'ROAS', 'Status'].map(
-                  (h) => (
-                    <th
-                      key={h}
-                      className="px-3 py-3 text-xs font-bold uppercase tracking-wider text-foreground-muted whitespace-nowrap"
-                    >
-                      {h}
-                    </th>
-                  )
-                )}
+          {campaigns.map((c) => {
+            const m = metricsFor(c.id);
+            return (
+              <tr key={c.id} className="hover:bg-black/[0.02] dark:hover:bg-white/[0.03] transition-colors">
+                <td className="px-5 py-3.5 text-[13px] font-bold text-foreground">
+                  {c.name}
+                  {c.target_category && (
+                    <span className="block text-xs font-medium text-foreground-muted">
+                      {c.target_category}
+                    </span>
+                  )}
+                </td>
+                <td className="px-5 py-3.5 text-[12px] text-foreground-muted capitalize">{c.objective}</td>
+                <td className="px-5 py-3.5 text-xs text-foreground-muted">{c.placements?.join(', ')}</td>
+                <td className="px-5 py-3.5 text-[13px] text-foreground tabular-nums">
+                  {(m?.impressions ?? 0).toLocaleString('en-IN')}
+                </td>
+                <td className="px-5 py-3.5 text-[13px] text-foreground tabular-nums">
+                  {(m?.clicks ?? 0).toLocaleString('en-IN')}
+                </td>
+                <td className="px-5 py-3.5 text-[13px] text-foreground tabular-nums">{pct(m?.ctr ?? null)}</td>
+                <td className="px-5 py-3.5 text-[13px] text-foreground tabular-nums">
+                  {(m?.conversions ?? 0).toLocaleString('en-IN')}
+                </td>
+                <td className="px-5 py-3.5 text-[13px] text-foreground tabular-nums">
+                  {money(m?.spend ?? 0)}
+                </td>
+                <td className="px-5 py-3.5 text-[13px] font-bold tabular-nums">
+                  {m?.roas == null ? (
+                    <span className="text-foreground-muted">—</span>
+                  ) : (
+                    <span className={m.roas >= 1 ? 'text-success' : 'text-error'}>
+                      {m.roas.toFixed(2)}x
+                    </span>
+                  )}
+                </td>
+                <td className="px-5 py-3.5 text-right">
+                  <select
+                    value={c.status}
+                    onChange={(e) => updateStatus(c.id, e.target.value)}
+                    aria-label={`Status for ${c.name}`}
+                    className={`text-xs font-bold uppercase tracking-wide rounded-lg border px-2.5 py-1 cursor-pointer outline-none ${
+                      STATUS_STYLES[c.status] ?? STATUS_STYLES.draft
+                    }`}
+                  >
+                    <option value="draft">Draft</option>
+                    <option value="active">Active</option>
+                    <option value="paused">Paused</option>
+                    <option value="ended">Ended</option>
+                  </select>
+                </td>
               </tr>
-            </thead>
-            <tbody>
-              {campaigns.map((c) => {
-                const m = metricsFor(c.id);
-                return (
-                  <tr key={c.id} className="border-b border-border last:border-0 hover:bg-surface-muted/50">
-                    <td className="px-3 py-3 text-[13px] font-bold text-foreground">
-                      {c.name}
-                      {c.target_category && (
-                        <span className="block text-xs font-medium text-foreground-muted">
-                          {c.target_category}
-                        </span>
-                      )}
-                    </td>
-                    <td className="px-3 py-3 text-[12px] text-foreground-muted capitalize">{c.objective}</td>
-                    <td className="px-3 py-3 text-xs text-foreground-muted">{c.placements?.join(', ')}</td>
-                    <td className="px-3 py-3 text-[13px] text-foreground tabular-nums">
-                      {(m?.impressions ?? 0).toLocaleString('en-IN')}
-                    </td>
-                    <td className="px-3 py-3 text-[13px] text-foreground tabular-nums">
-                      {(m?.clicks ?? 0).toLocaleString('en-IN')}
-                    </td>
-                    <td className="px-3 py-3 text-[13px] text-foreground tabular-nums">{pct(m?.ctr ?? null)}</td>
-                    <td className="px-3 py-3 text-[13px] text-foreground tabular-nums">
-                      {(m?.conversions ?? 0).toLocaleString('en-IN')}
-                    </td>
-                    <td className="px-3 py-3 text-[13px] text-foreground tabular-nums">
-                      {money(m?.spend ?? 0)}
-                    </td>
-                    <td className="px-3 py-3 text-[13px] font-bold tabular-nums">
-                      {m?.roas == null ? (
-                        <span className="text-foreground-muted">—</span>
-                      ) : (
-                        <span className={m.roas >= 1 ? 'text-success' : 'text-error'}>
-                          {m.roas.toFixed(2)}x
-                        </span>
-                      )}
-                    </td>
-                    <td className="px-3 py-3">
-                      <select
-                        value={c.status}
-                        onChange={(e) => updateStatus(c.id, e.target.value)}
-                        aria-label={`Status for ${c.name}`}
-                        className={`text-xs font-bold uppercase tracking-wide rounded-lg border px-2 py-1 cursor-pointer ${
-                          STATUS_STYLES[c.status] ?? STATUS_STYLES.draft
-                        }`}
-                      >
-                        <option value="draft">Draft</option>
-                        <option value="active">Active</option>
-                        <option value="paused">Paused</option>
-                        <option value="ended">Ended</option>
-                      </select>
-                    </td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
-        </div>
-      )}
+            );
+          })}
+        </AdminTable>
+      </div>
     </div>
   );
 }

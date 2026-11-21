@@ -61,6 +61,7 @@ import { AuthProvider } from "@/components/shared/AuthProvider";
 import { JsonLd } from "@/components/seo/JsonLd";
 import { ThemeProvider } from "@/components/theme/ThemeProvider";
 import { BRAND } from "@/lib/constants/brand";
+import { AgentationDev } from "@/components/dev/AgentationDev";
 
 const orgStructuredData = {
   "@context": "https://schema.org",
@@ -113,6 +114,7 @@ export default function RootLayout({
           <AuthProvider>
             <LanguageManager />
             {children}
+            <AgentationDev />
           </AuthProvider>
         </ThemeProvider>
       </body>

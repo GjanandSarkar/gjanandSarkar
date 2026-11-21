@@ -15,13 +15,16 @@ import {
   CheckCircle2, 
   Ban, 
   RefreshCw,
-  IndianRupee 
+  IndianRupee,
+  Search,
+  X
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { getAllOrders, updateOrderStatus } from '@/lib/api/orders';
 import type { OrderWithItems } from '@/lib/api/orders';
 import { PLACEHOLDER_PRODUCT_IMAGE } from '@/lib/constants/brand';
 import { ConfirmCodPaymentModal } from '@/components/admin/ConfirmCodPaymentModal';
+import { AdminHeader } from '@/components/admin/AdminHeader';
 
 const STATUS_STYLES: Record<string, { bg: string; color: string; dot: string }> = {
   'pending':          { bg: '#ffdcc7', color: 'var(--warning)', dot: '#d4712a' },
@@ -170,79 +173,97 @@ export default function AdminOrdersPage() {
     }
   };
 
-  const filtered = activeTab === 'all'
-    ? orders
-    : activeTab === 'cod_pending'
-      ? orders.filter(o => o.payment_method?.toUpperCase() === 'COD' && o.payment_status !== 'paid')
-      : orders.filter(o => o.status === activeTab);
+  const [searchQuery, setSearchQuery] = useState('');
+
+  const filtered = orders.filter(o => {
+    const matchesTab = activeTab === 'all'
+      ? true
+      : activeTab === 'cod_pending'
+        ? o.payment_method?.toUpperCase() === 'COD' && o.payment_status !== 'paid'
+        : o.status === activeTab;
+    if (!matchesTab) return false;
+    if (!searchQuery.trim()) return true;
+    const q = searchQuery.toLowerCase();
+    const orderNo = (o.order_number || o.id).toLowerCase();
+    const customer = ((o as any).customer_name || o.profiles?.name || o.profiles?.email || '').toLowerCase();
+    const phone = (o.profiles?.phone || '').toLowerCase();
+    return orderNo.includes(q) || customer.includes(q) || phone.includes(q);
+  });
 
   if (isLoading) {
     return (
-      <div className="flex flex-col min-h-screen items-center justify-center pt-20 px-6" style={{ background: 'var(--color-surface)' }}>
-        <Loader2 className="w-8 h-8 animate-spin" style={{ color: 'var(--color-primary)' }} />
+      <div className="flex flex-col min-h-screen items-center justify-center pt-20 px-6 bg-surface">
+        <Loader2 className="w-8 h-8 animate-spin text-primary" />
       </div>
     );
   }
 
   return (
     <div className="flex flex-col min-h-screen">
-      <div className="sticky top-0 z-30 glass-surface">
-        <div className="px-6 md:px-10 pt-6 pb-0">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-4">
-            <div>
-              <div className="flex items-center gap-2">
-                <span className="px-2.5 py-0.5 rounded-full bg-success-bg text-success text-xs font-semibold uppercase tracking-wider">
-                  Admin Platform Inventory
-                </span>
-              </div>
-              <h1 className="font-semibold text-[24px] tracking-tight mt-1"
-                style={{ color: 'var(--color-on-surface)' }}>
-                Admin Product Orders
-                <span className="ml-2 text-[15px] font-normal" style={{ color: 'var(--color-on-surface-variant)' }}>
-                  ({filtered.length})
-                </span>
-              </h1>
-              <p className="text-[12px] text-foreground-muted mt-0.5">
-                Orders containing direct platform & admin products. For external vendor products, manage under All Seller Orders List.
-              </p>
-            </div>
-
-            <div className="flex items-center gap-2">
-
-              <button
-                onClick={() => {
-                  setIsLoading(true);
-                  fetchOrders();
-                }}
-                title="Refresh Orders"
-                className="p-2 rounded-xl border border-border hover:bg-surface-muted text-foreground-muted transition-colors cursor-pointer shrink-0"
-              >
-                <RefreshCw className="w-4 h-4" />
-              </button>
-            </div>
+      {/* Standard Admin Header */}
+      <AdminHeader
+        title={
+          <div className="flex items-center gap-3">
+            <span>Admin Orders</span>
+            <span className="text-[14px] font-normal text-foreground-muted">
+              ({filtered.length})
+            </span>
           </div>
+        }
+        subtitle="Manage platform-fulfilled orders, status lifecycle, and COD payment collections"
+        onRefresh={() => {
+          setIsLoading(true);
+          fetchOrders();
+        }}
+        isRefreshing={isLoading}
+      />
 
-          <div className="flex gap-2 overflow-x-auto no-scrollbar -mx-6 px-6 pb-1">
-            {['all', 'cod_pending', 'confirmed', 'out_for_delivery', 'delivered', 'cancelled'].map(tab => (
-              <button key={tab} onClick={() => setActiveTab(tab)}
-                className="whitespace-nowrap px-4 py-2 rounded-full text-[12px] font-semibold transition-all duration-200 shrink-0 capitalize"
-                style={activeTab === tab ? {
-                  background: 'var(--cta-gradient)',
-                  color: 'white',
-                  boxShadow: '0 3px 10px rgba(12, 60, 38, 0.25)',
-                } : {
-                  background: 'var(--color-surface-container-low)',
-                  color: 'var(--color-on-surface-variant)',
-                }}>
-                {tab === 'cod_pending' ? 'COD Payment Pending' : tab.replace(/_/g, ' ')}
+      <div className="px-6 md:px-10 py-5 flex flex-col gap-4">
+        {/* Search & Filter Toolbar */}
+        <div className="bg-surface rounded-2xl border border-border p-3.5 shadow-2xs flex flex-col md:flex-row md:items-center justify-between gap-3">
+          <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar pb-1 md:pb-0">
+            {[
+              { id: 'all', label: 'All Orders' },
+              { id: 'cod_pending', label: 'COD Pending' },
+              { id: 'confirmed', label: 'Confirmed' },
+              { id: 'out_for_delivery', label: 'Out for Delivery' },
+              { id: 'delivered', label: 'Delivered' },
+              { id: 'cancelled', label: 'Cancelled' },
+            ].map(tab => (
+              <button
+                key={tab.id}
+                onClick={() => setActiveTab(tab.id)}
+                className={`whitespace-nowrap h-8 px-3.5 rounded-full text-[12px] font-bold transition-all shrink-0 cursor-pointer flex items-center border ${
+                  activeTab === tab.id
+                    ? 'bg-primary text-white border-primary shadow-xs'
+                    : 'bg-surface border-border text-foreground-muted hover:text-foreground hover:bg-surface-muted'
+                }`}
+              >
+                {tab.label}
               </button>
             ))}
           </div>
-        </div>
-        <div className="h-px mt-2 opacity-25" style={{ background: 'var(--color-outline-variant)' }} />
-      </div>
 
-      <div className="px-6 md:px-10 py-5 flex flex-col gap-3">
+          <div className="relative w-full md:w-64">
+            <Search className="w-4 h-4 text-foreground-muted absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+            <input
+              type="text"
+              placeholder="Search order #, customer, phone..."
+              value={searchQuery}
+              onChange={e => setSearchQuery(e.target.value)}
+              className="w-full h-10 pl-10 pr-8 rounded-xl border border-border bg-surface text-xs font-medium text-foreground placeholder:text-foreground-muted focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary shadow-2xs transition-all"
+            />
+            {searchQuery && (
+              <button
+                type="button"
+                onClick={() => setSearchQuery('')}
+                className="absolute right-2.5 top-1/2 -translate-y-1/2 text-foreground-muted hover:text-foreground p-0.5 cursor-pointer"
+              >
+                <X className="w-3.5 h-3.5" />
+              </button>
+            )}
+          </div>
+        </div>
         <AnimatePresence mode="wait">
           {filtered.length === 0 ? (
             <motion.div key="empty" initial={{ opacity: 0 }} animate={{ opacity: 1 }}

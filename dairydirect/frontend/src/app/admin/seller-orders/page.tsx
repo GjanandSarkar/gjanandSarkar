@@ -21,6 +21,7 @@ import { getAllSellers } from '@/lib/api/sellers';
 import type { OrderWithItems } from '@/lib/api/orders';
 import type { SellerLifecycleRecord } from '@/lib/api/sellers';
 import { PLACEHOLDER_PRODUCT_IMAGE } from '@/lib/constants/brand';
+import { AdminHeader } from '@/components/admin/AdminHeader';
 
 const STATUS_STYLES: Record<string, { bg: string; color: string; dot: string; label: string }> = {
   'pending':          { bg: '#ffdcc7', color: 'var(--warning)', dot: '#d4712a', label: 'Pending' },
@@ -197,115 +198,91 @@ export default function AllSellerOrdersListPage() {
 
   return (
     <div className="flex flex-col min-h-screen">
-      {/* ─── Header & Top Controls ─── */}
-      <div className="sticky top-0 z-30 glass-surface">
-        <div className="px-6 md:px-10 pt-6 pb-0">
-          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-4">
-            <div>
-              <div className="flex items-center gap-2">
-                <span className="px-2.5 py-0.5 rounded-full bg-purple-100 text-purple-900 text-xs font-semibold uppercase tracking-wider flex items-center gap-1">
-                  <Store className="w-3 h-3 text-purple-700" />
-                  <span>Vendor Marketplace</span>
-                </span>
-              </div>
-              <h1 className="font-semibold text-[24px] tracking-tight mt-1"
-                style={{ color: 'var(--color-on-surface)' }}>
-                All Seller Orders List
-                <span className="ml-2 text-[15px] font-normal" style={{ color: 'var(--color-on-surface-variant)' }}>
-                  ({filteredOrders.length})
-                </span>
-              </h1>
-              <p className="text-[12px] text-foreground-muted mt-0.5">
-                Overview of vendor store orders across all marketplace sellers. Order fulfillment and status changes are managed directly by each seller.
-              </p>
-            </div>
+      {/* Standard Admin Header */}
+      <AdminHeader
+        title={
+          <div className="flex items-center gap-3">
+            <span>All Seller Orders</span>
+            <span className="text-[14px] font-normal text-foreground-muted">
+              ({filteredOrders.length})
+            </span>
+          </div>
+        }
+        subtitle="Overview of vendor store orders across all marketplace sellers"
+        onRefresh={() => {
+          setIsLoading(true);
+          fetchOrders();
+          fetchSellers();
+        }}
+        isRefreshing={isLoading}
+      />
 
-            <div className="flex items-center gap-2.5 flex-wrap">
-
+      <div className="px-6 md:px-10 py-5 flex flex-col gap-4">
+        {/* Unified Search & Filter Toolbar */}
+        <div className="bg-surface rounded-2xl border border-border p-3.5 shadow-2xs flex flex-col lg:flex-row lg:items-center justify-between gap-3">
+          {/* Status Filter Pills */}
+          <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar pb-1 lg:pb-0">
+            {[
+              { id: 'all', label: 'All Orders' },
+              { id: 'cod_pending', label: `COD Pending (${codPendingCount})` },
+              { id: 'pending', label: `Pending (${pendingCount})` },
+              { id: 'confirmed', label: 'Confirmed' },
+              { id: 'out_for_delivery', label: `In Transit (${inTransitCount})` },
+              { id: 'delivered', label: `Delivered (${deliveredCount})` },
+              { id: 'cancelled', label: 'Cancelled' },
+            ].map(tab => (
               <button
-                onClick={() => {
-                  setIsLoading(true);
-                  fetchOrders();
-                  fetchSellers();
-                }}
-                title="Refresh Orders"
-                className="p-2 rounded-xl border border-border hover:bg-surface-muted text-foreground-muted transition-colors cursor-pointer"
+                key={tab.id}
+                onClick={() => setActiveTab(tab.id)}
+                className={`whitespace-nowrap h-8 px-3.5 rounded-full text-[12px] font-bold transition-all shrink-0 cursor-pointer flex items-center border ${
+                  activeTab === tab.id
+                    ? 'bg-primary text-white border-primary shadow-xs'
+                    : 'bg-surface border-border text-foreground-muted hover:text-foreground hover:bg-surface-muted'
+                }`}
               >
-                <RefreshCw className="w-4 h-4" />
+                {tab.label}
               </button>
-            </div>
+            ))}
           </div>
 
-          {/* ─── Filter Bar: Seller Dropdown, Search & Status Tabs ─── */}
-          <div className="bg-surface/80 backdrop-blur-xs rounded-2xl border border-border/80 p-3 mb-3 flex flex-col lg:flex-row lg:items-center justify-between gap-3 shadow-2xs">
-            {/* Seller Filter Dropdown */}
-            <div className="flex items-center gap-2 shrink-0">
-              <div className="flex items-center gap-1.5 text-xs font-bold text-foreground">
-                <Filter className="w-4 h-4 text-purple-700" />
-                <span>Filter by Seller:</span>
-              </div>
-              <select
-                value={selectedSellerId}
-                onChange={e => setSelectedSellerId(e.target.value)}
-                className="px-3 py-1.5 bg-surface-muted border border-border-hover rounded-xl text-xs font-bold text-foreground outline-none focus:ring-2 focus:ring-purple-500/20 cursor-pointer"
-              >
-                <option value="all">All Sellers ({orders.length} orders)</option>
-                {sellerOptions.map(seller => (
-                  <option key={seller.id} value={seller.id}>
-                    {seller.name} ({seller.count} orders)
-                  </option>
-                ))}
-              </select>
-            </div>
+          {/* Seller Filter & Search Input */}
+          <div className="grid grid-cols-1 sm:flex sm:items-center gap-2.5 w-full sm:w-auto">
+            <select
+              value={selectedSellerId}
+              onChange={e => setSelectedSellerId(e.target.value)}
+              className="h-10 px-3 bg-surface border border-border rounded-xl text-xs font-bold text-foreground outline-none focus:ring-2 focus:ring-primary/20 shadow-2xs cursor-pointer w-full sm:w-auto"
+            >
+              <option value="all">All Sellers ({orders.length} orders)</option>
+              {sellerOptions.map(seller => (
+                <option key={seller.id} value={seller.id}>
+                  {seller.name} ({seller.count} orders)
+                </option>
+              ))}
+            </select>
 
-            {/* Search Input */}
-            <div className="relative flex-1 max-w-md">
-              <Search className="w-4 h-4 text-foreground-muted absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+            <div className="relative flex-1 w-full sm:w-64">
+              <Search className="w-4 h-4 text-foreground-muted absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
               <input
                 type="text"
-                placeholder="Search order ID, store, customer, product..."
+                placeholder="Search order ID, customer, product..."
                 value={searchQuery}
                 onChange={e => setSearchQuery(e.target.value)}
-                className="w-full pl-9 pr-3 py-1.5 bg-surface-muted border border-border rounded-xl text-xs font-medium placeholder-foreground-muted focus:outline-none focus:ring-2 focus:ring-[var(--primary)]/20 focus:bg-surface"
+                className="w-full h-10 pl-10 pr-8 bg-surface border border-border rounded-xl text-xs font-medium text-foreground placeholder:text-foreground-muted focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary shadow-2xs transition-all"
               />
               {searchQuery && (
                 <button
+                  type="button"
                   onClick={() => setSearchQuery('')}
-                  className="absolute right-2.5 top-1/2 -translate-y-1/2 text-foreground-muted hover:text-foreground-muted"
+                  className="absolute right-2.5 top-1/2 -translate-y-1/2 text-foreground-muted hover:text-foreground p-0.5 cursor-pointer"
                 >
                   <X className="w-3.5 h-3.5" />
                 </button>
               )}
             </div>
           </div>
-
-          {/* Status Tabs */}
-          <div className="flex gap-2 overflow-x-auto no-scrollbar -mx-6 px-6 pb-1">
-            {['all', 'cod_pending', 'pending', 'confirmed', 'out_for_delivery', 'delivered', 'cancelled'].map(tab => (
-              <button key={tab} onClick={() => setActiveTab(tab)}
-                className="whitespace-nowrap px-4 py-2 rounded-full text-[12px] font-semibold transition-all duration-200 shrink-0 capitalize flex items-center gap-1.5"
-                style={activeTab === tab ? {
-                  background: tab === 'cod_pending' ? 'linear-gradient(135deg, #b45309, #d97706)' : 'var(--cta-gradient)',
-                  color: 'white',
-                  boxShadow: '0 3px 10px rgba(12, 60, 38, 0.25)',
-                } : {
-                  background: 'var(--color-surface-container-low)',
-                  color: 'var(--color-on-surface-variant)',
-                }}>
-                {tab === 'cod_pending' ? (
-                  <>
-                    <IndianRupee className="w-3.5 h-3.5" />
-                    <span>COD Pending ({codPendingCount})</span>
-                  </>
-                ) : (
-                  tab.replace(/_/g, ' ')
-                )}
-              </button>
-            ))}
-          </div>
         </div>
-        <div className="h-px mt-2 opacity-25" style={{ background: 'var(--color-outline-variant)' }} />
-      </div>
+          <div className="h-px mt-2 opacity-25" style={{ background: 'var(--color-outline-variant)' }} />
+        </div>
 
       {/* ─── Orders List ─── */}
       <div className="px-6 md:px-10 py-5 flex flex-col gap-3">

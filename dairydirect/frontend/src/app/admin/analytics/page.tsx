@@ -12,6 +12,7 @@ import {
   ProductPerformanceBarList,
   DonutChart,
 } from '@/components/admin/charts';
+import { AdminHeader } from '@/components/admin/AdminHeader';
 import {
   Loader2,
   TrendingUp,
@@ -44,21 +45,21 @@ const StatCard = ({
   icon?: React.ReactNode;
   iconBg?: string;
 }) => (
-  <div className="bg-surface-container-lowest border border-sand/30 rounded-2xl p-5 flex items-center justify-between shadow-2xs">
-    <div className="flex flex-col gap-1">
-      <span className="text-muted text-xs font-bold uppercase tracking-wider">{title}</span>
-      <span className="text-on-surface text-2xl font-semibold">{value}</span>
+  <div className="bg-surface-container-lowest border border-sand/30 rounded-2xl p-3.5 sm:p-5 flex items-start justify-between shadow-2xs">
+    <div className="flex flex-col gap-0.5 min-w-0">
+      <span className="text-muted text-[10px] sm:text-xs font-bold uppercase tracking-wider truncate">{title}</span>
+      <span className="text-on-surface text-lg sm:text-2xl font-bold truncate">{value}</span>
       {growth && (
-        <span className="text-success text-xs font-bold flex items-center gap-1 mt-0.5">
-          <ArrowUpRight className="w-3.5 h-3.5" />
-          {growth}
+        <span className="text-success text-[10px] sm:text-xs font-bold flex items-center gap-0.5 mt-0.5">
+          <ArrowUpRight className="w-3 h-3 shrink-0" />
+          <span className="truncate">{growth}</span>
         </span>
       )}
-      {subText && <span className="text-muted text-xs font-medium mt-0.5">{subText}</span>}
+      {subText && <span className="text-muted text-[10px] sm:text-xs font-medium mt-0.5 truncate">{subText}</span>}
     </div>
 
     {icon && (
-      <div className={`w-10 h-10 rounded-2xl flex items-center justify-center shrink-0 ${iconBg || 'bg-primary-fixed text-primary'}`}>
+      <div className={`w-8 h-8 sm:w-10 sm:h-10 rounded-xl sm:rounded-2xl flex items-center justify-center shrink-0 ${iconBg || 'bg-primary-fixed text-primary'}`}>
         {icon}
       </div>
     )}
@@ -210,20 +211,22 @@ export default function AdminAnalyticsPage() {
 
 
   return (
-    <div className="flex flex-col min-h-screen bg-surface-container-low pb-20 font-sans">
-      {/* Top Header */}
-      <div className="px-6 md:px-10 pt-8 pb-6 bg-surface-container-lowest border-b border-sand/30">
-        <div>
-          <h1 className="font-semibold text-[28px] tracking-tight text-on-surface">
-            Business Intelligence
-          </h1>
-          <p className="text-sm mt-0.5 text-muted font-medium">
-            Real-time analytics, data insights, and performance overview
-          </p>
-        </div>
-      </div>
+    <div className="flex flex-col min-h-screen pb-20 font-sans">
+      {/* Standard Admin Header */}
+      <AdminHeader
+        title="Business Intelligence"
+        subtitle="Live operations analytics, subscription performance, customer retention and revenue metrics"
+        onRefresh={() => {
+          setIsLoading(true);
+          getBusinessIntelligence().then((res) => {
+            setData(res);
+            setIsLoading(false);
+          });
+        }}
+        isRefreshing={isLoading}
+      />
 
-      <div className="px-6 md:px-10 py-6 flex flex-col gap-8 max-w-7xl mx-auto w-full">
+      <div className="px-6 md:px-10 py-6 flex flex-col gap-8 w-full">
         {/* ─── 1. REVENUE ANALYTICS ────────────────────────────────────── */}
         <section>
           <div className="flex items-center gap-2 mb-4">
@@ -233,7 +236,7 @@ export default function AdminAnalyticsPage() {
             <h2 className="text-lg font-semibold text-on-surface">Revenue Analytics</h2>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
+          <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-4 gap-3">
             <StatCard
               title="Revenue Today"
               value={`${t('currency')}${metrics.revenueToday.toLocaleString() || '250'}`}
@@ -316,7 +319,7 @@ export default function AdminAnalyticsPage() {
             </div>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 mb-4">
+          <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-4 gap-3 mb-4">
             <StatCard
               title="Orders Today"
               value={metrics.ordersToday || 6}
@@ -397,7 +400,7 @@ export default function AdminAnalyticsPage() {
             <h2 className="text-lg font-semibold text-on-surface">Customer Analytics</h2>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-4">
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 mb-4 [&>*:last-child]:col-span-2 sm:[&>*:last-child]:col-span-1">
             <StatCard
               title="Total Customers"
               value={metrics.totalCustomers || 5}
@@ -435,7 +438,7 @@ export default function AdminAnalyticsPage() {
             <h2 className="text-lg font-semibold text-on-surface">Subscription Analytics</h2>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-4">
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 mb-4 [&>*:last-child]:col-span-2 sm:[&>*:last-child]:col-span-1">
             <StatCard
               title="Active Subscriptions"
               value={metrics.activeSubs || 0}

@@ -1,17 +1,19 @@
 "use client";
 
-import { useState, useEffect, Suspense } from 'react';
+import { useState, useEffect, useRef, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useTranslation } from '@/lib/i18n';
 import { getProducts } from '@/lib/api/products';
 import type { ProductWithVariants } from '@/lib/api/products';
 import { ProductEditModal } from '@/components/admin/ProductEditModal';
-import { Search, Plus, Pencil, Eye, Droplets, Package, Cylinder, CupSoda, GlassWater, Loader2 } from 'lucide-react';
+import { Search, Plus, Pencil, Eye, Droplets, Package, Cylinder, CupSoda, GlassWater, Loader2, LayoutGrid, List, X } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { api } from '@/lib/api/client';
 import { PLACEHOLDER_PRODUCT_IMAGE } from '@/lib/constants/brand';
 
 import { categoryColors } from '@/lib/constants/categories';
+import { AdminHeader } from '@/components/admin/AdminHeader';
+import { AdminTable } from '@/components/admin/AdminTable';
 
 function AdminProductsContent() {
   const router = useRouter();
@@ -26,8 +28,28 @@ function AdminProductsContent() {
   const [category, setCategory] = useState(categoryFromUrl);
   const [status, setStatus] = useState('All'); // 'All' | 'Active' | 'Draft'
   const [sortBy, setSortBy] = useState('Name A-Z'); // 'Name A-Z' | 'Price L-H' | 'Price H-L'
+  const [viewMode, setViewMode] = useState<'table' | 'grid'>('table');
   const [editingProduct, setEditingProduct] = useState<ProductWithVariants | null>(null);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+
+  // Progressive scroll blur for category pills
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const [canScrollLeft, setCanScrollLeft] = useState(false);
+  const [canScrollRight, setCanScrollRight] = useState(false);
+
+  const checkScroll = () => {
+    if (scrollRef.current) {
+      const { scrollLeft, scrollWidth, clientWidth } = scrollRef.current;
+      setCanScrollLeft(scrollLeft > 6);
+      setCanScrollRight(scrollLeft < scrollWidth - clientWidth - 6);
+    }
+  };
+
+  useEffect(() => {
+    checkScroll();
+    window.addEventListener('resize', checkScroll);
+    return () => window.removeEventListener('resize', checkScroll);
+  }, [categoriesList]);
 
   const fetchProductList = () => {
     Promise.all([
@@ -88,94 +110,250 @@ function AdminProductsContent() {
 
   return (
     <div className="flex flex-col min-h-screen">
-      {/* Header */}
-      <div className="px-6 md:px-10 pt-6 pb-5 flex items-center justify-between"
-        style={{ background: 'var(--color-surface-container-lowest)' }}>
-        <div>
-          <h1 className="font-semibold text-[24px] tracking-tight" style={{ color: 'var(--color-on-surface)' }}>
-            Products
-          </h1>
-          <p className="text-[13px] mt-0.5" style={{ color: 'var(--color-on-surface-variant)' }}>
-            {filtered.length} products shown {category !== 'All' ? `in "${category}"` : 'in catalogue'}
-          </p>
-        </div>
-        <div className="flex items-center gap-2.5">
-          <button 
-            onClick={() => router.push('/admin/products/approvals')}
-            className="flex items-center gap-2 px-4 py-2.5 rounded-[12px] font-bold text-[13px] transition-all border border-success/30 text-success bg-success-bg hover:bg-success-bg cursor-pointer"
-          >
-            Review Approvals
-          </button>
-          <button onClick={() => router.push('/admin/products/add')} className="flex items-center gap-2 px-4 py-2.5 rounded-[12px] font-bold text-[13px] text-white transition-all active:scale-95 cursor-pointer"
-            style={{
-              background: 'linear-gradient(135deg, var(--primary), var(--primary-hover))',
-              boxShadow: '0 4px 12px rgba(12, 60, 38, 0.25)',
-            }}>
-            <Plus className="w-4 h-4" strokeWidth={2.5} />
-            Add Product
-          </button>
-        </div>
-      </div>
+      {/* Standard Admin Header */}
+      <AdminHeader
+        title="Products"
+        subtitle={`${filtered.length} products shown ${category !== 'All' ? `in "${category}"` : 'in catalogue'}`}
+        onRefresh={fetchProductList}
+        isRefreshing={isLoading}
+        actions={
+          <>
+            <button 
+              onClick={() => router.push('/admin/products/approvals')}
+              className="flex items-center gap-2 px-3.5 py-2 rounded-[12px] font-bold text-[13px] transition-all border border-success/30 text-success bg-success-bg hover:bg-success-bg cursor-pointer"
+            >
+              Review Approvals
+            </button>
+            <button
+              onClick={() => router.push('/admin/products/add')}
+              className="flex items-center gap-2 px-4 py-2 rounded-[12px] font-bold text-[13px] text-white transition-all active:scale-95 cursor-pointer shadow-xs bg-primary hover:bg-primary/90"
+            >
+              <Plus className="w-4 h-4" strokeWidth={2.5} />
+              Add Product
+            </button>
+          </>
+        }
+      />
 
-      <div className="px-6 md:px-10 py-5 flex flex-col gap-5">
-        {/* Filters */}
-        <div className="flex flex-col sm:flex-row gap-3 items-center">
-          <div className="relative flex-1 w-full">
-            <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 pointer-events-none"
-              style={{ color: 'var(--color-on-surface-variant)' }} strokeWidth={2} />
-            <input
-              value={search}
-              onChange={e => setSearch(e.target.value)}
-              placeholder="Search products..."
-              className="w-full pl-10 pr-4 py-3 rounded-[12px] text-[14px] font-medium outline-none transition-all"
-              style={{ background: 'var(--color-surface-container)', color: 'var(--color-on-surface)' }}
-              onFocus={e => { e.target.style.background = 'white'; e.target.style.boxShadow = '0 0 0 1.5px rgba(63,101,48,0.22)'; }}
-              onBlur={e => { e.target.style.background = 'var(--color-surface-container)'; e.target.style.boxShadow = 'none'; }}
-            />
+      <div className="px-6 md:px-10 py-5 flex flex-col gap-4">
+        {/* Category Filter with Progressive Overflow Blur */}
+        <div className="relative w-full overflow-hidden">
+          {canScrollLeft && (
+            <div className="absolute left-0 top-0 bottom-0 w-10 bg-gradient-to-r from-[#F5F6F5] dark:from-black to-transparent z-10 pointer-events-none transition-opacity" />
+          )}
+          <div
+            ref={scrollRef}
+            onScroll={checkScroll}
+            className="flex gap-2 overflow-x-auto no-scrollbar py-1 items-center"
+          >
+            {categoriesList.map(cat => (
+              <button
+                key={cat}
+                type="button"
+                onClick={() => handleCategorySelect(cat)}
+                className={`whitespace-nowrap h-8 px-3.5 rounded-full text-[12px] font-bold transition-all shrink-0 cursor-pointer flex items-center justify-center border active:scale-95 ${
+                  category === cat
+                    ? 'bg-primary text-white border-primary shadow-xs'
+                    : 'bg-surface border-border text-foreground-muted hover:text-foreground hover:bg-surface-muted'
+                }`}
+              >
+                {cat === 'All' ? 'All Categories' : cat}
+              </button>
+            ))}
           </div>
-          
-          <div className="flex gap-2">
+          {canScrollRight && (
+            <div className="absolute right-0 top-0 bottom-0 w-10 bg-gradient-to-l from-[#F5F6F5] dark:from-black to-transparent z-10 pointer-events-none transition-opacity" />
+          )}
+        </div>
+
+        {/* Unified Search, Filter Dropdowns & View Mode (Edit #36) */}
+        <div className="bg-surface rounded-2xl border border-border p-3 sm:p-3.5 shadow-2xs flex flex-col lg:flex-row lg:items-center justify-between gap-3">
+          {/* Top row on mobile / Left on desktop: Search bar with View Mode Switcher */}
+          <div className="flex items-center gap-2 w-full lg:max-w-md">
+            <div className="relative flex-1 min-w-0">
+              <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 pointer-events-none text-foreground-muted" strokeWidth={2} />
+              <input
+                value={search}
+                onChange={e => setSearch(e.target.value)}
+                placeholder="Search products by title, category..."
+                className="w-full pl-10 pr-8 h-10 rounded-xl text-xs font-medium outline-none transition-all bg-surface border border-border text-foreground placeholder:text-foreground-muted focus:ring-2 focus:ring-primary/20 focus:border-primary shadow-2xs"
+              />
+              {search && (
+                <button
+                  type="button"
+                  onClick={() => setSearch('')}
+                  className="absolute right-2.5 top-1/2 -translate-y-1/2 text-foreground-muted hover:text-foreground p-0.5 cursor-pointer"
+                >
+                  <X className="w-3.5 h-3.5" />
+                </button>
+              )}
+            </div>
+
+            {/* View Mode Switcher pinned beside search on mobile */}
+            <div className="flex items-center rounded-xl p-0.5 border border-border bg-surface shadow-2xs h-10 shrink-0">
+              <button
+                type="button"
+                onClick={() => setViewMode('table')}
+                className={`h-8.5 px-2.5 rounded-lg text-xs font-bold transition-all cursor-pointer flex items-center justify-center gap-1 ${
+                  viewMode === 'table' ? 'bg-primary text-white shadow-xs' : 'text-foreground-muted hover:text-foreground'
+                }`}
+                title="Table View (Default)"
+              >
+                <List className="w-3.5 h-3.5" />
+                <span className="hidden sm:inline">Table</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => setViewMode('grid')}
+                className={`h-8.5 px-2.5 rounded-lg text-xs font-bold transition-all cursor-pointer flex items-center justify-center gap-1 ${
+                  viewMode === 'grid' ? 'bg-primary text-white shadow-xs' : 'text-foreground-muted hover:text-foreground'
+                }`}
+                title="Grid View"
+              >
+                <LayoutGrid className="w-3.5 h-3.5" />
+                <span className="hidden sm:inline">Grid</span>
+              </button>
+            </div>
+          </div>
+
+          {/* Bottom row on mobile (2 equal-width columns) / Right on desktop: Status & Sort dropdowns */}
+          <div className="grid grid-cols-2 sm:flex sm:items-center gap-2 w-full lg:w-auto">
             <select
               value={status}
               onChange={e => setStatus(e.target.value)}
-              className="px-4 py-2.5 rounded-[12px] text-[13px] font-semibold outline-none border border-border cursor-pointer"
-              style={{ background: 'var(--color-surface-container)', color: 'var(--color-on-surface)' }}
+              className="h-10 px-3 rounded-xl text-xs font-semibold outline-none border border-border bg-surface shadow-2xs text-foreground cursor-pointer focus:border-primary w-full sm:w-auto"
             >
               <option value="All">All Status</option>
-              <option value="Active">Active</option>
+              <option value="Active">Active Live</option>
               <option value="Draft">Draft</option>
             </select>
-            
+
             <select
               value={sortBy}
               onChange={e => setSortBy(e.target.value)}
-              className="px-4 py-2.5 rounded-[12px] text-[13px] font-semibold outline-none border border-border cursor-pointer"
-              style={{ background: 'var(--color-surface-container)', color: 'var(--color-on-surface)' }}
+              className="h-10 px-3 rounded-xl text-xs font-semibold outline-none border border-border bg-surface shadow-2xs text-foreground cursor-pointer focus:border-primary w-full sm:w-auto"
             >
-              <option value="Name A-Z">Name A-Z</option>
-              <option value="Price L-H">Price L-H</option>
-              <option value="Price H-L">Price H-L</option>
+              <option value="Name A-Z">Sort: Name (A-Z)</option>
+              <option value="Price L-H">Sort: Price (Low → High)</option>
+              <option value="Price H-L">Sort: Price (High → Low)</option>
             </select>
           </div>
         </div>
 
-        {/* Category Pills Filter */}
-        <div className="flex gap-2 overflow-x-auto no-scrollbar pb-1">
-          {categoriesList.map(cat => (
-            <button key={cat} onClick={() => handleCategorySelect(cat)}
-              className={`whitespace-nowrap px-4 py-2 rounded-full text-[12px] font-bold transition-all shrink-0 cursor-pointer ${
-                category === cat
-                  ? 'bg-primary text-white shadow-xs'
-                  : 'bg-surface-muted text-foreground hover:bg-border'
-              }`}
-            >
-              {cat === 'All' ? 'All Categories' : cat}
-            </button>
-          ))}
-        </div>
-
-        {/* Products Grid */}
-        {isLoading ? (
+        {/* Products Table / Grid View */}
+        {viewMode === 'table' ? (
+          <AdminTable
+            columns={[
+              { header: 'Product' },
+              { header: 'Category' },
+              { header: 'Price / Unit' },
+              { header: 'Stock Units' },
+              { header: 'Channel' },
+              { header: 'Status' },
+              { header: 'Actions', align: 'right' },
+            ]}
+            isLoading={isLoading}
+            isEmpty={!isLoading && filtered.length === 0}
+            emptyIcon={Package}
+            emptyTitle="No products found"
+            emptyDescription={category !== 'All' ? `No products matching category "${category}".` : 'No products in catalogue.'}
+          >
+            {filtered.map((product) => {
+              const catStyle = categoryColors(product.category);
+              const variant = product.product_variants?.[0];
+              const stock = variant?.stock || 0;
+              return (
+                <tr
+                  key={product.id}
+                  className="hover:bg-black/[0.02] dark:hover:bg-white/[0.03] transition-colors cursor-pointer"
+                  onClick={() => {
+                    setEditingProduct(product);
+                    setIsEditModalOpen(true);
+                  }}
+                >
+                  <td className="px-5 py-3.5">
+                    <div className="flex items-center gap-3">
+                      <img
+                        src={product.image_url || PLACEHOLDER_PRODUCT_IMAGE}
+                        alt={product.name}
+                        className="w-10 h-10 object-cover rounded-[10px] border border-border/80 shrink-0"
+                      />
+                      <div className="min-w-0 max-w-[280px]">
+                        <span className="font-bold text-[13px] text-foreground block truncate">
+                          {product.name}
+                        </span>
+                        {product.description && (
+                          <span className="text-[11px] text-foreground-muted block truncate" title={product.description}>
+                            {product.description}
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                  </td>
+                  <td className="px-5 py-3.5 whitespace-nowrap min-w-[150px]">
+                    <span
+                      className="text-[11px] font-bold uppercase tracking-wider px-3 py-1 rounded-full border inline-block whitespace-nowrap shadow-2xs"
+                      style={{
+                        background: catStyle.bg,
+                        color: catStyle.color,
+                        borderColor: `${catStyle.color}40`,
+                      }}
+                    >
+                      {product.category}
+                    </span>
+                  </td>
+                  <td className="px-5 py-3.5 font-bold text-[13px] text-foreground whitespace-nowrap">
+                    {t('currency')}{variant?.price || 0}
+                    {variant?.weight && <span className="text-xs font-normal text-foreground-muted ml-1">/ {variant.weight}</span>}
+                  </td>
+                  <td className="px-5 py-3.5 whitespace-nowrap">
+                    <span className={`text-xs font-bold px-2.5 py-1 rounded-full border ${
+                      stock < 10 
+                        ? 'bg-amber-100 text-amber-900 border-amber-300 dark:bg-amber-950/40 dark:text-amber-300' 
+                        : 'bg-surface-muted text-foreground border-border/70'
+                    }`}>
+                      {stock} in stock
+                    </span>
+                  </td>
+                  <td className="px-5 py-3.5 whitespace-nowrap">
+                    {product.seller_id ? (
+                      <span className="text-xs font-bold px-2.5 py-1 rounded-full bg-purple-100 text-purple-900 border border-purple-200 dark:bg-purple-950/40 dark:text-purple-300">
+                        Seller Partner
+                      </span>
+                    ) : (
+                      <span className="text-xs font-bold px-2.5 py-1 rounded-full bg-emerald-100 text-emerald-900 border border-emerald-200 dark:bg-emerald-950/40 dark:text-emerald-300">
+                        Platform Direct
+                      </span>
+                    )}
+                  </td>
+                  <td className="px-5 py-3.5 whitespace-nowrap">
+                    <span className={`text-xs font-bold uppercase px-2.5 py-1 rounded-full border ${
+                      product.is_active 
+                        ? 'text-emerald-900 bg-emerald-100 border-emerald-200 dark:bg-emerald-950/40 dark:text-emerald-300' 
+                        : 'text-foreground-muted bg-surface-muted border-border/70'
+                    }`}>
+                      {product.is_active ? 'Active' : 'Draft'}
+                    </span>
+                  </td>
+                  <td className="px-5 py-3.5 text-right whitespace-nowrap">
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setEditingProduct(product);
+                        setIsEditModalOpen(true);
+                      }}
+                      className="p-1.5 rounded-lg hover:bg-surface-muted text-primary cursor-pointer transition-colors"
+                      title="Edit Product"
+                    >
+                      <Pencil className="w-4 h-4" />
+                    </button>
+                  </td>
+                </tr>
+              );
+            })}
+          </AdminTable>
+        ) : isLoading ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
             {[1, 2, 3, 4, 5, 6].map(i => (
               <div key={i} className="h-64 rounded-[16px] animate-pulse"

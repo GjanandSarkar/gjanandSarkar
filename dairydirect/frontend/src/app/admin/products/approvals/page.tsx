@@ -5,11 +5,15 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import {
   Package, Search, CheckCircle, XCircle, Clock, AlertTriangle, Eye,
   Building2, ArrowLeft, RefreshCw, ShieldAlert, FileText, Check, X,
-  ExternalLink, Layers, Sparkles, Filter, ChevronRight
+  ExternalLink, Layers, Sparkles, Filter, ChevronRight, List, LayoutGrid
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { getAdminProductApprovals, updateAdminProductApproval } from '@/lib/api/products';
 import { PLACEHOLDER_PRODUCT_IMAGE } from '@/lib/constants/brand';
+import { AdminHeader } from '@/components/admin/AdminHeader';
+import { AdminTable } from '@/components/admin/AdminTable';
+import { AdminToolbar } from '@/components/admin/AdminToolbar';
+import { categoryColors } from '@/lib/constants/categories';
 
 interface ProductItem {
   id: string;
@@ -67,6 +71,7 @@ function ProductApprovalsContent() {
   });
   const [selectedStatus, setSelectedStatus] = useState<string>(searchParams.get('status') || 'pending');
   const [searchQuery, setSearchQuery] = useState('');
+  const [viewMode, setViewMode] = useState<'table' | 'grid'>('table');
   const [isLoading, setIsLoading] = useState(true);
   const [selectedProduct, setSelectedProduct] = useState<ProductItem | null>(null);
   const [isPreviewOpen, setIsPreviewOpen] = useState(false);
@@ -190,122 +195,116 @@ function ProductApprovalsContent() {
     switch (status) {
       case 'approved':
         return (
-          <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-bold bg-success-bg text-success border border-success/20">
-            <CheckCircle className="w-3.5 h-3.5 text-success" /> Approved
+          <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-bold bg-emerald-100 text-emerald-900 border border-emerald-300 dark:bg-emerald-950/40 dark:text-emerald-300">
+            <CheckCircle className="w-3.5 h-3.5 text-emerald-700" /> Approved
           </span>
         );
       case 'rejected':
         return (
-          <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-bold bg-error-bg text-error border border-error/20">
-            <XCircle className="w-3.5 h-3.5 text-error" /> Rejected
+          <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-bold bg-red-100 text-red-900 border border-red-300 dark:bg-red-950/40 dark:text-red-300">
+            <XCircle className="w-3.5 h-3.5 text-red-700" /> Rejected
           </span>
         );
       case 'suspended':
         return (
-          <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-bold bg-border text-foreground border border-border-hover">
-            <ShieldAlert className="w-3.5 h-3.5 text-foreground-muted" /> Suspended
+          <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-bold bg-zinc-100 text-zinc-900 border border-zinc-300 dark:bg-zinc-800 dark:text-zinc-300">
+            <ShieldAlert className="w-3.5 h-3.5 text-zinc-600" /> Suspended
           </span>
         );
       case 'pending':
       default:
         return (
-          <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-bold bg-warning-bg text-warning border border-warning/20 animate-pulse">
-            <Clock className="w-3.5 h-3.5 text-warning" /> Awaiting Review
+          <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-bold bg-amber-100 text-amber-900 border border-amber-300 dark:bg-amber-950/40 dark:text-amber-300 animate-pulse">
+            <Clock className="w-3.5 h-3.5 text-amber-700" /> Awaiting Review
           </span>
         );
     }
   };
 
   return (
-    <div className="flex flex-col min-h-screen bg-surface-muted/60 pb-16">
-      {/* Header */}
-      <div className="bg-surface border-b border-border px-6 md:px-10 py-5">
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-          <div>
-            <div className="flex items-center gap-2 mb-1">
-              <button
-                onClick={() => router.push('/admin/products')}
-                className="text-foreground-muted hover:text-foreground transition-colors p-1 -ml-1 rounded-lg hover:bg-surface-muted"
-                title="Back to Products"
-              >
-                <ArrowLeft className="w-5 h-5" />
-              </button>
-              <h1 className="text-2xl font-semibold text-foreground tracking-tight flex items-center gap-2.5">
-                <Package className="w-7 h-7 text-primary" />
-                Product Approval Requests
-              </h1>
-            </div>
-            <p className="text-sm text-foreground-muted ml-6">
-              Review, verify, and approve marketplace products submitted by active sellers before publishing.
-            </p>
-          </div>
+    <div className="flex flex-col min-h-screen pb-16">
+      {/* Standard Admin Header */}
+      <AdminHeader
+        title="Product Approvals"
+        subtitle="Review, verify, and approve marketplace products submitted by active sellers before publishing"
+        onRefresh={() => loadApprovals()}
+        isRefreshing={isLoading}
+        actions={
+          <button
+            onClick={() => router.push('/admin/products')}
+            className="flex items-center gap-2 px-4 py-2 rounded-[12px] font-bold text-[13px] text-white transition-all shadow-xs active:scale-95 cursor-pointer"
+            style={{ background: 'var(--color-primary)' }}
+          >
+            <span>View All Catalogue</span>
+          </button>
+        }
+      />
 
-          <div className="flex items-center gap-3">
-            <button
-              onClick={() => loadApprovals()}
-              className="flex items-center gap-2 px-3.5 py-2 rounded-xl text-sm font-semibold bg-surface-muted hover:bg-border text-foreground transition-all cursor-pointer"
-            >
-              <RefreshCw className={`w-4 h-4 ${isLoading ? 'animate-spin' : ''}`} />
-              Refresh
-            </button>
-            <button
-              onClick={() => router.push('/admin/products')}
-              className="px-4 py-2 rounded-xl text-sm font-bold bg-primary text-on-primary shadow-xs hover:bg-primary-hover transition-all cursor-pointer"
-            >
-              View All Catalogue
-            </button>
-          </div>
-        </div>
-
-        {/* Status Metrics Cards */}
-        <div className="grid grid-cols-2 sm:grid-cols-5 gap-3 mt-5">
+      <div className="px-6 md:px-10 py-6 flex flex-col gap-5">
+        {/* Status Metrics Cards (Edit #20: Non-bulky summary cards) */}
+        <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
           {[
-            { id: 'pending', label: 'Pending Review', count: counts.pending, color: 'text-warning', bg: 'bg-warning-bg/70 border-warning/20', activeBg: 'border-warning bg-warning-bg' },
-            { id: 'approved', label: 'Approved Live', count: counts.approved, color: 'text-success', bg: 'bg-success-bg/70 border-success/20', activeBg: 'border-success bg-success-bg' },
-            { id: 'rejected', label: 'Rejected', count: counts.rejected, color: 'text-error', bg: 'bg-error-bg/70 border-error/20', activeBg: 'border-error bg-error-bg' },
-            { id: 'suspended', label: 'Suspended', count: counts.suspended, color: 'text-foreground', bg: 'bg-surface-muted/70 border-border', activeBg: 'border-border-hover bg-surface-muted' },
-            { id: 'all', label: 'Total Products', count: counts.all, color: 'text-foreground', bg: 'bg-surface border-border', activeBg: 'border-primary bg-success-bg/30' },
-          ].map(tab => {
-            const isSelected = selectedStatus === tab.id;
-            return (
+            { id: 'pending', label: 'Pending Review', count: counts.pending, color: 'text-amber-900 dark:text-amber-300', bg: 'bg-amber-50/70 border-amber-200/80', dot: 'bg-amber-500' },
+            { id: 'approved', label: 'Approved Live', count: counts.approved, color: 'text-emerald-900 dark:text-emerald-300', bg: 'bg-emerald-50/70 border-emerald-200/80', dot: 'bg-emerald-600' },
+            { id: 'rejected', label: 'Rejected', count: counts.rejected, color: 'text-red-900 dark:text-red-300', bg: 'bg-red-50/70 border-red-200/80', dot: 'bg-red-500' },
+            { id: 'suspended', label: 'Suspended', count: counts.suspended, color: 'text-foreground', bg: 'bg-surface border-border/80', dot: 'bg-zinc-400' },
+            { id: 'all', label: 'Total Products', count: counts.all, color: 'text-foreground', bg: 'bg-surface border-border/80', dot: 'bg-primary' },
+          ].map(stat => (
+            <div key={stat.id} className={`p-3.5 rounded-xl border ${stat.bg} shadow-2xs`}>
+              <div className="flex items-center justify-between">
+                <span className="text-[11px] font-bold uppercase tracking-wider text-foreground-muted">{stat.label}</span>
+                <span className={`w-2 h-2 rounded-full ${stat.dot}`} />
+              </div>
+              <p className={`text-2xl font-bold mt-1.5 ${stat.color}`}>{stat.count}</p>
+            </div>
+          ))}
+        </div>
+
+        {/* Standard AdminToolbar with Status Pills, Search, and View Mode (Edit #37) */}
+        <AdminToolbar
+          pills={[
+            { id: 'pending', label: 'Pending', count: counts.pending },
+            { id: 'approved', label: 'Approved', count: counts.approved },
+            { id: 'rejected', label: 'Rejected', count: counts.rejected },
+            { id: 'suspended', label: 'Suspended', count: counts.suspended },
+            { id: 'all', label: 'All', count: counts.all },
+          ]}
+          activePill={selectedStatus}
+          onPillChange={(id) => setSelectedStatus(id)}
+          searchPlaceholder="Search product name, SKU, seller, brand..."
+          searchValue={searchQuery}
+          onSearchChange={setSearchQuery}
+          actions={
+            <div className="flex items-center rounded-xl p-0.5 border border-border bg-surface shadow-2xs h-10 shrink-0">
               <button
-                key={tab.id}
-                onClick={() => setSelectedStatus(tab.id)}
-                className={`p-3 rounded-xl border text-left transition-all cursor-pointer ${
-                  isSelected ? tab.activeBg + ' ring-2 ring-emerald-600/30 font-bold shadow-xs' : tab.bg + ' hover:opacity-90'
+                type="button"
+                onClick={() => setViewMode('table')}
+                className={`h-8.5 px-2.5 rounded-lg text-xs font-bold transition-all cursor-pointer flex items-center justify-center gap-1 ${
+                  viewMode === 'table' ? 'bg-primary text-white shadow-xs' : 'text-foreground-muted hover:text-foreground'
                 }`}
+                title="Table View (Default)"
               >
-                <p className="text-xs font-semibold uppercase tracking-wider text-foreground-muted">{tab.label}</p>
-                <p className={`text-xl font-semibold mt-0.5 ${tab.color}`}>{tab.count}</p>
+                <List className="w-3.5 h-3.5" />
+                <span className="hidden sm:inline">Table</span>
               </button>
-            );
-          })}
-        </div>
-      </div>
-
-      {/* Main Body */}
-      <div className="px-6 md:px-10 py-6">
-        {/* Search & Filter Bar */}
-        <div className="flex flex-col sm:flex-row gap-3 items-center justify-between mb-5">
-          <div className="relative w-full sm:w-96">
-            <Search className="w-4 h-4 text-foreground-muted absolute left-3.5 top-1/2 -translate-y-1/2" />
-            <input
-              type="text"
-              value={searchQuery}
-              onChange={e => setSearchQuery(e.target.value)}
-              placeholder="Search by name, SKU, brand, ID..."
-              className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-border bg-surface text-sm focus:outline-none focus:ring-2 focus:ring-emerald-600/30 transition-all"
-            />
-          </div>
-
-          <div className="text-xs text-foreground-muted font-medium self-end sm:self-center">
-            Showing <span className="font-bold text-foreground">{products.length}</span> items
-          </div>
-        </div>
+              <button
+                type="button"
+                onClick={() => setViewMode('grid')}
+                className={`h-8.5 px-2.5 rounded-lg text-xs font-bold transition-all cursor-pointer flex items-center justify-center gap-1 ${
+                  viewMode === 'grid' ? 'bg-primary text-white shadow-xs' : 'text-foreground-muted hover:text-foreground'
+                }`}
+                title="Grid View"
+              >
+                <LayoutGrid className="w-3.5 h-3.5" />
+                <span className="hidden sm:inline">Grid</span>
+              </button>
+            </div>
+          }
+        />
 
         {/* Notification Banner */}
         {notification && (
-          <div className={`mb-5 p-4 rounded-xl flex items-center justify-between ${
+          <div className={`p-4 rounded-xl flex items-center justify-between ${
             notification.type === 'success' ? 'bg-success-bg border border-success/20 text-success' : 'bg-error-bg border border-error/20 text-error'
           }`}>
             <span className="text-sm font-semibold">{notification.message}</span>
@@ -317,7 +316,7 @@ function ProductApprovalsContent() {
 
         {/* Error Alert */}
         {errorMessage && (
-          <div className="mb-5 p-4 rounded-xl bg-warning-bg border border-warning text-warning flex items-start justify-between gap-3 shadow-xs">
+          <div className="p-4 rounded-xl bg-warning-bg border border-warning text-warning flex items-start justify-between gap-3 shadow-xs">
             <div className="flex items-start gap-2.5">
               <AlertTriangle className="w-5 h-5 text-warning shrink-0 mt-0.5" />
               <div>
@@ -336,8 +335,137 @@ function ProductApprovalsContent() {
           </div>
         )}
 
-        {/* Content Table / Cards */}
-        {isLoading ? (
+        {/* Content Table (Default) or Grid View */}
+        {viewMode === 'table' ? (
+          <AdminTable
+            columns={[
+              { header: 'Product & SKU' },
+              { header: 'Seller Store' },
+              { header: 'Category' },
+              { header: 'Price & Stock' },
+              { header: 'Status' },
+              { header: 'Submitted' },
+              { header: 'Actions', align: 'right' },
+            ]}
+            isLoading={isLoading}
+            isEmpty={!isLoading && products.length === 0}
+            emptyIcon={Package}
+            emptyTitle={`No ${selectedStatus !== 'all' ? selectedStatus : ''} products found`}
+            emptyDescription={selectedStatus === 'pending'
+              ? 'All seller product approval requests have been addressed. No pending reviews!'
+              : `No products matching the status "${selectedStatus}" were found.`}
+          >
+            {products.map(product => {
+              const primaryVariant = product.product_variants?.[0];
+              const price = primaryVariant?.price || 0;
+              const stock = primaryVariant?.stock ?? 0;
+              const sellerName = product.sellers?.store_name || 'Direct / Gjanand';
+              const catStyle = categoryColors(product.category);
+
+              return (
+                <tr
+                  key={product.id}
+                  className="hover:bg-black/[0.02] dark:hover:bg-white/[0.03] transition-colors cursor-pointer"
+                  onClick={() => {
+                    setSelectedProduct(product);
+                    setIsPreviewOpen(true);
+                  }}
+                >
+                  <td className="px-5 py-3.5">
+                    <div className="flex items-center gap-3">
+                      <img
+                        src={product.image_url || PLACEHOLDER_PRODUCT_IMAGE}
+                        alt={product.name}
+                        className="w-10 h-10 object-cover rounded-[10px] border border-border/80 shrink-0"
+                      />
+                      <div className="min-w-0 max-w-[260px]">
+                        <span className="font-bold text-[13px] text-foreground block truncate">
+                          {product.name}
+                        </span>
+                        <span className="text-[11px] text-foreground-muted block font-mono truncate">
+                          SKU: {product.sku || product.id.slice(0, 8).toUpperCase()}
+                        </span>
+                      </div>
+                    </div>
+                  </td>
+                  <td className="px-5 py-3.5 whitespace-nowrap">
+                    <div className="flex items-center gap-1.5">
+                      <Building2 className="w-3.5 h-3.5 text-foreground-muted" />
+                      <span className="text-[13px] font-semibold text-foreground">
+                        {sellerName}
+                      </span>
+                    </div>
+                  </td>
+                  <td className="px-5 py-3.5 whitespace-nowrap min-w-[140px]">
+                    <span
+                      className="text-[11px] font-bold uppercase tracking-wider px-3 py-1 rounded-full border inline-block whitespace-nowrap shadow-2xs"
+                      style={{
+                        background: catStyle.bg,
+                        color: catStyle.color,
+                        borderColor: `${catStyle.color}40`,
+                      }}
+                    >
+                      {product.category}
+                    </span>
+                  </td>
+                  <td className="px-5 py-3.5 whitespace-nowrap font-bold text-[13px] text-foreground">
+                    ₹{price}
+                    <span className="text-xs font-normal text-foreground-muted ml-1.5">
+                      ({stock} in stock)
+                    </span>
+                  </td>
+                  <td className="px-5 py-3.5 whitespace-nowrap">
+                    {getStatusBadge(product.approval_status)}
+                  </td>
+                  <td className="px-5 py-3.5 whitespace-nowrap text-xs text-foreground-muted font-medium">
+                    {new Date(product.created_at).toLocaleDateString('en-IN', {
+                      day: 'numeric',
+                      month: 'short',
+                      year: 'numeric',
+                    })}
+                  </td>
+                  <td className="px-5 py-3.5 text-right whitespace-nowrap" onClick={e => e.stopPropagation()}>
+                    <div className="flex items-center justify-end gap-1.5">
+                      {product.approval_status === 'pending' && (
+                        <>
+                          <button
+                            type="button"
+                            onClick={() => handleOpenDecisionModal(product, 'approved')}
+                            className="px-2.5 py-1 rounded-lg text-xs font-bold text-white bg-emerald-600 hover:bg-emerald-700 transition-colors shadow-2xs cursor-pointer flex items-center gap-1"
+                            title="Approve Product"
+                          >
+                            <Check className="w-3 h-3" />
+                            <span>Approve</span>
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => handleOpenDecisionModal(product, 'rejected')}
+                            className="px-2.5 py-1 rounded-lg text-xs font-bold text-red-700 bg-red-100 border border-red-200 hover:bg-red-200 transition-colors cursor-pointer flex items-center gap-1"
+                            title="Reject Product"
+                          >
+                            <X className="w-3 h-3" />
+                            <span>Reject</span>
+                          </button>
+                        </>
+                      )}
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setSelectedProduct(product);
+                          setIsPreviewOpen(true);
+                        }}
+                        className="p-1.5 rounded-lg hover:bg-surface-muted text-foreground-muted hover:text-foreground cursor-pointer transition-colors"
+                        title="View Product Dossier"
+                      >
+                        <Eye className="w-4 h-4" />
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              );
+            })}
+          </AdminTable>
+        ) : isLoading ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {[1, 2, 3, 4, 5, 6].map(i => (
               <div key={i} className="h-64 bg-surface rounded-2xl border border-border animate-pulse p-5" />

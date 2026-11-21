@@ -68,9 +68,12 @@ export function ConfirmCodPaymentModal({
       role="alertdialog"
       aria-modal="true"
       aria-labelledby="cod-modal-title"
-      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-xs animate-in fade-in duration-150"
+      className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/60 backdrop-blur-xs animate-in fade-in duration-150"
     >
-      <div className="bg-surface rounded-xl max-w-md w-full p-6 shadow-2xl border border-border space-y-4">
+      <div className="bg-surface rounded-t-[24px] sm:rounded-2xl max-w-md w-full p-6 shadow-2xl border border-border space-y-4 max-h-[85vh] overflow-y-auto">
+        {/* Mobile Swipe Grab Handle (Edit #40) */}
+        <div className="sm:hidden w-10 h-1.5 rounded-full bg-border mx-auto -mt-2 mb-3" />
+
         {/* Header */}
         <div className="flex items-start justify-between">
           <div className="flex items-center gap-3">
@@ -88,7 +91,7 @@ export function ConfirmCodPaymentModal({
             type="button"
             disabled={busy}
             onClick={onClose}
-            className="p-1 rounded-xl text-foreground-muted hover:text-foreground-muted hover:bg-surface-muted transition-colors"
+            className="p-1 rounded-xl text-foreground-muted hover:text-foreground-muted hover:bg-surface-muted transition-colors cursor-pointer"
           >
             <X className="w-5 h-5" />
           </button>
@@ -98,47 +101,44 @@ export function ConfirmCodPaymentModal({
         <div className="p-4 rounded-2xl bg-surface-muted border border-border/80 space-y-2 text-xs">
           <div className="flex justify-between items-center">
             <span className="text-foreground-muted">Customer:</span>
-            <span className="font-bold text-foreground">{order.profiles?.name || 'Customer'}</span>
-          </div>
-          {order.profiles?.phone && (
-            <div className="flex justify-between items-center">
-              <span className="text-foreground-muted">Phone:</span>
-              <span className="font-mono text-foreground">+91 {order.profiles.phone}</span>
-            </div>
-          )}
-          <div className="flex justify-between items-center">
-            <span className="text-foreground-muted">Seller / Store:</span>
-            <span className="font-bold text-purple-700">{sellerStore}</span>
+            <span className="font-semibold text-foreground">{order.profiles?.name || 'Customer'}</span>
           </div>
           <div className="flex justify-between items-center">
-            <span className="text-foreground-muted">Order Status:</span>
-            <span className="font-bold uppercase text-foreground">{order.status.replace(/_/g, ' ')}</span>
+            <span className="text-foreground-muted">Store Attribution:</span>
+            <span className="font-semibold text-primary">{sellerStore}</span>
+          </div>
+          <div className="flex justify-between items-center">
+            <span className="text-foreground-muted">Payment Mode:</span>
+            <span className="font-semibold uppercase text-warning">Cash on Delivery (COD)</span>
           </div>
           <div className="flex justify-between items-center pt-2 border-t border-border">
-            <span className="text-foreground font-semibold">Total Cash Amount:</span>
-            <span className="text-base font-semibold text-primary">₹{order.total_amount}</span>
+            <span className="font-bold text-foreground">Amount to Confirm:</span>
+            <span className="text-base font-bold text-success">₹{order.total_amount}</span>
           </div>
         </div>
 
-        {/* Verification Notice */}
-        <p className="text-xs text-foreground-muted leading-relaxed">
-          Please confirm that the physical cash of <strong className="text-foreground">₹{order.total_amount}</strong> has been collected from the customer. Once confirmed, this order&apos;s payment status will permanently change to <span className="font-bold text-success">Paid</span>.
-        </p>
+        {/* Audit Warning */}
+        <div className="p-3 rounded-xl bg-info-bg border border-info/20 text-xs text-blue-900 dark:text-blue-200 flex items-start gap-2">
+          <AlertCircle className="w-4 h-4 text-info shrink-0 mt-0.5" />
+          <span>
+            Marking this as paid records a permanent payment confirmation timestamp on the order ledger. Only confirm if cash has been physically received.
+          </span>
+        </div>
 
         {error && (
-          <div role="alert" className="p-3 rounded-xl bg-error-bg border border-error/20 text-error text-xs font-medium flex items-center gap-2">
-            <AlertCircle className="w-4 h-4 shrink-0 text-error" />
+          <div className="p-3 rounded-xl bg-error-bg border border-error/20 text-error text-xs font-semibold flex items-center gap-2">
+            <AlertCircle className="w-4 h-4 shrink-0" />
             <span>{error}</span>
           </div>
         )}
 
         {/* Actions */}
-        <div className="flex gap-2.5 justify-end pt-2">
+        <div className="flex items-center gap-3 pt-2">
           <button
             type="button"
             disabled={busy}
             onClick={onClose}
-            className="px-4 py-2.5 rounded-xl text-xs font-bold text-foreground bg-surface-muted hover:bg-border transition-colors disabled:opacity-50"
+            className="flex-1 py-2.5 px-4 rounded-xl border border-border text-xs font-semibold text-foreground hover:bg-surface-muted transition-colors cursor-pointer"
           >
             Cancel
           </button>
@@ -146,11 +146,19 @@ export function ConfirmCodPaymentModal({
             type="button"
             disabled={busy}
             onClick={handleConfirm}
-            className="px-4 py-2.5 rounded-xl text-xs font-bold text-on-success bg-success hover:bg-success transition-colors flex items-center gap-1.5 shadow-sm disabled:opacity-50"
+            className="flex-1 py-2.5 px-4 rounded-xl bg-success hover:bg-success text-on-success text-xs font-bold transition-all shadow-sm flex items-center justify-center gap-1.5 cursor-pointer disabled:opacity-50"
           >
-            {busy && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
-            <CheckCircle2 className="w-4 h-4" />
-            <span>{busy ? 'Confirming...' : 'Confirm Cash Collected'}</span>
+            {busy ? (
+              <>
+                <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                <span>Confirming...</span>
+              </>
+            ) : (
+              <>
+                <CheckCircle2 className="w-3.5 h-3.5" />
+                <span>Confirm Received</span>
+              </>
+            )}
           </button>
         </div>
       </div>

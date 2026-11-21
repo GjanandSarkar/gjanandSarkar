@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { useTranslation } from '@/lib/i18n';
 import { createProduct, uploadProductImage } from '@/lib/api/products';
 import { MultiImageUpload, ImageItem } from '@/components/admin/MultiImageUpload';
+import { AdminHeader } from '@/components/admin/AdminHeader';
 import { api } from '@/lib/api/client';
 import {
   ArrowLeft,
@@ -154,36 +155,24 @@ function AddProductPage() {
   };
 
   return (
-    <div className="flex flex-col min-h-screen pb-12" style={{ background: 'var(--color-background, #fbfaf6)' }}>
-      {/* Header */}
-      <div className="px-6 md:px-10 pt-6 pb-5 flex items-center justify-between border-b"
-        style={{ background: 'var(--color-surface, #ffffff)', borderColor: 'var(--color-border, var(--border))' }}>
-        <div className="flex items-center gap-3">
-          <button onClick={() => router.back()} className="p-2 -ml-2 rounded-full hover:bg-black/5 transition-colors"
-            style={{ color: 'var(--color-foreground-muted, var(--foreground-muted))' }}>
-            <ArrowLeft className="w-5 h-5" />
+    <div className="flex flex-col min-h-screen pb-12" style={{ background: '#F5F6F5' }}>
+      {/* Standard Admin Header */}
+      <AdminHeader
+        title="Add Product"
+        subtitle="Create a new product listing with custom attributes and pricing variants"
+        actions={
+          <button
+            type="button"
+            onClick={handleSubmit}
+            disabled={isSubmitting}
+            className="inline-flex items-center gap-2 px-6 h-11 rounded-[12px] font-semibold text-[14px] text-white shadow-sm transition-all hover:opacity-95 disabled:opacity-50 cursor-pointer"
+            style={{ background: 'var(--cta-gradient)' }}
+          >
+            {isSubmitting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Plus className="w-4 h-4" />}
+            {isSubmitting ? 'Creating Product...' : 'Save Product'}
           </button>
-          <div>
-            <h1 className="font-semibold text-[22px] tracking-tight" style={{ color: 'var(--color-foreground, var(--foreground))' }}>
-              Add Product
-            </h1>
-            <p className="text-[13px]" style={{ color: 'var(--color-foreground-muted, var(--foreground-muted))' }}>
-              Create a new product listing with custom attributes and pricing variants.
-            </p>
-          </div>
-        </div>
-
-        <button
-          type="button"
-          onClick={handleSubmit}
-          disabled={isSubmitting}
-          className="inline-flex items-center gap-2 px-6 h-11 rounded-[10px] font-semibold text-[14px] text-white shadow-sm transition-all hover:opacity-95 disabled:opacity-50"
-          style={{ background: 'var(--color-primary, var(--primary))' }}
-        >
-          {isSubmitting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Plus className="w-4 h-4" />}
-          {isSubmitting ? 'Creating Product...' : 'Save Product'}
-        </button>
-      </div>
+        }
+      />
 
       <div className="px-6 md:px-10 py-6 max-w-7xl w-full mx-auto flex flex-col gap-6">
         {/* Main 2-Column Grid */}

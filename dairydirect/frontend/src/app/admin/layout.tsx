@@ -1,19 +1,20 @@
 "use client";
 
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import { useStore } from '@/store/useStore';
 import { AdminSidebar } from '@/components/admin/AdminSidebar';
-import { Loader2, Menu } from 'lucide-react';
-import { ThemeToggle } from '@/components/theme/ThemeToggle';
-import Link from 'next/link';
+import { AdminMobileNav } from '@/components/admin/AdminMobileNav';
+import { Loader2 } from 'lucide-react';
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const user = useStore(state => state.user);
   const router = useRouter();
   const pathname = usePathname();
-
   const isAuthLoading = useStore(state => state.isAuthLoading);
+
+  // Mobile Slide-In Sidebar Drawer State (Edit #40)
+  const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
 
   useEffect(() => {
     if (isAuthLoading) return;
@@ -26,32 +27,35 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     }
   }, [user, pathname, router, isAuthLoading]);
 
+  // Close mobile sidebar on route transition
+  useEffect(() => {
+    setIsMobileSidebarOpen(false);
+  }, [pathname]);
+
   if (!user || user.role !== 'admin') {
     return (
-      <div className="min-h-screen flex items-center justify-center" style={{ background: 'var(--color-surface)' }}>
-        <Loader2 className="w-8 h-8 animate-spin" style={{ color: 'var(--color-primary)' }} />
+      <div className="min-h-screen flex items-center justify-center bg-[#F5F6F5] dark:bg-black text-foreground">
+        <Loader2 className="w-8 h-8 animate-spin text-primary" />
       </div>
     );
   }
 
   return (
-    <div className="flex min-h-screen" style={{ background: 'var(--color-surface-container-low)' }}>
-      <AdminSidebar />
-      <main className="flex-1 md:ml-[260px] min-h-screen overflow-x-hidden flex flex-col">
-        {/* Mobile Header */}
-        <header className="md:hidden flex items-center justify-between p-4 bg-surface border-b border-sand z-40 sticky top-0">
-          <div className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded-lg flex items-center justify-center bg-primary text-on-primary">
-              <span className="font-bold text-xs">GS</span>
-            </div>
-            <h1 className="font-bold text-sm">Operations</h1>
-          </div>
-          <div className="flex items-center gap-2">
-            <ThemeToggle />
-          </div>
-        </header>
+    <div className="flex min-h-screen bg-[#F5F6F5] dark:bg-black text-foreground">
+      {/* Viewport-Pinned Desktop Sidebar + Slide-in Mobile Drawer */}
+      <AdminSidebar
+        isOpenMobile={isMobileSidebarOpen}
+        onCloseMobile={() => setIsMobileSidebarOpen(false)}
+      />
 
-        <div className="max-w-[1400px] mx-auto w-full flex-1">
+      <main className="flex-1 md:ml-[260px] min-h-screen overflow-x-hidden flex flex-col bg-[#F5F6F5] dark:bg-black text-foreground">
+        {/* Floating Rounded Frosted Mobile Top Bar (Edit #40) */}
+        <AdminMobileNav
+          portalType="admin"
+          onOpenSidebar={() => setIsMobileSidebarOpen(true)}
+        />
+
+        <div className="w-full flex-1 flex flex-col">
           {children}
         </div>
       </main>

@@ -9,6 +9,7 @@ import {
 import Link from 'next/link';
 import { format } from 'date-fns';
 import dynamic from 'next/dynamic';
+import { AdminHeader } from '@/components/admin/AdminHeader';
 
 // Lazy-load recharts so it is excluded from the customer-facing JS bundle.
 const AreaChart = dynamic(() => import('recharts').then(m => m.AreaChart));
@@ -52,31 +53,24 @@ export default function AdminReportsPage() {
   };
 
   return (
-    <div className="flex flex-col min-h-screen" style={{ background: 'var(--color-background)' }}>
-      {/* Header */}
-      <div className="px-6 md:px-10 pt-8 pb-6" style={{ background: 'var(--color-surface-container-lowest)', borderBottom: '1px solid rgba(195,201,187,0.2)' }}>
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <Link href="/admin" className="p-1.5 rounded-[8px] hover:opacity-70 transition-opacity" style={{ background: 'var(--color-surface-container-low)' }}>
-              <ArrowLeft className="w-4 h-4" style={{ color: 'var(--color-on-surface)' }} />
-            </Link>
-            <div>
-              <h1 className="font-semibold text-[24px]" style={{ color: 'var(--color-on-surface)' }}>Business Reports & Analytics</h1>
-              <p className="text-[12px]" style={{ color: 'var(--color-on-surface-variant)' }}>Financial analytics, revenue trends, and product performance</p>
-            </div>
-          </div>
-
-          <div className="flex items-center gap-3">
-            <div className="flex rounded-[10px] overflow-hidden border" style={{ borderColor: 'rgba(195,201,187,0.4)' }}>
+    <div className="flex flex-col min-h-screen">
+      {/* Standard Admin Header */}
+      <AdminHeader
+        title="Business Reports"
+        subtitle="Financial analytics, gross revenue trends, and product performance aggregates"
+        onRefresh={fetchReports}
+        isRefreshing={isLoading}
+        actions={
+          <div className="flex items-center gap-2.5">
+            <div className="flex rounded-[10px] overflow-hidden border border-border/80 bg-surface shadow-xs p-0.5">
               {(['7d', '30d', '90d'] as const).map(p => (
                 <button
                   key={p}
+                  type="button"
                   onClick={() => setPeriod(p)}
-                  className="px-3 py-1.5 text-[12px] font-semibold transition-all"
-                  style={{
-                    background: period === p ? 'var(--color-primary)' : 'transparent',
-                    color: period === p ? '#fff' : 'var(--color-outline)',
-                  }}
+                  className={`px-3 py-1.5 text-[12px] font-bold rounded-[8px] transition-all cursor-pointer ${
+                    period === p ? 'bg-primary text-white shadow-xs' : 'text-foreground hover:bg-surface-muted'
+                  }`}
                 >
                   {p}
                 </button>
@@ -84,15 +78,16 @@ export default function AdminReportsPage() {
             </div>
 
             <button
+              type="button"
               onClick={handleExportCSV}
-              className="flex items-center gap-1.5 px-3 py-2 rounded-[10px] text-[12px] font-semibold"
-              style={{ background: 'var(--color-surface-container-low)', color: 'var(--color-on-surface)' }}
+              className="flex items-center gap-1.5 px-3.5 py-2 rounded-[12px] text-[12px] font-bold border border-border/80 bg-surface-container-low hover:bg-surface-muted text-foreground transition-all cursor-pointer"
             >
-              <Download className="w-4 h-4" /> Export CSV
+              <Download className="w-4 h-4" />
+              <span>Export CSV</span>
             </button>
           </div>
-        </div>
-      </div>
+        }
+      />
 
       <div className="px-6 md:px-10 py-6 flex flex-col gap-6">
         {isLoading ? (

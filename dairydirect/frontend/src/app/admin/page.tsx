@@ -1,21 +1,23 @@
 "use client";
 
-import { useState, useEffect } from 'react';
-import { motion, Variants } from 'framer-motion';
+import { useState, useEffect, useRef } from 'react';
+import { useRouter } from 'next/navigation';
+import { motion, Variants, AnimatePresence } from 'framer-motion';
 import {
   TrendingUp, ShoppingBag, Truck, Package, ArrowRight,
-  Clock, CheckCircle2, AlertCircle, BarChart3, Leaf,
+  Clock, CheckCircle2, AlertCircle, BarChart3,
   Loader2, AlertTriangle, RefreshCw, Users, IndianRupee,
-  ArrowUpRight, ArrowDownRight
+  Calendar, Info, ChevronDown, Check, X
 } from 'lucide-react';
-import { format, isToday, subDays } from 'date-fns';
+import { format } from 'date-fns';
 import Link from 'next/link';
 import { useStore } from '@/store/useStore';
 import { useTranslation } from '@/lib/i18n';
 import dynamic from 'next/dynamic';
+import { AdminTable } from '@/components/admin/AdminTable';
 
 // Recharts is heavy (~160 KB gzip). Dynamic import ensures it is only loaded
-// when the admin dashboard is actually visited — never on customer routes.
+// when the admin dashboard is actually visited.
 const AreaChart = dynamic(() => import('recharts').then(m => m.AreaChart));
 const Area = dynamic(() => import('recharts').then(m => m.Area));
 const XAxis = dynamic(() => import('recharts').then(m => m.XAxis));
@@ -24,22 +26,21 @@ const Tooltip = dynamic(() => import('recharts').then(m => m.Tooltip));
 const ResponsiveContainer = dynamic(() => import('recharts').then(m => m.ResponsiveContainer));
 const CartesianGrid = dynamic(() => import('recharts').then(m => m.CartesianGrid));
 
-
 const container: Variants = {
   hidden: { opacity: 0 },
-  show: { opacity: 1, transition: { staggerChildren: 0.06 } },
+  show: { opacity: 1, transition: { staggerChildren: 0.05 } },
 };
 const item: Variants = {
-  hidden: { opacity: 0, y: 20 },
-  show: { opacity: 1, y: 0, transition: { duration: 0.4, ease: [0.4, 0, 0.2, 1] } },
+  hidden: { opacity: 0, y: 16 },
+  show: { opacity: 1, y: 0, transition: { duration: 0.35, ease: [0.4, 0, 0.2, 1] } },
 };
 
 const STATUS_CONFIG: Record<string, { bg: string; color: string; dot: string; icon: any }> = {
-  confirmed:        { bg: '#c2efac', color: '#042100', dot: '#3f6530', icon: CheckCircle2 },
-  out_for_delivery: { bg: '#fff8e6', color: 'var(--warning)', dot: '#c78c2e', icon: Truck },
-  delivered:        { bg: '#eaf4e2', color: '#2a4f1d', dot: '#3f6530', icon: CheckCircle2 },
-  pending:          { bg: '#ffdcc7', color: 'var(--warning)', dot: '#d4712a', icon: Clock },
-  cancelled:        { bg: '#e3e3dc', color: 'var(--foreground-muted)', dot: '#73796d', icon: AlertCircle },
+  confirmed:        { bg: '#dcfce7', color: '#14532d', dot: '#16a34a', icon: CheckCircle2 },
+  out_for_delivery: { bg: '#fef3c7', color: '#92400e', dot: '#d97706', icon: Truck },
+  delivered:        { bg: '#d1fae5', color: '#065f46', dot: '#059669', icon: CheckCircle2 },
+  pending:          { bg: '#ffedd5', color: '#9a3412', dot: '#ea580c', icon: Clock },
+  cancelled:        { bg: '#f1f5f9', color: '#475569', dot: '#64748b', icon: AlertCircle },
 };
 
 type DashboardData = {
@@ -69,19 +70,40 @@ type DashboardData = {
   };
 };
 
+type FilterPeriod = 'today' | '7d' | '30d' | 'custom';
+type ChartMetric = 'revenue' | 'orders' | 'aov';
+
 export default function AdminDashboard() {
+  const router = useRouter();
   const { t } = useTranslation();
   const user = useStore((s) => s.user);
   const [data, setData] = useState<DashboardData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [period, setPeriod] = useState<'7d' | '30d'>('30d');
+  const [isRefreshing, setIsRefreshing] = useState(false);
+
+  // Period filter state
+  const [period, setPeriod] = useState<FilterPeriod>('30d');
+  const [customStartDate, setCustomStartDate] = useState(
+    new Date(Date.now() - 30 * 86400000).toISOString().split('T')[0]
+  );
+  const [customEndDate, setCustomEndDate] = useState(
+    new Date().toISOString().split('T')[0]
+  );
+  const [isCustomOpen, setIsCustomOpen] = useState(false);
   const [lastRefreshed, setLastRefreshed] = useState(new Date());
 
+  // Chart swap state (Edit #8)
+  const [activeChart, setActiveChart] = useState<ChartMetric>('revenue');
+  const [showChartExplainer, setShowChartExplainer] = useState(false);
+
+  const customFilterRef = useRef<HTMLDivElement>(null);
+
   const fetchData = async () => {
-    setIsLoading(true);
+    setIsRefreshing(true);
     try {
+      const apiPeriod = period === 'today' ? 'today' : (period === '7d' ? '7d' : '30d');
       const [reportsRes, ordersRes, inventoryRes] = await Promise.all([
-        fetch(`/api/admin/reports?period=${period}`),
+        fetch(`/api/admin/reports?period=${apiPeriod}`),
         fetch('/api/orders?limit=8&admin=true'),
         fetch('/api/admin/inventory?filter=summary'),
       ]);
@@ -107,150 +129,283 @@ export default function AdminDashboard() {
       console.error('Dashboard fetch error:', err);
     } finally {
       setIsLoading(false);
+      setIsRefreshing(false);
     }
   };
 
-  useEffect(() => { fetchData(); }, [period]);
+  useEffect(() => {
+    fetchData();
+  }, [period]);
 
+  // Close custom filter popup on outside click
+  useEffect(() => {
+    const handleOutside = (e: MouseEvent) => {
+      if (customFilterRef.current && !customFilterRef.current.contains(e.target as Node)) {
+        setIsCustomOpen(false);
+      }
+    };
+    if (isCustomOpen) document.addEventListener('mousedown', handleOutside);
+    return () => document.removeEventListener('mousedown', handleOutside);
+  }, [isCustomOpen]);
+
+  // Dynamic time-aware greeting (Edit #3)
+  const getGreeting = () => {
+    const h = new Date().getHours();
+    if (h >= 4 && h < 12) return 'Good morning';
+    if (h >= 12 && h < 17) return 'Good afternoon';
+    if (h >= 17 && h < 22) return 'Good evening';
+    return 'Good night';
+  };
+
+  // Stats cards configuration
   const statsCards = data ? [
     {
       label: 'Total Revenue',
       value: `₹${parseFloat(data.overview.gross_revenue || '0').toLocaleString('en-IN', { maximumFractionDigits: 0 })}`,
-      sub: `${period === '7d' ? 'Last 7 days' : 'Last 30 days'}`,
+      sub: `${period === 'today' ? 'Today' : period === '7d' ? 'Last 7 days' : 'Last 30 days'}`,
       icon: IndianRupee,
-      color: 'var(--primary)',
-      bg: '#c2efac',
-      trend: '+',
+      color: '#15803d',
+      bg: '#dcfce7',
     },
     {
       label: 'Total Orders',
       value: data.overview.total_orders || '0',
       sub: `${data.overview.delivered_orders || '0'} delivered`,
       icon: ShoppingBag,
-      color: '#4a6fa5',
-      bg: '#dce8ff',
-      trend: data.overview.total_orders,
+      color: '#1d4ed8',
+      bg: '#dbeafe',
     },
     {
       label: 'Pending Orders',
       value: data.overview.pending_orders || '0',
       sub: 'Needs attention',
       icon: Clock,
-      color: 'var(--warning)',
-      bg: '#ffdcc7',
-      trend: 'Alert',
+      color: '#c2410c',
+      bg: '#ffedd5',
     },
     {
       label: 'Active Customers',
       value: data.overview.unique_customers || '0',
       sub: 'Unique buyers',
       icon: Users,
-      color: '#6b21a8',
+      color: '#7e22ce',
       bg: '#f3e8ff',
-      trend: 'New',
     },
     {
       label: 'Avg Order Value',
       value: `₹${parseFloat(data.overview.avg_order_value || '0').toFixed(0)}`,
-      sub: 'Per order',
+      sub: 'Per order ticket',
       icon: TrendingUp,
-      color: '#065f46',
+      color: '#047857',
       bg: '#d1fae5',
-      trend: '+',
     },
     {
       label: 'Low Stock Alerts',
       value: data.inventory.out_of_stock || '0',
       sub: `${data.inventory.low_stock || '0'} low stock`,
       icon: AlertTriangle,
-      color: '#92400e',
-      bg: '#fef3c7',
-      trend: 'Alert',
+      color: '#a16207',
+      bg: '#fef9c3',
     },
   ] : [];
 
-  const greeting = () => {
-    const h = new Date().getHours();
-    if (h < 12) return 'Good morning';
-    if (h < 18) return 'Good afternoon';
-    return 'Good evening';
-  };
+  // Chart configuration computed from daily data (Edit #8)
+  const chartData = (data?.daily || []).map((d) => ({
+    ...d,
+    aov: d.orders > 0 ? Math.round(d.revenue / d.orders) : 0,
+  }));
+
+  const chartConfig = {
+    revenue: {
+      title: 'Gross Revenue Trend',
+      unit: '₹',
+      color: '#16a34a',
+      gradId: 'revGrad',
+      dataKey: 'revenue',
+      explanation: 'Displays daily gross turnover generated from completed orders over time.',
+      formatter: (v: number) => `₹${parseFloat(String(v)).toLocaleString('en-IN')}`,
+    },
+    orders: {
+      title: 'Daily Order Volume',
+      unit: '',
+      color: '#2563eb',
+      gradId: 'ordGrad',
+      dataKey: 'orders',
+      explanation: 'Visualizes daily order numbers to identify high-traffic days and purchasing momentum.',
+      formatter: (v: number) => `${v} orders`,
+    },
+    aov: {
+      title: 'Average Order Value (AOV)',
+      unit: '₹',
+      color: '#9333ea',
+      gradId: 'aovGrad',
+      dataKey: 'aov',
+      explanation: 'Calculated as daily gross revenue divided by orders to show basket size trends.',
+      formatter: (v: number) => `₹${v}`,
+    },
+  }[activeChart];
 
   if (isLoading) {
     return (
-      <div className="flex flex-col min-h-screen items-center justify-center gap-3">
-        <Loader2 className="w-8 h-8 animate-spin" style={{ color: 'var(--color-primary)' }} />
-        <p className="text-sm font-medium" style={{ color: 'var(--color-on-surface-variant)' }}>Loading dashboard...</p>
+      <div className="flex flex-col min-h-[60vh] items-center justify-center gap-3">
+        <Loader2 className="w-8 h-8 animate-spin text-primary" />
+        <p className="text-sm font-semibold text-foreground-muted">Loading dashboard data...</p>
       </div>
     );
   }
 
   return (
-    <div className="flex flex-col min-h-screen" style={{ background: 'var(--color-background)' }}>
-      {/* ═══ HEADER ═══ */}
-      <div
-        className="px-6 md:px-10 pt-8 pb-6"
-        style={{ background: 'var(--color-surface-container-lowest)', borderBottom: '1px solid rgba(195,201,187,0.2)' }}
-      >
-        <div className="flex items-start justify-between">
+    <div className="flex flex-col min-h-screen">
+      {/* ═══ HEADER (Edits #1, #2, #3, #7) ═══ */}
+      <div className="px-4 sm:px-6 md:px-10 pt-20 md:pt-7 pb-6 bg-surface border-b border-border transition-colors">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-5">
+          {/* Left: Time-Aware Greeting (Leaf removed per Edit #2; Title aware per Edit #3) */}
           <div>
-            <div className="flex items-center gap-2 mb-1">
-              <Leaf className="w-3.5 h-3.5" style={{ color: 'var(--color-primary)' }} strokeWidth={2.5} />
-              <span className="text-xs font-bold uppercase tracking-widest" style={{ color: 'var(--color-primary)' }}>
-                Admin Dashboard
+            <h1 className="font-semibold text-[26px] md:text-[28px] tracking-tight text-foreground leading-snug">
+              {getGreeting()}, {user?.name?.split(' ')[0] || 'Admin'}{' '}
+              <span className="text-[19px] md:text-[22px] font-normal text-foreground-muted">
+                — on your dashboard
               </span>
-            </div>
-            <h1 className="font-semibold text-[28px] tracking-tight" style={{ color: 'var(--color-on-surface)' }}>
-              {greeting()}, {user?.name?.split(' ')[0] || 'Admin'}
             </h1>
-            <p className="text-[13px] mt-1" style={{ color: 'var(--color-on-surface-variant)' }}>
+            <p className="text-[13px] text-foreground-muted mt-1">
               {format(new Date(), 'EEEE, MMMM d, yyyy')} · Last updated {format(lastRefreshed, 'h:mm a')}
             </p>
           </div>
 
-          <div className="flex items-center gap-3">
-            {/* Period Toggle */}
-            <div className="flex rounded-[10px] overflow-hidden border" style={{ borderColor: 'rgba(195,201,187,0.4)' }}>
-              {(['7d', '30d'] as const).map((p) => (
-                <button
-                  key={p}
-                  onClick={() => setPeriod(p)}
-                  className="px-3 py-1.5 text-[12px] font-semibold transition-all"
-                  style={{
-                    background: period === p ? 'var(--color-primary)' : 'transparent',
-                    color: period === p ? '#fff' : 'var(--color-outline)',
-                  }}
-                >
-                  {p}
-                </button>
-              ))}
-            </div>
-
+          {/* Right: Ordered toolbar per Edit #7: [1. Refresh] -> [2. Filters with Custom] -> [3. Full Reports] */}
+          <div className="flex items-center gap-2.5 flex-wrap sm:flex-nowrap">
+            {/* 1. Refresh Button (Left side) */}
             <button
+              type="button"
               onClick={fetchData}
-              className="p-2 rounded-[10px] transition-all hover:opacity-80"
-              style={{ background: 'var(--color-surface-container-low)' }}
+              disabled={isRefreshing}
+              className="p-2.5 rounded-[12px] border border-border/80 bg-surface-container-low hover:bg-surface-muted transition-all cursor-pointer disabled:opacity-50 text-foreground"
+              title="Refresh Dashboard"
             >
-              <RefreshCw className="w-4 h-4" style={{ color: 'var(--color-primary)' }} />
+              <RefreshCw className={`w-4 h-4 text-primary ${isRefreshing ? 'animate-spin' : ''}`} />
             </button>
 
+            {/* 2. Filter Selector in between (Background-aware per Edit #1 + Custom filter per Edit #7) */}
+            <div className="relative" ref={customFilterRef}>
+              <div className="flex items-center rounded-[12px] p-1 border border-border/80 bg-surface shadow-xs">
+                {(['today', '7d', '30d'] as const).map((p) => {
+                  const isActive = period === p;
+                  return (
+                    <button
+                      key={p}
+                      type="button"
+                      onClick={() => {
+                        setPeriod(p);
+                        setIsCustomOpen(false);
+                      }}
+                      className={`px-3 py-1.5 text-[12px] font-bold rounded-[8px] transition-all cursor-pointer ${
+                        isActive
+                          ? 'bg-primary text-white shadow-xs'
+                          : 'text-foreground hover:bg-surface-muted hover:text-foreground'
+                      }`}
+                    >
+                      {p === 'today' ? 'Today' : p}
+                    </button>
+                  );
+                })}
+
+                {/* Custom Filter Button */}
+                <button
+                  type="button"
+                  onClick={() => setIsCustomOpen(prev => !prev)}
+                  className={`flex items-center gap-1.5 px-3 py-1.5 text-[12px] font-bold rounded-[8px] transition-all cursor-pointer ${
+                    period === 'custom' || isCustomOpen
+                      ? 'bg-primary-fixed text-primary shadow-xs'
+                      : 'text-foreground hover:bg-surface-muted hover:text-foreground'
+                  }`}
+                >
+                  <Calendar className="w-3.5 h-3.5" />
+                  <span>Custom</span>
+                  <ChevronDown className="w-3 h-3 opacity-70" />
+                </button>
+              </div>
+
+              {/* Custom Date Range Popover */}
+              <AnimatePresence>
+                {isCustomOpen && (
+                  <motion.div
+                    initial={{ opacity: 0, y: 8, scale: 0.98 }}
+                    animate={{ opacity: 1, y: 0, scale: 1 }}
+                    exit={{ opacity: 0, y: 6, scale: 0.98 }}
+                    transition={{ duration: 0.16 }}
+                    className="absolute right-0 top-[calc(100%+8px)] w-72 rounded-[16px] p-4 bg-surface border border-border shadow-2xl z-50 flex flex-col gap-3"
+                    style={{ background: 'var(--color-surface)' }}
+                  >
+                    <div className="flex items-center justify-between pb-2 border-b border-border/60">
+                      <span className="text-xs font-bold text-foreground">Custom Date Filter</span>
+                      <button
+                        type="button"
+                        onClick={() => setIsCustomOpen(false)}
+                        className="text-foreground-muted hover:text-foreground p-0.5"
+                      >
+                        <X className="w-4 h-4" />
+                      </button>
+                    </div>
+
+                    <div className="flex flex-col gap-2">
+                      <label className="text-[11px] font-semibold text-foreground-muted">Start Date</label>
+                      <input
+                        type="date"
+                        value={customStartDate}
+                        onChange={(e) => setCustomStartDate(e.target.value)}
+                        className="w-full px-3 py-2 rounded-[10px] text-xs font-medium border border-border bg-surface-container-low text-foreground outline-none focus:border-primary"
+                      />
+                    </div>
+
+                    <div className="flex flex-col gap-2">
+                      <label className="text-[11px] font-semibold text-foreground-muted">End Date</label>
+                      <input
+                        type="date"
+                        value={customEndDate}
+                        onChange={(e) => setCustomEndDate(e.target.value)}
+                        className="w-full px-3 py-2 rounded-[10px] text-xs font-medium border border-border bg-surface-container-low text-foreground outline-none focus:border-primary"
+                      />
+                    </div>
+
+                    <div className="flex items-center gap-2 pt-2">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setPeriod('custom');
+                          setIsCustomOpen(false);
+                          fetchData();
+                        }}
+                        className="flex-1 py-2 rounded-[10px] text-xs font-bold bg-primary text-white hover:opacity-95 transition-opacity cursor-pointer shadow-xs"
+                      >
+                        Apply Range
+                      </button>
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
+
+            {/* 3. Full Reports Button (Right side) */}
             <Link
               href="/admin/reports"
-              className="hidden md:flex items-center gap-2 px-4 py-2 rounded-[10px] transition-opacity hover:opacity-90 text-[13px] font-semibold"
-              style={{ background: 'var(--color-primary)', color: 'var(--on-primary)' }}
+              className="flex items-center gap-2 px-4 py-2 rounded-[12px] text-[13px] font-bold text-white transition-all hover:opacity-90 active:scale-95 shadow-xs"
+              style={{ background: 'var(--color-primary)' }}
             >
               <BarChart3 className="w-4 h-4" />
-              Full Reports
+              <span>Full Reports</span>
             </Link>
           </div>
         </div>
       </div>
 
+      {/* ═══ DASHBOARD CONTENT ═══ */}
       <div className="px-6 md:px-10 py-6 flex flex-col gap-6">
         {/* ═══ STAT CARDS ═══ */}
         <motion.div
-          className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3"
-          variants={container} initial="hidden" animate="show"
+          className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3.5"
+          variants={container}
+          initial="hidden"
+          animate="show"
         >
           {statsCards.map((stat, i) => {
             const Icon = stat.icon;
@@ -258,28 +413,24 @@ export default function AdminDashboard() {
               <motion.div
                 key={i}
                 variants={item}
-                className="rounded-[16px] p-4 flex flex-col gap-2 cursor-default hover:shadow-md transition-shadow"
-                style={{
-                  background: 'var(--color-surface-container-lowest)',
-                  border: '1px solid rgba(195,201,187,0.25)',
-                }}
+                className="rounded-[16px] p-4 flex flex-col gap-2 bg-surface border border-border shadow-xs hover:shadow-md transition-all cursor-default"
               >
                 <div className="flex items-center justify-between">
                   <div
-                    className="w-9 h-9 rounded-[10px] flex items-center justify-center"
+                    className="w-9 h-9 rounded-[10px] flex items-center justify-center font-bold"
                     style={{ background: stat.bg, color: stat.color }}
                   >
-                    <Icon className="w-4.5 h-4.5" strokeWidth={2} />
+                    <Icon className="w-4.5 h-4.5" strokeWidth={2.2} />
                   </div>
                 </div>
                 <div>
-                  <p className="font-semibold text-[20px] leading-tight" style={{ color: 'var(--color-on-surface)' }}>
+                  <p className="font-bold text-[20px] leading-tight text-foreground tracking-tight">
                     {stat.value}
                   </p>
-                  <p className="text-xs font-semibold mt-0.5" style={{ color: 'var(--color-on-surface)' }}>
+                  <p className="text-xs font-bold mt-1 text-foreground">
                     {stat.label}
                   </p>
-                  <p className="text-xs mt-0.5" style={{ color: 'var(--color-on-surface-variant)' }}>
+                  <p className="text-[11px] text-foreground-muted mt-0.5">
                     {stat.sub}
                   </p>
                 </div>
@@ -288,184 +439,257 @@ export default function AdminDashboard() {
           })}
         </motion.div>
 
-        {/* ═══ CHART + QUICK LINKS ═══ */}
-        <div className="grid lg:grid-cols-3 gap-4">
-          {/* Revenue Chart */}
+        {/* ═══ CHART (Edit #8) + QUICK ACTIONS (Edit #6) ═══ */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 items-start">
+          {/* Revenue / Orders / AOV Trend (lg:col-span-8 or 9) */}
           <motion.div
-            variants={item} initial="hidden" animate="show"
-            className="lg:col-span-2 rounded-[16px] p-5"
-            style={{
-              background: 'var(--color-surface-container-lowest)',
-              border: '1px solid rgba(195,201,187,0.25)',
-            }}
+            variants={item}
+            initial="hidden"
+            animate="show"
+            className="lg:col-span-8 xl:col-span-8 rounded-[16px] p-5 bg-surface border border-border shadow-xs"
           >
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="font-bold text-[15px]" style={{ color: 'var(--color-on-surface)' }}>
-                Revenue Trend
-              </h2>
-              <span className="text-xs font-medium px-2 py-1 rounded-full" style={{ background: 'var(--success-bg)', color: 'var(--success)' }}>
-                Last {period === '7d' ? '7' : '14'} days
-              </span>
+            {/* Chart Header with Interactive Swappable Tabs per Edit #8 */}
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
+              <div className="flex items-center gap-2">
+                <h2 className="font-bold text-[15px] text-foreground">
+                  {chartConfig.title}
+                </h2>
+                <button
+                  type="button"
+                  onClick={() => setShowChartExplainer(prev => !prev)}
+                  className="text-foreground-muted hover:text-foreground transition-colors p-1"
+                  title="What is this chart?"
+                >
+                  <Info className="w-4 h-4 text-foreground-muted" />
+                </button>
+              </div>
+
+              {/* Chart Switcher Buttons (Revenue | Orders | Avg Order Value) */}
+              <div className="flex items-center rounded-[10px] p-1 border border-border bg-surface-muted/60 self-start sm:self-auto">
+                {(['revenue', 'orders', 'aov'] as const).map((metric) => {
+                  const isActive = activeChart === metric;
+                  const label = metric === 'revenue' ? 'Revenue' : (metric === 'orders' ? 'Orders' : 'Avg Value');
+                  return (
+                    <button
+                      key={metric}
+                      type="button"
+                      onClick={() => setActiveChart(metric)}
+                      className={`px-3 py-1 text-[11px] font-bold rounded-[8px] transition-all cursor-pointer ${
+                        isActive
+                          ? 'bg-primary text-white shadow-xs'
+                          : 'text-foreground-muted hover:text-foreground'
+                      }`}
+                    >
+                      {label}
+                    </button>
+                  );
+                })}
+              </div>
             </div>
-            <ResponsiveContainer width="100%" height={200}>
-              <AreaChart data={data?.daily || []} margin={{ top: 4, right: 4, bottom: 0, left: -20 }}>
-                <defs>
-                  <linearGradient id="revenueGrad" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#4a8c3f" stopOpacity={0.15} />
-                    <stop offset="95%" stopColor="#4a8c3f" stopOpacity={0} />
-                  </linearGradient>
-                </defs>
-                <CartesianGrid strokeDasharray="3 3" stroke="rgba(195,201,187,0.2)" vertical={false} />
-                <XAxis dataKey="date" tick={{ fontSize: 10, fill: '#7a8870' }} tickFormatter={(d) => d ? format(new Date(String(d)), 'MMM d') : ''} />
-                <YAxis tick={{ fontSize: 10, fill: '#7a8870' }} tickFormatter={(v) => `₹${v >= 1000 ? (v/1000).toFixed(0)+'k' : v}`} />
-                <Tooltip
-                  contentStyle={{ background: '#fff', border: '1px solid rgba(195,201,187,0.4)', borderRadius: 8, fontSize: 12 }}
-                  formatter={(v: any) => [`₹${parseFloat(v).toLocaleString('en-IN')}`, 'Revenue']}
-                  labelFormatter={(l) => l ? format(new Date(String(l)), 'MMM d, yyyy') : ''}
-                />
-                <Area type="monotone" dataKey="revenue" stroke="#4a8c3f" strokeWidth={2} fill="url(#revenueGrad)" dot={false} />
-              </AreaChart>
-            </ResponsiveContainer>
+
+            {/* Explanation banner toggleable */}
+            <AnimatePresence>
+              {showChartExplainer && (
+                <motion.div
+                  initial={{ opacity: 0, height: 0 }}
+                  animate={{ opacity: 1, height: 'auto' }}
+                  exit={{ opacity: 0, height: 0 }}
+                  className="mb-3 px-3 py-2 rounded-[10px] bg-primary-fixed/30 border border-primary/20 text-xs text-foreground flex items-center justify-between"
+                >
+                  <span>{chartConfig.explanation}</span>
+                  <button
+                    type="button"
+                    onClick={() => setShowChartExplainer(false)}
+                    className="p-1 text-foreground-muted hover:text-foreground"
+                  >
+                    <X className="w-3.5 h-3.5" />
+                  </button>
+                </motion.div>
+              )}
+            </AnimatePresence>
+
+            <div className="h-[210px] w-full">
+              <ResponsiveContainer width="100%" height="100%">
+                <AreaChart data={chartData} margin={{ top: 8, right: 8, bottom: 0, left: -16 }}>
+                  <defs>
+                    <linearGradient id={chartConfig.gradId} x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="5%" stopColor={chartConfig.color} stopOpacity={0.25} />
+                      <stop offset="95%" stopColor={chartConfig.color} stopOpacity={0.0} />
+                    </linearGradient>
+                  </defs>
+                  <CartesianGrid strokeDasharray="3 3" stroke="var(--color-border)" vertical={false} />
+                  <XAxis
+                    dataKey="date"
+                    tick={{ fontSize: 11, fill: 'var(--color-foreground-muted)' }}
+                    tickFormatter={(d) => d ? format(new Date(String(d)), 'MMM d') : ''}
+                  />
+                  <YAxis
+                    tick={{ fontSize: 11, fill: 'var(--color-foreground-muted)' }}
+                    tickFormatter={(v) => {
+                      if (activeChart === 'orders') return String(v);
+                      return `₹${v >= 1000 ? (v / 1000).toFixed(0) + 'k' : v}`;
+                    }}
+                  />
+                  <Tooltip
+                    contentStyle={{
+                      background: 'var(--color-surface)',
+                      borderColor: 'var(--color-border)',
+                      borderRadius: 12,
+                      fontSize: 12,
+                      color: 'var(--color-foreground)',
+                      boxShadow: '0 8px 24px rgba(0,0,0,0.1)',
+                    }}
+                    formatter={(v: any) => [chartConfig.formatter(Number(v)), chartConfig.title]}
+                    labelFormatter={(l) => l ? format(new Date(String(l)), 'EEEE, MMM d, yyyy') : ''}
+                  />
+                  <Area
+                    type="monotone"
+                    dataKey={chartConfig.dataKey}
+                    stroke={chartConfig.color}
+                    strokeWidth={2.5}
+                    fill={`url(#${chartConfig.gradId})`}
+                    dot={false}
+                  />
+                </AreaChart>
+              </ResponsiveContainer>
+            </div>
           </motion.div>
 
-          {/* Quick Navigation */}
+          {/* Quick Actions (Compact width: lg:col-span-4 per Edit #6) */}
           <motion.div
-            variants={item} initial="hidden" animate="show"
-            className="rounded-[16px] p-5 flex flex-col gap-3"
-            style={{
-              background: 'var(--color-surface-container-lowest)',
-              border: '1px solid rgba(195,201,187,0.25)',
-            }}
+            variants={item}
+            initial="hidden"
+            animate="show"
+            className="lg:col-span-4 xl:col-span-4 rounded-[16px] p-5 bg-surface border border-border shadow-xs flex flex-col gap-2.5"
           >
-            <h2 className="font-bold text-[15px]" style={{ color: 'var(--color-on-surface)' }}>Quick Actions</h2>
+            <div className="flex items-center justify-between pb-1">
+              <h2 className="font-bold text-[15px] text-foreground">Quick Actions</h2>
+              <span className="text-[11px] font-semibold text-foreground-muted">Fast Shortcuts</span>
+            </div>
+
+            {/* Buttons with tone-matched borders and elevated hover per Edit #6 */}
             {[
-              { label: 'Manage Orders', href: '/admin/orders', color: '#c2efac', text: '#2d5a27' },
-              { label: 'Inventory & Stock', href: '/admin/inventory', color: '#dce8ff', text: '#4a6fa5' },
-              { label: 'Return Requests', href: '/admin/returns', color: '#ffdcc7', text: 'var(--warning)' },
-              { label: 'All Products', href: '/admin/products', color: '#f3e8ff', text: '#6b21a8' },
-              { label: 'Customers', href: '/admin/customers', color: '#d1fae5', text: '#065f46' },
-              { label: 'Business Settings', href: '/admin/settings', color: '#fef3c7', text: '#92400e' },
+              { label: 'Manage Orders', href: '/admin/orders', bg: '#f0fdf4', border: '#bbf7d0', text: '#15803d', iconColor: '#16a34a' },
+              { label: 'Inventory & Stock', href: '/admin/inventory', bg: '#eff6ff', border: '#bfdbfe', text: '#1d4ed8', iconColor: '#2563eb' },
+              { label: 'Return Requests', href: '/admin/returns', bg: '#fff7ed', border: '#fed7aa', text: '#c2410c', iconColor: '#ea580c' },
+              { label: 'All Products', href: '/admin/products', bg: '#faf5ff', border: '#e9d5ff', text: '#7e22ce', iconColor: '#9333ea' },
+              { label: 'Customers', href: '/admin/customers', bg: '#ecfdf5', border: '#a7f3d0', text: '#047857', iconColor: '#059669' },
+              { label: 'Business Settings', href: '/admin/settings', bg: '#fefce8', border: '#fef08a', text: '#a16207', iconColor: '#ca8a04' },
             ].map((link) => (
               <Link
                 key={link.href}
                 href={link.href}
-                className="flex items-center justify-between px-3 py-2.5 rounded-[10px] transition-opacity hover:opacity-80"
-                style={{ background: link.color }}
+                className="flex items-center justify-between px-3.5 py-2.5 rounded-[12px] border transition-all duration-150 hover:shadow-xs hover:scale-[1.01] active:scale-[0.99] group cursor-pointer"
+                style={{
+                  backgroundColor: link.bg,
+                  borderColor: link.border,
+                  color: link.text,
+                }}
               >
-                <span className="text-[13px] font-semibold" style={{ color: link.text }}>{link.label}</span>
-                <ArrowRight className="w-3.5 h-3.5" style={{ color: link.text }} />
+                <span className="text-[13px] font-bold">{link.label}</span>
+                <ArrowRight
+                  className="w-4 h-4 transition-transform group-hover:translate-x-1"
+                  style={{ color: link.iconColor }}
+                />
               </Link>
             ))}
           </motion.div>
         </div>
 
-        {/* ═══ RECENT ORDERS ═══ */}
-        <motion.div
-          variants={item} initial="hidden" animate="show"
-          className="rounded-[16px] overflow-hidden"
-          style={{
-            background: 'var(--color-surface-container-lowest)',
-            border: '1px solid rgba(195,201,187,0.25)',
-          }}
-        >
-          <div className="flex items-center justify-between px-6 py-4" style={{ borderBottom: '1px solid rgba(195,201,187,0.2)' }}>
-            <h2 className="font-bold text-[15px]" style={{ color: 'var(--color-on-surface)' }}>Recent Orders</h2>
-            <Link href="/admin/orders" className="flex items-center gap-1 text-[12px] font-semibold" style={{ color: 'var(--color-primary)' }}>
-              View All <ArrowRight className="w-3.5 h-3.5" />
-            </Link>
-          </div>
-
-          {!data?.recentOrders?.length ? (
-            <div className="flex flex-col items-center justify-center py-16">
-              <ShoppingBag className="w-8 h-8 mb-3" style={{ color: 'var(--color-on-surface-variant)' }} strokeWidth={1.5} />
-              <p className="font-semibold" style={{ color: 'var(--color-on-surface)' }}>No orders yet</p>
-            </div>
-          ) : (
-            <div className="overflow-x-auto">
-              <table className="w-full">
-                <thead>
-                  <tr style={{ background: 'var(--color-surface-container-low)' }}>
-                    {['Order #', 'Customer', 'Total', 'Status', 'Date'].map((h) => (
-                      <th key={h} className="text-left px-5 py-3 text-xs font-bold uppercase tracking-wider" style={{ color: 'var(--color-on-surface-variant)' }}>{h}</th>
-                    ))}
-                  </tr>
-                </thead>
-                <tbody>
-                  {data.recentOrders.map((order, i) => {
-                    const statusCfg = STATUS_CONFIG[order.status] || STATUS_CONFIG['pending'];
-                    const StatusIcon = statusCfg.icon;
-                    return (
-                      <tr
-                        key={order.id}
-                        className="transition-all hover:bg-black/[0.02] cursor-pointer"
-                        style={{ borderTop: i > 0 ? '1px solid rgba(195,201,187,0.15)' : undefined }}
-                        onClick={() => window.location.href = `/admin/orders?id=${order.id}`}
-                      >
-                        <td className="px-5 py-3.5">
-                          <span className="font-bold text-[12px]" style={{ color: 'var(--color-primary)' }}>
-                            {order.order_number || order.id.slice(0, 8).toUpperCase()}
-                          </span>
-                        </td>
-                        <td className="px-5 py-3.5 text-[12px] font-medium" style={{ color: 'var(--color-on-surface)' }}>
-                          {order.customer_name || '—'}
-                        </td>
-                        <td className="px-5 py-3.5 font-bold text-[13px]" style={{ color: 'var(--color-on-surface)' }}>
-                          ₹{order.total_amount}
-                        </td>
-                        <td className="px-5 py-3.5">
-                          <div className="inline-flex items-center gap-1.5 px-2 py-1 rounded-[6px]" style={{ background: statusCfg.bg }}>
-                            <div className="w-1.5 h-1.5 rounded-full" style={{ background: statusCfg.dot }} />
-                            <span className="text-xs font-bold capitalize" style={{ color: statusCfg.color }}>
-                              {order.status.replace(/_/g, ' ')}
-                            </span>
-                          </div>
-                        </td>
-                        <td className="px-5 py-3.5 text-xs" style={{ color: 'var(--color-on-surface-variant)' }}>
-                          {format(new Date(order.created_at), 'MMM d, h:mm a')}
-                        </td>
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
-            </div>
-          )}
+        {/* ═══ RECENT ORDERS (Standardized AdminTable per Edit #9 & #11) ═══ */}
+        <motion.div variants={item} initial="hidden" animate="show">
+          <AdminTable
+            title="Recent Orders"
+            headerAction={
+              <Link
+                href="/admin/orders"
+                className="flex items-center gap-1 text-[12px] font-bold text-primary hover:underline"
+              >
+                View All Orders <ArrowRight className="w-3.5 h-3.5" />
+              </Link>
+            }
+            columns={[
+              { header: 'Order #' },
+              { header: 'Customer' },
+              { header: 'Total' },
+              { header: 'Status' },
+              { header: 'Date', align: 'right' },
+            ]}
+            isEmpty={!data?.recentOrders?.length}
+            emptyIcon={ShoppingBag}
+            emptyTitle="No orders yet"
+            emptyDescription="Recent customer orders will automatically appear here."
+          >
+            {data?.recentOrders?.map((order) => {
+              const statusCfg = STATUS_CONFIG[order.status] || STATUS_CONFIG['pending'];
+              return (
+                <tr
+                  key={order.id}
+                  className="hover:bg-black/[0.02] dark:hover:bg-white/[0.03] transition-colors cursor-pointer"
+                  onClick={() => router.push(`/admin/orders?id=${order.id}`)}
+                >
+                  <td className="px-5 py-3.5">
+                    <span className="font-bold text-[13px] text-primary">
+                      {order.order_number || order.id.slice(0, 8).toUpperCase()}
+                    </span>
+                  </td>
+                  <td className="px-5 py-3.5 text-[13px] font-medium text-foreground">
+                    {order.customer_name || '—'}
+                  </td>
+                  <td className="px-5 py-3.5 font-bold text-[13px] text-foreground">
+                    ₹{order.total_amount}
+                  </td>
+                  <td className="px-5 py-3.5">
+                    <div
+                      className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold"
+                      style={{ background: statusCfg.bg, color: statusCfg.color }}
+                    >
+                      <div className="w-1.5 h-1.5 rounded-full" style={{ background: statusCfg.dot }} />
+                      <span className="capitalize">{order.status.replace(/_/g, ' ')}</span>
+                    </div>
+                  </td>
+                  <td className="px-5 py-3.5 text-right text-xs text-foreground-muted">
+                    {format(new Date(order.created_at), 'MMM d, h:mm a')}
+                  </td>
+                </tr>
+              );
+            })}
+          </AdminTable>
         </motion.div>
 
         {/* ═══ TOP PRODUCTS ═══ */}
         {data?.topProducts && data.topProducts.length > 0 && (
           <motion.div
-            variants={item} initial="hidden" animate="show"
-            className="rounded-[16px] p-5"
-            style={{
-              background: 'var(--color-surface-container-lowest)',
-              border: '1px solid rgba(195,201,187,0.25)',
-            }}
+            variants={item}
+            initial="hidden"
+            animate="show"
+            className="rounded-[16px] p-5 bg-surface border border-border shadow-xs"
           >
             <div className="flex items-center justify-between mb-4">
-              <h2 className="font-bold text-[15px]" style={{ color: 'var(--color-on-surface)' }}>Top Products</h2>
-              <Link href="/admin/products" className="text-[12px] font-semibold" style={{ color: 'var(--color-primary)' }}>
+              <h2 className="font-bold text-[15px] text-foreground">Top Performing Products</h2>
+              <Link href="/admin/products" className="text-[12px] font-bold text-primary hover:underline">
                 All Products
               </Link>
             </div>
             <div className="flex flex-col gap-3">
               {data.topProducts.map((product, i) => (
-                <div key={i} className="flex items-center justify-between">
+                <div key={i} className="flex items-center justify-between p-2 rounded-[10px] hover:bg-surface-muted transition-colors">
                   <div className="flex items-center gap-3">
-                    <span className="w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold"
-                      style={{ background: 'var(--color-primary-fixed)', color: 'var(--color-primary)' }}>
+                    <span
+                      className="w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold bg-primary-fixed text-primary"
+                    >
                       {i + 1}
                     </span>
                     <div>
-                      <p className="text-[13px] font-semibold" style={{ color: 'var(--color-on-surface)' }}>
+                      <p className="text-[13px] font-semibold text-foreground">
                         {product.name} ({product.weight})
                       </p>
-                      <p className="text-xs" style={{ color: 'var(--color-on-surface-variant)' }}>
+                      <p className="text-xs text-foreground-muted">
                         {product.total_sold} units sold
                       </p>
                     </div>
                   </div>
-                  <span className="font-bold text-[13px]" style={{ color: 'var(--color-primary)' }}>
+                  <span className="font-bold text-[13px] text-primary">
                     ₹{parseFloat(product.revenue as any).toLocaleString('en-IN', { maximumFractionDigits: 0 })}
                   </span>
                 </div>

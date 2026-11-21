@@ -3,9 +3,10 @@
 import React, { useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { ArrowLeft, ShoppingBag, Store, RotateCcw } from 'lucide-react';
+import { ShoppingBag, Store, RotateCcw } from 'lucide-react';
 import { useStore } from '@/store/useStore';
 import { SellerOrdersManager } from '@/components/seller/SellerOrdersManager';
+import { AdminHeader } from '@/components/admin/AdminHeader';
 
 export default function SellerOrdersDedicatedPage() {
   const router = useRouter();
@@ -19,54 +20,40 @@ export default function SellerOrdersDedicatedPage() {
   }, [isAuthLoading, user, router]);
 
   return (
-    <div className="w-full p-4 sm:p-6 md:p-8 flex flex-col gap-6">
-      {/* Navigation Breadcrumb / Header */}
-        <div className="bg-surface rounded-xl border border-border/90 shadow-2xs p-6 sm:p-8 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-          <div className="flex items-center gap-4">
-            <Link
-              href="/seller/dashboard"
-              className="p-2.5 rounded-xl border border-border text-foreground hover:bg-surface-muted flex items-center justify-center transition-colors shrink-0"
-              title="Return to Seller Dashboard"
-            >
-              <ArrowLeft className="w-5 h-5 text-foreground" />
-            </Link>
-
-            <div className="space-y-0.5">
-              <div className="flex items-center gap-2">
-                <span className="px-2 py-0.5 rounded-full bg-success-bg text-success text-xs font-semibold uppercase tracking-wider">
-                  Seller Orders Portal
-                </span>
-              </div>
-              <h1 className="text-xl sm:text-2xl font-semibold text-primary tracking-tight flex items-center gap-2">
-                <ShoppingBag className="w-6 h-6 text-secondary-ink" />
-                <span>Seller Order Management</span>
-              </h1>
-              <p className="text-xs text-foreground-muted">
-                Track incoming customer purchases, advance fulfillment milestones (Confirmed → Out for Delivery → Delivered), and manage cancellations.
-              </p>
-            </div>
+    <div className="flex flex-col min-h-screen">
+      {/* Standard Admin Header */}
+      <AdminHeader
+        title={
+          <div className="flex items-center gap-2.5">
+            <ShoppingBag className="w-5 h-5 text-primary" />
+            <span>Seller Order Management</span>
           </div>
-
-          <div className="flex items-center gap-3">
+        }
+        subtitle="Track incoming customer purchases, advance fulfillment milestones (Confirmed → Out for Delivery → Delivered), and manage cancellations"
+        actions={
+          <div className="flex items-center gap-2.5">
             <Link
               href="/seller/returns"
-              className="px-4 py-2.5 bg-warning-bg hover:bg-warning-bg text-warning border border-warning/20 text-xs font-bold rounded-xl flex items-center gap-1.5 transition-colors"
+              className="px-3.5 py-2 bg-surface hover:bg-surface-muted text-foreground border border-border text-xs font-bold rounded-xl flex items-center gap-1.5 transition-colors"
             >
-              <RotateCcw className="w-4 h-4 text-warning" />
-              <span>Returns & Replacements</span>
+              <RotateCcw className="w-3.5 h-3.5 text-warning" />
+              <span>Returns & Claims</span>
             </Link>
             <Link
               href="/seller/dashboard"
-              className="px-4 py-2.5 bg-surface-muted hover:bg-border text-foreground text-xs font-bold rounded-xl flex items-center gap-1.5 transition-colors"
+              className="px-4 py-2 bg-primary text-white text-xs font-bold rounded-xl flex items-center gap-1.5 hover:bg-primary/90 transition-all shadow-xs cursor-pointer"
             >
-              <Store className="w-4 h-4 text-foreground-muted" />
-              <span>Seller Dashboard</span>
+              <Store className="w-3.5 h-3.5" />
+              <span>Dashboard</span>
             </Link>
           </div>
-        </div>
+        }
+      />
 
       {/* Orders Manager Component */}
-      <SellerOrdersManager />
+      <div className="px-6 md:px-10 py-6">
+        <SellerOrdersManager />
+      </div>
     </div>
   );
 }

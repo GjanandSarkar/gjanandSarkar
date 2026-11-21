@@ -6,6 +6,9 @@ import { Tags, Plus, Pencil, Trash2, Package, Loader2, X, ExternalLink, UploadCl
 import { motion, AnimatePresence } from 'framer-motion';
 import { api } from '@/lib/api/client';
 import { uploadImageToImageKit } from '@/lib/api/imagekit';
+import { AdminHeader } from '@/components/admin/AdminHeader';
+import { AdminTable } from '@/components/admin/AdminTable';
+import { AdminToolbar } from '@/components/admin/AdminToolbar';
 
 export type Category = {
   id: string;
@@ -24,6 +27,7 @@ export default function AdminCategoriesPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [search, setSearch] = useState('');
 
   // Modal State
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -157,129 +161,116 @@ export default function AdminCategoriesPage() {
     }
   };
 
+  const filteredCategories = categories.filter(c =>
+    !search.trim() ||
+    c.name.toLowerCase().includes(search.toLowerCase()) ||
+    (c.description || '').toLowerCase().includes(search.toLowerCase())
+  );
+
   return (
     <div className="flex flex-col min-h-screen">
-      {/* Header */}
-      <div
-        className="px-6 md:px-10 pt-6 pb-5 flex items-center justify-between"
-        style={{ background: 'var(--color-surface-container-lowest)', borderBottom: '1px solid rgba(195,201,187,0.2)' }}
-      >
-        <div>
-          <h1 className="font-semibold text-[24px] tracking-tight" style={{ color: 'var(--color-on-surface)' }}>
-            Categories
-          </h1>
-          <p className="text-[13px] mt-0.5" style={{ color: 'var(--color-on-surface-variant)' }}>
-            Manage product taxonomy ({categories.length} total)
-          </p>
-        </div>
-        <button
-          onClick={handleOpenAddModal}
-          className="flex items-center gap-2 px-4 py-2.5 rounded-[12px] font-bold text-[13px] text-white transition-all active:scale-95 cursor-pointer"
-          style={{
-            background: 'linear-gradient(135deg, var(--primary), var(--primary-hover))',
-            boxShadow: '0 4px 12px rgba(12, 60, 38, 0.25)',
-          }}
-        >
-          <Plus className="w-4 h-4" strokeWidth={2.5} />
-          <span>New Category</span>
-        </button>
-      </div>
+      {/* Standard Admin Header */}
+      <AdminHeader
+        title="Categories"
+        subtitle={`Manage product taxonomy (${categories.length} total)`}
+        onRefresh={fetchCategories}
+        isRefreshing={isLoading}
+        actions={
+          <button
+            onClick={handleOpenAddModal}
+            className="flex items-center gap-2 px-4 py-2 rounded-[12px] font-bold text-[13px] text-white transition-all shadow-xs active:scale-95 cursor-pointer bg-primary hover:bg-primary/90"
+          >
+            <Plus className="w-4 h-4" strokeWidth={2.5} />
+            <span>New Category</span>
+          </button>
+        }
+      />
 
-      <div className="px-6 md:px-10 py-5">
-        {isLoading ? (
-          <div className="flex justify-center py-20">
-            <Loader2 className="w-7 h-7 animate-spin text-primary" />
-          </div>
-        ) : error && categories.length === 0 ? (
+      <div className="px-6 md:px-10 py-6 flex flex-col gap-5">
+        <AdminToolbar
+          searchPlaceholder="Search categories by name, description..."
+          searchValue={search}
+          onSearchChange={setSearch}
+        />
+
+        {error && categories.length === 0 ? (
           <div className="text-center py-16 text-error font-semibold">{error}</div>
         ) : (
-          <div
-            className="rounded-[16px] overflow-hidden shadow-xs"
-            style={{ border: '1px solid rgba(195,201,187,0.3)', background: 'var(--color-surface-container-lowest)' }}
+          <AdminTable
+            columns={[
+              { header: 'Category Name' },
+              { header: 'Products' },
+              { header: 'Actions', align: 'right' },
+            ]}
+            isLoading={isLoading}
+            isEmpty={!isLoading && filteredCategories.length === 0}
+            emptyIcon={Tags}
+            emptyTitle="No categories found"
+            emptyDescription={search ? "No categories match your search term." : "Create your first dairy category to start organizing products."}
           >
-            <div className="overflow-x-auto">
-            <table className="w-full min-w-[640px] text-left border-collapse">
-              <thead>
-                <tr style={{ background: 'var(--color-surface-container-low)' }}>
-                  <th className="px-5 py-4 text-[12px] font-bold uppercase tracking-wider" style={{ color: 'var(--color-on-surface-variant)' }}>
-                    Category Name
-                  </th>
-                  <th className="px-5 py-4 text-[12px] font-bold uppercase tracking-wider" style={{ color: 'var(--color-on-surface-variant)' }}>
-                    Products
-                  </th>
-                  <th className="px-5 py-4 text-[12px] font-bold uppercase tracking-wider text-right" style={{ color: 'var(--color-on-surface-variant)' }}>
-                    Actions
-                  </th>
-                </tr>
-              </thead>
-              <tbody>
-                {categories.map((cat, idx) => (
-                  <tr
-                    key={cat.id || cat.name}
-                    style={{ borderBottom: idx !== categories.length - 1 ? '1px solid rgba(195,201,187,0.3)' : 'none' }}
-                    className="hover:bg-black/[0.02] transition-colors"
-                  >
-                    <td className="px-5 py-4 cursor-pointer" onClick={() => handleNavigateToCategoryProducts(cat.name)}>
-                      <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-[10px] flex items-center justify-center bg-primary-fixed text-primary shrink-0 font-bold overflow-hidden">
-                          {cat.image_url ? (
-                            <img src={cat.image_url} alt={cat.name} className="w-full h-full object-cover rounded-[10px]" />
-                          ) : (
-                            <Tags className="w-5 h-5" />
-                          )}
-                        </div>
-                        <div>
-                          <span className="font-bold text-[14px] block hover:text-primary transition-colors" style={{ color: 'var(--color-on-surface)' }}>
-                            {cat.name}
-                          </span>
-                          {cat.description && (
-                            <span className="text-xs text-muted block max-w-xs truncate">{cat.description}</span>
-                          )}
-                        </div>
-                      </div>
-                    </td>
-                    <td className="px-5 py-4 cursor-pointer" onClick={() => handleNavigateToCategoryProducts(cat.name)}>
-                      <div className="flex items-center gap-2">
-                        <Package className="w-4 h-4 text-primary" />
-                        <span className="font-bold text-[13px] hover:underline text-primary">
-                          {cat.product_count ?? 0} items
-                        </span>
-                      </div>
-                    </td>
-                    <td className="px-5 py-4 text-right">
-                      <div className="flex items-center justify-end gap-2">
-                        <button
-                          onClick={() => handleNavigateToCategoryProducts(cat.name)}
-                          className="p-2 rounded-full hover:bg-black/5 transition-colors cursor-pointer text-primary"
-                          title="View Products in this category"
-                          type="button"
-                        >
-                          <ExternalLink className="w-4 h-4" />
-                        </button>
-                        <button
-                          onClick={() => handleOpenEditModal(cat)}
-                          className="p-2 rounded-full hover:bg-black/5 transition-colors cursor-pointer text-primary"
-                          title="Edit Category"
-                          type="button"
-                        >
-                          <Pencil className="w-4 h-4" />
-                        </button>
-                        <button
-                          onClick={() => setDeletingCategory(cat)}
-                          className="p-2 rounded-full hover:bg-black/5 transition-colors cursor-pointer text-error"
-                          title="Delete Category"
-                          type="button"
-                        >
-                          <Trash2 className="w-4 h-4" />
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-            </div>
-          </div>
+            {filteredCategories.map((cat) => (
+              <tr
+                key={cat.id || cat.name}
+                className="hover:bg-black/[0.02] dark:hover:bg-white/[0.03] transition-colors"
+              >
+                <td className="px-5 py-4 cursor-pointer" onClick={() => handleNavigateToCategoryProducts(cat.name)}>
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-[10px] flex items-center justify-center bg-primary-fixed text-primary shrink-0 font-bold overflow-hidden">
+                      {cat.image_url ? (
+                        <img src={cat.image_url} alt={cat.name} className="w-full h-full object-cover rounded-[10px]" />
+                      ) : (
+                        <Tags className="w-5 h-5" />
+                      )}
+                    </div>
+                    <div>
+                      <span className="font-bold text-[14px] block hover:text-primary transition-colors text-foreground">
+                        {cat.name}
+                      </span>
+                      {cat.description && (
+                        <span className="text-xs text-foreground-muted block max-w-xs truncate">{cat.description}</span>
+                      )}
+                    </div>
+                  </div>
+                </td>
+                <td className="px-5 py-4 cursor-pointer" onClick={() => handleNavigateToCategoryProducts(cat.name)}>
+                  <div className="flex items-center gap-2">
+                    <Package className="w-4 h-4 text-primary" />
+                    <span className="font-bold text-[13px] hover:underline text-primary">
+                      {cat.product_count ?? 0} items
+                    </span>
+                  </div>
+                </td>
+                <td className="px-5 py-4 text-right">
+                  <div className="flex items-center justify-end gap-2">
+                    <button
+                      onClick={() => handleNavigateToCategoryProducts(cat.name)}
+                      className="p-2 rounded-full hover:bg-black/5 dark:hover:bg-white/5 transition-colors cursor-pointer text-primary"
+                      title="View Products in this category"
+                      type="button"
+                    >
+                      <ExternalLink className="w-4 h-4" />
+                    </button>
+                    <button
+                      onClick={() => handleOpenEditModal(cat)}
+                      className="p-2 rounded-full hover:bg-black/5 dark:hover:bg-white/5 transition-colors cursor-pointer text-primary"
+                      title="Edit Category"
+                      type="button"
+                    >
+                      <Pencil className="w-4 h-4" />
+                    </button>
+                    <button
+                      onClick={() => setDeletingCategory(cat)}
+                      className="p-2 rounded-full hover:bg-black/5 dark:hover:bg-white/5 transition-colors cursor-pointer text-error"
+                      title="Delete Category"
+                      type="button"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            ))}
+          </AdminTable>
         )}
       </div>
 

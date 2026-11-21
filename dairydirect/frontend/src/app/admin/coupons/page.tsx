@@ -1,7 +1,9 @@
 "use client";
 
 import React, { useState, useEffect } from 'react';
-import { Plus, Edit2, Trash2, CheckCircle2, XCircle } from 'lucide-react';
+import { Plus, Edit2, Trash2, CheckCircle2, XCircle, Ticket } from 'lucide-react';
+import { AdminHeader } from '@/components/admin/AdminHeader';
+import { AdminTable } from '@/components/admin/AdminTable';
 
 export default function AdminCouponsPage() {
   const [coupons, setCoupons] = useState<any[]>([]);
@@ -24,6 +26,7 @@ export default function AdminCouponsPage() {
   }, []);
 
   const fetchCoupons = async () => {
+    setLoading(true);
     try {
       const res = await fetch('/api/coupons?admin=true');
       const data = await res.json();
@@ -132,151 +135,238 @@ export default function AdminCouponsPage() {
     }
   };
 
-  if (loading) return <div className="p-8">Loading coupons...</div>;
-
   return (
-    <div className="p-8">
-      <div className="flex justify-between items-center mb-6">
-        <div>
-          <h1 className="text-2xl font-bold text-foreground">Coupons Management</h1>
-          <p className="text-foreground-muted">Create and manage discount codes.</p>
-        </div>
-        <button onClick={() => handleOpen()} className="flex items-center gap-2 bg-primary text-on-primary px-4 py-2 rounded-lg hover:bg-success transition">
-          <Plus className="w-4 h-4" /> Add Coupon
-        </button>
-      </div>
+    <div className="flex flex-col min-h-screen">
+      {/* Standard Admin Header */}
+      <AdminHeader
+        title="Coupons Management"
+        subtitle="Create and manage customer promotional discount vouchers"
+        onRefresh={fetchCoupons}
+        isRefreshing={loading}
+        actions={
+          <button
+            onClick={() => handleOpen()}
+            className="flex items-center gap-2 px-4 py-2 rounded-[12px] font-bold text-[13px] text-white transition-all shadow-xs active:scale-95 cursor-pointer"
+            style={{ background: 'var(--color-primary)' }}
+          >
+            <Plus className="w-4 h-4" strokeWidth={2.5} />
+            <span>Add Coupon</span>
+          </button>
+        }
+      />
 
-      <div className="bg-surface rounded-xl shadow-sm border border-border overflow-hidden">
-        <div className="overflow-x-auto">
-        <table className="w-full min-w-[640px] text-left border-collapse">
-          <thead>
-            <tr className="bg-surface-muted border-b border-border text-sm text-foreground-muted uppercase tracking-wider">
-              <th className="px-6 py-4 font-medium">Code</th>
-              <th className="px-6 py-4 font-medium">Discount</th>
-              <th className="px-6 py-4 font-medium">Min Order</th>
-              <th className="px-6 py-4 font-medium">Valid Until</th>
-              <th className="px-6 py-4 font-medium">Usage</th>
-              <th className="px-6 py-4 font-medium">Status</th>
-              <th className="px-6 py-4 font-medium">Actions</th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-border">
-            {coupons.map(c => {
-              const isPercentage = c.type === 'percentage';
-              const discountText = isPercentage 
-                ? `${c.value ?? c.discount_amount}%` 
-                : `₹${c.value ?? c.discount_amount}`;
+      <div className="px-6 md:px-10 py-6">
+        <AdminTable
+          columns={[
+            { header: 'Coupon Code' },
+            { header: 'Discount' },
+            { header: 'Min Order' },
+            { header: 'Valid Until' },
+            { header: 'Usage Limit' },
+            { header: 'Status' },
+            { header: 'Actions', align: 'right' },
+          ]}
+          isLoading={loading}
+          isEmpty={!loading && coupons.length === 0}
+          emptyIcon={Ticket}
+          emptyTitle="No coupons created yet"
+          emptyDescription="Add promotional discount codes to incentivize your customers."
+        >
+          {coupons.map((c) => {
+            const isPercentage = c.type === 'percentage';
+            const discountText = isPercentage 
+              ? `${c.value ?? c.discount_amount}%` 
+              : `₹${c.value ?? c.discount_amount}`;
 
-              return (
-                <tr key={c.id} className="hover:bg-surface-muted">
-                  <td className="px-6 py-4 font-bold text-foreground">
-                    <span className="font-mono bg-surface-muted px-2 py-0.5 rounded text-sm">{c.code}</span>
-                  </td>
-                  <td className="px-6 py-4 font-medium text-success">
-                    {discountText}
-                    {isPercentage && c.max_discount ? ` (up to ₹${c.max_discount})` : ''}
-                  </td>
-                  <td className="px-6 py-4">₹{c.min_order_value ?? c.min_order_amount ?? 0}</td>
-                  <td className="px-6 py-4 text-sm text-foreground-muted">
-                    {(c.expiry_date || c.valid_until) ? new Date(c.expiry_date || c.valid_until).toLocaleDateString() : 'Never'}
-                  </td>
-                  <td className="px-6 py-4 text-sm text-foreground-muted">
-                    {c.used_count ?? c.usage_count ?? 0} / {c.max_uses ?? c.max_usage ?? '∞'}
-                  </td>
-                  <td className="px-6 py-4">
-                    <button onClick={() => toggleStatus(c.id, c.is_active)} className={`flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium ${c.is_active ? 'bg-success-bg text-success' : 'bg-error-bg text-error'}`}>
-                      {c.is_active ? <CheckCircle2 className="w-3.5 h-3.5"/> : <XCircle className="w-3.5 h-3.5"/>}
-                      {c.is_active ? 'Active' : 'Inactive'}
-                    </button>
-                  </td>
-                  <td className="px-6 py-4 flex items-center gap-3">
-                    <button onClick={() => handleOpen(c)} className="text-info hover:text-blue-800" title="Edit">
+            return (
+              <tr key={c.id} className="hover:bg-black/[0.02] dark:hover:bg-white/[0.03] transition-colors">
+                <td className="px-5 py-3.5 font-bold text-foreground">
+                  <span className="font-mono bg-surface-container px-2.5 py-1 rounded-[8px] text-[13px] font-bold border border-border/60">
+                    {c.code}
+                  </span>
+                </td>
+                <td className="px-5 py-3.5 font-bold text-[13px] text-primary">
+                  {discountText}
+                  {isPercentage && c.max_discount ? ` (up to ₹${c.max_discount})` : ''}
+                </td>
+                <td className="px-5 py-3.5 text-xs font-semibold text-foreground">
+                  ₹{c.min_order_value ?? c.min_order_amount ?? 0}
+                </td>
+                <td className="px-5 py-3.5 text-xs text-foreground-muted">
+                  {(c.expiry_date || c.valid_until) ? new Date(c.expiry_date || c.valid_until).toLocaleDateString() : 'Never'}
+                </td>
+                <td className="px-5 py-3.5 text-xs text-foreground-muted">
+                  {c.used_count ?? c.usage_count ?? 0} / {c.max_uses ?? c.max_usage ?? '∞'}
+                </td>
+                <td className="px-5 py-3.5">
+                  <button
+                    onClick={() => toggleStatus(c.id, c.is_active)}
+                    className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold cursor-pointer transition-opacity hover:opacity-80 ${
+                      c.is_active
+                        ? 'bg-green-100 text-green-800 dark:bg-green-950/40 dark:text-green-300'
+                        : 'bg-red-100 text-red-800 dark:bg-red-950/40 dark:text-red-300'
+                    }`}
+                  >
+                    {c.is_active ? <CheckCircle2 className="w-3.5 h-3.5"/> : <XCircle className="w-3.5 h-3.5"/>}
+                    <span>{c.is_active ? 'Active' : 'Inactive'}</span>
+                  </button>
+                </td>
+                <td className="px-5 py-3.5 text-right">
+                  <div className="flex items-center justify-end gap-2">
+                    <button
+                      onClick={() => handleOpen(c)}
+                      className="p-1.5 rounded-lg hover:bg-surface-muted text-primary cursor-pointer transition-colors"
+                      title="Edit Coupon"
+                    >
                       <Edit2 className="w-4 h-4" />
                     </button>
-                    <button onClick={() => handleDelete(c.id, c.code)} className="text-red-500 hover:text-error" title="Delete">
+                    <button
+                      onClick={() => handleDelete(c.id, c.code)}
+                      className="p-1.5 rounded-lg hover:bg-surface-muted text-error cursor-pointer transition-colors"
+                      title="Delete Coupon"
+                    >
                       <Trash2 className="w-4 h-4" />
                     </button>
-                  </td>
-                </tr>
-              );
-            })}
-            {coupons.length === 0 && (
-              <tr><td colSpan={7} className="px-6 py-8 text-center text-foreground-muted">No coupons found.</td></tr>
-            )}
-          </tbody>
-        </table>
-            </div>
+                  </div>
+                </td>
+              </tr>
+            );
+          })}
+        </AdminTable>
       </div>
 
+      {/* Modal */}
       {showModal && (
         <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
-          <div className="bg-surface rounded-xl shadow-xl w-full max-w-md p-6">
-            <h2 className="text-xl font-bold mb-4">{editingId ? 'Edit Coupon' : 'Create Coupon'}</h2>
+          <div className="bg-surface rounded-2xl shadow-xl w-full max-w-md p-6 border border-border" style={{ background: 'var(--color-surface)' }}>
+            <h2 className="text-xl font-bold mb-4 text-foreground">{editingId ? 'Edit Coupon' : 'Create Coupon'}</h2>
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
-                <label className="block text-sm font-medium mb-1">Coupon Code</label>
-                <input required type="text" value={form.code} onChange={e => setForm({...form, code: e.target.value.toUpperCase()})} className="w-full px-3 py-2 border rounded-lg uppercase font-mono" placeholder="e.g. WELCOME50"/>
+                <label className="block text-xs font-bold text-foreground-muted mb-1 uppercase tracking-wide">Coupon Code</label>
+                <input
+                  required
+                  type="text"
+                  value={form.code}
+                  onChange={e => setForm({...form, code: e.target.value.toUpperCase()})}
+                  className="w-full px-3 py-2 border border-border rounded-xl uppercase font-mono bg-surface-container-low text-foreground outline-none focus:border-primary text-sm font-bold"
+                  placeholder="e.g. WELCOME50"
+                />
               </div>
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium mb-1">Discount Type</label>
+                  <label className="block text-xs font-bold text-foreground-muted mb-1 uppercase tracking-wide">Discount Type</label>
                   <select 
                     value={form.type} 
                     onChange={e => setForm({...form, type: e.target.value as any})}
-                    className="w-full px-3 py-2 border rounded-lg bg-surface"
+                    className="w-full px-3 py-2 border border-border rounded-xl bg-surface-container-low text-foreground text-sm outline-none"
                   >
                     <option value="flat">Flat Amount (₹)</option>
                     <option value="percentage">Percentage (%)</option>
                   </select>
                 </div>
                 <div>
-                  <label className="block text-sm font-medium mb-1">
+                  <label className="block text-xs font-bold text-foreground-muted mb-1 uppercase tracking-wide">
                     {form.type === 'percentage' ? 'Discount (%)' : 'Discount (₹)'}
                   </label>
-                  <input required type="number" value={form.discount_amount} onChange={e => setForm({...form, discount_amount: Number(e.target.value)})} className="w-full px-3 py-2 border rounded-lg" min="1" max={form.type === 'percentage' ? 100 : undefined}/>
+                  <input
+                    required
+                    type="number"
+                    value={form.discount_amount}
+                    onChange={e => setForm({...form, discount_amount: Number(e.target.value)})}
+                    className="w-full px-3 py-2 border border-border rounded-xl bg-surface-container-low text-foreground text-sm outline-none"
+                    min="1"
+                    max={form.type === 'percentage' ? 100 : undefined}
+                  />
                 </div>
               </div>
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium mb-1">Min Order (₹)</label>
-                  <input type="number" value={form.min_order_amount} onChange={e => setForm({...form, min_order_amount: Number(e.target.value)})} className="w-full px-3 py-2 border rounded-lg" min="0"/>
+                  <label className="block text-xs font-bold text-foreground-muted mb-1 uppercase tracking-wide">Min Order (₹)</label>
+                  <input
+                    type="number"
+                    value={form.min_order_amount}
+                    onChange={e => setForm({...form, min_order_amount: Number(e.target.value)})}
+                    className="w-full px-3 py-2 border border-border rounded-xl bg-surface-container-low text-foreground text-sm outline-none"
+                    min="0"
+                  />
                 </div>
                 {form.type === 'percentage' ? (
                   <div>
-                    <label className="block text-sm font-medium mb-1">Max Discount (₹)</label>
-                    <input type="number" value={form.max_discount} onChange={e => setForm({...form, max_discount: e.target.value})} className="w-full px-3 py-2 border rounded-lg" placeholder="Optional" min="1"/>
+                    <label className="block text-xs font-bold text-foreground-muted mb-1 uppercase tracking-wide">Max Discount (₹)</label>
+                    <input
+                      type="number"
+                      value={form.max_discount}
+                      onChange={e => setForm({...form, max_discount: e.target.value})}
+                      className="w-full px-3 py-2 border border-border rounded-xl bg-surface-container-low text-foreground text-sm outline-none"
+                      placeholder="Optional"
+                      min="1"
+                    />
                   </div>
                 ) : (
                   <div>
-                    <label className="block text-sm font-medium mb-1">Max Usage Count</label>
-                    <input type="number" value={form.max_usage} onChange={e => setForm({...form, max_usage: Number(e.target.value)})} className="w-full px-3 py-2 border rounded-lg" min="1"/>
+                    <label className="block text-xs font-bold text-foreground-muted mb-1 uppercase tracking-wide">Max Usage Count</label>
+                    <input
+                      type="number"
+                      value={form.max_usage}
+                      onChange={e => setForm({...form, max_usage: Number(e.target.value)})}
+                      className="w-full px-3 py-2 border border-border rounded-xl bg-surface-container-low text-foreground text-sm outline-none"
+                      min="1"
+                    />
                   </div>
                 )}
               </div>
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium mb-1">Valid Until</label>
-                  <input type="date" value={form.valid_until} onChange={e => setForm({...form, valid_until: e.target.value})} className="w-full px-3 py-2 border rounded-lg"/>
+                  <label className="block text-xs font-bold text-foreground-muted mb-1 uppercase tracking-wide">Valid Until</label>
+                  <input
+                    type="date"
+                    value={form.valid_until}
+                    onChange={e => setForm({...form, valid_until: e.target.value})}
+                    className="w-full px-3 py-2 border border-border rounded-xl bg-surface-container-low text-foreground text-sm outline-none"
+                  />
                 </div>
                 {form.type === 'percentage' && (
                   <div>
-                    <label className="block text-sm font-medium mb-1">Max Usage Count</label>
-                    <input type="number" value={form.max_usage} onChange={e => setForm({...form, max_usage: Number(e.target.value)})} className="w-full px-3 py-2 border rounded-lg" min="1"/>
+                    <label className="block text-xs font-bold text-foreground-muted mb-1 uppercase tracking-wide">Max Usage Count</label>
+                    <input
+                      type="number"
+                      value={form.max_usage}
+                      onChange={e => setForm({...form, max_usage: Number(e.target.value)})}
+                      className="w-full px-3 py-2 border border-border rounded-xl bg-surface-container-low text-foreground text-sm outline-none"
+                      min="1"
+                    />
                   </div>
                 )}
               </div>
 
               <div className="flex items-center gap-2 mt-4">
-                <input type="checkbox" id="isActive" checked={form.is_active} onChange={e => setForm({...form, is_active: e.target.checked})} className="w-4 h-4 rounded text-primary" />
-                <label htmlFor="isActive" className="text-sm font-medium">Coupon is active</label>
+                <input
+                  type="checkbox"
+                  id="isActive"
+                  checked={form.is_active}
+                  onChange={e => setForm({...form, is_active: e.target.checked})}
+                  className="w-4 h-4 rounded text-primary"
+                />
+                <label htmlFor="isActive" className="text-sm font-medium text-foreground cursor-pointer">Coupon is active</label>
               </div>
 
               <div className="flex justify-end gap-3 pt-4 border-t border-border">
-                <button type="button" onClick={() => setShowModal(false)} className="px-4 py-2 bg-surface-muted rounded-lg hover:bg-border transition">Cancel</button>
-                <button type="submit" className="px-4 py-2 bg-primary text-on-primary rounded-lg hover:bg-success transition">Save</button>
+                <button
+                  type="button"
+                  onClick={() => setShowModal(false)}
+                  className="px-4 py-2 rounded-xl text-xs font-bold bg-surface-container-low hover:bg-surface-muted text-foreground transition-colors cursor-pointer"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="px-5 py-2 rounded-xl text-xs font-bold bg-primary text-white hover:opacity-90 transition-opacity cursor-pointer shadow-xs"
+                >
+                  Save Coupon
+                </button>
               </div>
             </form>
           </div>

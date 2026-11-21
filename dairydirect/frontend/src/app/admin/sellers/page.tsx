@@ -31,6 +31,7 @@ import {
   Loader2,
   Lock,
 } from 'lucide-react';
+import { AdminHeader } from '@/components/admin/AdminHeader';
 import {
   getAdminSellersList,
   getSellerLifecycleDetails,
@@ -219,41 +220,41 @@ export default function AdminSellersPage() {
   const permanentCount = sellers.filter((s) => s.status === 'permanently_deactivated').length;
   const reactivationRequestedCount = sellers.filter((s) => s.status === 'reactivation_requested').length;
 
-  // Status Badge Component
+  // Status Badge Component (Edit #22: High-contrast, semantic colors)
   const getStatusBadge = (status: string) => {
     switch (status) {
       case 'active':
         return (
-          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold uppercase tracking-wider bg-success-bg text-success border border-success/20">
-            <CheckCircle2 className="w-3.5 h-3.5 text-success" />
+          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold uppercase tracking-wider bg-emerald-100 text-emerald-900 border border-emerald-300 dark:bg-emerald-950/40 dark:text-emerald-300">
+            <CheckCircle2 className="w-3.5 h-3.5 text-emerald-700" />
             Active
           </span>
         );
       case 'under_review':
         return (
-          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold uppercase tracking-wider bg-warning-bg text-warning border border-warning animate-pulse">
-            <Clock className="w-3.5 h-3.5 text-warning" />
+          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold uppercase tracking-wider bg-amber-100 text-amber-900 border border-amber-300 dark:bg-amber-950/40 dark:text-amber-300 animate-pulse">
+            <Clock className="w-3.5 h-3.5 text-amber-700" />
             Under Review
           </span>
         );
       case 'deactivated':
         return (
-          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold uppercase tracking-wider bg-error-bg text-error border border-error/20">
-            <Ban className="w-3.5 h-3.5 text-error" />
+          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold uppercase tracking-wider bg-red-50 text-red-900 border border-red-200 dark:bg-red-950/30 dark:text-red-300">
+            <Ban className="w-3.5 h-3.5 text-red-600" />
             Deactivated
           </span>
         );
       case 'permanently_deactivated':
         return (
-          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold uppercase tracking-wider bg-primary text-red-400 border border-border-hover">
-            <Lock className="w-3.5 h-3.5 text-red-400" />
+          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold uppercase tracking-wider bg-red-100 text-red-900 border border-red-300 dark:bg-red-950/50 dark:text-red-300">
+            <Lock className="w-3.5 h-3.5 text-red-700" />
             Permanently Deactivated
           </span>
         );
       case 'reactivation_requested':
         return (
-          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold uppercase tracking-wider bg-info-bg text-blue-800 border border-blue-300">
-            <BadgeAlert className="w-3.5 h-3.5 text-info" />
+          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold uppercase tracking-wider bg-blue-100 text-blue-900 border border-blue-300 dark:bg-blue-950/40 dark:text-blue-300">
+            <BadgeAlert className="w-3.5 h-3.5 text-blue-700" />
             Reactivation Requested
           </span>
         );
@@ -261,21 +262,21 @@ export default function AdminSellersPage() {
       case 'pending_kyc':
       case 'pending_inquiry':
         return (
-          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold uppercase tracking-wider bg-warning-bg text-yellow-800 border border-yellow-200">
-            <Clock className="w-3.5 h-3.5 text-yellow-600" />
+          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold uppercase tracking-wider bg-amber-50 text-amber-900 border border-amber-200 dark:bg-amber-950/30 dark:text-amber-300">
+            <Clock className="w-3.5 h-3.5 text-amber-600" />
             Pending Onboarding
           </span>
         );
       case 'rejected':
         return (
-          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold uppercase tracking-wider bg-surface-muted text-foreground border border-border-hover">
-            <XCircle className="w-3.5 h-3.5 text-foreground-muted" />
+          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold uppercase tracking-wider bg-zinc-100 text-zinc-800 border border-zinc-300 dark:bg-zinc-800 dark:text-zinc-300">
+            <XCircle className="w-3.5 h-3.5 text-zinc-600" />
             Rejected
           </span>
         );
       default:
         return (
-          <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-bold uppercase bg-surface-muted text-foreground">
+          <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-bold uppercase bg-surface-muted text-foreground border border-border">
             {status}
           </span>
         );
@@ -295,30 +296,23 @@ export default function AdminSellersPage() {
   };
 
   return (
-    <div className="space-y-6">
-      {/* Top Header */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-        <div>
-          <div className="flex items-center gap-2">
-            <h1 className="text-2xl font-semibold text-foreground tracking-tight">Seller Lifecycle Management</h1>
+    <div className="flex flex-col min-h-screen">
+      {/* Standard Admin Header */}
+      <AdminHeader
+        title={
+          <div className="flex items-center gap-3">
+            <span>Seller Lifecycle Management</span>
             <span className="px-2.5 py-0.5 rounded-full text-xs font-semibold uppercase bg-success-bg text-success">
               Admin Control
             </span>
           </div>
-          <p className="text-xs text-foreground-muted mt-1">
-            Supervise seller operational lifecycle states, manage temporary review periods, process deactivations and review reactivation requests.
-          </p>
-        </div>
+        }
+        subtitle="Supervise seller operational lifecycle states, manage review periods, and process reactivation requests"
+        onRefresh={loadSellers}
+        isRefreshing={isLoading}
+      />
 
-        <button
-          onClick={loadSellers}
-          disabled={isLoading}
-          className="self-start md:self-auto px-4 py-2 bg-surface border border-border text-foreground text-xs font-bold rounded-xl hover:bg-surface-muted flex items-center gap-2 shadow-2xs transition-all cursor-pointer"
-        >
-          <RefreshCw className={`w-3.5 h-3.5 ${isLoading ? 'animate-spin text-primary' : ''}`} />
-          <span>Refresh Data</span>
-        </button>
-      </div>
+      <div className="px-6 md:px-10 py-6 space-y-6">
 
       {/* Metric Cards Grid */}
       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
@@ -338,22 +332,22 @@ export default function AdminSellersPage() {
           <p className="text-xs font-semibold uppercase tracking-wider text-error">Deactivated</p>
           <p className="text-2xl font-semibold text-error mt-1">{deactivatedCount}</p>
         </div>
-        <div className="bg-surface p-4 rounded-2xl border border-border-hover shadow-2xs bg-primary text-white">
-          <p className="text-xs font-semibold uppercase tracking-wider text-foreground-muted">Permanently Banned</p>
-          <p className="text-2xl font-semibold text-red-400 mt-1">{permanentCount}</p>
+        <div className="bg-red-50/70 p-4 rounded-2xl border border-red-200/80 shadow-2xs text-red-900">
+          <p className="text-xs font-bold uppercase tracking-wider text-red-800/80">Permanently Banned</p>
+          <p className="text-2xl font-bold text-red-800 mt-1">{permanentCount}</p>
         </div>
       </div>
 
-      {/* Status Filter Tabs (Required by prompt: All, Pending, Active, Under Review, Deactivated, Permanently Deactivated, Reactivation Requested, Rejected) */}
+      {/* Status Filter Tabs (Edit #22 & #24: Standard h-8 pill styling) */}
       <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar pb-1">
         {STATUS_FILTERS.map((tab) => (
           <button
             key={tab.id}
             onClick={() => setSelectedStatus(tab.id)}
-            className={`px-3.5 py-2 text-xs font-bold rounded-xl whitespace-nowrap transition-all cursor-pointer ${
+            className={`h-8 px-3.5 text-xs font-bold rounded-full whitespace-nowrap transition-all cursor-pointer flex items-center justify-center border ${
               selectedStatus === tab.id
-                ? 'bg-primary text-white shadow-sm'
-                : 'bg-surface border border-border text-foreground-muted hover:border-border-hover hover:text-foreground'
+                ? 'bg-primary text-white border-primary shadow-xs'
+                : 'bg-surface border-border/80 text-foreground-muted hover:text-foreground hover:border-border-hover'
             }`}
           >
             {tab.label}
@@ -366,8 +360,8 @@ export default function AdminSellersPage() {
         
         {/* Left: Sellers Table & Search */}
         <div className="bg-surface rounded-2xl border border-border shadow-2xs overflow-hidden flex flex-col">
-          {/* Search bar */}
-          <div className="p-4 border-b border-border bg-surface-muted/50">
+          {/* Search bar with crisp border and standard h-10 height */}
+          <div className="p-3.5 border-b border-border bg-surface-muted/30">
             <div className="relative">
               <Search className="w-4 h-4 text-foreground-muted absolute left-3 top-1/2 -translate-y-1/2" />
               <input
@@ -375,7 +369,7 @@ export default function AdminSellersPage() {
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder="Search by store name, slug, owner, state, status..."
-                className="w-full pl-9 pr-4 py-2 bg-surface rounded-xl border border-border text-xs text-foreground focus:border-primary outline-none"
+                className="w-full pl-9 pr-4 h-10 bg-surface rounded-xl border border-border/90 text-xs text-foreground focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all shadow-2xs"
               />
             </div>
           </div>
@@ -404,8 +398,8 @@ export default function AdminSellersPage() {
                     onClick={() => handleSelectSeller(seller)}
                     className={`p-4 transition-all cursor-pointer flex items-center justify-between gap-4 ${
                       isSelected
-                        ? 'bg-success-bg/60 border-l-4 border-l-[var(--primary)]'
-                        : 'hover:bg-surface-muted/80 border-l-4 border-l-transparent'
+                        ? 'bg-surface-muted border-l-4 border-l-primary shadow-2xs font-medium'
+                        : 'hover:bg-surface-muted/60 border-l-4 border-l-transparent'
                     }`}
                   >
                     <div className="flex items-center gap-3 min-w-0">
@@ -522,18 +516,18 @@ export default function AdminSellersPage() {
               )}
 
               {selectedSeller.status === 'permanently_deactivated' && (
-                <div className="bg-primary text-white rounded-xl p-4 space-y-2 text-xs border border-red-500/40">
-                  <div className="flex items-center gap-2 font-bold text-red-400">
-                    <Lock className="w-4 h-4 text-red-400" />
-                    <span>Permanently Deactivated (Terminal)</span>
+                <div className="bg-red-50/80 border border-red-200 text-red-900 rounded-xl p-4 space-y-2 text-xs">
+                  <div className="flex items-center gap-2 font-bold text-red-900">
+                    <Lock className="w-4 h-4 text-red-700" />
+                    <span>Permanently Deactivated (Terminal State)</span>
                   </div>
                   {selectedSeller.deactivation_reason && (
-                    <p className="text-foreground-muted">
+                    <p className="text-red-800">
                       <strong>Reason:</strong> {selectedSeller.deactivation_reason}
                     </p>
                   )}
-                  <p className="text-xs text-foreground-muted">
-                    This account is permanently banned. No further status transitions or reactivation requests are allowed.
+                  <p className="text-xs text-red-700">
+                    This account is permanently deactivated. No further status transitions or product listings are permitted.
                   </p>
                 </div>
               )}
@@ -558,7 +552,7 @@ export default function AdminSellersPage() {
                   <div className="space-y-2">
                     <button
                       onClick={() => openActionModal('keep_active')}
-                      className="w-full px-4 py-2.5 bg-success hover:bg-success text-on-success text-xs font-bold rounded-xl flex items-center justify-center gap-2 shadow-sm transition-colors cursor-pointer"
+                      className="w-full px-4 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-xl flex items-center justify-center gap-2 shadow-xs transition-colors cursor-pointer"
                     >
                       <Check className="w-4 h-4" />
                       <span>Keep Active / Complete Review (Restore)</span>
@@ -566,9 +560,9 @@ export default function AdminSellersPage() {
 
                     <button
                       onClick={() => openActionModal('start_temporary_review')}
-                      className="w-full px-4 py-2.5 bg-warning-bg hover:bg-warning-bg border border-warning text-warning text-xs font-bold rounded-xl flex items-center justify-center gap-2 transition-colors cursor-pointer"
+                      className="w-full px-4 py-2.5 bg-amber-50 hover:bg-amber-100 border border-amber-300 text-amber-900 text-xs font-bold rounded-xl flex items-center justify-center gap-2 transition-colors cursor-pointer"
                     >
-                      <Calendar className="w-4 h-4 text-warning" />
+                      <Calendar className="w-4 h-4 text-amber-700" />
                       <span>{selectedSeller.review_expires_at ? 'Set / Update Temporary Review Period' : 'Start Temporary Review Period'}</span>
                     </button>
 
@@ -576,14 +570,14 @@ export default function AdminSellersPage() {
                       <div className="grid grid-cols-2 gap-2">
                         <button
                           onClick={() => openActionModal('extend_review')}
-                          className="px-3 py-2 bg-surface-muted hover:bg-surface-muted border border-border text-foreground text-xs font-bold rounded-xl flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
+                          className="px-3 py-2 bg-surface-muted hover:bg-border border border-border text-foreground text-xs font-bold rounded-xl flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
                         >
                           <Clock className="w-3.5 h-3.5 text-foreground-muted" />
                           <span>Extend Review</span>
                         </button>
                         <button
                           onClick={() => openActionModal('end_review')}
-                          className="px-3 py-2 bg-surface-muted hover:bg-surface-muted border border-border text-foreground text-xs font-bold rounded-xl flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
+                          className="px-3 py-2 bg-surface-muted hover:bg-border border border-border text-foreground text-xs font-bold rounded-xl flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
                         >
                           <XCircle className="w-3.5 h-3.5 text-foreground-muted" />
                           <span>End Review Early</span>
@@ -593,9 +587,9 @@ export default function AdminSellersPage() {
 
                     <button
                       onClick={() => openActionModal('deactivate')}
-                      className="w-full px-4 py-2.5 bg-error-bg hover:bg-error-bg border border-error/20 text-error text-xs font-bold rounded-xl flex items-center justify-center gap-2 transition-colors cursor-pointer"
+                      className="w-full px-4 py-2.5 bg-red-50 hover:bg-red-100 border border-red-200 text-red-800 text-xs font-bold rounded-xl flex items-center justify-center gap-2 transition-colors cursor-pointer"
                     >
-                      <Ban className="w-4 h-4 text-error" />
+                      <Ban className="w-4 h-4 text-red-600" />
                       <span>Deactivate Seller</span>
                     </button>
                   </div>
@@ -606,16 +600,16 @@ export default function AdminSellersPage() {
                   <div className="space-y-2">
                     <button
                       onClick={() => openActionModal('approve_reactivation')}
-                      className="w-full px-4 py-2.5 bg-success hover:bg-success text-on-success text-xs font-bold rounded-xl flex items-center justify-center gap-2 shadow-sm transition-colors cursor-pointer"
+                      className="w-full px-4 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-xl flex items-center justify-center gap-2 shadow-xs transition-colors cursor-pointer"
                     >
                       <CheckCircle2 className="w-4 h-4" />
                       <span>Approve Reactivation (Restore to Active)</span>
                     </button>
                     <button
                       onClick={() => openActionModal('reject_reactivation')}
-                      className="w-full px-4 py-2.5 bg-error-bg hover:bg-error-bg border border-error/20 text-error text-xs font-bold rounded-xl flex items-center justify-center gap-2 transition-colors cursor-pointer"
+                      className="w-full px-4 py-2.5 bg-red-50 hover:bg-red-100 border border-red-200 text-red-800 text-xs font-bold rounded-xl flex items-center justify-center gap-2 transition-colors cursor-pointer"
                     >
-                      <XCircle className="w-4 h-4 text-error" />
+                      <XCircle className="w-4 h-4 text-red-600" />
                       <span>Reject Reactivation (Remain Deactivated)</span>
                     </button>
                   </div>
@@ -631,13 +625,13 @@ export default function AdminSellersPage() {
                   </div>
                 )}
 
-                {/* 5. Permanent Deactivation Action (Available for non-permanently deactivated) */}
+                {/* 5. Permanent Deactivation Action (High impact destructive button) */}
                 {selectedSeller.status !== 'permanently_deactivated' && (
                   <button
                     onClick={() => openActionModal('permanently_deactivate')}
-                    className="w-full px-4 py-2 bg-primary hover:bg-black text-red-400 text-xs font-bold rounded-xl flex items-center justify-center gap-2 transition-colors cursor-pointer mt-2"
+                    className="w-full px-4 py-2.5 bg-red-600 hover:bg-red-700 text-white text-xs font-bold rounded-xl flex items-center justify-center gap-2 shadow-xs transition-colors cursor-pointer mt-2"
                   >
-                    <Lock className="w-3.5 h-3.5 text-red-400" />
+                    <Lock className="w-3.5 h-3.5" />
                     <span>Permanently Deactivate (Irreversible)</span>
                   </button>
                 )}
@@ -920,6 +914,7 @@ export default function AdminSellersPage() {
         </div>
       )}
 
+      </div>
     </div>
   );
 }

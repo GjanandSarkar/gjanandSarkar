@@ -201,21 +201,21 @@ export function findCategory(value?: string | null): Category | undefined {
  * all tinted pale green.
  */
 const CATEGORY_COLORS: Record<CategoryKey, { bg: string; color: string }> = {
-  dairy: { bg: '#e8f4fd', color: '#3f7fb8' },
-  groceries: { bg: '#f4f1e4', color: '#8a7638' },
-  spices: { bg: '#fdeee8', color: '#c0552a' },
-  oils: { bg: '#fef5ec', color: '#c07a24' },
-  ayurveda: { bg: '#e9f6ee', color: '#2f7d4f' },
-  beauty: { bg: '#fdecf3', color: '#b5447a' },
-  'home-kitchen': { bg: '#f1f0ec', color: '#6e6758' },
-  handicrafts: { bg: '#f3edfa', color: '#7452a8' },
-  fashion: { bg: '#ecf0fb', color: '#4a5fa8' },
-  pooja: { bg: '#fdf6e3', color: '#b08a1e' },
-  electronics: { bg: '#e9f2f5', color: '#3b7383' },
-  books: { bg: '#f0f2e9', color: '#5f7334' },
+  dairy: { bg: '#e0f2fe', color: '#0369a1' },
+  groceries: { bg: '#fef3c7', color: '#92400e' },
+  spices: { bg: '#ffedd5', color: '#c2410c' },
+  oils: { bg: '#fef3c7', color: '#b45309' },
+  ayurveda: { bg: '#dcfce7', color: '#15803d' },
+  beauty: { bg: '#fce7f3', color: '#be185d' },
+  'home-kitchen': { bg: '#f3f4f6', color: '#374151' },
+  handicrafts: { bg: '#f3e8ff', color: '#6b21a8' },
+  fashion: { bg: '#e0e7ff', color: '#3730a3' },
+  pooja: { bg: '#fef9c3', color: '#854d0e' },
+  electronics: { bg: '#cffafe', color: '#0e7490' },
+  books: { bg: '#ecfccb', color: '#3f6212' },
 };
 
-const FALLBACK_CATEGORY_COLOR = { bg: '#f2f1ed', color: '#6b6659' };
+const FALLBACK_CATEGORY_COLOR = { bg: '#f3f4f6', color: '#374151' };
 
 export function categoryColors(category?: string | null): { bg: string; color: string } {
   const match = findCategory(category);

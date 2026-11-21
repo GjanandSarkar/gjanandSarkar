@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from 'react';
+import { AdminHeader } from '@/components/admin/AdminHeader';
 import { useStore } from '@/store/useStore';
 import { useRouter } from 'next/navigation';
 import { getSellerDashboard } from '@/lib/api/sellers';

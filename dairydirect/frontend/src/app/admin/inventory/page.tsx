@@ -5,10 +5,13 @@ import { motion, AnimatePresence } from 'framer-motion';
 import {
   Package, AlertTriangle, CheckCircle2, TrendingDown, Edit3,
   Save, X, ChevronDown, Search, Filter, Loader2, ArrowLeft,
-  RefreshCw
+  RefreshCw, Boxes
 } from 'lucide-react';
 import Link from 'next/link';
 import { format } from 'date-fns';
+import { AdminHeader } from '@/components/admin/AdminHeader';
+import { AdminTable } from '@/components/admin/AdminTable';
+import { AdminToolbar } from '@/components/admin/AdminToolbar';
 
 type VariantInventory = {
   variant_id: string;
@@ -102,9 +105,14 @@ export default function AdminInventoryPage() {
       setVariants(prev =>
         prev.map(v =>
           v.variant_id === variantId
-            ? { ...v, stock: edit.stock, low_stock_threshold: edit.threshold, batch_number: edit.batch || null, expiry_date: edit.expiry || null,
+            ? {
+                ...v,
+                stock: edit.stock,
+                low_stock_threshold: edit.threshold,
+                batch_number: edit.batch || null,
+                expiry_date: edit.expiry || null,
                 stock_status: edit.stock === 0 ? 'out_of_stock' : edit.stock <= edit.threshold ? 'low_stock' : 'in_stock',
-                is_available: edit.stock > 0 }
+              }
             : v
         )
       );
@@ -124,224 +132,181 @@ export default function AdminInventoryPage() {
   );
 
   const statusStyle = {
-    in_stock: { bg: '#c2efac', text: '#2d5a27', label: 'In Stock' },
-    low_stock: { bg: '#fff8e6', text: 'var(--warning)', label: 'Low Stock' },
-    out_of_stock: { bg: '#ffdcc7', text: 'var(--warning)', label: 'Out of Stock' },
+    in_stock: { bg: '#dcfce7', text: '#15803d', label: 'In Stock' },
+    low_stock: { bg: '#fef3c7', text: '#b45309', label: 'Low Stock' },
+    out_of_stock: { bg: '#fee2e2', text: '#b91c1c', label: 'Out of Stock' },
   };
 
   return (
-    <div className="flex flex-col min-h-screen" style={{ background: 'var(--color-background)' }}>
-      {/* Header */}
-      <div
-        className="px-6 md:px-10 pt-8 pb-6"
-        style={{ background: 'var(--color-surface-container-lowest)', borderBottom: '1px solid rgba(195,201,187,0.2)' }}
+    <div className="flex flex-col min-h-screen">
+      {/* Standard Admin Header */}
+      <AdminHeader
+        title="Inventory & Stock"
+        subtitle="Live tracking of warehouse batches, stock levels, and safety thresholds"
+        onRefresh={fetchInventory}
+        isRefreshing={isLoading}
       >
-        <div className="flex items-center gap-3 mb-4">
-          <Link href="/admin" className="p-1.5 rounded-[8px] hover:opacity-70 transition-opacity" style={{ background: 'var(--color-surface-container-low)' }}>
-            <ArrowLeft className="w-4 h-4" style={{ color: 'var(--color-on-surface)' }} />
-          </Link>
-          <div>
-            <h1 className="font-semibold text-[24px]" style={{ color: 'var(--color-on-surface)' }}>Inventory Management</h1>
-            <p className="text-[12px]" style={{ color: 'var(--color-on-surface-variant)' }}>Monitor and update stock levels for all products</p>
-          </div>
-        </div>
-
-        {/* Stats Row */}
+        {/* Quick Summary Cards */}
         {stats && (
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mt-1">
             {[
-              { label: 'Out of Stock', value: stats.out_of_stock, bg: '#ffdcc7', text: 'var(--warning)', icon: X },
-              { label: 'Low Stock', value: stats.low_stock, bg: '#fff8e6', text: 'var(--warning)', icon: AlertTriangle },
-              { label: 'In Stock', value: stats.in_stock, bg: '#c2efac', text: '#2d5a27', icon: CheckCircle2 },
-              { label: 'Inventory Value', value: `₹${parseFloat(stats.total_inventory_value || '0').toLocaleString('en-IN', { maximumFractionDigits: 0 })}`, bg: '#dce8ff', text: '#4a6fa5', icon: Package },
+              { label: 'Out of Stock', value: stats.out_of_stock, bg: 'bg-red-50 text-red-900 border-red-200 dark:bg-red-950/40 dark:text-red-300 dark:border-red-900/40', icon: X },
+              { label: 'Low Stock', value: stats.low_stock, bg: 'bg-amber-50 text-amber-900 border-amber-200 dark:bg-amber-950/40 dark:text-amber-300 dark:border-amber-900/40', icon: AlertTriangle },
+              { label: 'In Stock', value: stats.in_stock, bg: 'bg-emerald-50 text-emerald-900 border-emerald-200 dark:bg-emerald-950/40 dark:text-emerald-300 dark:border-emerald-900/40', icon: CheckCircle2 },
+              { label: 'Inventory Value', value: `₹${parseFloat(stats.total_inventory_value || '0').toLocaleString('en-IN', { maximumFractionDigits: 0 })}`, bg: 'bg-blue-50 text-blue-900 border-blue-200 dark:bg-blue-950/40 dark:text-blue-300 dark:border-blue-900/40', icon: Package },
             ].map((s) => {
               const Icon = s.icon;
               return (
-                <div key={s.label} className="rounded-[12px] px-4 py-3 flex items-center gap-3" style={{ background: s.bg }}>
-                  <Icon className="w-5 h-5 shrink-0" style={{ color: s.text }} strokeWidth={2} />
+                <div key={s.label} className={`rounded-[12px] px-3.5 py-2.5 flex items-center gap-3 border ${s.bg}`}>
+                  <Icon className="w-5 h-5 shrink-0" strokeWidth={2.2} />
                   <div>
-                    <p className="font-semibold text-[18px] leading-none" style={{ color: s.text }}>{s.value}</p>
-                    <p className="text-xs font-semibold mt-0.5" style={{ color: s.text, opacity: 0.7 }}>{s.label}</p>
+                    <p className="font-bold text-[17px] leading-tight">{s.value}</p>
+                    <p className="text-[11px] font-bold opacity-80">{s.label}</p>
                   </div>
                 </div>
               );
             })}
           </div>
         )}
-      </div>
+      </AdminHeader>
 
-      <div className="px-6 md:px-10 py-5">
-        {/* Controls */}
-        <div className="flex flex-wrap gap-3 mb-5">
-          {/* Search */}
-          <div className="flex-1 min-w-[200px] relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4" style={{ color: 'var(--color-on-surface-variant)' }} />
-            <input
-              type="text"
-              placeholder="Search products..."
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              className="w-full pl-9 pr-3 py-2.5 rounded-[10px] text-[13px] outline-none"
-              style={{
-                background: 'var(--color-surface-container-lowest)',
-                border: '1px solid rgba(195,201,187,0.4)',
-                color: 'var(--color-on-surface)',
-              }}
-            />
-          </div>
-
-          {/* Filter */}
-          {(['all', 'low_stock', 'out_of_stock'] as const).map((f) => (
-            <button
-              key={f}
-              onClick={() => setFilter(f)}
-              className="px-3 py-2 rounded-[10px] text-[12px] font-semibold transition-all"
-              style={{
-                background: filter === f ? 'var(--color-primary)' : 'var(--color-surface-container-low)',
-                color: filter === f ? '#fff' : 'var(--color-on-surface)',
-              }}
-            >
-              {f === 'all' ? 'All Items' : f === 'low_stock' ? 'Low Stock' : 'Out of Stock'}
-            </button>
-          ))}
-
-          <button
-            onClick={fetchInventory}
-            className="p-2 rounded-[10px]"
-            style={{ background: 'var(--color-surface-container-low)' }}
-          >
-            <RefreshCw className="w-4 h-4" style={{ color: 'var(--color-primary)' }} />
-          </button>
-        </div>
+      <div className="px-6 md:px-10 py-6 flex flex-col gap-5">
+        {/* Standard Search & Filter Toolbar */}
+        <AdminToolbar
+          pills={[
+            { id: 'all', label: 'All Stock' },
+            { id: 'low_stock', label: 'Low Stock', count: stats ? parseInt(stats.low_stock) : undefined },
+            { id: 'out_of_stock', label: 'Out of Stock', count: stats ? parseInt(stats.out_of_stock) : undefined },
+          ]}
+          activePill={filter}
+          onPillChange={(id) => setFilter(id as any)}
+          searchPlaceholder="Search by product name, weight, or category..."
+          searchValue={search}
+          onSearchChange={setSearch}
+        />
 
         {error && (
-          <div className="mb-4 px-4 py-3 rounded-[10px] flex items-center gap-2 text-[13px]"
-            style={{ background: 'var(--warning-bg)', color: 'var(--warning)' }}>
-            <AlertTriangle className="w-4 h-4" />
-            {error}
-            <button onClick={() => setError('')} className="ml-auto"><X className="w-4 h-4" /></button>
+          <div className="px-4 py-3 rounded-[12px] flex items-center gap-2 text-[13px] bg-amber-50 dark:bg-amber-950/40 text-amber-800 dark:text-amber-200 border border-amber-200">
+            <AlertTriangle className="w-4 h-4 text-amber-600" />
+            <span>{error}</span>
+            <button onClick={() => setError('')} className="ml-auto text-amber-700 hover:text-amber-900">
+              <X className="w-4 h-4" />
+            </button>
           </div>
         )}
 
-        {isLoading ? (
-          <div className="flex justify-center py-20"><Loader2 className="w-7 h-7 animate-spin" style={{ color: 'var(--color-primary)' }} /></div>
-        ) : (
-          <div className="rounded-[16px] overflow-hidden" style={{ background: 'var(--color-surface-container-lowest)', border: '1px solid rgba(195,201,187,0.25)' }}>
-            <div className="overflow-x-auto">
-              <table className="w-full">
-                <thead>
-                  <tr style={{ background: 'var(--color-surface-container-low)' }}>
-                    {['Product', 'Category', 'Weight', 'Price', 'Stock', 'Status', 'Batch / Expiry', ''].map(h => (
-                      <th key={h} className="text-left px-4 py-3 text-xs font-bold uppercase tracking-wider whitespace-nowrap"
-                        style={{ color: 'var(--color-on-surface-variant)' }}>{h}</th>
-                    ))}
-                  </tr>
-                </thead>
-                <tbody>
-                  {filtered.map((variant, i) => {
-                    const isEditing = !!editMap[variant.variant_id];
-                    const editData = editMap[variant.variant_id];
-                    const isSaving = savingIds.has(variant.variant_id);
-                    const ss = statusStyle[variant.stock_status];
+        {/* Standardized AdminTable */}
+        <AdminTable
+          columns={[
+            { header: 'Product' },
+            { header: 'Category' },
+            { header: 'Weight' },
+            { header: 'Price' },
+            { header: 'Stock Units' },
+            { header: 'Status' },
+            { header: 'Batch / Expiry' },
+            { header: 'Action', align: 'right' },
+          ]}
+          isLoading={isLoading}
+          isEmpty={!isLoading && filtered.length === 0}
+          emptyIcon={Boxes}
+          emptyTitle="No inventory matches found"
+          emptyDescription={search ? `No items matched "${search}".` : 'No product stock items currently registered.'}
+        >
+          {filtered.map((variant) => {
+            const isEditing = !!editMap[variant.variant_id];
+            const editData = editMap[variant.variant_id];
+            const isSaving = savingIds.has(variant.variant_id);
+            const ss = statusStyle[variant.stock_status] || statusStyle.in_stock;
 
-                    return (
-                      <motion.tr
-                        key={variant.variant_id}
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        transition={{ delay: i * 0.02 }}
-                        style={{ borderTop: i > 0 ? '1px solid rgba(195,201,187,0.15)' : undefined }}
-                        className={isEditing ? '' : 'hover:bg-black/[0.01]'}
+            return (
+              <tr
+                key={variant.variant_id}
+                className={isEditing ? 'bg-primary-fixed/20' : 'hover:bg-black/[0.02] dark:hover:bg-white/[0.03] transition-colors'}
+              >
+                <td className="px-5 py-3.5 font-bold text-[13px] text-foreground">
+                  {variant.product_name}
+                </td>
+                <td className="px-5 py-3.5">
+                  <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-surface-container text-foreground">
+                    {variant.category}
+                  </span>
+                </td>
+                <td className="px-5 py-3.5 text-xs font-medium text-foreground">
+                  {variant.weight}
+                </td>
+                <td className="px-5 py-3.5 text-xs font-bold text-foreground">
+                  ₹{variant.price}
+                </td>
+                <td className="px-5 py-3.5">
+                  {isEditing ? (
+                    <input
+                      type="number"
+                      min={0}
+                      value={editData.stock}
+                      onChange={e => setEditMap(prev => ({ ...prev, [variant.variant_id]: { ...editData, stock: parseInt(e.target.value) || 0 } }))}
+                      className="w-20 px-2 py-1.5 rounded-[8px] text-[13px] font-bold outline-none border border-primary bg-surface text-foreground"
+                    />
+                  ) : (
+                    <span className={`font-bold text-[14px] ${variant.stock === 0 ? 'text-error' : variant.stock <= variant.low_stock_threshold ? 'text-amber-600' : 'text-foreground'}`}>
+                      {variant.stock}
+                    </span>
+                  )}
+                </td>
+                <td className="px-5 py-3.5">
+                  <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-bold" style={{ background: ss.bg, color: ss.text }}>
+                    {ss.label}
+                  </span>
+                </td>
+                <td className="px-5 py-3.5">
+                  {isEditing ? (
+                    <input
+                      type="text"
+                      placeholder="Batch #"
+                      value={editData.batch}
+                      onChange={e => setEditMap(prev => ({ ...prev, [variant.variant_id]: { ...editData, batch: e.target.value } }))}
+                      className="w-28 px-2 py-1.5 rounded-[8px] text-xs outline-none border border-border bg-surface text-foreground"
+                    />
+                  ) : (
+                    <p className="text-xs text-foreground-muted">
+                      {variant.batch_number || '—'}
+                      {variant.expiry_date && <span className="block text-[11px]">{format(new Date(variant.expiry_date), 'dd MMM yy')}</span>}
+                    </p>
+                  )}
+                </td>
+                <td className="px-5 py-3.5 text-right">
+                  {isEditing ? (
+                    <div className="flex items-center justify-end gap-1.5">
+                      <button
+                        onClick={() => handleSave(variant.variant_id)}
+                        disabled={isSaving}
+                        className="p-1.5 rounded-[8px] text-white bg-primary hover:opacity-90 transition-opacity cursor-pointer"
+                        title="Save Changes"
                       >
-                        <td className="px-4 py-3">
-                          <p className="font-semibold text-[13px]" style={{ color: 'var(--color-on-surface)' }}>{variant.product_name}</p>
-                        </td>
-                        <td className="px-4 py-3">
-                          <span className="text-xs font-medium px-2 py-0.5 rounded-full" style={{ background: 'var(--color-surface-container)', color: 'var(--color-on-surface)' }}>
-                            {variant.category}
-                          </span>
-                        </td>
-                        <td className="px-4 py-3 text-[12px] font-medium" style={{ color: 'var(--color-on-surface)' }}>
-                          {variant.weight}
-                        </td>
-                        <td className="px-4 py-3 text-[12px] font-semibold" style={{ color: 'var(--color-on-surface)' }}>
-                          ₹{variant.price}
-                        </td>
-                        <td className="px-4 py-3">
-                          {isEditing ? (
-                            <input
-                              type="number"
-                              min={0}
-                              value={editData.stock}
-                              onChange={e => setEditMap(prev => ({ ...prev, [variant.variant_id]: { ...editData, stock: parseInt(e.target.value) || 0 } }))}
-                              className="w-20 px-2 py-1.5 rounded-[8px] text-[13px] font-bold outline-none"
-                              style={{ background: 'var(--color-surface-container)', border: '1.5px solid var(--color-primary)', color: 'var(--color-on-surface)' }}
-                            />
-                          ) : (
-                            <span className="font-bold text-[14px]" style={{ color: variant.stock === 0 ? 'var(--warning)' : variant.stock <= variant.low_stock_threshold ? 'var(--warning)' : 'var(--color-on-surface)' }}>
-                              {variant.stock}
-                            </span>
-                          )}
-                        </td>
-                        <td className="px-4 py-3">
-                          <span className="inline-flex items-center gap-1 px-2 py-1 rounded-[6px] text-xs font-bold" style={{ background: ss.bg, color: ss.text }}>
-                            {ss.label}
-                          </span>
-                        </td>
-                        <td className="px-4 py-3">
-                          {isEditing ? (
-                            <input
-                              type="text"
-                              placeholder="Batch #"
-                              value={editData.batch}
-                              onChange={e => setEditMap(prev => ({ ...prev, [variant.variant_id]: { ...editData, batch: e.target.value } }))}
-                              className="w-24 px-2 py-1.5 rounded-[8px] text-xs outline-none"
-                              style={{ background: 'var(--color-surface-container)', border: '1px solid rgba(195,201,187,0.4)', color: 'var(--color-on-surface)' }}
-                            />
-                          ) : (
-                            <p className="text-xs" style={{ color: 'var(--color-on-surface-variant)' }}>
-                              {variant.batch_number || '—'}
-                              {variant.expiry_date && <span className="block">{format(new Date(variant.expiry_date), 'dd MMM yy')}</span>}
-                            </p>
-                          )}
-                        </td>
-                        <td className="px-4 py-3">
-                          {isEditing ? (
-                            <div className="flex items-center gap-2">
-                              <button
-                                onClick={() => handleSave(variant.variant_id)}
-                                disabled={isSaving}
-                                className="p-1.5 rounded-[6px] transition-opacity hover:opacity-80"
-                                style={{ background: 'var(--color-primary)' }}
-                              >
-                                {isSaving ? <Loader2 className="w-3.5 h-3.5 animate-spin text-white" /> : <Save className="w-3.5 h-3.5 text-white" />}
-                              </button>
-                              <button onClick={() => handleCancel(variant.variant_id)} className="p-1.5 rounded-[6px]" style={{ background: 'var(--surface-muted)' }}>
-                                <X className="w-3.5 h-3.5" style={{ color: 'var(--foreground-muted)' }} />
-                              </button>
-                            </div>
-                          ) : (
-                            <button onClick={() => handleEdit(variant)} className="p-1.5 rounded-[6px] hover:opacity-70 transition-opacity" style={{ background: 'var(--color-surface-container-low)' }}>
-                              <Edit3 className="w-3.5 h-3.5" style={{ color: 'var(--color-on-surface)' }} />
-                            </button>
-                          )}
-                        </td>
-                      </motion.tr>
-                    );
-                  })}
-                </tbody>
-              </table>
-              {filtered.length === 0 && (
-                <div className="text-center py-16">
-                  <Package className="w-8 h-8 mx-auto mb-3" style={{ color: 'var(--color-on-surface-variant)' }} strokeWidth={1.5} />
-                  <p className="font-semibold" style={{ color: 'var(--color-on-surface)' }}>
-                    {search ? 'No products match your search' : 'No inventory data'}
-                  </p>
-                </div>
-              )}
-            </div>
-          </div>
-        )}
+                        {isSaving ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Save className="w-3.5 h-3.5" />}
+                      </button>
+                      <button
+                        onClick={() => handleCancel(variant.variant_id)}
+                        className="p-1.5 rounded-[8px] text-foreground-muted hover:bg-surface-muted transition-colors cursor-pointer"
+                        title="Cancel"
+                      >
+                        <X className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
+                  ) : (
+                    <button
+                      onClick={() => handleEdit(variant)}
+                      className="p-1.5 rounded-[8px] hover:bg-surface-muted text-primary cursor-pointer transition-colors"
+                      title="Edit Stock"
+                    >
+                      <Edit3 className="w-4 h-4" />
+                    </button>
+                  )}
+                </td>
+              </tr>
+            );
+          })}
+        </AdminTable>
       </div>
     </div>
   );

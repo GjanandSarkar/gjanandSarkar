@@ -18,6 +18,9 @@ import {
 } from 'lucide-react';
 import { SellerQualityReportModal } from '@/components/seller/SellerQualityReportModal';
 import { motion, AnimatePresence } from 'framer-motion';
+import { AdminHeader } from '@/components/admin/AdminHeader';
+import { AdminTable } from '@/components/admin/AdminTable';
+import { AdminToolbar } from '@/components/admin/AdminToolbar';
 
 export default function AdminQualityReportsPage() {
   const [reports, setReports] = useState<any[]>([]);
@@ -99,195 +102,161 @@ export default function AdminQualityReportsPage() {
   const pendingCount = reports.filter((r) => r.status === 'pending').length;
 
   return (
-    <div className="p-4 sm:p-6 lg:p-8 space-y-6">
-      {/* Top Banner */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div>
-          <div className="flex items-center gap-2">
-            <h1 className="text-xl sm:text-2xl font-bold text-foreground">Quality Test Reports</h1>
+    <div className="flex flex-col min-h-screen">
+      {/* Standard Admin Header */}
+      <AdminHeader
+        title={
+          <div className="flex items-center gap-3">
+            <span>Quality Test Reports</span>
             {pendingCount > 0 && (
-              <span className="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-warning-bg text-secondary-ink border border-secondary/20">
+              <span className="px-2.5 py-0.5 rounded-full text-xs font-bold bg-amber-100 text-amber-800 dark:bg-amber-950/40 dark:text-amber-300 border border-amber-300">
                 {pendingCount} Pending Review
               </span>
             )}
           </div>
-          <p className="text-xs sm:text-sm text-foreground-muted mt-0.5">
-            Verify laboratory test reports submitted by sellers before displaying to customers.
-          </p>
-        </div>
+        }
+        subtitle="Verify laboratory certifications submitted by sellers before customer display"
+        onRefresh={fetchData}
+        isRefreshing={loading}
+        actions={
+          <button
+            type="button"
+            onClick={() => setIsUploadModalOpen(true)}
+            className="flex items-center gap-2 px-4 py-2 rounded-xl font-bold text-xs text-white transition-all shadow-xs active:scale-95 cursor-pointer bg-primary hover:bg-primary/90"
+          >
+            <Plus className="w-4 h-4" strokeWidth={2.5} />
+            <span>Upload Report</span>
+          </button>
+        }
+      />
 
-        <button
-          type="button"
-          onClick={() => setIsUploadModalOpen(true)}
-          className="px-4 py-2.5 rounded-lg bg-primary hover:bg-primary-hover text-on-primary text-xs font-semibold flex items-center gap-2 shadow-xs transition-all active:scale-95 cursor-pointer self-start sm:self-auto"
+      {/* Reports Table & Standard Toolbar (Edit #38) */}
+      <div className="px-6 md:px-10 py-6 flex flex-col gap-5">
+        <AdminToolbar
+          pills={[
+            { id: 'pending', label: 'Pending Review', count: pendingCount },
+            { id: 'approved', label: 'Approved' },
+            { id: 'rejected', label: 'Rejected' },
+            { id: 'all', label: 'All Reports' },
+          ]}
+          activePill={activeTab}
+          onPillChange={(id) => setActiveTab(id as any)}
+          searchPlaceholder="Search reports by lab, product, batch..."
+          searchValue={searchQuery}
+          onSearchChange={setSearchQuery}
+        />
+        <AdminTable
+          columns={[
+            { header: 'Product & Test Title' },
+            { header: 'Laboratory & Date' },
+            { header: 'Batch #' },
+            { header: 'Status' },
+            { header: 'Actions', align: 'right' },
+          ]}
+          isLoading={loading}
+          isEmpty={!loading && filteredReports.length === 0}
+          emptyIcon={FileText}
+          emptyTitle="No quality reports found"
+          emptyDescription="No reports match your current filter and search criteria."
         >
-          <Plus className="w-4 h-4" />
-          <span>Upload Report</span>
-        </button>
-      </div>
+          {filteredReports.map((report) => {
+            const isPending = report.status === 'pending';
+            const isApproved = report.status === 'approved';
 
-      {/* Tabs & Search */}
-      <div className="bg-surface rounded-xl border border-border p-4 shadow-xs space-y-3">
-        <div className="flex flex-col sm:flex-row items-center justify-between gap-3">
-          <div className="flex items-center gap-1.5 w-full sm:w-auto overflow-x-auto no-scrollbar">
-            {(['pending', 'approved', 'rejected', 'all'] as const).map((tab) => (
-              <button
-                key={tab}
-                type="button"
-                onClick={() => setActiveTab(tab)}
-                className={`px-3 py-1.5 rounded-lg text-xs font-semibold uppercase tracking-wider transition-colors cursor-pointer capitalize ${
-                  activeTab === tab
-                    ? 'bg-primary text-on-primary shadow-2xs'
-                    : 'text-foreground-muted hover:text-foreground hover:bg-surface-muted'
-                }`}
-              >
-                {tab === 'pending'
-                  ? `Pending (${pendingCount})`
-                  : tab}
-              </button>
-            ))}
-          </div>
+            return (
+              <tr key={report.id} className="hover:bg-black/[0.02] dark:hover:bg-white/[0.03] transition-colors">
+                <td className="px-5 py-3.5">
+                  <div className="flex items-center gap-3">
+                    {report.product?.image_url && (
+                      <img
+                        src={report.product.image_url}
+                        alt=""
+                        className="w-10 h-10 object-cover rounded-[10px] border border-border shrink-0"
+                      />
+                    )}
+                    <div className="min-w-0">
+                      <p className="font-bold text-[13px] text-foreground truncate max-w-xs">{report.title}</p>
+                      <p className="text-xs text-foreground-muted truncate max-w-xs">
+                        {report.product?.name || 'General Dairy Line'}
+                      </p>
+                    </div>
+                  </div>
+                </td>
 
-          <div className="relative w-full sm:w-64">
-            <Search className="w-4 h-4 text-foreground-muted absolute left-3 top-1/2 -translate-y-1/2" />
-            <input
-              type="text"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Filter reports..."
-              className="w-full pl-9 pr-3 py-1.5 rounded-lg border border-border bg-surface text-xs text-foreground placeholder:text-foreground-muted/60 outline-none focus:border-primary"
-            />
-          </div>
-        </div>
-      </div>
+                <td className="px-5 py-3.5">
+                  <p className="font-semibold text-xs text-foreground">{report.laboratory_name}</p>
+                  <p className="text-[11px] text-foreground-muted">
+                    {new Date(report.test_date).toLocaleDateString('en-IN', {
+                      day: 'numeric',
+                      month: 'short',
+                      year: 'numeric',
+                    })}
+                  </p>
+                </td>
 
-      {/* Reports Table / Card Container */}
-      {loading ? (
-        <div className="flex flex-col items-center justify-center py-20 gap-3 text-foreground-muted">
-          <Loader2 className="w-8 h-8 animate-spin text-primary" />
-          <p className="text-xs font-semibold">Loading quality reports...</p>
-        </div>
-      ) : filteredReports.length === 0 ? (
-        <div className="bg-surface rounded-xl border border-border p-12 text-center text-foreground-muted space-y-2">
-          <FileText className="w-8 h-8 mx-auto text-foreground-muted/60" />
-          <p className="text-sm font-semibold text-foreground">No reports found</p>
-          <p className="text-xs">No quality reports currently match this filter.</p>
-        </div>
-      ) : (
-        <div className="bg-surface rounded-xl border border-border shadow-xs overflow-hidden">
-          <div className="overflow-x-auto">
-            <table className="w-full text-left border-collapse text-xs">
-              <thead>
-                <tr className="border-b border-border bg-surface-muted/50 text-foreground-muted font-semibold">
-                  <th className="p-3.5 pl-4">Product & Report</th>
-                  <th className="p-3.5">Laboratory & Date</th>
-                  <th className="p-3.5">Batch</th>
-                  <th className="p-3.5">Status</th>
-                  <th className="p-3.5 text-right pr-4">Actions</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-border">
-                {filteredReports.map((report) => {
-                  const isPending = report.status === 'pending';
-                  const isApproved = report.status === 'approved';
+                <td className="px-5 py-3.5 font-mono text-xs text-foreground">
+                  {report.batch_number || '—'}
+                </td>
 
-                  return (
-                    <tr key={report.id} className="hover:bg-surface-muted/30 transition-colors">
-                      <td className="p-3.5 pl-4">
-                        <div className="flex items-center gap-3">
-                          {report.product?.image_url && (
-                            <img
-                              src={report.product.image_url}
-                              alt=""
-                              className="w-10 h-10 object-cover rounded-lg border border-border shrink-0"
-                            />
-                          )}
-                          <div className="min-w-0">
-                            <p className="font-semibold text-foreground truncate max-w-xs">{report.title}</p>
-                            <p className="text-[11px] text-foreground-muted truncate max-w-xs">
-                              {report.product?.name || 'General Product'}
-                            </p>
-                          </div>
-                        </div>
-                      </td>
+                <td className="px-5 py-3.5">
+                  <span
+                    className={`inline-flex px-2.5 py-0.5 rounded-full text-xs font-bold uppercase tracking-wider ${
+                      isApproved
+                        ? 'bg-green-100 text-green-800 dark:bg-green-950/40 dark:text-green-300'
+                        : isPending
+                        ? 'bg-amber-100 text-amber-800 dark:bg-amber-950/40 dark:text-amber-300'
+                        : 'bg-red-100 text-red-800 dark:bg-red-950/40 dark:text-red-300'
+                    }`}
+                  >
+                    {report.status}
+                  </span>
+                </td>
 
-                      <td className="p-3.5">
-                        <p className="font-semibold text-foreground">{report.laboratory_name}</p>
-                        <p className="text-[11px] text-foreground-muted">
-                          {new Date(report.test_date).toLocaleDateString('en-IN', {
-                            day: 'numeric',
-                            month: 'short',
-                            year: 'numeric',
-                          })}
-                        </p>
-                      </td>
+                <td className="px-5 py-3.5 text-right">
+                  <div className="flex items-center justify-end gap-2">
+                    <button
+                      type="button"
+                      onClick={() => setActiveReport(report)}
+                      className="px-2.5 py-1.5 rounded-lg border border-border/80 hover:bg-surface-muted text-foreground text-xs font-semibold flex items-center gap-1 transition-colors cursor-pointer"
+                      title="Preview certificate"
+                    >
+                      <Eye className="w-3.5 h-3.5 text-foreground-muted" />
+                      <span>Preview</span>
+                    </button>
 
-                      <td className="p-3.5 font-mono text-[11px] text-foreground">
-                        {report.batch_number || '—'}
-                      </td>
-
-                      <td className="p-3.5">
-                        <span
-                          className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider border ${
-                            isApproved
-                              ? 'bg-success-bg text-primary border-primary/20'
-                              : isPending
-                              ? 'bg-warning-bg text-secondary-ink border-secondary/20'
-                              : 'bg-error-bg text-error border-error/20'
-                          }`}
+                    {isPending && (
+                      <>
+                        <button
+                          type="button"
+                          disabled={isUpdating}
+                          onClick={() => handleUpdateStatus(report.id, 'approved')}
+                          className="px-3 py-1.5 rounded-lg bg-primary hover:opacity-90 text-white text-xs font-bold flex items-center gap-1 shadow-xs transition-all active:scale-95 cursor-pointer disabled:opacity-50"
                         >
-                          {report.status}
-                        </span>
-                      </td>
+                          <CheckCircle2 className="w-3.5 h-3.5" />
+                          <span>Approve</span>
+                        </button>
 
-                      <td className="p-3.5 text-right pr-4">
-                        <div className="flex items-center justify-end gap-1.5">
-                          <button
-                            type="button"
-                            onClick={() => setActiveReport(report)}
-                            className="px-2.5 py-1.5 rounded-lg border border-border hover:bg-surface-muted text-foreground text-xs font-semibold flex items-center gap-1 transition-colors cursor-pointer"
-                            title="Preview certificate"
-                          >
-                            <Eye className="w-3.5 h-3.5 text-foreground-muted" />
-                            <span>Preview</span>
-                          </button>
-
-                          {isPending && (
-                            <>
-                              <button
-                                type="button"
-                                disabled={isUpdating}
-                                onClick={() => handleUpdateStatus(report.id, 'approved')}
-                                className="px-3 py-1.5 rounded-lg bg-primary hover:bg-primary-hover text-on-primary text-xs font-semibold flex items-center gap-1 shadow-2xs transition-all active:scale-95 cursor-pointer disabled:opacity-50"
-                              >
-                                <CheckCircle2 className="w-3.5 h-3.5" />
-                                <span>Approve</span>
-                              </button>
-
-                              <button
-                                type="button"
-                                disabled={isUpdating}
-                                onClick={() => {
-                                  setRejectingId(report.id);
-                                  setAdminNotes('');
-                                }}
-                                className="px-3 py-1.5 rounded-lg border border-error/30 hover:bg-error-bg text-error text-xs font-semibold flex items-center gap-1 transition-all cursor-pointer disabled:opacity-50"
-                              >
-                                <XCircle className="w-3.5 h-3.5" />
-                                <span>Reject</span>
-                              </button>
-                            </>
-                          )}
-                        </div>
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          </div>
-        </div>
-      )}
+                        <button
+                          type="button"
+                          disabled={isUpdating}
+                          onClick={() => {
+                            setRejectingId(report.id);
+                            setAdminNotes('');
+                          }}
+                          className="px-3 py-1.5 rounded-lg border border-red-300 hover:bg-red-50 text-red-700 text-xs font-bold flex items-center gap-1 transition-all cursor-pointer disabled:opacity-50"
+                        >
+                          <XCircle className="w-3.5 h-3.5" />
+                          <span>Reject</span>
+                        </button>
+                      </>
+                    )}
+                  </div>
+                </td>
+              </tr>
+            );
+          })}
+        </AdminTable>
+      </div>
 
       {/* Rejection Notes Modal */}
       <AnimatePresence>

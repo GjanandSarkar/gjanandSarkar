@@ -11,6 +11,7 @@ import {
   type ProductWithVariants,
 } from '@/lib/api/products';
 import { MultiImageUpload, ImageItem } from '@/components/admin/MultiImageUpload';
+import { AdminHeader } from '@/components/admin/AdminHeader';
 import {
   ArrowLeft,
   Plus,
@@ -244,50 +245,29 @@ export default function EditProductPage() {
   }
 
   return (
-    <div className="flex flex-col min-h-screen pb-16">
-      {/* Top Header */}
-      <div
-        className="px-6 md:px-10 pt-6 pb-5 flex items-center justify-between sticky top-0 z-20 backdrop-blur-md"
-        style={{
-          background: 'rgba(255,255,255,0.92)',
-          borderBottom: '1px solid rgba(195,201,187,0.3)',
-        }}
-      >
-        <div className="flex items-center gap-3">
+    <div className="flex flex-col min-h-screen pb-16" style={{ background: '#F5F6F5' }}>
+      {/* Standard Admin Header */}
+      <AdminHeader
+        title="Edit Product"
+        subtitle={`ID: ${productId}`}
+        actions={
           <button
-            onClick={() => router.back()}
-            className="p-2 -ml-2 rounded-full hover:bg-black/5 transition-colors"
-            style={{ color: 'var(--color-on-surface-variant)' }}
+            onClick={handleSubmit}
+            disabled={isSubmitting || isDeleting}
+            className="flex items-center gap-2 px-5 py-2.5 rounded-[12px] font-bold text-[13px] text-white transition-all active:scale-95 shadow-md disabled:opacity-50 cursor-pointer"
+            style={{
+              background: 'var(--cta-gradient)',
+            }}
           >
-            <ArrowLeft className="w-5 h-5" />
+            {isSubmitting ? (
+              <Loader2 className="w-4 h-4 animate-spin" />
+            ) : (
+              <Save className="w-4 h-4" />
+            )}
+            Save Changes
           </button>
-          <div>
-            <h1
-              className="font-semibold text-[22px] tracking-tight"
-              style={{ color: 'var(--color-on-surface)' }}
-            >
-              Edit Product
-            </h1>
-            <p className="text-[12px] text-foreground-muted">ID: {productId}</p>
-          </div>
-        </div>
-
-        <button
-          onClick={handleSubmit}
-          disabled={isSubmitting || isDeleting}
-          className="flex items-center gap-2 px-5 py-2.5 rounded-[12px] font-bold text-[13px] text-white transition-all active:scale-95 shadow-md disabled:opacity-50"
-          style={{
-            background: 'var(--cta-gradient)',
-          }}
-        >
-          {isSubmitting ? (
-            <Loader2 className="w-4 h-4 animate-spin" />
-          ) : (
-            <Save className="w-4 h-4" />
-          )}
-          Save Changes
-        </button>
-      </div>
+        }
+      />
 
       <div className="px-6 md:px-10 py-6 max-w-4xl flex flex-col gap-6">
         {/* Status Alerts */}
