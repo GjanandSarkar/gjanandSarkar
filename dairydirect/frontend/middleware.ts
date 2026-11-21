@@ -14,6 +14,7 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server';
+import { isSameOriginRequest, forbiddenResponse } from '@/lib/security/same-origin';
 
 const ACCESS_TOKEN_COOKIE = 'gs_access_token';
 
@@ -51,6 +52,38 @@ function extractToken(request: NextRequest): string | null {
 
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
+
+  // ─── CSRF / cross-origin gate for mutating API calls ──────────────────────
+  // Cookie-authenticated APIs are the classic CSRF target. Browsers attach
+  // `Origin` to every cross-site state change; a mismatch is rejected before
+  // the handler runs (and before the body is parsed). Webhooks and the future
+  // mobile app send no Origin and are unaffected.
+  if (pathname.startsWith('/api/')) {
+    const allowed = isSameOriginRequest({
+      method: request.method,
+      origin: request.headers.get('origin'),
+      host: request.headers.get('host'),
+      forwardedHost: request.headers.get('x-forwarded-host'),
+      secFetchSite: request.headers.get('sec-fetch-site'),
+    });
+
+    if (!allowed) return forbiddenResponse();
+    return NextResponse.next();
+  }
+
+  // ─── Guard subscription routes (require any signed-in customer) ───────────
+  // The page also checks the session server-side, but doing it here returns a
+  // real 307 instead of a streamed 200 with a client-side redirect — which
+  // crawlers and link previews read as "this page exists".
+  if (pathname === '/subscribe' || pathname.startsWith('/subscribe/')) {
+    const token = extractToken(request);
+    if (!token) {
+      const loginUrl = request.nextUrl.clone();
+      loginUrl.pathname = '/login';
+      loginUrl.searchParams.set('redirect', pathname);
+      return NextResponse.redirect(loginUrl);
+    }
+  }
 
   // ─── Guard /admin/* routes (require 'admin' role) ─────────────────────────
   if (pathname.startsWith('/admin')) {
@@ -106,6 +139,6 @@ export const config = {
      * - /api/* routes (these have their own server-side auth)
      * - /monitoring (Sentry tunnel)
      */
-    '/((?!_next/static|_next/image|favicon\\.ico|monitoring|api/|.*\\.(?:png|jpg|jpeg|gif|webp|svg|ico|woff2?|ttf|otf|eot|css|js)$).*)',
+    '/((?!_next/static|_next/image|favicon\\.ico|monitoring|.*\\.(?:png|jpg|jpeg|gif|webp|svg|ico|woff2?|ttf|otf|eot|css|js)$).*)',
   ],
 };

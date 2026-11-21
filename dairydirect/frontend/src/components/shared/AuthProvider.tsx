@@ -70,6 +70,52 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  /**
+   * Restore a custom-JWT session on reload.
+   *
+   * Identity is no longer persisted to localStorage (see useStore), and
+   * phone-OTP users have no Supabase session for AuthProvider to restore.
+   * The HttpOnly `gs_access_token` cookie is the real session, so ask the
+   * server who it belongs to before deciding the visitor is signed out.
+   */
+  useEffect(() => {
+    let cancelled = false;
+
+    (async () => {
+      try {
+        const res = await fetch('/api/auth/session', {
+          credentials: 'same-origin',
+          cache: 'no-store',
+        });
+        if (!res.ok) return;
+        const data = await res.json();
+        if (cancelled || !data?.authenticated || !data?.user) return;
+
+        // Do not clobber a richer profile already hydrated by Supabase.
+        if (useStore.getState().user) return;
+
+        const p = data.user;
+        setUser({
+          id: p.id,
+          name: p.name || p.email?.split('@')[0] || 'Customer',
+          phone: p.phone || '',
+          email: p.email || '',
+          avatar_url: p.avatar_url || '',
+          role: p.role === 'admin' || p.role === 'seller' ? p.role : 'customer',
+          loyalty_points: p.loyalty_points ?? 0,
+          saved_addresses: [],
+        });
+        setAuthLoading(false);
+      } catch {
+        // No cookie or the server is unavailable: fall through to the
+        // Supabase listener, which will set loading false.
+      }
+    })();
+
+    return () => { cancelled = true; };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   // Supabase Auth listener (client loaded lazily — see loadSupabase above)
   useEffect(() => {
     setAuthLoading(true);
@@ -99,11 +145,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       }
 
       if (event === 'SIGNED_OUT') {
-        const currentUser = useStore.getState().user;
-        if (currentUser?.id && currentUser.id.includes('demo')) {
-          setAuthLoading(false);
-          return;
-        }
         sessionStorage.removeItem('auth_callback_processed');
         logout();
         setAuthLoading(false);
@@ -238,19 +279,19 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           || sbUser.user_metadata?.display_name 
           || (sbUser.email ? sbUser.email.split('@')[0] : (sbUser.phone ? `User (${sbUser.phone.slice(-4)})` : 'Customer'));
 
-        const isUserAdmin = sbUser.email && (
-          sbUser.email.toLowerCase().includes('admin') ||
-          sbUser.email.toLowerCase() === 'gjanandsarkar09@gmail.com' ||
-          sbUser.email.toLowerCase() === 'patelroshu1218@gmail.com'
-        );
-
+        /**
+         * Server sync failed, so we do not know the authoritative role.
+         * Never guess from the email address or user metadata — both are
+         * user-controlled. A least-privilege customer session is the only
+         * safe fallback; privileged APIs will still check the database.
+         */
         setUser({
           id: sbUser.id,
           name: fallbackName,
           phone: sbUser.phone || '',
           email: sbUser.email || '',
           avatar_url: sbUser.user_metadata?.avatar_url || sbUser.user_metadata?.picture || sbUser.user_metadata?.image || '',
-          role: isUserAdmin ? 'admin' : (sbUser.user_metadata?.role || 'customer'),
+          role: 'customer',
           saved_addresses: [],
         });
 

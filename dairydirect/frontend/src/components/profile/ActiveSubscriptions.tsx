@@ -37,7 +37,7 @@ export function ActiveSubscriptions({ subscriptions, hideHeader = false }: Activ
           <CalendarDays className="w-10 h-10 text-muted mx-auto mb-3 opacity-50" />
           <h3 className="text-base font-bold text-dark mb-1">No Active Subscriptions</h3>
           <p className="text-sm text-muted mb-4 font-medium">Get fresh milk delivered to your doorstep daily.</p>
-          <Link href="/home">
+          <Link href="/subscribe/new">
             <Button size="sm" className="shadow-active">Start Subscription</Button>
           </Link>
         </div>

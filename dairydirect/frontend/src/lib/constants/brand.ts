@@ -15,26 +15,28 @@ export const BRAND = {
   domain: 'gjanandsarkar.com',
   url: 'https://gjanandsarkar.com',
 
-  /** One-line positioning used in the hero and as the default page title. */
-  tagline: 'India\u2019s Curated Marketplace',
-
-  /** The promise that actually differentiates the platform. */
-  promise: 'One trusted brand per category. Every product made in India.',
-
+  /**
+   * Launch positioning.
+   *
+   * The platform is built to host one trusted partner per category, but at
+   * launch exactly one dairy partner is onboarded. Every customer-facing
+   * promise therefore talks about milk — not "groceries, spices, wellness and
+   * electronics" the storefront cannot actually deliver yet.
+   */
+  tagline: 'Fresh dairy, before breakfast',
+  promise: 'One trusted dairy. Every bottle traceable.',
   shortDescription:
-    'Shop verified Indian products across dairy, groceries, spices, wellness, home, fashion and electronics \u2014 one trusted partner brand per category.',
-
+    'A2 milk, curd, paneer and ghee from a single verified dairy partner — chilled, traceable and delivered to your door every morning.',
   longDescription:
-    'Gjanand Sarkar brings India\u2019s best brands onto one platform. We partner with exactly one trusted company per category, so every product you see is verified, authentic and made in India \u2014 no counterfeits, no endless duplicate listings, no guesswork.',
-
+    'Gjanand Sarkar works with one vetted dairy for everything we sell. That means no blended milk, no mystery supply chain and no twenty near-identical listings to compare. Choose your milk, build a morning plan, and pause or skip whenever life gets in the way.',
   keywords: [
-    'Indian products online',
-    'made in India marketplace',
-    'authentic Indian brands',
-    'buy Indian products',
-    'verified Indian sellers',
-    'swadeshi shopping',
-    'Indian ecommerce',
+    'fresh milk delivery',
+    'A2 milk online',
+    'dairy subscription India',
+    'daily milk delivery',
+    'paneer online',
+    'curd delivery',
+    'farm fresh dairy',
   ],
 
   social: {

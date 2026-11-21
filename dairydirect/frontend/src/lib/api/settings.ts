@@ -16,17 +16,23 @@ import { getAdminSupabase } from '@/lib/supabase/admin';
  * engine.
  */
 import { BUSINESS_CONFIG } from '@/lib/config/business';
+import { withTimeout, TIMEOUTS } from '@/lib/utils/timeout';
 
 export const DEFAULT_FREE_DELIVERY_THRESHOLD = BUSINESS_CONFIG.delivery.freeDeliveryThreshold;
 
 async function fetchFreeDeliveryThreshold(): Promise<number> {
   try {
     const admin = getAdminSupabase();
-    const { data, error } = await admin
-      .from('business_settings')
-      .select('free_delivery_threshold')
-      .limit(1)
-      .maybeSingle();
+    const { data, error } = await withTimeout(
+      async () =>
+        admin
+        .from('business_settings')
+        .select('free_delivery_threshold')
+        .limit(1)
+        .maybeSingle(),
+      TIMEOUTS.settings,
+      'business-settings'
+    );
 
     if (error || !data) return DEFAULT_FREE_DELIVERY_THRESHOLD;
 

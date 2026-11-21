@@ -30,37 +30,33 @@ function genRepId(): string {
 }
 
 // ─── Get User Subscriptions ───────────────────────────────────
-export async function getUserSubscriptions(userId: string): Promise<SubscriptionWithProduct[]> {
-  const { data, error } = await supabase
-    .from('subscriptions')
-    .select('*, products(*)')
-    .eq('user_id', userId)
-    .neq('status', 'cancelled')
-    .order('created_at', { ascending: false });
-
-  if (error) {
-    console.error('getUserSubscriptions error:', error);
+export async function getUserSubscriptions(_userId?: string): Promise<SubscriptionWithProduct[]> {
+  // Read through the authenticated API rather than the browser Supabase
+  // client. The client has no Supabase session (auth is a custom JWT cookie),
+  // so it acts as `anon` — which the Nov 2026 RLS hardening revoked from
+  // personal tables. The route scopes rows to the caller's JWT either way.
+  try {
+    const result = await api.subscriptions.get();
+    return (result.subscriptions ?? []) as SubscriptionWithProduct[];
+  } catch (err) {
+    console.error('getUserSubscriptions error:', err);
     return [];
   }
-
-  return (data as SubscriptionWithProduct[]) ?? [];
 }
 
 // ─── Get All Subscriptions (Admin) ───────────────────────────
 export async function getAllSubscriptions(): Promise<
   (SubscriptionWithProduct & { profiles?: { name: string; phone: string } })[]
 > {
-  const { data, error } = await supabase
-    .from('subscriptions')
-    .select('*, products(*), profiles:user_id(name, phone)')
-    .order('created_at', { ascending: false });
-
-  if (error) {
-    console.error('getAllSubscriptions error:', error);
+  try {
+    const result = await api.subscriptions.get();
+    return (result.subscriptions ?? []) as (SubscriptionWithProduct & {
+      profiles?: { name: string; phone: string };
+    })[];
+  } catch (err) {
+    console.error('getAllSubscriptions error:', err);
     return [];
   }
-
-  return data as any[];
 }
 
 // ─── Create Subscription ──────────────────────────────────────
@@ -89,27 +85,24 @@ export async function pauseSubscription(
   subId: string,
   currentStatus: string
 ): Promise<{ success: boolean; error?: string }> {
-  const newStatus = currentStatus === 'paused' ? 'active' : 'paused';
-  const { error } = await supabase
-    .from('subscriptions')
-    .update({ status: newStatus })
-    .eq('id', subId);
-
-  if (error) return { success: false, error: error.message };
-  return { success: true };
+  try {
+    await api.subscriptions.update({ subId, action: currentStatus === 'paused' ? 'resume' : 'pause' });
+    return { success: true };
+  } catch (err: any) {
+    return { success: false, error: err.message };
+  }
 }
 
 // ─── Cancel Subscription ──────────────────────────────────────
 export async function cancelSubscription(
   subId: string
 ): Promise<{ success: boolean; error?: string }> {
-  const { error } = await supabase
-    .from('subscriptions')
-    .update({ status: 'cancelled' })
-    .eq('id', subId);
-
-  if (error) return { success: false, error: error.message };
-  return { success: true };
+  try {
+    await api.subscriptions.update({ subId, action: 'cancel' });
+    return { success: true };
+  } catch (err: any) {
+    return { success: false, error: err.message };
+  }
 }
 
 // ─── Submit Modification Report ───────────────────────────────

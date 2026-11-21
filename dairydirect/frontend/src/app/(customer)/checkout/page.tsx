@@ -45,8 +45,6 @@ export default function CheckoutScreen() {
   const [isProcessing, setIsProcessing] = useState(false);
   const [stockError, setStockError] = useState<string | null>(null);
 
-  const [upiId, setUpiId] = useState('');
-
   const [couponCode, setCouponCode] = useState('');
   const [isApplyingCoupon, setIsApplyingCoupon] = useState(false);
   const [couponError, setCouponError] = useState('');
@@ -143,20 +141,13 @@ export default function CheckoutScreen() {
   const handlePlaceOrder = async () => {
     if (!user || cartItemsData.length === 0) return;
     if (!checkoutAddressId) {
-      alert('Please add a delivery address.');
+      setStockError('Where should we deliver? Add an address to continue.');
       return;
     }
 
-    if (selectedMethod === 'upi') {
-      if (!upiId) {
-        alert('Please enter your UPI ID');
-        return;
-      }
-      if (!upiId.includes('@')) {
-        alert('Please enter a valid UPI ID (e.g. name@okhdfc)');
-        return;
-      }
-    }
+    // Only methods the order API accepts may reach the network. This also
+    // neutralises any legacy 'upi' value left in client state.
+    const method = selectedMethod === 'cod' ? 'cod' : 'razorpay';
 
     const orderItems = cartItemsData.map(item => ({
       productId: item.productId,
@@ -187,7 +178,7 @@ export default function CheckoutScreen() {
     }
 
     // ─── Razorpay Online Payment Flow ───
-    if (selectedMethod === 'razorpay') {
+    if (method === 'razorpay') {
       const amountInPaise = Math.round((pricing?.total || 0) * 100);
       setIsProcessing(true); // Lock UI immediately before opening Razorpay modal
 
@@ -286,10 +277,9 @@ export default function CheckoutScreen() {
         items: orderItems,
         total: pricing?.total || 0,
         addressId: checkoutAddressId,
-        paymentMethod: selectedMethod,
-        paymentStatus: selectedMethod === 'cod' ? 'pending' : 'paid',
+        paymentMethod: method,
+        paymentStatus: method === 'cod' ? 'pending' : 'paid',
         couponCode: couponCode || undefined,
-        upiId: selectedMethod === 'upi' ? upiId : undefined,
         reservationId: activeReservationId,
       });
 
@@ -360,11 +350,9 @@ export default function CheckoutScreen() {
   const isFreeDelivery = pricing.delivery === 0;
 
   const ctaLabel =
-    selectedMethod === 'razorpay'
-      ? `Pay ₹${pricing.total} with Razorpay`
-      : selectedMethod === 'cod'
-        ? 'Place Order (Cash on Delivery)'
-        : 'Place Order';
+    selectedMethod === 'cod'
+      ? `Place order · Pay ₹${pricing.total} on delivery`
+      : `Pay ₹${pricing.total} securely`;
 
   return (
     <>
@@ -459,11 +447,9 @@ export default function CheckoutScreen() {
             </div>
           </div>
 
-          <PaymentSelection 
-            selectedMethod={selectedMethod} 
-            onSelectMethod={setSelectedMethod} 
-            upiId={upiId} 
-            onChangeUpiId={setUpiId} 
+          <PaymentSelection
+            selectedMethod={selectedMethod}
+            onSelectMethod={setSelectedMethod}
           />
 
               <CheckoutConfidence />

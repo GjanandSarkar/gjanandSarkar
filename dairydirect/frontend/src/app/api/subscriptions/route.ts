@@ -9,6 +9,7 @@ import { getAuthUser, getClientIP } from '@/lib/api/auth-middleware';
 import { checkRateLimit } from '@/lib/aws/redis';
 import { isValidUUID } from '@/lib/security/sanitize';
 import { getAdminSupabase } from '@/lib/supabase/admin';
+import { addDays, CADENCES, todayInIST, type PlanCadence } from '@/lib/subscriptions/schedule';
 
 export async function GET(request: NextRequest) {
   try {
@@ -205,74 +206,118 @@ export async function PUT(request: NextRequest) {
       return NextResponse.json({ error: 'Valid subscription ID required' }, { status: 400 });
     }
 
+    const allowedActions = ['cancel', 'pause', 'resume', 'skip', 'modify'];
+    if (!allowedActions.includes(action)) {
+      return NextResponse.json({ error: 'Invalid action' }, { status: 400 });
+    }
+
+    const VALID_PLANS = ['daily', 'alternate', 'weekly', 'custom'] as const;
+    const planValid = typeof newPlan === 'string' && (VALID_PLANS as readonly string[]).includes(newPlan);
+    const volumeValid = Number.isInteger(newVolume) && newVolume > 0 && newVolume <= 20;
+
+    if (action === 'modify' && (!planValid || !volumeValid)) {
+      return NextResponse.json(
+        { error: 'A valid volume (1–20) and plan are required to modify a plan' },
+        { status: 400 }
+      );
+    }
+
+    // ── Load the plan once, and authorise once ──────────────────────────────
+    // Every action needs the same ownership check. Previously only `cancel`
+    // verified it, so any signed-in customer could pause, resume or change the
+    // volume of another customer's subscription by guessing a UUID.
+    const sb = getAdminSupabase();
+    let ownerId: string | null = null;
+    let currentPlan = 'daily';
+    let currentNext: string | null = null;
+    let loadedFromPg = false;
+
     if (isPgConfigured) {
       try {
-        if (action === 'cancel') {
-          const checkRes = await query<{ user_id: string }>('SELECT user_id FROM subscriptions WHERE id = $1', [subId]);
-          if (checkRes.rows.length === 0) return NextResponse.json({ error: 'Not found' }, { status: 404 });
-          if (!auth.isAdmin && checkRes.rows[0].user_id !== auth.userId) {
-            return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
-          }
-
-          await query("UPDATE subscriptions SET status = 'cancelled', updated_at = now() WHERE id = $1", [subId]);
-          return NextResponse.json({ success: true });
-        }
-
-        if (action === 'pause') {
-          await query("UPDATE subscriptions SET status = 'paused', updated_at = now() WHERE id = $1", [subId]);
-          return NextResponse.json({ success: true });
-        }
-
-        if (action === 'resume') {
-          await query("UPDATE subscriptions SET status = 'active', updated_at = now() WHERE id = $1", [subId]);
-          return NextResponse.json({ success: true });
-        }
-
-        if (action === 'modify' && newVolume && newPlan) {
-          await query("UPDATE subscriptions SET volume = $1, plan = $2, updated_at = now() WHERE id = $3", [
-            newVolume,
-            newPlan,
-            subId,
-          ]);
-          return NextResponse.json({ success: true });
-        }
+        const res = await query<{ user_id: string; plan: string; next_delivery_date: string | null }>(
+          'SELECT user_id, plan, next_delivery_date FROM subscriptions WHERE id = $1',
+          [subId]
+        );
+        const row = res.rows[0];
+        if (!row) return NextResponse.json({ error: 'Not found' }, { status: 404 });
+        ownerId = row.user_id;
+        currentPlan = row.plan;
+        currentNext = row.next_delivery_date;
+        loadedFromPg = true;
       } catch (err: any) {
-        console.warn('[Subscriptions PUT] RDS failed, fallback to Supabase:', err.message);
+        console.warn('[Subscriptions PUT] RDS read failed, fallback to Supabase:', err.message);
       }
     }
 
-    const sb = getAdminSupabase();
-
-    if (action === 'cancel') {
-      const { data: subData } = await sb.from('subscriptions').select('user_id').eq('id', subId).maybeSingle();
-      if (!subData) return NextResponse.json({ error: 'Not found' }, { status: 404 });
-      if (!auth.isAdmin && subData.user_id !== auth.userId) {
-        return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
-      }
-
-      await sb.from('subscriptions').update({ status: 'cancelled', updated_at: new Date().toISOString() }).eq('id', subId);
-      return NextResponse.json({ success: true });
-    }
-
-    if (action === 'pause') {
-      await sb.from('subscriptions').update({ status: 'paused', updated_at: new Date().toISOString() }).eq('id', subId);
-      return NextResponse.json({ success: true });
-    }
-
-    if (action === 'resume') {
-      await sb.from('subscriptions').update({ status: 'active', updated_at: new Date().toISOString() }).eq('id', subId);
-      return NextResponse.json({ success: true });
-    }
-
-    if (action === 'modify' && newVolume && newPlan) {
-      await sb
+    if (!loadedFromPg) {
+      const { data: row, error } = await sb
         .from('subscriptions')
-        .update({ volume: newVolume, plan: newPlan, updated_at: new Date().toISOString() })
-        .eq('id', subId);
-      return NextResponse.json({ success: true });
+        .select('user_id, plan, next_delivery_date')
+        .eq('id', subId)
+        .maybeSingle();
+
+      if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+      if (!row) return NextResponse.json({ error: 'Not found' }, { status: 404 });
+      ownerId = row.user_id;
+      currentPlan = row.plan;
+      currentNext = row.next_delivery_date;
     }
 
-    return NextResponse.json({ error: 'Invalid action' }, { status: 400 });
+    if (!auth.isAdmin && ownerId !== auth.userId) {
+      return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+    }
+
+    // ── Build the patch ────────────────────────────────────────────────────
+    const patch: Record<string, unknown> = { updated_at: new Date().toISOString() };
+
+    switch (action) {
+      case 'cancel':
+        patch.status = 'cancelled';
+        break;
+      case 'pause':
+        patch.status = 'paused';
+        if (typeof pauseUntil === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(pauseUntil)) {
+          patch.pause_until = pauseUntil;
+        }
+        break;
+      case 'resume':
+        patch.status = 'active';
+        patch.pause_until = null;
+        break;
+      case 'skip': {
+        // Move the next delivery forward by one cadence step, starting from
+        // whichever is later: the scheduled date or today.
+        const from = currentNext && currentNext >= todayInIST() ? currentNext : todayInIST();
+        patch.next_delivery_date = addDays(from, CADENCES[currentPlan as PlanCadence]?.stepDays ?? 1);
+        break;
+      }
+      case 'modify':
+        patch.volume = newVolume;
+        patch.plan = newPlan;
+        break;
+    }
+
+    if (isPgConfigured) {
+      try {
+        const keys = Object.keys(patch).filter((k) => k !== 'updated_at');
+        const values = keys.map((k) => patch[k]);
+        const sets = keys.map((k, i) => `${k} = $${i + 1}`);
+        await query(
+          `UPDATE subscriptions SET ${sets.join(', ')}, updated_at = now() WHERE id = $${keys.length + 1}`,
+          [...values, subId]
+        );
+        return NextResponse.json({ success: true, ...patch });
+      } catch (err: any) {
+        console.warn('[Subscriptions PUT] RDS write failed, fallback to Supabase:', err.message);
+      }
+    }
+
+    const { error } = await sb.from('subscriptions').update(patch).eq('id', subId);
+    if (error) {
+      return NextResponse.json({ error: error.message }, { status: 500 });
+    }
+
+    return NextResponse.json({ success: true, ...patch });
   } catch (error: any) {
     console.error('[Subscriptions PUT] Error:', error.message);
     return NextResponse.json({ error: 'Failed to update subscription' }, { status: 500 });

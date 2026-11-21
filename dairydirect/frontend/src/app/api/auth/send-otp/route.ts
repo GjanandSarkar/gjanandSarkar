@@ -58,12 +58,14 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: stored.error }, { status: 429 });
     }
 
-    // In development/demo mode, return OTP directly (NEVER in production)
-    if (process.env.NODE_ENV !== 'production' || process.env.DEMO_MODE === 'true') {
+    // Local development only. This branch must never be reachable in a
+    // production build: DEMO_MODE is no longer honoured, because a single
+    // mis-set environment variable would return live OTPs to the caller.
+    if (process.env.NODE_ENV !== 'production') {
       console.log(`[DEV] OTP for ${phone}: ${otp}`);
       return NextResponse.json({
         success: true,
-        demoOtp: otp, // Remove this in production!
+        demoOtp: otp,
         message: 'OTP sent successfully',
       });
     }

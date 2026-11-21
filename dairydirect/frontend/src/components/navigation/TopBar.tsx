@@ -15,10 +15,10 @@ export async function TopBar() {
         {/* Left Notice */}
         <div className="flex items-center gap-2">
           <ShieldCheck className="w-3.5 h-3.5 text-on-primary shrink-0" aria-hidden="true" />
-          <span className="font-medium text-on-primary">100% Made in India</span>
+          <span className="font-medium text-on-primary">One verified dairy partner</span>
           <span className="text-on-primary/40 hidden sm:inline" aria-hidden="true">|</span>
           <span className="text-on-primary/80 hidden sm:inline">
-            One verified brand per category
+            Delivered 5–9 AM, every morning
           </span>
         </div>
 

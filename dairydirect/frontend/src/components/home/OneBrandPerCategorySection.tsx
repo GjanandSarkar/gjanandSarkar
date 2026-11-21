@@ -4,10 +4,14 @@ import React from 'react';
 import Link from 'next/link';
 import { ShieldCheck, Award, Factory, ArrowRight, CheckCircle2 } from 'lucide-react';
 import { CATEGORIES } from '@/lib/constants/categories';
+import { LIVE_CATEGORY_KEYS } from '@/lib/config/launch';
 import { useTranslation } from '@/lib/i18n';
 
 export function OneBrandPerCategorySection() {
   const { t } = useTranslation();
+  // Only promise categories that are actually live. At launch that is dairy
+  // alone; the other eleven have no partner and no stock.
+  const liveCategories = CATEGORIES.filter((c) => (LIVE_CATEGORY_KEYS as readonly string[]).includes(c.key));
 
   const benefits = [
     {
@@ -86,7 +90,9 @@ export function OneBrandPerCategorySection() {
           <div className="flex items-center gap-2">
             <CheckCircle2 className="w-4 h-4 text-primary shrink-0" />
             <p className="text-xs text-foreground font-medium">
-              Active across {CATEGORIES.length} essential categories — Dairy, Groceries, Spices, Oils, Wellness, Handicrafts & more.
+              {liveCategories.length > 0
+                ? `Live today in ${liveCategories.map((c) => c.name).join(', ')} — one partner, verified end to end.`
+                : 'Onboarding our first verified partner.'}
             </p>
           </div>
           <Link

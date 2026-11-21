@@ -1,0 +1,729 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Gjanand Sarkar — Product Audit 2026</title>
+<meta name="description" content="A full product, UX, design and security audit of the Gjanand Sarkar commerce platform." />
+<style>
+  :root{
+    /* Bright q-commerce: white canvas, one saturated green, amber for offers. */
+    --forest:#0a7b3e; --forest-2:#0b8c46; --forest-soft:#e7f7ee;
+    --saffron:#b45309; --gold:#b45309; --gold-soft:#fff6e5;
+    --ink:#101613; --ink-2:#3a4640; --muted:#5b6660; --faint:#8b958f;
+    --canvas:#ffffff; --paper:#ffffff; --sunken:#f4f6f5;
+    --line:#e6eae7; --line-2:#cbd5cf;
+    --ok:#0a7b3e; --warn:#b45309; --err:#b91c1c;
+    --r:18px; --r-sm:10px;
+    --serif:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+    --sans:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+    --mono:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+    --shadow:0 24px 60px rgba(16,22,19,.10), 0 2px 8px rgba(16,22,19,.04);
+    --shadow-sm:0 1px 2px rgba(16,22,19,.05);
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth; scroll-padding-top:88px}
+  body{
+    margin:0; background:var(--canvas); color:var(--ink);
+    font-family:var(--sans); font-size:16px; line-height:1.6;
+    -webkit-font-smoothing:antialiased; letter-spacing:-.005em;
+    background-image:
+      radial-gradient(circle at 12% -8%, rgba(10,123,62,.06), transparent 30%),
+      radial-gradient(circle at 92% 4%, rgba(194,65,12,.05), transparent 26%);
+  }
+  ::selection{background:var(--forest); color:#fff}
+  a{color:var(--forest); text-underline-offset:3px}
+  .wrap{max-width:1180px; margin:0 auto; padding:0 24px}
+  .layout{display:grid; grid-template-columns:236px minmax(0,1fr); gap:56px; align-items:start}
+  @media (max-width:980px){ .layout{grid-template-columns:1fr; gap:24px} }
+
+  /* ── top bar ───────────────────────────── */
+  .topbar{
+    position:sticky; top:0; z-index:50; backdrop-filter:blur(14px);
+    background:rgba(251,248,242,.86); border-bottom:1px solid var(--line);
+  }
+  .topbar .wrap{display:flex; align-items:center; justify-content:space-between; height:64px; gap:16px}
+  .brand{display:flex; align-items:center; gap:10px; text-decoration:none; color:var(--ink); font-weight:650}
+  .mark{width:30px;height:30px;border-radius:9px;background:var(--forest);color:#fff;display:grid;place-items:center;font-family:var(--serif);font-size:15px;letter-spacing:.02em}
+  .brand small{display:block; font-size:10.5px; font-weight:600; letter-spacing:.16em; text-transform:uppercase; color:var(--muted); line-height:1.2}
+  .top-actions{display:flex; align-items:center; gap:8px}
+  .pill{display:inline-flex;align-items:center;gap:6px;padding:7px 12px;border-radius:999px;border:1px solid var(--line-2);background:var(--paper);font-size:12px;font-weight:600;color:var(--ink-2);text-decoration:none;white-space:nowrap}
+  .pill:hover{border-color:var(--forest); color:var(--forest)}
+  .dot{width:7px;height:7px;border-radius:50%;background:var(--ok);box-shadow:0 0 0 3px rgba(15,122,85,.12)}
+
+  /* ── side nav ──────────────────────────── */
+  .sidenav{position:sticky; top:88px; padding-bottom:32px}
+  .sidenav p{font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--faint);font-weight:700;margin:0 0 10px}
+  .sidenav a{display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:9px;text-decoration:none;color:var(--ink-2);font-size:13.5px;font-weight:550;line-height:1.35;transition:.18s}
+  .sidenav a span{font-family:var(--mono);font-size:10px;color:var(--faint);width:18px;flex:none}
+  .sidenav a:hover{background:var(--sunken);color:var(--ink)}
+  .sidenav a.active{background:var(--forest-soft); color:var(--forest); font-weight:650}
+  .sidenav a.active span{color:var(--forest-2)}
+  .sidenav .note{margin-top:18px;padding:12px;border-left:2px solid var(--line-2);color:var(--muted);font-size:11.5px;line-height:1.5}
+  @media (max-width:980px){
+    .sidenav{position:static; overflow-x:auto; white-space:nowrap; padding:8px 0 4px; margin-top:8px}
+    .sidenav p,.sidenav .note{display:none}
+    .sidenav a{display:inline-flex; margin-right:6px; background:var(--paper); border:1px solid var(--line)}
+    .sidenav a span{display:none}
+  }
+
+  /* ── hero ──────────────────────────────── */
+  .hero{padding:56px 0 8px}
+  .eyebrow{display:inline-flex;align-items:center;gap:8px;font-size:11px;font-weight:700;letter-spacing:.17em;text-transform:uppercase;color:var(--gold)}
+  .eyebrow::before{content:"";width:26px;height:1px;background:var(--gold);opacity:.6}
+  h1{font-family:var(--serif); font-weight:500; font-size:clamp(38px,5.2vw,62px); line-height:1.03; letter-spacing:-.028em; margin:18px 0 0}
+  h1 em{font-style:italic; color:var(--forest)}
+  .dek{font-size:clamp(16px,1.6vw,19px); color:var(--ink-2); max-width:62ch; margin:20px 0 0; line-height:1.6}
+  .meta{display:flex;flex-wrap:wrap;gap:8px;margin-top:24px}
+  .meta span{font-size:11.5px;color:var(--muted);border:1px solid var(--line);background:rgba(255,255,255,.55);padding:5px 10px;border-radius:999px}
+  .hero-rule{height:1px;background:linear-gradient(90deg,var(--line-2),transparent);margin:34px 0 0}
+
+  /* ── verdict ───────────────────────────── */
+  .verdict{display:grid;grid-template-columns:168px 1fr;gap:26px;align-items:center;margin:32px 0 8px;padding:26px;border:1px solid var(--line);border-radius:24px;background:linear-gradient(160deg,#fff, #fdfbf6);box-shadow:var(--shadow-sm)}
+  @media (max-width:640px){.verdict{grid-template-columns:1fr; justify-items:start}}
+  .score{position:relative;width:148px;height:148px;display:grid;place-items:center}
+  .score svg{transform:rotate(-90deg)}
+  .score .num{position:absolute;text-align:center;line-height:1}
+  .score .num b{font-family:var(--serif);font-size:40px;font-weight:500;letter-spacing:-.03em}
+  .score .num small{display:block;font-size:9.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin-top:7px;font-weight:700}
+  .verdict h2{font-family:var(--serif);font-size:26px;font-weight:500;margin:0 0 8px;letter-spacing:-.015em}
+  .verdict p{margin:0;color:var(--ink-2);font-size:14.5px;max-width:58ch}
+  .verdict .tags{display:flex;gap:6px;flex-wrap:wrap;margin-top:14px}
+  .tag{font-size:10.5px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;padding:4px 9px;border-radius:6px;background:var(--forest-soft);color:var(--forest)}
+  .tag.warn{background:var(--gold-soft);color:var(--gold)}
+  .tag.err{background:#fee2e2;color:var(--err)}
+
+  /* ── sections ──────────────────────────── */
+  section{padding:58px 0 8px; border-top:1px solid var(--line); margin-top:52px}
+  section:first-of-type{border-top:0; margin-top:0}
+  .sec-head{display:flex;align-items:baseline;gap:14px;margin-bottom:8px}
+  .sec-no{font-family:var(--mono);font-size:11px;color:var(--faint);letter-spacing:.06em}
+  h2.sec{font-family:var(--serif);font-size:clamp(27px,3vw,36px);font-weight:500;letter-spacing:-.02em;line-height:1.1;margin:0}
+  .lede{color:var(--ink-2);font-size:15.5px;max-width:68ch;margin:12px 0 26px}
+  h3{font-size:16px;font-weight:650;margin:30px 0 8px;letter-spacing:-.01em}
+  p{margin:0 0 14px;color:var(--ink-2)}
+  strong{color:var(--ink);font-weight:650}
+  code{font-family:var(--mono);font-size:.86em;background:var(--sunken);padding:2px 5px;border-radius:4px;color:var(--ink)}
+  ul{margin:0 0 16px;padding-left:18px;color:var(--ink-2)}
+  li{margin:0 0 7px}
+  li::marker{color:var(--forest-2)}
+  .fine{font-size:12px;color:var(--muted)}
+
+  /* ── scorecard ─────────────────────────── */
+  .grid{display:grid;gap:12px}
+  .grid.two{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .grid.three{grid-template-columns:repeat(3,minmax(0,1fr))}
+  .grid.four{grid-template-columns:repeat(4,minmax(0,1fr))}
+  @media (max-width:780px){.grid.two,.grid.three,.grid.four{grid-template-columns:1fr}}
+  .card{background:var(--paper);border:1px solid var(--line);border-radius:var(--r);padding:18px;box-shadow:var(--shadow-sm)}
+  .card h4{margin:0 0 6px;font-size:13.5px;font-weight:650}
+  .card p{margin:0;font-size:13px;color:var(--muted);line-height:1.55}
+  .scorebar{display:grid;grid-template-columns:minmax(0,1fr) 40px;gap:12px;align-items:center;padding:11px 0;border-bottom:1px solid var(--line)}
+  .scorebar:last-child{border-bottom:0}
+  .scorebar .label{display:flex;justify-content:space-between;gap:10px;font-size:13.5px;font-weight:550}
+  .scorebar .label span{font-family:var(--mono);font-size:11.5px;color:var(--muted)}
+  .track{height:6px;background:var(--sunken);border-radius:99px;overflow:hidden;margin-top:7px}
+  .fill{height:100%;border-radius:99px;background:linear-gradient(90deg,var(--forest),var(--forest-2));width:0;transition:width 1.1s cubic-bezier(.22,1,.36,1)}
+  .fill.warn{background:linear-gradient(90deg,#b45309,#e8871e)}
+  .fill.err{background:linear-gradient(90deg,#b91c1c,#e05252)}
+  .scorebar b{font-family:var(--serif);font-size:19px;font-weight:500;text-align:right}
+
+  /* ── findings ──────────────────────────── */
+  .finding{display:grid;grid-template-columns:64px minmax(0,1fr);gap:16px;padding:18px 0;border-bottom:1px solid var(--line)}
+  .finding:last-child{border-bottom:0;padding-bottom:0}
+  .sev{font-family:var(--mono);font-size:10px;font-weight:700;letter-spacing:.08em;text-align:center;padding:5px 0;border-radius:5px;height:24px}
+  .sev.p0{background:#fee2e2;color:#991b1b}
+  .sev.p1{background:var(--gold-soft);color:var(--gold)}
+  .sev.p2{background:var(--forest-soft);color:var(--forest)}
+  .finding h4{margin:0 0 4px;font-size:14.5px;font-weight:650;letter-spacing:-.005em}
+  .finding p{margin:0;font-size:13.2px;color:var(--muted);line-height:1.55}
+  .finding .where{font-family:var(--mono);font-size:10.5px;color:var(--faint);margin-top:5px;display:block}
+
+  /* ── five fixes ────────────────────────── */
+  .fixes{counter-reset:f;display:grid;gap:10px}
+  .fix{position:relative;display:grid;grid-template-columns:34px 1fr;gap:14px;padding:16px 18px;border:1px solid var(--line);border-radius:var(--r-sm);background:var(--paper)}
+  .fix::before{counter-increment:f;content:counter(f);font-family:var(--serif);font-size:17px;color:var(--forest);width:30px;height:30px;border-radius:50%;background:var(--forest-soft);display:grid;place-items:center;font-weight:500}
+  .fix h4{margin:2px 0 3px;font-size:14px}
+  .fix p{margin:0;font-size:12.8px;color:var(--muted)}
+
+  /* ── modules ───────────────────────────── */
+  .module{background:var(--paper);border:1px solid var(--line);border-radius:20px;overflow:hidden}
+  .module .head{padding:18px 20px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center;gap:12px}
+  .module .head h3{margin:0;font-family:var(--serif);font-size:21px;font-weight:500}
+  .module .head span{font-family:var(--mono);font-size:10px;color:var(--muted)}
+  .module .body{padding:18px 20px}
+  .module .body p{font-size:13.2px;margin:0 0 10px}
+  .module .body p:last-child{margin:0}
+  .k{font-size:12px;font-weight:700;color:var(--forest);text-transform:uppercase;letter-spacing:.08em}
+
+  /* ── quote ─────────────────────────────── */
+  .quote{border-left:2px solid var(--saffron);padding:4px 0 4px 18px;margin:22px 0;font-family:var(--serif);font-size:20px;line-height:1.45;color:var(--ink);letter-spacing:-.01em}
+  .quote small{display:block;font-family:var(--sans);font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin-top:8px;font-weight:700}
+
+  /* ── table ─────────────────────────────── */
+  .tablewrap{overflow-x:auto;border:1px solid var(--line);border-radius:14px;background:var(--paper)}
+  table{border-collapse:collapse;width:100%;font-size:13px;min-width:560px}
+  th{text-align:left;font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);font-weight:700;padding:12px 14px;border-bottom:1px solid var(--line);background:#fdfbf7}
+  td{padding:12px 14px;border-bottom:1px solid var(--line);vertical-align:top;color:var(--ink-2)}
+  tr:last-child td{border-bottom:0}
+  td strong{color:var(--ink)}
+  .num{font-variant-numeric:tabular-nums;white-space:nowrap}
+  .good{color:var(--ok);font-weight:650}
+  .bad{color:var(--err);font-weight:650}
+  .mid{color:var(--gold);font-weight:650}
+
+  /* ── design direction ──────────────────── */
+  .tokens{display:grid;grid-template-columns:repeat(6,1fr);gap:8px;margin:14px 0 6px}
+  @media (max-width:640px){.tokens{grid-template-columns:repeat(3,1fr)}}
+  .swatch{border:1px solid var(--line);border-radius:10px;overflow:hidden;background:var(--paper)}
+  .swatch i{display:block;height:52px}
+  .swatch span{display:block;padding:7px 8px;font-family:var(--mono);font-size:9.5px;color:var(--muted)}
+
+  .phones{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:22px;margin-top:20px}
+  @media (max-width:680px){.phones{grid-template-columns:1fr}}
+  .phone{background:var(--paper);border:1px solid var(--line);border-radius:26px;padding:10px;box-shadow:var(--shadow)}
+  .screen{border-radius:18px;overflow:hidden;background:var(--canvas);border:1px solid var(--line)}
+  .statusbar{display:flex;justify-content:space-between;font-size:8.5px;font-weight:700;color:var(--ink-2);padding:7px 12px 3px}
+  .appbar{padding:2px 12px 8px}
+  .loc{display:flex;justify-content:space-between;align-items:center;font-size:10px;color:var(--muted)}
+  .loc b{color:var(--ink);font-size:11px}
+  .search{margin-top:6px;height:30px;border-radius:9px;background:var(--sunken);border:1px solid var(--line-2);display:flex;align-items:center;gap:6px;padding:0 9px;font-size:9.5px;color:var(--faint)}
+  .chips{display:flex;gap:5px;padding:0 12px 9px;overflow:hidden}
+  .chip{font-size:8.7px;font-weight:650;padding:4px 8px;border-radius:99px;border:1px solid var(--line-2);background:var(--paper);white-space:nowrap}
+  .chip.on{background:var(--forest);color:#fff;border-color:var(--forest)}
+  .hero-card{margin:0 12px 10px;border-radius:14px;background:linear-gradient(145deg,#0a7b3e,#0b8c46);color:#fff;padding:13px}
+  .hero-card .tiny{font-size:7.5px;letter-spacing:.14em;text-transform:uppercase;opacity:.7;font-weight:700}
+  .hero-card h4{font-family:var(--serif);font-size:17px;line-height:1.15;margin:5px 0 4px;font-weight:500;letter-spacing:-.01em}
+  .hero-card p{font-size:8.5px;line-height:1.45;margin:0;color:rgba(255,255,255,.78)}
+  .hero-card .cta{margin-top:8px;display:inline-block;background:#fff;color:var(--forest);font-size:8.5px;font-weight:700;padding:4px 8px;border-radius:5px}
+  .minihead{display:flex;justify-content:space-between;align-items:center;padding:0 12px 6px;font-size:9.5px;font-weight:700}
+  .minihead span{font-size:8px;color:var(--muted);font-weight:600}
+  .mini-rail{display:grid;grid-template-columns:1fr 1fr;gap:7px;padding:0 12px 8px}
+  .mini{padding:6px;border:1px solid var(--line);border-radius:9px;background:#fff}
+  .mini .img{height:40px;border-radius:6px;background:linear-gradient(145deg,#f2ecdf,#e6ddc9);display:grid;place-items:center;font-family:var(--serif);font-size:14px;color:#b3a88f}
+  .mini .b{font-size:7.5px;color:var(--muted);margin-top:4px}
+  .mini .n{font-size:8.5px;font-weight:650;line-height:1.2}
+  .mini .row{display:flex;justify-content:space-between;align-items:center;margin-top:4px}
+  .mini .p{font-size:10px;font-weight:750;color:var(--forest)}
+  .mini .add{font-size:7px;font-weight:700;border:1px solid var(--forest);color:var(--forest);border-radius:4px;padding:2px 4px}
+  .bottomnav{display:flex;justify-content:space-around;align-items:center;border-top:1px solid var(--line);background:#fff;padding:6px 4px 8px;margin-top:2px}
+  .bn{text-align:center;font-size:7px;color:var(--faint);font-weight:650}
+  .bn.on{color:var(--forest)}
+  .bn i{display:block;width:14px;height:14px;margin:0 auto 2px;border-radius:4px;background:var(--sunken)}
+  .bn.on i{background:var(--forest-soft);box-shadow:inset 0 0 0 1px rgba(11,59,39,.2)}
+  .bn .badge{position:relative}
+  .bn .badge::after{content:"3";position:absolute;top:-3px;right:-5px;background:var(--saffron);color:#fff;font-size:6px;width:9px;height:9px;border-radius:50%;display:grid;place-items:center;font-weight:700}
+
+  .beforeafter{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:14px}
+  @media (max-width:680px){.beforeafter{grid-template-columns:1fr}}
+  .ba{border:1px solid var(--line);border-radius:12px;padding:13px;background:#fff}
+  .ba h5{margin:0 0 7px;font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+  .ba .old{color:var(--err);font-size:12.5px;margin:0 0 4px}
+  .ba .new{color:var(--ok);font-size:12.5px;margin:0}
+
+  /* ── roadmap ───────────────────────────── */
+  .road{position:relative;margin:10px 0 0;padding-left:26px}
+  .road::before{content:"";position:absolute;left:7px;top:6px;bottom:6px;width:1px;background:var(--line-2)}
+  .phase{position:relative;padding:0 0 24px}
+  .phase:last-child{padding-bottom:0}
+  .phase::before{content:"";position:absolute;left:-24px;top:5px;width:13px;height:13px;border-radius:50%;background:var(--canvas);border:1px solid var(--forest)}
+  .phase.done::before{background:var(--forest)}
+  .phase h4{margin:0 0 3px;font-size:14.5px}
+  .phase .when{font-family:var(--mono);font-size:10px;color:var(--gold);letter-spacing:.05em}
+  .phase p{margin:5px 0 0;font-size:13px;color:var(--muted);max-width:66ch}
+
+  .callout{border:1px solid var(--line-2);background:linear-gradient(160deg,#fff, #fbf6ea);border-radius:16px;padding:20px;margin:22px 0}
+  .callout h4{margin:0 0 6px;font-size:14px}
+  .callout p{margin:0;font-size:13.2px;color:var(--ink-2)}
+
+  .sources{font-size:12px;color:var(--muted);columns:2;column-gap:26px}
+  @media (max-width:680px){.sources{columns:1}}
+  .sources a{display:block;margin-bottom:7px;color:var(--ink-2);text-decoration:none;border-bottom:1px solid transparent}
+  .sources a:hover{color:var(--forest);border-bottom-color:var(--forest)}
+
+  footer{margin-top:64px;border-top:1px solid var(--line);padding:28px 0 46px;display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;font-size:11.5px;color:var(--muted)}
+
+  @media (prefers-reduced-motion:reduce){
+    html{scroll-behavior:auto}
+    .fill{transition:none}
+  }
+  @media print{
+    .topbar,.sidenav{display:none}
+    body{background:#fff}
+    .layout{display:block}
+    section{break-inside:avoid}
+    .phone{box-shadow:none}
+  }
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="wrap">
+    <a class="brand" href="#top">
+      <span class="mark">GS</span>
+      <span>Gjanand Sarkar<small>Product Audit · 2026</small></span>
+    </a>
+    <div class="top-actions">
+      <span class="pill"><span class="dot"></span> Local-only</span>
+      <a class="pill" href="#roadmap">Roadmap →</a>
+    </div>
+  </div>
+</div>
+
+<div class="wrap" id="top">
+  <div class="layout">
+
+    <nav class="sidenav" aria-label="Report sections">
+      <p>Contents</p>
+      <a href="#verdict" class="active"><span>01</span> Verdict</a>
+      <a href="#strengths"><span>02</span> What works</a>
+      <a href="#findings"><span>03</span> Critical findings</a>
+      <a href="#modules"><span>04</span> The three modules</a>
+      <a href="#psychology"><span>05</span> Psychology of premium</a>
+      <a href="#direction"><span>06</span> Design direction</a>
+      <a href="#performance"><span>07</span> Performance &amp; security</a>
+      <a href="#roadmap"><span>08</span> Roadmap</a>
+      <a href="#sources"><span>09</span> Sources</a>
+      <div class="note">Prepared from a full code read, production build, runtime probe and database review. No remote pushes.</div>
+    </nav>
+
+    <main>
+
+      <header class="hero">
+        <div class="eyebrow">Independent product &amp; experience audit</div>
+        <h1>Strong bones.<br><em>Unfinished product.</em></h1>
+        <p class="dek">A full read of the Gjanand Sarkar commerce platform — architecture, customer journey, seller and admin modules, visual craft, security and the psychology of trust. Calibrated against funded Indian commerce products, not against a hobby project.</p>
+        <div class="meta">
+          <span>20 November 2026</span>
+          <span>64 routes · 74 APIs · 44 tables</span>
+          <span>Build passing</span>
+          <span>Local working tree only</span>
+        </div>
+        <div class="hero-rule"></div>
+
+        <div class="verdict" id="verdict">
+          <div class="score" aria-label="Overall score 5.4 out of 10">
+            <svg width="148" height="148" viewBox="0 0 148 148" aria-hidden="true">
+              <circle cx="74" cy="74" r="64" fill="none" stroke="#f0eadf" stroke-width="9"/>
+              <circle cx="74" cy="74" r="64" fill="none" stroke="#0a7b3e" stroke-width="9"
+                stroke-linecap="round" stroke-dasharray="402" stroke-dashoffset="402"
+                id="scoreRing"/>
+            </svg>
+            <div class="num"><b>5.4</b><small>out of 10</small></div>
+          </div>
+          <div>
+            <h2>A credible product with a dangerous front door.</h2>
+            <p>Thirty-eight tables, real stock reservations, five-step payment verification and genuine accessibility intent. But a public “Super Admin” button mints an admin session, every customer profile is world-readable, the default payment method is rejected by the server, and an entire subscription pillar redirects to the home page.</p>
+            <div class="tags">
+              <span class="tag err">2 critical security holes</span>
+              <span class="tag warn">1 broken core flow</span>
+              <span class="tag">Design system 60% there</span>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      <section id="scorecard">
+        <div class="sec-head"><span class="sec-no">01</span><h2 class="sec">The scorecard</h2></div>
+        <p class="lede">Scored against what a funded Indian commerce product must be, not against the effort that went in. The pattern is clear: engineering maturity is ahead of product completeness, and both are ahead of visual craft.</p>
+        <div class="grid two">
+          <div class="card">
+            <div class="scorebar"><div><div class="label">Security &amp; compliance <span>3.0</span></div><div class="track"><div class="fill err" data-w="30"></div></div></div><b>3.0</b></div>
+            <div class="scorebar"><div><div class="label">Reliability <span>5.0</span></div><div class="track"><div class="fill warn" data-w="50"></div></div></div><b>5.0</b></div>
+            <div class="scorebar"><div><div class="label">Performance <span>6.0</span></div><div class="track"><div class="fill warn" data-w="60"></div></div></div><b>6.0</b></div>
+            <div class="scorebar"><div><div class="label">Architecture <span>6.5</span></div><div class="track"><div class="fill" data-w="65"></div></div></div><b>6.5</b></div>
+            <div class="scorebar"><div><div class="label">Information architecture <span>5.0</span></div><div class="track"><div class="fill warn" data-w="50"></div></div></div><b>5.0</b></div>
+            <div class="scorebar"><div><div class="label">Customer UX <span>5.5</span></div><div class="track"><div class="fill warn" data-w="55"></div></div></div><b>5.5</b></div>
+          </div>
+          <div class="card">
+            <div class="scorebar"><div><div class="label">Seller experience <span>5.0</span></div><div class="track"><div class="fill warn" data-w="50"></div></div></div><b>5.0</b></div>
+            <div class="scorebar"><div><div class="label">Admin experience <span>5.5</span></div><div class="track"><div class="fill warn" data-w="55"></div></div></div><b>5.5</b></div>
+            <div class="scorebar"><div><div class="label">Visual craft <span>6.0</span></div><div class="track"><div class="fill warn" data-w="60"></div></div></div><b>6.0</b></div>
+            <div class="scorebar"><div><div class="label">Accessibility <span>5.0</span></div><div class="track"><div class="fill warn" data-w="50"></div></div></div><b>5.0</b></div>
+            <div class="scorebar"><div><div class="label">Documentation <span>7.0</span></div><div class="track"><div class="fill" data-w="70"></div></div></div><b>7.0</b></div>
+            <div class="scorebar"><div><div class="label">Mobile readiness <span>6.5</span></div><div class="track"><div class="fill" data-w="65"></div></div></div><b>6.5</b></div>
+          </div>
+        </div>
+        <p class="fine" style="margin-top:12px">Full reasoning for every score is in the <a href="00-EXECUTIVE-AUDIT.md">executive document</a>.</p>
+      </section>
+
+      <section id="strengths">
+        <div class="sec-head"><span class="sec-no">02</span><h2 class="sec">What is genuinely strong</h2></div>
+        <p class="lede">This is not a rewrite. Several parts of the system are better than what many funded teams ship. Protect them while you fix the rest.</p>
+        <div class="grid three">
+          <div class="card"><h4>Payment verification</h4><p>Signature, gateway fetch, captured status, order-id match, amount match and user match. Not a single-step HMAC check.</p></div>
+          <div class="card"><h4>Stock integrity</h4><p>Row locks, reservation holds with expiry, idempotency keys and atomic cancel/return RPCs. Built for a festival spike.</p></div>
+          <div class="card"><h4>Server / browser split</h4><p><code>server-only</code> catalogue reads and a service key that never reaches the client. The common Supabase leak was avoided.</p></div>
+          <div class="card"><h4>Caching instinct</h4><p>Tagged <code>unstable_cache</code>, five-minute revalidation, explicit column lists, 24-item pages. The right shape.</p></div>
+          <div class="card"><h4>Trust copy</h4><p>No invented strikethroughs. No default 4.8 ratings. A support assistant that refuses to invent a refund timeline.</p></div>
+          <div class="card"><h4>Brand differentiation</h4><p>Forest, cream and ochre is a real identity — not a purple-gradient template. It needs discipline, not replacement.</p></div>
+        </div>
+      </section>
+
+      <section id="findings">
+        <div class="sec-head"><span class="sec-no">03</span><h2 class="sec">The findings that matter</h2></div>
+        <p class="lede">Sixty-four defects were logged. These twelve decide whether the product can launch, convert and be trusted.</p>
+
+        <div class="finding"><div class="sev p0">P0</div><div><h4>Anyone can mint an admin session</h4><p>“Instant Access → Super Admin” on the public login page calls an endpoint that signs a valid admin JWT.</p><span class="where">api/auth/sync · LoginView.tsx</span></div></div>
+        <div class="finding"><div class="sev p0">P0</div><div><h4>Every customer profile is world-readable</h4><p><code>profiles</code> uses <code>USING (true)</code> while <code>anon</code> holds <code>GRANT ALL</code>. Names, phones, emails, addresses and roles are enumerable with the public key.</p><span class="where">003_functions_rls_storage.sql:263–264, 415</span></div></div>
+        <div class="finding"><div class="sev p0">P0</div><div><h4>The default payment method is rejected</h4><p>Checkout defaults to “Direct UPI ID”; the order API returns HTTP 400 for it. The most likely first order fails at the last step.</p><span class="where">useStore.ts:242 · PaymentSelection.tsx · orders/place:80</span></div></div>
+        <div class="finding"><div class="sev p0">P0</div><div><h4>The subscription module does not exist</h4><p>Both subscription pages are redirects to <code>/home</code>, while the home page, profile and notifications advertise subscriptions.</p><span class="where">app/(customer)/subscribe/page.tsx · subscribe/new</span></div></div>
+        <div class="finding"><div class="sev p1">P1</div><div><h4>Role is inferred from an email substring</h4><p><code>email.includes("admin")</code> grants the admin shell in two places. Server APIs still check the DB, but it is one mistake from escalation.</p><span class="where">LoginView.tsx:83 · auth/callback:77</span></div></div>
+        <div class="finding"><div class="sev p1">P1</div><div><h4>No pincode check, but the FAQ promises one</h4><p>Delivery windows and charges are claimed at checkout; checkout never asks for a pincode or checks serviceability.</p><span class="where">faq/page.tsx:48</span></div></div>
+        <div class="finding"><div class="sev p1">P1</div><div><h4>No upstream timeouts</h4><p>With the database unavailable, <code>/products</code> took 7.32 s and <code>/offers</code> 7.12 s. One slow dependency becomes a blank page.</p><span class="where">measured in local production run</span></div></div>
+        <div class="finding"><div class="sev p1">P1</div><div><h4>Five admin screens are unreachable</h4><p>Inventory, settings, subscriptions, reports and vendors are absent from the sidebar. Two order screens compete for the same task.</p><span class="where">AdminSidebar.tsx · app/admin/*</span></div></div>
+        <div class="finding"><div class="sev p1">P1</div><div><h4>Identity is persisted in localStorage</h4><p>Name, phone, email, addresses and role survive logout and are readable by the next person on a shared phone.</p><span class="where">store/useStore.ts:246–254</span></div></div>
+        <div class="finding"><div class="sev p1">P1</div><div><h4>22 native alerts, 398 console calls</h4><p>The most sensitive moments — payment failure, order failure — are handled by a browser dialog with a raw gateway id.</p><span class="where">checkout/page.tsx:146–321</span></div></div>
+        <div class="finding"><div class="sev p1">P1</div><div><h4>Staff cannot use the storefront</h4><p>AuthGuard pushes admins and sellers out of every customer route, so nobody on the team can test or demo the real journey.</p><span class="where">components/auth/AuthGuard.tsx</span></div></div>
+        <div class="finding"><div class="sev p1">P1</div><div><h4>No app bridge</h4><p>No manifest, maskable icons, offline shell or install prompt — despite a stated “website now, app later” plan.</p><span class="where">public/ · no manifest</span></div></div>
+
+        <div class="callout">
+          <h4>Read the full register</h4>
+          <p>Sixty-four findings with file evidence, impact, fix and a dependency-aware sequence: <a href="04-BUG-REGISTER.md">04 — Bug Register</a>.</p>
+        </div>
+      </section>
+
+      <section id="fixfirst">
+        <div class="sec-head"><span class="sec-no">03.1</span><h2 class="sec">Five things before anything else</h2></div>
+        <p class="lede">Not design improvements. Stop-the-bleeding actions. Roughly three engineer-days in total.</p>
+        <div class="fixes">
+          <div class="fix"><div><h4>Delete the demo admin path</h4><p>Remove the endpoint branch and the UI. Add a CI guard. Verify with a production build.</p></div></div>
+          <div class="fix"><div><h4>Fix the profile RLS and anon grants</h4><p>Scope reads to self or admin, revoke <code>anon</code>, and remove anonymous order inserts.</p></div></div>
+          <div class="fix"><div><h4>Remove Direct UPI</h4><p>Default to Razorpay, migrate stored selections, and test that every rendered method can place an order.</p></div></div>
+          <div class="fix"><div><h4>Ship or hide subscriptions</h4><p>No banner may lead to a redirect. Either build the four-step plan builder or remove every link this week.</p></div></div>
+          <div class="fix"><div><h4>Stop trusting the browser for identity</h4><p>Role comes from <code>profiles.role</code> only. Remove email inference and hardcoded addresses.</p></div></div>
+        </div>
+      </section>
+
+      <section id="modules">
+        <div class="sec-head"><span class="sec-no">04</span><h2 class="sec">The three modules</h2></div>
+        <p class="lede">Each module works. Each one is also solving a different stage of the same trust problem — and each has a different shape of unfinished.</p>
+
+        <div class="grid three" style="align-items:start">
+          <div class="module">
+            <div class="head"><h3>Customer</h3><span>39 ROUTES</span></div>
+            <div class="body">
+              <p><span class="k">Strong</span> — product card accessibility, variant sheet, unresolved-cart handling, checkout skeletons, real discount logic.</p>
+              <p><span class="k" style="color:var(--gold)">Missing</span> — no hero promise, no pincode, no slot, no cart in the bottom nav, no search suggestions, dead subscriptions.</p>
+              <p><span class="k" style="color:var(--err)">Broken</span> — default UPI fails; payment failure has no recovery.</p>
+            </div>
+          </div>
+          <div class="module">
+            <div class="head"><h3>Seller</h3><span>6 ROUTES</span></div>
+            <div class="body">
+              <p><span class="k">Strong</span> — lifecycle states, KYC, product approval, stock/price edit, payouts, quality reports.</p>
+              <p><span class="k" style="color:var(--gold)">Missing</span> — a “Today” operations brief, guided onboarding, one navigation pattern, payout statements.</p>
+              <p><span class="k" style="color:var(--err)">Fragile</span> — one 1,699-line dashboard owns ten tabs and six modals.</p>
+            </div>
+          </div>
+          <div class="module">
+            <div class="head"><h3>Admin</h3><span>23 ROUTES</span></div>
+            <div class="body">
+              <p><span class="k">Strong</span> — breadth of control, audit logs, status transition guards, BI endpoints.</p>
+              <p><span class="k" style="color:var(--gold)">Missing</span> — global search, grouped navigation, money reconciliation, mobile exception queue.</p>
+              <p><span class="k" style="color:var(--err)">Risky</span> — client-side gate, direct browser PII queries, decorative role permissions.</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="quote">“Operators cannot find the order. Sellers cannot find the morning. Customers cannot find the cart.”<small>The three-module failure in one sentence</small></div>
+      </section>
+
+      <section id="psychology">
+        <div class="sec-head"><span class="sec-no">05</span><h2 class="sec">The psychology of premium</h2></div>
+        <p class="lede">Premium is not decoration. It is the absence of doubt at every moment the customer could hesitate. Indian grocery commerce is a certainty market before it is a convenience market.</p>
+
+        <div class="grid two">
+          <div>
+            <h3>What users actually read as “expensive”</h3>
+            <ul>
+              <li><strong>Latency</strong> — instant taps and no layout jump say “real company”.</li>
+              <li><strong>Consistency</strong> — one radius, one spacing rhythm, one button height.</li>
+              <li><strong>Restraint</strong> — one accent colour, few borders, no badge soup.</li>
+              <li><strong>Specificity</strong> — “A2 Gir cow milk, 1 L, batch G-2481” beats “pure milk”.</li>
+              <li><strong>Reversibility</strong> — a visible return promise at the point of doubt.</li>
+              <li><strong>Human fallback</strong> — a named support path with an SLA.</li>
+            </ul>
+          </div>
+          <div>
+            <h3>The Indian trust equation</h3>
+            <ol style="padding-left:18px;color:var(--ink-2)">
+              <li>Will it arrive when you said?</li>
+              <li>Is it actually fresh and authentic?</li>
+              <li>Is the price honest, all-in?</li>
+              <li>Can I undo this?</li>
+              <li>Can I pay my way — UPI first, COD available?</li>
+              <li>Will a human help, in my language?</li>
+            </ol>
+            <p style="font-size:13px;color:var(--muted)">Today the product supports four of the six partially, and two not at all: certainty of arrival and human recovery.</p>
+          </div>
+        </div>
+
+        <h3>Ethical persuasion — and the line</h3>
+        <p>CCPA’s 2023 guidelines prohibit false urgency, basket sneaking, drip pricing, subscription traps and confirm-shaming; from January 2027 e-commerce platforms must publish an annual dark-pattern self-audit. The audit found <strong>no active dark patterns</strong> — preserve that.</p>
+        <div class="beforeafter">
+          <div class="ba"><h5>Use</h5><p class="new">“Only 4 left in today’s batch” when it is true.</p><p class="new" style="margin-top:5px">A real reservation timer tied to the stock hold.</p><p class="new" style="margin-top:5px">Free-delivery progress that starts at 20%.</p><p class="new" style="margin-top:5px">A quality report before asking for the sale.</p></div>
+          <div class="ba"><h5>Avoid</h5><p class="old">A permanent “Only 2 left!” on every card.</p><p class="old" style="margin-top:5px">A handling fee revealed at payment.</p><p class="old" style="margin-top:5px">Auto-adding a “free” item.</p><p class="old" style="margin-top:5px">A cancellation flow behind three screens.</p></div>
+        </div>
+
+        <div class="quote">Fix the failure peak, not the confetti. The last ten seconds of an order — and the first ten of a failure — decide what the customer remembers.<small>Peak-end rule, applied to checkout recovery</small></div>
+      </section>
+
+      <section id="direction">
+        <div class="sec-head"><span class="sec-no">06</span><h2 class="sec">Design direction: Bright q-commerce</h2></div>
+        <p class="lede">A white canvas, one saturated green, and product cards that do the talking. This is the Blinkit/Zepto/Instamart grammar Indian shoppers already know how to use — applied to a single-partner dairy brand, so it feels fast <em>and</em> trustworthy rather than loud.</p>
+
+        <div class="tokens" aria-label="Proposed palette">
+          <div class="swatch"><i style="background:#0a7b3e"></i><span>#0A7B3E</span></div>
+          <div class="swatch"><i style="background:#0b8c46"></i><span>#0B8C46</span></div>
+          <div class="swatch"><i style="background:#b45309"></i><span>#B45309</span></div>
+          <div class="swatch"><i style="background:#e7f7ee;border-bottom:1px solid #e6eae7"></i><span>#E7F7EE</span></div>
+          <div class="swatch"><i style="background:#ffffff;border-bottom:1px solid #e6eae7"></i><span>#FFFFFF</span></div>
+          <div class="swatch"><i style="background:#101613"></i><span>#101613</span></div>
+        </div>
+        <p class="fine">80% white · 14% ink · 5% green · 1% amber. Green is action and freshness; amber is price, saving or scarcity — never body text. Contrast on white: green 5.36:1, amber 5.02:1, muted text 5.98:1.</p>
+
+        <div class="phones">
+          <div class="phone" aria-label="Proposed mobile home screen">
+            <div class="screen">
+              <div class="statusbar"><span>9:41</span><span>▰ ▰ ▰</span></div>
+              <div class="appbar">
+                <div class="loc"><span>Deliver to <b>380015</b> ▾</span><span>🔔</span></div>
+                <div class="search">⌕&nbsp; Search milk, ghee, paneer…</div>
+              </div>
+              <div class="chips">
+                <span class="chip on">Dairy</span><span class="chip">Ghee</span><span class="chip">Curd</span><span class="chip">Paneer</span><span class="chip">Oils</span>
+              </div>
+              <div class="hero-card">
+                <div class="tiny">Tomorrow · 6:30–7:30 a.m.</div>
+                <h4>Milk before your alarm.</h4>
+                <p>A2 Gir cow milk, curd, paneer and ghee from one farm. At your door 5–9 AM.</p>
+                <span class="cta">Shop dairy</span>
+              </div>
+              <div class="minihead">Your morning plan <span>Daily</span></div>
+              <div class="mini-rail">
+                <div class="mini"><div class="img">A2</div><div class="b">Gir Organic</div><div class="n">A2 Cow Milk · 1 L</div><div class="row"><span class="p">₹84</span><span class="add">ADD</span></div></div>
+                <div class="mini"><div class="img">PAN</div><div class="b">Gir Organic</div><div class="n">Malai Paneer · 200 g</div><div class="row"><span class="p">₹110</span><span class="add">ADD</span></div></div>
+              </div>
+              <div class="bottomnav">
+                <div class="bn on"><i></i>Home</div>
+                <div class="bn"><i></i>Shop</div>
+                <div class="bn"><i></i><span class="badge">Cart</span></div>
+                <div class="bn"><i></i>Orders</div>
+                <div class="bn"><i></i>You</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="phone" aria-label="Proposed checkout summary">
+            <div class="screen">
+              <div class="statusbar"><span>9:41</span><span>▰ ▰ ▰</span></div>
+              <div class="appbar">
+                <div class="loc"><span>‹ &nbsp; Checkout</span><span>Secure</span></div>
+              </div>
+              <div style="padding:0 12px 10px">
+                <div style="border:1px solid var(--line);border-radius:12px;padding:10px;background:#fff">
+                  <div style="font-size:8px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);font-weight:700">Delivering to</div>
+                  <div style="font-size:10px;font-weight:700;margin-top:2px">Home · A-402, Royal Palms</div>
+                  <div style="font-size:8.5px;color:var(--muted);margin-top:2px">Gandhinagar 382010</div>
+                  <div style="margin-top:7px;display:flex;gap:5px">
+                    <span style="font-size:7.5px;font-weight:700;background:var(--forest-soft);color:var(--forest);padding:3px 6px;border-radius:4px">Tomorrow 6:30–7:30</span>
+                    <span style="font-size:7.5px;font-weight:700;border:1px solid var(--line-2);padding:3px 6px;border-radius:4px;color:var(--muted)">Change</span>
+                  </div>
+                </div>
+                <div style="border:1px solid var(--line);border-radius:12px;padding:10px;background:#fff;margin-top:7px">
+                  <div style="font-size:8px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);font-weight:700">Bill details</div>
+                  <div style="display:flex;justify-content:space-between;font-size:9px;margin-top:6px"><span>Subtotal</span><span>₹194</span></div>
+                  <div style="display:flex;justify-content:space-between;font-size:9px;margin-top:4px"><span>Delivery</span><span style="color:var(--ok);font-weight:700">FREE</span></div>
+                  <div style="display:flex;justify-content:space-between;font-size:9px;margin-top:4px"><span>You saved</span><span style="color:var(--saffron);font-weight:700">₹26</span></div>
+                  <div style="height:1px;background:var(--line);margin:7px 0"></div>
+                  <div style="display:flex;justify-content:space-between;font-size:11px;font-weight:750"><span>Total</span><span>₹194</span></div>
+                </div>
+                <div style="border:1px solid var(--line);border-radius:12px;padding:10px;background:#fff;margin-top:7px">
+                  <div style="font-size:8px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);font-weight:700">Pay with</div>
+                  <div style="display:flex;align-items:center;gap:6px;margin-top:6px;font-size:9px;font-weight:650"><span style="width:9px;height:9px;border-radius:50%;border:2px solid var(--forest);display:inline-block"></span> UPI · GPay, PhonePe, Paytm</div>
+                  <div style="display:flex;align-items:center;gap:6px;margin-top:5px;font-size:9px;color:var(--muted)"><span style="width:9px;height:9px;border-radius:50%;border:1px solid var(--line-2);display:inline-block"></span> Cash on delivery</div>
+                </div>
+                <div style="background:var(--forest);color:#fff;text-align:center;font-size:10px;font-weight:750;padding:9px;border-radius:9px;margin-top:8px">Pay ₹194 securely</div>
+                <div style="text-align:center;font-size:7px;color:var(--muted);margin-top:6px">Freshness guaranteed · Free replacement</div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <p class="fine" style="margin-top:10px">Illustrative of the chosen direction — not screenshots of the current build. Full spec: <a href="05-DESIGN-SYSTEM-V2.md">05 — Design System v2</a>.</p>
+
+        <h3>What changes visually</h3>
+        <div class="beforeafter">
+          <div class="ba"><h5>Today</h5><p class="old">Header ~176px before content</p><p class="old" style="margin-top:4px">10–12px labels; 516 arbitrary sizes</p><p class="old" style="margin-top:4px">Border + shadow + tint on every card</p><p class="old" style="margin-top:4px">Five trust messages, no single promise</p></div>
+          <div class="ba"><h5>Proposed</h5><p class="new">Header ≤132px, sticky search, 5-slot nav</p><p class="new" style="margin-top:4px">12px minimum, fixed 8pt scale</p><p class="new" style="margin-top:4px">Hairline at rest, elevation only when floating</p><p class="new" style="margin-top:4px">One promise + one proof + one CTA per screen</p></div>
+        </div>
+      </section>
+
+      <section id="performance">
+        <div class="sec-head"><span class="sec-no">07</span><h2 class="sec">Performance, security &amp; resources</h2></div>
+        <p class="lede">Three budgets, measured locally on a production build: milliseconds, bytes and rupees per order.</p>
+
+        <div class="tablewrap">
+          <table>
+            <thead><tr><th>Signal</th><th>Measured</th><th>Target</th><th>Verdict</th></tr></thead>
+            <tbody>
+              <tr><td><strong>Build</strong></td><td class="num">95 pages, TS clean</td><td>Pass</td><td class="good">Pass</td></tr>
+              <tr><td><strong>Home HTML</strong></td><td class="num">82.4 KB</td><td>&lt; 50 KB</td><td class="mid">Watch</td></tr>
+              <tr><td><strong>JS chunks on home</strong></td><td class="num">19</td><td>≤ 8</td><td class="bad">Fail</td></tr>
+              <tr><td><strong>Raw JS on home</strong></td><td class="num">1,075 KB</td><td>&lt; 700 KB</td><td class="bad">Fail</td></tr>
+              <tr><td><strong>Cached home TTFB</strong></td><td class="num">12 ms</td><td>&lt; 200 ms</td><td class="good">Pass</td></tr>
+              <tr><td><strong>/products with DB down</strong></td><td class="num">7.32 s</td><td>&lt; 1.5 s</td><td class="bad">Fail</td></tr>
+              <tr><td><strong>/offers with DB down</strong></td><td class="num">7.12 s</td><td>&lt; 1.5 s</td><td class="bad">Fail</td></tr>
+              <tr><td><strong>Logo asset</strong></td><td class="num">263 KB PNG</td><td>&lt; 20 KB</td><td class="bad">Fail</td></tr>
+              <tr><td><strong>Automated tests</strong></td><td class="num">6 files</td><td>Critical paths</td><td class="bad">Fail</td></tr>
+              <tr><td><strong>Native alerts</strong></td><td class="num">22</td><td>0</td><td class="bad">Fail</td></tr>
+              <tr><td><strong>Arbitrary Tailwind values</strong></td><td class="num">516</td><td>&lt; 50</td><td class="bad">Fail</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="grid two" style="margin-top:18px">
+          <div class="card">
+            <h4>Security — the three holes</h4>
+            <p><strong>1.</strong> Public demo admin JWT.<br><strong>2.</strong> World-readable profiles + anon grants.<br><strong>3.</strong> Default UPI rejected after the customer commits.<br><br>Also: CSP ships <code>unsafe-eval</code>; Redis falls back to per-instance memory if unset; middleware decodes but does not verify the JWT.</p>
+          </div>
+          <div class="card">
+            <h4>DPDP Act 2023 exposure</h4>
+            <p>No itemised consent, no withdrawal or erasure path, identity in localStorage, and a public PII policy. Security-safeguard failures carry penalties up to ₹250 crore. The 2026 e-commerce rules add a dark-pattern self-audit from 1 Jan 2027 and a 48-hour grievance acknowledgement.</p>
+          </div>
+        </div>
+      </section>
+
+      <section id="roadmap">
+        <div class="sec-head"><span class="sec-no">08</span><h2 class="sec">The six-week sequence</h2></div>
+        <p class="lede">Safety before beauty. Every phase has an exit gate; nothing visual starts until the P0s are signed off by a second person.</p>
+        <div class="road">
+          <div class="phase done">
+            <span class="when">24–48 HOURS</span>
+            <h4>Phase 0 — Stop the bleeding</h4>
+            <p>Remove the demo admin path, fix RLS, remove Direct UPI, decide subscriptions, remove email-based role inference, add upstream timeouts. ~3 engineer-days.</p>
+          </div>
+          <div class="phase">
+            <span class="when">WEEK 1</span>
+            <h4>Phase 1 — Trust &amp; checkout</h4>
+            <p>Pincode and serviceability, delivery slots, toast/inline/recovery system, remove PII from storage, consent screen, refund reconciliation. Gate: 20 real test orders across every method, 3 refunds.</p>
+          </div>
+          <div class="phase">
+            <span class="when">WEEKS 2–3</span>
+            <h4>Phase 2 — Premium customer surface</h4>
+            <p>New tokens, customer shell, home hero, product card and PDP, cart and checkout, search, tracking, returns, accessibility, PWA. Gate: 8/10 usability participants order unaided under four minutes.</p>
+          </div>
+          <div class="phase">
+            <span class="when">WEEKS 4–5</span>
+            <h4>Phase 3 — Seller &amp; admin workspaces</h4>
+            <p>Split the monolith, seller “Today” brief, guided onboarding, grouped admin nav, one orders model, mobile exception dashboard, money reconciliation. Gate: a simulated 3× volume day on phones.</p>
+          </div>
+          <div class="phase">
+            <span class="when">WEEK 6</span>
+            <h4>Phase 4 — Harden &amp; launch</h4>
+            <p>Tests, CSP nonce, Redis fail-closed, structured logs, load and oversell tests, backup drill, SEO, analytics contract. Gate: every item in the launch checklist is true.</p>
+          </div>
+        </div>
+
+        <div class="callout">
+          <h4>If you only have two days</h4>
+          <p>Kill the demo path, fix profiles RLS, remove Direct UPI, hide subscriptions, strip PII from localStorage, add a three-second timeout. That removes every existential risk in this audit.</p>
+        </div>
+      </section>
+
+      <section id="sources">
+        <div class="sec-head"><span class="sec-no">09</span><h2 class="sec">Research anchors</h2></div>
+        <div class="sources">
+          <a href="https://www.startupchai.in/p/the-weekend-insight-quick-commerce-showdown-zepto-vs-blinkit-vs-instamart-vs-bigbasket">Quick-commerce UX teardown — Blinkit, Zepto, Instamart (StartupChai)</a>
+          <a href="https://productgrowth.in/tools/compare/blinkit-vs-zepto-vs-instamart/">Checkout and upsell teardown (ProductGrowth)</a>
+          <a href="https://medium.com/@tanmayvatsa1507/quick-commerce-indian-users-mindset-ux-345287c4d858">Quick commerce and the Indian user’s mindset (Medium)</a>
+          <a href="https://www.consent.in/blog/dpdp-act">DPDP Act explained — obligations and penalties (Consent.in)</a>
+          <a href="https://www.indiaconsent.com/resources/blog/dpdp-for-ecommerce">DPDP for e-commerce, 2026 amendment rules (IndiaConsent)</a>
+          <a href="https://www.incorpx.io/guide/dpdp-act-2023-compliance-guide-businesses">DPDP Act 2023 compliance guide (IncorpX)</a>
+          <a href="https://www.digitalapplied.com/blog/core-web-vitals-2026-inp-lcp-cls-optimization-guide">Core Web Vitals 2026 thresholds and budgets (DigitalApplied)</a>
+          <a href="https://prooflytics.io/blog/core-web-vitals-thresholds-2026-lcp-inp-cls">2026 Core Web Vitals benchmarks (Prooflytics)</a>
+        </div>
+
+        <h3>Full documentation set</h3>
+        <div class="tablewrap">
+          <table>
+            <thead><tr><th>Document</th><th>What it answers</th></tr></thead>
+            <tbody>
+              <tr><td><a href="00-EXECUTIVE-AUDIT.md"><strong>00 — Executive Audit</strong></a></td><td>Verdict, scorecard, top risks, module assessment, metrics.</td></tr>
+              <tr><td><a href="01-ARCHITECTURE-AND-MODULES.md"><strong>01 — Architecture</strong></a></td><td>Route maps, data flow, state, database, seams.</td></tr>
+              <tr><td><a href="02-UX-PSYCHOLOGY.md"><strong>02 — UX Psychology</strong></a></td><td>Premium perception, Indian trust equation, ethics, microcopy.</td></tr>
+              <tr><td><a href="03-SCENARIOS-AND-GLITCHES.md"><strong>03 — Scenarios</strong></a></td><td>14 named users traced end to end.</td></tr>
+              <tr><td><a href="04-BUG-REGISTER.md"><strong>04 — Bug Register</strong></a></td><td>64 defects with evidence, impact and fix.</td></tr>
+              <tr><td><a href="05-DESIGN-SYSTEM-V2.md"><strong>05 — Design System v2</strong></a></td><td>Tokens, type, motion, components, shell specs, checklist.</td></tr>
+              <tr><td><a href="06-PERFORMANCE-SECURITY-RESOURCES.md"><strong>06 — Performance &amp; Security</strong></a></td><td>Budgets, hardening, DPDP, cost control, launch gate.</td></tr>
+              <tr><td><a href="07-ROADMAP.md"><strong>07 — Roadmap</strong></a></td><td>Phases, acceptance criteria, success metrics.</td></tr>
+              <tr><td><a href="08-PROJECT-CONTEXT-FOR-AI.md"><strong>08 — AI Context</strong></a></td><td>Compact brief, invariants, landmines, file map.</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <footer>
+        <span>Gjanand Sarkar · Product &amp; Experience Audit · 20 Nov 2026</span>
+        <span>Local working tree · nothing pushed · prepared on Arena.ai</span>
+      </footer>
+
+    </main>
+  </div>
+</div>
+
+<script>
+  // Score ring: 5.4 / 10 of a 402-length circle
+  (function(){
+    var ring = document.getElementById('scoreRing');
+    if (!ring) return;
+    var pct = 0.54;
+    var len = 402;
+    var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (reduce) { ring.style.strokeDashoffset = String(len * (1 - pct)); return; }
+    ring.style.transition = 'stroke-dashoffset 1.4s cubic-bezier(.22,1,.36,1) .2s';
+    requestAnimationFrame(function(){
+      requestAnimationFrame(function(){ ring.style.strokeDashoffset = String(len * (1 - pct)); });
+    });
+  })();
+
+  // Animate score bars when visible
+  (function(){
+    var bars = [].slice.call(document.querySelectorAll('.fill'));
+    if (!('IntersectionObserver' in window)) { bars.forEach(function(b){ b.style.width = b.dataset.w + '%'; }); return; }
+    var io = new IntersectionObserver(function(entries){
+      entries.forEach(function(e){
+        if (e.isIntersecting) { e.target.style.width = e.target.dataset.w + '%'; io.unobserve(e.target); }
+      });
+    }, { threshold: 0.35 });
+    bars.forEach(function(b){ io.observe(b); });
+  })();
+
+  // Sidebar active section
+  (function(){
+    var links = [].slice.call(document.querySelectorAll('.sidenav a'));
+    var map = {};
+    links.forEach(function(l){ map[l.getAttribute('href').slice(1)] = l; });
+    var sections = [].slice.call(document.querySelectorAll('section[id]'));
+    if (!('IntersectionObserver' in window) || !sections.length) return;
+    var current = null;
+    var io = new IntersectionObserver(function(entries){
+      entries.forEach(function(e){
+        if (!e.isIntersecting) return;
+        var id = e.target.id;
+        // map scorecard/fixfirst to nearest nav item
+        if (id === 'scorecard') id = 'verdict';
+        if (id === 'fixfirst') id = 'findings';
+        var link = map[id];
+        if (!link) return;
+        if (current) current.classList.remove('active');
+        link.classList.add('active');
+        current = link;
+      });
+    }, { rootMargin: '-20% 0px -70% 0px' });
+    sections.forEach(function(s){ io.observe(s); });
+  })();
+</script>
+</body>
+</html>

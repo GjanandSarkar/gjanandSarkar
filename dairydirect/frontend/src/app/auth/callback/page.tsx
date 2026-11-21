@@ -10,7 +10,9 @@ function AuthCallbackInner() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const pathname = usePathname();
-  const next = searchParams.get('redirect') || searchParams.get('next') || '/home';
+  const rawNext = searchParams.get('redirect') || searchParams.get('next') || '/home';
+  // Same-origin absolute paths only: prevents ?redirect=https://evil.example.
+  const next = rawNext.startsWith('/') && !rawNext.startsWith('//') ? rawNext : '/home';
 
   const isProcessing = React.useRef(false);
 
@@ -71,13 +73,14 @@ function AuthCallbackInner() {
             }
           }
         } else if (session?.user) {
+          /**
+           * The server sync failed. Never infer a role here — an email
+           * containing "admin" is not proof of anything. Continue as a
+           * customer with a minimal profile so the session is usable, and
+           * let the server reject any privileged API call.
+           */
           const u = session.user;
           const fallbackName = (u.user_metadata?.full_name || u.user_metadata?.name || u.email?.split('@')[0] || 'Customer').trim();
-          const isAdmin = u.email && (
-            u.email.toLowerCase().includes('admin') ||
-            u.email.toLowerCase() === 'gjanandsarkar09@gmail.com' ||
-            u.email.toLowerCase() === 'patelroshu1218@gmail.com'
-          );
 
           useStore.getState().setUser({
             id: u.id,
@@ -85,13 +88,9 @@ function AuthCallbackInner() {
             phone: u.phone || '',
             email: u.email || '',
             avatar_url: u.user_metadata?.avatar_url || u.user_metadata?.picture || '',
-            role: isAdmin ? 'admin' : (u.user_metadata?.role || 'customer'),
+            role: 'customer',
             saved_addresses: [],
           });
-
-          if (isAdmin && (!next || next === '/home' || next === '/')) {
-            redirectTarget = '/admin';
-          }
         }
 
         // Mark callback as processed to prevent loops

@@ -1,4 +1,5 @@
 import { getHomeFeed } from '@/lib/api/home';
+import { HeroBanner } from '@/components/home/HeroBanner';
 import { CircularCategories } from '@/components/home/CircularCategories';
 import { TrustBar } from '@/components/home/TrustBar';
 import { DealsAndBrands } from '@/components/home/DealsAndBrands';
@@ -19,6 +20,9 @@ export default async function HomeScreen() {
 
   return (
     <div className="flex flex-col w-full overflow-x-hidden bg-background bg-dot-pattern">
+      {/* 0. One focal promise before the grid — dairy, morning, one partner. */}
+      <HeroBanner products={prods.slice(0, 5)} />
+
       {/* 1. Category Quick Navigation */}
       <CircularCategories />
 

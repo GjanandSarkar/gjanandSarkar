@@ -1,14 +1,21 @@
-"use client";
+import type { Metadata } from 'next';
+import { redirect } from 'next/navigation';
+import { SubscriptionHub } from '@/components/subscribe/SubscriptionHub';
+import { getPlansForUser, getSessionUser } from '@/lib/subscriptions/server';
 
-import { useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+export const metadata: Metadata = {
+  title: 'My milk plan',
+  description: 'Pause, skip or change your daily dairy subscription. No lock-in, pay per delivery.',
+};
 
-export default function SubscriptionHubScreen() {
-  const router = useRouter();
+// Personalised, auth-scoped data: never cache at the edge.
+export const dynamic = 'force-dynamic';
 
-  useEffect(() => {
-    router.replace('/home');
-  }, [router]);
+export default async function SubscriptionHubPage() {
+  const session = await getSessionUser();
+  if (!session) redirect('/login?redirect=%2Fsubscribe');
 
-  return null;
+  const plans = await getPlansForUser(session.userId);
+
+  return <SubscriptionHub initialPlans={plans} />;
 }

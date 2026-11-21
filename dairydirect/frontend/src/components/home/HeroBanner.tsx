@@ -5,7 +5,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { ArrowRight, ShieldCheck, ChevronLeft, ChevronRight, Award } from 'lucide-react';
 import type { CatalogProduct } from '@/lib/types/catalog';
-import { BRAND, PLACEHOLDER_PRODUCT_IMAGE } from '@/lib/constants/brand';
+import { PLACEHOLDER_PRODUCT_IMAGE } from '@/lib/constants/brand';
 import { findCategory } from '@/lib/constants/categories';
 import { PartnerBadge } from '@/components/shared/PartnerBadge';
 
@@ -40,16 +40,16 @@ export function HeroBanner({ products }: HeroBannerProps) {
           
           <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-primary-fixed text-primary text-xs font-medium mb-4 border border-primary/20">
             <ShieldCheck className="w-3.5 h-3.5 text-primary" />
-            <span>Direct From Indian Manufacturers</span>
+            <span>From one verified dairy partner</span>
           </div>
 
           <h1 className="text-3xl sm:text-4xl lg:text-[44px] font-semibold text-foreground leading-[1.18] tracking-tight mb-4">
-            One Verified Brand. <br />
-            <span className="text-primary">Every Category.</span>
+            Milk that beats <br />
+            <span className="text-primary">your alarm.</span>
           </h1>
 
           <p className="text-base text-foreground-muted font-normal leading-relaxed mb-8 max-w-lg">
-            {BRAND.promise} We partner with exactly one vetted manufacturer per category across dairy, groceries, spices, wellness, and lifestyle — zero middlemen, guaranteed quality.
+            A2 Gir cow milk, curd, paneer and ghee from a single farm we visit ourselves. Bottled before dawn, chilled to 4°C, and at your door between 5 and 9 AM, tracked from farm to doorstep.
           </p>
 
           <div className="flex flex-wrap items-center gap-3">
@@ -57,15 +57,15 @@ export function HeroBanner({ products }: HeroBannerProps) {
               href="/products"
               className="min-h-[44px] px-6 py-2.5 bg-primary hover:bg-primary-hover text-on-primary font-medium text-sm rounded-lg transition-colors flex items-center gap-2 shadow-xs"
             >
-              <span>Explore Products</span>
+              <span>Shop dairy</span>
               <ArrowRight className="w-4 h-4 text-on-primary" />
             </Link>
 
             <Link
-              href="/become-seller"
+              href="/subscribe/new"
               className="min-h-[44px] px-6 py-2.5 bg-surface hover:bg-surface-muted text-foreground border border-border font-medium text-sm rounded-lg transition-colors"
             >
-              Sell as Partner Brand
+              Build a morning plan
             </Link>
           </div>
 
@@ -73,11 +73,11 @@ export function HeroBanner({ products }: HeroBannerProps) {
           <div className="mt-8 pt-6 border-t border-border grid grid-cols-2 gap-4">
             <div className="flex items-center gap-2">
               <Award className="w-4 h-4 text-primary shrink-0" />
-              <span className="text-xs text-foreground font-medium">100% Indian Manufacturers</span>
+              <span className="text-xs text-foreground font-medium">A2 Gir cow milk, daily</span>
             </div>
             <div className="flex items-center gap-2">
               <ShieldCheck className="w-4 h-4 text-primary shrink-0" />
-              <span className="text-xs text-foreground font-medium">Single Brand Guarantee</span>
+              <span className="text-xs text-foreground font-medium">Adulteration-tested every batch</span>
             </div>
           </div>
         </div>
@@ -157,9 +157,9 @@ export function HeroBanner({ products }: HeroBannerProps) {
         ) : (
           <div className="flex-1 w-full max-w-md bg-surface-muted rounded-lg border border-border p-8 text-center">
             <ShieldCheck className="w-10 h-10 text-primary mx-auto mb-3" />
-            <h3 className="text-base font-semibold text-foreground">Official Brand Spotlight</h3>
+            <h3 className="text-base font-semibold text-foreground">Tomorrow&apos;s bottle</h3>
             <p className="text-xs text-foreground-muted mt-1 max-w-xs mx-auto">
-              Direct-to-consumer partnerships with India's premier verified manufacturers.
+              Fresh from the farm, one partner, fully traceable.
             </p>
           </div>
         )}

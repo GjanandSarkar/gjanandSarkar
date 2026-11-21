@@ -86,7 +86,12 @@ const nextConfig: NextConfig = {
         source: '/:path*',
         headers: [
           { key: 'X-Content-Type-Options', value: 'nosniff' },
-          { key: 'X-Frame-Options', value: 'DENY' },
+          // X-Frame-Options cannot express wildcard hosts, so the Arena preview
+          // (served from *.e2b.app) opts out of it and relies on CSP
+          // `frame-ancestors` below instead. Production keeps DENY.
+          ...(process.env.ALLOW_PREVIEW_EMBED === '1'
+            ? []
+            : [{ key: 'X-Frame-Options', value: 'DENY' }]),
           { key: 'X-XSS-Protection', value: '1; mode=block' },
           { key: 'Referrer-Policy', value: 'strict-origin-when-cross-origin' },
           { key: 'Permissions-Policy', value: 'camera=(), microphone=(), geolocation=(self)' },
@@ -108,6 +113,13 @@ const nextConfig: NextConfig = {
               "object-src 'none'",
               "base-uri 'self'",
               "form-action 'self'",
+              // Clickjacking protection. `DENY` by default; the preview build
+              // additionally allows the sandbox host.
+              `frame-ancestors ${
+                process.env.ALLOW_PREVIEW_EMBED === '1'
+                  ? "'self' https://*.e2b.app"
+                  : "'self'"
+              }`,
             ].join('; '),
           },
         ],

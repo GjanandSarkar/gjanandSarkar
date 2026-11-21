@@ -98,59 +98,66 @@
     --cart-bar-h: 72px;
 
     /* Translucent surface for blurred bars */
-    --surface-translucent: rgba(251, 250, 246, 0.95);
-    --scrim: rgba(0, 0, 0, 0.4);
+    --surface-translucent: rgba(255, 255, 255, 0.92);
+    --scrim: rgba(15, 23, 20, 0.45);
 
-    /* Deep heritage green */
-    --primary: #0c3c26;
-    --primary-hover: #114e32;
-    --primary-active: #072617;
-    --primary-light: #1b6342;
-    --primary-fixed: #e6f2ec;
-    --primary-fixed-dim: #cce6d9;
-    
-    --cta-gradient: linear-gradient(135deg, #0c3c26, #1b6342);
-    --cta-shadow: 0 4px 14px rgba(12, 60, 38, 0.2);
+    /*
+     * "Bright q-commerce" palette.
+     *
+     * White canvas, one saturated green accent, amber reserved for offers and
+     * urgency. Every value below is checked for WCAG AA against the surface it
+     * actually sits on: green on white 5.36:1, amber on white 5.02:1, muted
+     * text 5.98:1. Product cards stay the loudest element on the page.
+     */
+    --primary: #0a7b3e;
+    --primary-hover: #086a35;
+    --primary-active: #065c2d;
+    --primary-light: #12a054;
+    --primary-fixed: #e7f7ee;
+    --primary-fixed-dim: #c8edd8;
 
-    /* Warm authentic ochre amber */
-    --secondary: #9c6819;
-    --secondary-hover: #855615;
-    --secondary-bg: #fdf4e3;
+    --cta-gradient: linear-gradient(135deg, #0a7b3e, #0b8c46);
+    --cta-shadow: 0 4px 14px rgba(10, 123, 62, 0.22);
 
-    --highlight: #9c6819;
-    --highlight-hover: #855615;
-    --highlight-bg: #fdf4e3;
-    
-    --on-primary: #FFFFFF;
-    --on-secondary: #FFFFFF;
-    --on-success: #FFFFFF;
-    --on-warning: #FFFFFF;
-    --on-error: #FFFFFF;
-    --on-info: #FFFFFF;
+    /* Amber for deals, ratings and "only 2 left" style urgency. */
+    --secondary: #b45309;
+    --secondary-hover: #98450a;
+    --secondary-bg: #fff6e5;
 
-    /* Base authentic cream & sand surfaces */
-    --background: #fbfaf6;
-    --surface: #FFFFFF;
-    --surface-muted: #f2ede4;
-    --surface-elevated: #FFFFFF;
+    --highlight: #b45309;
+    --highlight-hover: #98450a;
+    --highlight-bg: #fff6e5;
 
-    /* Text & Borders */
-    --foreground: #1c201e;
-    --foreground-muted: #58625c;
-    --foreground-inverse: #FFFFFF;
-    
-    --border: #e4e2db;
-    --border-hover: #c5c2b6;
-    --ring: rgba(12, 60, 38, 0.25);
+    --on-primary: #ffffff;
+    --on-secondary: #ffffff;
+    --on-success: #ffffff;
+    --on-warning: #ffffff;
+    --on-error: #ffffff;
+    --on-info: #ffffff;
 
-    --success: #0c3c26;
-    --success-bg: #e6f2ec;
-    --warning: #9c6819;
-    --warning-bg: #fdf4e3;
-    --error: #DC2626;
-    --error-bg: #FEE2E2;
-    --info: #2563EB;
-    --info-bg: #EFF6FF;
+    /* Pure white canvas — the Blinkit/Zepto starting point. */
+    --background: #ffffff;
+    --surface: #ffffff;
+    --surface-muted: #f4f6f5;
+    --surface-elevated: #ffffff;
+
+    /* Near-black text, not pure black, for softer halos on OLED. */
+    --foreground: #101613;
+    --foreground-muted: #5b6660;
+    --foreground-inverse: #ffffff;
+
+    --border: #e6eae7;
+    --border-hover: #cbd5cf;
+    --ring: rgba(10, 123, 62, 0.28);
+
+    --success: #0a7b3e;
+    --success-bg: #e7f7ee;
+    --warning: #b45309;
+    --warning-bg: #fff6e5;
+    --error: #dc2626;
+    --error-bg: #fee2e2;
+    --info: #1d4ed8;
+    --info-bg: #eff6ff;
 
     /* Radius scale */
     --radius-xs: 4px;
@@ -545,9 +552,12 @@
   .page-wide   { width: 100%; max-width: 90rem; margin-inline: auto; }  /* 1440px - dashboards, product grids */
 
   /* Authentic dot pattern background */
+  /* A whisper of texture on the white canvas. The old version used ochre at
+     12% opacity — visible as warm dots behind product cards and off-brand for
+     a bright quick-commerce surface. */
   .bg-dot-pattern {
-    background-image: radial-gradient(rgba(156, 104, 25, 0.12) 1px, transparent 1px);
-    background-size: 24px 24px;
+    background-image: radial-gradient(rgba(16, 22, 19, 0.04) 1px, transparent 1px);
+    background-size: 28px 28px;
   }
 }
 

@@ -239,17 +239,27 @@ export const useStore = create<AppState>()(
       // ── Checkout Selection ─────────────────────────────────
       checkoutAddressId: null,
       setCheckoutAddressId: (id) => set({ checkoutAddressId: id }),
-      checkoutPaymentMethod: 'upi',
+      checkoutPaymentMethod: 'razorpay',
       setCheckoutPaymentMethod: (method) => set({ checkoutPaymentMethod: method }),
     }),
     {
       name: 'gjanand-sarkar-storage',
       partialize: (state) => ({
-        user: state.user,
-        sellerStore: state.sellerStore,
+        /*
+         * Identity is deliberately NOT persisted.
+         *
+         * `user` contains a name, phone number, email, saved addresses and a
+         * role. Writing that to localStorage means it survives logout and is
+         * readable by the next person on a shared phone — and by any script.
+         * Identity is rehydrated from the HttpOnly session cookie via
+         * /api/auth/session on every load instead.
+         *
+         * `sellerStore` is also identity-adjacent (revenue, KYC state) and is
+         * re-fetched with the dashboard.
+         *
+         * What remains is non-identifying UI preference and a guest basket.
+         */
         language: state.language,
-        // NOTE: translationsCache is intentionally NOT persisted — it's large and
-        // re-fetched idly per session. Persisting it caused slow store hydration.
         cart: state.cart,
         wishlist: state.wishlist,
       }),

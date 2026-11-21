@@ -4,6 +4,7 @@ import 'server-only';
 import { getAdminSupabase } from '@/lib/supabase/admin';
 import type { ProductWithVariants } from './products';
 import { legacyCategoryFilter } from '@/lib/constants/categories';
+import { withTimeout, TIMEOUTS } from '@/lib/utils/timeout';
 
 /**
  * Server-only catalogue reads.
@@ -164,7 +165,7 @@ export async function getProductsPage(
     // ── Pagination ──────────────────────────────────────────────────────────
     query = query.range(from, to);
 
-    const { data, error, count } = await query;
+    const { data, error, count } = await withTimeout(async () => query, TIMEOUTS.pageData, 'products-page');
 
     if (error) {
       // If FTS textSearch fails at the DB level (column not yet added), retry
@@ -232,7 +233,7 @@ async function getProductsPageFallback(
       query = query.ilike('name', `%${q.trim()}%`);
     }
 
-    const { data, error, count } = await query;
+    const { data, error, count } = await withTimeout(async () => query, TIMEOUTS.pageData, 'products-page');
     if (error) throw error;
 
     const products = filterSellable((data ?? []) as ProductWithVariants[]);

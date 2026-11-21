@@ -1,22 +1,23 @@
-"use client";
+import type { Metadata } from 'next';
+import { redirect } from 'next/navigation';
+import { PlanBuilder } from '@/components/subscribe/PlanBuilder';
+import { getAddressesForUser, getPlanCatalogue, getSessionUser } from '@/lib/subscriptions/server';
 
-import { useEffect, Suspense } from 'react';
-import { useRouter } from 'next/navigation';
+export const metadata: Metadata = {
+  title: 'Start a milk plan',
+  description: 'Choose your milk, quantity and delivery days. Fresh dairy at your door before breakfast.',
+};
 
-function NewSubscriptionContent() {
-  const router = useRouter();
+export const dynamic = 'force-dynamic';
 
-  useEffect(() => {
-    router.replace('/home');
-  }, [router]);
+export default async function NewSubscriptionPage() {
+  const session = await getSessionUser();
+  if (!session) redirect('/login?redirect=%2Fsubscribe%2Fnew');
 
-  return null;
-}
+  const [products, addresses] = await Promise.all([
+    getPlanCatalogue(),
+    getAddressesForUser(session.userId),
+  ]);
 
-export default function NewSubscriptionScreen() {
-  return (
-    <Suspense fallback={null}>
-      <NewSubscriptionContent />
-    </Suspense>
-  );
+  return <PlanBuilder products={products} addresses={addresses} />;
 }

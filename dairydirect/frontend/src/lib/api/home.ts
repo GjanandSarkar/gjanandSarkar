@@ -4,6 +4,7 @@ import { getAdminSupabase } from '@/lib/supabase/admin';
 import type { CatalogProduct } from '@/lib/types/catalog';
 import { legacyCategoryFilter } from '@/lib/constants/categories';
 import { getProductsPage, PRODUCTS_PAGE_SIZE } from '@/lib/api/products.server';
+import { withTimeout, TIMEOUTS } from '@/lib/utils/timeout';
 
 /**
  * Slim product shape for the homepage.
@@ -28,16 +29,21 @@ async function fetchHomeFeed(): Promise<HomeProduct[]> {
   try {
     const admin = getAdminSupabase();
 
-    const { data, error } = await admin
-      .from('products')
-      // Explicit column list instead of `*` — no description/cost_price/etc.
-      .select(
-        'id, name, category, image_url, brand, rating, reviews_count, product_variants(id, weight, price, original_price, stock, available_quantity)'
-      )
-      .eq('is_active', true)
-      .eq('approval_status', 'approved')
-      .order('created_at', { ascending: false })
-      .limit(HOME_FEED_LIMIT);
+    const { data, error } = await withTimeout(
+      async () =>
+        admin
+        .from('products')
+        // Explicit column list instead of `*` — no description/cost_price/etc.
+        .select(
+          'id, name, category, image_url, brand, rating, reviews_count, product_variants(id, weight, price, original_price, stock, available_quantity)'
+        )
+        .eq('is_active', true)
+        .eq('approval_status', 'approved')
+        .order('created_at', { ascending: false })
+        .limit(HOME_FEED_LIMIT),
+      TIMEOUTS.pageData,
+      'home-feed'
+    );
 
     if (error) throw error;
     // Never list a product the storefront cannot price; it renders ₹0

@@ -7,16 +7,39 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { getAdminSupabase } from '@/lib/supabase/admin';
+import { checkRateLimit } from '@/lib/aws/redis';
+import { getClientIP } from '@/lib/api/auth-middleware';
+
+/**
+ * This endpoint is intentionally public: guest PDPs and the cart need live
+ * stock without a session. Public does not mean unbounded — one request could
+ * otherwise enumerate the whole inventory. Cap the batch and rate-limit per IP.
+ */
+const MAX_VARIANTS = 50;
+
+function tooMany(variantIds: string[]) {
+  return variantIds.length > MAX_VARIANTS;
+}
 
 export const dynamic = 'force-dynamic';
 
 export async function POST(request: NextRequest) {
   try {
+    const ip = getClientIP(request);
+    const limit = await checkRateLimit(ip, 'inventory_status', 120, 60);
+    if (!limit.allowed) {
+      return NextResponse.json({ error: 'Too many requests' }, { status: 429 });
+    }
+
     const body = await request.json().catch(() => ({}));
     const variantIds: string[] = body.variantIds || [];
 
     if (!Array.isArray(variantIds) || variantIds.length === 0) {
       return NextResponse.json({ error: 'variantIds array required' }, { status: 400 });
+    }
+
+    if (tooMany(variantIds)) {
+      return NextResponse.json({ error: `At most ${MAX_VARIANTS} variants per request` }, { status: 400 });
     }
 
     const sb = getAdminSupabase();
@@ -73,6 +96,9 @@ export async function GET(request: NextRequest) {
 
     if (variantIdsParam) {
       const ids = variantIdsParam.split(',').map((s) => s.trim()).filter(Boolean);
+      if (tooMany(ids)) {
+        return NextResponse.json({ error: `At most ${MAX_VARIANTS} variants per request` }, { status: 400 });
+      }
       const { data: variants, error } = await sb
         .from('product_variants')
         .select('id, product_id, weight, price, stock, reserved_quantity, available_quantity, low_stock_threshold')

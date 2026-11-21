@@ -26,7 +26,7 @@ export default function OrderConfirmedScreen() {
 
   useEffect(() => {
     setCheckoutAddressId(null);
-    setCheckoutPaymentMethod('upi');
+    setCheckoutPaymentMethod('razorpay');
     
     getOrderById(id).then(res => {
       setOrder(res);

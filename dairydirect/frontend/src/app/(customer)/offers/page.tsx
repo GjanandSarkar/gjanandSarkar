@@ -1,25 +1,13 @@
 import React from 'react';
 import { Tag, Clock } from 'lucide-react';
 import Link from 'next/link';
+import { getActiveCouponsServer } from '@/lib/api/coupons.server';
 
 export const dynamic = 'force-dynamic';
 
-async function getActiveCoupons() {
-  try {
-    const res = await fetch(`${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/api/coupons`, {
-      cache: 'no-store'
-    });
-    if (!res.ok) return [];
-    const data = await res.json();
-    return data.coupons || [];
-  } catch (err) {
-    console.error('Failed to fetch coupons', err);
-    return [];
-  }
-}
-
 export default async function OffersPage() {
-  const coupons = await getActiveCoupons();
+  const coupons = await getActiveCouponsServer();
+
 
   return (
     <div className="w-full bg-background min-h-screen">
