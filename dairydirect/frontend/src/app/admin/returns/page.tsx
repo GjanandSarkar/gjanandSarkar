@@ -293,6 +293,7 @@ export default function AdminReturnsPage() {
   };
 
   return (
+<<<<<<< HEAD
     <div className="flex flex-col min-h-screen">
       {/* Standard Admin Header */}
       <AdminHeader
@@ -305,6 +306,46 @@ export default function AdminReturnsPage() {
                 <span>{stuckCount} Stuck &gt;3d</span>
               </span>
             )}
+=======
+    <div className="flex flex-col min-h-screen bg-[#fafaf8]">
+      {/* Top Header */}
+      <div className="px-6 md:px-10 pt-8 pb-6 bg-white border-b border-gray-200/90 shadow-2xs">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div className="flex items-center gap-4">
+            <Link
+              href="/admin"
+              className="p-2.5 rounded-xl border border-gray-200 text-gray-700 hover:bg-gray-50 flex items-center justify-center transition-colors shrink-0"
+              title="Return to Admin"
+            >
+              <ArrowLeft className="w-5 h-5 text-gray-700" />
+            </Link>
+
+            <div>
+              <div className="flex items-center gap-2">
+                <span className="px-2 py-0.5 rounded-full bg-primary-fixed text-primary text-[10px] font-bold uppercase tracking-wider">
+                  Admin Global Desk
+                </span>
+              </div>
+              <h1 className="text-xl md:text-2xl font-bold text-foreground tracking-tight flex items-center gap-2 mt-0.5">
+                <RotateCcw className="w-5 h-5 text-primary" />
+                <span>Returns & Cancellations Management</span>
+              </h1>
+              <p className="text-xs text-muted-foreground mt-0.5">
+                Global multi-seller request desk: review customer claims, inspect evidence, enforce policies, and authorize refunds.
+              </p>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-3">
+            <button
+              onClick={fetchRequests}
+              disabled={isLoading}
+              className="p-2.5 border border-border text-foreground hover:bg-muted rounded-xl transition-colors shrink-0 cursor-pointer"
+              title="Refresh Requests"
+            >
+              <RefreshCw className={`w-4 h-4 ${isLoading ? 'animate-spin text-primary' : ''}`} />
+            </button>
+>>>>>>> c80e27e54a7a9fd8b6f001d1c284f29909639613
           </div>
         }
         subtitle="Monitor fulfillment progression, enforce policy compliance, oversee Razorpay refunds, and execute payouts"
@@ -345,6 +386,7 @@ export default function AdminReturnsPage() {
             <p className="text-xl font-semibold text-warning">{openReplacementsCount}</p>
           </button>
 
+<<<<<<< HEAD
           <button
             onClick={() => setTabFilter('refund_pending')}
             className={`p-3.5 rounded-2xl border text-left transition-all ${
@@ -354,6 +396,12 @@ export default function AdminReturnsPage() {
             <p className="text-xs font-bold uppercase tracking-wider opacity-80">Refunds Pending</p>
             <p className="text-xl font-semibold text-orange-800">{refundsPendingCount}</p>
           </button>
+=======
+          <div className="p-3.5 rounded-2xl border border-blue-200 bg-blue-50/50">
+            <span className="text-[10px] font-black uppercase tracking-wider text-info block">Returns</span>
+            <span className="text-xl font-black text-info mt-1 block">{returnsCount}</span>
+          </div>
+>>>>>>> c80e27e54a7a9fd8b6f001d1c284f29909639613
 
           <button
             onClick={() => setTabFilter('failed_refunds')}
@@ -380,12 +428,76 @@ export default function AdminReturnsPage() {
         </div>
       </div>
 
+<<<<<<< HEAD
       {/* Main Content Area */}
       <div className="flex-1 px-6 md:px-10 py-6 w-full space-y-6">
         
         {/* Search & Status Filters */}
         <div className="bg-surface rounded-2xl border border-border p-3.5 shadow-2xs flex flex-col md:flex-row gap-3 items-center justify-between">
           <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar w-full md:w-auto pb-1 md:pb-0">
+=======
+      {/* Main Body */}
+      <div className="px-6 md:px-10 py-6 space-y-6">
+
+        {/* Feedback Toast */}
+        {toast && (
+          <motion.div
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            className={`p-4 rounded-2xl flex items-center gap-3 text-xs font-bold shadow-md ${
+              toast.type === 'success' ? 'bg-emerald-50 text-emerald-800 border border-emerald-200' : 'bg-red-50 text-danger border border-red-200'
+            }`}
+          >
+            {toast.type === 'success' ? <CheckCircle2 className="w-5 h-5 text-emerald-600 shrink-0" /> : <AlertTriangle className="w-5 h-5 text-danger shrink-0" />}
+            <span>{toast.message}</span>
+          </motion.div>
+        )}
+
+        {/* Filter Toolbar */}
+        <div className="bg-white rounded-3xl border border-gray-200 p-5 space-y-4 shadow-2xs">
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+            
+            {/* Search Input */}
+            <div className="relative flex-1 md:max-w-md">
+              <Search className="w-4 h-4 text-gray-400 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+              <input
+                type="text"
+                placeholder="Search by Request ID, Order #, Customer, or Product..."
+                value={searchQuery}
+                onChange={e => setSearchQuery(e.target.value)}
+                className="w-full pl-10 pr-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-xs font-medium placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:bg-white"
+              />
+              {searchQuery && (
+                <button
+                  onClick={() => setSearchQuery('')}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              )}
+            </div>
+
+            {/* Filter Dropdown: Request Type */}
+            <div className="flex items-center gap-3 flex-wrap">
+              {/* Type Filter */}
+              <div className="flex items-center gap-1.5 bg-gray-50 border border-gray-200 rounded-xl px-3 py-1.5 text-xs font-bold text-gray-700">
+                <span className="text-gray-400 text-[10px] uppercase">Type:</span>
+                <select
+                  value={typeFilter}
+                  onChange={e => setTypeFilter(e.target.value)}
+                  className="bg-transparent outline-none cursor-pointer"
+                >
+                  <option value="all">All Types</option>
+                  <option value="cancellation">Cancellations</option>
+                  <option value="return">Returns</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          {/* Status Filter Pills */}
+          <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar pt-1 border-t border-gray-100">
+>>>>>>> c80e27e54a7a9fd8b6f001d1c284f29909639613
             {[
               { id: 'all', label: 'All Statuses' },
               { id: 'initiated', label: 'Initiated' },
@@ -400,8 +512,13 @@ export default function AdminReturnsPage() {
                 onClick={() => setStatusFilter(tab.id)}
                 className={`whitespace-nowrap h-8 px-3.5 rounded-full text-[12px] font-bold transition-all shrink-0 cursor-pointer flex items-center border ${
                   statusFilter === tab.id
+<<<<<<< HEAD
                     ? 'bg-primary text-white border-primary shadow-xs'
                     : 'bg-surface border-border text-foreground-muted hover:text-foreground hover:bg-surface-muted'
+=======
+                    ? 'bg-primary text-primary-foreground shadow-xs'
+                    : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'
+>>>>>>> c80e27e54a7a9fd8b6f001d1c284f29909639613
                 }`}
               >
                 {tab.label}
@@ -434,7 +551,11 @@ export default function AdminReturnsPage() {
         {isLoading ? (
           <div className="py-20 flex flex-col items-center justify-center gap-3">
             <Loader2 className="w-8 h-8 text-primary animate-spin" />
+<<<<<<< HEAD
             <p className="text-xs font-semibold text-foreground-muted">Loading returns & replacements...</p>
+=======
+            <p className="text-xs font-semibold text-gray-500">Loading requests...</p>
+>>>>>>> c80e27e54a7a9fd8b6f001d1c284f29909639613
           </div>
         ) : filteredRequests.length === 0 ? (
           <div className="bg-surface rounded-xl border border-border p-12 text-center space-y-4">
@@ -471,8 +592,13 @@ export default function AdminReturnsPage() {
                         REQ #{req.id.slice(0, 8).toUpperCase()}
                       </span>
 
+<<<<<<< HEAD
                       <span className={`px-2.5 py-0.5 rounded-full text-xs font-semibold uppercase tracking-wider flex items-center gap-1 ${
                         isReplacement ? 'bg-purple-100 text-purple-900' : 'bg-info-bg text-blue-900'
+=======
+                      <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider flex items-center gap-1 ${
+                        isCancellation ? 'bg-amber-100 text-amber-900' : 'bg-blue-100 text-info'
+>>>>>>> c80e27e54a7a9fd8b6f001d1c284f29909639613
                       }`}>
                         {isReplacement ? <Repeat className="w-3 h-3" /> : <RotateCcw className="w-3 h-3" />}
                         <span>{req.request_type}</span>
@@ -530,6 +656,7 @@ export default function AdminReturnsPage() {
                             <span className="mx-1">·</span>
                             <span>Price: <strong className="text-foreground">₹{req.item_price}</strong></span>
                           </p>
+<<<<<<< HEAD
                           <p className="text-xs text-foreground-muted">
                             Order: <Link href={`/orders/${req.order_id}`} className="font-mono font-bold text-primary hover:underline" target="_blank">
                               #{req.order_number}
@@ -537,6 +664,23 @@ export default function AdminReturnsPage() {
                           </p>
                         </div>
                       </div>
+=======
+                          <p className="text-xs font-bold text-primary">
+                            ₹{req.item_price * req.item_quantity}
+                          </p>
+                        </div>
+                      </div>
+
+                      <div className="text-[11px] text-gray-500 pt-1">
+                        <span>Order: </span>
+                        <Link
+                          href={`/admin/orders`}
+                          className="font-bold text-primary hover:underline"
+                        >
+                          #{req.order_number}
+                        </Link>
+                      </div>
+>>>>>>> c80e27e54a7a9fd8b6f001d1c284f29909639613
                     </div>
 
                     {/* Column 2: Customer & Seller */}
@@ -555,6 +699,7 @@ export default function AdminReturnsPage() {
                             <span>{req.customer_phone}</span>
                           </div>
                         )}
+<<<<<<< HEAD
                         <div className="flex items-center gap-1.5 text-foreground-muted">
                           <Store className="w-3.5 h-3.5 text-foreground-muted" />
                           <span>Seller: <strong className="text-foreground">{req.seller_name}</strong></span>
@@ -563,6 +708,20 @@ export default function AdminReturnsPage() {
                           <div className="flex items-center gap-1.5 text-purple-700 font-bold bg-purple-50 px-2 py-0.5 rounded-lg border border-purple-200">
                             <Truck className="w-3.5 h-3.5" />
                             <span>Dispatch Tracking: {req.replacement_tracking_no}</span>
+=======
+                        {req.customer_email && (
+                          <p className="flex items-center gap-1.5 truncate">
+                            <Mail className="w-3.5 h-3.5 text-gray-400 shrink-0" />
+                            <span>{req.customer_email}</span>
+                          </p>
+                        )}
+                        {req.delivery_address && (
+                          <div className="pt-1.5 mt-1 border-t border-gray-100 flex items-start gap-1.5 text-gray-700">
+                            <MapPin className="w-3.5 h-3.5 text-primary shrink-0 mt-0.5" />
+                            <p className="leading-snug text-[11px] font-medium text-gray-700">
+                              {req.delivery_address}
+                            </p>
+>>>>>>> c80e27e54a7a9fd8b6f001d1c284f29909639613
                           </div>
                         )}
                       </div>
@@ -579,8 +738,17 @@ export default function AdminReturnsPage() {
                           <span className="font-bold text-foreground uppercase">{req.payment_method} · {req.payment_status}</span>
                         </div>
                         <div className="flex justify-between items-center">
+<<<<<<< HEAD
                           <span className="text-foreground-muted">Target Refund:</span>
                           <span className="font-semibold text-primary">
+=======
+                          <span className="text-gray-400">Payment:</span>
+                          <span className="font-semibold text-gray-800 uppercase">{req.payment_status}</span>
+                        </div>
+                        <div className="flex justify-between items-center">
+                          <span className="text-gray-400">Refund Target:</span>
+                          <span className="font-bold text-primary">
+>>>>>>> c80e27e54a7a9fd8b6f001d1c284f29909639613
                             ₹{req.refund_amount || (req.item_price * req.item_quantity)}
                           </span>
                         </div>
@@ -642,6 +810,25 @@ export default function AdminReturnsPage() {
                       </div>
                     )}
 
+<<<<<<< HEAD
+=======
+                    {/* Seller Response / Seller Status */}
+                    {req.seller_status && req.seller_status !== 'pending' && (
+                      <div className="pt-2 border-t border-gray-200 flex items-start gap-2">
+                        <Store className="w-3.5 h-3.5 text-gray-500 mt-0.5" />
+                        <div>
+                          <span className="font-bold text-gray-800">Seller Response: </span>
+                          <span className={`font-bold uppercase ${req.seller_status === 'approved' ? 'text-emerald-700' : 'text-danger'}`}>
+                            {req.seller_status}
+                          </span>
+                          {req.seller_notes && <span className="ml-1 text-gray-600">({req.seller_notes})</span>}
+                          {req.rejection_reason && <p className="text-danger font-bold mt-0.5">Rejection reason: {req.rejection_reason}</p>}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Uploaded Photos Gallery */}
+>>>>>>> c80e27e54a7a9fd8b6f001d1c284f29909639613
                     {req.images && req.images.length > 0 && (
                       <div className="pt-2 border-t border-border">
                         <span className="font-bold text-foreground block mb-1.5">
@@ -719,12 +906,91 @@ export default function AdminReturnsPage() {
                               note: '',
                             });
                           }}
+<<<<<<< HEAD
                           className="px-3.5 py-1.5 rounded-xl border border-border-hover hover:bg-surface-muted text-foreground text-xs font-bold flex items-center gap-1.5 transition-colors"
+=======
+                          className="px-3.5 py-1.5 rounded-xl border border-red-300 text-danger hover:bg-red-50 text-xs font-bold flex items-center gap-1.5 transition-colors"
+>>>>>>> c80e27e54a7a9fd8b6f001d1c284f29909639613
                         >
                           <ShieldAlert className="w-3.5 h-3.5 text-warning" />
                           <span>Override / Advance Status</span>
                         </button>
                       )}
+<<<<<<< HEAD
+=======
+
+                      {/* Action: Override Seller Decision */}
+                      {req.seller_status && req.seller_status !== 'pending' && (
+                        <button
+                          onClick={() => {
+                            setSelectedRequest(req);
+                            setActionType('override');
+                            setReasonInput('');
+                          }}
+                          className="px-3.5 py-1.5 rounded-xl border border-amber-300 text-amber-800 hover:bg-amber-50 text-xs font-bold flex items-center gap-1.5 transition-colors"
+                        >
+                          <ShieldAlert className="w-3.5 h-3.5 text-amber-600" />
+                          <span>Override Seller Decision</span>
+                        </button>
+                      )}
+
+                      {/* Return Operational Stages Progression */}
+                      {req.request_type === 'return' && req.status === 'approved' && (
+                        <button
+                          onClick={() => {
+                            setSelectedRequest(req);
+                            setActionType('return_in_progress');
+                            setReasonInput('');
+                          }}
+                          className="px-3 py-1.5 rounded-xl bg-indigo-50 hover:bg-indigo-100 text-indigo-800 border border-indigo-200 text-xs font-bold transition-colors"
+                        >
+                          Mark In Progress
+                        </button>
+                      )}
+
+                      {req.request_type === 'return' && req.status === 'return_in_progress' && (
+                        <button
+                          onClick={() => {
+                            setSelectedRequest(req);
+                            setActionType('item_received');
+                            setReasonInput('');
+                          }}
+                          className="px-3 py-1.5 rounded-xl bg-indigo-50 hover:bg-indigo-100 text-indigo-800 border border-indigo-200 text-xs font-bold transition-colors"
+                        >
+                          Mark Item Received
+                        </button>
+                      )}
+
+                      {req.request_type === 'return' && req.status === 'item_received' && (
+                        <button
+                          onClick={() => {
+                            setSelectedRequest(req);
+                            setActionType('inspection_completed');
+                            setReasonInput('');
+                          }}
+                          className="px-3 py-1.5 rounded-xl bg-indigo-50 hover:bg-indigo-100 text-indigo-800 border border-indigo-200 text-xs font-bold transition-colors"
+                        >
+                          Inspection Completed
+                        </button>
+                      )}
+
+                      {/* Finalize Refund */}
+                      {['approved', 'inspection_completed', 'refund_pending'].includes(req.status) && req.status !== 'refunded' && (
+                        <button
+                          onClick={() => {
+                            setSelectedRequest(req);
+                            setActionType('refunded');
+                            setRefundAmountInput(String(req.refund_amount || (req.item_price * req.item_quantity)));
+                            setReasonInput('Refund authorized & processed');
+                          }}
+                          className="px-3.5 py-1.5 rounded-xl bg-primary hover:bg-primary-hover text-primary-foreground text-xs font-bold flex items-center gap-1.5 shadow-xs transition-colors"
+                        >
+                          <IndianRupee className="w-3.5 h-3.5" />
+                          <span>Authorize & Finalize Refund</span>
+                        </button>
+                      )}
+
+>>>>>>> c80e27e54a7a9fd8b6f001d1c284f29909639613
                     </div>
                   </div>
 
@@ -735,6 +1001,7 @@ export default function AdminReturnsPage() {
         )}
       </div>
 
+<<<<<<< HEAD
       {/* Override / Advance Modal */}
       {overrideModal && (
         <div className="fixed inset-0 z-50 grid place-items-center bg-black/50 p-4">
@@ -749,6 +1016,33 @@ export default function AdminReturnsPage() {
                 <span>Admin Status Override</span>
               </h3>
               <button onClick={() => setOverrideModal(null)} className="p-1 rounded-lg hover:bg-surface-muted text-foreground-muted">
+=======
+      {/* ─── ACTION CONFIRMATION MODAL ───────────────────────── */}
+      {selectedRequest && actionType && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-2xs p-4">
+          <div className="bg-white rounded-3xl max-w-md w-full p-6 space-y-5 shadow-2xl animate-in fade-in">
+            <div className="flex items-center justify-between border-b border-gray-100 pb-3">
+              <div className="flex items-center gap-2">
+                <div className="p-2 rounded-xl bg-primary-fixed text-primary">
+                  <RotateCcw className="w-5 h-5 text-primary" />
+                </div>
+                <div>
+                  <h3 className="font-extrabold text-base text-gray-900 capitalize">
+                    {actionType.replace(/_/g, ' ')} Request
+                  </h3>
+                  <p className="text-xs text-gray-500">
+                    Order #{selectedRequest.order_number} · {selectedRequest.product_name}
+                  </p>
+                </div>
+              </div>
+              <button
+                onClick={() => {
+                  setSelectedRequest(null);
+                  setActionType(null);
+                }}
+                className="p-1 rounded-lg text-gray-400 hover:text-gray-700"
+              >
+>>>>>>> c80e27e54a7a9fd8b6f001d1c284f29909639613
                 <X className="w-5 h-5" />
               </button>
             </div>
@@ -757,6 +1051,7 @@ export default function AdminReturnsPage() {
               Request #{overrideModal.request.id.slice(0, 8)} ({overrideModal.request.request_type}) · Current status: <strong className="uppercase">{overrideModal.request.status}</strong>
             </p>
 
+<<<<<<< HEAD
             <div className="space-y-1">
               <label className="text-xs font-bold text-foreground">Target Next Status</label>
               <select
@@ -779,6 +1074,57 @@ export default function AdminReturnsPage() {
                   </>
                 )}
               </select>
+=======
+                  <div>
+                    <label className="block font-bold text-gray-700 mb-1">
+                      Refund Amount (₹)
+                    </label>
+                    <input
+                      type="number"
+                      step="0.01"
+                      value={refundAmountInput}
+                      onChange={e => setRefundAmountInput(e.target.value)}
+                      className="w-full p-2.5 rounded-xl border border-gray-200 text-xs font-bold outline-none focus:ring-2 focus:ring-primary/20 bg-white"
+                      placeholder="Enter refund amount..."
+                      required
+                    />
+                  </div>
+                </div>
+              ) : ['reject', 'override'].includes(actionType) ? (
+                <div className="p-3 rounded-xl bg-red-50 border border-red-200 text-danger leading-relaxed">
+                  <p className="font-bold">Mandatory Reason Required:</p>
+                  <p className="mt-0.5">
+                    A documented reason is mandatory when {actionType === 'reject' ? 'rejecting' : 'overriding'} a request. This reason is logged in the permanent audit history.
+                  </p>
+                </div>
+              ) : (
+                <div className="p-3 rounded-xl bg-gray-50 border border-gray-200 text-gray-800 leading-relaxed">
+                  <p className="font-bold">Confirmation:</p>
+                  <p className="mt-0.5">
+                    Are you sure you want to transition this request to <strong>'{actionType.replace(/_/g, ' ')}'</strong>?
+                    {actionType === 'approve' && selectedRequest.request_type === 'cancellation' && ' Reserved product inventory will be restored to stock.'}
+                  </p>
+                </div>
+              )}
+
+              <div>
+                <label className="block font-bold text-gray-700 mb-1">
+                  {['reject', 'override'].includes(actionType) ? 'Reason (Mandatory)' : 'Administrative Remarks (Optional)'}
+                </label>
+                <textarea
+                  rows={3}
+                  value={reasonInput}
+                  onChange={e => setReasonInput(e.target.value)}
+                  placeholder={
+                    ['reject', 'override'].includes(actionType)
+                      ? 'Enter detailed justification (mandatory)...'
+                      : 'Add any optional notes for this administrative action...'
+                  }
+                  className="w-full p-2.5 rounded-xl border border-gray-200 text-xs font-medium outline-none focus:ring-2 focus:ring-primary/20 resize-none"
+                  required={['reject', 'override'].includes(actionType)}
+                />
+              </div>
+>>>>>>> c80e27e54a7a9fd8b6f001d1c284f29909639613
             </div>
 
             <div className="space-y-1">
@@ -800,9 +1146,16 @@ export default function AdminReturnsPage() {
                 Cancel
               </button>
               <button
+<<<<<<< HEAD
                 disabled={isProcessing || !overrideModal.note.trim()}
                 onClick={handleConfirmOverride}
                 className="px-4 py-2 rounded-xl bg-primary hover:bg-primary-light text-on-primary text-xs font-bold disabled:opacity-50 flex items-center gap-1.5"
+=======
+                type="button"
+                disabled={isProcessing || (['reject', 'override'].includes(actionType) && !reasonInput.trim())}
+                onClick={handleConfirmAction}
+                className="px-5 py-2 text-xs font-bold bg-primary hover:bg-primary-hover text-primary-foreground rounded-xl shadow-xs disabled:opacity-50 flex items-center gap-1.5"
+>>>>>>> c80e27e54a7a9fd8b6f001d1c284f29909639613
               >
                 {isProcessing && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
                 <span>Confirm Override</span>
@@ -812,6 +1165,7 @@ export default function AdminReturnsPage() {
         </div>
       )}
 
+<<<<<<< HEAD
       {/* Refund Action Modal (Retry or COD paid) */}
       {refundActionModal && (
         <div className="fixed inset-0 z-50 grid place-items-center bg-black/50 p-4">
@@ -826,15 +1180,60 @@ export default function AdminReturnsPage() {
                 <span>{refundActionModal.action === 'retry_refund' ? 'Retry Failed Razorpay Refund' : 'Mark COD Refund Paid'}</span>
               </h3>
               <button onClick={() => setRefundActionModal(null)} className="p-1 rounded-lg hover:bg-surface-muted text-foreground-muted">
+=======
+      {/* ─── AUDIT HISTORY / TIMELINE MODAL ───────────────────── */}
+      {historyModalRequest && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-2xs p-4">
+          <div className="bg-white rounded-3xl max-w-lg w-full p-6 space-y-4 shadow-2xl animate-in fade-in">
+            <div className="flex items-center justify-between border-b border-gray-100 pb-3">
+              <div className="flex items-center gap-2">
+                <History className="w-5 h-5 text-primary" />
+                <div>
+                  <h3 className="font-extrabold text-base text-gray-900">Request Lifecycle History</h3>
+                  <p className="text-xs text-gray-500">
+                    REQ #{historyModalRequest.id.slice(0, 8).toUpperCase()} · Order #{historyModalRequest.order_number}
+                  </p>
+                </div>
+              </div>
+              <button
+                onClick={() => setHistoryModalRequest(null)}
+                className="p-1 rounded-lg text-gray-400 hover:text-gray-700"
+              >
+>>>>>>> c80e27e54a7a9fd8b6f001d1c284f29909639613
                 <X className="w-5 h-5" />
               </button>
             </div>
 
+<<<<<<< HEAD
             <div className="p-3 bg-surface-muted rounded-2xl border text-xs space-y-1">
               <p>Order: <strong>#{refundActionModal.request.order_number}</strong></p>
               <p>Refund Amount: <strong className="text-primary">₹{refundActionModal.request.refund_amount}</strong></p>
               {refundActionModal.request.refund?.destination?.upi_id && (
                 <p>Customer UPI ID: <strong className="font-mono text-blue-900">{refundActionModal.request.refund.destination.upi_id}</strong></p>
+=======
+            <div className="max-h-80 overflow-y-auto space-y-3 pr-1 text-xs">
+              {(!historyModalRequest.history || historyModalRequest.history.length === 0) ? (
+                <p className="text-gray-400 italic py-4 text-center">No action log recorded.</p>
+              ) : (
+                historyModalRequest.history.map((h, i) => (
+                  <div key={i} className="p-3 rounded-2xl bg-gray-50 border border-gray-100 space-y-1">
+                    <div className="flex items-center justify-between text-gray-500 text-[10px]">
+                      <span className="font-bold uppercase tracking-wider text-primary">
+                        {h.actor_type || 'system'}
+                      </span>
+                      <span>{format(new Date(h.timestamp), 'MMM d, yyyy · h:mm a')}</span>
+                    </div>
+                    <p className="font-bold text-gray-900 capitalize">
+                      Action: {h.action?.replace(/_/g, ' ')}
+                    </p>
+                    {h.notes && (
+                      <p className="text-gray-600 bg-white p-2 rounded-lg border border-gray-100 text-[11px]">
+                        {h.notes}
+                      </p>
+                    )}
+                  </div>
+                ))
+>>>>>>> c80e27e54a7a9fd8b6f001d1c284f29909639613
               )}
             </div>
 

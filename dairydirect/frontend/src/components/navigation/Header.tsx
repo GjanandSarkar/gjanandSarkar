@@ -1,5 +1,6 @@
 "use client";
 
+<<<<<<< HEAD
 import React, { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
@@ -292,6 +293,10 @@ function HeaderInner() {
     </header>
   );
 }
+=======
+import React, { Suspense } from 'react';
+import { HeaderBar } from './HeaderBar';
+>>>>>>> c80e27e54a7a9fd8b6f001d1c284f29909639613
 
 function MenuLink({
   href,
@@ -305,6 +310,7 @@ function MenuLink({
   onNavigate: () => void;
 }) {
   return (
+<<<<<<< HEAD
     <Link
       href={href}
       onClick={onNavigate}
@@ -317,3 +323,16 @@ function MenuLink({
 }
 
 export { HeaderInner as Header };
+=======
+    <Suspense
+      fallback={
+        <header className="sticky top-0 w-full z-40 bg-surface border-b border-border shadow-xs h-[104px] md:h-[72px]" />
+      }
+    >
+      <HeaderBar />
+    </Suspense>
+  );
+}
+
+export { HeaderBar };
+>>>>>>> c80e27e54a7a9fd8b6f001d1c284f29909639613

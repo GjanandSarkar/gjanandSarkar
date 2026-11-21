@@ -7,13 +7,10 @@ export function EngagementBanner() {
 
   return (
     <div 
-      className="relative overflow-hidden rounded-[24px] p-6 mb-6 cursor-pointer group"
-      style={{
-        background: 'linear-gradient(135deg, #c2efac, #a7d392)',
-        boxShadow: '0 4px 12px rgba(63, 101, 48, 0.15)',
-      }}
+      className="bg-surface rounded-xl border border-border p-4 cursor-pointer hover:border-primary/50 transition-colors flex items-center gap-3.5"
       onClick={() => router.push('/onboarding/profile')}
     >
+<<<<<<< HEAD
       <div className="absolute -right-10 -top-10 w-32 h-32 bg-surface/20 rounded-full blur-2xl group-hover:bg-surface/30 transition-colors" />
       <div className="absolute -left-10 -bottom-10 w-24 h-24 bg-surface/20 rounded-full blur-xl group-hover:bg-surface/30 transition-colors" />
       
@@ -28,6 +25,17 @@ export function EngagementBanner() {
         <div className="w-8 h-8 rounded-full bg-surface/40 flex items-center justify-center shrink-0 group-hover:bg-surface transition-colors">
           <ArrowRight className="w-4 h-4 text-dark" />
         </div>
+=======
+      <div className="w-9 h-9 rounded-lg bg-primary/10 text-primary flex items-center justify-center shrink-0">
+        <Sparkles className="w-4 h-4" />
+      </div>
+      <div className="flex-1 min-w-0">
+        <h3 className="text-xs font-bold text-foreground mb-0.5">Complete your profile</h3>
+        <p className="text-[11px] text-muted">Add delivery preferences for personalized milk & grocery recommendations.</p>
+      </div>
+      <div className="w-7 h-7 rounded-lg bg-surface-muted flex items-center justify-center shrink-0 text-muted">
+        <ArrowRight className="w-3.5 h-3.5" />
+>>>>>>> c80e27e54a7a9fd8b6f001d1c284f29909639613
       </div>
     </div>
   );

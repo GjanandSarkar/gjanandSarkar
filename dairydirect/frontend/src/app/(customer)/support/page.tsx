@@ -132,9 +132,15 @@ export default function SupportPage() {
 
   if (isAuthLoading || loading) {
     return (
+<<<<<<< HEAD
       <div className="min-h-screen bg-background flex flex-col items-center justify-center gap-3">
         <Loader2 className="w-8 h-8 animate-spin text-primary" />
         <p className="text-xs font-bold text-foreground-muted">Loading support portal...</p>
+=======
+      <div className="min-h-screen bg-[#fafaf8] flex flex-col items-center justify-center gap-3">
+        <Loader2 className="w-8 h-8 animate-spin text-primary" />
+        <p className="text-xs font-bold text-gray-500">Loading support portal...</p>
+>>>>>>> c80e27e54a7a9fd8b6f001d1c284f29909639613
       </div>
     );
   }
@@ -174,8 +180,13 @@ export default function SupportPage() {
         {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8 border-b border-border pb-4">
           <div>
+<<<<<<< HEAD
             <span className="text-xs font-semibold uppercase tracking-widest text-secondary-ink">Customer Care</span>
             <h1 className="text-2xl md:text-3xl font-semibold text-primary">Support Tickets</h1>
+=======
+            <span className="text-[10px] font-bold uppercase tracking-widest text-primary">Customer Care</span>
+            <h1 className="text-2xl md:text-3xl font-bold text-foreground">Support Tickets</h1>
+>>>>>>> c80e27e54a7a9fd8b6f001d1c284f29909639613
           </div>
           <div className="flex items-center gap-2">
             <button
@@ -184,16 +195,26 @@ export default function SupportPage() {
               className="p-2.5 bg-surface border border-border rounded-xl text-foreground-muted hover:bg-surface-muted transition shadow-2xs disabled:opacity-50"
               title="Refresh tickets"
             >
+<<<<<<< HEAD
               <RefreshCw className={`w-4 h-4 ${isRefreshing ? 'animate-spin text-success' : ''}`} />
+=======
+              <RefreshCw className={`w-4 h-4 ${isRefreshing ? 'animate-spin text-primary' : ''}`} />
+>>>>>>> c80e27e54a7a9fd8b6f001d1c284f29909639613
             </button>
             <button 
               onClick={() => {
                 setShowNew(!showNew);
                 setError('');
               }}
+<<<<<<< HEAD
               className="flex items-center gap-2 px-5 py-2.5 bg-primary text-on-primary text-xs font-bold rounded-xl hover:bg-primary-hover transition shadow-sm active:scale-95"
             >
               {showNew ? 'Cancel' : <><Plus className="w-4 h-4 text-secondary-ink" /> New Ticket</>}
+=======
+              className="flex items-center gap-2 px-5 py-2.5 bg-primary text-primary-foreground text-xs font-bold rounded-xl hover:bg-primary-hover transition shadow-sm active:scale-95"
+            >
+              {showNew ? 'Cancel' : <><Plus className="w-4 h-4 text-primary-foreground" /> New Ticket</>}
+>>>>>>> c80e27e54a7a9fd8b6f001d1c284f29909639613
             </button>
           </div>
         </div>
@@ -211,9 +232,15 @@ export default function SupportPage() {
 
         {/* New Ticket Form Modal/Drawer */}
         {showNew && (
+<<<<<<< HEAD
           <div className="bg-surface rounded-xl shadow-md border border-border/80 p-6 sm:p-8 mb-8 animate-in fade-in zoom-in-95">
             <h2 className="text-base font-semibold text-primary mb-1">Create Support Ticket</h2>
             <p className="text-xs text-foreground-muted mb-6">
+=======
+          <div className="bg-white rounded-3xl shadow-md border border-gray-200/80 p-6 sm:p-8 mb-8 animate-in fade-in zoom-in-95">
+            <h2 className="text-base font-bold text-foreground mb-1">Create Support Ticket</h2>
+            <p className="text-xs text-muted-foreground mb-6">
+>>>>>>> c80e27e54a7a9fd8b6f001d1c284f29909639613
               Our support team will review your inquiry and respond as soon as possible.
             </p>
 
@@ -235,7 +262,11 @@ export default function SupportPage() {
                     required 
                     value={form.subject} 
                     onChange={e => setForm({...form, subject: e.target.value})}
+<<<<<<< HEAD
                     className="w-full px-4 py-2.5 rounded-xl border border-border-hover text-xs focus:ring-1 focus:ring-[var(--primary)] focus:border-primary outline-none"
+=======
+                    className="w-full px-4 py-2.5 rounded-xl border border-gray-300 text-xs focus:ring-1 focus:ring-primary focus:border-primary outline-none"
+>>>>>>> c80e27e54a7a9fd8b6f001d1c284f29909639613
                     placeholder="e.g. Question about order delivery or ghee purity"
                   />
                 </div>
@@ -248,7 +279,11 @@ export default function SupportPage() {
                     type="text" 
                     value={form.orderId} 
                     onChange={e => setForm({...form, orderId: e.target.value})}
+<<<<<<< HEAD
                     className="w-full px-4 py-2.5 rounded-xl border border-border-hover text-xs focus:ring-1 focus:ring-[var(--primary)] focus:border-primary outline-none font-mono"
+=======
+                    className="w-full px-4 py-2.5 rounded-xl border border-gray-300 text-xs focus:ring-1 focus:ring-primary focus:border-primary outline-none font-mono"
+>>>>>>> c80e27e54a7a9fd8b6f001d1c284f29909639613
                     placeholder="e.g. ORD-2026-1001 or order UUID"
                   />
                   <p className="text-xs text-foreground-muted mt-1">If your issue is related to an existing order, enter it here.</p>
@@ -261,7 +296,11 @@ export default function SupportPage() {
                   <select
                     value={form.priority}
                     onChange={e => setForm({...form, priority: e.target.value})}
+<<<<<<< HEAD
                     className="w-full px-4 py-2.5 rounded-xl border border-border-hover text-xs bg-surface focus:ring-1 focus:ring-[var(--primary)] outline-none font-medium"
+=======
+                    className="w-full px-4 py-2.5 rounded-xl border border-gray-300 text-xs bg-white focus:ring-1 focus:ring-primary outline-none font-medium"
+>>>>>>> c80e27e54a7a9fd8b6f001d1c284f29909639613
                   >
                     <option value="low">Low (General Query)</option>
                     <option value="normal">Normal (Standard Assistance)</option>
@@ -279,7 +318,11 @@ export default function SupportPage() {
                     rows={4} 
                     value={form.message} 
                     onChange={e => setForm({...form, message: e.target.value})}
+<<<<<<< HEAD
                     className="w-full px-4 py-2.5 rounded-xl border border-border-hover text-xs focus:ring-1 focus:ring-[var(--primary)] focus:border-primary outline-none resize-none"
+=======
+                    className="w-full px-4 py-2.5 rounded-xl border border-gray-300 text-xs focus:ring-1 focus:ring-primary focus:border-primary outline-none resize-none"
+>>>>>>> c80e27e54a7a9fd8b6f001d1c284f29909639613
                     placeholder="Describe your issue or question in detail..."
                   />
                 </div>
@@ -296,16 +339,24 @@ export default function SupportPage() {
                 <button 
                   type="submit" 
                   disabled={submitting}
+<<<<<<< HEAD
                   className="px-6 py-2.5 bg-primary hover:bg-primary-hover text-on-primary text-xs font-bold rounded-xl shadow-md flex items-center gap-2 transition disabled:opacity-50 active:scale-95"
+=======
+                  className="px-6 py-2.5 bg-primary hover:bg-primary-hover text-primary-foreground text-xs font-bold rounded-xl shadow-sm flex items-center gap-2 transition disabled:opacity-50 active:scale-95"
+>>>>>>> c80e27e54a7a9fd8b6f001d1c284f29909639613
                 >
                   {submitting ? (
                     <>
-                      <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                      <Loader2 className="w-3.5 h-3.5 animate-spin text-primary-foreground" />
                       <span>Submitting Ticket...</span>
                     </>
                   ) : (
                     <>
+<<<<<<< HEAD
                       <Send className="w-3.5 h-3.5 text-secondary-ink" />
+=======
+                      <Send className="w-3.5 h-3.5 text-primary-foreground" />
+>>>>>>> c80e27e54a7a9fd8b6f001d1c284f29909639613
                       <span>Submit Ticket</span>
                     </>
                   )}

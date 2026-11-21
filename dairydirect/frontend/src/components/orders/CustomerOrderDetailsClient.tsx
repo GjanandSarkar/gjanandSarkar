@@ -345,9 +345,15 @@ export function CustomerOrderDetailsClient({ initialOrder }: CustomerOrderDetail
 
             <Link
               href={`/tracking/${order.id}`}
+<<<<<<< HEAD
               className="px-5 py-2.5 bg-primary hover:bg-primary-light text-on-primary text-xs font-bold rounded-xl flex items-center gap-2 shadow-sm transition-all"
             >
               <Truck className="w-4 h-4 text-secondary-ink" />
+=======
+              className="px-5 py-2.5 bg-primary hover:bg-primary-hover text-primary-foreground text-xs font-bold rounded-xl flex items-center gap-2 shadow-sm transition-all"
+            >
+              <Truck className="w-4 h-4 text-primary-foreground" />
+>>>>>>> c80e27e54a7a9fd8b6f001d1c284f29909639613
               <span>Track Live Delivery</span>
             </Link>
           </div>
@@ -376,11 +382,19 @@ export function CustomerOrderDetailsClient({ initialOrder }: CustomerOrderDetail
         </div>
 
         {/* 100% Freshness Promise Notice */}
+<<<<<<< HEAD
         <div className="p-4 rounded-2xl bg-success-bg/70 border border-success/20/80 flex items-start sm:items-center gap-3 text-xs text-success">
           <ShieldCheck className="w-6 h-6 text-success shrink-0 mt-0.5 sm:mt-0" />
           <div className="flex-1">
             <span className="font-semibold text-success">Gjanand Sarkar Freshness & Quality Guarantee:</span>
             <span className="ml-1 text-success">
+=======
+        <div className="p-4 rounded-2xl bg-primary-fixed/60 border border-primary/20 flex items-start sm:items-center gap-3 text-xs text-foreground">
+          <ShieldCheck className="w-6 h-6 text-primary shrink-0 mt-0.5 sm:mt-0" />
+          <div className="flex-1">
+            <span className="font-extrabold text-foreground">Gjanand Sarkar Freshness & Quality Guarantee:</span>
+            <span className="ml-1 text-muted-foreground">
+>>>>>>> c80e27e54a7a9fd8b6f001d1c284f29909639613
               Orders can be cancelled before fulfillment. Delivered items are backed by our 7-day hassle-free replacement or return warranty.
             </span>
           </div>
@@ -390,8 +404,13 @@ export function CustomerOrderDetailsClient({ initialOrder }: CustomerOrderDetail
         <div className="bg-surface rounded-xl border border-border/80 shadow-2xs overflow-hidden">
           <div className="p-6 border-b border-border flex items-center justify-between">
             <div className="flex items-center gap-2">
+<<<<<<< HEAD
               <ShoppingBag className="w-5 h-5 text-secondary-ink" />
               <h2 className="text-base font-bold text-foreground">Order Items & Return Actions</h2>
+=======
+              <ShoppingBag className="w-5 h-5 text-primary" />
+              <h2 className="text-base font-bold text-gray-900">Order Items & Return Actions</h2>
+>>>>>>> c80e27e54a7a9fd8b6f001d1c284f29909639613
             </div>
             <span className="text-xs font-bold text-foreground-muted">
               {order.order_items?.length || 0} Products
@@ -456,7 +475,11 @@ export function CustomerOrderDetailsClient({ initialOrder }: CustomerOrderDetail
                           {item.variant_weight && ` • ${item.variant_weight}`}
                         </p>
 
+<<<<<<< HEAD
                         <p className="text-sm font-semibold text-primary">
+=======
+                        <p className="text-sm font-black text-primary">
+>>>>>>> c80e27e54a7a9fd8b6f001d1c284f29909639613
                           ₹{Number(item.price) * Number(item.quantity)}
                           <span className="text-xs font-normal text-foreground-muted ml-1">
                             (₹{item.price} each)
@@ -520,6 +543,7 @@ export function CustomerOrderDetailsClient({ initialOrder }: CustomerOrderDetail
                             href={`/returns/${activeReturnReq.id}`}
                             className="px-3.5 py-2 rounded-xl bg-success-bg hover:bg-success-bg text-success text-xs font-bold flex items-center gap-1.5 border border-success/20 transition-colors shadow-2xs"
                           >
+<<<<<<< HEAD
                             <RotateCcw className="w-3.5 h-3.5 text-success" />
                             <span>View Request</span>
                           </Link>
@@ -541,6 +565,25 @@ export function CustomerOrderDetailsClient({ initialOrder }: CustomerOrderDetail
                             </Link>
                           </>
                         ) : null}
+=======
+                            <Ban className="w-3.5 h-3.5 text-red-600" />
+                            <span>Cancel Item</span>
+                          </button>
+                        )}
+
+                        {canReturnItem && (
+                          <button
+                            onClick={() => {
+                              setReturnModalItem(item);
+                              setReturnImages([]);
+                            }}
+                            className="px-3.5 py-2 rounded-xl bg-primary hover:bg-primary-hover text-primary-foreground text-xs font-bold flex items-center gap-1.5 shadow-xs transition-colors"
+                          >
+                            <RotateCcw className="w-3.5 h-3.5" />
+                            <span>Return Product</span>
+                          </button>
+                        )}
+>>>>>>> c80e27e54a7a9fd8b6f001d1c284f29909639613
                       </div>
                     </div>
                   </div>
@@ -556,8 +599,13 @@ export function CustomerOrderDetailsClient({ initialOrder }: CustomerOrderDetail
             </div>
             <div className="flex items-center gap-6 self-end sm:self-auto">
               <div className="text-right">
+<<<<<<< HEAD
                 <span className="text-xs text-foreground-muted block font-bold uppercase">Order Total</span>
                 <span className="text-xl font-semibold text-primary">
+=======
+                <span className="text-xs text-gray-400 block font-bold uppercase">Order Total</span>
+                <span className="text-xl font-black text-primary">
+>>>>>>> c80e27e54a7a9fd8b6f001d1c284f29909639613
                   ₹{order.total_amount}
                 </span>
               </div>
@@ -568,10 +616,17 @@ export function CustomerOrderDetailsClient({ initialOrder }: CustomerOrderDetail
         {/* Shipping & Payment Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {/* Shipping Details */}
+<<<<<<< HEAD
           <div className="bg-surface rounded-xl border border-border/80 shadow-2xs p-6 space-y-3">
             <div className="flex items-center gap-2 pb-2 border-b border-border">
               <MapPin className="w-4 h-4 text-primary" />
               <h3 className="text-xs font-semibold uppercase tracking-wider text-foreground">Delivery Address</h3>
+=======
+          <div className="bg-white rounded-3xl border border-gray-200/80 shadow-2xs p-6 space-y-3">
+            <div className="flex items-center gap-2 pb-2 border-b border-gray-100">
+              <MapPin className="w-4 h-4 text-primary" />
+              <h3 className="text-xs font-black uppercase tracking-wider text-gray-700">Delivery Address</h3>
+>>>>>>> c80e27e54a7a9fd8b6f001d1c284f29909639613
             </div>
             <div className="text-xs text-foreground-muted space-y-1">
               <p className="font-bold text-foreground text-sm">{order.profiles?.name || 'Customer'}</p>
@@ -586,10 +641,17 @@ export function CustomerOrderDetailsClient({ initialOrder }: CustomerOrderDetail
           </div>
 
           {/* Payment Details */}
+<<<<<<< HEAD
           <div className="bg-surface rounded-xl border border-border/80 shadow-2xs p-6 space-y-3">
             <div className="flex items-center gap-2 pb-2 border-b border-border">
               <CreditCard className="w-4 h-4 text-primary" />
               <h3 className="text-xs font-semibold uppercase tracking-wider text-foreground">Payment & Refund Status</h3>
+=======
+          <div className="bg-white rounded-3xl border border-gray-200/80 shadow-2xs p-6 space-y-3">
+            <div className="flex items-center gap-2 pb-2 border-b border-gray-100">
+              <CreditCard className="w-4 h-4 text-primary" />
+              <h3 className="text-xs font-black uppercase tracking-wider text-gray-700">Payment & Refund Status</h3>
+>>>>>>> c80e27e54a7a9fd8b6f001d1c284f29909639613
             </div>
             <div className="text-xs text-foreground-muted space-y-2">
               <div className="flex justify-between items-center">
@@ -687,7 +749,11 @@ export function CustomerOrderDetailsClient({ initialOrder }: CustomerOrderDetail
                 <select
                   value={cancelReason}
                   onChange={(e) => setCancelReason(e.target.value)}
+<<<<<<< HEAD
                   className="w-full px-3.5 py-2.5 rounded-xl border border-border-hover text-xs bg-surface text-foreground focus:outline-none focus:ring-2 focus:ring-[var(--primary)]"
+=======
+                  className="w-full px-3.5 py-2.5 rounded-xl border border-gray-300 text-xs bg-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-primary"
+>>>>>>> c80e27e54a7a9fd8b6f001d1c284f29909639613
                 >
                   {CANCELLATION_REASONS.map(r => (
                     <option key={r} value={r}>{r}</option>
@@ -704,7 +770,11 @@ export function CustomerOrderDetailsClient({ initialOrder }: CustomerOrderDetail
                   onChange={(e) => setCustomCancelNotes(e.target.value)}
                   placeholder="Share any additional details with the seller..."
                   rows={3}
+<<<<<<< HEAD
                   className="w-full px-3.5 py-2.5 rounded-xl border border-border-hover text-xs text-foreground placeholder-foreground-muted focus:outline-none focus:ring-2 focus:ring-[var(--primary)] resize-none"
+=======
+                  className="w-full px-3.5 py-2.5 rounded-xl border border-gray-300 text-xs text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary resize-none"
+>>>>>>> c80e27e54a7a9fd8b6f001d1c284f29909639613
                 />
               </div>
 
@@ -743,7 +813,11 @@ export function CustomerOrderDetailsClient({ initialOrder }: CustomerOrderDetail
           >
             <div className="p-6 border-b border-border flex items-center justify-between bg-surface-muted/50">
               <div className="flex items-center gap-2.5">
+<<<<<<< HEAD
                 <div className="p-2 rounded-xl bg-success-bg text-success">
+=======
+                <div className="p-2 rounded-xl bg-primary-fixed text-primary">
+>>>>>>> c80e27e54a7a9fd8b6f001d1c284f29909639613
                   <RotateCcw className="w-5 h-5 text-primary" />
                 </div>
                 <div>
@@ -775,7 +849,11 @@ export function CustomerOrderDetailsClient({ initialOrder }: CustomerOrderDetail
                   <p className="text-xs text-foreground-muted">
                     Seller: {returnModalItem.products?.sellers?.store_name || 'Direct Seller'} • Qty: {returnModalItem.quantity}
                   </p>
+<<<<<<< HEAD
                   <p className="text-xs font-semibold text-success mt-0.5">
+=======
+                  <p className="text-xs font-bold text-primary mt-0.5">
+>>>>>>> c80e27e54a7a9fd8b6f001d1c284f29909639613
                     Refund Value: ₹{Number(returnModalItem.price) * Number(returnModalItem.quantity)}
                   </p>
                 </div>
@@ -788,7 +866,11 @@ export function CustomerOrderDetailsClient({ initialOrder }: CustomerOrderDetail
                 <select
                   value={returnReason}
                   onChange={(e) => setReturnReason(e.target.value)}
+<<<<<<< HEAD
                   className="w-full px-3.5 py-2.5 rounded-xl border border-border-hover text-xs bg-surface text-foreground focus:outline-none focus:ring-2 focus:ring-[var(--primary)]"
+=======
+                  className="w-full px-3.5 py-2.5 rounded-xl border border-gray-300 text-xs bg-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-primary"
+>>>>>>> c80e27e54a7a9fd8b6f001d1c284f29909639613
                 >
                   {RETURN_REASONS.map(r => (
                     <option key={r} value={r}>{r}</option>
@@ -805,7 +887,11 @@ export function CustomerOrderDetailsClient({ initialOrder }: CustomerOrderDetail
                   onChange={(e) => setReturnDescription(e.target.value)}
                   placeholder="Explain the defect, spoilage, or discrepancy in detail..."
                   rows={3}
+<<<<<<< HEAD
                   className="w-full px-3.5 py-2.5 rounded-xl border border-border-hover text-xs text-foreground placeholder-foreground-muted focus:outline-none focus:ring-2 focus:ring-[var(--primary)] resize-none"
+=======
+                  className="w-full px-3.5 py-2.5 rounded-xl border border-gray-300 text-xs text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary resize-none"
+>>>>>>> c80e27e54a7a9fd8b6f001d1c284f29909639613
                   required
                 />
               </div>
@@ -838,8 +924,13 @@ export function CustomerOrderDetailsClient({ initialOrder }: CustomerOrderDetail
                     </div>
                   )}
 
+<<<<<<< HEAD
                   {returnImages.length < 6 && (
                     <label className="border-2 border-dashed border-border-hover hover:border-primary rounded-2xl p-4 flex flex-col items-center justify-center cursor-pointer transition-colors bg-surface-muted/50">
+=======
+                  {returnImages.length < 3 && (
+                    <label className="border-2 border-dashed border-gray-300 hover:border-primary rounded-2xl p-4 flex flex-col items-center justify-center cursor-pointer transition-colors bg-gray-50/50">
+>>>>>>> c80e27e54a7a9fd8b6f001d1c284f29909639613
                       <input
                         type="file"
                         multiple
@@ -849,6 +940,7 @@ export function CustomerOrderDetailsClient({ initialOrder }: CustomerOrderDetail
                         className="hidden"
                       />
                       {isUploadingPhoto ? (
+<<<<<<< HEAD
                         <div className="flex items-center gap-2 text-xs text-foreground-muted">
                           <Loader2 className="w-4 h-4 animate-spin text-primary" />
                           <span>Uploading photo(s)...</span>
@@ -857,6 +949,16 @@ export function CustomerOrderDetailsClient({ initialOrder }: CustomerOrderDetail
                         <div className="flex items-center gap-2 text-xs font-semibold text-foreground-muted">
                           <Upload className="w-4 h-4 text-secondary-ink" />
                           <span>Attach multiple photos of product defect / issue</span>
+=======
+                        <div className="flex items-center gap-2 text-xs text-gray-500">
+                          <Loader2 className="w-4 h-4 animate-spin text-primary" />
+                          <span>Processing photo...</span>
+                        </div>
+                      ) : (
+                        <div className="flex items-center gap-2 text-xs font-semibold text-gray-600">
+                          <Upload className="w-4 h-4 text-primary" />
+                          <span>Attach photos of product defect / issue</span>
+>>>>>>> c80e27e54a7a9fd8b6f001d1c284f29909639613
                         </div>
                       )}
                       <span className="text-xs text-foreground-muted mt-0.5">JPG, PNG, or WebP up to 10MB (select multiple)</span>
@@ -876,7 +978,11 @@ export function CustomerOrderDetailsClient({ initialOrder }: CustomerOrderDetail
                 <button
                   type="submit"
                   disabled={isSubmittingReturn || !returnDescription.trim()}
+<<<<<<< HEAD
                   className="flex-1 py-2.5 rounded-xl bg-primary hover:bg-primary-light text-on-primary text-xs font-bold shadow-sm flex items-center justify-center gap-1.5 transition-colors disabled:opacity-50"
+=======
+                  className="flex-1 py-2.5 rounded-xl bg-primary hover:bg-primary-hover text-primary-foreground text-xs font-bold shadow-sm flex items-center justify-center gap-1.5 transition-colors disabled:opacity-50"
+>>>>>>> c80e27e54a7a9fd8b6f001d1c284f29909639613
                 >
                   {isSubmittingReturn ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Submit Return Request'}
                 </button>

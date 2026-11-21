@@ -239,22 +239,37 @@ export default function AdminSellersPage() {
         );
       case 'deactivated':
         return (
+<<<<<<< HEAD
           <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold uppercase tracking-wider bg-red-50 text-red-900 border border-red-200 dark:bg-red-950/30 dark:text-red-300">
             <Ban className="w-3.5 h-3.5 text-red-600" />
+=======
+          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-black uppercase tracking-wider bg-red-100 text-danger border border-red-200">
+            <Ban className="w-3.5 h-3.5 text-danger" />
+>>>>>>> c80e27e54a7a9fd8b6f001d1c284f29909639613
             Deactivated
           </span>
         );
       case 'permanently_deactivated':
         return (
+<<<<<<< HEAD
           <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold uppercase tracking-wider bg-red-100 text-red-900 border border-red-300 dark:bg-red-950/50 dark:text-red-300">
             <Lock className="w-3.5 h-3.5 text-red-700" />
+=======
+          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-black uppercase tracking-wider bg-gray-900 text-danger border border-gray-700">
+            <Lock className="w-3.5 h-3.5 text-danger" />
+>>>>>>> c80e27e54a7a9fd8b6f001d1c284f29909639613
             Permanently Deactivated
           </span>
         );
       case 'reactivation_requested':
         return (
+<<<<<<< HEAD
           <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold uppercase tracking-wider bg-blue-100 text-blue-900 border border-blue-300 dark:bg-blue-950/40 dark:text-blue-300">
             <BadgeAlert className="w-3.5 h-3.5 text-blue-700" />
+=======
+          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-black uppercase tracking-wider bg-blue-100 text-info border border-blue-300">
+            <BadgeAlert className="w-3.5 h-3.5 text-info" />
+>>>>>>> c80e27e54a7a9fd8b6f001d1c284f29909639613
             Reactivation Requested
           </span>
         );
@@ -262,8 +277,13 @@ export default function AdminSellersPage() {
       case 'pending_kyc':
       case 'pending_inquiry':
         return (
+<<<<<<< HEAD
           <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold uppercase tracking-wider bg-amber-50 text-amber-900 border border-amber-200 dark:bg-amber-950/30 dark:text-amber-300">
             <Clock className="w-3.5 h-3.5 text-amber-600" />
+=======
+          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-black uppercase tracking-wider bg-yellow-100 text-warning border border-yellow-200">
+            <Clock className="w-3.5 h-3.5 text-warning" />
+>>>>>>> c80e27e54a7a9fd8b6f001d1c284f29909639613
             Pending Onboarding
           </span>
         );
@@ -312,7 +332,19 @@ export default function AdminSellersPage() {
         isRefreshing={isLoading}
       />
 
+<<<<<<< HEAD
       <div className="px-6 md:px-10 py-6 space-y-6">
+=======
+        <button
+          onClick={loadSellers}
+          disabled={isLoading}
+          className="self-start md:self-auto px-4 py-2 bg-white border border-gray-200 text-gray-700 text-xs font-bold rounded-xl hover:bg-gray-50 flex items-center gap-2 shadow-2xs transition-all cursor-pointer"
+        >
+          <RefreshCw className={`w-3.5 h-3.5 ${isLoading ? 'animate-spin text-primary' : ''}`} />
+          <span>Refresh Data</span>
+        </button>
+      </div>
+>>>>>>> c80e27e54a7a9fd8b6f001d1c284f29909639613
 
       {/* Metric Cards Grid */}
       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
@@ -324,6 +356,7 @@ export default function AdminSellersPage() {
           <p className="text-xs font-semibold uppercase tracking-wider text-warning">Under Review</p>
           <p className="text-2xl font-semibold text-warning mt-1">{underReviewCount}</p>
         </div>
+<<<<<<< HEAD
         <div className="bg-surface p-4 rounded-2xl border border-info/20 shadow-2xs bg-info-bg/20">
           <p className="text-xs font-semibold uppercase tracking-wider text-info">Reactivation Requested</p>
           <p className="text-2xl font-semibold text-info mt-1">{reactivationRequestedCount}</p>
@@ -335,6 +368,19 @@ export default function AdminSellersPage() {
         <div className="bg-red-50/70 p-4 rounded-2xl border border-red-200/80 shadow-2xs text-red-900">
           <p className="text-xs font-bold uppercase tracking-wider text-red-800/80">Permanently Banned</p>
           <p className="text-2xl font-bold text-red-800 mt-1">{permanentCount}</p>
+=======
+        <div className="bg-white p-4 rounded-2xl border border-blue-200 shadow-2xs bg-blue-50/20">
+          <p className="text-[10px] font-black uppercase tracking-wider text-info">Reactivation Requested</p>
+          <p className="text-2xl font-black text-info mt-1">{reactivationRequestedCount}</p>
+        </div>
+        <div className="bg-white p-4 rounded-2xl border border-red-200 shadow-2xs bg-red-50/20">
+          <p className="text-[10px] font-black uppercase tracking-wider text-danger">Deactivated</p>
+          <p className="text-2xl font-black text-danger mt-1">{deactivatedCount}</p>
+        </div>
+        <div className="bg-white p-4 rounded-2xl border border-gray-700 shadow-2xs bg-gray-900 text-white">
+          <p className="text-[10px] font-black uppercase tracking-wider text-gray-400">Permanently Banned</p>
+          <p className="text-2xl font-black text-danger mt-1">{permanentCount}</p>
+>>>>>>> c80e27e54a7a9fd8b6f001d1c284f29909639613
         </div>
       </div>
 
@@ -346,8 +392,13 @@ export default function AdminSellersPage() {
             onClick={() => setSelectedStatus(tab.id)}
             className={`h-8 px-3.5 text-xs font-bold rounded-full whitespace-nowrap transition-all cursor-pointer flex items-center justify-center border ${
               selectedStatus === tab.id
+<<<<<<< HEAD
                 ? 'bg-primary text-white border-primary shadow-xs'
                 : 'bg-surface border-border/80 text-foreground-muted hover:text-foreground hover:border-border-hover'
+=======
+                ? 'bg-primary text-white shadow-sm'
+                : 'bg-white border border-gray-200 text-gray-600 hover:border-gray-300 hover:text-gray-900'
+>>>>>>> c80e27e54a7a9fd8b6f001d1c284f29909639613
             }`}
           >
             {tab.label}
@@ -369,7 +420,11 @@ export default function AdminSellersPage() {
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder="Search by store name, slug, owner, state, status..."
+<<<<<<< HEAD
                 className="w-full pl-9 pr-4 h-10 bg-surface rounded-xl border border-border/90 text-xs text-foreground focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all shadow-2xs"
+=======
+                className="w-full pl-9 pr-4 py-2 bg-white rounded-xl border border-gray-200 text-xs text-gray-900 focus:border-primary outline-none"
+>>>>>>> c80e27e54a7a9fd8b6f001d1c284f29909639613
               />
             </div>
           </div>
@@ -379,7 +434,11 @@ export default function AdminSellersPage() {
             {isLoading ? (
               <div className="p-12 text-center">
                 <Loader2 className="w-6 h-6 animate-spin text-primary mx-auto" />
+<<<<<<< HEAD
                 <p className="text-xs text-foreground-muted mt-2">Loading sellers...</p>
+=======
+                <p className="text-xs text-gray-500 mt-2">Loading sellers...</p>
+>>>>>>> c80e27e54a7a9fd8b6f001d1c284f29909639613
               </div>
             ) : filteredSellers.length === 0 ? (
               <div className="p-12 text-center space-y-2">
@@ -398,12 +457,21 @@ export default function AdminSellersPage() {
                     onClick={() => handleSelectSeller(seller)}
                     className={`p-4 transition-all cursor-pointer flex items-center justify-between gap-4 ${
                       isSelected
+<<<<<<< HEAD
                         ? 'bg-surface-muted border-l-4 border-l-primary shadow-2xs font-medium'
                         : 'hover:bg-surface-muted/60 border-l-4 border-l-transparent'
                     }`}
                   >
                     <div className="flex items-center gap-3 min-w-0">
                       <div className="w-10 h-10 rounded-xl bg-primary/10 text-primary flex items-center justify-center font-bold text-sm shrink-0">
+=======
+                        ? 'bg-emerald-50/60 border-l-4 border-l-primary'
+                        : 'hover:bg-gray-50/80 border-l-4 border-l-transparent'
+                    }`}
+                  >
+                    <div className="flex items-center gap-3 min-w-0">
+                      <div className="w-10 h-10 rounded-xl bg-primary-fixed text-primary flex items-center justify-center font-bold text-sm shrink-0">
+>>>>>>> c80e27e54a7a9fd8b6f001d1c284f29909639613
                         {seller.store_name?.charAt(0) || 'S'}
                       </div>
                       <div className="min-w-0">
@@ -487,8 +555,13 @@ export default function AdminSellersPage() {
               )}
 
               {selectedSeller.status === 'reactivation_requested' && (
+<<<<<<< HEAD
                 <div className="bg-info-bg border border-info/20 rounded-xl p-4 space-y-2 text-xs text-blue-900">
                   <div className="flex items-center gap-2 font-bold text-blue-900">
+=======
+                <div className="bg-blue-50 border border-blue-200 rounded-xl p-4 space-y-2 text-xs text-info">
+                  <div className="flex items-center gap-2 font-bold text-info">
+>>>>>>> c80e27e54a7a9fd8b6f001d1c284f29909639613
                     <BadgeAlert className="w-4 h-4 text-info" />
                     <span>Seller Requested Reactivation</span>
                   </div>
@@ -499,9 +572,15 @@ export default function AdminSellersPage() {
               )}
 
               {selectedSeller.status === 'deactivated' && (
+<<<<<<< HEAD
                 <div className="bg-error-bg border border-error/20 rounded-xl p-4 space-y-2 text-xs text-red-900">
                   <div className="flex items-center gap-2 font-bold text-red-900">
                     <Ban className="w-4 h-4 text-error" />
+=======
+                <div className="bg-red-50 border border-red-200 rounded-xl p-4 space-y-2 text-xs text-danger">
+                  <div className="flex items-center gap-2 font-bold text-danger">
+                    <Ban className="w-4 h-4 text-danger" />
+>>>>>>> c80e27e54a7a9fd8b6f001d1c284f29909639613
                     <span>Account Is Deactivated</span>
                   </div>
                   {selectedSeller.deactivation_reason && (
@@ -509,17 +588,28 @@ export default function AdminSellersPage() {
                       <strong>Deactivation reason:</strong> {selectedSeller.deactivation_reason}
                     </p>
                   )}
+<<<<<<< HEAD
                   <p className="text-xs text-error">
+=======
+                  <p className="text-[11px] text-danger">
+>>>>>>> c80e27e54a7a9fd8b6f001d1c284f29909639613
                     Seller is blocked from creating, editing, and deleting products. Seller can submit a reactivation request.
                   </p>
                 </div>
               )}
 
               {selectedSeller.status === 'permanently_deactivated' && (
+<<<<<<< HEAD
                 <div className="bg-red-50/80 border border-red-200 text-red-900 rounded-xl p-4 space-y-2 text-xs">
                   <div className="flex items-center gap-2 font-bold text-red-900">
                     <Lock className="w-4 h-4 text-red-700" />
                     <span>Permanently Deactivated (Terminal State)</span>
+=======
+                <div className="bg-gray-900 text-white rounded-xl p-4 space-y-2 text-xs border border-red-500/40">
+                  <div className="flex items-center gap-2 font-bold text-danger">
+                    <Lock className="w-4 h-4 text-danger" />
+                    <span>Permanently Deactivated (Terminal)</span>
+>>>>>>> c80e27e54a7a9fd8b6f001d1c284f29909639613
                   </div>
                   {selectedSeller.deactivation_reason && (
                     <p className="text-red-800">
@@ -587,9 +677,13 @@ export default function AdminSellersPage() {
 
                     <button
                       onClick={() => openActionModal('deactivate')}
+<<<<<<< HEAD
                       className="w-full px-4 py-2.5 bg-red-50 hover:bg-red-100 border border-red-200 text-red-800 text-xs font-bold rounded-xl flex items-center justify-center gap-2 transition-colors cursor-pointer"
+=======
+                      className="w-full px-4 py-2.5 bg-red-50 hover:bg-red-100 border border-red-200 text-danger text-xs font-bold rounded-xl flex items-center justify-center gap-2 transition-colors cursor-pointer"
+>>>>>>> c80e27e54a7a9fd8b6f001d1c284f29909639613
                     >
-                      <Ban className="w-4 h-4 text-red-600" />
+                      <Ban className="w-4 h-4 text-danger" />
                       <span>Deactivate Seller</span>
                     </button>
                   </div>
@@ -607,9 +701,13 @@ export default function AdminSellersPage() {
                     </button>
                     <button
                       onClick={() => openActionModal('reject_reactivation')}
+<<<<<<< HEAD
                       className="w-full px-4 py-2.5 bg-red-50 hover:bg-red-100 border border-red-200 text-red-800 text-xs font-bold rounded-xl flex items-center justify-center gap-2 transition-colors cursor-pointer"
+=======
+                      className="w-full px-4 py-2.5 bg-red-50 hover:bg-red-100 border border-red-200 text-danger text-xs font-bold rounded-xl flex items-center justify-center gap-2 transition-colors cursor-pointer"
+>>>>>>> c80e27e54a7a9fd8b6f001d1c284f29909639613
                     >
-                      <XCircle className="w-4 h-4 text-red-600" />
+                      <XCircle className="w-4 h-4 text-danger" />
                       <span>Reject Reactivation (Remain Deactivated)</span>
                     </button>
                   </div>
@@ -629,9 +727,15 @@ export default function AdminSellersPage() {
                 {selectedSeller.status !== 'permanently_deactivated' && (
                   <button
                     onClick={() => openActionModal('permanently_deactivate')}
+<<<<<<< HEAD
                     className="w-full px-4 py-2.5 bg-red-600 hover:bg-red-700 text-white text-xs font-bold rounded-xl flex items-center justify-center gap-2 shadow-xs transition-colors cursor-pointer mt-2"
                   >
                     <Lock className="w-3.5 h-3.5" />
+=======
+                    className="w-full px-4 py-2 bg-gray-900 hover:bg-black text-danger text-xs font-bold rounded-xl flex items-center justify-center gap-2 transition-colors cursor-pointer mt-2"
+                  >
+                    <Lock className="w-3.5 h-3.5 text-danger" />
+>>>>>>> c80e27e54a7a9fd8b6f001d1c284f29909639613
                     <span>Permanently Deactivate (Irreversible)</span>
                   </button>
                 )}
@@ -735,14 +839,23 @@ export default function AdminSellersPage() {
               <div
                 className={`p-3 rounded-xl text-xs font-bold flex items-center gap-2 ${
                   actionMessage.type === 'success'
+<<<<<<< HEAD
                     ? 'bg-success-bg text-success border border-success/20'
                     : 'bg-error-bg text-error border border-error/20'
+=======
+                    ? 'bg-emerald-50 text-emerald-800 border border-emerald-200'
+                    : 'bg-red-50 text-danger border border-red-200'
+>>>>>>> c80e27e54a7a9fd8b6f001d1c284f29909639613
                 }`}
               >
                 {actionMessage.type === 'success' ? (
                   <CheckCircle2 className="w-4 h-4 text-success shrink-0" />
                 ) : (
+<<<<<<< HEAD
                   <AlertCircle className="w-4 h-4 text-error shrink-0" />
+=======
+                  <AlertCircle className="w-4 h-4 text-danger shrink-0" />
+>>>>>>> c80e27e54a7a9fd8b6f001d1c284f29909639613
                 )}
                 <span>{actionMessage.text}</span>
               </div>
@@ -753,15 +866,24 @@ export default function AdminSellersPage() {
               
               {/* Reason Selector / Input */}
               <div>
+<<<<<<< HEAD
                 <label className="block font-bold text-foreground mb-1.5">
                   Reason <span className="text-red-500">*</span>
+=======
+                <label className="block font-bold text-gray-700 mb-1.5">
+                  Reason <span className="text-danger">*</span>
+>>>>>>> c80e27e54a7a9fd8b6f001d1c284f29909639613
                 </label>
                 {modalAction.includes('review') ? (
                   <div className="space-y-2">
                     <select
                       value={actionReason}
                       onChange={(e) => setActionReason(e.target.value)}
+<<<<<<< HEAD
                       className="w-full p-2.5 bg-surface-muted border border-border rounded-xl text-xs font-medium text-foreground outline-none focus:border-primary"
+=======
+                      className="w-full p-2.5 bg-gray-50 border border-gray-200 rounded-xl text-xs font-medium text-gray-900 outline-none focus:border-primary"
+>>>>>>> c80e27e54a7a9fd8b6f001d1c284f29909639613
                     >
                       <option value="">Select predefined reason...</option>
                       {metadata.reviewReasons.map((r) => (
@@ -773,7 +895,11 @@ export default function AdminSellersPage() {
                       placeholder="Or specify custom reason..."
                       value={actionReason}
                       onChange={(e) => setActionReason(e.target.value)}
+<<<<<<< HEAD
                       className="w-full p-2.5 bg-surface border border-border rounded-xl text-xs text-foreground outline-none focus:border-primary"
+=======
+                      className="w-full p-2.5 bg-white border border-gray-200 rounded-xl text-xs text-gray-900 outline-none focus:border-primary"
+>>>>>>> c80e27e54a7a9fd8b6f001d1c284f29909639613
                     />
                   </div>
                 ) : modalAction.includes('deactivate') ? (
@@ -781,7 +907,11 @@ export default function AdminSellersPage() {
                     <select
                       value={actionReason}
                       onChange={(e) => setActionReason(e.target.value)}
+<<<<<<< HEAD
                       className="w-full p-2.5 bg-surface-muted border border-border rounded-xl text-xs font-medium text-foreground outline-none focus:border-primary"
+=======
+                      className="w-full p-2.5 bg-gray-50 border border-gray-200 rounded-xl text-xs font-medium text-gray-900 outline-none focus:border-primary"
+>>>>>>> c80e27e54a7a9fd8b6f001d1c284f29909639613
                     >
                       <option value="">Select deactivation reason...</option>
                       {metadata.deactivationReasons.map((r) => (
@@ -793,7 +923,11 @@ export default function AdminSellersPage() {
                       placeholder="Or specify custom deactivation reason..."
                       value={actionReason}
                       onChange={(e) => setActionReason(e.target.value)}
+<<<<<<< HEAD
                       className="w-full p-2.5 bg-surface border border-border rounded-xl text-xs text-foreground outline-none focus:border-primary"
+=======
+                      className="w-full p-2.5 bg-white border border-gray-200 rounded-xl text-xs text-gray-900 outline-none focus:border-primary"
+>>>>>>> c80e27e54a7a9fd8b6f001d1c284f29909639613
                     />
                   </div>
                 ) : (
@@ -802,16 +936,26 @@ export default function AdminSellersPage() {
                     placeholder="Enter reason..."
                     value={actionReason}
                     onChange={(e) => setActionReason(e.target.value)}
+<<<<<<< HEAD
                     className="w-full p-2.5 bg-surface border border-border rounded-xl text-xs text-foreground outline-none focus:border-primary"
+=======
+                    className="w-full p-2.5 bg-white border border-gray-200 rounded-xl text-xs text-gray-900 outline-none focus:border-primary"
+>>>>>>> c80e27e54a7a9fd8b6f001d1c284f29909639613
                   />
                 )}
               </div>
 
               {/* Temporary Review Duration (1 day, 7 days, 14 days, 30 days, or custom) */}
               {(modalAction === 'start_temporary_review' || modalAction === 'extend_review') && (
+<<<<<<< HEAD
                 <div className="space-y-3 bg-surface-muted p-4 rounded-2xl border border-border">
                   <label className="block font-bold text-foreground">
                     Review Duration Period <span className="text-red-500">*</span>
+=======
+                <div className="space-y-3 bg-gray-50 p-4 rounded-2xl border border-gray-200">
+                  <label className="block font-bold text-gray-800">
+                    Review Duration Period <span className="text-danger">*</span>
+>>>>>>> c80e27e54a7a9fd8b6f001d1c284f29909639613
                   </label>
                   <div className="grid grid-cols-3 sm:grid-cols-5 gap-2">
                     {[
@@ -828,7 +972,11 @@ export default function AdminSellersPage() {
                         className={`py-2 px-2 text-xs font-bold rounded-xl border text-center transition-colors cursor-pointer ${
                           reviewDuration === opt.id
                             ? 'bg-primary text-white border-primary'
+<<<<<<< HEAD
                             : 'bg-surface text-foreground border-border hover:border-border-hover'
+=======
+                            : 'bg-white text-gray-700 border-gray-200 hover:border-gray-300'
+>>>>>>> c80e27e54a7a9fd8b6f001d1c284f29909639613
                         }`}
                       >
                         {opt.label}
@@ -845,7 +993,11 @@ export default function AdminSellersPage() {
                             type="date"
                             value={customStartDate}
                             onChange={(e) => setCustomStartDate(e.target.value)}
+<<<<<<< HEAD
                             className="w-full p-2 bg-surface border border-border rounded-xl text-xs text-foreground outline-none"
+=======
+                            className="w-full p-2 bg-white border border-gray-200 rounded-xl text-xs text-gray-900 outline-none focus:border-primary"
+>>>>>>> c80e27e54a7a9fd8b6f001d1c284f29909639613
                           />
                         </div>
                       )}
@@ -855,7 +1007,11 @@ export default function AdminSellersPage() {
                           type="date"
                           value={customEndDate}
                           onChange={(e) => setCustomEndDate(e.target.value)}
+<<<<<<< HEAD
                           className="w-full p-2 bg-surface border border-border rounded-xl text-xs text-foreground outline-none"
+=======
+                          className="w-full p-2 bg-white border border-gray-200 rounded-xl text-xs text-gray-900 outline-none focus:border-primary"
+>>>>>>> c80e27e54a7a9fd8b6f001d1c284f29909639613
                         />
                       </div>
                     </div>
@@ -871,14 +1027,23 @@ export default function AdminSellersPage() {
                   value={actionNotes}
                   onChange={(e) => setActionNotes(e.target.value)}
                   placeholder="Additional notes for audit history..."
+<<<<<<< HEAD
                   className="w-full p-2.5 bg-surface border border-border rounded-xl text-xs text-foreground outline-none focus:border-primary"
+=======
+                  className="w-full p-2.5 bg-white border border-gray-200 rounded-xl text-xs text-gray-900 outline-none focus:border-primary"
+>>>>>>> c80e27e54a7a9fd8b6f001d1c284f29909639613
                 />
               </div>
 
               {/* Warning for permanent deactivation */}
               {modalAction === 'permanently_deactivate' && (
+<<<<<<< HEAD
                 <div className="p-3 bg-error-bg border border-error/20 rounded-xl text-xs text-error font-bold flex items-center gap-2">
                   <AlertTriangle className="w-4 h-4 text-error shrink-0" />
+=======
+                <div className="p-3 bg-red-50 border border-red-200 rounded-xl text-[11px] text-danger font-bold flex items-center gap-2">
+                  <AlertTriangle className="w-4 h-4 text-danger shrink-0" />
+>>>>>>> c80e27e54a7a9fd8b6f001d1c284f29909639613
                   <span>Warning: Permanent deactivation cannot be reversed. The seller will never be able to reactivate.</span>
                 </div>
               )}

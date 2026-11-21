@@ -136,6 +136,7 @@ export default function AdminCouponsPage() {
   };
 
   return (
+<<<<<<< HEAD
     <div className="flex flex-col min-h-screen">
       {/* Standard Admin Header */}
       <AdminHeader
@@ -154,6 +155,23 @@ export default function AdminCouponsPage() {
           </button>
         }
       />
+=======
+    <div className="p-8">
+      <div className="flex justify-between items-center mb-6">
+        <div>
+          <h1 className="text-2xl font-bold text-gray-900">Coupons Management</h1>
+          <p className="text-gray-500">Create and manage discount codes.</p>
+        </div>
+        <button 
+          type="button"
+          onClick={() => handleOpen()} 
+          className="flex items-center gap-2 bg-primary hover:bg-primary-hover text-white text-xs font-bold px-4 py-2.5 rounded-xl shadow-2xs transition-colors cursor-pointer"
+        >
+          <Plus className="w-4 h-4 stroke-[2.5]" />
+          <span>Add Coupon</span>
+        </button>
+      </div>
+>>>>>>> c80e27e54a7a9fd8b6f001d1c284f29909639613
 
       <div className="px-6 md:px-10 py-6">
         <AdminTable
@@ -178,6 +196,7 @@ export default function AdminCouponsPage() {
               ? `${c.value ?? c.discount_amount}%` 
               : `₹${c.value ?? c.discount_amount}`;
 
+<<<<<<< HEAD
             return (
               <tr key={c.id} className="hover:bg-black/[0.02] dark:hover:bg-white/[0.03] transition-colors">
                 <td className="px-5 py-3.5 font-bold text-foreground">
@@ -225,6 +244,35 @@ export default function AdminCouponsPage() {
                       className="p-1.5 rounded-lg hover:bg-surface-muted text-error cursor-pointer transition-colors"
                       title="Delete Coupon"
                     >
+=======
+              return (
+                <tr key={c.id} className="hover:bg-gray-50">
+                  <td className="px-6 py-4 font-bold text-gray-900">
+                    <span className="font-mono bg-gray-100 px-2 py-0.5 rounded text-sm">{c.code}</span>
+                  </td>
+                  <td className="px-6 py-4 font-medium text-emerald-700">
+                    {discountText}
+                    {isPercentage && c.max_discount ? ` (up to ₹${c.max_discount})` : ''}
+                  </td>
+                  <td className="px-6 py-4">₹{c.min_order_value ?? c.min_order_amount ?? 0}</td>
+                  <td className="px-6 py-4 text-sm text-gray-600">
+                    {(c.expiry_date || c.valid_until) ? new Date(c.expiry_date || c.valid_until).toLocaleDateString() : 'Never'}
+                  </td>
+                  <td className="px-6 py-4 text-sm text-gray-600">
+                    {c.used_count ?? c.usage_count ?? 0} / {c.max_uses ?? c.max_usage ?? '∞'}
+                  </td>
+                  <td className="px-6 py-4">
+                    <button onClick={() => toggleStatus(c.id, c.is_active)} className={`flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium ${c.is_active ? 'bg-green-100 text-success' : 'bg-red-100 text-danger'}`}>
+                      {c.is_active ? <CheckCircle2 className="w-3.5 h-3.5"/> : <XCircle className="w-3.5 h-3.5"/>}
+                      {c.is_active ? 'Active' : 'Inactive'}
+                    </button>
+                  </td>
+                  <td className="px-6 py-4 flex items-center gap-3">
+                    <button onClick={() => handleOpen(c)} className="text-info hover:text-info" title="Edit">
+                      <Edit2 className="w-4 h-4" />
+                    </button>
+                    <button onClick={() => handleDelete(c.id, c.code)} className="text-danger hover:text-danger" title="Delete">
+>>>>>>> c80e27e54a7a9fd8b6f001d1c284f29909639613
                       <Trash2 className="w-4 h-4" />
                     </button>
                   </div>
@@ -343,6 +391,7 @@ export default function AdminCouponsPage() {
               </div>
 
               <div className="flex items-center gap-2 mt-4">
+<<<<<<< HEAD
                 <input
                   type="checkbox"
                   id="isActive"
@@ -367,6 +416,15 @@ export default function AdminCouponsPage() {
                 >
                   Save Coupon
                 </button>
+=======
+                <input type="checkbox" id="isActive" checked={form.is_active} onChange={e => setForm({...form, is_active: e.target.checked})} className="w-4 h-4 rounded text-primary focus:ring-primary" />
+                <label htmlFor="isActive" className="text-sm font-medium">Coupon is active</label>
+              </div>
+
+              <div className="flex justify-end gap-3 pt-4 border-t border-gray-100">
+                <button type="button" onClick={() => setShowModal(false)} className="px-4 py-2 bg-gray-100 rounded-lg hover:bg-gray-200 transition text-xs font-semibold cursor-pointer">Cancel</button>
+                <button type="submit" className="px-5 py-2 bg-primary hover:bg-primary-hover text-white rounded-lg shadow-2xs transition text-xs font-bold cursor-pointer">Save</button>
+>>>>>>> c80e27e54a7a9fd8b6f001d1c284f29909639613
               </div>
             </form>
           </div>

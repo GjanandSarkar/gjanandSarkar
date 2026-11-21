@@ -1,92 +1,22 @@
 "use client";
 
-import { useState, useEffect, useCallback } from 'react';
+import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useStore } from '@/store/useStore';
-import { useTranslation } from '@/lib/i18n';
-import {
-  getNotifications,
-  markAsRead,
-  markAllRead,
-  subscribeToNotifications,
-} from '@/lib/api/notifications';
-import type { DBNotification } from '@/lib/supabase';
-import { Bell, ArrowLeft, Package, CalendarDays, Info, Truck, CheckCheck, Loader2 } from 'lucide-react';
-import { motion, AnimatePresence } from 'framer-motion';
-
-function timeAgo(dateStr: string): string {
-  const diff = Date.now() - new Date(dateStr).getTime();
-  const mins = Math.floor(diff / 60000);
-  if (mins < 1) return 'Just now';
-  if (mins < 60) return `${mins}m ago`;
-  const hrs = Math.floor(mins / 60);
-  if (hrs < 24) return `${hrs}h ago`;
-  return `${Math.floor(hrs / 24)}d ago`;
-}
-
-const TYPE_ICON: Record<string, any> = {
-  order: Package,
-  subscription: CalendarDays,
-  delivery: Truck,
-  system: Info,
-};
+import { Loader2 } from 'lucide-react';
 
 export default function NotificationsPage() {
-  const { t } = useTranslation();
   const router = useRouter();
-  const user = useStore((s) => s.user);
-
-  const [notifications, setNotifications] = useState<DBNotification[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [markingAll, setMarkingAll] = useState(false);
-
-  const unreadCount = notifications.filter((n) => !n.is_read).length;
-
-  const loadNotifications = useCallback(async () => {
-    if (!user) return;
-    setLoading(true);
-    const data = await getNotifications(user.id, user.role);
-    setNotifications(data);
-    setLoading(false);
-  }, [user]);
+  const setNotificationDrawerOpen = useStore((s) => s.setNotificationDrawerOpen);
 
   useEffect(() => {
-    if (!user) return;
-    loadNotifications();
-
-    const unsubscribe = subscribeToNotifications(user.id, (newNotif) => {
-      setNotifications((prev) => [newNotif, ...prev]);
-    });
-
-    return unsubscribe;
-  }, [user, loadNotifications]);
-
-  const handleNotificationClick = async (notif: DBNotification) => {
-    if (!notif.is_read) {
-      await markAsRead(notif.id);
-      setNotifications((prev) =>
-        prev.map((n) => (n.id === notif.id ? { ...n, is_read: true } : n))
-      );
-    }
-    if (notif.related_id) {
-      const path = notif.type === 'order'
-        ? `/tracking/${notif.related_id}`
-        : notif.type === 'subscription'
-        ? `/subscribe`
-        : null;
-      if (path) router.push(path);
-    }
-  };
-
-  const handleMarkAllRead = async () => {
-    if (!user || markingAll) return;
-    setMarkingAll(true);
-    await markAllRead(user.id);
-    setNotifications((prev) => prev.map((n) => ({ ...n, is_read: true })));
-    setMarkingAll(false);
-  };
+    // Notifications are displayed via the responsive global drawer/sidebar
+    setNotificationDrawerOpen(true);
+    router.replace('/home');
+  }, [router, setNotificationDrawerOpen]);
 
   return (
+<<<<<<< HEAD
     <div className="flex flex-col min-h-screen bg-surface">
       {/* Header */}
       <div className="sticky top-0 z-30 bg-surface/80 backdrop-blur-md border-b border-sand px-4 py-4 md:px-8">
@@ -177,6 +107,12 @@ export default function NotificationsPage() {
             </div>
           </div>
         )}
+=======
+    <div className="flex min-h-[60vh] flex-col items-center justify-center bg-background text-foreground">
+      <div className="flex items-center gap-3 text-sm font-semibold text-foreground-muted">
+        <Loader2 className="w-5 h-5 animate-spin text-primary" />
+        <span>Opening notifications...</span>
+>>>>>>> c80e27e54a7a9fd8b6f001d1c284f29909639613
       </div>
     </div>
   );

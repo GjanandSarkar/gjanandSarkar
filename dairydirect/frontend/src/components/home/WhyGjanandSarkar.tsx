@@ -64,6 +64,7 @@ const pillars = [
 
 export function WhyGjanandSarkar() {
   return (
+<<<<<<< HEAD
     <section className="w-full max-w-[1440px] mx-auto px-4 md:px-8 py-4">
       <div className="bg-surface rounded-xl border border-border/80 p-6 md:p-8">
         <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-3 mb-7">
@@ -72,42 +73,77 @@ export function WhyGjanandSarkar() {
               How we work
             </span>
             <h2 className="text-xl md:text-2xl font-semibold text-primary tracking-tight mt-1">
+=======
+    <section className="w-full max-w-[1440px] mx-auto px-4 md:px-8 py-4 mb-4">
+      <div className="bg-surface rounded-xl border border-border p-5 md:p-6">
+        <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-3 mb-6">
+          <div>
+            <span className="text-[11px] font-bold uppercase tracking-wider text-primary">
+              Our Guarantee
+            </span>
+            <h2 className="text-xl md:text-2xl font-bold text-foreground tracking-tight mt-1">
+>>>>>>> c80e27e54a7a9fd8b6f001d1c284f29909639613
               Fewer choices. Far better ones.
             </h2>
           </div>
 
+<<<<<<< HEAD
           {/* Derived from the taxonomy, so this number cannot go stale. */}
           <p className="text-xs text-foreground-muted font-medium">
             <strong className="text-primary font-semibold tabular-nums">
+=======
+          {/* Derived from the taxonomy */}
+          <p className="text-xs text-foreground-muted font-medium">
+            <strong className="text-primary font-bold tabular-nums">
+>>>>>>> c80e27e54a7a9fd8b6f001d1c284f29909639613
               {CATEGORIES.length}
             </strong>{' '}
-            categories live, one partner brand each
+            verified categories live
           </p>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 reveal">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
           {pillars.map(({ icon: Icon, title, body }) => (
+<<<<<<< HEAD
             <div key={title} className="flex flex-col gap-2.5">
               <div className="w-10 h-10 rounded-2xl bg-success-bg text-primary flex items-center justify-center border border-success-bg">
                 <Icon className="w-5 h-5" />
               </div>
               <h3 className="text-sm font-semibold text-foreground leading-snug">{title}</h3>
+=======
+            <div key={title} className="flex flex-col gap-2">
+              <div className="w-10 h-10 rounded-lg bg-primary-fixed text-primary flex items-center justify-center border border-primary/20">
+                <Icon className="w-5 h-5" />
+              </div>
+              <h3 className="text-sm font-bold text-foreground leading-snug">{title}</h3>
+>>>>>>> c80e27e54a7a9fd8b6f001d1c284f29909639613
               <p className="text-xs text-foreground-muted leading-relaxed">{body}</p>
             </div>
           ))}
         </div>
 
+<<<<<<< HEAD
         <div className="mt-7 pt-5 border-t border-border flex flex-wrap items-center justify-between gap-4">
           <span className="text-xs font-bold text-foreground-muted inline-flex items-center gap-1.5">
             <ShieldCheck className="w-4 h-4 text-success" />
             Every partner verified before listing
+=======
+        <div className="mt-6 pt-4 border-t border-border flex flex-wrap items-center justify-between gap-4">
+          <span className="text-[11px] font-medium text-foreground-muted inline-flex items-center gap-1.5">
+            <ShieldCheck className="w-4 h-4 text-primary" />
+            Every partner verified and certified before listing
+>>>>>>> c80e27e54a7a9fd8b6f001d1c284f29909639613
           </span>
 
           <Link
             href="/about#verification"
+<<<<<<< HEAD
             className="text-xs font-semibold text-secondary-ink hover:text-primary inline-flex items-center gap-1 transition-colors"
+=======
+            className="text-xs font-bold text-primary hover:underline inline-flex items-center gap-1 transition-colors"
+>>>>>>> c80e27e54a7a9fd8b6f001d1c284f29909639613
           >
-            <span>How we verify partners</span>
+            <span>Learn how we verify quality</span>
             <ArrowRight className="w-3.5 h-3.5" />
           </Link>
         </div>

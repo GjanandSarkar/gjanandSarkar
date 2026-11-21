@@ -169,6 +169,7 @@ export default function AdminCategoriesPage() {
 
   return (
     <div className="flex flex-col min-h-screen">
+<<<<<<< HEAD
       {/* Standard Admin Header */}
       <AdminHeader
         title="Categories"
@@ -271,6 +272,129 @@ export default function AdminCategoriesPage() {
               </tr>
             ))}
           </AdminTable>
+=======
+      {/* Header */}
+      <div
+        className="px-6 md:px-10 pt-6 pb-5 flex items-center justify-between"
+        style={{ background: 'var(--color-surface-container-lowest)', borderBottom: '1px solid rgba(195,201,187,0.2)' }}
+      >
+        <div>
+          <h1 className="font-extrabold text-[24px] tracking-tight" style={{ color: 'var(--color-on-surface)' }}>
+            Categories
+          </h1>
+          <p className="text-[13px] mt-0.5" style={{ color: 'var(--color-on-surface-variant)' }}>
+            Manage product taxonomy ({categories.length} total)
+          </p>
+        </div>
+        <button
+          onClick={handleOpenAddModal}
+          className="flex items-center gap-2 px-4 py-2.5 rounded-[12px] font-bold text-[13px] text-white transition-all active:scale-95 cursor-pointer"
+          style={{
+            background: 'linear-gradient(135deg, #0c3c26, #114e32)',
+            boxShadow: '0 4px 12px rgba(12, 60, 38, 0.25)',
+          }}
+        >
+          <Plus className="w-4 h-4" strokeWidth={2.5} />
+          <span>New Category</span>
+        </button>
+      </div>
+
+      <div className="px-6 md:px-10 py-5">
+        {isLoading ? (
+          <div className="flex justify-center py-20">
+            <Loader2 className="w-7 h-7 animate-spin text-[#0c3c26]" />
+          </div>
+        ) : error && categories.length === 0 ? (
+          <div className="text-center py-16 text-danger font-semibold">{error}</div>
+        ) : (
+          <div
+            className="rounded-[16px] overflow-hidden shadow-xs"
+            style={{ border: '1px solid rgba(195,201,187,0.3)', background: 'var(--color-surface-container-lowest)' }}
+          >
+            <div className="overflow-x-auto">
+            <table className="w-full min-w-[640px] text-left border-collapse">
+              <thead>
+                <tr style={{ background: 'var(--color-surface-container-low)' }}>
+                  <th className="px-5 py-4 text-[12px] font-bold uppercase tracking-wider" style={{ color: 'var(--color-on-surface-variant)' }}>
+                    Category Name
+                  </th>
+                  <th className="px-5 py-4 text-[12px] font-bold uppercase tracking-wider" style={{ color: 'var(--color-on-surface-variant)' }}>
+                    Products
+                  </th>
+                  <th className="px-5 py-4 text-[12px] font-bold uppercase tracking-wider text-right" style={{ color: 'var(--color-on-surface-variant)' }}>
+                    Actions
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                {categories.map((cat, idx) => (
+                  <tr
+                    key={cat.id || cat.name}
+                    style={{ borderBottom: idx !== categories.length - 1 ? '1px solid rgba(195,201,187,0.3)' : 'none' }}
+                    className="hover:bg-black/[0.02] transition-colors"
+                  >
+                    <td className="px-5 py-4 cursor-pointer" onClick={() => handleNavigateToCategoryProducts(cat.name)}>
+                      <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 rounded-[10px] flex items-center justify-center bg-[#e6f2ec] text-[#0c3c26] shrink-0 font-bold overflow-hidden">
+                          {cat.image_url ? (
+                            <img src={cat.image_url} alt={cat.name} className="w-full h-full object-cover rounded-[10px]" />
+                          ) : (
+                            <Tags className="w-5 h-5" />
+                          )}
+                        </div>
+                        <div>
+                          <span className="font-bold text-[14px] block hover:text-[#0c3c26] transition-colors" style={{ color: 'var(--color-on-surface)' }}>
+                            {cat.name}
+                          </span>
+                          {cat.description && (
+                            <span className="text-[11px] text-muted block max-w-xs truncate">{cat.description}</span>
+                          )}
+                        </div>
+                      </div>
+                    </td>
+                    <td className="px-5 py-4 cursor-pointer" onClick={() => handleNavigateToCategoryProducts(cat.name)}>
+                      <div className="flex items-center gap-2">
+                        <Package className="w-4 h-4 text-[#0c3c26]" />
+                        <span className="font-bold text-[13px] hover:underline text-[#0c3c26]">
+                          {cat.product_count ?? 0} items
+                        </span>
+                      </div>
+                    </td>
+                    <td className="px-5 py-4 text-right">
+                      <div className="flex items-center justify-end gap-2">
+                        <button
+                          onClick={() => handleNavigateToCategoryProducts(cat.name)}
+                          className="p-2 rounded-full hover:bg-black/5 transition-colors cursor-pointer text-[#0c3c26]"
+                          title="View Products in this category"
+                          type="button"
+                        >
+                          <ExternalLink className="w-4 h-4" />
+                        </button>
+                        <button
+                          onClick={() => handleOpenEditModal(cat)}
+                          className="p-2 rounded-full hover:bg-black/5 transition-colors cursor-pointer text-[#0c3c26]"
+                          title="Edit Category"
+                          type="button"
+                        >
+                          <Pencil className="w-4 h-4" />
+                        </button>
+                        <button
+                          onClick={() => setDeletingCategory(cat)}
+                          className="p-2 rounded-full hover:bg-black/5 transition-colors cursor-pointer text-danger"
+                          title="Delete Category"
+                          type="button"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+            </div>
+          </div>
+>>>>>>> c80e27e54a7a9fd8b6f001d1c284f29909639613
         )}
       </div>
 
@@ -306,7 +430,11 @@ export default function AdminCategoriesPage() {
               </p>
 
               {error && (
+<<<<<<< HEAD
                 <div className="mb-4 p-3 bg-error-bg text-error rounded-xl text-xs font-semibold">
+=======
+                <div className="mb-4 p-3 bg-red-50 text-danger rounded-xl text-xs font-semibold">
+>>>>>>> c80e27e54a7a9fd8b6f001d1c284f29909639613
                   {error}
                 </div>
               )}
@@ -434,7 +562,11 @@ export default function AdminCategoriesPage() {
               className="bg-surface rounded-2xl max-w-sm w-full p-6 shadow-2xl text-center"
               onClick={(e) => e.stopPropagation()}
             >
+<<<<<<< HEAD
               <div className="w-12 h-12 rounded-full bg-error-bg text-error flex items-center justify-center mx-auto mb-3">
+=======
+              <div className="w-12 h-12 rounded-full bg-red-100 text-danger flex items-center justify-center mx-auto mb-3">
+>>>>>>> c80e27e54a7a9fd8b6f001d1c284f29909639613
                 <Trash2 className="w-6 h-6" />
               </div>
               <h3 className="font-semibold text-lg text-foreground mb-1">Delete Category?</h3>

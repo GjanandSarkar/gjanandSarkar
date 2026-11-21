@@ -1,7 +1,11 @@
 "use client";
 
+<<<<<<< HEAD
 import { useEffect, useRef } from 'react';
 import { SmartImage } from '@/components/ui/SmartImage';
+=======
+import { useState, useEffect, useRef } from 'react';
+>>>>>>> c80e27e54a7a9fd8b6f001d1c284f29909639613
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Trash2, Plus, Minus, ArrowRight } from 'lucide-react';
 import { useTranslation } from '@/lib/i18n';
@@ -25,6 +29,14 @@ export function CartDrawer({ isOpen, onClose }: CartDrawerProps) {
   const router = useRouter();
   const pathname = usePathname();
   const drawerRef = useRef<HTMLDivElement>(null);
+  const [isDesktop, setIsDesktop] = useState(false);
+
+  useEffect(() => {
+    const updateMedia = () => setIsDesktop(window.innerWidth >= 768);
+    updateMedia();
+    window.addEventListener('resize', updateMedia);
+    return () => window.removeEventListener('resize', updateMedia);
+  }, []);
 
   const user = useStore(s => s.user);
   const updateCartQuantityLocal = useStore(s => s.updateCartQuantityLocal);
@@ -149,30 +161,38 @@ export function CartDrawer({ isOpen, onClose }: CartDrawerProps) {
           role="dialog"
           aria-modal="true"
           aria-labelledby="cart-title"
-          initial={{ y: '100%', x: 0 }}
-          animate={{ y: 0, x: 0 }}
-          exit={{ y: '100%', x: 0 }}
+          initial={isDesktop ? { x: '100%', y: 0 } : { y: '100%', x: 0 }}
+          animate={{ x: 0, y: 0 }}
+          exit={isDesktop ? { x: '100%', y: 0 } : { y: '100%', x: 0 }}
           transition={{ type: 'spring', stiffness: 300, damping: 30 }}
+<<<<<<< HEAD
           className="fixed z-[60] bottom-0 left-0 right-0 h-[88vh] bg-surface rounded-t-[24px] md:top-4 md:bottom-4 md:left-auto md:right-4 md:h-auto md:w-[420px] md:rounded-[20px] flex flex-col shadow-2xl overflow-hidden"
+=======
+          className="fixed z-[60] bottom-0 left-0 right-0 h-[88vh] bg-surface rounded-t-2xl md:top-0 md:bottom-0 md:left-auto md:right-0 md:h-full md:w-[420px] md:rounded-none flex flex-col shadow-2xl border-t md:border-t-0 md:border-l border-border"
+>>>>>>> c80e27e54a7a9fd8b6f001d1c284f29909639613
         >
         {/* Header */}
-        <div className="flex items-center justify-between p-5 border-b border-outline-variant/30 shrink-0">
+        <div className="flex items-center justify-between p-4 sm:p-5 border-b border-border/80 shrink-0">
           <div>
+<<<<<<< HEAD
             <h2 id="cart-title" className="font-semibold text-[20px] text-on-surface">
+=======
+            <h2 id="cart-title" className="font-extrabold text-lg sm:text-xl text-foreground">
+>>>>>>> c80e27e54a7a9fd8b6f001d1c284f29909639613
               {t('myCart')}
             </h2>
             {!isEmpty && (
-              <p className="text-[13px] text-on-surface-variant font-medium">
+              <p className="text-xs text-muted font-medium">
                 {cartItemsData.length} {t('items')}
               </p>
             )}
           </div>
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2.5">
             {!isEmpty && (
               <button 
                 onClick={handleClearAll}
                 aria-label={t('clearAll')}
-                className="text-[12px] font-bold text-error bg-error/10 px-3 py-1.5 rounded-full"
+                className="text-xs font-bold text-rose-500 bg-rose-500/10 px-2.5 py-1 rounded-lg hover:bg-rose-500/20 transition-colors cursor-pointer"
               >
                 {t('clearAll')}
               </button>
@@ -181,27 +201,27 @@ export function CartDrawer({ isOpen, onClose }: CartDrawerProps) {
               onClick={onClose}
               data-autofocus
               aria-label="Close cart drawer"
-              className="w-8 h-8 rounded-full bg-surface-container-low flex items-center justify-center text-on-surface focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+              className="w-8 h-8 rounded-lg bg-surface-muted hover:bg-border/60 flex items-center justify-center text-foreground transition-colors cursor-pointer"
             >
-              <X className="w-5 h-5" />
+              <X className="w-4 h-4" />
             </button>
           </div>
         </div>
 
-        {/* Content */}
-        <div className="flex-1 overflow-y-auto px-5 py-6">
+        {/* Scrollable Content */}
+        <div className="flex-1 overflow-y-auto px-4 sm:px-5 py-5 space-y-6">
           {isLoading ? (
-            <div className="flex flex-col gap-4">
+            <div className="flex flex-col gap-3">
               {[1, 2, 3].map(i => (
-                <div key={i} className="h-24 rounded-[16px] animate-pulse bg-surface-container-low" />
+                <div key={i} className="h-20 rounded-xl animate-pulse bg-surface-muted border border-border/50" />
               ))}
             </div>
           ) : isEmpty ? (
             <EmptyCart onActionClick={onClose} />
           ) : (
-            <div className="flex flex-col gap-6">
-              {/* Items */}
-              <div className="flex flex-col gap-3">
+            <div className="flex flex-col gap-5">
+              {/* Items List */}
+              <div className="flex flex-col gap-2.5">
                 <AnimatePresence initial={false}>
                   {cartItemsData.map((item) => (
                     <motion.div
@@ -210,6 +230,7 @@ export function CartDrawer({ isOpen, onClose }: CartDrawerProps) {
                       initial={{ opacity: 0, scale: 0.95 }}
                       animate={{ opacity: 1, scale: 1 }}
                       exit={{ opacity: 0, scale: 0.95 }}
+<<<<<<< HEAD
                       className="flex gap-4 p-3 rounded-lg bg-surface border border-border"
                     >
                       <div 
@@ -223,21 +244,44 @@ export function CartDrawer({ isOpen, onClose }: CartDrawerProps) {
                         <div className="flex justify-between items-start">
                           <h3 className="font-semibold text-sm leading-tight text-foreground line-clamp-2 pr-2">
                             {tProduct(item.product.name)}
+=======
+                      className="flex gap-3.5 p-3 rounded-xl bg-surface-muted/40 border border-border/80 hover:border-border transition-colors"
+                    >
+                      <div 
+                        className="w-16 h-16 rounded-lg flex items-center justify-center shrink-0 overflow-hidden bg-surface-muted border border-border/60 p-1"
+                      >
+                        <img src={item.product.image_url ?? PLACEHOLDER_PRODUCT_IMAGE} alt={item.product.name} className="w-full h-full object-contain" />
+                      </div>
+
+                      <div className="flex-1 flex flex-col justify-center min-w-0">
+                        <div className="flex justify-between items-start gap-1">
+                          <h3 className="font-bold text-xs sm:text-sm leading-tight text-foreground line-clamp-1">
+                            {item.product.name}
+>>>>>>> c80e27e54a7a9fd8b6f001d1c284f29909639613
                           </h3>
                           <button
                             onClick={() => handleRemove(item.productId, item.variantId)}
                             aria-label={`Remove ${item.product.name} from cart`}
+<<<<<<< HEAD
                             className="p-1 min-h-[44px] min-w-[44px] flex items-center justify-center text-foreground-muted hover:text-error transition-colors focus-visible:outline-2 focus-visible:outline-primary rounded-md"
+=======
+                            className="p-1 text-muted hover:text-rose-500 transition-colors rounded-md shrink-0 cursor-pointer"
+>>>>>>> c80e27e54a7a9fd8b6f001d1c284f29909639613
                           >
-                            <Trash2 className="w-4 h-4" />
+                            <Trash2 className="w-3.5 h-3.5" />
                           </button>
                         </div>
                         
+<<<<<<< HEAD
                         <span className="inline-block px-2 py-0.5 rounded-full text-xs font-semibold bg-primary-fixed text-primary w-fit mt-1 mb-2">
+=======
+                        <span className="inline-block px-1.5 py-0.5 rounded-md text-[10px] font-bold bg-primary/10 text-primary w-fit mt-0.5 mb-1.5">
+>>>>>>> c80e27e54a7a9fd8b6f001d1c284f29909639613
                           {item.variant.weight}
                         </span>
 
                         <div className="flex items-center justify-between">
+<<<<<<< HEAD
                           <span className="font-semibold text-sm text-primary">
                             {t('currency')}{item.variant.price * item.quantity}
                           </span>
@@ -252,6 +296,22 @@ export function CartDrawer({ isOpen, onClose }: CartDrawerProps) {
                             </button>
                             <span 
                               className="w-6 text-center text-xs font-semibold text-foreground"
+=======
+                          <span className="font-extrabold text-sm sm:text-base text-primary tabular-nums">
+                            {t('currency')}{item.variant.price * item.quantity}
+                          </span>
+
+                          <div className="flex items-center rounded-lg bg-surface border border-border shadow-2xs">
+                            <button
+                              onClick={() => handleUpdateQuantity(item.productId, item.variantId, item.quantity - 1)}
+                              aria-label={`Decrease quantity of ${item.product.name}`}
+                              className="w-6 h-6 sm:w-7 sm:h-7 flex items-center justify-center text-foreground hover:text-primary active:scale-95 transition-colors cursor-pointer"
+                            >
+                              <Minus className="w-3 h-3 stroke-[2.5]" />
+                            </button>
+                            <span 
+                              className="w-6 text-center text-xs font-black text-foreground tabular-nums select-none"
+>>>>>>> c80e27e54a7a9fd8b6f001d1c284f29909639613
                               aria-live="polite"
                               aria-label={`Quantity: ${item.quantity}`}
                             >
@@ -260,9 +320,15 @@ export function CartDrawer({ isOpen, onClose }: CartDrawerProps) {
                             <button
                               onClick={() => handleUpdateQuantity(item.productId, item.variantId, item.quantity + 1)}
                               aria-label={`Increase quantity of ${item.product.name}`}
+<<<<<<< HEAD
                               className="w-8 h-8 min-h-[44px] min-w-[44px] flex items-center justify-center text-primary active:scale-95 focus-visible:outline-2 focus-visible:outline-primary"
                             >
                               <Plus className="w-3.5 h-3.5" strokeWidth={2.5} />
+=======
+                              className="w-6 h-6 sm:w-7 sm:h-7 flex items-center justify-center text-foreground hover:text-primary active:scale-95 transition-colors cursor-pointer"
+                            >
+                              <Plus className="w-3 h-3 stroke-[2.5]" />
+>>>>>>> c80e27e54a7a9fd8b6f001d1c284f29909639613
                             </button>
                           </div>
                         </div>
@@ -272,7 +338,12 @@ export function CartDrawer({ isOpen, onClose }: CartDrawerProps) {
                 </AnimatePresence>
               </div>
 
-              {/* Summary */}
+              {/* Cross Sells (Inside scrollable container so user items aren't pushed off-screen) */}
+              <div className="pt-2 border-t border-border/60">
+                <CartCrossSells />
+              </div>
+
+              {/* Order Summary */}
               <OrderSummary 
                 subtotal={subtotal}
                 delivery={delivery}
@@ -285,6 +356,7 @@ export function CartDrawer({ isOpen, onClose }: CartDrawerProps) {
             </div>
           )}
 
+<<<<<<< HEAD
           {/* Cross-sell lives in the scroll flow so it can never clip the
               payment summary above it. */}
           {!isLoading && !isEmpty && (
@@ -297,16 +369,28 @@ export function CartDrawer({ isOpen, onClose }: CartDrawerProps) {
         {/* Footer CTA */}
         {!isEmpty && !isLoading && (
           <div className="px-5 pt-4 pb-[max(1.25rem,env(safe-area-inset-bottom))] border-t border-border bg-surface shrink-0">
+=======
+        {/* Footer CTA */}
+        {!isEmpty && !isLoading && (
+          <div 
+            className="p-4 sm:p-5 border-t border-border/80 bg-surface shrink-0"
+            style={{ paddingBottom: 'max(env(safe-area-inset-bottom, 0px), 16px)' }}
+          >
+>>>>>>> c80e27e54a7a9fd8b6f001d1c284f29909639613
             <button
               onClick={() => {
                 onClose();
                 router.push('/checkout');
               }}
               aria-label="Proceed to checkout"
+<<<<<<< HEAD
               className="flex items-center justify-between w-full px-6 py-3.5 min-h-[44px] rounded-lg font-semibold text-sm transition-colors active:scale-[0.98] bg-primary text-on-primary hover:bg-primary-hover shadow-xs focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+=======
+              className="flex items-center justify-between w-full px-5 py-3.5 rounded-xl font-black text-sm sm:text-base bg-primary hover:bg-primary-hover text-foreground-inverse transition-transform active:scale-[0.98] shadow-md cursor-pointer"
+>>>>>>> c80e27e54a7a9fd8b6f001d1c284f29909639613
             >
               <span>{t('proceedToCheckout')}</span>
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-1.5 tabular-nums">
                 <span>{t('currency')}{total}</span>
                 <ArrowRight className="w-4 h-4" />
               </div>

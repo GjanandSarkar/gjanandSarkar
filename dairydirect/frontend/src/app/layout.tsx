@@ -1,7 +1,9 @@
 import type { Metadata, Viewport } from "next";
+import { cookies } from "next/headers";
 import localFont from "next/font/local";
 import "./globals.css";
 
+<<<<<<< HEAD
 // Self-hosted Manrope variable font (one woff2, weights 200-800).
 //
 // Manrope replaced Inter for the product-first rebuild: it is a little more
@@ -11,10 +13,41 @@ import "./globals.css";
 const manrope = localFont({
   src: "../fonts/manrope-latin-wght-normal.woff2",
   variable: "--font-manrope",
+=======
+const ui = localFont({
+  src: "../fonts/inter-latin-wght-normal.woff2",
+  variable: "--font-ui",
+>>>>>>> c80e27e54a7a9fd8b6f001d1c284f29909639613
   weight: "100 900",
   display: "swap",
   preload: true,
-  fallback: ["system-ui", "-apple-system", "Segoe UI", "Roboto", "sans-serif"],
+  adjustFontFallback: "Arial", // kills CLS on swap
+});
+
+const display = localFont({
+  src: "../fonts/bricolage-grotesque-latin-wght-normal.woff2",
+  variable: "--font-display",
+  weight: "200 800",
+  display: "swap",
+  preload: true,
+  adjustFontFallback: false,
+});
+
+// Lazy: English users never download these
+const devanagari = localFont({
+  src: "../fonts/noto-sans-devanagari-devanagari-wght-normal.woff2",
+  variable: "--font-devanagari",
+  weight: "100 900",
+  display: "swap",
+  preload: false,
+});
+
+const gujarati = localFont({
+  src: "../fonts/noto-sans-gujarati-gujarati-wght-normal.woff2",
+  variable: "--font-gujarati",
+  weight: "100 900",
+  display: "swap",
+  preload: false,
 });
 
 export const metadata: Metadata = {
@@ -53,15 +86,25 @@ export const metadata: Metadata = {
 export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
+<<<<<<< HEAD
   themeColor: "#ffffff",
 }
+=======
+  themeColor: "#FFFBF5",
+};
+>>>>>>> c80e27e54a7a9fd8b6f001d1c284f29909639613
 
 import { LanguageManager } from "@/components/shared/LanguageManager";
 import { AuthProvider } from "@/components/shared/AuthProvider";
+import { ThemeProvider } from "@/components/theme/ThemeProvider";
 import { JsonLd } from "@/components/seo/JsonLd";
 import { ThemeProvider } from "@/components/theme/ThemeProvider";
 import { BRAND } from "@/lib/constants/brand";
+<<<<<<< HEAD
 import { AgentationDev } from "@/components/dev/AgentationDev";
+=======
+import { AgentationDevTool } from "@/components/dev/AgentationDevTool";
+>>>>>>> c80e27e54a7a9fd8b6f001d1c284f29909639613
 
 const orgStructuredData = {
   "@context": "https://schema.org",
@@ -86,14 +129,32 @@ const webSiteStructuredData = {
   },
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const cookieStore = await cookies();
+  const locale = cookieStore.get("locale")?.value || "en";
+
   return (
+<<<<<<< HEAD
     <html lang="en-IN" data-scroll-behavior="smooth" className={`${manrope.variable}`} suppressHydrationWarning>
+=======
+    <html
+      lang={locale}
+      data-locale={locale}
+      data-scroll-behavior="smooth"
+      className={`${ui.variable} ${display.variable} ${devanagari.variable} ${gujarati.variable}`}
+      suppressHydrationWarning
+    >
+>>>>>>> c80e27e54a7a9fd8b6f001d1c284f29909639613
       <head>
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `(function(){try{var t=localStorage.getItem('gjanand-theme');if(t==='dark'){document.documentElement.classList.add('dark');}else{document.documentElement.classList.remove('dark');}}catch(e){}})();`,
+          }}
+        />
         <JsonLd data={orgStructuredData} />
         <JsonLd data={webSiteStructuredData} />
         <link rel="icon" href="/application logo/gjanand sarkar logo.png" type="image/png" />
@@ -106,15 +167,23 @@ export default function RootLayout({
         />
       </head>
       <body
+<<<<<<< HEAD
         className={`${manrope.className} min-h-screen antialiased`}
         style={{ background: 'var(--background)', color: 'var(--foreground)' }}
+=======
+        className="min-h-screen antialiased bg-background text-foreground transition-colors duration-150"
+>>>>>>> c80e27e54a7a9fd8b6f001d1c284f29909639613
         suppressHydrationWarning
       >
         <ThemeProvider>
           <AuthProvider>
             <LanguageManager />
             {children}
+<<<<<<< HEAD
             <AgentationDev />
+=======
+            <AgentationDevTool />
+>>>>>>> c80e27e54a7a9fd8b6f001d1c284f29909639613
           </AuthProvider>
         </ThemeProvider>
       </body>

@@ -259,6 +259,7 @@ export default function BecomeSellerPage() {
   // If user is logged out, show clean login redirect view
   if (!isAuthLoading && !user) {
     return (
+<<<<<<< HEAD
       <div className="min-h-screen bg-background py-16 px-4 sm:px-6 lg:px-8 flex items-center justify-center">
         <div className="bg-surface rounded-xl border border-border/90 shadow-xl p-8 sm:p-12 text-center max-w-md mx-auto space-y-6">
           <div className="w-16 h-16 rounded-2xl bg-primary/10 text-primary flex items-center justify-center mx-auto">
@@ -267,14 +268,30 @@ export default function BecomeSellerPage() {
           <div className="space-y-2">
             <h2 className="text-2xl font-semibold text-foreground">Sign In to Become a Seller</h2>
             <p className="text-xs text-foreground-muted leading-relaxed">
+=======
+      <div className="min-h-screen bg-[#fafaf8] py-16 px-4 sm:px-6 lg:px-8 flex items-center justify-center">
+        <div className="bg-white rounded-3xl border border-gray-200/90 shadow-xl p-8 sm:p-12 text-center max-w-md mx-auto space-y-6">
+          <div className="w-16 h-16 rounded-2xl bg-primary-fixed text-primary flex items-center justify-center mx-auto">
+            <Store className="w-8 h-8 text-primary" />
+          </div>
+          <div className="space-y-2">
+            <h2 className="text-2xl font-bold text-gray-900">Sign In to Become a Seller</h2>
+            <p className="text-xs text-gray-600 leading-relaxed">
+>>>>>>> c80e27e54a7a9fd8b6f001d1c284f29909639613
               Please sign in to your Gjanand Sarkar account to submit and track your seller registration application.
             </p>
           </div>
           <Link
             href="/login?redirect=/become-seller"
+<<<<<<< HEAD
             className="w-full py-3.5 px-6 bg-primary hover:bg-primary-hover text-on-primary text-xs font-semibold rounded-xl shadow-md flex items-center justify-center gap-2 transition-all active:scale-95"
           >
             <LogIn className="w-4 h-4 text-secondary-ink" />
+=======
+            className="w-full py-3.5 px-6 bg-primary hover:bg-primary-hover text-primary-foreground text-xs font-bold rounded-xl shadow-sm flex items-center justify-center gap-2 transition-all active:scale-95"
+          >
+            <LogIn className="w-4 h-4 text-primary-foreground" />
+>>>>>>> c80e27e54a7a9fd8b6f001d1c284f29909639613
             <span>Sign In to Continue</span>
           </Link>
           <div className="pt-2">
@@ -288,6 +305,7 @@ export default function BecomeSellerPage() {
   }
 
   return (
+<<<<<<< HEAD
     <div className="min-h-screen bg-background">
       {/* Authentic Image 3 Showcase Banner */}
       <SellerHeroBanner />
@@ -302,16 +320,52 @@ export default function BecomeSellerPage() {
             </div>
             <h3 className="text-sm font-semibold text-foreground mb-1">Submit Application</h3>
             <p className="text-xs text-foreground-muted leading-normal">
+=======
+    <div className="min-h-screen bg-background text-foreground transition-colors duration-150 py-10 px-4 sm:px-6 lg:px-8">
+      <div className="max-w-5xl mx-auto space-y-10">
+        
+        {/* Top Hero Banner */}
+        <div className="text-center max-w-3xl mx-auto space-y-3">
+          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-primary/10 border border-primary/20 text-primary text-xs font-bold uppercase tracking-wider">
+            <Sparkles className="w-4 h-4 text-primary" />
+            <span>Marketplace Seller Onboarding</span>
+          </div>
+          <h1 className="text-3xl sm:text-4xl lg:text-5xl font-black text-foreground tracking-tight leading-tight">
+            Become a Verified Seller on Gjanand Sarkar
+          </h1>
+          <p className="text-sm sm:text-base text-foreground-muted leading-relaxed">
+            Expand your business across India with verified merchant privileges, dedicated delivery logistics, and transparent payouts. Submit your seller application below for admin review.
+          </p>
+        </div>
+
+        {/* 3-Step Manual Onboarding Workflow Banner */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="bg-white p-5 rounded-2xl border border-gray-200 shadow-2xs relative">
+            <div className="w-10 h-10 rounded-xl bg-primary-fixed text-primary flex items-center justify-center font-bold text-sm mb-3">
+              01
+            </div>
+            <h3 className="text-sm font-bold text-gray-900 mb-1">Submit Application</h3>
+            <p className="text-xs text-gray-500 leading-normal">
+>>>>>>> c80e27e54a7a9fd8b6f001d1c284f29909639613
               Provide your business name, address, GSTIN, PAN, and verification documents.
             </p>
           </div>
 
+<<<<<<< HEAD
           <div className="bg-surface p-5 rounded-2xl border border-secondary/30 shadow-2xs relative">
             <div className="w-10 h-10 rounded-xl bg-warning-bg text-secondary-ink flex items-center justify-center font-semibold text-sm mb-3">
               02
             </div>
             <h3 className="text-sm font-semibold text-foreground mb-1">Admin Verification</h3>
             <p className="text-xs text-foreground-muted leading-normal">
+=======
+          <div className="bg-white p-5 rounded-2xl border border-gray-200 shadow-2xs relative">
+            <div className="w-10 h-10 rounded-xl bg-amber-100 text-amber-800 flex items-center justify-center font-bold text-sm mb-3">
+              02
+            </div>
+            <h3 className="text-sm font-bold text-gray-900 mb-1">Admin Verification</h3>
+            <p className="text-xs text-gray-500 leading-normal">
+>>>>>>> c80e27e54a7a9fd8b6f001d1c284f29909639613
               Our marketplace compliance team reviews your business credentials and licenses.
             </p>
           </div>
@@ -339,6 +393,7 @@ export default function BecomeSellerPage() {
 
         {/* ─── Dynamic View Based on Application Status ─────────────────────── */}
         {isCheckingStatus ? (
+<<<<<<< HEAD
           <div className="bg-surface rounded-xl border border-border shadow-sm p-12 text-center max-w-xl mx-auto space-y-4">
             <div className="w-16 h-16 rounded-2xl bg-primary/10 text-primary flex items-center justify-center mx-auto">
               <Loader2 className="w-8 h-8 animate-spin text-primary" />
@@ -346,6 +401,15 @@ export default function BecomeSellerPage() {
             <div className="space-y-1">
               <h3 className="text-lg font-semibold text-foreground">Checking Seller Application Status</h3>
               <p className="text-xs text-foreground-muted">
+=======
+          <div className="bg-white rounded-3xl border border-gray-200 shadow-sm p-12 text-center max-w-xl mx-auto space-y-4">
+            <div className="w-16 h-16 rounded-2xl bg-primary-fixed text-primary flex items-center justify-center mx-auto">
+              <Loader2 className="w-8 h-8 animate-spin text-primary" />
+            </div>
+            <div className="space-y-1">
+              <h3 className="text-lg font-bold text-gray-900">Checking Seller Application Status</h3>
+              <p className="text-xs text-gray-500">
+>>>>>>> c80e27e54a7a9fd8b6f001d1c284f29909639613
                 Fetching your registration records and review history from the database...
               </p>
             </div>
@@ -360,10 +424,17 @@ export default function BecomeSellerPage() {
                 </div>
 
                 <div className="space-y-3">
+<<<<<<< HEAD
                   <span className="px-3.5 py-1 rounded-full bg-warning-bg border border-warning/20 text-warning text-xs font-semibold uppercase tracking-wider">
                     Application Pending Review
                   </span>
                   <h2 className="text-2xl sm:text-3xl font-semibold text-foreground">
+=======
+                  <span className="px-3.5 py-1 rounded-full bg-amber-50 border border-amber-200 text-amber-800 text-xs font-bold uppercase tracking-wider">
+                    Application Pending Review
+                  </span>
+                  <h2 className="text-2xl sm:text-3xl font-bold text-gray-900">
+>>>>>>> c80e27e54a7a9fd8b6f001d1c284f29909639613
                     Awaiting Admin Approval
                   </h2>
                   <p className="text-sm font-medium text-foreground leading-relaxed max-w-lg mx-auto bg-warning-bg/60 p-4 rounded-2xl border border-warning/20/60">
@@ -375,11 +446,19 @@ export default function BecomeSellerPage() {
                 <div className="p-5 bg-surface-muted rounded-2xl border border-border text-left space-y-3 max-w-lg mx-auto">
                   <div className="flex items-center justify-between pb-3 border-b border-border">
                     <div>
+<<<<<<< HEAD
                       <p className="text-xs uppercase font-semibold text-foreground-muted">Business Name</p>
                       <p className="text-base font-semibold text-foreground">{existingInquiry.business_name}</p>
                     </div>
                     <div className="text-right">
                       <p className="text-xs uppercase font-semibold text-foreground-muted">Application ID</p>
+=======
+                      <p className="text-[10px] uppercase font-bold text-gray-400">Business Name</p>
+                      <p className="text-base font-bold text-gray-900">{existingInquiry.business_name}</p>
+                    </div>
+                    <div className="text-right">
+                      <p className="text-[10px] uppercase font-bold text-gray-400">Application ID</p>
+>>>>>>> c80e27e54a7a9fd8b6f001d1c284f29909639613
                       <button
                         type="button"
                         onClick={handleCopyId}
@@ -417,13 +496,20 @@ export default function BecomeSellerPage() {
                 </div>
 
                 {/* What Happens Next Card */}
+<<<<<<< HEAD
                 <div className="bg-warning-bg/70 border border-warning/20/80 rounded-2xl p-5 text-left space-y-3">
                   <h4 className="text-xs font-semibold text-warning uppercase tracking-wider flex items-center gap-2">
                     <Clock className="w-4 h-4 text-secondary-ink" />
+=======
+                <div className="bg-amber-50/70 border border-amber-200/80 rounded-2xl p-5 text-left space-y-3">
+                  <h4 className="text-xs font-bold text-amber-950 uppercase tracking-wider flex items-center gap-2">
+                    <Clock className="w-4 h-4 text-amber-700" />
+>>>>>>> c80e27e54a7a9fd8b6f001d1c284f29909639613
                     <span>What Happens Next?</span>
                   </h4>
                   <ul className="text-xs text-warning space-y-2">
                     <li className="flex items-start gap-2">
+<<<<<<< HEAD
                       <span className="font-bold text-secondary-ink">•</span>
                       <span>The admin team verifies your business details, PAN, and applicable GSTIN.</span>
                     </li>
@@ -433,6 +519,17 @@ export default function BecomeSellerPage() {
                     </li>
                     <li className="flex items-start gap-2">
                       <span className="font-bold text-secondary-ink">•</span>
+=======
+                      <span className="font-bold text-amber-700">•</span>
+                      <span>The admin team verifies your business details, PAN, and applicable GSTIN.</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <span className="font-bold text-amber-700">•</span>
+                      <span>Upon approval, your seller account is activated and your seller dashboard is unlocked automatically.</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <span className="font-bold text-amber-700">•</span>
+>>>>>>> c80e27e54a7a9fd8b6f001d1c284f29909639613
                       <span>You will receive an in-app notification and email once a decision is made.</span>
                     </li>
                   </ul>
@@ -462,9 +559,15 @@ export default function BecomeSellerPage() {
 
             {/* ─── 2. APPROVED SCREEN ───────────────────────────────────────── */}
             {existingInquiry.status === 'approved' && (
+<<<<<<< HEAD
               <div className="bg-surface rounded-xl border-2 border-success/40 p-8 sm:p-12 shadow-xl text-center max-w-2xl mx-auto space-y-6 animate-in fade-in zoom-in-95">
                 <div className="w-20 h-20 rounded-full bg-success-bg text-primary flex items-center justify-center mx-auto shadow-inner">
                   <CheckCircle2 className="w-12 h-12 text-success" />
+=======
+              <div className="bg-white rounded-3xl border-2 border-emerald-500/40 p-8 sm:p-12 shadow-xl text-center max-w-2xl mx-auto space-y-6 animate-in fade-in zoom-in-95">
+                <div className="w-20 h-20 rounded-full bg-primary/10 text-primary flex items-center justify-center mx-auto shadow-inner">
+                  <CheckCircle2 className="w-12 h-12 text-primary" />
+>>>>>>> c80e27e54a7a9fd8b6f001d1c284f29909639613
                 </div>
 
                 <div className="space-y-3">
@@ -482,9 +585,15 @@ export default function BecomeSellerPage() {
                 {/* Approved Store Badge */}
                 <div className="p-4 bg-surface-muted rounded-2xl border border-border flex items-center justify-between gap-4 max-w-md mx-auto text-left">
                   <div>
+<<<<<<< HEAD
                     <p className="text-xs uppercase font-semibold text-foreground-muted">Verified Seller Account</p>
                     <p className="text-base font-semibold text-primary">{existingInquiry.business_name}</p>
                     <p className="text-xs text-foreground-muted font-medium">Category: {existingInquiry.category}</p>
+=======
+                    <p className="text-[10px] uppercase font-black text-gray-400">Verified Seller Account</p>
+                    <p className="text-base font-black text-primary">{existingInquiry.business_name}</p>
+                    <p className="text-xs text-gray-500 font-medium">Category: {existingInquiry.category}</p>
+>>>>>>> c80e27e54a7a9fd8b6f001d1c284f29909639613
                   </div>
                   <div className="inline-flex items-center gap-1.5 px-3 py-1 bg-success-bg text-success rounded-lg text-xs font-semibold">
                     <ShieldCheck className="w-4 h-4 text-success" />
@@ -496,11 +605,17 @@ export default function BecomeSellerPage() {
                 <div className="flex flex-col sm:flex-row items-center justify-center gap-3 pt-2">
                   <Link
                     href="/seller/dashboard"
+<<<<<<< HEAD
                     className="w-full sm:w-auto px-8 py-3.5 bg-primary hover:bg-primary-hover text-on-primary text-xs font-semibold rounded-xl shadow-md flex items-center justify-center gap-2 transition-all active:scale-95"
                   >
                     <Store className="w-4 h-4 text-secondary-ink" />
+=======
+                    className="w-full sm:w-auto px-8 py-3.5 bg-primary hover:bg-primary-hover text-primary-foreground text-xs font-bold rounded-xl shadow-sm flex items-center justify-center gap-2 transition-all active:scale-95"
+                  >
+                    <Store className="w-4 h-4 text-primary-foreground" />
+>>>>>>> c80e27e54a7a9fd8b6f001d1c284f29909639613
                     <span>Go to Seller Dashboard</span>
-                    <ArrowRight className="w-4 h-4 text-white" />
+                    <ArrowRight className="w-4 h-4 text-primary-foreground" />
                   </Link>
 
                   <Link
@@ -521,10 +636,17 @@ export default function BecomeSellerPage() {
                 </div>
 
                 <div className="space-y-3">
+<<<<<<< HEAD
                   <span className="px-3.5 py-1 rounded-full bg-error-bg border border-error/20 text-error text-xs font-semibold uppercase tracking-wider">
                     Application Rejected
                   </span>
                   <h2 className="text-2xl sm:text-3xl font-semibold text-foreground">
+=======
+                  <span className="px-3.5 py-1 rounded-full bg-rose-50 border border-rose-200 text-rose-800 text-xs font-bold uppercase tracking-wider">
+                    Application Rejected
+                  </span>
+                  <h2 className="text-2xl sm:text-3xl font-bold text-gray-900">
+>>>>>>> c80e27e54a7a9fd8b6f001d1c284f29909639613
                     Application Review Update
                   </h2>
                   <p className="text-sm font-medium text-foreground leading-relaxed max-w-lg mx-auto bg-error-bg/60 p-4 rounded-2xl border border-error/20/60">
@@ -533,9 +655,15 @@ export default function BecomeSellerPage() {
                 </div>
 
                 {/* Admin Feedback Box */}
+<<<<<<< HEAD
                 <div className="bg-error-bg/80 border border-error/20 rounded-2xl p-5 text-left space-y-2 max-w-lg mx-auto">
                   <h4 className="text-xs font-semibold text-error uppercase tracking-wider flex items-center gap-2">
                     <AlertCircle className="w-4 h-4 text-error" />
+=======
+                <div className="bg-rose-50/80 border border-rose-200 rounded-2xl p-5 text-left space-y-2 max-w-lg mx-auto">
+                  <h4 className="text-xs font-bold text-rose-950 uppercase tracking-wider flex items-center gap-2">
+                    <AlertCircle className="w-4 h-4 text-rose-600" />
+>>>>>>> c80e27e54a7a9fd8b6f001d1c284f29909639613
                     <span>Admin Rejection Reason</span>
                   </h4>
                   <p className="text-xs text-error leading-relaxed font-semibold">
@@ -554,9 +682,15 @@ export default function BecomeSellerPage() {
                       setIsEditing(true);
                       setError('');
                     }}
+<<<<<<< HEAD
                     className="w-full sm:w-auto px-6 py-3.5 bg-primary hover:bg-primary-hover text-on-primary text-xs font-semibold rounded-xl shadow-md flex items-center justify-center gap-2 transition-all active:scale-95 cursor-pointer"
                   >
                     <Edit3 className="w-4 h-4 text-secondary-ink" />
+=======
+                    className="w-full sm:w-auto px-6 py-3.5 bg-primary hover:bg-primary-hover text-primary-foreground text-xs font-bold rounded-xl shadow-sm flex items-center justify-center gap-2 transition-all active:scale-95 cursor-pointer"
+                  >
+                    <Edit3 className="w-4 h-4 text-primary-foreground" />
+>>>>>>> c80e27e54a7a9fd8b6f001d1c284f29909639613
                     <span>Edit & Resubmit Application</span>
                   </button>
 
@@ -578,10 +712,17 @@ export default function BecomeSellerPage() {
                 </div>
 
                 <div className="space-y-3">
+<<<<<<< HEAD
                   <span className="px-3.5 py-1 rounded-full bg-error-bg border border-error/20 text-error text-xs font-semibold uppercase tracking-wider">
                     Seller Account Suspended
                   </span>
                   <h2 className="text-2xl sm:text-3xl font-semibold text-foreground">
+=======
+                  <span className="px-3.5 py-1 rounded-full bg-red-50 border border-red-200 text-red-800 text-xs font-bold uppercase tracking-wider">
+                    Seller Account Suspended
+                  </span>
+                  <h2 className="text-2xl sm:text-3xl font-bold text-gray-900">
+>>>>>>> c80e27e54a7a9fd8b6f001d1c284f29909639613
                     Account Under Suspension
                   </h2>
                   <p className="text-sm font-medium text-foreground leading-relaxed max-w-lg mx-auto bg-error-bg/60 p-4 rounded-2xl border border-error/20/60">
@@ -604,9 +745,15 @@ export default function BecomeSellerPage() {
                       setIsEditing(true);
                       setError('');
                     }}
+<<<<<<< HEAD
                     className="w-full sm:w-auto px-6 py-3.5 bg-primary hover:bg-primary-hover text-on-primary text-xs font-semibold rounded-xl shadow-md flex items-center justify-center gap-2 transition-all active:scale-95 cursor-pointer"
                   >
                     <Edit3 className="w-4 h-4 text-secondary-ink" />
+=======
+                    className="w-full sm:w-auto px-6 py-3.5 bg-primary hover:bg-primary-hover text-primary-foreground text-xs font-bold rounded-xl shadow-sm flex items-center justify-center gap-2 transition-all active:scale-95 cursor-pointer"
+                  >
+                    <Edit3 className="w-4 h-4 text-primary-foreground" />
+>>>>>>> c80e27e54a7a9fd8b6f001d1c284f29909639613
                     <span>Update Business Details</span>
                   </button>
 
@@ -652,8 +799,13 @@ export default function BecomeSellerPage() {
 
               {/* Section 1: Business Identity */}
               <div>
+<<<<<<< HEAD
                 <h3 className="text-sm font-semibold text-primary uppercase tracking-wider mb-4 flex items-center gap-2 pb-2 border-b border-border">
                   <Building2 className="w-4 h-4 text-secondary-ink" />
+=======
+                <h3 className="text-sm font-bold text-foreground uppercase tracking-wider mb-4 flex items-center gap-2 pb-2 border-b border-gray-100">
+                  <Building2 className="w-4 h-4 text-primary" />
+>>>>>>> c80e27e54a7a9fd8b6f001d1c284f29909639613
                   <span>1. Business & Store Identity</span>
                 </h3>
 
@@ -668,7 +820,11 @@ export default function BecomeSellerPage() {
                       value={businessName}
                       onChange={(e) => setBusinessName(e.target.value)}
                       placeholder="e.g. Gir Organic Farms Pvt Ltd"
+<<<<<<< HEAD
                       className="w-full px-4 py-2.5 rounded-xl border border-border-hover text-xs text-foreground focus:border-primary focus:ring-1 focus:ring-[var(--primary)] outline-none"
+=======
+                      className="w-full px-4 py-2.5 rounded-xl border border-gray-300 text-xs text-gray-900 focus:border-primary focus:ring-1 focus:ring-primary outline-none"
+>>>>>>> c80e27e54a7a9fd8b6f001d1c284f29909639613
                     />
                   </div>
 
@@ -679,7 +835,11 @@ export default function BecomeSellerPage() {
                     <select
                       value={businessType}
                       onChange={(e) => setBusinessType(e.target.value)}
+<<<<<<< HEAD
                       className="w-full px-4 py-2.5 rounded-xl border border-border-hover text-xs text-foreground focus:border-primary focus:ring-1 focus:ring-[var(--primary)] outline-none bg-surface"
+=======
+                      className="w-full px-4 py-2.5 rounded-xl border border-gray-300 text-xs text-gray-900 focus:border-primary focus:ring-1 focus:ring-primary outline-none bg-white"
+>>>>>>> c80e27e54a7a9fd8b6f001d1c284f29909639613
                     >
                       {businessTypes.map((bt) => (
                         <option key={bt.id} value={bt.id}>{bt.label}</option>
@@ -694,7 +854,11 @@ export default function BecomeSellerPage() {
                     <select
                       value={category}
                       onChange={(e) => setCategory(e.target.value)}
+<<<<<<< HEAD
                       className="w-full px-4 py-2.5 rounded-xl border border-border-hover text-xs text-foreground focus:border-primary focus:ring-1 focus:ring-[var(--primary)] outline-none bg-surface"
+=======
+                      className="w-full px-4 py-2.5 rounded-xl border border-gray-300 text-xs text-gray-900 focus:border-primary focus:ring-1 focus:ring-primary outline-none bg-white"
+>>>>>>> c80e27e54a7a9fd8b6f001d1c284f29909639613
                     >
                       {categoriesList.map((cat) => (
                         <option key={cat} value={cat}>{cat}</option>
@@ -709,7 +873,11 @@ export default function BecomeSellerPage() {
                     <select
                       value={monthlyVolume}
                       onChange={(e) => setMonthlyVolume(e.target.value)}
+<<<<<<< HEAD
                       className="w-full px-4 py-2.5 rounded-xl border border-border-hover text-xs text-foreground focus:border-primary focus:ring-1 focus:ring-[var(--primary)] outline-none bg-surface"
+=======
+                      className="w-full px-4 py-2.5 rounded-xl border border-gray-300 text-xs text-gray-900 focus:border-primary focus:ring-1 focus:ring-primary outline-none bg-white"
+>>>>>>> c80e27e54a7a9fd8b6f001d1c284f29909639613
                     >
                       {volumeOptions.map((opt) => (
                         <option key={opt} value={opt}>{opt}</option>
@@ -721,8 +889,13 @@ export default function BecomeSellerPage() {
 
               {/* Section 2: Contact Person */}
               <div>
+<<<<<<< HEAD
                 <h3 className="text-sm font-semibold text-primary uppercase tracking-wider mb-4 flex items-center gap-2 pb-2 border-b border-border">
                   <Phone className="w-4 h-4 text-secondary-ink" />
+=======
+                <h3 className="text-sm font-bold text-foreground uppercase tracking-wider mb-4 flex items-center gap-2 pb-2 border-b border-gray-100">
+                  <Phone className="w-4 h-4 text-primary" />
+>>>>>>> c80e27e54a7a9fd8b6f001d1c284f29909639613
                   <span>2. Contact Person Information</span>
                 </h3>
 
@@ -737,7 +910,11 @@ export default function BecomeSellerPage() {
                       value={fullName}
                       onChange={(e) => setFullName(e.target.value)}
                       placeholder="e.g. Bhavesh Bhai Patel"
+<<<<<<< HEAD
                       className="w-full px-4 py-2.5 rounded-xl border border-border-hover text-xs text-foreground focus:border-primary focus:ring-1 focus:ring-[var(--primary)] outline-none"
+=======
+                      className="w-full px-4 py-2.5 rounded-xl border border-gray-300 text-xs text-gray-900 focus:border-primary focus:ring-1 focus:ring-primary outline-none"
+>>>>>>> c80e27e54a7a9fd8b6f001d1c284f29909639613
                     />
                   </div>
 
@@ -762,7 +939,11 @@ export default function BecomeSellerPage() {
                           setPhone(digits);
                         }}
                         placeholder="9825123456"
+<<<<<<< HEAD
                         className="w-full pl-[72px] pr-4 py-2.5 rounded-xl border border-border-hover text-xs text-foreground font-medium focus:border-primary focus:ring-1 focus:ring-[var(--primary)] outline-none"
+=======
+                        className="w-full pl-[72px] pr-4 py-2.5 rounded-xl border border-gray-300 text-xs text-gray-900 font-medium focus:border-primary focus:ring-1 focus:ring-primary outline-none"
+>>>>>>> c80e27e54a7a9fd8b6f001d1c284f29909639613
                       />
                     </div>
                     <p className="text-xs text-foreground-muted mt-1">
@@ -780,7 +961,11 @@ export default function BecomeSellerPage() {
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
                       placeholder="contact@girfarms.com"
+<<<<<<< HEAD
                       className="w-full px-4 py-2.5 rounded-xl border border-border-hover text-xs text-foreground focus:border-primary focus:ring-1 focus:ring-[var(--primary)] outline-none"
+=======
+                      className="w-full px-4 py-2.5 rounded-xl border border-gray-300 text-xs text-gray-900 focus:border-primary focus:ring-1 focus:ring-primary outline-none"
+>>>>>>> c80e27e54a7a9fd8b6f001d1c284f29909639613
                     />
                   </div>
                 </div>
@@ -788,8 +973,13 @@ export default function BecomeSellerPage() {
 
               {/* Section 3: Business Address */}
               <div>
+<<<<<<< HEAD
                 <h3 className="text-sm font-semibold text-primary uppercase tracking-wider mb-4 flex items-center gap-2 pb-2 border-b border-border">
                   <MapPin className="w-4 h-4 text-secondary-ink" />
+=======
+                <h3 className="text-sm font-bold text-foreground uppercase tracking-wider mb-4 flex items-center gap-2 pb-2 border-b border-gray-100">
+                  <MapPin className="w-4 h-4 text-primary" />
+>>>>>>> c80e27e54a7a9fd8b6f001d1c284f29909639613
                   <span>3. Registered Business Address</span>
                 </h3>
 
@@ -804,7 +994,11 @@ export default function BecomeSellerPage() {
                       value={businessAddress}
                       onChange={(e) => setBusinessAddress(e.target.value)}
                       placeholder="Plot No. 42, GIDC Industrial Estate, Highway Road"
+<<<<<<< HEAD
                       className="w-full px-4 py-2.5 rounded-xl border border-border-hover text-xs text-foreground focus:border-primary focus:ring-1 focus:ring-[var(--primary)] outline-none"
+=======
+                      className="w-full px-4 py-2.5 rounded-xl border border-gray-300 text-xs text-gray-900 focus:border-primary focus:ring-1 focus:ring-primary outline-none"
+>>>>>>> c80e27e54a7a9fd8b6f001d1c284f29909639613
                     />
                   </div>
 
@@ -819,7 +1013,11 @@ export default function BecomeSellerPage() {
                         value={city}
                         onChange={(e) => setCity(e.target.value)}
                         placeholder="e.g. Palanpur"
+<<<<<<< HEAD
                         className="w-full px-4 py-2.5 rounded-xl border border-border-hover text-xs text-foreground focus:border-primary focus:ring-1 focus:ring-[var(--primary)] outline-none"
+=======
+                        className="w-full px-4 py-2.5 rounded-xl border border-gray-300 text-xs text-gray-900 focus:border-primary focus:ring-1 focus:ring-primary outline-none"
+>>>>>>> c80e27e54a7a9fd8b6f001d1c284f29909639613
                       />
                     </div>
 
@@ -830,7 +1028,11 @@ export default function BecomeSellerPage() {
                       <select
                         value={stateOrigin}
                         onChange={(e) => setStateOrigin(e.target.value)}
+<<<<<<< HEAD
                         className="w-full px-4 py-2.5 rounded-xl border border-border-hover text-xs text-foreground focus:border-primary focus:ring-1 focus:ring-[var(--primary)] outline-none bg-surface"
+=======
+                        className="w-full px-4 py-2.5 rounded-xl border border-gray-300 text-xs text-gray-900 focus:border-primary focus:ring-1 focus:ring-primary outline-none bg-white"
+>>>>>>> c80e27e54a7a9fd8b6f001d1c284f29909639613
                       >
                         {statesList.map((st) => (
                           <option key={st} value={st}>{st}</option>
@@ -849,7 +1051,11 @@ export default function BecomeSellerPage() {
                         value={pincode}
                         onChange={(e) => setPincode(e.target.value.replace(/\D/g, ''))}
                         placeholder="385001"
+<<<<<<< HEAD
                         className="w-full px-4 py-2.5 rounded-xl border border-border-hover text-xs text-foreground focus:border-primary focus:ring-1 focus:ring-[var(--primary)] outline-none"
+=======
+                        className="w-full px-4 py-2.5 rounded-xl border border-gray-300 text-xs text-gray-900 focus:border-primary focus:ring-1 focus:ring-primary outline-none"
+>>>>>>> c80e27e54a7a9fd8b6f001d1c284f29909639613
                       />
                     </div>
                   </div>
@@ -858,8 +1064,13 @@ export default function BecomeSellerPage() {
 
               {/* Section 4: Tax & Regulatory Verification */}
               <div>
+<<<<<<< HEAD
                 <h3 className="text-sm font-semibold text-primary uppercase tracking-wider mb-4 flex items-center gap-2 pb-2 border-b border-border">
                   <CreditCard className="w-4 h-4 text-secondary-ink" />
+=======
+                <h3 className="text-sm font-bold text-foreground uppercase tracking-wider mb-4 flex items-center gap-2 pb-2 border-b border-gray-100">
+                  <CreditCard className="w-4 h-4 text-primary" />
+>>>>>>> c80e27e54a7a9fd8b6f001d1c284f29909639613
                   <span>4. Tax & Business Verification Details</span>
                 </h3>
 
@@ -874,7 +1085,11 @@ export default function BecomeSellerPage() {
                       value={pan}
                       onChange={(e) => setPan(e.target.value.toUpperCase())}
                       placeholder="ABCDE1234F"
+<<<<<<< HEAD
                       className="w-full px-4 py-2.5 rounded-xl border border-border-hover text-xs text-foreground font-mono uppercase focus:border-primary focus:ring-1 focus:ring-[var(--primary)] outline-none"
+=======
+                      className="w-full px-4 py-2.5 rounded-xl border border-gray-300 text-xs text-gray-900 font-mono uppercase focus:border-primary focus:ring-1 focus:ring-primary outline-none"
+>>>>>>> c80e27e54a7a9fd8b6f001d1c284f29909639613
                     />
                     <p className="text-xs text-foreground-muted mt-1">10-character PAN of business/proprietor</p>
                   </div>
@@ -889,7 +1104,11 @@ export default function BecomeSellerPage() {
                       value={gstin}
                       onChange={(e) => setGstin(e.target.value.toUpperCase())}
                       placeholder="24AAAAA0000A1Z5"
+<<<<<<< HEAD
                       className="w-full px-4 py-2.5 rounded-xl border border-border-hover text-xs text-foreground font-mono uppercase focus:border-primary focus:ring-1 focus:ring-[var(--primary)] outline-none"
+=======
+                      className="w-full px-4 py-2.5 rounded-xl border border-gray-300 text-xs text-gray-900 font-mono uppercase focus:border-primary focus:ring-1 focus:ring-primary outline-none"
+>>>>>>> c80e27e54a7a9fd8b6f001d1c284f29909639613
                     />
                     <p className="text-xs text-foreground-muted mt-1">Optional for unregistered small producers</p>
                   </div>
@@ -903,7 +1122,11 @@ export default function BecomeSellerPage() {
                       value={fssaiNumber}
                       onChange={(e) => setFssaiNumber(e.target.value)}
                       placeholder="e.g. 10723000000000"
+<<<<<<< HEAD
                       className="w-full px-4 py-2.5 rounded-xl border border-border-hover text-xs text-foreground font-mono focus:border-primary focus:ring-1 focus:ring-[var(--primary)] outline-none"
+=======
+                      className="w-full px-4 py-2.5 rounded-xl border border-gray-300 text-xs text-gray-900 font-mono focus:border-primary focus:ring-1 focus:ring-primary outline-none"
+>>>>>>> c80e27e54a7a9fd8b6f001d1c284f29909639613
                     />
                     <p className="text-xs text-foreground-muted mt-1">Required for food, dairy, and grocery items</p>
                   </div>
@@ -918,7 +1141,11 @@ export default function BecomeSellerPage() {
                     value={documentUrl}
                     onChange={(e) => setDocumentUrl(e.target.value)}
                     placeholder="https://... (Cloud drive link or certificate URL)"
+<<<<<<< HEAD
                     className="w-full px-4 py-2.5 rounded-xl border border-border-hover text-xs text-foreground focus:border-primary focus:ring-1 focus:ring-[var(--primary)] outline-none"
+=======
+                    className="w-full px-4 py-2.5 rounded-xl border border-gray-300 text-xs text-gray-900 focus:border-primary focus:ring-1 focus:ring-primary outline-none"
+>>>>>>> c80e27e54a7a9fd8b6f001d1c284f29909639613
                   />
                   <p className="text-xs text-foreground-muted mt-1">
                     Upload your GST certificate, FSSAI license, or Shop Establishment document to a secure cloud drive and share the link.
@@ -928,8 +1155,13 @@ export default function BecomeSellerPage() {
 
               {/* Section 5: Products & Notes */}
               <div>
+<<<<<<< HEAD
                 <h3 className="text-sm font-semibold text-primary uppercase tracking-wider mb-4 flex items-center gap-2 pb-2 border-b border-border">
                   <FileText className="w-4 h-4 text-secondary-ink" />
+=======
+                <h3 className="text-sm font-bold text-foreground uppercase tracking-wider mb-4 flex items-center gap-2 pb-2 border-b border-gray-100">
+                  <FileText className="w-4 h-4 text-primary" />
+>>>>>>> c80e27e54a7a9fd8b6f001d1c284f29909639613
                   <span>5. Products Overview & Remarks</span>
                 </h3>
 
@@ -943,7 +1175,11 @@ export default function BecomeSellerPage() {
                       value={productRange}
                       onChange={(e) => setProductRange(e.target.value)}
                       placeholder="e.g. A2 Bilona Cow Ghee, Organic Butter, Artisanal Honey"
+<<<<<<< HEAD
                       className="w-full px-4 py-2.5 rounded-xl border border-border-hover text-xs text-foreground focus:border-primary focus:ring-1 focus:ring-[var(--primary)] outline-none"
+=======
+                      className="w-full px-4 py-2.5 rounded-xl border border-gray-300 text-xs text-gray-900 focus:border-primary focus:ring-1 focus:ring-primary outline-none"
+>>>>>>> c80e27e54a7a9fd8b6f001d1c284f29909639613
                     />
                   </div>
 
@@ -956,7 +1192,11 @@ export default function BecomeSellerPage() {
                       value={notes}
                       onChange={(e) => setNotes(e.target.value)}
                       placeholder="Tell us about your production facilities, cold storage, delivery readiness, or certifications..."
+<<<<<<< HEAD
                       className="w-full px-4 py-2.5 rounded-xl border border-border-hover text-xs text-foreground focus:border-primary focus:ring-1 focus:ring-[var(--primary)] outline-none resize-none"
+=======
+                      className="w-full px-4 py-2.5 rounded-xl border border-gray-300 text-xs text-gray-900 focus:border-primary focus:ring-1 focus:ring-primary outline-none resize-none"
+>>>>>>> c80e27e54a7a9fd8b6f001d1c284f29909639613
                     />
                   </div>
                 </div>
@@ -974,17 +1214,29 @@ export default function BecomeSellerPage() {
                 <button
                   type="submit"
                   disabled={isLoading}
+<<<<<<< HEAD
                   className="w-full sm:w-auto px-8 py-3.5 bg-primary hover:bg-primary-hover text-on-primary text-xs font-semibold rounded-xl shadow-md flex items-center justify-center gap-2 transition-all active:scale-95 disabled:opacity-50 cursor-pointer"
                 >
                   {isLoading ? (
                     <>
                       <Loader2 className="w-4 h-4 animate-spin text-secondary-ink" />
+=======
+                  className="w-full sm:w-auto px-8 py-3.5 bg-primary hover:bg-primary-hover text-primary-foreground text-xs font-bold rounded-xl shadow-sm flex items-center justify-center gap-2 transition-all active:scale-95 disabled:opacity-50 cursor-pointer"
+                >
+                  {isLoading ? (
+                    <>
+                      <Loader2 className="w-4 h-4 animate-spin text-primary-foreground" />
+>>>>>>> c80e27e54a7a9fd8b6f001d1c284f29909639613
                       <span>Submitting Application...</span>
                     </>
                   ) : (
                     <>
                       <span>Submit Seller Application</span>
+<<<<<<< HEAD
                       <ArrowRight className="w-4 h-4 text-secondary-ink" />
+=======
+                      <ArrowRight className="w-4 h-4 text-primary-foreground" />
+>>>>>>> c80e27e54a7a9fd8b6f001d1c284f29909639613
                     </>
                   )}
                 </button>

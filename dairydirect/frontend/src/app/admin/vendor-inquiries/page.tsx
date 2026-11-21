@@ -237,6 +237,7 @@ export default function AdminVendorInquiriesPage() {
   const suspendedCount = inquiries.filter(i => i.status === 'suspended').length;
 
   return (
+<<<<<<< HEAD
     <div className="flex flex-col min-h-screen">
       {/* Standard Admin Header */}
       <AdminHeader
@@ -248,6 +249,16 @@ export default function AdminVendorInquiriesPage() {
                 {pendingCount} Pending Review
               </span>
             )}
+=======
+    <div className="p-4 sm:p-6 lg:p-8 space-y-6">
+      
+      {/* Top Header */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 text-primary text-xs font-bold uppercase tracking-wider mb-1">
+            <Clock className="w-3.5 h-3.5" />
+            <span>Marketplace Onboarding</span>
+>>>>>>> c80e27e54a7a9fd8b6f001d1c284f29909639613
           </div>
         }
         subtitle="Review business credentials, PAN, GSTIN, and compliance documents to approve or reject merchant accounts"
@@ -289,8 +300,13 @@ export default function AdminVendorInquiriesPage() {
           </div>
         </div>
 
+<<<<<<< HEAD
         <div className="p-4 bg-surface rounded-2xl border border-border shadow-2xs flex items-center gap-3">
           <div className="w-10 h-10 rounded-xl bg-error-bg text-error flex items-center justify-center font-bold">
+=======
+        <div className="p-4 bg-white rounded-2xl border border-gray-200 shadow-2xs flex items-center gap-3">
+          <div className="w-10 h-10 rounded-xl bg-red-50 text-danger flex items-center justify-center font-bold">
+>>>>>>> c80e27e54a7a9fd8b6f001d1c284f29909639613
             <AlertTriangle className="w-5 h-5" />
           </div>
           <div>
@@ -321,14 +337,33 @@ export default function AdminVendorInquiriesPage() {
               onClick={() => setSelectedStatus(f.id)}
               className={`whitespace-nowrap h-8 px-3.5 rounded-full text-[12px] font-bold transition-all shrink-0 cursor-pointer flex items-center justify-center border ${
                 selectedStatus === f.id
+<<<<<<< HEAD
                   ? 'bg-primary text-white border-primary shadow-xs'
                   : 'bg-surface border-border/80 text-foreground-muted hover:text-foreground hover:border-border-hover'
+=======
+                  ? 'bg-primary text-white shadow-2xs'
+                  : 'text-gray-600 hover:bg-gray-100'
+>>>>>>> c80e27e54a7a9fd8b6f001d1c284f29909639613
               }`}
             >
               {f.label}
             </button>
           ))}
         </div>
+<<<<<<< HEAD
+=======
+
+        <div className="relative min-w-[260px]">
+          <Search className="w-3.5 h-3.5 text-gray-400 absolute left-3 top-3" />
+          <input
+            type="text"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            placeholder="Search seller, email, phone, or ID..."
+            className="w-full pl-9 pr-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-xs text-gray-900 placeholder:text-gray-400 focus:bg-white focus:border-primary outline-none"
+          />
+        </div>
+>>>>>>> c80e27e54a7a9fd8b6f001d1c284f29909639613
       </div>
 
       {actionSuccess && (
@@ -338,6 +373,7 @@ export default function AdminVendorInquiriesPage() {
         </div>
       )}
 
+<<<<<<< HEAD
       {/* Vendor Inquiries AdminTable */}
       <AdminTable
         columns={[
@@ -367,6 +403,61 @@ export default function AdminVendorInquiriesPage() {
                 <div className="flex items-center gap-3">
                   <div className="w-9 h-9 rounded-xl bg-primary/10 text-primary flex items-center justify-center font-bold text-xs shrink-0 border border-primary/20">
                     <Building2 className="w-4 h-4 text-primary" />
+=======
+      {/* Main Grid: Left List + Right Detail Drawer */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+        
+        {/* Left Column: Applications List */}
+        <div className="lg:col-span-5 space-y-3">
+          {isLoading ? (
+            <div className="bg-white rounded-2xl p-10 border border-gray-200 text-center space-y-3">
+              <Loader2 className="w-6 h-6 animate-spin text-primary mx-auto" />
+              <p className="text-xs text-gray-500 font-medium">Loading seller applications...</p>
+            </div>
+          ) : filteredInquiries.length === 0 ? (
+            <div className="bg-white rounded-2xl p-10 border border-gray-200 text-center space-y-2">
+              <Building2 className="w-8 h-8 text-gray-300 mx-auto" />
+              <p className="text-xs font-bold text-gray-800">No applications match your filter</p>
+              <p className="text-[11px] text-gray-400">Applications submitted from the Become a Seller page will appear here.</p>
+            </div>
+          ) : (
+            filteredInquiries.map((inq) => {
+              const isSelected = selectedInquiry?.id === inq.id;
+              return (
+                <div
+                  key={inq.id}
+                  onClick={() => handleSelectInquiry(inq)}
+                  className={`p-4 rounded-2xl border transition-all cursor-pointer text-left space-y-2.5 ${
+                    isSelected
+                      ? 'bg-emerald-50/40 border-primary shadow-sm'
+                      : 'bg-white border-gray-200 hover:border-gray-300'
+                  }`}
+                >
+                  <div className="flex items-start justify-between gap-2">
+                    <div>
+                      <h4 className="text-sm font-black text-gray-900 leading-snug">
+                        {inq.business_name}
+                      </h4>
+                      <p className="text-xs text-gray-500 font-medium flex items-center gap-1.5 mt-0.5">
+                        <span>{inq.full_name}</span>
+                        <span>•</span>
+                        <span>{inq.category}</span>
+                      </p>
+                    </div>
+
+                    {/* Status Badge */}
+                    <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider shrink-0 ${
+                      inq.status === 'approved' 
+                        ? 'bg-emerald-100 text-emerald-800 border border-emerald-200'
+                        : inq.status === 'rejected'
+                        ? 'bg-rose-100 text-rose-800 border border-rose-200'
+                        : inq.status === 'suspended'
+                        ? 'bg-red-100 text-danger border border-red-200'
+                        : 'bg-amber-100 text-amber-800 border border-amber-200'
+                    }`}>
+                      {inq.status}
+                    </span>
+>>>>>>> c80e27e54a7a9fd8b6f001d1c284f29909639613
                   </div>
                   <div>
                     <div className="font-semibold text-foreground text-[13px] leading-tight flex items-center gap-2">
@@ -445,7 +536,21 @@ export default function AdminVendorInquiriesPage() {
                     <h3 className="text-xl font-bold text-foreground tracking-tight">
                       {selectedInquiry.business_name}
                     </h3>
+<<<<<<< HEAD
                     {getStatusBadge(selectedInquiry.status)}
+=======
+                    <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider ${
+                      selectedInquiry.status === 'approved' 
+                        ? 'bg-emerald-100 text-emerald-800'
+                        : selectedInquiry.status === 'rejected'
+                        ? 'bg-rose-100 text-rose-800'
+                        : selectedInquiry.status === 'suspended'
+                        ? 'bg-red-100 text-danger'
+                        : 'bg-amber-100 text-amber-800'
+                    }`}>
+                      {selectedInquiry.status}
+                    </span>
+>>>>>>> c80e27e54a7a9fd8b6f001d1c284f29909639613
                   </div>
                   <p className="text-xs text-foreground-muted font-mono mt-1">Application ID: {selectedInquiry.id}</p>
                 </div>
@@ -472,7 +577,11 @@ export default function AdminVendorInquiriesPage() {
                     className="p-2 rounded-xl border border-border text-foreground hover:bg-surface-muted transition-colors"
                     title="Send Email"
                   >
+<<<<<<< HEAD
                     <Mail className="w-4 h-4 text-sky-600" />
+=======
+                    <Mail className="w-4 h-4 text-info" />
+>>>>>>> c80e27e54a7a9fd8b6f001d1c284f29909639613
                   </a>
                   <button
                     type="button"
@@ -485,8 +594,13 @@ export default function AdminVendorInquiriesPage() {
               </div>
 
               {/* 1. Owner & Contact Information */}
+<<<<<<< HEAD
               <div className="space-y-2.5">
                 <h4 className="text-xs font-bold text-foreground-muted uppercase tracking-wider flex items-center gap-2">
+=======
+              <div className="space-y-3">
+                <h4 className="text-xs font-black text-foreground uppercase tracking-wider flex items-center gap-2">
+>>>>>>> c80e27e54a7a9fd8b6f001d1c284f29909639613
                   <PhoneCall className="w-3.5 h-3.5 text-primary" />
                   <span>Applicant & Contact Details</span>
                 </h4>
@@ -508,8 +622,13 @@ export default function AdminVendorInquiriesPage() {
               </div>
 
               {/* 2. Business Address & Structure */}
+<<<<<<< HEAD
               <div className="space-y-2.5">
                 <h4 className="text-xs font-bold text-foreground-muted uppercase tracking-wider flex items-center gap-2">
+=======
+              <div className="space-y-3">
+                <h4 className="text-xs font-black text-foreground uppercase tracking-wider flex items-center gap-2">
+>>>>>>> c80e27e54a7a9fd8b6f001d1c284f29909639613
                   <Building2 className="w-3.5 h-3.5 text-primary" />
                   <span>Business Address & Structure</span>
                 </h4>
@@ -536,8 +655,13 @@ export default function AdminVendorInquiriesPage() {
               </div>
 
               {/* 3. Verification Details (PAN, GSTIN, FSSAI, Docs) */}
+<<<<<<< HEAD
               <div className="space-y-2.5">
                 <h4 className="text-xs font-bold text-foreground-muted uppercase tracking-wider flex items-center gap-2">
+=======
+              <div className="space-y-3">
+                <h4 className="text-xs font-black text-foreground uppercase tracking-wider flex items-center gap-2">
+>>>>>>> c80e27e54a7a9fd8b6f001d1c284f29909639613
                   <CreditCard className="w-3.5 h-3.5 text-primary" />
                   <span>Tax & Compliance Verification</span>
                 </h4>
@@ -599,7 +723,11 @@ export default function AdminVendorInquiriesPage() {
                   value={adminNotes}
                   onChange={(e) => setAdminNotes(e.target.value)}
                   placeholder="Enter feedback or mandatory rejection reason to communicate with the seller..."
+<<<<<<< HEAD
                   className="w-full px-4 py-2.5 rounded-xl border border-border text-xs text-foreground focus:border-primary outline-none resize-none"
+=======
+                  className="w-full px-4 py-2.5 rounded-2xl border border-gray-300 text-xs text-gray-900 focus:border-primary outline-none resize-none"
+>>>>>>> c80e27e54a7a9fd8b6f001d1c284f29909639613
                 />
               </div>
 
@@ -618,7 +746,11 @@ export default function AdminVendorInquiriesPage() {
                     type="button"
                     onClick={() => handleTriggerConfirm('suspended')}
                     disabled={isUpdating}
+<<<<<<< HEAD
                     className="px-4 py-2 border border-red-200 dark:border-red-900 bg-red-50 dark:bg-red-950/40 hover:bg-red-100 text-red-700 dark:text-red-300 text-xs font-bold rounded-xl transition-colors cursor-pointer"
+=======
+                    className="px-4 py-2.5 border border-red-200 hover:bg-red-50 text-danger text-xs font-bold rounded-xl transition-colors cursor-pointer"
+>>>>>>> c80e27e54a7a9fd8b6f001d1c284f29909639613
                   >
                     Suspend Seller
                   </button>
@@ -641,9 +773,15 @@ export default function AdminVendorInquiriesPage() {
                     type="button"
                     onClick={() => handleTriggerConfirm('approved')}
                     disabled={isUpdating}
+<<<<<<< HEAD
                     className="px-5 py-2 bg-primary hover:bg-primary/90 text-white text-xs font-bold rounded-xl shadow-xs flex items-center gap-1.5 transition-all active:scale-95 cursor-pointer"
                   >
                     <ShieldCheck className="w-4 h-4" />
+=======
+                    className="px-6 py-2.5 bg-primary hover:bg-primary-hover text-white text-xs font-black rounded-xl shadow-md flex items-center gap-1.5 transition-all active:scale-95 cursor-pointer"
+                  >
+                    <ShieldCheck className="w-4 h-4 text-white" />
+>>>>>>> c80e27e54a7a9fd8b6f001d1c284f29909639613
                     <span>Approve Seller Account</span>
                   </button>
                 )}
@@ -660,11 +798,19 @@ export default function AdminVendorInquiriesPage() {
             <div className="flex items-center gap-3">
               <div className={`w-12 h-12 rounded-2xl flex items-center justify-center ${
                 confirmModal.action === 'approved' 
+<<<<<<< HEAD
                   ? 'bg-success-bg text-primary' 
                   : 'bg-error-bg text-error'
               }`}>
                 {confirmModal.action === 'approved' ? (
                   <ShieldCheck className="w-6 h-6 text-success" />
+=======
+                  ? 'bg-primary/10 text-primary' 
+                  : 'bg-rose-100 text-rose-600'
+              }`}>
+                {confirmModal.action === 'approved' ? (
+                  <ShieldCheck className="w-6 h-6 text-primary" />
+>>>>>>> c80e27e54a7a9fd8b6f001d1c284f29909639613
                 ) : (
                   <AlertTriangle className="w-6 h-6 text-error" />
                 )}
@@ -698,7 +844,11 @@ export default function AdminVendorInquiriesPage() {
                 className={`px-6 py-2.5 text-white text-xs font-semibold rounded-xl shadow-md flex items-center gap-2 cursor-pointer ${
                   confirmModal.action === 'approved'
                     ? 'bg-primary hover:bg-primary-hover'
+<<<<<<< HEAD
                     : 'bg-error hover:bg-error'
+=======
+                    : 'bg-rose-600 hover:bg-rose-700'
+>>>>>>> c80e27e54a7a9fd8b6f001d1c284f29909639613
                 }`}
               >
                 {isUpdating ? (

@@ -267,7 +267,11 @@ export default function AllSellerOrdersListPage() {
                 placeholder="Search order ID, customer, product..."
                 value={searchQuery}
                 onChange={e => setSearchQuery(e.target.value)}
+<<<<<<< HEAD
                 className="w-full h-10 pl-10 pr-8 bg-surface border border-border rounded-xl text-xs font-medium text-foreground placeholder:text-foreground-muted focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary shadow-2xs transition-all"
+=======
+                className="w-full pl-9 pr-3 py-1.5 bg-gray-50 border border-gray-200 rounded-xl text-xs font-medium placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary focus:bg-white"
+>>>>>>> c80e27e54a7a9fd8b6f001d1c284f29909639613
               />
               {searchQuery && (
                 <button

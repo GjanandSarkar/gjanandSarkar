@@ -61,6 +61,7 @@ export function Sidebar({ items, title, isOpenMobile, onCloseMobile }: SidebarPr
     return pathname.startsWith(item.href);
   };
 
+<<<<<<< HEAD
   // Close user dropdown when clicking outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -101,6 +102,28 @@ export function Sidebar({ items, title, isOpenMobile, onCloseMobile }: SidebarPr
             <span className="text-[10px] font-semibold text-secondary-ink tracking-wider leading-none mt-0.5">
               SARKAR
             </span>
+=======
+      {/* ── Brand Logo ── */}
+      <div className="h-[72px] flex items-center px-6 relative z-10">
+        <Link href="/home" className="flex items-center gap-2 shrink-0 group active:scale-95 transition-transform">
+          <div className="relative flex items-center">
+            <img
+              src="/application logo/gjanand sarkar logo.png"
+              alt="Gjanand Sarkar"
+              className="h-12 md:h-14 w-auto object-contain drop-shadow-xs"
+              onError={(e) => {
+                (e.target as HTMLElement).style.display = 'none';
+              }}
+            />
+            <div className="flex flex-col">
+              <span className="text-xl md:text-2xl font-bold tracking-tight leading-none text-foreground">
+                <span className="text-primary">Gjanand</span>
+              </span>
+              <span className="text-[10px] md:text-[11px] tracking-[0.2em] font-bold text-muted-foreground uppercase text-right leading-none mt-0.5">
+                SARKAR
+              </span>
+            </div>
+>>>>>>> c80e27e54a7a9fd8b6f001d1c284f29909639613
           </div>
         </Link>
 
@@ -140,10 +163,46 @@ export function Sidebar({ items, title, isOpenMobile, onCloseMobile }: SidebarPr
         )}
       </div>
 
+<<<<<<< HEAD
       {/* ── Nav Items with clearance padding so items scroll behind floating profile ── */}
       <nav className="flex-1 px-3 py-3 pb-24 overflow-y-auto no-scrollbar flex flex-col gap-0.5">
         {navItems.map((item, idx) => {
           const active = isItemActive(item);
+=======
+      {/* User Greeting */}
+      {user && (
+        <div className="mx-4 mb-2 px-4 py-3 rounded-[14px] flex items-center gap-3"
+          style={{ background: 'var(--color-surface-container-low)' }}>
+          <div className="w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm text-white shrink-0 bg-primary border border-primary/10 relative overflow-hidden">
+            <img 
+              src={user.avatar_url || '/profile/profile.jpg'} 
+              alt="Profile" 
+              className="w-full h-full object-cover" 
+              referrerPolicy="no-referrer"
+              onError={(e) => {
+                (e.currentTarget as HTMLImageElement).src = '/profile/profile.jpg';
+              }}
+            />
+          </div>
+          <div className="flex-1 min-w-0">
+            <p className="text-[11px] font-semibold uppercase tracking-wider"
+              style={{ color: 'var(--color-on-surface-variant)' }}>Good morning</p>
+            <p className="font-bold text-[15px] leading-tight mt-0.5 truncate"
+              style={{ color: 'var(--color-on-surface)' }}>
+              {user.name?.split(' ')[0] || 'Guest'}
+            </p>
+          </div>
+        </div>
+      )}
+
+      {/* Nav Items */}
+      <nav className="flex-1 px-3 py-3 flex flex-col gap-0.5 overflow-y-auto no-scrollbar">
+        <p className="px-3 py-2 text-[10px] font-bold uppercase tracking-[0.1em]"
+          style={{ color: 'var(--color-on-surface-variant)' }}>Navigation</p>
+
+        {navItems.map((item) => {
+          const isActive = pathname.startsWith(item.href);
+>>>>>>> c80e27e54a7a9fd8b6f001d1c284f29909639613
           const Icon = item.icon;
           const showSection = item.section && (idx === 0 || navItems[idx - 1].section !== item.section);
 

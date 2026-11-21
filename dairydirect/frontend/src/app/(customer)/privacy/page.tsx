@@ -14,6 +14,7 @@ export default function PrivacyPolicyPage() {
       <div className="max-w-4xl mx-auto bg-surface border border-border rounded-xl p-6 sm:p-10 shadow-sm">
         
         {/* Header */}
+<<<<<<< HEAD
         <div className="border-b border-border pb-6 mb-8">
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-success-bg text-primary text-xs font-bold uppercase tracking-wider mb-3">
             <Lock className="w-3.5 h-3.5" />
@@ -23,6 +24,17 @@ export default function PrivacyPolicyPage() {
             Privacy Policy
           </h1>
           <p className="text-xs text-foreground-muted mt-1">
+=======
+        <div className="border-b border-gray-100 pb-6 mb-8">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary-fixed text-primary text-xs font-bold uppercase tracking-wider mb-3">
+            <Lock className="w-3.5 h-3.5" />
+            <span>Data Security & Trust</span>
+          </div>
+          <h1 className="text-2xl sm:text-3xl font-bold text-foreground">
+            Privacy Policy
+          </h1>
+          <p className="text-xs text-muted-foreground mt-1">
+>>>>>>> c80e27e54a7a9fd8b6f001d1c284f29909639613
             Last Updated: August 2026 | Effective for all Gjanand Sarkar users
           </p>
         </div>
@@ -30,8 +42,13 @@ export default function PrivacyPolicyPage() {
         <div className="prose prose-sm max-w-none text-foreground space-y-6 text-xs sm:text-sm leading-relaxed">
           
           <section>
+<<<<<<< HEAD
             <h2 className="text-base font-bold text-primary mb-2 flex items-center gap-2">
               <ShieldCheck className="w-4 h-4 text-secondary-ink" />
+=======
+            <h2 className="text-base font-bold text-foreground mb-2 flex items-center gap-2">
+              <ShieldCheck className="w-4 h-4 text-primary" />
+>>>>>>> c80e27e54a7a9fd8b6f001d1c284f29909639613
               1. Information We Collect
             </h2>
             <p>
@@ -46,8 +63,13 @@ export default function PrivacyPolicyPage() {
           </section>
 
           <section>
+<<<<<<< HEAD
             <h2 className="text-base font-bold text-primary mb-2 flex items-center gap-2">
               <Eye className="w-4 h-4 text-secondary-ink" />
+=======
+            <h2 className="text-base font-bold text-foreground mb-2 flex items-center gap-2">
+              <Eye className="w-4 h-4 text-primary" />
+>>>>>>> c80e27e54a7a9fd8b6f001d1c284f29909639613
               2. How We Use Your Information
             </h2>
             <p>We utilize the collected information strictly for:</p>
@@ -60,8 +82,13 @@ export default function PrivacyPolicyPage() {
           </section>
 
           <section>
+<<<<<<< HEAD
             <h2 className="text-base font-bold text-primary mb-2 flex items-center gap-2">
               <FileText className="w-4 h-4 text-secondary-ink" />
+=======
+            <h2 className="text-base font-bold text-foreground mb-2 flex items-center gap-2">
+              <FileText className="w-4 h-4 text-primary" />
+>>>>>>> c80e27e54a7a9fd8b6f001d1c284f29909639613
               3. Data Protection & Sharing
             </h2>
             <p>
@@ -75,19 +102,33 @@ export default function PrivacyPolicyPage() {
           </section>
 
           <section>
+<<<<<<< HEAD
             <h2 className="text-base font-bold text-primary mb-2 flex items-center gap-2">
               <CheckCircle2 className="w-4 h-4 text-secondary-ink" />
               4. Your Rights & Account Controls
             </h2>
             <p>
               You have the right to review, modify, or request deletion of your saved addresses, account details, and subscription history at any time. Simply visit your Profile settings or email us at <a href="mailto:care@gjanandsarkar.com" className="text-secondary-ink font-bold hover:underline">care@gjanandsarkar.com</a>.
+=======
+            <h2 className="text-base font-bold text-foreground mb-2 flex items-center gap-2">
+              <CheckCircle2 className="w-4 h-4 text-primary" />
+              4. Your Rights & Account Controls
+            </h2>
+            <p>
+              You have the right to review, modify, or request deletion of your saved addresses, account details, and subscription history at any time. Simply visit your Profile settings or email us at <a href="mailto:care@gjanandsarkar.com" className="text-primary font-bold hover:underline">care@gjanandsarkar.com</a>.
+>>>>>>> c80e27e54a7a9fd8b6f001d1c284f29909639613
             </p>
           </section>
 
         </div>
 
+<<<<<<< HEAD
         <div className="mt-8 pt-6 border-t border-border flex items-center justify-between text-xs text-foreground-muted">
           <Link href="/terms" className="text-secondary-ink font-bold hover:underline">
+=======
+        <div className="mt-8 pt-6 border-t border-gray-100 flex items-center justify-between text-xs text-gray-500">
+          <Link href="/terms" className="text-primary font-bold hover:underline">
+>>>>>>> c80e27e54a7a9fd8b6f001d1c284f29909639613
             Read Terms of Service →
           </Link>
           <Link href="/contact" className="hover:text-foreground transition-colors">

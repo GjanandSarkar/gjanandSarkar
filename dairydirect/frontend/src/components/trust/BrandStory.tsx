@@ -12,6 +12,7 @@ export function BrandStory({ categoryName }: BrandStoryProps) {
   const categoryLabel = categoryName ? tCategory(categoryName) : '';
 
   return (
+<<<<<<< HEAD
     <div className="bg-surface rounded-lg p-6 border border-border mt-4">
       <div>
         <h3 className="text-sm font-semibold text-foreground mb-1.5">
@@ -19,6 +20,13 @@ export function BrandStory({ categoryName }: BrandStoryProps) {
         </h3>
         <p className="text-sm text-foreground-muted leading-relaxed mb-5">
           {t('partnerCommitmentSub')}
+=======
+    <div className="bg-white rounded-2xl p-6 border border-border mt-4 shadow-2xs">
+      <div>
+        <h3 className="text-sm font-bold text-foreground uppercase tracking-wider mb-2">The GjanandSarkar Promise</h3>
+        <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed mb-6">
+          We bring you pure products, directly from verified brands to your doorstep. Every product is rigorously tested to ensure it meets our quality standards.
+>>>>>>> c80e27e54a7a9fd8b6f001d1c284f29909639613
         </p>
 
         <div className="grid grid-cols-2 gap-4">

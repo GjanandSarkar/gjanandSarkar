@@ -153,11 +153,19 @@ export function SearchableCombobox({
       <div
         className={`relative flex items-center w-full h-11 bg-surface border rounded-xl transition-all ${
           error
+<<<<<<< HEAD
             ? 'border-error focus-within:ring-2 focus-within:ring-rose-500/20 focus-within:border-error'
             : isOpen
             ? 'border-success ring-2 ring-emerald-500/20 shadow-sm'
             : 'border-border hover:border-border focus-within:ring-2 focus-within:ring-emerald-500/20 focus-within:border-success'
         } ${disabled ? 'opacity-60 bg-surface-muted cursor-not-allowed' : ''}`}
+=======
+            ? 'border-rose-500 focus-within:ring-2 focus-within:ring-rose-500/20 focus-within:border-rose-600'
+            : isOpen
+            ? 'border-primary ring-2 ring-primary/20 shadow-sm'
+            : 'border-border hover:border-border-hover focus-within:ring-2 focus-within:ring-primary/20 focus-within:border-primary'
+        } ${disabled ? 'opacity-60 bg-surface-elevated cursor-not-allowed' : ''}`}
+>>>>>>> c80e27e54a7a9fd8b6f001d1c284f29909639613
       >
         <input
           ref={inputRef}
@@ -172,7 +180,11 @@ export function SearchableCombobox({
           placeholder={placeholder}
           disabled={disabled}
           autoComplete="off"
+<<<<<<< HEAD
           className="w-full h-full pl-3.5 pr-10 bg-transparent text-xs font-medium text-foreground placeholder-slate-400 focus:outline-none"
+=======
+          className="w-full h-full pl-3.5 pr-10 bg-transparent text-xs font-medium text-foreground placeholder:text-muted-foreground/60 focus:outline-none"
+>>>>>>> c80e27e54a7a9fd8b6f001d1c284f29909639613
         />
 
         <button
@@ -185,11 +197,19 @@ export function SearchableCombobox({
               inputRef.current?.focus();
             }
           }}
+<<<<<<< HEAD
           className="absolute right-0 top-0 bottom-0 px-3 flex items-center justify-center text-foreground-muted hover:text-foreground-muted transition-colors"
           aria-label="Toggle dropdown"
         >
           <ChevronDown
             className={`w-4 h-4 transition-transform duration-200 ${isOpen ? 'rotate-180 text-success' : ''}`}
+=======
+          className="absolute right-0 top-0 bottom-0 px-3 flex items-center justify-center text-muted-foreground hover:text-foreground transition-colors"
+          aria-label="Toggle dropdown"
+        >
+          <ChevronDown
+            className={`w-4 h-4 transition-transform duration-200 ${isOpen ? 'rotate-180 text-primary' : ''}`}
+>>>>>>> c80e27e54a7a9fd8b6f001d1c284f29909639613
           />
         </button>
       </div>
@@ -215,27 +235,46 @@ export function SearchableCombobox({
                   onClick={() => handleSelect(opt.value)}
                   className={`px-3.5 py-2.5 text-xs font-medium cursor-pointer flex items-center justify-between transition-colors ${
                     isHighlighted
+<<<<<<< HEAD
                       ? 'bg-success-bg text-success'
                       : isSelected
                       ? 'bg-success-bg/50 text-success font-semibold'
                       : 'text-foreground hover:bg-surface-muted'
+=======
+                      ? 'bg-primary/10 text-primary font-semibold'
+                      : isSelected
+                      ? 'bg-primary/15 text-primary font-bold'
+                      : 'text-foreground hover:bg-surface-elevated'
+>>>>>>> c80e27e54a7a9fd8b6f001d1c284f29909639613
                   }`}
                 >
                   <div className="flex items-center gap-2 truncate">
                     <span className="truncate">{opt.label}</span>
                     {opt.badge && (
+<<<<<<< HEAD
                       <span className="text-xs font-semibold uppercase tracking-wider px-1.5 py-0.5 rounded bg-surface-muted text-foreground-muted">
+=======
+                      <span className="text-[10px] font-semibold uppercase tracking-wider px-1.5 py-0.5 rounded bg-surface-elevated text-muted-foreground border border-border/40">
+>>>>>>> c80e27e54a7a9fd8b6f001d1c284f29909639613
                         {opt.badge}
                       </span>
                     )}
                   </div>
 
+<<<<<<< HEAD
                   {isSelected && <Check className="w-3.5 h-3.5 text-success shrink-0 ml-2" />}
+=======
+                  {isSelected && <Check className="w-3.5 h-3.5 text-primary shrink-0 ml-2" />}
+>>>>>>> c80e27e54a7a9fd8b6f001d1c284f29909639613
                 </li>
               );
             })
           ) : (
+<<<<<<< HEAD
             <li className="px-3.5 py-3 text-xs text-foreground-muted italic text-center">
+=======
+            <li className="px-3.5 py-3 text-xs text-muted-foreground italic text-center">
+>>>>>>> c80e27e54a7a9fd8b6f001d1c284f29909639613
               No exact matches found
             </li>
           )}
@@ -244,9 +283,14 @@ export function SearchableCombobox({
           {allowCustom && query.trim() && !hasExactMatch && (
             <li
               role="option"
+              aria-selected={false}
               onMouseEnter={() => setHighlightedIndex(filteredOptions.length)}
               onClick={() => handleSelect(query.trim())}
+<<<<<<< HEAD
               className={`px-3.5 py-2.5 text-xs cursor-pointer border-t border-border flex items-center gap-2 text-success bg-success-bg/60 hover:bg-success-bg font-semibold transition-colors`}
+=======
+              className={`px-3.5 py-2.5 text-xs cursor-pointer border-t border-border flex items-center gap-2 text-primary bg-primary/5 hover:bg-primary/10 font-semibold transition-colors`}
+>>>>>>> c80e27e54a7a9fd8b6f001d1c284f29909639613
             >
               <Plus className="w-3.5 h-3.5 shrink-0" />
               <span className="truncate">Use custom: &quot;{query.trim()}&quot;</span>

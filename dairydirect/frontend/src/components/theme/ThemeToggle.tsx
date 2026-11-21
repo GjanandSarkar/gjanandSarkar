@@ -39,13 +39,21 @@ export function ThemeToggle({
       >
         <span className="flex items-center gap-2">
           {isDark ? (
+<<<<<<< HEAD
             <Sun className="w-4 h-4 text-warning" />
+=======
+            <Sun className="w-4 h-4 text-amber-400" />
+>>>>>>> c80e27e54a7a9fd8b6f001d1c284f29909639613
           ) : (
             <Moon className="w-4 h-4 text-primary" />
           )}
           <span>{isDark ? 'Light Mode' : 'Dark Mode'}</span>
         </span>
+<<<<<<< HEAD
         <span className="text-xs font-bold uppercase tracking-wider text-muted px-1.5 py-0.5 rounded bg-surface border border-border">
+=======
+        <span className="text-[10px] font-bold uppercase tracking-wider text-muted px-1.5 py-0.5 rounded bg-surface border border-border">
+>>>>>>> c80e27e54a7a9fd8b6f001d1c284f29909639613
           {isDark ? 'Dark' : 'Light'}
         </span>
       </button>
@@ -69,7 +77,11 @@ export function ThemeToggle({
       <div className="relative w-4.5 h-4.5 flex items-center justify-center">
         <Sun
           className={cn(
+<<<<<<< HEAD
             "w-4.5 h-4.5 text-warning transition-all duration-300 absolute",
+=======
+            "w-4.5 h-4.5 text-amber-500 transition-all duration-300 absolute",
+>>>>>>> c80e27e54a7a9fd8b6f001d1c284f29909639613
             isDark
               ? "rotate-90 scale-0 opacity-0"
               : "rotate-0 scale-100 opacity-100"
@@ -77,7 +89,11 @@ export function ThemeToggle({
         />
         <Moon
           className={cn(
+<<<<<<< HEAD
             "w-4.5 h-4.5 text-success transition-all duration-300 absolute",
+=======
+            "w-4.5 h-4.5 text-emerald-400 transition-all duration-300 absolute",
+>>>>>>> c80e27e54a7a9fd8b6f001d1c284f29909639613
             isDark
               ? "rotate-0 scale-100 opacity-100"
               : "-rotate-90 scale-0 opacity-0"

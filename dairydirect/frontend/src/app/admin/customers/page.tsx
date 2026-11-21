@@ -211,6 +211,7 @@ export default function AdminCustomersPage() {
                 </button>
               </div>
 
+<<<<<<< HEAD
               <div className="grid grid-cols-3 gap-3">
                 <div className="p-3 rounded-[12px] bg-green-50 dark:bg-green-950/30 border border-green-200 dark:border-green-800/40 text-center">
                   <p className="text-[11px] font-bold uppercase text-green-800 dark:text-green-300">Total Spent</p>
@@ -221,6 +222,18 @@ export default function AdminCustomersPage() {
                 <div className="p-3 rounded-[12px] bg-blue-50 dark:bg-blue-950/30 border border-blue-200 dark:border-blue-800/40 text-center">
                   <p className="text-[11px] font-bold uppercase text-blue-800 dark:text-blue-300">Orders</p>
                   <p className="font-bold text-[15px] text-blue-900 dark:text-blue-200 mt-0.5">{selectedCustomer.total_orders || 0}</p>
+=======
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                <div className="p-3 rounded-[12px] bg-green-50 border border-green-100 text-center">
+                  <p className="text-[10px] font-bold uppercase text-success">Total Spent</p>
+                  <p className="font-extrabold text-[16px] text-success mt-1">
+                    ₹{parseFloat(selectedCustomer.total_spent || '0').toLocaleString('en-IN', { maximumFractionDigits: 0 })}
+                  </p>
+                </div>
+                <div className="p-3 rounded-[12px] bg-blue-50 border border-blue-100 text-center">
+                  <p className="text-[10px] font-bold uppercase text-info">Orders</p>
+                  <p className="font-extrabold text-[16px] text-info mt-1">{selectedCustomer.total_orders}</p>
+>>>>>>> c80e27e54a7a9fd8b6f001d1c284f29909639613
                 </div>
                 <div className="p-3 rounded-[12px] bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800/40 text-center">
                   <p className="text-[11px] font-bold uppercase text-amber-800 dark:text-amber-300">Active Subs</p>

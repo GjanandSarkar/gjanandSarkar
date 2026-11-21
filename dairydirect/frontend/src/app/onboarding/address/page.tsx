@@ -215,38 +215,51 @@ function AddressOnboardingInner() {
   ];
 
   return (
+<<<<<<< HEAD
     <div className="min-h-screen flex flex-col bg-surface">
       {/* Header */}
       <div className="px-6 pt-10 pb-4 max-w-xl mx-auto w-full">
         <h1 className="text-2xl sm:text-3xl font-semibold text-on-surface tracking-tight mb-1">
+=======
+    <div className="min-h-screen flex flex-col bg-background">
+      {/* Header */}
+      <div className="px-4 sm:px-6 pt-8 pb-4 max-w-xl mx-auto w-full">
+        <h1 className="text-xl sm:text-2xl font-bold text-foreground tracking-tight mb-1">
+>>>>>>> c80e27e54a7a9fd8b6f001d1c284f29909639613
           {t('deliveryAddressTitle') || 'Add Delivery Address'}
         </h1>
-        <p className="text-muted text-xs sm:text-sm leading-relaxed">
+        <p className="text-foreground-muted text-xs sm:text-sm">
           {t('whereDeliver') || 'Where should we deliver your fresh farm products?'}
         </p>
       </div>
 
-      <div className="flex-1 px-6 space-y-6 pb-32 max-w-xl mx-auto w-full">
+      <div className="flex-1 px-4 sm:px-6 space-y-5 pb-32 max-w-xl mx-auto w-full">
         {/* Name Input */}
         <div className="space-y-1.5">
+<<<<<<< HEAD
           <label className="text-xs font-bold uppercase tracking-widest text-muted ml-1">
+=======
+          <label className="text-xs font-semibold text-foreground">
+>>>>>>> c80e27e54a7a9fd8b6f001d1c284f29909639613
             {t('fullName') || 'Recipient Name'}
           </label>
-          <div className="relative">
-            <input 
-              type="text" 
-              placeholder={t('addressNamePlaceholder') || 'Enter your full name'}
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              className="w-full h-12 bg-surface-container rounded-2xl px-4 text-sm font-bold border-2 border-transparent focus:border-primary outline-none transition-all shadow-sm"
-            />
-          </div>
+          <input 
+            type="text" 
+            placeholder={t('addressNamePlaceholder') || 'Enter your full name'}
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            className="w-full h-11 bg-surface rounded-xl px-3.5 text-sm font-medium border border-border focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all"
+          />
         </div>
 
         {/* Search Bar / Manual Input */}
-        <div className="space-y-3">
+        <div className="space-y-2.5">
           <div className="flex items-center justify-between">
+<<<<<<< HEAD
             <label className="text-xs font-bold uppercase tracking-widest text-muted ml-1">
+=======
+            <label className="text-xs font-semibold text-foreground">
+>>>>>>> c80e27e54a7a9fd8b6f001d1c284f29909639613
               Complete Address
             </label>
             <button 
@@ -256,49 +269,64 @@ function AddressOnboardingInner() {
               className="flex items-center gap-1.5 text-primary text-xs font-bold hover:underline active:scale-95 transition-all cursor-pointer"
             >
               {isLocating ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Navigation className="w-3.5 h-3.5" />}
-              {isLocating ? 'Locating...' : 'Use Current Location'}
+              <span>{isLocating ? 'Locating...' : 'Use Current Location'}</span>
             </button>
           </div>
 
           <div className="relative">
-            <div className="absolute left-4 top-4">
-              {isGeocoding ? <Loader2 className="w-4 h-4 text-primary animate-spin" /> : <Search className="w-4 h-4 text-muted" />}
+            <div className="absolute left-3.5 top-3.5">
+              {isGeocoding ? <Loader2 className="w-4 h-4 text-primary animate-spin" /> : <Search className="w-4 h-4 text-foreground-muted" />}
             </div>
             <textarea 
               placeholder="House/Flat number, Building, Street name, Area, City, Pincode"
               value={address}
               onChange={(e) => setAddress(e.target.value)}
               rows={3}
-              className="w-full bg-surface-container rounded-2xl pl-11 pr-4 py-3 text-sm font-medium border-2 border-transparent focus:border-primary outline-none transition-all resize-none shadow-sm"
+              className="w-full bg-surface rounded-xl pl-10 pr-3.5 py-2.5 text-sm font-medium border border-border focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all resize-none"
             />
           </div>
 
           {locationNotice && (
+<<<<<<< HEAD
             <div className="flex items-center gap-2 px-3 py-2 bg-success-bg text-success rounded-xl text-xs font-medium border border-success/20">
               <Info className="w-4 h-4 shrink-0 text-success" />
+=======
+            <div className="flex items-center gap-2 px-3 py-2 bg-primary/10 text-primary rounded-xl text-xs font-medium border border-primary/20">
+              <Info className="w-4 h-4 shrink-0" />
+>>>>>>> c80e27e54a7a9fd8b6f001d1c284f29909639613
               <span>{locationNotice}</span>
             </div>
           )}
 
           {/* Map Preview with Pinpoint */}
-          <div className="rounded-2xl overflow-hidden shadow-sm border border-sand relative group">
+          <div className="rounded-xl overflow-hidden border border-border relative">
             <OrderTrackingMap 
               customerLocation={coords} 
-              height="220px" 
+              height="200px" 
               interactive={true} 
               showCenterMarker={true}
               onLocationChange={handleLocationChange}
             />
+<<<<<<< HEAD
             <div className="absolute bottom-2 right-2 px-2.5 py-1 bg-surface/90 backdrop-blur rounded-lg text-xs font-bold text-foreground shadow-sm pointer-events-none">
               📍 Drag map to adjust pin
+=======
+            <div className="absolute bottom-2 right-2 px-2.5 py-1 bg-surface/90 backdrop-blur rounded-lg text-[10px] font-bold text-foreground border border-border shadow-xs pointer-events-none">
+              Drag map to adjust pin
+>>>>>>> c80e27e54a7a9fd8b6f001d1c284f29909639613
             </div>
           </div>
         </div>
 
         {/* Address Type Chips */}
         <div className="space-y-2">
+<<<<<<< HEAD
           <label className="text-xs font-bold uppercase tracking-widest text-muted ml-1">{t('saveAs') || 'Save Address As'}</label>
           <div className="flex flex-wrap gap-2.5">
+=======
+          <label className="text-xs font-semibold text-foreground">{t('saveAs') || 'Save Address As'}</label>
+          <div className="flex flex-wrap gap-2">
+>>>>>>> c80e27e54a7a9fd8b6f001d1c284f29909639613
             {addressTypes.map(item => {
               const Icon = item.icon;
               const isSelected = type === item.id;
@@ -317,12 +345,16 @@ function AddressOnboardingInner() {
                       placeholder="e.g. Grandma's House, Farm"
                       value={customLabel}
                       onChange={(e) => setCustomLabel(e.target.value)}
-                      className="w-full h-11 bg-primary/5 border-2 border-primary rounded-xl px-3 text-xs font-bold text-primary outline-none"
+                      className="w-full h-10 bg-surface border border-primary rounded-xl px-3 text-xs font-bold text-primary outline-none"
                     />
                     <button 
                       type="button"
                       onClick={() => { setType('Home'); setCustomLabel(''); }}
+<<<<<<< HEAD
                       className="absolute right-2.5 top-1/2 -translate-y-1/2 text-xs font-semibold uppercase text-primary/60 hover:text-primary"
+=======
+                      className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[10px] font-bold uppercase text-foreground-muted hover:text-foreground"
+>>>>>>> c80e27e54a7a9fd8b6f001d1c284f29909639613
                     >
                       Reset
                     </button>
@@ -335,14 +367,19 @@ function AddressOnboardingInner() {
                   type="button"
                   key={item.id}
                   onClick={() => setType(item.id)}
-                  className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold transition-all border-2 ${
+                  className={`flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-semibold transition-all border cursor-pointer ${
                     isSelected 
+<<<<<<< HEAD
                       ? 'bg-primary/10 border-primary text-primary shadow-sm' 
                       : 'bg-surface border-sand text-on-surface hover:bg-surface-container'
+=======
+                      ? 'bg-primary-fixed border-primary text-primary shadow-xs' 
+                      : 'bg-surface border-border text-foreground hover:bg-surface-muted'
+>>>>>>> c80e27e54a7a9fd8b6f001d1c284f29909639613
                   }`}
                 >
                   <Icon className="w-3.5 h-3.5" />
-                  {item.label}
+                  <span>{item.label}</span>
                 </button>
               );
             })}
@@ -352,16 +389,28 @@ function AddressOnboardingInner() {
         {/* Default Address Checkbox */}
         <div 
           onClick={() => setIsDefault(prev => !prev)}
+<<<<<<< HEAD
           className="flex items-center gap-3 p-3.5 bg-surface-container rounded-2xl cursor-pointer hover:bg-surface-muted transition-colors select-none"
+=======
+          className="flex items-center gap-3 p-3.5 bg-surface border border-border rounded-xl cursor-pointer hover:bg-surface-muted/50 transition-colors select-none"
+>>>>>>> c80e27e54a7a9fd8b6f001d1c284f29909639613
         >
           {isDefault ? (
-            <CheckSquare className="w-5 h-5 text-primary" />
+            <CheckSquare className="w-4 h-4 text-primary shrink-0" />
           ) : (
+<<<<<<< HEAD
             <Square className="w-5 h-5 text-foreground-muted" />
           )}
           <div>
             <p className="text-xs font-bold text-foreground">Make this my default delivery address</p>
             <p className="text-xs text-foreground-muted">
+=======
+            <Square className="w-4 h-4 text-foreground-muted shrink-0" />
+          )}
+          <div>
+            <p className="text-xs font-semibold text-foreground">Make this my default delivery address</p>
+            <p className="text-[11px] text-foreground-muted">
+>>>>>>> c80e27e54a7a9fd8b6f001d1c284f29909639613
               {hasExistingAddresses 
                 ? 'Will be used as your primary address for quick checkouts.' 
                 : 'Your primary delivery location.'}
@@ -371,31 +420,40 @@ function AddressOnboardingInner() {
       </div>
 
       {/* Footer Button */}
+<<<<<<< HEAD
       <div className="fixed bottom-0 left-0 right-0 p-4 bg-surface/90 backdrop-blur-xl border-t border-sand z-50">
+=======
+      <div className="fixed bottom-0 left-0 right-0 p-4 bg-surface/90 backdrop-blur-md border-t border-border z-50">
+>>>>>>> c80e27e54a7a9fd8b6f001d1c284f29909639613
         <div className="max-w-xl mx-auto w-full">
           <button
+            type="button"
             onClick={handleSave}
             disabled={!address.trim() || !name.trim() || isSaving || isSuccess}
-            className={`w-full h-12 sm:h-14 rounded-2xl font-bold flex items-center justify-center gap-2 transition-all active:scale-95 shadow-xl ${
+            className={`w-full h-12 rounded-xl font-bold flex items-center justify-center gap-2 transition-all cursor-pointer shadow-sm active:scale-[0.99] ${
               isSuccess 
+<<<<<<< HEAD
                 ? 'bg-success text-white shadow-emerald-200'
+=======
+                ? 'bg-primary text-white'
+>>>>>>> c80e27e54a7a9fd8b6f001d1c284f29909639613
                 : isSaving
                   ? 'bg-primary/70 text-white cursor-wait'
-                  : 'bg-primary text-white shadow-primary/20 disabled:opacity-50'
+                  : 'bg-primary hover:bg-primary-hover text-white disabled:opacity-50 disabled:cursor-not-allowed'
             }`}
           >
             {isSuccess ? (
               <>
-                <Check className="w-5 h-5" strokeWidth={3} />
-                Address Saved Successfully!
+                <Check className="w-4 h-4 stroke-[3]" />
+                <span>Address Saved Successfully!</span>
               </>
             ) : isSaving ? (
               <>
-                <Loader2 className="w-5 h-5 animate-spin" />
-                Saving Address...
+                <Loader2 className="w-4 h-4 animate-spin" />
+                <span>Saving Address...</span>
               </>
             ) : (
-              'Save Delivery Address'
+              <span>Save Delivery Address</span>
             )}
           </button>
         </div>

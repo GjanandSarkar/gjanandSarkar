@@ -81,23 +81,33 @@ export default function ContactPage() {
       <div className="max-w-6xl mx-auto">
         
         {/* Header */}
+<<<<<<< HEAD
         <div className="text-center max-w-2xl mx-auto mb-12">
           <span className="text-xs font-semibold uppercase tracking-widest text-secondary-ink">We Are Here For You</span>
           <h1 className="text-3xl sm:text-4xl font-semibold text-primary mt-2 mb-3">
             Contact Customer Support
           </h1>
           <p className="text-xs sm:text-sm text-foreground-muted leading-relaxed">
+=======
+        <div className="text-center max-w-2xl mx-auto mb-10">
+          <span className="text-xs font-bold uppercase tracking-wider text-primary">Customer Care</span>
+          <h1 className="text-2xl sm:text-3xl font-extrabold text-foreground mt-1.5 mb-2.5">
+            Contact Customer Support
+          </h1>
+          <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed">
+>>>>>>> c80e27e54a7a9fd8b6f001d1c284f29909639613
             Questions about an order, a partner brand, a subscription or bulk
             purchasing? Our team is available 7 days a week.
           </p>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 sm:gap-8 items-start">
           
           {/* Direct Support Channels */}
           <div className="space-y-4 lg:col-span-1">
             
             {/* WhatsApp Quick Support */}
+<<<<<<< HEAD
             <div className="bg-success-bg border border-success/20/80 rounded-2xl p-5 shadow-xs">
               <div className="flex items-center gap-3 mb-2">
                 <div className="w-10 h-10 rounded-xl bg-primary text-on-primary flex items-center justify-center">
@@ -109,13 +119,30 @@ export default function ContactPage() {
                 </div>
               </div>
               <p className="text-xs text-foreground-muted mb-3 leading-relaxed">
+=======
+            <div className="bg-primary/5 border border-primary/20 rounded-2xl p-5 shadow-2xs">
+              <div className="flex items-center gap-3 mb-2">
+                <div className="w-10 h-10 rounded-xl bg-primary text-white flex items-center justify-center">
+                  <MessageCircle className="w-5 h-5 text-white" />
+                </div>
+                <div>
+                  <h3 className="text-xs font-bold text-foreground">WhatsApp Instant Support</h3>
+                  <span className="text-[10px] text-primary font-semibold">Average reply under 5 mins</span>
+                </div>
+              </div>
+              <p className="text-xs text-muted-foreground mb-3 leading-relaxed">
+>>>>>>> c80e27e54a7a9fd8b6f001d1c284f29909639613
                 Chat directly with our delivery operations desk for immediate slot adjustments or morning updates.
               </p>
               <a
                 href="https://wa.me/919876543210?text=Hello%20Gjanand%20Sarkar%20Team%2C%20I%20have%20a%20query%20about%20my%20order."
                 target="_blank"
                 rel="noreferrer"
+<<<<<<< HEAD
                 className="inline-flex items-center justify-center gap-2 w-full py-2.5 bg-primary hover:bg-primary-hover text-on-primary text-xs font-bold rounded-xl transition-all shadow-xs"
+=======
+                className="inline-flex items-center justify-center gap-2 w-full py-2.5 bg-primary hover:bg-primary-hover text-white text-xs font-bold rounded-xl transition-all shadow-xs"
+>>>>>>> c80e27e54a7a9fd8b6f001d1c284f29909639613
               >
                 <MessageCircle className="w-4 h-4" />
                 <span>Chat on WhatsApp</span>
@@ -123,25 +150,44 @@ export default function ContactPage() {
             </div>
 
             {/* Helpline Phone */}
+<<<<<<< HEAD
             <div className="bg-surface border border-border rounded-2xl p-5 shadow-xs space-y-3">
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 rounded-xl bg-warning-bg/80 text-secondary-ink flex items-center justify-center">
+=======
+            <div className="bg-white border border-border rounded-2xl p-5 shadow-2xs space-y-2">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-neutral-100 text-foreground flex items-center justify-center">
+>>>>>>> c80e27e54a7a9fd8b6f001d1c284f29909639613
                   <Phone className="w-5 h-5" />
                 </div>
                 <div>
                   <h3 className="text-xs font-bold text-foreground">Toll-Free Helpline</h3>
+<<<<<<< HEAD
                   <p className="text-xs font-semibold text-primary">+91 1800-419-4567</p>
                 </div>
               </div>
               <p className="text-xs text-foreground-muted">
+=======
+                  <p className="text-xs font-extrabold text-primary">+91 1800-419-4567</p>
+                </div>
+              </div>
+              <p className="text-[11px] text-muted-foreground">
+>>>>>>> c80e27e54a7a9fd8b6f001d1c284f29909639613
                 Operating Hours: 6:00 AM – 9:00 PM IST (Mon – Sun)
               </p>
             </div>
 
             {/* Email Contact */}
+<<<<<<< HEAD
             <div className="bg-surface border border-border rounded-2xl p-5 shadow-xs space-y-3">
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 rounded-xl bg-info-bg text-info flex items-center justify-center">
+=======
+            <div className="bg-white border border-border rounded-2xl p-5 shadow-2xs space-y-2">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-neutral-100 text-foreground flex items-center justify-center">
+>>>>>>> c80e27e54a7a9fd8b6f001d1c284f29909639613
                   <Mail className="w-5 h-5" />
                 </div>
                 <div>
@@ -149,23 +195,38 @@ export default function ContactPage() {
                   <p className="text-xs font-bold text-foreground">care@gjanandsarkar.com</p>
                 </div>
               </div>
+<<<<<<< HEAD
               <p className="text-xs text-foreground-muted">
+=======
+              <p className="text-[11px] text-muted-foreground">
+>>>>>>> c80e27e54a7a9fd8b6f001d1c284f29909639613
                 For corporate gifting, bulk orders, or brand partnerships.
               </p>
             </div>
 
             {/* Headquarters */}
+<<<<<<< HEAD
             <div className="bg-surface border border-border rounded-2xl p-5 shadow-xs space-y-2">
+=======
+            <div className="bg-white border border-border rounded-2xl p-5 shadow-2xs space-y-2">
+>>>>>>> c80e27e54a7a9fd8b6f001d1c284f29909639613
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-purple-50 text-purple-700 flex items-center justify-center">
+                <div className="w-10 h-10 rounded-xl bg-neutral-100 text-foreground flex items-center justify-center">
                   <MapPin className="w-5 h-5" />
                 </div>
                 <div>
                   <h3 className="text-xs font-bold text-foreground">Headquarters</h3>
+<<<<<<< HEAD
                   <p className="text-xs text-foreground-muted">Gjanand Sarkar</p>
                 </div>
               </div>
               <p className="text-xs text-foreground-muted leading-relaxed">
+=======
+                  <p className="text-[11px] text-muted-foreground">Gjanand Sarkar</p>
+                </div>
+              </div>
+              <p className="text-[11px] text-muted-foreground leading-relaxed">
+>>>>>>> c80e27e54a7a9fd8b6f001d1c284f29909639613
                 Kudasan, Near Infocity Circle, Gandhinagar, Gujarat - 382421
               </p>
             </div>
@@ -173,27 +234,48 @@ export default function ContactPage() {
           </div>
 
           {/* Contact & Inquiry Form */}
+<<<<<<< HEAD
           <div className="lg:col-span-2 bg-surface border border-border rounded-xl p-6 sm:p-8 shadow-sm">
             <h2 className="text-lg font-bold text-primary mb-1">
               Send us a Message
             </h2>
             <p className="text-xs text-foreground-muted mb-6">
+=======
+          <div className="lg:col-span-2 bg-white border border-border rounded-2xl p-6 sm:p-8 shadow-xs">
+            <h2 className="text-base font-extrabold text-foreground mb-1">
+              Send us a Message
+            </h2>
+            <p className="text-xs text-muted-foreground mb-6">
+>>>>>>> c80e27e54a7a9fd8b6f001d1c284f29909639613
               Fill in your details below and our customer success team will reach out within 2 hours.
             </p>
 
             {submitted ? (
+<<<<<<< HEAD
               <div className="p-6 rounded-2xl bg-success-bg border border-success/20 text-center space-y-3">
                 <div className="w-12 h-12 rounded-full bg-success-bg text-primary flex items-center justify-center mx-auto">
                   <CheckCircle2 className="w-7 h-7 text-success" />
                 </div>
                 <h3 className="text-sm font-bold text-primary">Message Received!</h3>
                 <p className="text-xs text-foreground-muted max-w-sm mx-auto">
+=======
+              <div className="p-6 rounded-2xl bg-primary/5 border border-primary/20 text-center space-y-3">
+                <div className="w-12 h-12 rounded-full bg-primary/10 text-primary flex items-center justify-center mx-auto">
+                  <CheckCircle2 className="w-7 h-7 text-primary" />
+                </div>
+                <h3 className="text-sm font-bold text-foreground">Message Received!</h3>
+                <p className="text-xs text-muted-foreground max-w-sm mx-auto">
+>>>>>>> c80e27e54a7a9fd8b6f001d1c284f29909639613
                   Thank you for contacting Gjanand Sarkar. Our support team will get back to you shortly at your registered contact.
                 </p>
                 <button
                   type="button"
                   onClick={() => setSubmitted(false)}
+<<<<<<< HEAD
                   className="mt-2 text-xs font-bold text-secondary-ink hover:underline"
+=======
+                  className="mt-2 text-xs font-bold text-primary hover:underline"
+>>>>>>> c80e27e54a7a9fd8b6f001d1c284f29909639613
                 >
                   Send another inquiry
                 </button>
@@ -216,7 +298,11 @@ export default function ContactPage() {
                       value={form.name}
                       onChange={e => setForm({ ...form, name: e.target.value })}
                       placeholder="e.g. Ananya Patel"
+<<<<<<< HEAD
                       className="w-full px-3.5 py-2.5 text-xs rounded-xl border border-border-hover focus:border-primary focus:ring-1 focus:ring-[var(--primary)] outline-none"
+=======
+                      className="w-full px-3.5 py-2.5 text-xs rounded-xl border border-border focus:border-primary focus:ring-1 focus:ring-primary outline-none"
+>>>>>>> c80e27e54a7a9fd8b6f001d1c284f29909639613
                     />
                   </div>
 
@@ -231,7 +317,11 @@ export default function ContactPage() {
                       onChange={e => setForm({ ...form, phone: formatPhoneInput(e.target.value) })}
                       placeholder="+919876543210"
                       maxLength={13}
+<<<<<<< HEAD
                       className="w-full px-3.5 py-2.5 text-xs rounded-xl border border-border-hover focus:border-primary focus:ring-1 focus:ring-[var(--primary)] outline-none"
+=======
+                      className="w-full px-3.5 py-2.5 text-xs rounded-xl border border-border focus:border-primary focus:ring-1 focus:ring-primary outline-none"
+>>>>>>> c80e27e54a7a9fd8b6f001d1c284f29909639613
                     />
                   </div>
                 </div>
@@ -247,7 +337,11 @@ export default function ContactPage() {
                       value={form.email}
                       onChange={e => setForm({ ...form, email: e.target.value })}
                       placeholder="ananya@example.com"
+<<<<<<< HEAD
                       className="w-full px-3.5 py-2.5 text-xs rounded-xl border border-border-hover focus:border-primary focus:ring-1 focus:ring-[var(--primary)] outline-none"
+=======
+                      className="w-full px-3.5 py-2.5 text-xs rounded-xl border border-border focus:border-primary focus:ring-1 focus:ring-primary outline-none"
+>>>>>>> c80e27e54a7a9fd8b6f001d1c284f29909639613
                     />
                   </div>
 
@@ -258,7 +352,11 @@ export default function ContactPage() {
                     <select
                       value={form.subject}
                       onChange={e => setForm({ ...form, subject: e.target.value })}
+<<<<<<< HEAD
                       className="w-full px-3.5 py-2.5 text-xs rounded-xl border border-border-hover focus:border-primary focus:ring-1 focus:ring-[var(--primary)] outline-none bg-surface"
+=======
+                      className="w-full px-3.5 py-2.5 text-xs rounded-xl border border-border focus:border-primary focus:ring-1 focus:ring-primary outline-none bg-white text-foreground"
+>>>>>>> c80e27e54a7a9fd8b6f001d1c284f29909639613
                     >
                       <option value="Order Query">Order Status & Delivery</option>
                       <option value="Subscription">Subscriptions</option>
@@ -280,14 +378,22 @@ export default function ContactPage() {
                     value={form.message}
                     onChange={e => setForm({ ...form, message: e.target.value })}
                     placeholder="Please mention your order ID or subscription details if applicable..."
+<<<<<<< HEAD
                     className="w-full px-3.5 py-2.5 text-xs rounded-xl border border-border-hover focus:border-primary focus:ring-1 focus:ring-[var(--primary)] outline-none"
+=======
+                    className="w-full px-3.5 py-2.5 text-xs rounded-xl border border-border focus:border-primary focus:ring-1 focus:ring-primary outline-none"
+>>>>>>> c80e27e54a7a9fd8b6f001d1c284f29909639613
                   ></textarea>
                 </div>
 
                 <button
                   type="submit"
                   disabled={loading}
+<<<<<<< HEAD
                   className="w-full sm:w-auto px-8 py-3 bg-primary hover:bg-primary-hover text-on-primary font-bold text-xs rounded-xl shadow-md transition-all flex items-center justify-center gap-2 cursor-pointer"
+=======
+                  className="w-full sm:w-auto px-7 py-2.5 bg-primary hover:bg-primary-hover text-white font-bold text-xs rounded-xl shadow-xs transition-all flex items-center justify-center gap-2 cursor-pointer"
+>>>>>>> c80e27e54a7a9fd8b6f001d1c284f29909639613
                 >
                   <Send className="w-3.5 h-3.5" />
                   <span>{loading ? 'Sending...' : 'Submit Inquiry'}</span>
@@ -295,12 +401,21 @@ export default function ContactPage() {
               </form>
             )}
 
+<<<<<<< HEAD
             <div className="mt-8 pt-6 border-t border-border flex flex-wrap items-center justify-between gap-4 text-xs text-foreground-muted">
               <span className="flex items-center gap-1.5">
                 <ShieldCheck className="w-4 h-4 text-success" />
                 Data encrypted & secure
               </span>
               <Link href="/faq" className="text-secondary-ink font-bold hover:underline flex items-center gap-1">
+=======
+            <div className="mt-8 pt-6 border-t border-border flex flex-wrap items-center justify-between gap-4 text-xs text-muted-foreground">
+              <span className="flex items-center gap-1.5">
+                <ShieldCheck className="w-4 h-4 text-primary" />
+                Data encrypted & secure
+              </span>
+              <Link href="/faq" className="text-primary font-bold hover:underline flex items-center gap-1">
+>>>>>>> c80e27e54a7a9fd8b6f001d1c284f29909639613
                 <HelpCircle className="w-3.5 h-3.5" />
                 <span>Check Frequently Asked Questions</span>
               </Link>

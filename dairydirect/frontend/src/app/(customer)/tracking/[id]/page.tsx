@@ -2,7 +2,12 @@
 
 import { useEffect, useState, useMemo } from 'react';
 import { useParams, useRouter } from 'next/navigation';
+<<<<<<< HEAD
 import { ArrowLeft, Phone, MessageSquare, Star, Info, MapPin, Repeat, ThermometerSnowflake, ShieldCheck, CreditCard, Banknote } from 'lucide-react';
+=======
+import Link from 'next/link';
+import { Phone, MessageSquare, Star, Info, MapPin, Repeat, ThermometerSnowflake, ShieldCheck } from 'lucide-react';
+>>>>>>> c80e27e54a7a9fd8b6f001d1c284f29909639613
 import { motion } from 'framer-motion';
 import { getOrderById } from '@/lib/api/orders';
 import type { OrderWithItems } from '@/lib/api/orders';
@@ -85,6 +90,7 @@ export default function TrackingPage() {
           : 'Preparing your order';
 
   return (
+<<<<<<< HEAD
     <div className="min-h-screen flex flex-col bg-background">
       <div className="w-full max-w-3xl mx-auto px-4 pt-4 pb-6 flex flex-col gap-5">
 
@@ -144,10 +150,72 @@ export default function TrackingPage() {
             <MapPin className="w-4 h-4 mr-2 text-primary" /> {addressLabel}
           </h3>
           <p className="text-sm text-foreground-muted leading-relaxed font-medium">
+=======
+    <div className="min-h-screen flex flex-col bg-background relative pb-[100px]">
+      {/* Header Over Map */}
+      <div className="absolute top-0 left-0 right-0 z-10 p-4 pt-10 flex justify-between items-center bg-gradient-to-b from-black/60 to-transparent pointer-events-none">
+        <Link 
+          href="/orders"
+          className="px-3 py-1.5 rounded-full bg-black/40 backdrop-blur-md flex items-center gap-1.5 text-white pointer-events-auto transition-transform active:scale-95 hover:bg-black/60 text-xs font-bold"
+        >
+          <span>All Orders</span>
+        </Link>
+        <div className="px-3 py-1 rounded-full bg-black/40 backdrop-blur-md text-white text-xs font-mono font-bold pointer-events-auto shadow-sm">
+          #{order.id.substring(0, 8).toUpperCase()}
+        </div>
+      </div>
+
+      {/* Map Segment */}
+      <div className="relative w-full" style={{ height: '36vh' }}>
+        <OrderTrackingMap 
+          farmLocation={farmCoords} 
+          customerLocation={customerCoords} 
+          driverLocation={undefined} 
+          height="100%" 
+        />
+      </div>
+
+      {/* Main Content Area */}
+      <motion.div 
+        initial={{ y: "100%" }}
+        animate={{ y: 0 }}
+        transition={{ type: "spring", stiffness: 300, damping: 30 }}
+        className="bg-surface rounded-t-2xl shadow-xl border-t border-border z-20 -mt-6 relative flex-1 flex flex-col gap-4 p-4 pt-4 w-full max-w-2xl mx-auto"
+      >
+        <div className="w-10 h-1 bg-border rounded-full mx-auto mb-1" />
+
+        {/* Status Header */}
+        <div className="flex justify-between items-end border-b border-border/60 pb-4">
+          <div>
+            <h2 className="text-xl font-black text-foreground mb-0.5">
+              {order.status === 'delivered' ? 'Order Delivered' : 
+               order.status === 'out_for_delivery' ? 'Out for Delivery' : 
+               'Preparing at Farm'}
+            </h2>
+            <p className="text-muted text-xs">
+              Delivery expected by {new Date(order.delivery_date || Date.now()).toLocaleDateString()} • 6:30 AM
+            </p>
+          </div>
+          <div className="px-2.5 py-1 rounded-md bg-primary/10 text-primary text-[11px] font-bold uppercase tracking-wider border border-primary/20">
+            {order.status.replace(/_/g, ' ')}
+          </div>
+        </div>
+
+        {/* Timeline */}
+        <OrderStatusTimeline currentStatus={order.status} />
+
+        {/* Delivery Address Summary */}
+        <div className="bg-surface rounded-xl p-4 border border-border">
+          <h3 className="font-bold text-foreground text-xs flex items-center mb-2 uppercase tracking-wider">
+            <MapPin className="w-3.5 h-3.5 mr-1.5 text-primary" /> {addressLabel}
+          </h3>
+          <p className="text-muted text-xs leading-relaxed">
+>>>>>>> c80e27e54a7a9fd8b6f001d1c284f29909639613
             {addressText}
           </p>
         </div>
 
+<<<<<<< HEAD
         {/* Payment method */}
         <div className="bg-surface rounded-2xl border border-border p-5 shadow-2xs">
           <div className="flex items-center justify-between">
@@ -201,6 +269,36 @@ export default function TrackingPage() {
           <Button className="flex-1 font-bold text-sm h-12" onClick={handleReorder}>
             <Repeat className="w-4 h-4 mr-2" /> Reorder
           </Button>
+=======
+        {/* Order Items */}
+        <OrderItemsReview order={order} />
+        
+        {/* Freshness Assurance */}
+        <div className="bg-surface rounded-xl p-3.5 border border-border flex items-start gap-2.5 text-xs">
+          <ThermometerSnowflake className="w-4 h-4 text-primary shrink-0 mt-0.5" />
+          <div>
+            <h4 className="font-bold text-foreground mb-0.5">Cold-Chain Guaranteed (4°C)</h4>
+            <p className="text-muted text-[11px] leading-relaxed">Transported in temperature-controlled chilled insulation direct from the farm.</p>
+          </div>
+        </div>
+      </motion.div>
+
+      {/* Sticky Bottom Actions */}
+      <div className="fixed bottom-0 left-0 right-0 z-40 bg-surface/95 backdrop-blur-md border-t border-border p-3 pb-safe shadow-lg">
+        <div className="max-w-2xl mx-auto flex gap-2.5">
+          <button 
+            className="flex-1 py-2.5 px-4 rounded-xl border border-border font-bold text-xs text-foreground hover:bg-surface-muted transition-colors cursor-pointer" 
+            onClick={() => router.push('/support')}
+          >
+            Need Help?
+          </button>
+          <button 
+            className="flex-1 py-2.5 px-4 rounded-xl bg-primary hover:bg-primary-hover font-bold text-xs text-foreground-inverse flex items-center justify-center gap-1.5 transition-colors cursor-pointer shadow-sm" 
+            onClick={handleReorder}
+          >
+            <Repeat className="w-3.5 h-3.5" /> Reorder Items
+          </button>
+>>>>>>> c80e27e54a7a9fd8b6f001d1c284f29909639613
         </div>
       </div>
     </div>

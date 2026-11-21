@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react';
 import Link from 'next/link';
+<<<<<<< HEAD
 import { Heart, ChevronDown, Globe } from 'lucide-react';
 import { useStore } from '@/store/useStore';
 import { useTranslation } from '@/lib/i18n';
@@ -17,6 +18,9 @@ const SOCIALS = [
   { label: 'LinkedIn', href: 'https://linkedin.com', d: 'M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z' },
   { label: 'X', href: 'https://twitter.com', d: 'M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z' }
 ];
+=======
+import { Send, ArrowRight } from 'lucide-react';
+>>>>>>> c80e27e54a7a9fd8b6f001d1c284f29909639613
 
 export function Footer() {
   const [openColumn, setOpenColumn] = useState<string | null>(null);
@@ -47,6 +51,7 @@ export function Footer() {
   ];
 
   return (
+<<<<<<< HEAD
     <footer className="w-full bg-surface-muted text-foreground pt-10 pb-[calc(var(--bottom-nav-h,64px)+2.5rem+env(safe-area-inset-bottom,0px))] md:pb-8 border-t border-border">
       <div className="max-w-[1440px] mx-auto px-4 md:px-8">
 
@@ -157,6 +162,150 @@ export function Footer() {
             <span>Made with</span>
             <Heart className="w-3 h-3 fill-error text-error" aria-hidden="true" />
             <span>in Bharat</span>
+=======
+    <footer id="main-footer" className="w-full bg-surface text-foreground border-t border-border">
+      <div className="max-w-[1440px] mx-auto px-4 sm:px-6 md:px-8 pt-8 pb-20 md:pt-12 md:pb-10">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-6 md:gap-8 lg:gap-10 pb-6 md:pb-10 border-b border-border">
+          
+          {/* Column 1: Brand & Bio (4 cols on lg) */}
+          <div className="lg:col-span-4 space-y-3">
+            <Link href="/home" className="flex items-center gap-2.5 shrink-0">
+              <img
+                src="/application logo/gjanand sarkar logo.png"
+                alt="Gjanand Sarkar"
+                className="h-9 w-auto object-contain"
+                onError={(e) => {
+                  (e.target as HTMLElement).style.display = 'none';
+                }}
+              />
+              <span className="text-xl font-bold tracking-tight text-foreground">
+                Gjanand Sarkar
+              </span>
+            </Link>
+
+            <p className="text-xs text-foreground-muted leading-relaxed max-w-sm">
+              One trusted brand per category. Genuine Indian groceries, farm essentials, and pantry staples delivered directly to your doorstep.
+            </p>
+          </div>
+
+          {/* Column 2: Quick Links (2 cols on lg) */}
+          <div className="lg:col-span-3 space-y-3">
+            <h4 className="text-xs font-bold uppercase tracking-wider text-foreground">
+              Shop Categories
+            </h4>
+            <ul className="space-y-2 text-xs text-foreground-muted">
+              <li>
+                <Link href="/categories/milk" className="hover:text-primary transition-colors">
+                  A2 Milk & Dairy
+                </Link>
+              </li>
+              <li>
+                <Link href="/categories/ghee" className="hover:text-primary transition-colors">
+                  Bilona Ghee
+                </Link>
+              </li>
+              <li>
+                <Link href="/categories/sweets" className="hover:text-primary transition-colors">
+                  Traditional Sweets
+                </Link>
+              </li>
+              <li>
+                <Link href="/offers" className="hover:text-primary transition-colors">
+                  Special Offers
+                </Link>
+              </li>
+              <li>
+                <Link href="/products" className="hover:text-primary transition-colors font-semibold text-primary inline-flex items-center gap-1">
+                  <span>Browse All Products</span>
+                  <ArrowRight className="w-3 h-3" />
+                </Link>
+              </li>
+            </ul>
+          </div>
+
+          {/* Column 3: Customer Care (2 cols on lg) */}
+          <div className="lg:col-span-2 space-y-3">
+            <h4 className="text-xs font-bold uppercase tracking-wider text-foreground">
+              Customer Support
+            </h4>
+            <ul className="space-y-2 text-xs text-foreground-muted">
+              <li>
+                <Link href="/orders" className="hover:text-primary transition-colors">
+                  My Orders
+                </Link>
+              </li>
+              <li>
+                <Link href="/subscribe" className="hover:text-primary transition-colors">
+                  Subscriptions
+                </Link>
+              </li>
+              <li>
+                <Link href="/contact" className="hover:text-primary transition-colors">
+                  Help & Contact
+                </Link>
+              </li>
+              <li>
+                <Link href="/faq" className="hover:text-primary transition-colors">
+                  FAQ
+                </Link>
+              </li>
+              <li>
+                <Link href="/become-seller" className="hover:text-primary transition-colors">
+                  Become a Seller
+                </Link>
+              </li>
+            </ul>
+          </div>
+
+          {/* Column 4: Newsletter (3 cols on lg) */}
+          <div className="lg:col-span-3 space-y-3">
+            <h4 className="text-xs font-bold uppercase tracking-wider text-foreground">
+              Stay Updated
+            </h4>
+            <p className="text-xs text-foreground-muted leading-relaxed">
+              Receive updates on seasonal harvest batches and exclusive offers.
+            </p>
+
+            <form onSubmit={handleSubscribe} className="space-y-2">
+              <input
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="Enter your email"
+                className="w-full px-3 py-2 text-xs rounded-xl bg-surface-muted border border-border text-foreground placeholder:text-foreground-muted outline-none focus:border-primary transition-colors"
+                required
+              />
+              <button
+                type="submit"
+                className="w-full py-2 bg-primary hover:bg-primary-hover text-white font-bold text-xs rounded-xl transition-colors flex items-center justify-center gap-1.5 shadow-xs cursor-pointer"
+              >
+                <Send className="w-3.5 h-3.5" />
+                <span>{subscribed ? 'Subscribed!' : 'Subscribe'}</span>
+              </button>
+            </form>
+          </div>
+
+        </div>
+
+        {/* ── Sub-Footer / Copyright & Legal Links ── */}
+        <div className="pt-4 md:pt-6 flex flex-col sm:flex-row items-center justify-between gap-3 sm:gap-4 text-xs text-foreground-muted">
+          <div>
+            <span>© {new Date().getFullYear()} Gjanand Sarkar. All rights reserved.</span>
+          </div>
+
+          <div className="flex items-center gap-4 text-xs font-medium">
+            <Link href="/privacy" className="hover:text-foreground transition-colors">
+              Privacy Policy
+            </Link>
+            <span className="text-border">•</span>
+            <Link href="/terms" className="hover:text-foreground transition-colors">
+              Terms of Service
+            </Link>
+            <span className="text-border">•</span>
+            <Link href="/about" className="hover:text-foreground transition-colors">
+              About Us
+            </Link>
+>>>>>>> c80e27e54a7a9fd8b6f001d1c284f29909639613
           </div>
         </div>
       </div>

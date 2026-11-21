@@ -5,6 +5,7 @@ import { useSearchParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
 import {
+<<<<<<< HEAD
   RotateCcw,
   RefreshCw,
   AlertCircle,
@@ -22,6 +23,10 @@ import {
   X,
   Trash2,
   Eye,
+=======
+  RotateCcw, Package, AlertCircle, CheckCircle2,
+  Clock, Loader2, IndianRupee, ShieldCheck, X
+>>>>>>> c80e27e54a7a9fd8b6f001d1c284f29909639613
 } from 'lucide-react';
 
 const REASON_OPTIONS = [
@@ -276,6 +281,7 @@ function ReturnsContent() {
   };
 
   return (
+<<<<<<< HEAD
     <div className="w-full bg-background min-h-screen py-10 px-4 sm:px-6 lg:px-8">
       <div className="max-w-4xl mx-auto space-y-8 pt-12 md:pt-16">
         {/* Header */}
@@ -292,10 +298,45 @@ function ReturnsContent() {
             </h1>
             <p className="text-xs md:text-sm text-foreground-muted mt-1">
               Hassle-free, auto-approved returns and replacements for delivered items
+=======
+    <div className="flex flex-col min-h-screen bg-background text-foreground transition-colors duration-150">
+      {/* Standardized Page Header */}
+      <div className="max-w-[1440px] mx-auto px-4 md:px-8 pt-6 pb-2 w-full">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-border/60 pb-5">
+          <div>
+            <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-foreground">
+              Returns & Freshness Claims
+            </h1>
+            <p className="text-xs sm:text-sm text-foreground-muted mt-1">
+              100% Farm Freshness Guarantee Replacement & Refund Policy
+>>>>>>> c80e27e54a7a9fd8b6f001d1c284f29909639613
             </p>
           </div>
-        </div>
 
+<<<<<<< HEAD
+=======
+          <button
+            onClick={() => setShowModal(true)}
+            className="self-start sm:self-auto flex items-center gap-2 px-4 py-2.5 rounded-xl font-bold text-xs sm:text-sm text-white bg-primary hover:bg-primary-hover shadow-xs active:scale-95 transition-all cursor-pointer"
+          >
+            <RotateCcw className="w-4 h-4" />
+            <span>Request Return</span>
+          </button>
+        </div>
+      </div>
+
+      <div className="px-5 md:px-10 py-6 max-w-4xl">
+        {toast && (
+          <div className="mb-6 p-4 rounded-[12px] flex items-center gap-3" style={{
+            background: toast.type === 'success' ? '#c2efac' : '#ffdad6',
+            color: toast.type === 'success' ? '#2d5a27' : '#93000a',
+          }}>
+            {toast.type === 'success' ? <CheckCircle2 className="w-5 h-5" /> : <AlertCircle className="w-5 h-5" />}
+            <span className="text-[13px] font-semibold">{toast.message}</span>
+          </div>
+        )}
+
+>>>>>>> c80e27e54a7a9fd8b6f001d1c284f29909639613
         {/* Freshness Promise Banner */}
         <div className="p-4 rounded-2xl bg-success-bg border border-success/20/80 flex items-start gap-3">
           <ShieldCheck className="w-5 h-5 text-success shrink-0 mt-0.5" />

@@ -398,9 +398,15 @@ export function ProductEditModal({
               <motion.div
                 initial={{ opacity: 0, y: -8 }}
                 animate={{ opacity: 1, y: 0 }}
+<<<<<<< HEAD
                 className="p-3.5 rounded-[12px] flex items-center gap-3 bg-error-bg text-error text-[13px] font-medium border border-error/20"
               >
                 <AlertTriangle className="w-4 h-4 shrink-0 text-error" />
+=======
+                className="p-3.5 rounded-[12px] flex items-center gap-3 bg-red-50 text-danger text-[13px] font-medium border border-red-200"
+              >
+                <AlertTriangle className="w-4 h-4 shrink-0 text-danger" />
+>>>>>>> c80e27e54a7a9fd8b6f001d1c284f29909639613
                 <span>{errorMessage}</span>
               </motion.div>
             )}
@@ -617,7 +623,11 @@ export function ProductEditModal({
                           <button
                             type="button"
                             onClick={() => handleRemoveVariant(idx)}
+<<<<<<< HEAD
                             className="p-1 rounded-full text-red-500 hover:bg-error-bg transition-colors"
+=======
+                            className="p-1 rounded-full text-danger hover:bg-red-50 transition-colors"
+>>>>>>> c80e27e54a7a9fd8b6f001d1c284f29909639613
                             title="Remove Variant"
                           >
                             <Trash2 className="w-4 h-4" />
@@ -708,11 +718,19 @@ export function ProductEditModal({
               >
               <div className="flex items-center justify-between">
                 <div>
+<<<<<<< HEAD
                   <h4 className="text-[13px] font-bold text-red-900 flex items-center gap-1.5">
                     <ShieldAlert className="w-4 h-4 text-error" />
                     Danger Zone: Remove Product
                   </h4>
                   <p className="text-xs text-error">
+=======
+                  <h4 className="text-[13px] font-bold text-danger flex items-center gap-1.5">
+                    <ShieldAlert className="w-4 h-4 text-danger" />
+                    Danger Zone: Remove Product
+                  </h4>
+                  <p className="text-[11px] text-danger">
+>>>>>>> c80e27e54a7a9fd8b6f001d1c284f29909639613
                     Deactivate or permanently remove this product from your inventory and customer app.
                   </p>
                 </div>
@@ -721,7 +739,11 @@ export function ProductEditModal({
                   <button
                     type="button"
                     onClick={() => setShowDeleteConfirm(true)}
+<<<<<<< HEAD
                     className="px-3.5 py-1.5 rounded-[10px] text-[12px] font-bold text-error border border-red-300 hover:bg-error-bg transition-colors"
+=======
+                    className="px-3.5 py-1.5 rounded-[10px] text-[12px] font-bold text-danger border border-red-300 hover:bg-red-100 transition-colors"
+>>>>>>> c80e27e54a7a9fd8b6f001d1c284f29909639613
                   >
                     Remove Product...
                   </button>
@@ -734,7 +756,7 @@ export function ProductEditModal({
                   animate={{ opacity: 1, height: 'auto' }}
                   className="pt-3 border-t border-error/20 space-y-3"
                 >
-                  <p className="text-[12px] text-red-900 font-semibold">
+                  <p className="text-[12px] text-danger font-semibold">
                     Are you sure you want to remove <span className="font-bold underline">{product.name}</span>?
                   </p>
 
@@ -758,9 +780,15 @@ export function ProductEditModal({
                         name="del_option"
                         checked={permanentDelete}
                         onChange={() => setPermanentDelete(true)}
+<<<<<<< HEAD
                         className="text-error accent-red-600"
                       />
                       <span className="text-error">
+=======
+                        className="text-danger accent-red-600"
+                      />
+                      <span className="text-danger">
+>>>>>>> c80e27e54a7a9fd8b6f001d1c284f29909639613
                         <strong>Permanent Delete:</strong> Completely delete product and variants (only allowed if product has no past order history).
                       </span>
                     </label>

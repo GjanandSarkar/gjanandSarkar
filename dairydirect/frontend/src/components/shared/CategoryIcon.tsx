@@ -65,7 +65,11 @@ export function CategoryIcon({
   className?: string;
 }) {
   const Icon = iconByName(name);
+<<<<<<< HEAD
   return React.createElement(Icon, { className: className ?? 'w-4 h-4 text-primary' });
+=======
+  return <Icon className={className ?? 'w-4 h-4 text-primary'} />;
+>>>>>>> c80e27e54a7a9fd8b6f001d1c284f29909639613
 }
 
 /** Render the icon for a category display name. */
@@ -77,5 +81,9 @@ export function CategoryNameIcon({
   className?: string;
 }) {
   const Icon = iconForCategory(category);
+<<<<<<< HEAD
   return React.createElement(Icon, { className: className ?? 'w-4 h-4 text-primary' });
+=======
+  return <Icon className={className ?? 'w-4 h-4 text-primary'} />;
+>>>>>>> c80e27e54a7a9fd8b6f001d1c284f29909639613
 }

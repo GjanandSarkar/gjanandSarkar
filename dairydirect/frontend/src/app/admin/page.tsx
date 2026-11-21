@@ -13,6 +13,7 @@ import { format } from 'date-fns';
 import Link from 'next/link';
 import { useStore } from '@/store/useStore';
 import { useTranslation } from '@/lib/i18n';
+<<<<<<< HEAD
 import dynamic from 'next/dynamic';
 import { AdminTable } from '@/components/admin/AdminTable';
 
@@ -25,6 +26,15 @@ const YAxis = dynamic(() => import('recharts').then(m => m.YAxis));
 const Tooltip = dynamic(() => import('recharts').then(m => m.Tooltip));
 const ResponsiveContainer = dynamic(() => import('recharts').then(m => m.ResponsiveContainer));
 const CartesianGrid = dynamic(() => import('recharts').then(m => m.CartesianGrid));
+=======
+import { AdminPageShell } from '@/components/admin/AdminPageShell';
+import { Badge } from '@/components/ui/Badge';
+import { Button } from '@/components/ui/Button';
+import { toneFor } from '@/lib/statusTone';
+import {
+  AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid
+} from 'recharts';
+>>>>>>> c80e27e54a7a9fd8b6f001d1c284f29909639613
 
 const container: Variants = {
   hidden: { opacity: 0 },
@@ -35,12 +45,21 @@ const item: Variants = {
   show: { opacity: 1, y: 0, transition: { duration: 0.35, ease: [0.4, 0, 0.2, 1] } },
 };
 
+<<<<<<< HEAD
 const STATUS_CONFIG: Record<string, { bg: string; color: string; dot: string; icon: any }> = {
   confirmed:        { bg: '#dcfce7', color: '#14532d', dot: '#16a34a', icon: CheckCircle2 },
   out_for_delivery: { bg: '#fef3c7', color: '#92400e', dot: '#d97706', icon: Truck },
   delivered:        { bg: '#d1fae5', color: '#065f46', dot: '#059669', icon: CheckCircle2 },
   pending:          { bg: '#ffedd5', color: '#9a3412', dot: '#ea580c', icon: Clock },
   cancelled:        { bg: '#f1f5f9', color: '#475569', dot: '#64748b', icon: AlertCircle },
+=======
+const STATUS_CONFIG: Record<string, { bg: string; text: string; dot: string; icon: any }> = {
+  confirmed:        { bg: 'bg-emerald-50 border-emerald-200', text: 'text-emerald-700', dot: 'bg-emerald-500', icon: CheckCircle2 },
+  out_for_delivery: { bg: 'bg-blue-50 border-blue-200', text: 'text-info', dot: 'bg-blue-500', icon: Truck },
+  delivered:        { bg: 'bg-primary-fixed/80 border-primary/20', text: 'text-primary', dot: 'bg-primary', icon: CheckCircle2 },
+  pending:          { bg: 'bg-amber-50 border-amber-200', text: 'text-amber-700', dot: 'bg-amber-500', icon: Clock },
+  cancelled:        { bg: 'bg-slate-100 border-slate-200', text: 'text-slate-600', dot: 'bg-slate-400', icon: AlertCircle },
+>>>>>>> c80e27e54a7a9fd8b6f001d1c284f29909639613
 };
 
 type DashboardData = {
@@ -164,48 +183,72 @@ export default function AdminDashboard() {
       value: `₹${parseFloat(data.overview.gross_revenue || '0').toLocaleString('en-IN', { maximumFractionDigits: 0 })}`,
       sub: `${period === 'today' ? 'Today' : period === '7d' ? 'Last 7 days' : 'Last 30 days'}`,
       icon: IndianRupee,
+<<<<<<< HEAD
       color: '#15803d',
       bg: '#dcfce7',
+=======
+      iconClass: 'text-primary bg-primary-fixed',
+>>>>>>> c80e27e54a7a9fd8b6f001d1c284f29909639613
     },
     {
       label: 'Total Orders',
       value: data.overview.total_orders || '0',
       sub: `${data.overview.delivered_orders || '0'} delivered`,
       icon: ShoppingBag,
+<<<<<<< HEAD
       color: '#1d4ed8',
       bg: '#dbeafe',
+=======
+      iconClass: 'text-info bg-blue-50',
+>>>>>>> c80e27e54a7a9fd8b6f001d1c284f29909639613
     },
     {
       label: 'Pending Orders',
       value: data.overview.pending_orders || '0',
       sub: 'Needs attention',
       icon: Clock,
+<<<<<<< HEAD
       color: '#c2410c',
       bg: '#ffedd5',
+=======
+      iconClass: 'text-amber-600 bg-amber-50',
+>>>>>>> c80e27e54a7a9fd8b6f001d1c284f29909639613
     },
     {
       label: 'Active Customers',
       value: data.overview.unique_customers || '0',
       sub: 'Unique buyers',
       icon: Users,
+<<<<<<< HEAD
       color: '#7e22ce',
       bg: '#f3e8ff',
+=======
+      iconClass: 'text-indigo-600 bg-indigo-50',
+>>>>>>> c80e27e54a7a9fd8b6f001d1c284f29909639613
     },
     {
       label: 'Avg Order Value',
       value: `₹${parseFloat(data.overview.avg_order_value || '0').toFixed(0)}`,
       sub: 'Per order ticket',
       icon: TrendingUp,
+<<<<<<< HEAD
       color: '#047857',
       bg: '#d1fae5',
+=======
+      iconClass: 'text-emerald-600 bg-emerald-50',
+>>>>>>> c80e27e54a7a9fd8b6f001d1c284f29909639613
     },
     {
       label: 'Low Stock Alerts',
       value: data.inventory.out_of_stock || '0',
       sub: `${data.inventory.low_stock || '0'} low stock`,
       icon: AlertTriangle,
+<<<<<<< HEAD
       color: '#a16207',
       bg: '#fef9c3',
+=======
+      iconClass: 'text-rose-600 bg-rose-50',
+>>>>>>> c80e27e54a7a9fd8b6f001d1c284f29909639613
     },
   ] : [];
 
@@ -255,6 +298,7 @@ export default function AdminDashboard() {
   }
 
   return (
+<<<<<<< HEAD
     <div className="flex flex-col min-h-screen">
       {/* ═══ HEADER (Edits #1, #2, #3, #7) ═══ */}
       <div className="px-4 sm:px-6 md:px-10 pt-20 md:pt-7 pb-6 bg-surface border-b border-border transition-colors">
@@ -394,8 +438,38 @@ export default function AdminDashboard() {
               <BarChart3 className="w-4 h-4" />
               <span>Full Reports</span>
             </Link>
+=======
+    <AdminPageShell
+      title="Platform Operations"
+      description={`${greeting()}, ${user?.name?.split(' ')[0] || 'Admin'} · ${format(new Date(), 'EEEE, MMMM d, yyyy')} · Last updated ${format(lastRefreshed, 'h:mm a')}`}
+      actions={
+        <div className="flex items-center gap-2">
+          <div className="flex rounded-lg overflow-hidden border border-border bg-surface-muted p-0.5">
+            {(['7d', '30d'] as const).map((p) => (
+              <button
+                key={p}
+                type="button"
+                onClick={() => setPeriod(p)}
+                className={`px-3 py-1 text-xs font-semibold rounded-md transition-all cursor-pointer ${
+                  period === p ? 'bg-surface text-foreground shadow-2xs font-bold' : 'text-foreground-muted hover:text-foreground'
+                }`}
+              >
+                {p}
+              </button>
+            ))}
+>>>>>>> c80e27e54a7a9fd8b6f001d1c284f29909639613
           </div>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={fetchData}
+            loading={isLoading}
+            leftIcon={<RefreshCw className="w-3.5 h-3.5" />}
+          >
+            Refresh
+          </Button>
         </div>
+<<<<<<< HEAD
       </div>
 
       {/* ═══ DASHBOARD CONTENT ═══ */}
@@ -406,6 +480,16 @@ export default function AdminDashboard() {
           variants={container}
           initial="hidden"
           animate="show"
+=======
+      }
+    >
+      <div className="space-y-6">
+        
+        {/* ═══ STAT CARDS ═══ */}
+        <motion.div
+          className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 sm:gap-4"
+          variants={container} initial="hidden" animate="show"
+>>>>>>> c80e27e54a7a9fd8b6f001d1c284f29909639613
         >
           {statsCards.map((stat, i) => {
             const Icon = stat.icon;
@@ -413,6 +497,7 @@ export default function AdminDashboard() {
               <motion.div
                 key={i}
                 variants={item}
+<<<<<<< HEAD
                 className="rounded-[16px] p-4 flex flex-col gap-2 bg-surface border border-border shadow-xs hover:shadow-md transition-all cursor-default"
               >
                 <div className="flex items-center justify-between">
@@ -431,6 +516,23 @@ export default function AdminDashboard() {
                     {stat.label}
                   </p>
                   <p className="text-[11px] text-foreground-muted mt-0.5">
+=======
+                className="rounded-xl p-3.5 sm:p-4 bg-surface border border-border flex flex-col justify-between shadow-2xs hover:border-primary/40 transition-colors"
+              >
+                <div className="flex items-center justify-between mb-3">
+                  <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${stat.iconClass}`}>
+                    <Icon className="w-4 h-4" strokeWidth={2.2} />
+                  </div>
+                </div>
+                <div>
+                  <p className="text-lg sm:text-xl font-bold tracking-tight text-foreground leading-none">
+                    {stat.value}
+                  </p>
+                  <p className="text-xs font-medium text-foreground mt-1 truncate">
+                    {stat.label}
+                  </p>
+                  <p className="text-[10px] text-foreground-muted mt-0.5 truncate">
+>>>>>>> c80e27e54a7a9fd8b6f001d1c284f29909639613
                     {stat.sub}
                   </p>
                 </div>
@@ -443,6 +545,7 @@ export default function AdminDashboard() {
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 items-start">
           {/* Revenue / Orders / AOV Trend (lg:col-span-8 or 9) */}
           <motion.div
+<<<<<<< HEAD
             variants={item}
             initial="hidden"
             animate="show"
@@ -553,10 +656,43 @@ export default function AdminDashboard() {
                 </AreaChart>
               </ResponsiveContainer>
             </div>
+=======
+            variants={item} initial="hidden" animate="show"
+            className="lg:col-span-2 rounded-xl p-4 sm:p-5 bg-surface border border-border shadow-2xs"
+          >
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-sm font-bold text-foreground">
+                Revenue Trajectory
+              </h2>
+              <span className="text-[11px] font-semibold px-2 py-0.5 rounded-full bg-primary-fixed text-primary">
+                Last {period === '7d' ? '7' : '14'} days
+              </span>
+            </div>
+            <ResponsiveContainer width="100%" height={220}>
+              <AreaChart data={data?.daily || []} margin={{ top: 8, right: 8, bottom: 0, left: -20 }}>
+                <defs>
+                  <linearGradient id="revenueGrad" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%" stopColor="#0c831f" stopOpacity={0.2} />
+                    <stop offset="95%" stopColor="#0c831f" stopOpacity={0} />
+                  </linearGradient>
+                </defs>
+                <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" vertical={false} />
+                <XAxis dataKey="date" tick={{ fontSize: 10, fill: '#64748b' }} tickFormatter={(d) => d ? format(new Date(String(d)), 'MMM d') : ''} />
+                <YAxis tick={{ fontSize: 10, fill: '#64748b' }} tickFormatter={(v) => `₹${v >= 1000 ? (v/1000).toFixed(0)+'k' : v}`} />
+                <Tooltip
+                  contentStyle={{ background: '#ffffff', border: '1px solid #e2e8f0', borderRadius: 8, fontSize: 12, boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }}
+                  formatter={(v: any) => [`₹${parseFloat(v).toLocaleString('en-IN')}`, 'Revenue']}
+                  labelFormatter={(l) => l ? format(new Date(String(l)), 'MMM d, yyyy') : ''}
+                />
+                <Area type="monotone" dataKey="revenue" stroke="#0c831f" strokeWidth={2.5} fill="url(#revenueGrad)" dot={false} />
+              </AreaChart>
+            </ResponsiveContainer>
+>>>>>>> c80e27e54a7a9fd8b6f001d1c284f29909639613
           </motion.div>
 
           {/* Quick Actions (Compact width: lg:col-span-4 per Edit #6) */}
           <motion.div
+<<<<<<< HEAD
             variants={item}
             initial="hidden"
             animate="show"
@@ -655,11 +791,111 @@ export default function AdminDashboard() {
               );
             })}
           </AdminTable>
+=======
+            variants={item} initial="hidden" animate="show"
+            className="rounded-xl p-4 sm:p-5 bg-surface border border-border shadow-2xs flex flex-col justify-between"
+          >
+            <h2 className="text-sm font-bold text-foreground mb-3">Quick Actions</h2>
+            <div className="space-y-2">
+              {[
+                { label: 'Manage Orders', href: '/admin/orders', sub: 'Status updates & fulfillment' },
+                { label: 'Inventory & Stock', href: '/admin/inventory', sub: 'Real-time SKU quantities' },
+                { label: 'Return Requests', href: '/admin/returns', sub: 'Cancellations & approvals' },
+                { label: 'Product Catalog', href: '/admin/products', sub: 'Pricing & pack variations' },
+                { label: 'Sellers & Vendors', href: '/admin/sellers', sub: 'Commission & verification' },
+                { label: 'Audit Log', href: '/admin/audit-log', sub: 'Security & system history' },
+              ].map((link) => (
+                <Link
+                  key={link.href}
+                  href={link.href}
+                  className="flex items-center justify-between p-2.5 rounded-lg border border-border hover:border-primary/40 hover:bg-surface-muted/60 transition-all group"
+                >
+                  <div>
+                    <span className="text-xs font-semibold text-foreground group-hover:text-primary transition-colors block">
+                      {link.label}
+                    </span>
+                    <span className="text-[10px] text-foreground-muted">
+                      {link.sub}
+                    </span>
+                  </div>
+                  <ArrowRight className="w-3.5 h-3.5 text-foreground-muted group-hover:text-primary group-hover:translate-x-0.5 transition-transform" />
+                </Link>
+              ))}
+            </div>
+          </motion.div>
+        </div>
+
+        {/* ═══ RECENT ORDERS ═══ */}
+        <motion.div
+          variants={item} initial="hidden" animate="show"
+          className="rounded-xl overflow-hidden bg-surface border border-border shadow-2xs"
+        >
+          <div className="flex items-center justify-between px-5 py-3.5 border-b border-border">
+            <h2 className="text-sm font-bold text-foreground">Recent Orders</h2>
+            <Link href="/admin/orders" className="flex items-center gap-1 text-xs font-semibold text-primary hover:underline">
+              <span>View All</span>
+              <ArrowRight className="w-3.5 h-3.5" />
+            </Link>
+          </div>
+
+          {!data?.recentOrders?.length ? (
+            <div className="flex flex-col items-center justify-center py-12 text-center">
+              <ShoppingBag className="w-8 h-8 text-foreground-muted mb-2 opacity-50" strokeWidth={1.5} />
+              <p className="text-xs font-semibold text-foreground">No recent orders found</p>
+            </div>
+          ) : (
+            <div className="overflow-x-auto">
+              <table className="w-full text-left">
+                <thead>
+                  <tr className="bg-surface-muted/50 border-b border-border text-[11px] font-semibold text-foreground-muted uppercase tracking-wider">
+                    <th className="px-5 py-3">Order #</th>
+                    <th className="px-5 py-3">Customer</th>
+                    <th className="px-5 py-3">Total</th>
+                    <th className="px-5 py-3">Status</th>
+                    <th className="px-5 py-3">Date</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-border">
+                  {data.recentOrders.map((order) => {
+                    const statusCfg = STATUS_CONFIG[order.status] || STATUS_CONFIG['pending'];
+                    const StatusIcon = statusCfg.icon;
+                    return (
+                      <tr
+                        key={order.id}
+                        className="hover:bg-surface-muted/40 transition-colors cursor-pointer text-xs"
+                        onClick={() => window.location.href = `/admin/orders?id=${order.id}`}
+                      >
+                        <td className="px-5 py-3.5 font-bold text-primary tabular">
+                          {order.order_number || order.id.slice(0, 8).toUpperCase()}
+                        </td>
+                        <td className="px-5 py-3.5 font-medium text-foreground">
+                          {order.customer_name || 'Customer'}
+                        </td>
+                        <td className="px-5 py-3.5 font-bold text-foreground tabular">
+                          ₹{order.total_amount}
+                        </td>
+                        <td className="px-5 py-3.5">
+                          <Badge variant={toneFor(order.status)} dot size="sm">
+                            {order.status.replace(/_/g, ' ')}
+                          </Badge>
+                        </td>
+                        <td className="px-5 py-3.5 text-foreground-muted text-[11px] tabular">
+                          {format(new Date(order.created_at), 'MMM d, h:mm a')}
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+          )}
+>>>>>>> c80e27e54a7a9fd8b6f001d1c284f29909639613
         </motion.div>
 
         {/* ═══ TOP PRODUCTS ═══ */}
         {data?.topProducts && data.topProducts.length > 0 && (
           <motion.div
+<<<<<<< HEAD
             variants={item}
             initial="hidden"
             animate="show"
@@ -668,11 +904,20 @@ export default function AdminDashboard() {
             <div className="flex items-center justify-between mb-4">
               <h2 className="font-bold text-[15px] text-foreground">Top Performing Products</h2>
               <Link href="/admin/products" className="text-[12px] font-bold text-primary hover:underline">
+=======
+            variants={item} initial="hidden" animate="show"
+            className="rounded-xl p-5 bg-surface border border-border shadow-2xs"
+          >
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-sm font-bold text-foreground">Top Performing Products</h2>
+              <Link href="/admin/products" className="text-xs font-semibold text-primary hover:underline">
+>>>>>>> c80e27e54a7a9fd8b6f001d1c284f29909639613
                 All Products
               </Link>
             </div>
-            <div className="flex flex-col gap-3">
+            <div className="grid sm:grid-cols-2 lg:grid-cols-5 gap-3">
               {data.topProducts.map((product, i) => (
+<<<<<<< HEAD
                 <div key={i} className="flex items-center justify-between p-2 rounded-[10px] hover:bg-surface-muted transition-colors">
                   <div className="flex items-center gap-3">
                     <span
@@ -692,12 +937,31 @@ export default function AdminDashboard() {
                   <span className="font-bold text-[13px] text-primary">
                     ₹{parseFloat(product.revenue as any).toLocaleString('en-IN', { maximumFractionDigits: 0 })}
                   </span>
+=======
+                <div key={i} className="p-3 rounded-lg border border-border bg-surface-muted/30 flex flex-col justify-between">
+                  <div className="flex items-center gap-2 mb-2">
+                    <span className="w-5 h-5 rounded-md flex items-center justify-center text-[10px] font-bold bg-primary-fixed text-primary">
+                      #{i + 1}
+                    </span>
+                    <p className="text-xs font-semibold text-foreground truncate">
+                      {product.name}
+                    </p>
+                  </div>
+                  <div className="flex items-center justify-between text-xs">
+                    <span className="text-[11px] text-foreground-muted">
+                      {product.total_sold} sold
+                    </span>
+                    <span className="font-bold text-foreground">
+                      ₹{parseFloat(product.revenue as any).toLocaleString('en-IN', { maximumFractionDigits: 0 })}
+                    </span>
+                  </div>
+>>>>>>> c80e27e54a7a9fd8b6f001d1c284f29909639613
                 </div>
               ))}
             </div>
           </motion.div>
         )}
       </div>
-    </div>
+    </AdminPageShell>
   );
 }

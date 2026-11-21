@@ -14,6 +14,7 @@ export default function TermsPage() {
       <div className="max-w-4xl mx-auto bg-surface border border-border rounded-xl p-6 sm:p-10 shadow-sm">
         
         {/* Header */}
+<<<<<<< HEAD
         <div className="border-b border-border pb-6 mb-8">
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-warning-bg text-secondary-ink text-xs font-bold uppercase tracking-wider mb-3">
             <Scale className="w-3.5 h-3.5" />
@@ -23,6 +24,17 @@ export default function TermsPage() {
             Terms of Service
           </h1>
           <p className="text-xs text-foreground-muted mt-1">
+=======
+        <div className="border-b border-gray-100 pb-6 mb-8">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary-fixed text-primary text-xs font-bold uppercase tracking-wider mb-3">
+            <Scale className="w-3.5 h-3.5" />
+            <span>Legal & Marketplace Agreement</span>
+          </div>
+          <h1 className="text-2xl sm:text-3xl font-bold text-foreground">
+            Terms of Service
+          </h1>
+          <p className="text-xs text-muted-foreground mt-1">
+>>>>>>> c80e27e54a7a9fd8b6f001d1c284f29909639613
             Effective Date: August 2026 | Governing all marketplace orders and subscriptions
           </p>
         </div>
@@ -30,8 +42,13 @@ export default function TermsPage() {
         <div className="prose prose-sm max-w-none text-foreground space-y-6 text-xs sm:text-sm leading-relaxed">
           
           <section>
+<<<<<<< HEAD
             <h2 className="text-base font-bold text-primary mb-2 flex items-center gap-2">
               <CheckCircle2 className="w-4 h-4 text-secondary-ink" />
+=======
+            <h2 className="text-base font-bold text-foreground mb-2 flex items-center gap-2">
+              <CheckCircle2 className="w-4 h-4 text-primary" />
+>>>>>>> c80e27e54a7a9fd8b6f001d1c284f29909639613
               1. Platform Services & Eligibility
             </h2>
             <p>
@@ -43,8 +60,13 @@ export default function TermsPage() {
           </section>
 
           <section>
+<<<<<<< HEAD
             <h2 className="text-base font-bold text-primary mb-2 flex items-center gap-2">
               <Truck className="w-4 h-4 text-secondary-ink" />
+=======
+            <h2 className="text-base font-bold text-foreground mb-2 flex items-center gap-2">
+              <Truck className="w-4 h-4 text-primary" />
+>>>>>>> c80e27e54a7a9fd8b6f001d1c284f29909639613
               2. Deliveries, Slots & Cold Chain
             </h2>
             <p>
@@ -59,8 +81,13 @@ export default function TermsPage() {
           </section>
 
           <section>
+<<<<<<< HEAD
             <h2 className="text-base font-bold text-primary mb-2 flex items-center gap-2">
               <RefreshCw className="w-4 h-4 text-secondary-ink" />
+=======
+            <h2 className="text-base font-bold text-foreground mb-2 flex items-center gap-2">
+              <RefreshCw className="w-4 h-4 text-primary" />
+>>>>>>> c80e27e54a7a9fd8b6f001d1c284f29909639613
               3. Pricing, Payments & Refunds
             </h2>
             <p>
@@ -73,8 +100,13 @@ export default function TermsPage() {
           </section>
 
           <section>
+<<<<<<< HEAD
             <h2 className="text-base font-bold text-primary mb-2 flex items-center gap-2">
               <ShieldAlert className="w-4 h-4 text-secondary-ink" />
+=======
+            <h2 className="text-base font-bold text-foreground mb-2 flex items-center gap-2">
+              <ShieldAlert className="w-4 h-4 text-primary" />
+>>>>>>> c80e27e54a7a9fd8b6f001d1c284f29909639613
               4. Quality & Purity Assurance
             </h2>
             <p>
@@ -87,8 +119,13 @@ export default function TermsPage() {
 
         </div>
 
+<<<<<<< HEAD
         <div className="mt-8 pt-6 border-t border-border flex items-center justify-between text-xs text-foreground-muted">
           <Link href="/privacy" className="text-secondary-ink font-bold hover:underline">
+=======
+        <div className="mt-8 pt-6 border-t border-gray-100 flex items-center justify-between text-xs text-gray-500">
+          <Link href="/privacy" className="text-primary font-bold hover:underline">
+>>>>>>> c80e27e54a7a9fd8b6f001d1c284f29909639613
             ← Read Privacy Policy
           </Link>
           <Link href="/contact" className="hover:text-foreground transition-colors">

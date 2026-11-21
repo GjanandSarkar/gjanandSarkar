@@ -3,7 +3,6 @@
 import { useEffect, useState, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import {
-  ChevronLeft,
   Plus,
   Trash2,
   Check,
@@ -51,7 +50,7 @@ export default function SavedAddressesPage() {
     } catch (e) {
       return null;
     }
-  }, [user]);
+  }, [user?.id]);
 
   const showFeedback = (text: string, type: 'success' | 'error' = 'success') => {
     setFeedbackMsg({ text, type });
@@ -199,6 +198,7 @@ export default function SavedAddressesPage() {
   };
 
   return (
+<<<<<<< HEAD
     <div className="min-h-screen bg-surface-muted text-foreground pb-28">
       {/* Top Navigation */}
       <header className="sticky top-0 z-30 bg-surface/90 backdrop-blur-md border-b border-border">
@@ -215,9 +215,29 @@ export default function SavedAddressesPage() {
               <h1 className="text-lg font-bold text-foreground leading-none">Saved Addresses</h1>
               <p className="text-xs text-foreground-muted mt-1">Manage delivery locations for quick checkout</p>
             </div>
+=======
+    <div className="min-h-screen bg-background text-foreground pb-28 transition-colors duration-150">
+      {/* Standardized Page Header */}
+      <div className="max-w-[1440px] mx-auto px-4 md:px-8 pt-6 pb-2">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-border/60 pb-5">
+          <div>
+            <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-foreground">
+              Saved Addresses
+            </h1>
+            <p className="text-xs sm:text-sm text-foreground-muted mt-1">
+              Manage delivery locations for fast, seamless checkout
+            </p>
+>>>>>>> c80e27e54a7a9fd8b6f001d1c284f29909639613
           </div>
+          <button
+            onClick={handleOpenAdd}
+            className="self-start sm:self-auto flex items-center gap-2 px-4 py-2.5 bg-primary hover:bg-primary-hover text-white font-bold text-xs sm:text-sm rounded-xl shadow-xs transition-all active:scale-95 cursor-pointer"
+          >
+            <Plus className="w-4 h-4" />
+            <span>Add Address</span>
+          </button>
         </div>
-      </header>
+      </div>
 
       {/* Floating Feedback Toast */}
       {feedbackMsg && (
@@ -225,8 +245,13 @@ export default function SavedAddressesPage() {
           <div
             className={`flex items-center gap-2 px-4 py-2.5 rounded-full shadow-lg text-sm font-medium ${
               feedbackMsg.type === 'success'
+<<<<<<< HEAD
                 ? 'bg-success text-success-bg shadow-emerald-950/20'
                 : 'bg-error text-error-bg shadow-rose-950/20'
+=======
+                ? 'bg-primary text-white shadow-primary/20'
+                : 'bg-rose-600 text-white shadow-rose-900/20'
+>>>>>>> c80e27e54a7a9fd8b6f001d1c284f29909639613
             }`}
           >
             {feedbackMsg.type === 'success' ? <Check className="w-4 h-4" /> : <AlertCircle className="w-4 h-4" />}
@@ -236,6 +261,7 @@ export default function SavedAddressesPage() {
       )}
 
       {/* Main Content */}
+<<<<<<< HEAD
       <main className="max-w-4xl mx-auto px-4 pt-6 space-y-6">
         {/* Quick Add Banner */}
         <div className="bg-gradient-to-r from-emerald-600 to-teal-700 rounded-2xl p-5 text-white shadow-sm flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
@@ -263,11 +289,22 @@ export default function SavedAddressesPage() {
         {isLoading ? (
           <div className="bg-surface rounded-2xl border border-border p-12 flex flex-col items-center justify-center text-center space-y-3">
             <Loader2 className="w-8 h-8 text-success animate-spin" />
+=======
+      <main className="max-w-[1440px] mx-auto px-4 md:px-8 pt-6 space-y-6">
+        {/* Addresses List Container */}
+        {isLoading ? (
+          <div className="bg-surface rounded-2xl border border-border p-12 flex flex-col items-center justify-center text-center space-y-3">
+            <Loader2 className="w-8 h-8 text-primary animate-spin" />
+>>>>>>> c80e27e54a7a9fd8b6f001d1c284f29909639613
             <p className="text-sm font-medium text-foreground-muted">Loading your saved addresses...</p>
           </div>
         ) : addresses.length === 0 ? (
           <div className="bg-surface rounded-2xl border border-dashed border-border p-10 flex flex-col items-center justify-center text-center space-y-4">
+<<<<<<< HEAD
             <div className="w-14 h-14 bg-success-bg text-success rounded-2xl flex items-center justify-center shadow-inner">
+=======
+            <div className="w-14 h-14 bg-primary/10 text-primary rounded-2xl flex items-center justify-center shadow-inner">
+>>>>>>> c80e27e54a7a9fd8b6f001d1c284f29909639613
               <MapPin className="w-7 h-7" />
             </div>
             <div className="space-y-1 max-w-sm">
@@ -278,10 +315,14 @@ export default function SavedAddressesPage() {
             </div>
             <button
               onClick={handleOpenAdd}
+<<<<<<< HEAD
               className="flex items-center gap-2 px-4 py-2.5 bg-success hover:bg-success text-on-success text-xs font-semibold rounded-xl shadow transition-all active:scale-95 cursor-pointer"
+=======
+              className="flex items-center gap-2 px-5 py-2.5 bg-primary hover:bg-primary-hover text-white text-xs font-bold rounded-xl shadow-xs transition-all active:scale-95 cursor-pointer"
+>>>>>>> c80e27e54a7a9fd8b6f001d1c284f29909639613
             >
               <Plus className="w-4 h-4" />
-              Add First Address
+              <span>Add First Address</span>
             </button>
           </div>
         ) : (
@@ -290,12 +331,16 @@ export default function SavedAddressesPage() {
               <h2 className="text-xs font-bold uppercase tracking-wider text-foreground-muted">
                 Your Saved Locations ({addresses.length})
               </h2>
+<<<<<<< HEAD
               <span className="text-xs text-foreground-muted">
+=======
+              <span className="text-[11px] text-foreground-muted">
+>>>>>>> c80e27e54a7a9fd8b6f001d1c284f29909639613
                 {addresses.filter((a) => a.is_default).length} active default address
               </span>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {addresses.map((addr) => (
                 <AddressCard
                   key={addr.id}
@@ -313,9 +358,15 @@ export default function SavedAddressesPage() {
 
       {/* Delete Confirmation Modal */}
       {deleteConfirmId && (
+<<<<<<< HEAD
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-foreground/60 backdrop-blur-sm animate-in fade-in duration-200">
           <div className="bg-surface max-w-sm w-full rounded-2xl p-5 shadow-2xl border border-border space-y-4 animate-in zoom-in-95">
             <div className="w-12 h-12 bg-error-bg text-error rounded-2xl flex items-center justify-center mx-auto">
+=======
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
+          <div className="bg-surface max-w-sm w-full rounded-2xl p-5 shadow-2xl border border-border space-y-4 animate-in zoom-in-95">
+            <div className="w-12 h-12 bg-rose-500/10 text-rose-600 rounded-2xl flex items-center justify-center mx-auto">
+>>>>>>> c80e27e54a7a9fd8b6f001d1c284f29909639613
               <Trash2 className="w-6 h-6" />
             </div>
             <div className="text-center space-y-1">

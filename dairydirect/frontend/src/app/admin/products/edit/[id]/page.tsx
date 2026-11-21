@@ -275,9 +275,15 @@ export default function EditProductPage() {
           <motion.div
             initial={{ opacity: 0, y: -6 }}
             animate={{ opacity: 1, y: 0 }}
+<<<<<<< HEAD
             className="p-4 rounded-[14px] flex items-center gap-3 bg-error-bg text-error text-[13px] font-medium border border-error/20"
           >
             <AlertTriangle className="w-5 h-5 shrink-0 text-error" />
+=======
+            className="p-4 rounded-[14px] flex items-center gap-3 bg-red-50 text-danger text-[13px] font-medium border border-red-200"
+          >
+            <AlertTriangle className="w-5 h-5 shrink-0 text-danger" />
+>>>>>>> c80e27e54a7a9fd8b6f001d1c284f29909639613
             <span>{error}</span>
           </motion.div>
         )}
@@ -491,7 +497,11 @@ export default function EditProductPage() {
                       <button
                         type="button"
                         onClick={() => removeVariant(index)}
+<<<<<<< HEAD
                         className="p-1 rounded-full text-red-500 hover:bg-error-bg transition-colors"
+=======
+                        className="p-1 rounded-full text-danger hover:bg-red-50 transition-colors"
+>>>>>>> c80e27e54a7a9fd8b6f001d1c284f29909639613
                       >
                         <Trash2 className="w-4 h-4" />
                       </button>
@@ -578,11 +588,19 @@ export default function EditProductPage() {
         <div className="p-5 rounded-[16px] border border-error/20 bg-error-bg/50 space-y-4">
           <div className="flex items-center justify-between">
             <div>
+<<<<<<< HEAD
               <h4 className="text-[14px] font-bold text-red-900 flex items-center gap-2">
                 <ShieldAlert className="w-5 h-5 text-error" />
                 Danger Zone: Remove Product
               </h4>
               <p className="text-[12px] text-error mt-0.5">
+=======
+              <h4 className="text-[14px] font-bold text-danger flex items-center gap-2">
+                <ShieldAlert className="w-5 h-5 text-danger" />
+                Danger Zone: Remove Product
+              </h4>
+              <p className="text-[12px] text-danger mt-0.5">
+>>>>>>> c80e27e54a7a9fd8b6f001d1c284f29909639613
                 Deactivate or permanently remove this product from the inventory.
               </p>
             </div>
@@ -591,7 +609,11 @@ export default function EditProductPage() {
               <button
                 type="button"
                 onClick={() => setShowDeleteConfirm(true)}
+<<<<<<< HEAD
                 className="px-4 py-2 rounded-[10px] text-[12px] font-bold text-error border border-red-300 hover:bg-error-bg transition-colors"
+=======
+                className="px-4 py-2 rounded-[10px] text-[12px] font-bold text-danger border border-red-300 hover:bg-red-100 transition-colors"
+>>>>>>> c80e27e54a7a9fd8b6f001d1c284f29909639613
               >
                 Remove Product...
               </button>
@@ -604,7 +626,7 @@ export default function EditProductPage() {
               animate={{ opacity: 1, height: 'auto' }}
               className="pt-3 border-t border-error/20 space-y-3"
             >
-              <p className="text-[13px] text-red-900 font-semibold">
+              <p className="text-[13px] text-danger font-semibold">
                 Are you sure you want to remove <span className="font-bold underline">{name}</span>?
               </p>
 
@@ -622,13 +644,21 @@ export default function EditProductPage() {
                   </span>
                 </label>
 
+<<<<<<< HEAD
                 <label className="flex items-center gap-2 cursor-pointer text-error">
+=======
+                <label className="flex items-center gap-2 cursor-pointer text-danger">
+>>>>>>> c80e27e54a7a9fd8b6f001d1c284f29909639613
                   <input
                     type="radio"
                     name="del_choice"
                     checked={permanentDelete}
                     onChange={() => setPermanentDelete(true)}
+<<<<<<< HEAD
                     className="text-error accent-red-600"
+=======
+                    className="text-danger accent-red-600"
+>>>>>>> c80e27e54a7a9fd8b6f001d1c284f29909639613
                   />
                   <span>
                     <strong>Permanent Delete:</strong> Remove entirely from database (fails if order history exists).
