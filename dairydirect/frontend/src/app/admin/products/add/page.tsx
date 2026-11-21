@@ -381,7 +381,7 @@ function AddProductPage() {
                     <button
                       type="button"
                       onClick={() => removeVariant(index)}
-                      className="p-1.5 rounded-md text-red-500 hover:text-red-600 hover:bg-red-50 transition-colors"
+                      className="p-1.5 rounded-md text-danger hover:text-danger hover:bg-red-50 transition-colors"
                     >
                       <Trash2 className="w-4 h-4" />
                     </button>
@@ -490,7 +490,7 @@ function AddProductPage() {
 
         {/* Error message display */}
         {error && (
-          <div className="p-4 rounded-[10px] border border-red-200 bg-red-50 text-red-700 text-[14px] font-semibold flex items-center gap-2">
+          <div className="p-4 rounded-[10px] border border-red-200 bg-red-50 text-danger text-[14px] font-semibold flex items-center gap-2">
             <span>{error}</span>
           </div>
         )}

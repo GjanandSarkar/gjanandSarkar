@@ -1,17 +1,41 @@
 import type { Metadata, Viewport } from "next";
+import { cookies } from "next/headers";
 import localFont from "next/font/local";
 import "./globals.css";
 
-// Self-hosted Inter variable font (single 48KB woff2 covering weights 100-900).
-// Replaces the previous 7 separate static weights fetched from Google Fonts at
-// build time: fewer requests, no third-party dependency, no build-time network call.
-const inter = localFont({
+const ui = localFont({
   src: "../fonts/inter-latin-wght-normal.woff2",
-  variable: "--font-inter",
+  variable: "--font-ui",
   weight: "100 900",
   display: "swap",
   preload: true,
-  fallback: ["system-ui", "-apple-system", "Segoe UI", "Roboto", "sans-serif"],
+  adjustFontFallback: "Arial", // kills CLS on swap
+});
+
+const display = localFont({
+  src: "../fonts/bricolage-grotesque-latin-wght-normal.woff2",
+  variable: "--font-display",
+  weight: "200 800",
+  display: "swap",
+  preload: true,
+  adjustFontFallback: false,
+});
+
+// Lazy: English users never download these
+const devanagari = localFont({
+  src: "../fonts/noto-sans-devanagari-devanagari-wght-normal.woff2",
+  variable: "--font-devanagari",
+  weight: "100 900",
+  display: "swap",
+  preload: false,
+});
+
+const gujarati = localFont({
+  src: "../fonts/noto-sans-gujarati-gujarati-wght-normal.woff2",
+  variable: "--font-gujarati",
+  weight: "100 900",
+  display: "swap",
+  preload: false,
 });
 
 export const metadata: Metadata = {
@@ -50,8 +74,8 @@ export const metadata: Metadata = {
 export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
-  themeColor: "#fafaf3",
-}
+  themeColor: "#FFFBF5",
+};
 
 import { LanguageManager } from "@/components/shared/LanguageManager";
 import { AuthProvider } from "@/components/shared/AuthProvider";
@@ -83,13 +107,22 @@ const webSiteStructuredData = {
   },
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const cookieStore = await cookies();
+  const locale = cookieStore.get("locale")?.value || "en";
+
   return (
-    <html lang="en-IN" data-scroll-behavior="smooth" className={`${inter.variable}`} suppressHydrationWarning>
+    <html
+      lang={locale}
+      data-locale={locale}
+      data-scroll-behavior="smooth"
+      className={`${ui.variable} ${display.variable} ${devanagari.variable} ${gujarati.variable}`}
+      suppressHydrationWarning
+    >
       <head>
         <script
           dangerouslySetInnerHTML={{
@@ -101,7 +134,7 @@ export default function RootLayout({
         <link rel="icon" href="/application logo/gjanand sarkar logo.png" type="image/png" />
       </head>
       <body
-        className={`${inter.className} min-h-screen antialiased bg-background text-foreground transition-colors duration-150`}
+        className="min-h-screen antialiased bg-background text-foreground transition-colors duration-150"
         suppressHydrationWarning
       >
         <ThemeProvider>

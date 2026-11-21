@@ -1,54 +1,31 @@
 "use client";
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import { useStore } from '@/store/useStore';
 import { AdminSidebar } from '@/components/admin/AdminSidebar';
+import { AdminRailProvider, useAdminRail } from '@/components/admin/AdminRailContext';
+import { ADMIN_NAV_GROUPS } from './_nav';
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from '@/components/ui/Sheet';
 import {
   Loader2,
   Menu,
-  X,
-  LayoutDashboard,
-  Store,
-  Building2,
-  ShieldCheck,
-  Package,
-  Tags,
-  ShoppingBag,
-  RotateCcw,
-  CalendarDays,
-  Users,
-  Truck,
-  BarChart3,
-  Leaf,
+  ExternalLink,
   LogOut,
 } from 'lucide-react';
 import Link from 'next/link';
-import { motion, AnimatePresence } from 'framer-motion';
+import { cn } from '@/lib/utils';
+import { Badge } from '@/components/ui/Badge';
 
-const mobileNavItems = [
-  { href: '/admin', icon: LayoutDashboard, label: 'Dashboard', exact: true },
-  { href: '/admin/orders', icon: ShoppingBag, label: 'Orders' },
-  { href: '/admin/products', icon: Package, label: 'Products', exact: true },
-  { href: '/admin/inventory', icon: Package, label: 'Inventory' },
-  { href: '/admin/subscriptions', icon: CalendarDays, label: 'Subscriptions' },
-  { href: '/admin/sellers', icon: Store, label: 'Sellers' },
-  { href: '/admin/categories', icon: Tags, label: 'Categories' },
-  { href: '/admin/delivery', icon: Truck, label: 'Deliveries' },
-  { href: '/admin/analytics', icon: BarChart3, label: 'Analytics' },
-  { href: '/admin/returns', icon: RotateCcw, label: 'Returns' },
-  { href: '/home', icon: Leaf, label: 'Visit Storefront' },
-];
-
-export default function AdminLayout({ children }: { children: React.ReactNode }) {
-  const user = useStore(state => state.user);
+function AdminLayoutInner({ children }: { children: React.ReactNode }) {
+  const user = useStore((state) => state.user);
   const router = useRouter();
   const pathname = usePathname();
-  const logout = useStore(state => state.logout);
-  const [isMobileNavOpen, setIsMobileNavOpen] = useState(false);
+  const logout = useStore((state) => state.logout);
+  const isAuthLoading = useStore((state) => state.isAuthLoading);
+  const { isCollapsed, isMobileOpen, setIsMobileOpen, badgeCounts } = useAdminRail();
 
-  const isAuthLoading = useStore(state => state.isAuthLoading);
-
+  // RBAC Guard — unchanged per rules
   useEffect(() => {
     if (isAuthLoading) return;
     if (!user) {
@@ -62,39 +39,63 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
   // Close mobile nav on route change
   useEffect(() => {
-    setIsMobileNavOpen(false);
-  }, [pathname]);
+    setIsMobileOpen(false);
+  }, [pathname, setIsMobileOpen]);
 
   if (!user || user.role !== 'admin') {
     return (
       <div className="min-h-screen flex items-center justify-center bg-surface">
-        <Loader2 className="w-8 h-8 animate-spin text-primary" />
+        <Loader2 className="w-8 h-8 animate-spin text-secondary" />
       </div>
     );
   }
 
+  const handleLogout = async () => {
+    try {
+      const { logout: apiLogout } = await import('@/lib/api/auth');
+      await apiLogout();
+    } catch {}
+    logout();
+    router.replace('/login');
+  };
+
+  const isItemActive = (href: string, exact?: boolean) => {
+    if (exact) return pathname === href;
+    if (href === '/admin/products' && pathname.startsWith('/admin/products/approvals')) return false;
+    if (href === '/admin/orders' && pathname.startsWith('/admin/seller-orders')) return false;
+    return pathname.startsWith(href);
+  };
+
   return (
-    <div className="flex min-h-screen bg-background text-foreground transition-colors duration-150">
+    <div className="min-h-screen bg-background text-foreground flex">
+      {/* Desktop Persistent / Collapsible Left Rail (240px / 68px) */}
       <AdminSidebar />
-      <main className="flex-1 md:ml-[260px] min-h-screen overflow-x-hidden flex flex-col">
-        {/* Mobile Header with Hamburger Drawer */}
-        <header className="md:hidden flex items-center justify-between px-4 py-3 bg-surface border-b border-border z-40 sticky top-0 shadow-2xs">
-          <div className="flex items-center gap-2.5">
+
+      {/* Main Content Area */}
+      <div
+        className={cn(
+          'flex-1 min-h-screen overflow-x-hidden flex flex-col transition-[margin] duration-200 ease-in-out',
+          isCollapsed ? 'lg:ml-0' : 'lg:ml-0'
+        )}
+      >
+        {/* Mobile Header (56px) */}
+        <header className="lg:hidden h-14 bg-surface border-b border-border sticky top-0 z-40 flex items-center justify-between px-4">
+          <div className="flex items-center gap-3">
             <button
               type="button"
-              onClick={() => setIsMobileNavOpen(true)}
-              className="p-1.5 rounded-xl bg-surface-muted border border-border text-foreground hover:bg-surface-elevated transition-colors"
-              aria-label="Open operations menu"
+              onClick={() => setIsMobileOpen(true)}
+              className="p-1.5 rounded-[var(--radius-md)] text-foreground hover:bg-surface-muted transition-colors cursor-pointer"
+              aria-label="Open navigation drawer"
             >
-              <Menu className="w-5 h-5 text-foreground" />
+              <Menu className="w-5 h-5" />
             </button>
             <div className="flex items-center gap-2">
-              <div className="w-7 h-7 rounded-lg flex items-center justify-center bg-primary text-foreground-inverse">
-                <span className="font-black text-xs">GS</span>
+              <div className="w-7 h-7 rounded-lg bg-secondary text-on-secondary flex items-center justify-center font-bold text-xs select-none shadow-xs">
+                GS
               </div>
               <div>
-                <h1 className="font-black text-xs text-foreground leading-tight">Admin Console</h1>
-                <p className="text-[10px] text-muted leading-none">Operations & Orders</p>
+                <h1 className="text-xs font-bold text-foreground leading-tight">Admin Console</h1>
+                <p className="text-[10px] text-foreground-muted leading-none">Operations & Catalog</p>
               </div>
             </div>
           </div>
@@ -102,92 +103,99 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           <div className="flex items-center gap-2">
             <Link
               href="/home"
-              className="text-xs font-bold px-2.5 py-1 rounded-lg bg-primary/10 text-primary hover:bg-primary hover:text-white transition-colors"
+              className="text-xs font-semibold px-2.5 py-1 rounded-[var(--radius-sm)] bg-surface-muted text-foreground-muted hover:text-foreground transition-colors flex items-center gap-1"
             >
-              Storefront →
+              <span>Storefront</span>
+              <ExternalLink className="w-3 h-3" />
             </Link>
           </div>
         </header>
 
-        {/* Mobile Navigation Drawer */}
-        <AnimatePresence>
-          {isMobileNavOpen && (
-            <>
-              <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                className="fixed inset-0 bg-black/60 z-[80] backdrop-blur-xs md:hidden"
-                onClick={() => setIsMobileNavOpen(false)}
-              />
-              <motion.div
-                initial={{ x: '-100%' }}
-                animate={{ x: 0 }}
-                exit={{ x: '-100%' }}
-                transition={{ type: 'spring', damping: 25, stiffness: 280 }}
-                className="fixed top-0 bottom-0 left-0 w-72 bg-surface border-r border-border z-[90] p-4 flex flex-col justify-between shadow-2xl md:hidden overflow-y-auto"
-              >
+        {/* Mobile Navigation Sheet Drawer */}
+        <Sheet open={isMobileOpen} onOpenChange={setIsMobileOpen}>
+          <SheetContent side="left" className="p-0 w-[280px] max-w-[85vw] flex flex-col justify-between">
+            <SheetHeader className="sr-only">
+              <SheetTitle>Admin Navigation</SheetTitle>
+              <SheetDescription>Administrative console navigation drawer</SheetDescription>
+            </SheetHeader>
+
+            <div>
+              <div className="h-14 flex items-center gap-3 px-4 border-b border-border">
+                <div className="w-8 h-8 rounded-lg bg-secondary text-on-secondary flex items-center justify-center font-bold text-xs select-none shadow-xs">
+                  GS
+                </div>
                 <div>
-                  <div className="flex items-center justify-between pb-3.5 border-b border-border mb-4">
-                    <div className="flex items-center gap-2">
-                      <div className="w-8 h-8 rounded-lg bg-primary text-white flex items-center justify-center font-black text-sm">
-                        GS
-                      </div>
-                      <span className="font-black text-sm text-foreground">Operations Hub</span>
+                  <p className="text-xs font-bold text-foreground leading-tight">Gjanand Sarkar</p>
+                  <p className="text-[10px] text-foreground-muted">Administration Console</p>
+                </div>
+              </div>
+
+              <nav className="p-3 space-y-4 max-h-[calc(100vh-140px)] overflow-y-auto no-scrollbar">
+                {ADMIN_NAV_GROUPS.map((grp) => (
+                  <div key={grp.group} className="space-y-1">
+                    <div className="px-2 text-[10px] font-bold uppercase tracking-wider text-foreground-muted">
+                      {grp.group}
                     </div>
-                    <button
-                      type="button"
-                      onClick={() => setIsMobileNavOpen(false)}
-                      className="p-1 rounded-lg text-muted hover:text-foreground"
-                    >
-                      <X className="w-5 h-5" />
-                    </button>
+                    <div className="space-y-0.5">
+                      {grp.items.map((item) => {
+                        const isActive = isItemActive(item.href, item.exact);
+                        const Icon = item.icon;
+                        const badgeCount = item.badgeKey ? badgeCounts[item.badgeKey] ?? 0 : 0;
+
+                        return (
+                          <Link
+                            key={item.href}
+                            href={item.href}
+                            onClick={() => setIsMobileOpen(false)}
+                            className={cn(
+                              'flex items-center gap-2.5 px-2.5 py-2 rounded-[var(--radius-md)] text-xs font-medium transition-colors',
+                              isActive
+                                ? 'bg-secondary text-on-secondary font-semibold shadow-xs'
+                                : 'text-foreground-muted hover:text-foreground hover:bg-surface-muted'
+                            )}
+                          >
+                            <Icon className={cn('w-4 h-4 shrink-0', isActive ? 'text-on-secondary' : 'text-foreground-muted')} />
+                            <span className="flex-1 truncate">{item.label}</span>
+                            {badgeCount > 0 && (
+                              <Badge variant={isActive ? 'neutral' : 'danger'} size="sm" className="tabular">
+                                {badgeCount}
+                              </Badge>
+                            )}
+                          </Link>
+                        );
+                      })}
+                    </div>
                   </div>
+                ))}
+              </nav>
+            </div>
 
-                  <nav className="space-y-1">
-                    {mobileNavItems.map((item) => {
-                      const isActive = item.exact ? pathname === item.href : pathname.startsWith(item.href);
-                      const Icon = item.icon;
-                      return (
-                        <Link
-                          key={item.href}
-                          href={item.href}
-                          className={`flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-bold transition-all ${
-                            isActive
-                              ? 'bg-primary text-foreground-inverse shadow-2xs'
-                              : 'text-muted hover:bg-surface-muted hover:text-foreground'
-                          }`}
-                        >
-                          <Icon className={`w-4 h-4 ${isActive ? 'text-white' : 'text-muted'}`} />
-                          <span>{item.label}</span>
-                        </Link>
-                      );
-                    })}
-                  </nav>
-                </div>
+            <div className="p-3 border-t border-border">
+              <button
+                type="button"
+                onClick={handleLogout}
+                className="w-full flex items-center gap-2 px-3 py-2 text-xs font-semibold text-danger hover:bg-danger-bg rounded-[var(--radius-md)] transition-colors cursor-pointer"
+              >
+                <LogOut className="w-4 h-4" />
+                <span>Log Out</span>
+              </button>
+            </div>
+          </SheetContent>
+        </Sheet>
 
-                <div className="pt-4 border-t border-border">
-                  <button
-                    type="button"
-                    onClick={() => {
-                      logout();
-                      router.replace('/login');
-                    }}
-                    className="w-full flex items-center gap-2 px-3.5 py-2.5 rounded-xl text-xs font-bold text-rose-600 hover:bg-rose-50 transition-colors"
-                  >
-                    <LogOut className="w-4 h-4" />
-                    <span>Log Out</span>
-                  </button>
-                </div>
-              </motion.div>
-            </>
-          )}
-        </AnimatePresence>
-
-        <div className="max-w-[1400px] mx-auto w-full flex-1">
+        {/* Page Content */}
+        <div className="flex-1 w-full min-w-0">
           {children}
         </div>
-      </main>
+      </div>
     </div>
+  );
+}
+
+export default function AdminLayout({ children }: { children: React.ReactNode }) {
+  return (
+    <AdminRailProvider>
+      <AdminLayoutInner>{children}</AdminLayoutInner>
+    </AdminRailProvider>
   );
 }

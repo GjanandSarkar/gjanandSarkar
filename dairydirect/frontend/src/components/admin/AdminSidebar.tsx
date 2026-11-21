@@ -1,137 +1,191 @@
-"use client";
+'use client';
 
+import React from 'react';
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
-import { useRouter } from 'next/navigation';
-import { useStore } from '@/store/useStore';
-import {
-  LayoutDashboard, ShoppingBag, Users, Package, BarChart3,
-  Truck, LogOut, Leaf, ShieldCheck, Bell, Settings, Tags, CalendarDays, User, Building2, Store, RotateCcw
+import { usePathname, useRouter } from 'next/navigation';
+import { 
+  ChevronLeft, 
+  ChevronRight, 
+  ExternalLink, 
+  LogOut
 } from 'lucide-react';
+import { useStore } from '@/store/useStore';
+import { ADMIN_NAV_GROUPS } from '@/app/admin/_nav';
+import { useAdminRail } from './AdminRailContext';
 import { cn } from '@/lib/utils';
-
-const navItems = [
-  { href: '/admin', icon: LayoutDashboard, label: 'Dashboard', exact: true },
-  { href: '/admin/sellers', icon: Store, label: 'Sellers' },
-  { href: '/admin/vendor-inquiries', icon: Building2, label: 'Seller Applications' },
-  { href: '/admin/products/approvals', icon: ShieldCheck, label: 'Product Approvals' },
-  { href: '/admin/products', icon: Package, label: 'Products', exact: true },
-  { href: '/admin/categories', icon: Tags, label: 'Categories' },
-  { href: '/admin/orders', icon: ShoppingBag, label: 'Admin Orders', exact: true },
-  { href: '/admin/seller-orders', icon: Store, label: 'All Seller Orders List' },
-  { href: '/admin/returns', icon: RotateCcw, label: 'Returns & Cancellations' },
-  { href: '/admin/subscriptions', icon: CalendarDays, label: 'Subscriptions' },
-  { href: '/admin/customers', icon: Users, label: 'Customers' },
-  { href: '/admin/delivery', icon: Truck, label: 'Deliveries' },
-  { href: '/admin/analytics', icon: BarChart3, label: 'Analytics' },
-  { href: '/admin/coupons', icon: Package, label: 'Coupons' },
-  { href: '/admin/audit-log', icon: ShieldCheck, label: 'Audit Log' },
-  { href: '/home', icon: Leaf, label: 'Visit Storefront' },
-];
+import { Badge } from '@/components/ui/Badge';
 
 export function AdminSidebar() {
   const pathname = usePathname();
-  const logout = useStore(state => state.logout);
-  const user = useStore(state => state.user);
   const router = useRouter();
+  const user = useStore((s) => s.user);
+  const logout = useStore((s) => s.logout);
+  const { isCollapsed, toggleRail, badgeCounts } = useAdminRail();
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
+    try {
+      const { logout: apiLogout } = await import('@/lib/api/auth');
+      await apiLogout();
+    } catch {}
     logout();
     router.replace('/login');
   };
 
-  const isActive = (item: typeof navItems[0]) => {
-    if (item.exact) return pathname === item.href;
-    if (item.href === '/admin/products' && pathname.startsWith('/admin/products/approvals')) {
-      return false;
-    }
-    if (item.href === '/admin/orders' && pathname.startsWith('/admin/seller-orders')) {
-      return false;
-    }
-    return pathname.startsWith(item.href);
+  const isItemActive = (href: string, exact?: boolean) => {
+    if (exact) return pathname === href;
+    if (href === '/admin/products' && pathname.startsWith('/admin/products/approvals')) return false;
+    if (href === '/admin/orders' && pathname.startsWith('/admin/seller-orders')) return false;
+    return pathname.startsWith(href);
   };
 
   return (
-    <aside className="hidden md:flex flex-col w-[260px] h-screen fixed top-0 left-0 z-50 bg-surface border-r border-border">
-      {/* ── Brand Logo ── */}
-      <div className="px-5 py-4 border-b border-border">
-        <Link href="/home" className="flex items-center gap-2.5 shrink-0 group active:scale-95 transition-transform">
-          <img
-            src="/application logo/gjanand sarkar logo.png"
-            alt="Gjanand Sarkar"
-            className="h-10 w-auto object-contain"
-            onError={(e) => {
-              (e.target as HTMLElement).style.display = 'none';
-            }}
-          />
-          <div className="flex flex-col">
-            <span className="text-lg font-black tracking-tight leading-none text-foreground">
-              Gjanand
-            </span>
-            <span className="text-[10px] tracking-[0.2em] font-black text-secondary uppercase leading-none mt-0.5">
-              SARKAR
-            </span>
+    <aside
+      className={cn(
+        'hidden lg:flex flex-col shrink-0 h-dvh sticky top-0 bg-surface border-r border-border z-30 transition-[width] duration-200 ease-in-out',
+        isCollapsed ? 'w-[68px]' : 'w-[240px]'
+      )}
+    >
+      {/* ─── Rail Header ─── */}
+      <div className="h-14 flex items-center justify-between px-3.5 border-b border-border shrink-0">
+        <Link 
+          href="/admin" 
+          className="flex items-center gap-2.5 min-w-0"
+          title="Admin Dashboard"
+        >
+          <div className="w-8 h-8 rounded-lg bg-secondary text-on-secondary flex items-center justify-center font-bold text-xs shrink-0 select-none shadow-xs">
+            GS
           </div>
+          {!isCollapsed && (
+            <div className="min-w-0 flex-1 truncate">
+              <span className="text-xs font-black tracking-tight text-foreground block truncate leading-tight">
+                Gjanand Sarkar
+              </span>
+              <span className="text-[10px] font-bold text-foreground-muted uppercase tracking-wider block">
+                Ops Console
+              </span>
+            </div>
+          )}
         </Link>
-      </div>
 
-      {/* Admin user chip */}
-      <div className="mx-3 my-3 p-3 rounded-xl bg-surface-muted/60 border border-border flex items-center gap-3">
-        <div className="w-9 h-9 rounded-lg flex items-center justify-center font-bold text-xs text-white shrink-0 bg-primary overflow-hidden">
-          <img
-            src={user?.avatar_url || '/profile/profile.jpg'}
-            alt="Profile"
-            className="w-full h-full object-cover"
-            referrerPolicy="no-referrer"
-            onError={(e) => {
-              (e.currentTarget as HTMLImageElement).src = '/profile/profile.jpg';
-            }}
-          />
-        </div>
-        <div className="flex-1 min-w-0">
-          <p className="text-[10px] font-bold uppercase tracking-wider text-foreground-muted">Admin Console</p>
-          <p className="font-bold text-xs text-foreground truncate">
-            {user?.name || 'Administrator'}
-          </p>
-        </div>
-      </div>
-
-      {/* Nav */}
-      <nav className="flex-1 px-3 py-1 flex flex-col gap-0.5 overflow-y-auto no-scrollbar">
-        <p className="px-3 pt-2 pb-1.5 text-[10px] font-bold uppercase tracking-wider text-foreground-muted">
-          Platform Operations
-        </p>
-
-        {navItems.map((item) => {
-          const active = isActive(item);
-          const Icon = item.icon;
-          return (
-            <Link
-              key={item.href}
-              href={item.href}
-              className={`flex items-center gap-3 px-3 py-2 rounded-xl text-xs font-semibold transition-all ${
-                active 
-                  ? 'bg-primary-fixed text-primary font-bold shadow-2xs' 
-                  : 'text-foreground-muted hover:text-foreground hover:bg-surface-muted'
-              }`}
-            >
-              <Icon className="w-4 h-4 shrink-0" strokeWidth={active ? 2.5 : 2} />
-              <span className="truncate">{item.label}</span>
-            </Link>
-          );
-        })}
-      </nav>
-
-      {/* Bottom */}
-      <div className="p-3 border-t border-border">
         <button
           type="button"
-          onClick={handleLogout}
-          className="flex items-center gap-2.5 px-3 py-2 rounded-xl w-full text-xs font-semibold text-rose-500 hover:bg-rose-500/10 transition-colors cursor-pointer"
+          onClick={toggleRail}
+          className="p-1.5 rounded-[var(--radius-sm)] text-foreground-muted hover:text-foreground hover:bg-surface-muted transition-colors cursor-pointer"
+          title={isCollapsed ? 'Expand sidebar ([)' : 'Collapse sidebar ([)'}
+          aria-label={isCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
         >
-          <LogOut className="w-4 h-4 shrink-0" />
-          <span>Sign Out</span>
+          {isCollapsed ? <ChevronRight className="w-4 h-4" /> : <ChevronLeft className="w-4 h-4" />}
         </button>
+      </div>
+
+      {/* ─── Navigation Groups ─── */}
+      <nav 
+        className="flex-1 overflow-y-auto px-2.5 py-3 space-y-4 no-scrollbar"
+        aria-label="Admin Navigation Rail"
+      >
+        {ADMIN_NAV_GROUPS.map((grp) => (
+          <div key={grp.group} className="space-y-1">
+            {!isCollapsed ? (
+              <div className="px-2 pt-1 pb-0.5 text-[10px] font-bold uppercase tracking-wider text-foreground-muted select-none">
+                {grp.group}
+              </div>
+            ) : (
+              <div className="my-2 border-t border-border/60 mx-1.5" />
+            )}
+
+            <div className="space-y-0.5">
+              {grp.items.map((item) => {
+                const isActive = isItemActive(item.href, item.exact);
+                const Icon = item.icon;
+                const badgeCount = item.badgeKey ? badgeCounts[item.badgeKey] ?? 0 : 0;
+
+                return (
+                  <Link
+                    key={item.href}
+                    href={item.href}
+                    title={isCollapsed ? item.label : undefined}
+                    className={cn(
+                      'flex items-center gap-2.5 rounded-[var(--radius-md)] text-xs font-medium transition-colors relative select-none',
+                      isCollapsed ? 'h-10 justify-center px-0' : 'h-9 px-2.5',
+                      isActive
+                        ? 'bg-secondary/10 text-secondary font-semibold border-l-[3px] border-secondary'
+                        : 'text-foreground-muted hover:text-foreground hover:bg-surface-muted',
+                      isActive && !isCollapsed && 'pl-[7px]'
+                    )}
+                  >
+                    <Icon className="w-4 h-4 shrink-0" />
+                    {!isCollapsed && (
+                      <span className="flex-1 truncate">{item.label}</span>
+                    )}
+                    {!isCollapsed && badgeCount > 0 && (
+                      <Badge variant="danger" size="sm" className="tabular ml-auto">
+                        {badgeCount}
+                      </Badge>
+                    )}
+                  </Link>
+                );
+              })}
+            </div>
+          </div>
+        ))}
+      </nav>
+
+      {/* ─── Bottom Actions & User Profile ─── */}
+      <div className="p-2.5 border-t border-border space-y-2 shrink-0">
+        {/* Quick link to Storefront */}
+        <Link
+          href="/home"
+          title={isCollapsed ? 'Visit Storefront' : undefined}
+          className={cn(
+            'flex items-center gap-2 rounded-[var(--radius-sm)] text-xs text-foreground-muted hover:text-foreground hover:bg-surface-muted transition-colors',
+            isCollapsed ? 'h-9 justify-center' : 'px-2.5 py-1.5'
+          )}
+        >
+          <ExternalLink className="w-3.5 h-3.5 shrink-0" />
+          {!isCollapsed && <span className="truncate">Storefront</span>}
+        </Link>
+
+        {/* User Card & Logout */}
+        <div
+          className={cn(
+            'flex items-center gap-2 p-1.5 rounded-[var(--radius-md)] bg-surface-muted/60 border border-border',
+            isCollapsed ? 'justify-center' : 'justify-between'
+          )}
+        >
+          <div className="flex items-center gap-2 min-w-0">
+            <div className="w-7 h-7 rounded-full bg-surface-muted border border-border flex items-center justify-center overflow-hidden shrink-0">
+              <img
+                src={user?.avatar_url || '/profile/profile.jpg'}
+                alt={user?.name || 'Admin'}
+                className="w-full h-full object-cover"
+                referrerPolicy="no-referrer"
+                onError={(e) => {
+                  (e.currentTarget as HTMLImageElement).src = '/profile/profile.jpg';
+                }}
+              />
+            </div>
+            {!isCollapsed && (
+              <div className="min-w-0 flex-1 truncate">
+                <p className="text-[11px] font-bold text-foreground truncate leading-tight">
+                  {user?.name || 'Admin'}
+                </p>
+                <p className="text-[10px] text-foreground-muted truncate capitalize">
+                  {user?.role || 'Administrator'}
+                </p>
+              </div>
+            )}
+          </div>
+
+          <button
+            type="button"
+            onClick={handleLogout}
+            className="p-1 text-foreground-muted hover:text-danger rounded-[var(--radius-sm)] transition-colors cursor-pointer shrink-0"
+            title="Log Out"
+            aria-label="Log out"
+          >
+            <LogOut className="w-3.5 h-3.5" />
+          </button>
+        </div>
       </div>
     </aside>
   );

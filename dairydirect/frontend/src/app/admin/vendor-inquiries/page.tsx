@@ -236,7 +236,7 @@ export default function AdminVendorInquiriesPage() {
         </div>
 
         <div className="p-4 bg-white rounded-2xl border border-gray-200 shadow-2xs flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-red-50 text-red-600 flex items-center justify-center font-bold">
+          <div className="w-10 h-10 rounded-xl bg-red-50 text-danger flex items-center justify-center font-bold">
             <AlertTriangle className="w-5 h-5" />
           </div>
           <div>
@@ -331,7 +331,7 @@ export default function AdminVendorInquiriesPage() {
                         : inq.status === 'rejected'
                         ? 'bg-rose-100 text-rose-800 border border-rose-200'
                         : inq.status === 'suspended'
-                        ? 'bg-red-100 text-red-800 border border-red-200'
+                        ? 'bg-red-100 text-danger border border-red-200'
                         : 'bg-amber-100 text-amber-800 border border-amber-200'
                     }`}>
                       {inq.status}
@@ -372,7 +372,7 @@ export default function AdminVendorInquiriesPage() {
                         : selectedInquiry.status === 'rejected'
                         ? 'bg-rose-100 text-rose-800'
                         : selectedInquiry.status === 'suspended'
-                        ? 'bg-red-100 text-red-800'
+                        ? 'bg-red-100 text-danger'
                         : 'bg-amber-100 text-amber-800'
                     }`}>
                       {selectedInquiry.status}
@@ -404,7 +404,7 @@ export default function AdminVendorInquiriesPage() {
                     className="p-2.5 rounded-xl border border-gray-200 text-gray-700 hover:bg-gray-50 transition-colors shadow-2xs"
                     title="Send Email"
                   >
-                    <Mail className="w-4 h-4 text-blue-600" />
+                    <Mail className="w-4 h-4 text-info" />
                   </a>
                 </div>
               </div>
@@ -535,7 +535,7 @@ export default function AdminVendorInquiriesPage() {
                     type="button"
                     onClick={() => handleTriggerConfirm('suspended')}
                     disabled={isUpdating}
-                    className="px-4 py-2.5 border border-red-200 hover:bg-red-50 text-red-700 text-xs font-bold rounded-xl transition-colors cursor-pointer"
+                    className="px-4 py-2.5 border border-red-200 hover:bg-red-50 text-danger text-xs font-bold rounded-xl transition-colors cursor-pointer"
                   >
                     Suspend Seller
                   </button>

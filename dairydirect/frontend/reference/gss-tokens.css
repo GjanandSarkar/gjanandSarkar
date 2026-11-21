@@ -1,0 +1,313 @@
+/* ══════════════════════════════════════════════════════════════════════════
+   GSS DESIGN TOKENS  v2  —  Gjanand Sarkar
+   Replace the existing @theme / :root / .dark blocks in
+   dairydirect/frontend/src/app/globals.css with this file's contents.
+   Keep `@import "tailwindcss";` at the very top and any utility/keyframe
+   blocks that live below the token blocks.
+
+   THREE TIERS:
+     Tier 1  primitives      raw values, referenced only from :root
+     Tier 2  semantic aliases  what components consume
+     Tier 3  component tokens  only when a component genuinely needs its own
+
+   RULE: a component file (.tsx) may only use tier-2/tier-3 names.
+   A raw hex / rgb() in a .tsx file is a bug. Enforce in review.
+
+   INDIAN FLAG PALETTE, MADE ACCESSIBLE:
+     Saffron #FF9933 is a SURFACE colour. Labels on it are near-black
+     (#2A1608 / #1A1206) → 8.9:1. Saffron used AS TEXT must be #B4460A
+     on light (4.6:1) and #FFB870 on dark — exposed as --brand-ink.
+     White on saffron is 2.1:1 and must never ship.
+   ══════════════════════════════════════════════════════════════════════════ */
+
+@import "tailwindcss";
+
+@theme {
+  /* ─── TIER 1: PRIMITIVES ─────────────────────────────────────────────── */
+  --color-saffron-50:  #FFF4E8;
+  --color-saffron-100: #FFE6CC;
+  --color-saffron-200: #FFD1A6;
+  --color-saffron-300: #FFB870;
+  --color-saffron-400: #FFA13D;
+  --color-saffron-500: #FF9933;
+  --color-saffron-600: #ED7A0A;
+  --color-saffron-700: #B4460A;
+  --color-saffron-800: #8F4303;
+  --color-saffron-900: #5C2B02;
+
+  --color-flaggreen-50:  #EDF8EA;
+  --color-flaggreen-100: #D6F0CF;
+  --color-flaggreen-300: #7CC96A;
+  --color-flaggreen-500: #138808;
+  --color-flaggreen-600: #0F6B06;
+  --color-flaggreen-700: #0B4F04;
+
+  --color-navy-50:  #EEEEF8;
+  --color-navy-100: #D6D6EE;
+  --color-navy-500: #000080;
+  --color-navy-600: #00006B;
+  --color-navy-700: #00004D;
+
+  --color-sand-0:   #FFFFFF;
+  --color-sand-25:  #FFFBF5;
+  --color-sand-50:  #FAF6F0;
+  --color-sand-100: #F3EDE4;
+  --color-sand-200: #EDE7DE;
+  --color-sand-300: #DCD4C8;
+  --color-sand-400: #A79E92;
+  --color-sand-500: #7A7268;
+  --color-sand-600: #6B6560;
+  --color-sand-700: #3C3733;
+  --color-sand-800: #26221F;
+  --color-sand-900: #1A1715;
+
+  /* ─── TIER 2: SEMANTIC ALIASES (components consume these) ───────────── */
+  --color-primary:          var(--primary);
+  --color-primary-hover:    var(--primary-hover);
+  --color-primary-active:   var(--primary-active);
+  --color-primary-light:    var(--primary-light);
+  --color-primary-fixed:    var(--primary-fixed);
+  --color-primary-fixed-dim: var(--primary-fixed-dim);
+  --color-on-primary:       var(--on-primary);
+
+  --color-secondary:        var(--secondary);
+  --color-secondary-hover:  var(--secondary-hover);
+  --color-on-secondary:     var(--on-secondary);
+
+  /* brand-ink = the ONLY saffron allowed as text */
+  --color-brand-ink:        var(--brand-ink);
+  --color-stocks:           var(--stocks-green);
+  --color-admin:            var(--admin-accent);
+
+  --color-background:       var(--background);
+  --color-surface:          var(--surface);
+  --color-surface-muted:    var(--surface-muted);
+  --color-surface-elevated: var(--surface-elevated);
+
+  --color-foreground:         var(--foreground);
+  --color-foreground-muted:   var(--foreground-muted);
+  --color-foreground-inverse: var(--foreground-inverse);
+  --color-muted:              var(--foreground-muted);
+
+  --color-border:       var(--border);
+  --color-border-hover: var(--border-hover);
+  --color-ring:         var(--ring);
+
+  --color-success: var(--success);  --color-success-bg: var(--success-bg);
+  --color-warning: var(--warning);  --color-warning-bg: var(--warning-bg);
+  --color-error:   var(--error);    --color-error-bg:   var(--error-bg);
+  --color-info:    var(--info);     --color-info-bg:    var(--info-bg);
+
+  /* ─── TYPOGRAPHY ────────────────────────────────────────────────────── */
+  --font-sans: var(--font-ui), var(--font-devanagari), system-ui, -apple-system,
+               "Segoe UI", Roboto, sans-serif;
+  --font-display: var(--font-display), var(--font-ui), Georgia, serif;
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+
+  /* Scale ~1.2 with injectable gaps (never 10/12/14/16 with no room for 18) */
+  --text-micro:     0.6875rem;  --text-micro--line-height:     0.9375rem;  /* 11/15 */
+  --text-caption:   0.75rem;    --text-caption--line-height:   1rem;       /* 12/16 */
+  --text-body-sm:   0.8125rem;  --text-body-sm--line-height:   1.125rem;   /* 13/18 */
+  --text-body:      0.9375rem;  --text-body--line-height:      1.375rem;   /* 15/22 */
+  --text-body-lg:   1.0625rem;  --text-body-lg--line-height:   1.5rem;     /* 17/24 */
+  --text-h3:        1.25rem;    --text-h3--line-height:        1.625rem;   /* 20/26 */
+  --text-h2:        1.5rem;     --text-h2--line-height:        1.875rem;   /* 24/30 */
+  --text-h1:        1.875rem;   --text-h1--line-height:        2.25rem;    /* 30/36 */
+  --text-display:   2.375rem;   --text-display--line-height:   2.625rem;   /* 38/42 */
+
+  /* ─── SHAPE ─────────────────────────────────────────────────────────── */
+  --radius-xs: 4px;   --radius-sm: 6px;   --radius-md: 10px;  --radius-lg: 12px;
+  --radius-xl: 16px;  --radius-2xl: 20px; --radius-3xl: 28px; --radius-full: 9999px;
+  --radius-card: 16px;
+
+  /* ─── ELEVATION (max 3 levels on mobile) ────────────────────────────── */
+  --shadow-xs: 0 1px 2px rgb(26 23 21 / 0.05);
+  --shadow-sm: 0 1px 2px rgb(26 23 21 / .06), 0 1px 3px rgb(26 23 21 / .08);
+  --shadow-md: 0 4px 12px rgb(26 23 21 / .08), 0 8px 24px rgb(26 23 21 / .06);
+  --shadow-lg: 0 12px 32px rgb(26 23 21 / .12), 0 24px 56px rgb(26 23 21 / .08);
+
+  /* ─── MOTION: 5 curves, 4 durations. This is the whole vocabulary. ──── */
+  --ease-standard: cubic-bezier(.4, 0, .2, 1);   /* almost everything        */
+  --ease-enter:    cubic-bezier(0, 0, .2, 1);    /* arriving on screen       */
+  --ease-exit:     cubic-bezier(.8, 0, 1, 1);    /* leaving screen           */
+  --ease-expo:     cubic-bezier(.25, 1, .5, 1);  /* long fast-then-settle    */
+  --ease-spring:   cubic-bezier(.22, 1, .36, 1.4); /* RATIONED: cart, badges,
+                                                      tab icons, steppers    */
+  --dur-press: 120ms;
+  --dur-state: 180ms;
+  --dur-nav:   280ms;
+  --dur-hero:  400ms;
+
+  /* ─── LAYOUT ────────────────────────────────────────────────────────── */
+  --w-content:   1600px;
+  --w-admin:     1400px;
+  --w-franchise: 1280px;
+  --h-header-desktop: 132px;  /* TopBar + main header + category rail */
+  --h-header-mobile:  104px;
+  --h-bottomnav:      64px;
+
+  /* ─── LEGACY ALIASES — kept so existing utilities keep working ──────── */
+  --color-cream: var(--background);
+  --color-dark: var(--foreground);
+  --color-sand: var(--border);
+  --color-mint: var(--primary-fixed);
+  --color-clay: var(--secondary);
+  --color-red: var(--error);
+  --color-on-surface: var(--foreground);
+  --color-on-surface-variant: var(--foreground-muted);
+  --color-outline: var(--border);
+  --color-outline-variant: var(--border-hover);
+  --color-surface-container-lowest: var(--surface);
+  --color-surface-container-low: var(--surface-muted);
+  --color-surface-container: var(--surface-muted);
+}
+
+@layer base {
+  /* ══════════════ LIGHT (default) ══════════════ */
+  :root {
+    --primary: #FF9933;             /* flag saffron — SURFACE colour      */
+    --primary-hover: #F08A1D;
+    --primary-active: #D97706;
+    --primary-light: #FFF4E8;
+    --primary-fixed: #FFF1E0;
+    --primary-fixed-dim: #FFE3C7;
+    --on-primary: #2A1608;          /* near-black ink on saffron → 8.9:1 ✓ */
+
+    --brand-ink: #B4460A;           /* saffron AS TEXT → 4.6:1 ✓          */
+    --stocks-green: #138808;        /* flag green — badges / ETA only     */
+    --admin-accent: #000080;        /* navy — admin authority             */
+
+    --secondary: #000080;           /* navy                               */
+    --secondary-hover: #00006B;
+    --on-secondary: #FFFFFF;
+
+    --background: #FFFBF5;          /* warm khadi white, not cool grey    */
+    --surface: #FFFFFF;
+    --surface-muted: #FAF6F0;
+    --surface-elevated: #FFFFFF;
+
+    --foreground: #1A1715;
+    --foreground-muted: #6B6560;
+    --foreground-inverse: #FFFFFF;
+
+    --border: #EDE7DE;
+    --border-hover: #DCD4C8;
+    --ring: rgb(255 153 51 / 0.28);
+
+    --success: #0F6B06;  --success-bg: #EDF8EA;
+    --warning: #B26A00;  --warning-bg: #FFF7E6;
+    --error:   #C62828;  --error-bg:   #FDECEA;
+    --info:    #0B63CE;  --info-bg:    #EAF2FF;
+  }
+
+  /* ══════════════ DARK ══════════════ */
+  .dark {
+    --primary: #FFA94D;
+    --primary-hover: #FFB870;
+    --primary-active: #F08A1D;
+    --primary-light: #2A1B0C;
+    --primary-fixed: #241708;
+    --primary-fixed-dim: #33200B;
+    --on-primary: #1A1206;
+
+    --brand-ink: #FFB870;
+    --stocks-green: #4CC94A;
+    --admin-accent: #9A9AFF;
+
+    --secondary: #8C8CFF;
+    --secondary-hover: #A5A5FF;
+    --on-secondary: #0A0A2E;
+
+    --background: #141110;
+    --surface: #1C1815;
+    --surface-muted: #221D19;
+    --surface-elevated: #262220;
+
+    --foreground: #F7F2EA;
+    --foreground-muted: #B3A99D;
+    --foreground-inverse: #141110;
+
+    --border: #322B25;
+    --border-hover: #433A32;
+    --ring: rgb(255 169 77 / 0.32);
+
+    --success: #4CC94A;  --success-bg: #12290F;
+    --warning: #F0B45A;  --warning-bg: #2B2010;
+    --error:   #FF7A6B;  --error-bg:   #2E1512;
+    --info:    #7FB2FF;  --info-bg:    #101C2E;
+  }
+
+  /* ══════════════ LANGUAGE → FONT SWAP (one rule, whole app) ══════════════ */
+  html[lang="hi"], html[data-locale="hi"],
+  html[lang="mr"], html[data-locale="mr"] {
+    --font-sans: var(--font-devanagari), var(--font-ui), system-ui, sans-serif;
+    --font-display: var(--font-display), var(--font-devanagari), serif;
+  }
+  html[lang="gu"], html[data-locale="gu"] {
+    --font-sans: var(--font-gujarati), var(--font-ui), system-ui, sans-serif;
+    --font-display: var(--font-display), var(--font-gujarati), serif;
+  }
+
+  html {
+    -webkit-text-size-adjust: 100%;
+    scroll-behavior: smooth;
+  }
+
+  body {
+    background: var(--background);
+    color: var(--foreground);
+    font-family: var(--font-sans);
+    font-size: var(--text-body);
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+
+  /* Numbers that must never jitter: prices, totals, ETAs, payouts, timers */
+  .tabular,
+  [data-numeric] {
+    font-variant-numeric: tabular-nums;
+    font-feature-settings: "tnum" 1;
+  }
+
+  /* Headings use the display face; body never does */
+  h1, h2, .font-display {
+    font-family: var(--font-display);
+    letter-spacing: -0.02em;
+  }
+
+  /* Global focus ring */
+  :where(a, button, [role="button"], input, select, textarea):focus-visible {
+    outline: 2px solid var(--brand-ink);
+    outline-offset: 2px;
+    border-radius: var(--radius-sm);
+  }
+
+  /* Minimum tap target (WCAG 2.5.8) */
+  :where(button, [role="button"], a[data-tap]) {
+    min-height: 44px;
+    min-width: 44px;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      animation-duration: .01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: .01ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
+}
+
+/* ══════════════════════════════════════════════════════════════════════════
+   CONTRAST LEDGER — paste into the PR description, reviewers will ask.
+
+   #2A1608 on #FF9933   8.9:1   AAA  all saffron buttons
+   #B4460A on #FFFBF5   4.6:1   AA   saffron text / links / active states
+   #FFFFFF on #000080  16.0:1   AAA  admin / navy
+   #FFFFFF on #0F6B06   5.5:1   AA   success text
+   #FFFFFF on #138808   3.9:1   LARGE/BOLD ONLY — badges, ETA chips
+   #1A1715 on #FFFBF5  15.8:1   AAA  body text
+   #6B6560 on #FFFFFF   5.3:1   AA   muted text
+   #FF9933 on #FFFFFF   2.1:1   FAIL — never use saffron as text on light
+   ══════════════════════════════════════════════════════════════════════════ */

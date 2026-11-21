@@ -189,16 +189,16 @@ export default function AdminCouponsPage() {
                     {c.used_count ?? c.usage_count ?? 0} / {c.max_uses ?? c.max_usage ?? '∞'}
                   </td>
                   <td className="px-6 py-4">
-                    <button onClick={() => toggleStatus(c.id, c.is_active)} className={`flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium ${c.is_active ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
+                    <button onClick={() => toggleStatus(c.id, c.is_active)} className={`flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium ${c.is_active ? 'bg-green-100 text-success' : 'bg-red-100 text-danger'}`}>
                       {c.is_active ? <CheckCircle2 className="w-3.5 h-3.5"/> : <XCircle className="w-3.5 h-3.5"/>}
                       {c.is_active ? 'Active' : 'Inactive'}
                     </button>
                   </td>
                   <td className="px-6 py-4 flex items-center gap-3">
-                    <button onClick={() => handleOpen(c)} className="text-blue-600 hover:text-blue-800" title="Edit">
+                    <button onClick={() => handleOpen(c)} className="text-info hover:text-info" title="Edit">
                       <Edit2 className="w-4 h-4" />
                     </button>
-                    <button onClick={() => handleDelete(c.id, c.code)} className="text-red-500 hover:text-red-700" title="Delete">
+                    <button onClick={() => handleDelete(c.id, c.code)} className="text-danger hover:text-danger" title="Delete">
                       <Trash2 className="w-4 h-4" />
                     </button>
                   </td>

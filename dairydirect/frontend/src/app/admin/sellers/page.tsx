@@ -238,22 +238,22 @@ export default function AdminSellersPage() {
         );
       case 'deactivated':
         return (
-          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-black uppercase tracking-wider bg-red-100 text-red-800 border border-red-200">
-            <Ban className="w-3.5 h-3.5 text-red-600" />
+          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-black uppercase tracking-wider bg-red-100 text-danger border border-red-200">
+            <Ban className="w-3.5 h-3.5 text-danger" />
             Deactivated
           </span>
         );
       case 'permanently_deactivated':
         return (
-          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-black uppercase tracking-wider bg-gray-900 text-red-400 border border-gray-700">
-            <Lock className="w-3.5 h-3.5 text-red-400" />
+          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-black uppercase tracking-wider bg-gray-900 text-danger border border-gray-700">
+            <Lock className="w-3.5 h-3.5 text-danger" />
             Permanently Deactivated
           </span>
         );
       case 'reactivation_requested':
         return (
-          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-black uppercase tracking-wider bg-blue-100 text-blue-800 border border-blue-300">
-            <BadgeAlert className="w-3.5 h-3.5 text-blue-600" />
+          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-black uppercase tracking-wider bg-blue-100 text-info border border-blue-300">
+            <BadgeAlert className="w-3.5 h-3.5 text-info" />
             Reactivation Requested
           </span>
         );
@@ -261,8 +261,8 @@ export default function AdminSellersPage() {
       case 'pending_kyc':
       case 'pending_inquiry':
         return (
-          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-black uppercase tracking-wider bg-yellow-100 text-yellow-800 border border-yellow-200">
-            <Clock className="w-3.5 h-3.5 text-yellow-600" />
+          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-black uppercase tracking-wider bg-yellow-100 text-warning border border-yellow-200">
+            <Clock className="w-3.5 h-3.5 text-warning" />
             Pending Onboarding
           </span>
         );
@@ -331,16 +331,16 @@ export default function AdminSellersPage() {
           <p className="text-2xl font-black text-amber-700 mt-1">{underReviewCount}</p>
         </div>
         <div className="bg-white p-4 rounded-2xl border border-blue-200 shadow-2xs bg-blue-50/20">
-          <p className="text-[10px] font-black uppercase tracking-wider text-blue-700">Reactivation Requested</p>
-          <p className="text-2xl font-black text-blue-700 mt-1">{reactivationRequestedCount}</p>
+          <p className="text-[10px] font-black uppercase tracking-wider text-info">Reactivation Requested</p>
+          <p className="text-2xl font-black text-info mt-1">{reactivationRequestedCount}</p>
         </div>
         <div className="bg-white p-4 rounded-2xl border border-red-200 shadow-2xs bg-red-50/20">
-          <p className="text-[10px] font-black uppercase tracking-wider text-red-700">Deactivated</p>
-          <p className="text-2xl font-black text-red-700 mt-1">{deactivatedCount}</p>
+          <p className="text-[10px] font-black uppercase tracking-wider text-danger">Deactivated</p>
+          <p className="text-2xl font-black text-danger mt-1">{deactivatedCount}</p>
         </div>
         <div className="bg-white p-4 rounded-2xl border border-gray-700 shadow-2xs bg-gray-900 text-white">
           <p className="text-[10px] font-black uppercase tracking-wider text-gray-400">Permanently Banned</p>
-          <p className="text-2xl font-black text-red-400 mt-1">{permanentCount}</p>
+          <p className="text-2xl font-black text-danger mt-1">{permanentCount}</p>
         </div>
       </div>
 
@@ -493,9 +493,9 @@ export default function AdminSellersPage() {
               )}
 
               {selectedSeller.status === 'reactivation_requested' && (
-                <div className="bg-blue-50 border border-blue-200 rounded-xl p-4 space-y-2 text-xs text-blue-900">
-                  <div className="flex items-center gap-2 font-bold text-blue-900">
-                    <BadgeAlert className="w-4 h-4 text-blue-600" />
+                <div className="bg-blue-50 border border-blue-200 rounded-xl p-4 space-y-2 text-xs text-info">
+                  <div className="flex items-center gap-2 font-bold text-info">
+                    <BadgeAlert className="w-4 h-4 text-info" />
                     <span>Seller Requested Reactivation</span>
                   </div>
                   <p>
@@ -505,9 +505,9 @@ export default function AdminSellersPage() {
               )}
 
               {selectedSeller.status === 'deactivated' && (
-                <div className="bg-red-50 border border-red-200 rounded-xl p-4 space-y-2 text-xs text-red-900">
-                  <div className="flex items-center gap-2 font-bold text-red-900">
-                    <Ban className="w-4 h-4 text-red-600" />
+                <div className="bg-red-50 border border-red-200 rounded-xl p-4 space-y-2 text-xs text-danger">
+                  <div className="flex items-center gap-2 font-bold text-danger">
+                    <Ban className="w-4 h-4 text-danger" />
                     <span>Account Is Deactivated</span>
                   </div>
                   {selectedSeller.deactivation_reason && (
@@ -515,7 +515,7 @@ export default function AdminSellersPage() {
                       <strong>Deactivation reason:</strong> {selectedSeller.deactivation_reason}
                     </p>
                   )}
-                  <p className="text-[11px] text-red-700">
+                  <p className="text-[11px] text-danger">
                     Seller is blocked from creating, editing, and deleting products. Seller can submit a reactivation request.
                   </p>
                 </div>
@@ -523,8 +523,8 @@ export default function AdminSellersPage() {
 
               {selectedSeller.status === 'permanently_deactivated' && (
                 <div className="bg-gray-900 text-white rounded-xl p-4 space-y-2 text-xs border border-red-500/40">
-                  <div className="flex items-center gap-2 font-bold text-red-400">
-                    <Lock className="w-4 h-4 text-red-400" />
+                  <div className="flex items-center gap-2 font-bold text-danger">
+                    <Lock className="w-4 h-4 text-danger" />
                     <span>Permanently Deactivated (Terminal)</span>
                   </div>
                   {selectedSeller.deactivation_reason && (
@@ -593,9 +593,9 @@ export default function AdminSellersPage() {
 
                     <button
                       onClick={() => openActionModal('deactivate')}
-                      className="w-full px-4 py-2.5 bg-red-50 hover:bg-red-100 border border-red-200 text-red-700 text-xs font-bold rounded-xl flex items-center justify-center gap-2 transition-colors cursor-pointer"
+                      className="w-full px-4 py-2.5 bg-red-50 hover:bg-red-100 border border-red-200 text-danger text-xs font-bold rounded-xl flex items-center justify-center gap-2 transition-colors cursor-pointer"
                     >
-                      <Ban className="w-4 h-4 text-red-600" />
+                      <Ban className="w-4 h-4 text-danger" />
                       <span>Deactivate Seller</span>
                     </button>
                   </div>
@@ -613,9 +613,9 @@ export default function AdminSellersPage() {
                     </button>
                     <button
                       onClick={() => openActionModal('reject_reactivation')}
-                      className="w-full px-4 py-2.5 bg-red-50 hover:bg-red-100 border border-red-200 text-red-700 text-xs font-bold rounded-xl flex items-center justify-center gap-2 transition-colors cursor-pointer"
+                      className="w-full px-4 py-2.5 bg-red-50 hover:bg-red-100 border border-red-200 text-danger text-xs font-bold rounded-xl flex items-center justify-center gap-2 transition-colors cursor-pointer"
                     >
-                      <XCircle className="w-4 h-4 text-red-600" />
+                      <XCircle className="w-4 h-4 text-danger" />
                       <span>Reject Reactivation (Remain Deactivated)</span>
                     </button>
                   </div>
@@ -635,9 +635,9 @@ export default function AdminSellersPage() {
                 {selectedSeller.status !== 'permanently_deactivated' && (
                   <button
                     onClick={() => openActionModal('permanently_deactivate')}
-                    className="w-full px-4 py-2 bg-gray-900 hover:bg-black text-red-400 text-xs font-bold rounded-xl flex items-center justify-center gap-2 transition-colors cursor-pointer mt-2"
+                    className="w-full px-4 py-2 bg-gray-900 hover:bg-black text-danger text-xs font-bold rounded-xl flex items-center justify-center gap-2 transition-colors cursor-pointer mt-2"
                   >
-                    <Lock className="w-3.5 h-3.5 text-red-400" />
+                    <Lock className="w-3.5 h-3.5 text-danger" />
                     <span>Permanently Deactivate (Irreversible)</span>
                   </button>
                 )}
@@ -742,13 +742,13 @@ export default function AdminSellersPage() {
                 className={`p-3 rounded-xl text-xs font-bold flex items-center gap-2 ${
                   actionMessage.type === 'success'
                     ? 'bg-emerald-50 text-emerald-800 border border-emerald-200'
-                    : 'bg-red-50 text-red-800 border border-red-200'
+                    : 'bg-red-50 text-danger border border-red-200'
                 }`}
               >
                 {actionMessage.type === 'success' ? (
                   <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
                 ) : (
-                  <AlertCircle className="w-4 h-4 text-red-600 shrink-0" />
+                  <AlertCircle className="w-4 h-4 text-danger shrink-0" />
                 )}
                 <span>{actionMessage.text}</span>
               </div>
@@ -760,7 +760,7 @@ export default function AdminSellersPage() {
               {/* Reason Selector / Input */}
               <div>
                 <label className="block font-bold text-gray-700 mb-1.5">
-                  Reason <span className="text-red-500">*</span>
+                  Reason <span className="text-danger">*</span>
                 </label>
                 {modalAction.includes('review') ? (
                   <div className="space-y-2">
@@ -817,7 +817,7 @@ export default function AdminSellersPage() {
               {(modalAction === 'start_temporary_review' || modalAction === 'extend_review') && (
                 <div className="space-y-3 bg-gray-50 p-4 rounded-2xl border border-gray-200">
                   <label className="block font-bold text-gray-800">
-                    Review Duration Period <span className="text-red-500">*</span>
+                    Review Duration Period <span className="text-danger">*</span>
                   </label>
                   <div className="grid grid-cols-3 sm:grid-cols-5 gap-2">
                     {[
@@ -883,8 +883,8 @@ export default function AdminSellersPage() {
 
               {/* Warning for permanent deactivation */}
               {modalAction === 'permanently_deactivate' && (
-                <div className="p-3 bg-red-50 border border-red-200 rounded-xl text-[11px] text-red-800 font-bold flex items-center gap-2">
-                  <AlertTriangle className="w-4 h-4 text-red-600 shrink-0" />
+                <div className="p-3 bg-red-50 border border-red-200 rounded-xl text-[11px] text-danger font-bold flex items-center gap-2">
+                  <AlertTriangle className="w-4 h-4 text-danger shrink-0" />
                   <span>Warning: Permanent deactivation cannot be reversed. The seller will never be able to reactivate.</span>
                 </div>
               )}

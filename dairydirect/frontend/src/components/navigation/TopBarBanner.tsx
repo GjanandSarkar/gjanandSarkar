@@ -16,15 +16,13 @@ export function TopBarBanner({ freeDeliveryThreshold }: TopBarBannerProps) {
   useEffect(() => {
     setIsMounted(true);
     try {
-      // Check session storage
       const dismissedInSession = sessionStorage.getItem(STORAGE_KEY) === 'true';
-      // Also check document.cookie as a fallback
       const dismissedInCookie = document.cookie.includes(`${STORAGE_KEY}=true`);
       if (dismissedInSession || dismissedInCookie) {
         setIsDismissed(true);
       }
     } catch {
-      // Ignore security errors in restricted environments
+      // Ignore in restricted environments
     }
   }, []);
 
@@ -32,49 +30,46 @@ export function TopBarBanner({ freeDeliveryThreshold }: TopBarBannerProps) {
     setIsDismissed(true);
     try {
       sessionStorage.setItem(STORAGE_KEY, 'true');
-      // Set session cookie (expires when browser session ends)
       document.cookie = `${STORAGE_KEY}=true; path=/; SameSite=Lax`;
     } catch {
       // Ignore
     }
   };
 
-  // If dismissed during this session, do not render
   if (isMounted && isDismissed) {
     return null;
   }
 
   return (
-    <div className="w-full bg-slate-900 text-slate-300 text-[11px] sm:text-xs py-1.5 px-4 md:px-8 border-b border-slate-800 transition-all duration-200">
-      <div className="max-w-[1440px] mx-auto flex items-center justify-between font-medium gap-2">
+    <div className="w-full bg-primary text-on-primary h-8 px-3 sm:px-6 border-b border-primary-active/20 transition-all duration-[var(--dur-state)] ease-[var(--ease-standard)] select-none">
+      <div className="max-w-[var(--w-content)] mx-auto h-full flex items-center justify-between text-[11px] sm:text-xs font-semibold gap-2">
         {/* Left Notice */}
         <div className="flex items-center gap-2 min-w-0 truncate">
-          <span className="inline-block w-1.5 h-1.5 rounded-full bg-primary shrink-0" />
-          <span className="font-medium text-slate-200 truncate">Pure Indian Farm Products</span>
-          <span className="text-slate-600 hidden sm:inline" aria-hidden="true">|</span>
-          <span className="text-slate-400 hidden sm:inline truncate">
+          <span className="w-1.5 h-1.5 rounded-full bg-on-primary shrink-0" />
+          <span className="truncate">Pure Indian Farm Products</span>
+          <span className="opacity-40 hidden sm:inline" aria-hidden="true">|</span>
+          <span className="opacity-90 hidden sm:inline truncate">
             Direct from Certified Ethical Farms
           </span>
         </div>
 
-        {/* Right Section: Delivery Notice + Dismiss Cross Button */}
+        {/* Right Section: Free delivery notice + Dismiss */}
         <div className="flex items-center gap-3 shrink-0">
-          <div className="flex items-center gap-1.5 text-slate-300 font-medium">
-            <Truck className="w-3.5 h-3.5 text-primary" aria-hidden="true" />
+          <div className="flex items-center gap-1.5 font-bold">
+            <Truck className="w-3.5 h-3.5" aria-hidden="true" />
             <span>
               Free delivery above{' '}
-              <strong className="text-white tabular-nums">
+              <span className="tabular font-black">
                 ₹{freeDeliveryThreshold}
-              </strong>
+              </span>
             </span>
           </div>
 
-          {/* Dismiss Cross Button */}
           <button
             type="button"
             onClick={handleDismiss}
             aria-label="Dismiss announcement"
-            className="p-1 -mr-1 rounded-md text-slate-400 hover:text-white hover:bg-slate-800 transition-colors cursor-pointer"
+            className="p-1 -mr-1 rounded-md opacity-80 hover:opacity-100 transition-opacity cursor-pointer"
             title="Dismiss for this session"
           >
             <X className="w-3.5 h-3.5" />

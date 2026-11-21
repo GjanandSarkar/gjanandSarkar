@@ -12,6 +12,10 @@ import { format, isToday, subDays } from 'date-fns';
 import Link from 'next/link';
 import { useStore } from '@/store/useStore';
 import { useTranslation } from '@/lib/i18n';
+import { AdminPageShell } from '@/components/admin/AdminPageShell';
+import { Badge } from '@/components/ui/Badge';
+import { Button } from '@/components/ui/Button';
+import { toneFor } from '@/lib/statusTone';
 import {
   AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid
 } from 'recharts';
@@ -27,7 +31,7 @@ const item: Variants = {
 
 const STATUS_CONFIG: Record<string, { bg: string; text: string; dot: string; icon: any }> = {
   confirmed:        { bg: 'bg-emerald-50 border-emerald-200', text: 'text-emerald-700', dot: 'bg-emerald-500', icon: CheckCircle2 },
-  out_for_delivery: { bg: 'bg-blue-50 border-blue-200', text: 'text-blue-700', dot: 'bg-blue-500', icon: Truck },
+  out_for_delivery: { bg: 'bg-blue-50 border-blue-200', text: 'text-info', dot: 'bg-blue-500', icon: Truck },
   delivered:        { bg: 'bg-primary-fixed/80 border-primary/20', text: 'text-primary', dot: 'bg-primary', icon: CheckCircle2 },
   pending:          { bg: 'bg-amber-50 border-amber-200', text: 'text-amber-700', dot: 'bg-amber-500', icon: Clock },
   cancelled:        { bg: 'bg-slate-100 border-slate-200', text: 'text-slate-600', dot: 'bg-slate-400', icon: AlertCircle },
@@ -111,7 +115,7 @@ export default function AdminDashboard() {
       value: data.overview.total_orders || '0',
       sub: `${data.overview.delivered_orders || '0'} delivered`,
       icon: ShoppingBag,
-      iconClass: 'text-blue-600 bg-blue-50',
+      iconClass: 'text-info bg-blue-50',
     },
     {
       label: 'Pending Orders',
@@ -160,62 +164,39 @@ export default function AdminDashboard() {
   }
 
   return (
-    <div className="flex flex-col min-h-screen bg-background">
-      {/* ═══ HEADER ═══ */}
-      <div className="px-5 sm:px-8 pt-6 pb-5 bg-surface border-b border-border">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-          <div>
-            <div className="flex items-center gap-2 mb-1">
-              <span className="text-[11px] font-bold uppercase tracking-wider text-primary">
-                Platform Operations
-              </span>
-            </div>
-            <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-foreground">
-              {greeting()}, {user?.name?.split(' ')[0] || 'Admin'}
-            </h1>
-            <p className="text-xs text-foreground-muted mt-0.5">
-              {format(new Date(), 'EEEE, MMMM d, yyyy')} · Last updated {format(lastRefreshed, 'h:mm a')}
-            </p>
+    <AdminPageShell
+      title="Platform Operations"
+      description={`${greeting()}, ${user?.name?.split(' ')[0] || 'Admin'} · ${format(new Date(), 'EEEE, MMMM d, yyyy')} · Last updated ${format(lastRefreshed, 'h:mm a')}`}
+      actions={
+        <div className="flex items-center gap-2">
+          <div className="flex rounded-lg overflow-hidden border border-border bg-surface-muted p-0.5">
+            {(['7d', '30d'] as const).map((p) => (
+              <button
+                key={p}
+                type="button"
+                onClick={() => setPeriod(p)}
+                className={`px-3 py-1 text-xs font-semibold rounded-md transition-all cursor-pointer ${
+                  period === p ? 'bg-surface text-foreground shadow-2xs font-bold' : 'text-foreground-muted hover:text-foreground'
+                }`}
+              >
+                {p}
+              </button>
+            ))}
           </div>
-
-          <div className="flex items-center gap-2.5">
-            {/* Period Toggle */}
-            <div className="flex rounded-lg overflow-hidden border border-border bg-surface-muted p-0.5">
-              {(['7d', '30d'] as const).map((p) => (
-                <button
-                  key={p}
-                  type="button"
-                  onClick={() => setPeriod(p)}
-                  className={`px-3 py-1 text-xs font-semibold rounded-md transition-all cursor-pointer ${
-                    period === p ? 'bg-surface text-foreground shadow-2xs font-bold' : 'text-foreground-muted hover:text-foreground'
-                  }`}
-                >
-                  {p}
-                </button>
-              ))}
-            </div>
-
-            <button
-              type="button"
-              onClick={fetchData}
-              title="Refresh Data"
-              className="p-2 rounded-lg border border-border bg-surface hover:bg-surface-muted text-foreground-muted hover:text-foreground transition-colors cursor-pointer"
-            >
-              <RefreshCw className="w-4 h-4" />
-            </button>
-
-            <Link
-              href="/admin/reports"
-              className="hidden sm:flex items-center gap-2 px-3.5 py-1.5 rounded-lg bg-primary hover:bg-primary-hover text-white text-xs font-semibold shadow-2xs transition-colors"
-            >
-              <BarChart3 className="w-4 h-4" />
-              <span>Full Reports</span>
-            </Link>
-          </div>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={fetchData}
+            loading={isLoading}
+            leftIcon={<RefreshCw className="w-3.5 h-3.5" />}
+          >
+            Refresh
+          </Button>
         </div>
-      </div>
-
-      <div className="px-5 sm:px-8 py-6 flex flex-col gap-6">
+      }
+    >
+      <div className="space-y-6">
+        
         {/* ═══ STAT CARDS ═══ */}
         <motion.div
           className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 sm:gap-4"
@@ -361,22 +342,21 @@ export default function AdminDashboard() {
                         className="hover:bg-surface-muted/40 transition-colors cursor-pointer text-xs"
                         onClick={() => window.location.href = `/admin/orders?id=${order.id}`}
                       >
-                        <td className="px-5 py-3.5 font-bold text-primary">
+                        <td className="px-5 py-3.5 font-bold text-primary tabular">
                           {order.order_number || order.id.slice(0, 8).toUpperCase()}
                         </td>
                         <td className="px-5 py-3.5 font-medium text-foreground">
                           {order.customer_name || 'Customer'}
                         </td>
-                        <td className="px-5 py-3.5 font-bold text-foreground">
+                        <td className="px-5 py-3.5 font-bold text-foreground tabular">
                           ₹{order.total_amount}
                         </td>
                         <td className="px-5 py-3.5">
-                          <span className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full border text-[10px] font-bold capitalize ${statusCfg.bg} ${statusCfg.text}`}>
-                            <span className={`w-1.5 h-1.5 rounded-full ${statusCfg.dot}`} />
+                          <Badge variant={toneFor(order.status)} dot size="sm">
                             {order.status.replace(/_/g, ' ')}
-                          </span>
+                          </Badge>
                         </td>
-                        <td className="px-5 py-3.5 text-foreground-muted text-[11px]">
+                        <td className="px-5 py-3.5 text-foreground-muted text-[11px] tabular">
                           {format(new Date(order.created_at), 'MMM d, h:mm a')}
                         </td>
                       </tr>
@@ -425,6 +405,6 @@ export default function AdminDashboard() {
           </motion.div>
         )}
       </div>
-    </div>
+    </AdminPageShell>
   );
 }

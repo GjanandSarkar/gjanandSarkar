@@ -268,8 +268,8 @@ export default function AdminReturnsPage() {
           </div>
 
           <div className="p-3.5 rounded-2xl border border-blue-200 bg-blue-50/50">
-            <span className="text-[10px] font-black uppercase tracking-wider text-blue-700 block">Returns</span>
-            <span className="text-xl font-black text-blue-900 mt-1 block">{returnsCount}</span>
+            <span className="text-[10px] font-black uppercase tracking-wider text-info block">Returns</span>
+            <span className="text-xl font-black text-info mt-1 block">{returnsCount}</span>
           </div>
 
           <div className="p-3.5 rounded-2xl border border-emerald-200 bg-emerald-50/50">
@@ -288,10 +288,10 @@ export default function AdminReturnsPage() {
             initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
             className={`p-4 rounded-2xl flex items-center gap-3 text-xs font-bold shadow-md ${
-              toast.type === 'success' ? 'bg-emerald-50 text-emerald-800 border border-emerald-200' : 'bg-red-50 text-red-800 border border-red-200'
+              toast.type === 'success' ? 'bg-emerald-50 text-emerald-800 border border-emerald-200' : 'bg-red-50 text-danger border border-red-200'
             }`}
           >
-            {toast.type === 'success' ? <CheckCircle2 className="w-5 h-5 text-emerald-600 shrink-0" /> : <AlertTriangle className="w-5 h-5 text-red-600 shrink-0" />}
+            {toast.type === 'success' ? <CheckCircle2 className="w-5 h-5 text-emerald-600 shrink-0" /> : <AlertTriangle className="w-5 h-5 text-danger shrink-0" />}
             <span>{toast.message}</span>
           </motion.div>
         )}
@@ -402,7 +402,7 @@ export default function AdminReturnsPage() {
                       </span>
 
                       <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider flex items-center gap-1 ${
-                        isCancellation ? 'bg-amber-100 text-amber-900' : 'bg-blue-100 text-blue-900'
+                        isCancellation ? 'bg-amber-100 text-amber-900' : 'bg-blue-100 text-info'
                       }`}>
                         {isCancellation ? <Ban className="w-3 h-3" /> : <RotateCcw className="w-3 h-3" />}
                         <span>{req.request_type}</span>
@@ -546,11 +546,11 @@ export default function AdminReturnsPage() {
                         <Store className="w-3.5 h-3.5 text-gray-500 mt-0.5" />
                         <div>
                           <span className="font-bold text-gray-800">Seller Response: </span>
-                          <span className={`font-bold uppercase ${req.seller_status === 'approved' ? 'text-emerald-700' : 'text-red-700'}`}>
+                          <span className={`font-bold uppercase ${req.seller_status === 'approved' ? 'text-emerald-700' : 'text-danger'}`}>
                             {req.seller_status}
                           </span>
                           {req.seller_notes && <span className="ml-1 text-gray-600">({req.seller_notes})</span>}
-                          {req.rejection_reason && <p className="text-red-700 font-bold mt-0.5">Rejection reason: {req.rejection_reason}</p>}
+                          {req.rejection_reason && <p className="text-danger font-bold mt-0.5">Rejection reason: {req.rejection_reason}</p>}
                         </div>
                       </div>
                     )}
@@ -610,7 +610,7 @@ export default function AdminReturnsPage() {
                             setActionType('reject');
                             setReasonInput('');
                           }}
-                          className="px-3.5 py-1.5 rounded-xl border border-red-300 text-red-700 hover:bg-red-50 text-xs font-bold flex items-center gap-1.5 transition-colors"
+                          className="px-3.5 py-1.5 rounded-xl border border-red-300 text-danger hover:bg-red-50 text-xs font-bold flex items-center gap-1.5 transition-colors"
                         >
                           <X className="w-3.5 h-3.5" />
                           <span>Reject</span>
@@ -753,7 +753,7 @@ export default function AdminReturnsPage() {
                   </div>
                 </div>
               ) : ['reject', 'override'].includes(actionType) ? (
-                <div className="p-3 rounded-xl bg-red-50 border border-red-200 text-red-900 leading-relaxed">
+                <div className="p-3 rounded-xl bg-red-50 border border-red-200 text-danger leading-relaxed">
                   <p className="font-bold">Mandatory Reason Required:</p>
                   <p className="mt-0.5">
                     A documented reason is mandatory when {actionType === 'reject' ? 'rejecting' : 'overriding'} a request. This reason is logged in the permanent audit history.

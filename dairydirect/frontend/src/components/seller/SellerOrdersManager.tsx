@@ -31,6 +31,10 @@ import { format } from 'date-fns';
 import { getSellerOrders, updateOrderStatus, processOrderRequest } from '@/lib/api/orders';
 import type { OrderWithItems, OrderStatus } from '@/lib/api/orders';
 import { PLACEHOLDER_PRODUCT_IMAGE } from '@/lib/constants/brand';
+import { Badge } from '@/components/ui/Badge';
+import { Button } from '@/components/ui/Button';
+import { EmptyState } from '@/components/ui/EmptyState';
+import { Skeleton } from '@/components/ui/Skeleton';
 
 const STATUS_STYLES: Record<string, { bg: string; color: string; border: string; dot: string; label: string }> = {
   'pending':          { bg: '#fff7ed', color: '#9a3412', border: '#fdba74', dot: '#ea580c', label: 'Pending Confirmation' },
@@ -41,6 +45,16 @@ const STATUS_STYLES: Record<string, { bg: string; color: string; border: string;
 };
 
 const ORDER_ACTION_STEPS: OrderStatus[] = ['confirmed', 'out_for_delivery', 'delivered'];
+
+function getOrderStatusBadgeVariant(status: string): 'warning' | 'info' | 'brand' | 'success' | 'neutral' {
+  switch (status) {
+    case 'delivered': return 'success';
+    case 'confirmed': return 'info';
+    case 'out_for_delivery': return 'brand';
+    case 'cancelled': return 'neutral';
+    default: return 'warning';
+  }
+}
 
 const ALLOWED_TRANSITIONS: Record<string, string[]> = {
   pending:          ['confirmed', 'cancelled'],
@@ -487,9 +501,10 @@ export function SellerOrdersManager({ initialStatusFilter = 'all' }: SellerOrder
 
       {/* ─── Orders List ─── */}
       {isLoading ? (
-        <div className="py-20 flex flex-col items-center justify-center gap-3">
-          <Loader2 className="w-8 h-8 text-primary animate-spin" />
-          <p className="text-xs font-semibold text-gray-500">Loading your store orders...</p>
+        <div className="space-y-4 py-4">
+          <Skeleton className="h-28 w-full rounded-2xl" />
+          <Skeleton className="h-28 w-full rounded-2xl" />
+          <Skeleton className="h-28 w-full rounded-2xl" />
         </div>
       ) : filteredOrders.length === 0 ? (
         <div className="bg-white rounded-3xl border border-gray-200 p-12 text-center space-y-4">
@@ -538,20 +553,12 @@ export function SellerOrdersManager({ initialStatusFilter = 'all' }: SellerOrder
                   {/* Left: ID, Date, Customer */}
                   <div className="space-y-1">
                     <div className="flex items-center gap-2.5 flex-wrap">
-                      <span className="font-mono font-bold text-sm text-foreground">
+                      <span className="font-mono font-bold text-sm text-foreground tabular">
                         {order.order_number || `ORD-${order.id.slice(0, 8).toUpperCase()}`}
                       </span>
-                      <span
-                        className="px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider flex items-center gap-1.5"
-                        style={{
-                          backgroundColor: statusStyle.bg,
-                          color: statusStyle.color,
-                          border: `1px solid ${statusStyle.border}`,
-                        }}
-                      >
-                        <span className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: statusStyle.dot }} />
-                        <span>{statusStyle.label}</span>
-                      </span>
+                      <Badge variant={getOrderStatusBadgeVariant(order.status)} dot size="sm">
+                        {statusStyle.label}
+                      </Badge>
 
                       {/* Payment Status Badge */}
                       <span className={`px-2 py-0.5 rounded-md text-[10px] font-bold uppercase tracking-wider flex items-center gap-1 ${
@@ -980,7 +987,7 @@ export function SellerOrdersManager({ initialStatusFilter = 'all' }: SellerOrder
                                     ? 'bg-primary-fixed text-primary border-2 border-primary shadow-2xs cursor-default'
                                     : isBlocked
                                       ? 'bg-gray-100 text-gray-400 border border-gray-200 cursor-not-allowed line-through opacity-50'
-                                      : 'bg-primary hover:bg-primary-hover text-primary-foreground shadow-xs active:scale-95'
+                                      : 'bg-secondary hover:opacity-90 text-on-secondary shadow-xs active:scale-95'
                                 }`}
                               >
                                 {isBusy ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <CheckCircle2 className="w-3.5 h-3.5" />}
@@ -1006,7 +1013,7 @@ export function SellerOrdersManager({ initialStatusFilter = 'all' }: SellerOrder
                                     ? 'bg-blue-100 text-blue-900 border-2 border-blue-500 shadow-2xs cursor-default'
                                     : isBlocked
                                       ? 'bg-gray-100 text-gray-400 border border-gray-200 cursor-not-allowed line-through opacity-50'
-                                      : 'bg-blue-600 hover:bg-blue-700 text-white shadow-xs active:scale-95'
+                                      : 'bg-secondary hover:opacity-90 text-on-secondary shadow-xs active:scale-95'
                                 }`}
                               >
                                 {isBusy ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Truck className="w-3.5 h-3.5" />}

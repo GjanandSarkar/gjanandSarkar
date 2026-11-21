@@ -24,7 +24,7 @@ import { PLACEHOLDER_PRODUCT_IMAGE } from '@/lib/constants/brand';
 const STATUS_STYLES: Record<string, { bg: string; text: string; dot: string }> = {
   'pending':          { bg: 'bg-amber-50 border-amber-200', text: 'text-amber-700', dot: 'bg-amber-500' },
   'confirmed':        { bg: 'bg-emerald-50 border-emerald-200', text: 'text-emerald-700', dot: 'bg-emerald-500' },
-  'out_for_delivery': { bg: 'bg-blue-50 border-blue-200', text: 'text-blue-700', dot: 'bg-blue-500' },
+  'out_for_delivery': { bg: 'bg-blue-50 border-blue-200', text: 'text-info', dot: 'bg-blue-500' },
   'delivered':        { bg: 'bg-primary-fixed/80 border-primary/20', text: 'text-primary', dot: 'bg-primary' },
   'cancelled':        { bg: 'bg-slate-100 border-slate-200', text: 'text-slate-600', dot: 'bg-slate-400' },
 };

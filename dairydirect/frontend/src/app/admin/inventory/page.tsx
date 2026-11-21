@@ -157,7 +157,7 @@ export default function AdminInventoryPage() {
               { label: 'Out of Stock', value: stats.out_of_stock, iconClass: 'text-rose-600 bg-rose-50', icon: X },
               { label: 'Low Stock', value: stats.low_stock, iconClass: 'text-amber-600 bg-amber-50', icon: AlertTriangle },
               { label: 'In Stock', value: stats.in_stock, iconClass: 'text-primary bg-primary-fixed', icon: CheckCircle2 },
-              { label: 'Inventory Value', value: `₹${parseFloat(stats.total_inventory_value || '0').toLocaleString('en-IN', { maximumFractionDigits: 0 })}`, iconClass: 'text-blue-600 bg-blue-50', icon: Package },
+              { label: 'Inventory Value', value: `₹${parseFloat(stats.total_inventory_value || '0').toLocaleString('en-IN', { maximumFractionDigits: 0 })}`, iconClass: 'text-info bg-blue-50', icon: Package },
             ].map((s) => {
               const Icon = s.icon;
               return (

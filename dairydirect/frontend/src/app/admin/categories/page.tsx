@@ -191,7 +191,7 @@ export default function AdminCategoriesPage() {
             <Loader2 className="w-7 h-7 animate-spin text-[#0c3c26]" />
           </div>
         ) : error && categories.length === 0 ? (
-          <div className="text-center py-16 text-red-600 font-semibold">{error}</div>
+          <div className="text-center py-16 text-danger font-semibold">{error}</div>
         ) : (
           <div
             className="rounded-[16px] overflow-hidden shadow-xs"
@@ -266,7 +266,7 @@ export default function AdminCategoriesPage() {
                         </button>
                         <button
                           onClick={() => setDeletingCategory(cat)}
-                          className="p-2 rounded-full hover:bg-black/5 transition-colors cursor-pointer text-red-600"
+                          className="p-2 rounded-full hover:bg-black/5 transition-colors cursor-pointer text-danger"
                           title="Delete Category"
                           type="button"
                         >
@@ -315,7 +315,7 @@ export default function AdminCategoriesPage() {
               </p>
 
               {error && (
-                <div className="mb-4 p-3 bg-red-50 text-red-600 rounded-xl text-xs font-semibold">
+                <div className="mb-4 p-3 bg-red-50 text-danger rounded-xl text-xs font-semibold">
                   {error}
                 </div>
               )}
@@ -443,7 +443,7 @@ export default function AdminCategoriesPage() {
               className="bg-white rounded-2xl max-w-sm w-full p-6 shadow-2xl text-center"
               onClick={(e) => e.stopPropagation()}
             >
-              <div className="w-12 h-12 rounded-full bg-red-100 text-red-600 flex items-center justify-center mx-auto mb-3">
+              <div className="w-12 h-12 rounded-full bg-red-100 text-danger flex items-center justify-center mx-auto mb-3">
                 <Trash2 className="w-6 h-6" />
               </div>
               <h3 className="font-extrabold text-lg text-gray-900 mb-1">Delete Category?</h3>

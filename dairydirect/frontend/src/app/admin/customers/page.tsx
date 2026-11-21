@@ -182,14 +182,14 @@ export default function AdminCustomersPage() {
 
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                 <div className="p-3 rounded-[12px] bg-green-50 border border-green-100 text-center">
-                  <p className="text-[10px] font-bold uppercase text-green-800">Total Spent</p>
-                  <p className="font-extrabold text-[16px] text-green-900 mt-1">
+                  <p className="text-[10px] font-bold uppercase text-success">Total Spent</p>
+                  <p className="font-extrabold text-[16px] text-success mt-1">
                     ₹{parseFloat(selectedCustomer.total_spent || '0').toLocaleString('en-IN', { maximumFractionDigits: 0 })}
                   </p>
                 </div>
                 <div className="p-3 rounded-[12px] bg-blue-50 border border-blue-100 text-center">
-                  <p className="text-[10px] font-bold uppercase text-blue-800">Orders</p>
-                  <p className="font-extrabold text-[16px] text-blue-900 mt-1">{selectedCustomer.total_orders}</p>
+                  <p className="text-[10px] font-bold uppercase text-info">Orders</p>
+                  <p className="font-extrabold text-[16px] text-info mt-1">{selectedCustomer.total_orders}</p>
                 </div>
                 <div className="p-3 rounded-[12px] bg-orange-50 border border-orange-100 text-center">
                   <p className="text-[10px] font-bold uppercase text-orange-800">Active Subs</p>
